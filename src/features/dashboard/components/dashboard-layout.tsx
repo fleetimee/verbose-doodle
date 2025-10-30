@@ -1,7 +1,8 @@
 import React from "react";
 import { Outlet, useLocation } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { useTheme } from "@/components/theme-provider";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -26,6 +27,7 @@ const routeLabels: Record<string, string> = {
 
 export function DashboardLayout() {
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
 
   const pathSegments = location.pathname
     .split("/")
@@ -45,7 +47,7 @@ export function DashboardLayout() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
           <SidebarTrigger className="-ml-1" />
           <Separator
             className="mr-2 data-[orientation=vertical]:h-4"
@@ -74,7 +76,7 @@ export function DashboardLayout() {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="ml-auto">
-            <ThemeToggle />
+            <ThemeSwitcher onChange={setTheme} value={theme} />
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 overflow-auto p-6">
