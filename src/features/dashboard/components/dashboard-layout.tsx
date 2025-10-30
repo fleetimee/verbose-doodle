@@ -20,8 +20,8 @@ import {
 // Map routes to breadcrumb labels
 const routeLabels: Record<string, string> = {
   overview: "Overview",
-  billing: "Billing",
-  scenarios: "Scenarios",
+  endpoints: "Endpoints",
+  users: "Users",
   settings: "Settings",
 };
 

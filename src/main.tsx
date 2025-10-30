@@ -9,10 +9,10 @@ import { Toaster } from "@/components/ui/sonner";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
 import { queryClient } from "@/lib/query-client";
 import { About } from "@/pages/about";
-import { BillingPage } from "@/pages/dashboard/billing";
+import { EndpointsPage } from "@/pages/dashboard/endpoints";
 import { OverviewPage } from "@/pages/dashboard/overview";
-import { ScenariosPage } from "@/pages/dashboard/scenarios";
 import { SettingsPage } from "@/pages/dashboard/settings";
+import { UsersPage } from "@/pages/dashboard/users";
 import { Home } from "@/pages/home";
 import { Login } from "@/pages/login";
 
@@ -39,8 +39,8 @@ createRoot(rootElement).render(
                 index
               />
               <Route element={<OverviewPage />} path="overview" />
-              <Route element={<BillingPage />} path="billing" />
-              <Route element={<ScenariosPage />} path="scenarios" />
+              <Route element={<EndpointsPage />} path="endpoints" />
+              <Route element={<UsersPage />} path="users" />
               <Route element={<SettingsPage />} path="settings" />
             </Route>
           </Routes>
