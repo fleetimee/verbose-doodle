@@ -34,6 +34,7 @@ import {
   httpMethods,
 } from "@/features/endpoints/schemas/endpoint-schema";
 import type { EndpointGroup } from "@/features/endpoints/types";
+import { getMethodTextColor } from "@/features/endpoints/utils/http-method-colors";
 
 type AddEndpointSheetProps = {
   endpointGroups: EndpointGroup[];
@@ -41,6 +42,7 @@ type AddEndpointSheetProps = {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   isSubmitting?: boolean;
+  showTrigger?: boolean;
 };
 
 export function AddEndpointSheet({
@@ -49,6 +51,7 @@ export function AddEndpointSheet({
   open,
   onOpenChange,
   isSubmitting: externalIsSubmitting,
+  showTrigger = true,
 }: AddEndpointSheetProps) {
   const form = useForm<EndpointFormData>({
     resolver: zodResolver(endpointSchema),
@@ -79,12 +82,14 @@ export function AddEndpointSheet({
 
   return (
     <Sheet onOpenChange={handleOpenChange} open={open}>
-      <SheetTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Endpoint
-        </Button>
-      </SheetTrigger>
+      {showTrigger && (
+        <SheetTrigger asChild>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Endpoint
+          </Button>
+        </SheetTrigger>
+      )}
       <SheetContent className="w-[400px] sm:w-[640px]">
         <SheetHeader>
           <SheetTitle>Add Endpoint</SheetTitle>
@@ -116,12 +121,22 @@ export function AddEndpointSheet({
                             aria-invalid={fieldState.invalid}
                             id="endpoint-method"
                           >
-                            <SelectValue placeholder="Select method" />
+                            <SelectValue placeholder="Select method">
+                              {field.value && (
+                                <span
+                                  className={getMethodTextColor(field.value)}
+                                >
+                                  {field.value}
+                                </span>
+                              )}
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             {httpMethods.map((method) => (
                               <SelectItem key={method} value={method}>
-                                {method}
+                                <span className={getMethodTextColor(method)}>
+                                  {method}
+                                </span>
                               </SelectItem>
                             ))}
                           </SelectContent>

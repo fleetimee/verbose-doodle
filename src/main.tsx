@@ -32,7 +32,6 @@ createRoot(rootElement).render(
             <Route element={<Login />} path="/login" />
             <Route element={<About />} path="/about" />
 
-            {/* Dashboard with nested routes */}
             <Route element={<DashboardLayout />} path="/dashboard">
               <Route
                 element={<Navigate replace to="/dashboard/overview" />}
