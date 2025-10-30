@@ -8,6 +8,7 @@ import { ThemeProvider } from "./components/theme-provider";
 import { queryClient } from "./lib/query-client";
 import AboutPage from "./pages/about";
 import HomePage from "./pages/home";
+import LoginPage from "./pages/login";
 
 const rootElement = document.getElementById("root");
 
@@ -23,6 +24,7 @@ createRoot(rootElement).render(
           <Routes>
             <Route element={<HomePage />} path="/" />
             <Route element={<AboutPage />} path="/about" />
+            <Route element={<LoginPage />} path="/login" />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
