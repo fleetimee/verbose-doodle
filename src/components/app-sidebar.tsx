@@ -32,7 +32,6 @@ const data = {
       title: "Overview",
       url: "/dashboard/overview",
       icon: LayoutDashboard,
-      isActive: true,
     },
     {
       title: "Endpoints",
@@ -77,7 +76,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    Biller Simulator
+                    Biller Simulator JSON
                   </span>
                   <span className="truncate text-xs">BPDDIY</span>
                 </div>
