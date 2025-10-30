@@ -1,10 +1,10 @@
 import {
   LayoutDashboard,
   LifeBuoy,
-  ListTodo,
-  Receipt,
+  Plug,
   Send,
   Settings,
+  Users,
   Wallet,
 } from "lucide-react";
 import type React from "react";
@@ -35,14 +35,14 @@ const data = {
       isActive: true,
     },
     {
-      title: "Billing",
-      url: "/dashboard/billing",
-      icon: Receipt,
+      title: "Endpoints",
+      url: "/dashboard/endpoints",
+      icon: Plug,
     },
     {
-      title: "Scenarios",
-      url: "/dashboard/scenarios",
-      icon: ListTodo,
+      title: "Users",
+      url: "/dashboard/users",
+      icon: Users,
     },
     {
       title: "Settings",
