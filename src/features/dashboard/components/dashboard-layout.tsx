@@ -17,7 +17,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-// Map routes to breadcrumb labels
 const routeLabels: Record<string, string> = {
   overview: "Overview",
   endpoints: "Endpoints",
@@ -28,12 +27,10 @@ const routeLabels: Record<string, string> = {
 export function DashboardLayout() {
   const location = useLocation();
 
-  // Parse the current path to generate breadcrumbs
   const pathSegments = location.pathname
     .split("/")
     .filter((segment) => segment !== "");
 
-  // Generate breadcrumb items
   const breadcrumbItems = pathSegments.map((segment, index) => {
     const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
     const label =
