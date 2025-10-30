@@ -7,9 +7,9 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { queryClient } from "@/lib/query-client";
-import AboutPage from "./pages/about";
-import HomePage from "./pages/home";
-import LoginPage from "./pages/login";
+import { About } from "@/pages/about";
+import { Home } from "@/pages/home";
+import { Login } from "@/pages/login";
 
 const rootElement = document.getElementById("root");
 
@@ -23,9 +23,9 @@ createRoot(rootElement).render(
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <BrowserRouter>
           <Routes>
-            <Route element={<HomePage />} path="/" />
-            <Route element={<AboutPage />} path="/about" />
-            <Route element={<LoginPage />} path="/login" />
+            <Route element={<Home />} path="/" />
+            <Route element={<About />} path="/about" />
+            <Route element={<Login />} path="/login" />
           </Routes>
         </BrowserRouter>
         <Toaster position="bottom-right" />

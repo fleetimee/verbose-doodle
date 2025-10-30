@@ -20,7 +20,10 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { type LoginFormData, loginSchema } from "../schemas/login-schema";
+import {
+  type LoginFormData,
+  loginSchema,
+} from "@/features/login/schemas/login-schema";
 
 type LoginFormProps = {
   onSubmit: (data: LoginFormData) => void;

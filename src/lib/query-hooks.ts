@@ -13,7 +13,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import type { ApiError } from "./api";
+import type { ApiError } from "@/lib/api";
 
 /**
  * Type-safe query options

@@ -2,7 +2,7 @@ import { LoginForm } from "@/features/login/components/login-form";
 import { useLogin } from "@/features/login/hooks/use-login";
 import { getErrorMessage } from "@/lib/error-handler";
 
-const LoginPage = () => {
+export const Login = () => {
   const { mutate: login, isPending, error, isError } = useLogin();
 
   return (
@@ -49,5 +49,3 @@ const LoginPage = () => {
     </div>
   );
 };
-
-export default LoginPage;
