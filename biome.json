@@ -76,6 +76,20 @@
           }
         }
       }
+    },
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "test-setup.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noEmptyBlockStatements": "off",
+            "noSkippedTests": "off"
+          },
+          "style": {
+            "noMagicNumbers": "off"
+          }
+        }
+      }
     }
   ]
 }
