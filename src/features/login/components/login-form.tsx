@@ -14,6 +14,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
@@ -81,14 +82,19 @@ export const LoginForm = ({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="login-form-email">Email</FieldLabel>
-                  <Input
-                    {...field}
-                    aria-invalid={fieldState.invalid}
-                    autoComplete="email"
-                    id="login-form-email"
-                    placeholder="name@example.com"
-                    type="email"
-                  />
+                  <FieldContent>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      autoComplete="email"
+                      id="login-form-email"
+                      placeholder="name@example.com"
+                      type="email"
+                    />
+                    <FieldDescription>
+                      This email will be used for account notifications.
+                    </FieldDescription>
+                  </FieldContent>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -112,14 +118,19 @@ export const LoginForm = ({
                       Forgot password?
                     </button>
                   </div>
-                  <Input
-                    {...field}
-                    aria-invalid={fieldState.invalid}
-                    autoComplete="current-password"
-                    id="login-form-password"
-                    placeholder="Enter your password"
-                    type="password"
-                  />
+                  <FieldContent>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      autoComplete="current-password"
+                      id="login-form-password"
+                      placeholder="Enter your password"
+                      type="password"
+                    />
+                    <FieldDescription>
+                      Use at least 8 characters with letters and numbers.
+                    </FieldDescription>
+                  </FieldContent>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -142,15 +153,17 @@ export const LoginForm = ({
                     name={field.name}
                     onCheckedChange={field.onChange}
                   />
-                  <FieldLabel
-                    className="cursor-pointer font-normal"
-                    htmlFor="login-form-remember"
-                  >
-                    Remember me for 30 days
-                  </FieldLabel>
-                  <FieldDescription className="sr-only">
-                    Stay signed in for 30 days
-                  </FieldDescription>
+                  <FieldContent>
+                    <FieldLabel
+                      className="cursor-pointer font-normal"
+                      htmlFor="login-form-remember"
+                    >
+                      Remember me for 30 days
+                    </FieldLabel>
+                    <FieldDescription className="sr-only">
+                      Stay signed in for 30 days
+                    </FieldDescription>
+                  </FieldContent>
                 </Field>
               )}
             />
