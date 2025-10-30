@@ -1,5 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { OctagonXIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,14 +20,22 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { type LoginFormData, loginSchema } from "../types";
+import { type LoginFormData, loginSchema } from "../schemas/login-schema";
 
 type LoginFormProps = {
   onSubmit: (data: LoginFormData) => void;
   isLoading?: boolean;
+  error?: {
+    message: string;
+    description?: string;
+  } | null;
 };
 
-export const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
+export const LoginForm = ({
+  onSubmit,
+  isLoading = false,
+  error = null,
+}: LoginFormProps) => {
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -51,6 +61,16 @@ export const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
           id="login-form"
           onSubmit={form.handleSubmit(onSubmit)}
         >
+          {error && (
+            <Alert variant="destructive">
+              <OctagonXIcon />
+              <AlertTitle>{error.message}</AlertTitle>
+              {error.description && (
+                <AlertDescription>{error.description}</AlertDescription>
+              )}
+            </Alert>
+          )}
+
           <FieldGroup>
             <Controller
               control={form.control}
