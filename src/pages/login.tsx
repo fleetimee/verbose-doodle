@@ -1,36 +1,9 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
 import { LoginForm } from "@/features/login/components/login-form";
-import type { LoginFormData } from "@/features/login/types";
-
-/**
- * Simulated API delay for demonstration purposes
- */
-const SIMULATED_API_DELAY_MS = 1500;
+import { useLogin } from "@/features/login/hooks/use-login";
+import { getErrorMessage } from "@/lib/error-handler";
 
 const LoginPage = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleLogin = async (_data: LoginFormData) => {
-    setIsLoading(true);
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) =>
-        setTimeout(resolve, SIMULATED_API_DELAY_MS)
-      );
-
-      // TODO: Replace with actual authentication logic
-
-      // On successful login, redirect to home
-      navigate("/");
-    } catch {
-      // TODO: Implement proper error handling with toast notifications
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { mutate: login, isPending, error, isError } = useLogin();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -46,7 +19,18 @@ const LoginPage = () => {
         </div>
 
         {/* Login Form */}
-        <LoginForm isLoading={isLoading} onSubmit={handleLogin} />
+        <LoginForm
+          error={
+            isError
+              ? {
+                  message: "Login Failed",
+                  description: getErrorMessage(error),
+                }
+              : null
+          }
+          isLoading={isPending}
+          onSubmit={login}
+        />
 
         {/* Footer */}
         <div className="mt-8 text-center">
