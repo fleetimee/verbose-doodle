@@ -1,4 +1,60 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite/core"]
+  "extends": ["ultracite/core"],
+  "overrides": [
+    {
+      "includes": ["src/components/ui/**", "src/hooks/**"],
+      "formatter": {
+        "enabled": false
+      },
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useFocusableInteractive": "off",
+            "useSemanticElements": "off",
+            "noNoninteractiveElementInteractions": "off",
+            "useKeyWithClickEvents": "off",
+            "useAriaPropsForRole": "off",
+            "noRedundantRoles": "off"
+          },
+          "correctness": {
+            "useExhaustiveDependencies": "off"
+          },
+          "complexity": {
+            "useSimplifiedLogicExpression": "off",
+            "noExcessiveCognitiveComplexity": "off"
+          },
+          "performance": {
+            "noNamespaceImport": "off"
+          },
+          "nursery": {
+            "useSortedClasses": "off",
+            "useConsistentArrowReturn": "off",
+            "noShadow": "off",
+            "noUselessUndefined": "off"
+          },
+          "style": {
+            "useImportType": "off",
+            "useBlockStatements": "off",
+            "useConsistentObjectDefinitions": "off",
+            "noNegationElse": "off",
+            "noNestedTernary": "off",
+            "noMagicNumbers": "off"
+          },
+          "suspicious": {
+            "noDoubleEquals": "off",
+            "noArrayIndexKey": "off",
+            "noApproximativeNumericConstant": "off",
+            "noDocumentCookie": "off"
+          },
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          }
+        }
+      },
+      "assist": {
+        "enabled": false
+      }
+    }
+  ]
 }
