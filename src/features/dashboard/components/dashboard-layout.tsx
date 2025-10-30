@@ -1,6 +1,7 @@
 import React from "react";
 import { Outlet, useLocation } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -75,6 +76,9 @@ export function DashboardLayout() {
               ))}
             </BreadcrumbList>
           </Breadcrumb>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 overflow-auto p-6">
           <Outlet />
