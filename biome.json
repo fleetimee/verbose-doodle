@@ -55,6 +55,27 @@
       "assist": {
         "enabled": false
       }
+    },
+    {
+      "includes": ["src/index.css"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnknownTypeSelector": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/**/*.d.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useConsistentBuiltinInstantiation": "off",
+            "useConsistentTypeDefinitions": "off"
+          }
+        }
+      }
     }
   ]
 }
