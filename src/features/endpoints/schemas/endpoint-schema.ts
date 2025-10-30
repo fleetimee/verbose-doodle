@@ -15,9 +15,7 @@ export const httpMethods = ["GET", "POST", "PUT", "DELETE", "PATCH"] as const;
  */
 export const endpointSchema = z
   .object({
-    method: z.enum(httpMethods, {
-      required_error: "Please select a method",
-    }),
+    method: z.enum(httpMethods),
     url: z
       .string()
       .min(MIN_URL_LENGTH, "URL is required")
