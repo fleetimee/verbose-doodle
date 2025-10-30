@@ -1,8 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { ThemeProvider } from "./components/theme-provider";
+import { queryClient } from "./lib/query-client";
 import AboutPage from "./pages/about";
 import HomePage from "./pages/home";
 
@@ -14,13 +17,16 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <BrowserRouter>
-        <Routes>
-          <Route element={<HomePage />} path="/" />
-          <Route element={<AboutPage />} path="/about" />
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <BrowserRouter>
+          <Routes>
+            <Route element={<HomePage />} path="/" />
+            <Route element={<AboutPage />} path="/about" />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   </StrictMode>
 );
