@@ -10,7 +10,7 @@ const MIN_PASSWORD_LENGTH = 8;
  * Validates email format and password requirements
  */
 export const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  email: z.email("Invalid email address"),
   password: z
     .string()
     .min(MIN_PASSWORD_LENGTH, "Password must be at least 8 characters"),
