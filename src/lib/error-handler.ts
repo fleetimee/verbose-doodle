@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import type { ApiError } from "./api";
+import type { ApiError } from "@/lib/api";
 
 /**
  * Error message mapping for common error codes

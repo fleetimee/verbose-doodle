@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
+import type { LoginFormData } from "@/features/login/schemas/login-schema";
+import type { LoginError, LoginResponse } from "@/features/login/types";
 import { handleAuthError, showSuccessToast } from "@/lib/error-handler";
-import type { LoginFormData } from "../schemas/login-schema";
-import type { LoginError, LoginResponse } from "../types";
 
 /**
  * Simulated API delay for demonstration purposes

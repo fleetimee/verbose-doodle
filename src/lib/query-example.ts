@@ -6,8 +6,8 @@
  */
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiGet, apiPost } from "./api";
-import { useInvalidateQueries } from "./query-hooks";
+import { apiGet, apiPost } from "@/lib/api";
+import { useInvalidateQueries } from "@/lib/query-hooks";
 
 // Example constants
 const MILLISECONDS_PER_SECOND = 1000;

@@ -1,5 +1,5 @@
-import { HomeContent } from "./home-content";
-import { HomeHeader } from "./home-header";
+import { HomeContent } from "@/features/home/components/home-content";
+import { HomeHeader } from "@/features/home/components/home-header";
 
 export function HomePage() {
   return (

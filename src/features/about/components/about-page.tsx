@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { AboutContent } from "./about-content";
-import { AboutHeader } from "./about-header";
+import { AboutContent } from "@/features/about/components/about-content";
+import { AboutHeader } from "@/features/about/components/about-header";
 
 export function AboutPage() {
   return (
