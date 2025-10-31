@@ -35,19 +35,14 @@ export function LogoutDialog({ open, onOpenChange }: LogoutDialogProps) {
   const handleLogout = async () => {
     setIsLoggingOut(true);
 
-    // Simulate logout delay
     await new Promise((resolve) => setTimeout(resolve, LOGOUT_DELAY_MS));
 
-    // Clear auth session
     logout();
 
-    // Close dialog
     onOpenChange(false);
 
-    // Reset loading state
     setIsLoggingOut(false);
 
-    // Redirect to login page
     navigate("/login");
   };
 
