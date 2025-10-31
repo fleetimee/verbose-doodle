@@ -11,12 +11,15 @@ import {
 } from "@/components/ui/empty";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
 import { EndpointCard } from "@/features/endpoints/components/endpoint-card";
+import { EndpointCardSkeleton } from "@/features/endpoints/components/endpoint-card-skeleton";
 import { EndpointsSearchControls } from "@/features/endpoints/components/endpoints-search-controls";
 import { useCreateEndpoint } from "@/features/endpoints/hooks/use-create-endpoint";
 import { useGetEndpoints } from "@/features/endpoints/hooks/use-get-endpoints";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import type { Endpoint } from "@/features/endpoints/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+
+const SKELETON_KEYS = Array.from({ length: 6 }, () => crypto.randomUUID());
 
 export function EndpointsPage() {
   useDocumentMeta({
@@ -25,11 +28,13 @@ export function EndpointsPage() {
     keywords: ["api endpoints", "integrations", "api management", "endpoints"],
   });
 
-  const { data: endpoints = [] } = useGetEndpoints();
+  const { data: endpoints = [], isPending: isLoadingEndpoints } =
+    useGetEndpoints();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { mutate: createEndpoint, isPending } = useCreateEndpoint();
+  const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
+    useCreateEndpoint();
 
   const filteredEndpoints = useMemo<Endpoint[]>(() => {
     const query = searchTerm.trim().toLowerCase();
@@ -75,7 +80,7 @@ export function EndpointsPage() {
           </p>
         </div>
         <AddEndpointSheet
-          isSubmitting={isPending}
+          isSubmitting={isCreatingEndpoint}
           onOpenChange={setIsDialogOpen}
           onSubmit={handleAddEndpoint}
           open={isDialogOpen}
@@ -83,7 +88,18 @@ export function EndpointsPage() {
         />
       </div>
 
-      {hasEndpoints ? (
+      {isLoadingEndpoints && (
+        <>
+          <EndpointsSearchControls onSearchChange={setSearchTerm} />
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {SKELETON_KEYS.map((key) => (
+              <EndpointCardSkeleton key={key} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {!isLoadingEndpoints && hasEndpoints && (
         <>
           <EndpointsSearchControls onSearchChange={setSearchTerm} />
 
@@ -108,7 +124,9 @@ export function EndpointsPage() {
             </Empty>
           )}
         </>
-      ) : (
+      )}
+
+      {!(isLoadingEndpoints || hasEndpoints) && (
         <Empty className="min-h-[60vh] border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
