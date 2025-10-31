@@ -256,10 +256,7 @@ export function EndpointsPage() {
           <ItemDescription className="text-left">
             {endpoint.responses.length > 0 ? (
               <div className="flex flex-col gap-0.5">
-                <span>{endpoint.responses.length} respon terkonfigurasi</span>
-                {endpoint.responses.some((r) => r.activated) && (
-                  <span>Respon aktif tersedia</span>
-                )}
+                <span>{endpoint.responses.length} respon </span>
               </div>
             ) : (
               "Belum ada respon terkonfigurasi"
@@ -277,12 +274,12 @@ export function EndpointsPage() {
   const renderEndpointListItem = (endpoint: Endpoint) => (
     <Item
       asChild
-      className="cursor-pointer hover:bg-accent/50"
+      className="w-full cursor-pointer hover:bg-accent/50"
       key={endpoint.id}
       size="default"
       variant="default"
     >
-      <button type="button">
+      <button className="w-full" type="button">
         <ItemMedia variant="default">
           <span
             className={`rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
@@ -299,17 +296,14 @@ export function EndpointsPage() {
           <ItemDescription className="text-left">
             {endpoint.responses.length > 0 ? (
               <div className="flex flex-col gap-0.5">
-                <span>{endpoint.responses.length} respon terkonfigurasi</span>
-                {endpoint.responses.some((r) => r.activated) && (
-                  <span>Respon aktif tersedia</span>
-                )}
+                <span>{endpoint.responses.length} respon</span>
               </div>
             ) : (
               "Belum ada respon terkonfigurasi"
             )}
           </ItemDescription>
         </ItemContent>
-        <ItemActions>
+        <ItemActions className="ml-auto">
           <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </ItemActions>
       </button>
@@ -411,14 +405,30 @@ export function EndpointsPage() {
 
       {/* Ungrouped View - List */}
       {endpoints.length > 0 && viewMode === "ungrouped" && (
-        <ItemGroup className="rounded-lg border">
-          {endpoints.map((endpoint, index) => (
-            <div key={endpoint.id}>
-              {renderEndpointListItem(endpoint)}
-              {index < endpoints.length - 1 && <ItemSeparator />}
-            </div>
-          ))}
-        </ItemGroup>
+        <div className="space-y-6">
+          {endpointGroups.map((group) => {
+            const groupEndpoints = endpoints.filter(
+              (endpoint) => endpoint.groupId === group.id
+            );
+            if (groupEndpoints.length === 0) {
+              return null;
+            }
+
+            return (
+              <div className="space-y-3" key={group.id}>
+                <h3 className="font-semibold text-lg">{group.name}</h3>
+                <ItemGroup className="w-full rounded-lg border">
+                  {groupEndpoints.map((endpoint, index) => (
+                    <div className="w-full" key={endpoint.id}>
+                      {renderEndpointListItem(endpoint)}
+                      {index < groupEndpoints.length - 1 && <ItemSeparator />}
+                    </div>
+                  ))}
+                </ItemGroup>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
