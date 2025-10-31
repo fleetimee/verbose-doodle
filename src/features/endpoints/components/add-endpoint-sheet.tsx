@@ -33,11 +33,9 @@ import {
   endpointSchema,
   httpMethods,
 } from "@/features/endpoints/schemas/endpoint-schema";
-import type { EndpointGroup } from "@/features/endpoints/types";
 import { getMethodTextColor } from "@/features/endpoints/utils/http-method-colors";
 
 type AddEndpointSheetProps = {
-  endpointGroups: EndpointGroup[];
   onSubmit: (data: EndpointFormData) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -46,7 +44,6 @@ type AddEndpointSheetProps = {
 };
 
 export function AddEndpointSheet({
-  endpointGroups,
   onSubmit,
   open,
   onOpenChange,
@@ -58,13 +55,9 @@ export function AddEndpointSheet({
     defaultValues: {
       method: "GET",
       url: "/",
-      groupId: "",
-      newGroupName: "",
+      billerId: 1,
     },
   });
-
-  const selectedGroupId = form.watch("groupId");
-  const isCreatingNewGroup = selectedGroupId === "new";
 
   const handleFormSubmit = (data: EndpointFormData) => {
     onSubmit(data);
@@ -94,8 +87,7 @@ export function AddEndpointSheet({
         <SheetHeader>
           <SheetTitle>Add Endpoint</SheetTitle>
           <SheetDescription>
-            Create a new API endpoint. You can also create a new group on the
-            fly.
+            Create a new API endpoint for a specific biller ID.
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
@@ -181,86 +173,32 @@ export function AddEndpointSheet({
 
                 <Controller
                   control={form.control}
-                  name="groupId"
-                  render={({ field, fieldState }) => {
-                    const selectedValue =
-                      field.value === "" ? undefined : field.value;
-                    return (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="endpoint-group">Group</FieldLabel>
-                        <FieldContent>
-                          <Select
-                            name={field.name}
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              if (value !== "new") {
-                                form.setValue("newGroupName", "");
-                              }
-                            }}
-                            value={selectedValue}
-                          >
-                            <SelectTrigger
-                              aria-invalid={fieldState.invalid}
-                              id="endpoint-group"
-                            >
-                              <SelectValue placeholder="Select or create a group" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="new">
-                                <div className="flex items-center gap-2">
-                                  <Plus className="h-4 w-4" />
-                                  <span>Create new group</span>
-                                </div>
-                              </SelectItem>
-                              {endpointGroups.map((group) => (
-                                <SelectItem key={group.id} value={group.id}>
-                                  {group.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FieldDescription>
-                            Assign this endpoint to an existing group or create
-                            a new one.
-                          </FieldDescription>
-                        </FieldContent>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    );
-                  }}
+                  name="billerId"
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="endpoint-biller">
+                        Biller ID
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          {...field}
+                          aria-invalid={fieldState.invalid}
+                          autoComplete="off"
+                          id="endpoint-biller"
+                          inputMode="numeric"
+                          placeholder="1"
+                          type="number"
+                        />
+                        <FieldDescription>
+                          Specify the biller ID this endpoint belongs to.
+                        </FieldDescription>
+                      </FieldContent>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
                 />
-
-                {isCreatingNewGroup && (
-                  <Controller
-                    control={form.control}
-                    name="newGroupName"
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="endpoint-new-group">
-                          New Group Name
-                        </FieldLabel>
-                        <FieldContent>
-                          <Input
-                            {...field}
-                            aria-invalid={fieldState.invalid}
-                            autoComplete="off"
-                            id="endpoint-new-group"
-                            placeholder="e.g., Payment Gateway, User Service"
-                          />
-                          <FieldDescription>
-                            This group will be created if it does not already
-                            exist.
-                          </FieldDescription>
-                        </FieldContent>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                )}
               </FieldGroup>
             </div>
 

@@ -1,7 +1,6 @@
-import { Plug, Plus, Search } from "lucide-react";
-import { useState } from "react";
+import { Plug, Plus } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
 import {
   Empty,
   EmptyContent,
@@ -10,144 +9,215 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Input } from "@/components/ui/input";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
+import { EndpointCard } from "@/features/endpoints/components/endpoint-card";
+import { EndpointCardSkeleton } from "@/features/endpoints/components/endpoint-card-skeleton";
+import { EndpointListItem } from "@/features/endpoints/components/endpoint-list-item";
+import { EndpointListSkeleton } from "@/features/endpoints/components/endpoint-list-skeleton";
+import { EndpointsSearchControls } from "@/features/endpoints/components/endpoints-search-controls";
 import { useCreateEndpoint } from "@/features/endpoints/hooks/use-create-endpoint";
+import { useGetEndpoints } from "@/features/endpoints/hooks/use-get-endpoints";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
-import type { Endpoint, EndpointGroup } from "@/features/endpoints/types";
+import type { Endpoint } from "@/features/endpoints/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+
+const SKELETON_KEYS = Array.from({ length: 6 }, () => crypto.randomUUID());
 
 export function EndpointsPage() {
   useDocumentMeta({
-    title: "Endpoints",
-    description:
-      "Manage your API endpoints and integrations for billing simulations",
+    title: "Endpoint",
+    description: "Kelola endpoint API dan integrasi untuk simulasi billing",
     keywords: ["api endpoints", "integrations", "api management", "endpoints"],
   });
-  // TODO: Replace with useQuery when implementing data fetching
-  const [endpointGroups, setEndpointGroups] = useState<EndpointGroup[]>([]);
-  const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { mutate: createEndpoint, isPending } = useCreateEndpoint();
+  const { data: endpoints = [], isPending: isLoadingEndpoints } =
+    useGetEndpoints();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useLocalStorage<"grid" | "list">(
+    "endpoints-view-mode",
+    "grid"
+  );
+
+  const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
+    useCreateEndpoint();
+
+  const filteredEndpoints = useMemo<Endpoint[]>(() => {
+    const query = searchTerm.trim().toLowerCase();
+
+    if (query.length === 0) {
+      return endpoints;
+    }
+
+    return endpoints.filter((endpoint) => {
+      const matchesUrl = endpoint.url.toLowerCase().includes(query);
+      const matchesMethod = endpoint.method.toLowerCase().includes(query);
+      const matchesBiller = endpoint.billerId.toString().includes(query);
+      const matchesResponse = endpoint.responses.some((response) =>
+        response.name.toLowerCase().includes(query)
+      );
+
+      return matchesUrl || matchesMethod || matchesBiller || matchesResponse;
+    });
+  }, [endpoints, searchTerm]);
+
+  const groupedEndpoints = useMemo(() => {
+    if (filteredEndpoints.length === 0) {
+      return [];
+    }
+
+    const groups = new Map<number, Endpoint[]>();
+
+    for (const endpoint of filteredEndpoints) {
+      const existing = groups.get(endpoint.billerId);
+
+      if (existing) {
+        existing.push(endpoint);
+      } else {
+        groups.set(endpoint.billerId, [endpoint]);
+      }
+    }
+
+    const sortedBillerIds = Array.from(groups.keys()).sort((a, b) => a - b);
+
+    return sortedBillerIds.map((billerId) => ({
+      billerId,
+      endpoints: groups.get(billerId) ?? [],
+    }));
+  }, [filteredEndpoints]);
+
+  const hasEndpoints = endpoints.length > 0;
+  const hasFilteredEndpoints = groupedEndpoints.length > 0;
 
   const handleCreateEndpoint = () => {
     setIsDialogOpen(true);
   };
 
   const handleAddEndpoint = (data: EndpointFormData) => {
-    // If creating a new group, add it to the state first
-    let targetGroupId = data.groupId;
-
-    if (data.groupId === "new" && data.newGroupName) {
-      const newGroup: EndpointGroup = {
-        id: crypto.randomUUID(),
-        name: data.newGroupName,
-      };
-      setEndpointGroups((prev) => [...prev, newGroup]);
-      targetGroupId = newGroup.id;
-    }
-
-    // Create endpoint with the correct groupId
-    createEndpoint(
-      { ...data, groupId: targetGroupId },
-      {
-        onSuccess: (response) => {
-          // Add to local state (temporary until we implement useQuery)
-          setEndpoints((prev) => [...prev, response.data]);
-          setIsDialogOpen(false);
-        },
-      }
-    );
+    createEndpoint(data, {
+      onSuccess: () => {
+        setIsDialogOpen(false);
+      },
+    });
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-bold text-3xl tracking-tight">Endpoints</h1>
+          <h1 className="font-bold text-3xl tracking-tight">Endpoint</h1>
           <p className="text-muted-foreground">
-            Manage your API endpoints and integrations
+            Kelola endpoint API dan integrasi Anda
           </p>
         </div>
         <AddEndpointSheet
-          endpointGroups={endpointGroups}
-          isSubmitting={isPending}
+          isSubmitting={isCreatingEndpoint}
           onOpenChange={setIsDialogOpen}
           onSubmit={handleAddEndpoint}
           open={isDialogOpen}
-          showTrigger={endpoints.length > 0}
+          showTrigger={hasEndpoints}
         />
       </div>
 
-      {/* Search and Filters */}
-      {endpoints.length > 0 && (
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1">
-            <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
-            <Input className="pl-9" placeholder="Search endpoints..." />
-          </div>
-        </div>
+      {isLoadingEndpoints && (
+        <>
+          <EndpointsSearchControls
+            onSearchChange={setSearchTerm}
+            onViewModeChange={setViewMode}
+            viewMode={viewMode}
+          />
+          {viewMode === "grid" ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {SKELETON_KEYS.map((key) => (
+                <EndpointCardSkeleton key={key} />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {SKELETON_KEYS.map((key) => (
+                <EndpointListSkeleton key={key} />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
-      {/* Empty State */}
-      {endpoints.length === 0 ? (
+      {!isLoadingEndpoints && hasEndpoints && (
+        <>
+          <EndpointsSearchControls
+            onSearchChange={setSearchTerm}
+            onViewModeChange={setViewMode}
+            viewMode={viewMode}
+          />
+
+          {hasFilteredEndpoints ? (
+            <div className="space-y-8">
+              {groupedEndpoints.map((group) => (
+                <section className="space-y-4" key={group.billerId}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <h2 className="font-semibold text-lg">
+                      Biller ID {group.billerId}
+                    </h2>
+                    <span className="text-muted-foreground text-sm">
+                      {group.endpoints.length} endpoint
+                    </span>
+                  </div>
+                  {viewMode === "grid" ? (
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                      {group.endpoints.map((endpoint) => (
+                        <EndpointCard endpoint={endpoint} key={endpoint.id} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {group.endpoints.map((endpoint) => (
+                        <EndpointListItem
+                          endpoint={endpoint}
+                          key={endpoint.id}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </section>
+              ))}
+            </div>
+          ) : (
+            <Empty className="border">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Plug />
+                </EmptyMedia>
+                <EmptyTitle>Tidak ada endpoint ditemukan</EmptyTitle>
+                <EmptyDescription>
+                  Ubah kata kunci pencarian atau reset filter untuk melihat
+                  daftar endpoint.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )}
+        </>
+      )}
+
+      {!(isLoadingEndpoints || hasEndpoints) && (
         <Empty className="min-h-[60vh] border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Plug />
             </EmptyMedia>
-            <EmptyTitle>No endpoints yet</EmptyTitle>
+            <EmptyTitle>Belum ada endpoint</EmptyTitle>
             <EmptyDescription>
-              Get started by creating your first API endpoint. You can organize
-              endpoints by creating groups on the fly.
+              Mulai dengan membuat endpoint API pertama Anda untuk biller yang
+              tersedia.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button onClick={handleCreateEndpoint}>
               <Plus className="mr-2 h-4 w-4" />
-              Create Your First Endpoint
+              Buat Endpoint Pertama
             </Button>
           </EmptyContent>
         </Empty>
-      ) : (
-        <div className="space-y-6">
-          {endpointGroups.map((group) => {
-            const groupEndpoints = endpoints.filter(
-              (endpoint) => endpoint.groupId === group.id
-            );
-            if (groupEndpoints.length === 0) {
-              return null;
-            }
-
-            return (
-              <div className="space-y-3" key={group.id}>
-                <h3 className="font-semibold text-lg">{group.name}</h3>
-                <div className="grid gap-3">
-                  {groupEndpoints.map((endpoint) => (
-                    <Card key={endpoint.id}>
-                      <CardHeader>
-                        <div className="flex items-center gap-3">
-                          <span className="rounded bg-primary/10 px-2 py-1 font-mono font-semibold text-primary text-xs">
-                            {endpoint.method}
-                          </span>
-                          <span className="font-mono text-sm">
-                            {endpoint.url}
-                          </span>
-                          <span className="text-muted-foreground text-xs">
-                            {endpoint.responses.length} response
-                            {endpoint.responses.length !== 1 ? "s" : ""}
-                          </span>
-                        </div>
-                      </CardHeader>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
       )}
     </div>
   );

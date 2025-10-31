@@ -62,3 +62,33 @@ export function getMethodColor(method: HttpMethod): MethodColorConfig {
 export function getMethodTextColor(method: HttpMethod): string {
   return getMethodColor(method).text;
 }
+
+/**
+ * Get combined badge classes (text, background, and border) for badges
+ */
+export function getMethodBadgeColor(method: HttpMethod): string {
+  const colors = getMethodColor(method);
+  return `${colors.text} ${colors.bg} ${colors.border}`;
+}
+
+const METHOD_ABBREVIATION_LENGTH = 3;
+
+/**
+ * Abbreviate HTTP method to 3 letters for consistent badge width
+ */
+export function abbreviateMethod(method: HttpMethod): string {
+  switch (method) {
+    case "GET":
+      return "GET";
+    case "POST":
+      return "PST";
+    case "PUT":
+      return "PUT";
+    case "DELETE":
+      return "DEL";
+    case "PATCH":
+      return "PAT";
+    default:
+      return method.slice(0, METHOD_ABBREVIATION_LENGTH);
+  }
+}
