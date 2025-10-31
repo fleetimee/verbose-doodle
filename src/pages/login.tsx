@@ -1,9 +1,13 @@
+import { Navigate } from "react-router";
+import { useAuth } from "@/features/auth/context";
 import { LoginForm } from "@/features/login/components/login-form";
 import { useLogin } from "@/features/login/hooks/use-login";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { getErrorMessage } from "@/lib/error-handler";
 
 export const Login = () => {
+  const { authState } = useAuth();
+
   useDocumentMeta({
     title: "Login",
     description: "Sign in to your billing simulator account",
@@ -11,6 +15,11 @@ export const Login = () => {
   });
 
   const { mutate: login, isPending, error, isError } = useLogin();
+
+  // Redirect to dashboard if already authenticated
+  if (authState.isAuthenticated) {
+    return <Navigate replace to="/dashboard" />;
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -38,20 +47,6 @@ export const Login = () => {
           isLoading={isPending}
           onSubmit={login}
         />
-
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-muted-foreground text-xs">
-            By signing in, you agree to our{" "}
-            <button className="text-primary hover:underline" type="button">
-              Terms of Service
-            </button>{" "}
-            and{" "}
-            <button className="text-primary hover:underline" type="button">
-              Privacy Policy
-            </button>
-          </p>
-        </div>
       </div>
     </div>
   );

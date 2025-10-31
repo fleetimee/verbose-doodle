@@ -2,28 +2,24 @@
  * Login feature type definitions
  */
 
+export type UserRole = "ADMIN" | "USER";
+
 /**
  * Login response from authentication service
+ * Based on backend API: POST /login
  */
 export type LoginResponse = {
-  success: boolean;
-  token?: string;
-  user?: {
-    id: string;
-    email: string;
-    name: string;
-  };
-  message?: string;
+  response_code: string;
+  response_desc: string;
+  role: UserRole;
 };
 
 /**
- * Authentication user data
+ * Authentication user data stored in session
  */
 export type AuthUser = {
-  id: string;
-  email: string;
-  name: string;
-  token: string;
+  username: string;
+  role: UserRole;
 };
 
 /**
