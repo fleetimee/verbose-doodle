@@ -1,6 +1,7 @@
 import { Plus, Users as UsersIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DataTable } from "@/components/ui/data-table";
 import {
   Empty,
   EmptyContent,
@@ -9,9 +10,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { columns } from "@/features/users/components/columns";
+import { sampleUsers } from "@/features/users/data/users-data";
+import type { User } from "@/features/users/types";
 
 export function UsersPage() {
-  const [users] = useState<unknown[]>([]);
+  const [users] = useState<User[]>(sampleUsers);
 
   const handleAddUser = () => {
     // TODO: Implement add user logic
@@ -27,13 +31,13 @@ export function UsersPage() {
             Manage users and their permissions
           </p>
         </div>
-        <Button>
+        <Button onClick={handleAddUser}>
           <Plus className="mr-2 h-4 w-4" />
           Add User
         </Button>
       </div>
 
-      {/* Empty State */}
+      {/* Empty State or Data Table */}
       {users.length === 0 ? (
         <Empty className="min-h-[60vh] border">
           <EmptyHeader>
@@ -54,7 +58,12 @@ export function UsersPage() {
           </EmptyContent>
         </Empty>
       ) : (
-        <div className="grid gap-4">{/* Users list will go here */}</div>
+        <DataTable
+          columns={columns}
+          data={users}
+          filterColumn="email"
+          filterPlaceholder="Filter by email..."
+        />
       )}
     </div>
   );
