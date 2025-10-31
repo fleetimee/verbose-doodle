@@ -186,8 +186,12 @@ export function AddEndpointSheet({
                           autoComplete="off"
                           id="endpoint-biller"
                           inputMode="numeric"
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                           placeholder="1"
                           type="number"
+                          value={field.value}
                         />
                         <FieldDescription>
                           Specify the biller ID this endpoint belongs to.
