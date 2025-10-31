@@ -15,8 +15,15 @@ import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-s
 import { useCreateEndpoint } from "@/features/endpoints/hooks/use-create-endpoint";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import type { Endpoint, EndpointGroup } from "@/features/endpoints/types";
+import { useDocumentMeta } from "@/hooks/use-document-meta";
 
 export function EndpointsPage() {
+  useDocumentMeta({
+    title: "Endpoints",
+    description:
+      "Manage your API endpoints and integrations for billing simulations",
+    keywords: ["api endpoints", "integrations", "api management", "endpoints"],
+  });
   // TODO: Replace with useQuery when implementing data fetching
   const [endpointGroups, setEndpointGroups] = useState<EndpointGroup[]>([]);
   const [endpoints, setEndpoints] = useState<Endpoint[]>([]);

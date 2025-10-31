@@ -13,8 +13,14 @@ import {
 import { columns } from "@/features/users/components/columns";
 import { sampleUsers } from "@/features/users/data/users-data";
 import type { User } from "@/features/users/types";
+import { useDocumentMeta } from "@/hooks/use-document-meta";
 
 export function UsersPage() {
+  useDocumentMeta({
+    title: "Users",
+    description: "Manage users and their permissions in the billing simulator",
+    keywords: ["user management", "permissions", "team", "users"],
+  });
   const [users] = useState<User[]>(sampleUsers);
 
   const handleAddUser = () => {

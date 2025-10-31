@@ -1,8 +1,15 @@
 import { LoginForm } from "@/features/login/components/login-form";
 import { useLogin } from "@/features/login/hooks/use-login";
+import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { getErrorMessage } from "@/lib/error-handler";
 
 export const Login = () => {
+  useDocumentMeta({
+    title: "Login",
+    description: "Sign in to your billing simulator account",
+    keywords: ["login", "sign in", "authentication"],
+  });
+
   const { mutate: login, isPending, error, isError } = useLogin();
 
   return (
