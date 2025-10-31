@@ -43,6 +43,10 @@ export function DashboardLayout() {
     return { label, href, isLast };
   });
 
+  // Filter theme to only pass valid values to ThemeSwitcher (light or dark)
+  const themeSwitcherValue =
+    theme === "light" || theme === "dark" ? theme : undefined;
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -76,7 +80,7 @@ export function DashboardLayout() {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="ml-auto">
-            <ThemeSwitcher onChange={setTheme} value={theme} />
+            <ThemeSwitcher onChange={setTheme} value={themeSwitcherValue} />
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 overflow-auto p-6">
