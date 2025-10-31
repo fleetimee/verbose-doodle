@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
   FieldContent,
@@ -20,6 +19,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import {
   type LoginFormData,
   loginSchema,
@@ -44,7 +44,6 @@ export const LoginForm = ({
     defaultValues: {
       username: "",
       password: "",
-      rememberMe: false,
     },
   });
 
@@ -130,36 +129,6 @@ export const LoginForm = ({
                 </Field>
               )}
             />
-
-            <Controller
-              control={form.control}
-              name="rememberMe"
-              render={({ field, fieldState }) => (
-                <Field
-                  data-invalid={fieldState.invalid}
-                  orientation="horizontal"
-                >
-                  <Checkbox
-                    aria-invalid={fieldState.invalid}
-                    checked={field.value}
-                    id="login-form-remember"
-                    name={field.name}
-                    onCheckedChange={field.onChange}
-                  />
-                  <FieldContent>
-                    <FieldLabel
-                      className="cursor-pointer font-normal"
-                      htmlFor="login-form-remember"
-                    >
-                      Remember me for 30 days
-                    </FieldLabel>
-                    <FieldDescription className="sr-only">
-                      Stay signed in for 30 days
-                    </FieldDescription>
-                  </FieldContent>
-                </Field>
-              )}
-            />
           </FieldGroup>
 
           <Button
@@ -168,6 +137,7 @@ export const LoginForm = ({
             form="login-form"
             type="submit"
           >
+            {isLoading && <Spinner className="mr-2" />}
             {isLoading ? "Signing in..." : "Sign in"}
           </Button>
         </form>

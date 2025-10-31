@@ -1,4 +1,6 @@
 import { Navigate } from "react-router";
+import { useTheme } from "@/components/theme-provider";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { useAuth } from "@/features/auth/context";
 import { LoginForm } from "@/features/login/components/login-form";
 import { useLogin } from "@/features/login/hooks/use-login";
@@ -7,6 +9,7 @@ import { getErrorMessage } from "@/lib/error-handler";
 
 export const Login = () => {
   const { authState } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   useDocumentMeta({
     title: "Login",
@@ -21,8 +24,17 @@ export const Login = () => {
     return <Navigate replace to="/dashboard" />;
   }
 
+  // Filter theme to only pass valid values to ThemeSwitcher (light or dark)
+  const themeSwitcherValue =
+    theme === "light" || theme === "dark" ? theme : undefined;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background p-4">
+      {/* Theme Switcher - Top Right */}
+      <div className="fixed top-4 right-4">
+        <ThemeSwitcher onChange={setTheme} value={themeSwitcherValue} />
+      </div>
+
       <div className="w-full max-w-md">
         {/* Logo or Brand */}
         <div className="mb-8 text-center">

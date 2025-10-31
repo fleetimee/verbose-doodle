@@ -54,7 +54,7 @@ createRoot(rootElement).render(
               </Route>
             </Routes>
           </BrowserRouter>
-          <Toaster position="bottom-right" />
+          <Toaster position="bottom-center" />
         </ThemeProvider>
       </AuthProvider>
       <ReactQueryDevtools initialIsOpen={false} />
