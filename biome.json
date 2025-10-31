@@ -57,6 +57,16 @@
       }
     },
     {
+      "includes": ["src/components/kibo-ui/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["src/index.css"],
       "linter": {
         "rules": {

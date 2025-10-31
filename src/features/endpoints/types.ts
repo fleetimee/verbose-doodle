@@ -21,46 +21,27 @@ export type Endpoint = {
   id: string;
   method: HttpMethod;
   url: string;
-  groupId: string;
+  billerId: number;
   responses: EndpointResponse[];
   createdAt?: string;
   updatedAt?: string;
 };
 
 /**
- * Endpoint Group entity
- */
-export type EndpointGroup = {
-  id: string;
-  name: string;
-  endpoints?: Endpoint[];
-  createdAt?: string;
-  updatedAt?: string;
-};
-
-/**
- * API response for creating an endpoint group
- */
-export type CreateEndpointGroupResponse = {
-  success: boolean;
-  data: EndpointGroup;
-  message: string;
-};
-
-/**
  * API response for creating an endpoint
  */
 export type CreateEndpointResponse = {
-  success: boolean;
-  data: Endpoint;
-  message: string;
+  response_code: string;
+  response_desc: string;
+  endpoint: Endpoint;
 };
 
 /**
- * API error for endpoint group operations
+ * API error for endpoint operations
  */
-export type EndpointGroupError = {
+export type EndpointError = {
   message: string;
   code?: string;
+  status?: number;
   field?: string;
 };

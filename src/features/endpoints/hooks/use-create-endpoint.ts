@@ -1,10 +1,12 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import type {
   CreateEndpointResponse,
-  EndpointGroupError,
+  Endpoint,
+  EndpointError,
 } from "@/features/endpoints/types";
+import { createMutationHook } from "@/lib/query-hooks";
 
 /**
  * Simulated API delay for demonstration purposes
@@ -24,25 +26,17 @@ async function createEndpoint(
   // TODO: Replace with actual API call
   // return apiPost<CreateEndpointResponse, EndpointFormData>('/api/endpoints', data);
 
-  const defaultResponse = {
-    id: crypto.randomUUID(),
-    name: "Default Response",
-    json: "{}",
-    statusCode: 200,
-    activated: true,
-  } as const;
-
   // Simulated success response
   return {
-    success: true,
-    data: {
+    response_code: "00",
+    response_desc: "Endpoint created successfully",
+    endpoint: {
       id: crypto.randomUUID(),
       method: data.method,
       url: data.url,
-      groupId: data.groupId,
-      responses: [defaultResponse],
+      billerId: data.billerId,
+      responses: [],
     },
-    message: "Endpoint created successfully",
   };
 }
 
@@ -62,22 +56,20 @@ async function createEndpoint(
 export function useCreateEndpoint() {
   const queryClient = useQueryClient();
 
-  return useMutation<
+  const mutation = createMutationHook<
     CreateEndpointResponse,
-    EndpointGroupError,
-    EndpointFormData
-  >({
-    mutationFn: createEndpoint,
+    EndpointFormData,
+    EndpointError
+  >(createEndpoint, {
     onSuccess: (response) => {
       // Show success message
       toast.success("Success", {
-        description: response.message,
+        description: response.response_desc,
       });
 
-      // Invalidate and refetch endpoints query
-      // TODO: Add query key when implementing data fetching
-      queryClient.invalidateQueries({ queryKey: ["endpoints"] });
-      queryClient.invalidateQueries({ queryKey: ["endpoint-groups"] });
+      queryClient.setQueryData<Endpoint[]>(["endpoints"], (current) =>
+        current ? [...current, response.endpoint] : [response.endpoint]
+      );
     },
     onError: (error) => {
       // Handle errors with toast notification
@@ -86,4 +78,6 @@ export function useCreateEndpoint() {
       });
     },
   });
+
+  return mutation();
 }
