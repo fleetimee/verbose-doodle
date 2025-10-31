@@ -244,9 +244,7 @@
 }
 
 ::view-transition-new(root) {
-  mask:
-    url("/assets/shigure-ui-dance.gif") center
-    / 0 no-repeat;
+  mask: url("/assets/shigure-ui-dance.gif") center / 0 no-repeat;
   animation: scale 3s;
   animation-fill-mode: both;
 }

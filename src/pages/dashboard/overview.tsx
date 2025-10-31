@@ -4,8 +4,21 @@ import { HttpMethodChart } from "@/features/overview/components/http-method-char
 import { RecentEndpoints } from "@/features/overview/components/recent-endpoints";
 import { ResponseTimeChart } from "@/features/overview/components/response-time-chart";
 import { StatsCards } from "@/features/overview/components/stats-cards";
+import { useDocumentMeta } from "@/hooks/use-document-meta";
 
 export function OverviewPage() {
+  useDocumentMeta({
+    title: "Overview",
+    description:
+      "View your billing simulator statistics, endpoint activity, and performance metrics",
+    keywords: [
+      "dashboard",
+      "overview",
+      "billing statistics",
+      "endpoint metrics",
+    ],
+  });
+
   return (
     <div className="space-y-6">
       <div>
