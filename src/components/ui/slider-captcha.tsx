@@ -40,6 +40,7 @@ export const SliderCaptcha = ({
   const [dragStartX, setDragStartX] = React.useState(0);
   const [dragStartPosition, setDragStartPosition] = React.useState(0);
   const [currentImage, setCurrentImage] = React.useState(() => imageUrl ?? getRandomImage());
+  const [isLocked, setIsLocked] = React.useState(false);
 
   React.useEffect(() => {
     if (!imageUrl) return;
@@ -120,10 +121,11 @@ export const SliderCaptcha = ({
 
     setTargetPosition(randomX);
     setTargetY(randomY);
+    setIsLocked(false);
   };
 
   const handlePuzzleDragStart = (clientX: number) => {
-    if (isVerified) return; // Lock when verified
+    if (isVerified || isLocked) return; // Lock when verified or during reset
     if (!hasInteracted) {
       setHasInteracted(true);
     }
@@ -133,7 +135,7 @@ export const SliderCaptcha = ({
   };
 
   const handlePuzzleDragMove = (clientX: number) => {
-    if (!isDragging || !containerRef.current) return;
+    if (!isDragging || isLocked || !containerRef.current) return;
 
     const deltaX = clientX - dragStartX;
     const newPosition = dragStartPosition + deltaX;
@@ -152,6 +154,7 @@ export const SliderCaptcha = ({
 
       if (!isCloseEnough) {
         // Failed verification - show error and reset
+        setIsLocked(true);
         toast.error("Verification failed", {
           description: "Please try again",
         });
@@ -211,7 +214,7 @@ export const SliderCaptcha = ({
   const getStatusColor = () => {
     if (!hasInteracted) return "border-border";
     if (isVerified) return "border-green-500 bg-green-50 dark:bg-green-950/20";
-    return "border-orange-400 bg-orange-50 dark:bg-orange-950/20";
+    return "border-red-500 bg-red-50 dark:bg-red-950/20";
   };
 
   const puzzlePath = `
@@ -320,7 +323,8 @@ export const SliderCaptcha = ({
               isVerified
                 ? "cursor-default drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]"
                 : "cursor-grab active:cursor-grabbing",
-              isDragging && !isVerified && "cursor-grabbing"
+              isDragging && !isVerified && "cursor-grabbing",
+              isLocked && "cursor-not-allowed pointer-events-none"
             )}
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
@@ -331,7 +335,8 @@ export const SliderCaptcha = ({
               width: `${PUZZLE_SIZE}px`,
               height: `${PUZZLE_SIZE}px`,
             }}
-            tabIndex={0}
+            tabIndex={isVerified || isLocked ? -1 : 0}
+            aria-disabled={isVerified || isLocked}
           >
             <svg
               aria-label="Draggable puzzle piece"
