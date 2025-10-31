@@ -22,7 +22,7 @@ export function EndpointListItem({ endpoint, onClick }: EndpointListItemProps) {
   return (
     <Item
       asChild
-      className="w-full cursor-pointer hover:bg-accent/50"
+      className="w-full cursor-pointer rounded-lg border border-border/40 hover:border-border/60 hover:bg-accent/50"
       size="default"
       variant="default"
     >

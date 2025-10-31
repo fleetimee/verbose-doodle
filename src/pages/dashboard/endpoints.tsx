@@ -12,12 +12,15 @@ import {
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
 import { EndpointCard } from "@/features/endpoints/components/endpoint-card";
 import { EndpointCardSkeleton } from "@/features/endpoints/components/endpoint-card-skeleton";
+import { EndpointListItem } from "@/features/endpoints/components/endpoint-list-item";
+import { EndpointListSkeleton } from "@/features/endpoints/components/endpoint-list-skeleton";
 import { EndpointsSearchControls } from "@/features/endpoints/components/endpoints-search-controls";
 import { useCreateEndpoint } from "@/features/endpoints/hooks/use-create-endpoint";
 import { useGetEndpoints } from "@/features/endpoints/hooks/use-get-endpoints";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import type { Endpoint } from "@/features/endpoints/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 const SKELETON_KEYS = Array.from({ length: 6 }, () => crypto.randomUUID());
 
@@ -32,6 +35,10 @@ export function EndpointsPage() {
     useGetEndpoints();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useLocalStorage<"grid" | "list">(
+    "endpoints-view-mode",
+    "grid"
+  );
 
   const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
     useCreateEndpoint();
@@ -55,8 +62,33 @@ export function EndpointsPage() {
     });
   }, [endpoints, searchTerm]);
 
+  const groupedEndpoints = useMemo(() => {
+    if (filteredEndpoints.length === 0) {
+      return [];
+    }
+
+    const groups = new Map<number, Endpoint[]>();
+
+    for (const endpoint of filteredEndpoints) {
+      const existing = groups.get(endpoint.billerId);
+
+      if (existing) {
+        existing.push(endpoint);
+      } else {
+        groups.set(endpoint.billerId, [endpoint]);
+      }
+    }
+
+    const sortedBillerIds = Array.from(groups.keys()).sort((a, b) => a - b);
+
+    return sortedBillerIds.map((billerId) => ({
+      billerId,
+      endpoints: groups.get(billerId) ?? [],
+    }));
+  }, [filteredEndpoints]);
+
   const hasEndpoints = endpoints.length > 0;
-  const hasFilteredEndpoints = filteredEndpoints.length > 0;
+  const hasFilteredEndpoints = groupedEndpoints.length > 0;
 
   const handleCreateEndpoint = () => {
     setIsDialogOpen(true);
@@ -90,23 +122,64 @@ export function EndpointsPage() {
 
       {isLoadingEndpoints && (
         <>
-          <EndpointsSearchControls onSearchChange={setSearchTerm} />
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {SKELETON_KEYS.map((key) => (
-              <EndpointCardSkeleton key={key} />
-            ))}
-          </div>
+          <EndpointsSearchControls
+            onSearchChange={setSearchTerm}
+            onViewModeChange={setViewMode}
+            viewMode={viewMode}
+          />
+          {viewMode === "grid" ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {SKELETON_KEYS.map((key) => (
+                <EndpointCardSkeleton key={key} />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {SKELETON_KEYS.map((key) => (
+                <EndpointListSkeleton key={key} />
+              ))}
+            </div>
+          )}
         </>
       )}
 
       {!isLoadingEndpoints && hasEndpoints && (
         <>
-          <EndpointsSearchControls onSearchChange={setSearchTerm} />
+          <EndpointsSearchControls
+            onSearchChange={setSearchTerm}
+            onViewModeChange={setViewMode}
+            viewMode={viewMode}
+          />
 
           {hasFilteredEndpoints ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {filteredEndpoints.map((endpoint) => (
-                <EndpointCard endpoint={endpoint} key={endpoint.id} />
+            <div className="space-y-8">
+              {groupedEndpoints.map((group) => (
+                <section className="space-y-4" key={group.billerId}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <h2 className="font-semibold text-lg">
+                      Biller ID {group.billerId}
+                    </h2>
+                    <span className="text-muted-foreground text-sm">
+                      {group.endpoints.length} endpoint
+                    </span>
+                  </div>
+                  {viewMode === "grid" ? (
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                      {group.endpoints.map((endpoint) => (
+                        <EndpointCard endpoint={endpoint} key={endpoint.id} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {group.endpoints.map((endpoint) => (
+                        <EndpointListItem
+                          endpoint={endpoint}
+                          key={endpoint.id}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </section>
               ))}
             </div>
           ) : (
