@@ -245,7 +245,7 @@
 
 ::view-transition-new(root) {
   mask:
-    url("https://media.tenor.com/cyORI7kwShQAAAAi/shigure-ui-dance.gif") center
+    url("/assets/shigure-ui-dance.gif") center
     / 0 no-repeat;
   animation: scale 3s;
   animation-fill-mode: both;
