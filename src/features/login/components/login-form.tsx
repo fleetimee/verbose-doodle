@@ -19,6 +19,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { SliderCaptcha } from "@/components/ui/slider-captcha";
 import { Spinner } from "@/components/ui/spinner";
 import {
   type LoginFormData,
@@ -44,6 +45,7 @@ export const LoginForm = ({
     defaultValues: {
       username: "",
       password: "",
+      captchaVerified: false,
     },
   });
 
@@ -130,6 +132,26 @@ export const LoginForm = ({
               )}
             />
           </FieldGroup>
+
+          <Controller
+            control={form.control}
+            name="captchaVerified"
+            render={({ field, fieldState }) => (
+              <div>
+                <SliderCaptcha
+                  className={
+                    fieldState.invalid ? "ring-2 ring-destructive" : ""
+                  }
+                  onVerify={(verified) => field.onChange(verified)}
+                />
+                {fieldState.invalid && (
+                  <p className="mt-2 text-destructive text-sm">
+                    {fieldState.error?.message}
+                  </p>
+                )}
+              </div>
+            )}
+          />
 
           <Button
             className="w-full"
