@@ -1,6 +1,6 @@
 import { CheckCircle2Icon, RefreshCwIcon, ShieldCheckIcon } from "lucide-react";
 import * as React from "react";
-import { Slider } from "@/components/ui/slider";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 type SliderCaptchaProps = {
@@ -12,18 +12,39 @@ type SliderCaptchaProps = {
 const PUZZLE_SIZE = 60;
 const PUZZLE_NOTCH = 10;
 
+const CAPTCHA_IMAGES = [
+  "/assets/captcha-images/frieren-ambience.png",
+  "/assets/captcha-images/wuwa-ambience.png",
+  "/assets/captcha-images/wuwa-ambience-2.png",
+  "/assets/captcha-images/wuwa-ambience-3.png",
+];
+
+const getRandomImage = () => {
+  const randomIndex = Math.floor(Math.random() * CAPTCHA_IMAGES.length);
+  return CAPTCHA_IMAGES[randomIndex] ?? CAPTCHA_IMAGES[0] ?? "";
+};
+
 export const SliderCaptcha = ({
   onVerify,
   className,
-  imageUrl = "/assets/frieren-ambience.png",
+  imageUrl,
 }: SliderCaptchaProps) => {
-  const [sliderValue, setSliderValue] = React.useState([0]);
+  const [piecePosition, setPiecePosition] = React.useState(0);
   const [targetPosition, setTargetPosition] = React.useState(0);
   const [targetY, setTargetY] = React.useState(0);
   const [isVerified, setIsVerified] = React.useState(false);
   const [hasInteracted, setHasInteracted] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = React.useState(0);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [dragStartX, setDragStartX] = React.useState(0);
+  const [dragStartPosition, setDragStartPosition] = React.useState(0);
+  const [currentImage, setCurrentImage] = React.useState(() => imageUrl ?? getRandomImage());
+
+  React.useEffect(() => {
+    if (!imageUrl) return;
+    setCurrentImage(imageUrl);
+  }, [imageUrl]);
 
   React.useEffect(() => {
     const generatePosition = () => {
@@ -52,39 +73,38 @@ export const SliderCaptcha = ({
   }, []);
 
   React.useEffect(() => {
-    if (!hasInteracted || !containerWidth) return;
+    if (!hasInteracted) return;
 
-    const currentPixels = (sliderValue[0] ?? 0) * (containerWidth / 100);
     const tolerance = 8;
-    const isCloseEnough = Math.abs(currentPixels - targetPosition) <= tolerance;
+    const isCloseEnough = Math.abs(piecePosition - targetPosition) <= tolerance;
 
     if (isCloseEnough && !isVerified) {
       setIsVerified(true);
       onVerify(true);
+
+      // Show success toast
+      toast.success("Verification successful!", {
+        description: "You have been verified",
+      });
     } else if (!isCloseEnough && isVerified) {
       setIsVerified(false);
       onVerify(false);
     }
   }, [
-    sliderValue,
+    piecePosition,
     targetPosition,
     isVerified,
     onVerify,
     hasInteracted,
-    containerWidth,
   ]);
 
-  const handleValueChange = (value: number[]) => {
-    if (!hasInteracted) {
-      setHasInteracted(true);
-    }
-    setSliderValue(value);
-  };
-
   const handleRefresh = () => {
-    setSliderValue([0]);
+    setPiecePosition(0);
     setIsVerified(false);
     setHasInteracted(false);
+
+    // Pick a new random image
+    setCurrentImage(imageUrl ?? getRandomImage());
 
     if (!containerRef.current) return;
     const width = containerRef.current.offsetWidth;
@@ -102,13 +122,97 @@ export const SliderCaptcha = ({
     setTargetY(randomY);
   };
 
+  const handlePuzzleDragStart = (clientX: number) => {
+    if (isVerified) return; // Lock when verified
+    if (!hasInteracted) {
+      setHasInteracted(true);
+    }
+    setIsDragging(true);
+    setDragStartX(clientX);
+    setDragStartPosition(piecePosition);
+  };
+
+  const handlePuzzleDragMove = (clientX: number) => {
+    if (!isDragging || !containerRef.current) return;
+
+    const deltaX = clientX - dragStartX;
+    const newPosition = dragStartPosition + deltaX;
+    const clampedPosition = Math.max(0, Math.min(containerWidth - PUZZLE_SIZE, newPosition));
+
+    setPiecePosition(clampedPosition);
+  };
+
+  const handlePuzzleDragEnd = () => {
+    setIsDragging(false);
+
+    // Check verification on drag end
+    if (hasInteracted && !isVerified) {
+      const tolerance = 8;
+      const isCloseEnough = Math.abs(piecePosition - targetPosition) <= tolerance;
+
+      if (!isCloseEnough) {
+        // Failed verification - show error and reset
+        toast.error("Verification failed", {
+          description: "Please try again",
+        });
+
+        // Reset after a short delay
+        setTimeout(() => {
+          handleRefresh();
+        }, 1000);
+      }
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handlePuzzleDragStart(e.clientX);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (touch) {
+      handlePuzzleDragStart(touch.clientX);
+    }
+  };
+
+  React.useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      handlePuzzleDragMove(e.clientX);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (touch) {
+        handlePuzzleDragMove(touch.clientX);
+      }
+    };
+
+    const handleMouseUp = () => {
+      handlePuzzleDragEnd();
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("touchend", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleMouseUp);
+    };
+  }, [isDragging, dragStartX, dragStartPosition, containerWidth, hasInteracted, isVerified, piecePosition, targetPosition]);
+
   const getStatusColor = () => {
     if (!hasInteracted) return "border-border";
     if (isVerified) return "border-green-500 bg-green-50 dark:bg-green-950/20";
     return "border-orange-400 bg-orange-50 dark:bg-orange-950/20";
   };
-
-  const currentPixelPosition = (sliderValue[0] ?? 0) * (containerWidth / 100);
 
   const puzzlePath = `
     M 0,${PUZZLE_NOTCH}
@@ -168,7 +272,7 @@ export const SliderCaptcha = ({
             className="h-full w-full object-cover"
             draggable={false}
             height="200"
-            src={imageUrl}
+            src={currentImage}
             width="400"
           />
 
@@ -193,7 +297,7 @@ export const SliderCaptcha = ({
               <image
                 clipPath="url(#puzzle-cutout)"
                 height="200"
-                href={imageUrl}
+                href={currentImage}
                 width={containerWidth}
                 x={-targetPosition}
                 y={-targetY}
@@ -212,15 +316,22 @@ export const SliderCaptcha = ({
 
           <div
             className={cn(
-              "pointer-events-none absolute transition-all duration-200",
-              isVerified && "drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+              "absolute transition-all duration-200",
+              isVerified
+                ? "cursor-default drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+                : "cursor-grab active:cursor-grabbing",
+              isDragging && !isVerified && "cursor-grabbing"
             )}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+            role="button"
             style={{
-              left: `${currentPixelPosition}px`,
+              left: `${piecePosition}px`,
               top: `${targetY}px`,
               width: `${PUZZLE_SIZE}px`,
               height: `${PUZZLE_SIZE}px`,
             }}
+            tabIndex={0}
           >
             <svg
               aria-label="Draggable puzzle piece"
@@ -236,47 +347,49 @@ export const SliderCaptcha = ({
                 <filter id="piece-shadow">
                   <feDropShadow
                     dx="0"
-                    dy="2"
-                    floodOpacity="0.3"
-                    stdDeviation="3"
+                    dy="4"
+                    floodOpacity="0.4"
+                    stdDeviation="4"
                   />
                 </filter>
               </defs>
-              <image
-                clipPath="url(#puzzle-piece)"
-                filter="url(#piece-shadow)"
-                height="200"
-                href={imageUrl}
-                width={containerWidth}
-                x={-currentPixelPosition}
-                y={-targetY}
-              />
+              {/* Solid background shape to make the puzzle piece stand out */}
               <path
                 className={cn(
                   "transition-colors duration-300",
-                  isVerified ? "stroke-green-500" : "stroke-white"
+                  isVerified ? "fill-green-100 dark:fill-green-900/30" : "fill-white dark:fill-gray-800"
+                )}
+                d={puzzlePath}
+                filter="url(#piece-shadow)"
+              />
+              {/* Image clipped to puzzle shape */}
+              <image
+                clipPath="url(#puzzle-piece)"
+                height="200"
+                href={currentImage}
+                width={containerWidth}
+                x={-targetPosition}
+                y={-targetY}
+                opacity="0.95"
+              />
+              {/* Stroke outline */}
+              <path
+                className={cn(
+                  "transition-colors duration-300",
+                  isVerified ? "stroke-green-500" : "stroke-gray-400 dark:stroke-gray-500"
                 )}
                 d={puzzlePath}
                 fill="none"
-                strokeWidth="2"
+                strokeWidth="3"
               />
             </svg>
           </div>
         </div>
 
-        <Slider
-          aria-label="Captcha verification slider"
-          max={100}
-          min={0}
-          onValueChange={handleValueChange}
-          step={0.5}
-          value={sliderValue}
-        />
-
-        <p className="mt-2 text-muted-foreground text-xs">
+        <p className="mt-2 text-center text-muted-foreground text-xs">
           {isVerified
             ? "Puzzle completed successfully!"
-            : "Drag the slider to fit the puzzle piece"}
+            : "Drag the puzzle piece to fit it into the cutout"}
         </p>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { OctagonXIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,8 @@ export const LoginForm = ({
   isLoading = false,
   error = null,
 }: LoginFormProps) => {
+  const [captchaKey, setCaptchaKey] = useState(0);
+
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -48,6 +51,14 @@ export const LoginForm = ({
       captchaVerified: false,
     },
   });
+
+  // Reset captcha when login fails
+  useEffect(() => {
+    if (error) {
+      setCaptchaKey((prev) => prev + 1);
+      form.setValue("captchaVerified", false);
+    }
+  }, [error, form]);
 
   return (
     <Card className="w-full max-w-md border-border/40 shadow-xl">
@@ -142,6 +153,7 @@ export const LoginForm = ({
                   className={
                     fieldState.invalid ? "ring-2 ring-destructive" : ""
                   }
+                  key={captchaKey}
                   onVerify={(verified) => field.onChange(verified)}
                 />
                 {fieldState.invalid && (
