@@ -89,6 +89,9 @@ export function abbreviateMethod(method: HttpMethod): string {
     case "PATCH":
       return "PAT";
     default:
-      return method.slice(0, METHOD_ABBREVIATION_LENGTH);
+      // Exhaustiveness check - this should never be reached since all cases are handled
+      return (method as string)
+        .slice(0, METHOD_ABBREVIATION_LENGTH)
+        .toUpperCase();
   }
 }

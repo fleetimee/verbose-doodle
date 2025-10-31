@@ -19,8 +19,8 @@ export const endpointSchema = z.object({
     .min(MIN_URL_LENGTH, "URL is required")
     .max(MAX_URL_LENGTH, `URL must not exceed ${MAX_URL_LENGTH} characters`)
     .regex(/^\//, "URL must start with /"),
-  billerId: z.coerce
-    .number({ invalid_type_error: "Biller ID must be a number" })
+  billerId: z
+    .number({ message: "Biller ID must be a number" })
     .int("Biller ID must be an integer")
     .min(MIN_BILLER_ID, "Biller ID must be at least 1"),
 });
