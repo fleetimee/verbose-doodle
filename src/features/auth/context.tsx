@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import {
-  clearAuthUser,
-  getAuthUser,
-  saveAuthUser,
+  clearAuthToken,
+  decodeJWT,
+  getAuthToken,
+  saveAuthToken,
 } from "@/features/auth/utils";
 import type { AuthUser } from "@/features/login/types";
 
@@ -14,7 +15,7 @@ type AuthState = {
 
 type AuthContextValue = {
   authState: AuthState;
-  login: (user: AuthUser) => void;
+  login: (token: string) => void;
   logout: () => void;
 };
 
@@ -22,32 +23,33 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>(() => {
-    const user = getAuthUser();
+    // Initialize from JWT token in localStorage
+    const token = getAuthToken();
+    if (!token) {
+      return {
+        user: null,
+        isAuthenticated: false,
+      };
+    }
+
+    const user = decodeJWT(token);
     return {
       user,
       isAuthenticated: user !== null,
     };
   });
 
-  useEffect(() => {
-    // Sync with sessionStorage on mount
-    const user = getAuthUser();
+  const login = (token: string) => {
+    saveAuthToken(token);
+    const user = decodeJWT(token);
     setAuthState({
       user,
       isAuthenticated: user !== null,
     });
-  }, []);
-
-  const login = (user: AuthUser) => {
-    saveAuthUser(user);
-    setAuthState({
-      user,
-      isAuthenticated: true,
-    });
   };
 
   const logout = () => {
-    clearAuthUser();
+    clearAuthToken();
     setAuthState({
       user: null,
       isAuthenticated: false,
