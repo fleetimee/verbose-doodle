@@ -13,7 +13,6 @@ import { EndpointsPage } from "@/pages/dashboard/endpoints";
 import { OverviewPage } from "@/pages/dashboard/overview";
 import { SettingsPage } from "@/pages/dashboard/settings";
 import { UsersPage } from "@/pages/dashboard/users";
-import { Home } from "@/pages/home";
 import { Login } from "@/pages/login";
 
 const rootElement = document.getElementById("root");
@@ -28,7 +27,7 @@ createRoot(rootElement).render(
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <BrowserRouter>
           <Routes>
-            <Route element={<Home />} path="/" />
+            <Route element={<Navigate replace to="/dashboard" />} path="/" />
             <Route element={<Login />} path="/login" />
             <Route element={<About />} path="/about" />
 
