@@ -4,8 +4,11 @@ import "./index.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { AuthRedirect } from "@/components/auth-redirect";
+import { ProtectedRoute } from "@/components/protected-route";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/features/auth/context";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
 import { queryClient } from "@/lib/query-client";
 import { About } from "@/pages/about";
@@ -24,27 +27,36 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <BrowserRouter>
-          <Routes>
-            <Route element={<Navigate replace to="/dashboard" />} path="/" />
-            <Route element={<Login />} path="/login" />
-            <Route element={<About />} path="/about" />
+      <AuthProvider>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <BrowserRouter>
+            <Routes>
+              <Route element={<AuthRedirect />} path="/" />
+              <Route element={<Login />} path="/login" />
+              <Route element={<About />} path="/about" />
 
-            <Route element={<DashboardLayout />} path="/dashboard">
               <Route
-                element={<Navigate replace to="/dashboard/overview" />}
-                index
-              />
-              <Route element={<OverviewPage />} path="overview" />
-              <Route element={<EndpointsPage />} path="endpoints" />
-              <Route element={<UsersPage />} path="users" />
-              <Route element={<SettingsPage />} path="settings" />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-        <Toaster position="bottom-right" />
-      </ThemeProvider>
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+                path="/dashboard"
+              >
+                <Route
+                  element={<Navigate replace to="/dashboard/overview" />}
+                  index
+                />
+                <Route element={<OverviewPage />} path="overview" />
+                <Route element={<EndpointsPage />} path="endpoints" />
+                <Route element={<UsersPage />} path="users" />
+                <Route element={<SettingsPage />} path="settings" />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+          <Toaster position="bottom-right" />
+        </ThemeProvider>
+      </AuthProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   </StrictMode>

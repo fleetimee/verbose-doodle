@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -43,7 +42,7 @@ export const LoginForm = ({
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
       rememberMe: false,
     },
@@ -56,7 +55,7 @@ export const LoginForm = ({
           Welcome back
         </CardTitle>
         <CardDescription className="text-muted-foreground">
-          Enter your email and password to sign in
+          Enter your username and password to sign in
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -78,21 +77,23 @@ export const LoginForm = ({
           <FieldGroup>
             <Controller
               control={form.control}
-              name="email"
+              name="username"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="login-form-email">Email</FieldLabel>
+                  <FieldLabel htmlFor="login-form-username">
+                    Username
+                  </FieldLabel>
                   <FieldContent>
                     <Input
                       {...field}
                       aria-invalid={fieldState.invalid}
-                      autoComplete="email"
-                      id="login-form-email"
-                      placeholder="name@example.com"
-                      type="email"
+                      autoComplete="username"
+                      id="login-form-username"
+                      placeholder="Enter your username"
+                      type="text"
                     />
                     <FieldDescription>
-                      This email will be used for account notifications.
+                      Your unique username for the biller simulator.
                     </FieldDescription>
                   </FieldContent>
                   {fieldState.invalid && (
@@ -107,17 +108,9 @@ export const LoginForm = ({
               name="password"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <div className="flex items-center justify-between">
-                    <FieldLabel htmlFor="login-form-password">
-                      Password
-                    </FieldLabel>
-                    <button
-                      className="text-muted-foreground text-sm transition-colors hover:text-primary"
-                      type="button"
-                    >
-                      Forgot password?
-                    </button>
-                  </div>
+                  <FieldLabel htmlFor="login-form-password">
+                    Password
+                  </FieldLabel>
                   <FieldContent>
                     <Input
                       {...field}
@@ -179,18 +172,6 @@ export const LoginForm = ({
           </Button>
         </form>
       </CardContent>
-
-      <CardFooter className="flex justify-center border-border/40 border-t pt-6">
-        <p className="text-muted-foreground text-sm">
-          Don't have an account?{" "}
-          <button
-            className="font-medium text-primary hover:underline"
-            type="button"
-          >
-            Sign up
-          </button>
-        </p>
-      </CardFooter>
     </Card>
   );
 };

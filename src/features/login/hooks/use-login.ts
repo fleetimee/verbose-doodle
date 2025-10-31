@@ -1,8 +1,9 @@
-import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
+import { useAuth } from "@/features/auth/context";
 import type { LoginFormData } from "@/features/login/schemas/login-schema";
 import type { LoginError, LoginResponse } from "@/features/login/types";
 import { handleAuthError, showSuccessToast } from "@/lib/error-handler";
+import { createMutationHook } from "@/lib/query-hooks";
 
 /**
  * Simulated API delay for demonstration purposes
@@ -10,32 +11,53 @@ import { handleAuthError, showSuccessToast } from "@/lib/error-handler";
 const SIMULATED_API_DELAY_MS = 1500;
 
 /**
- * Login API call
- * TODO: Replace with actual API endpoint when backend is ready
+ * Mock user credentials for testing
+ * TODO: Remove when backend is ready
+ */
+const MOCK_USER = {
+  username: "admin",
+  password: "password123",
+  role: "ADMIN" as const,
+};
+
+/**
+ * Login mutation function
+ * TODO: Replace with actual API call when backend is ready
  */
 async function loginUser(data: LoginFormData): Promise<LoginResponse> {
   // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, SIMULATED_API_DELAY_MS));
 
-  // TODO: Replace with actual API call
-  // return apiPost<LoginResponse, LoginFormData>('/auth/login', data);
+  // Check credentials against mock user
+  if (
+    data.username === MOCK_USER.username &&
+    data.password === MOCK_USER.password
+  ) {
+    return {
+      response_code: "00",
+      response_desc: "success",
+      role: MOCK_USER.role,
+    };
+  }
 
-  // Simulated success response
-  return {
-    success: true,
-    token: "simulated-jwt-token",
-    user: {
-      id: "1",
-      email: data.email,
-      name: "Demo User",
-    },
-    message: "Login successful",
-  };
+  // Invalid credentials
+  throw {
+    message: "Invalid username or password",
+    code: "AUTH_FAILED",
+    status: 401,
+  } as LoginError;
+
+  // Uncomment when backend is ready:
+  // return apiPost<LoginResponse>("/login", {
+  //   username: data.username,
+  //   password: data.password,
+  // });
 }
 
 /**
  * Custom hook for handling user login
  * Uses TanStack Query mutation for state management
+ * Integrates with AuthContext for session management
  *
  * @example
  * ```tsx
@@ -48,32 +70,42 @@ async function loginUser(data: LoginFormData): Promise<LoginResponse> {
  */
 export function useLogin() {
   const navigate = useNavigate();
+  const { login: setAuthUser } = useAuth();
 
-  return useMutation<LoginResponse, LoginError, LoginFormData>({
-    mutationFn: loginUser,
-    onSuccess: (data) => {
-      // Store auth token (TODO: use proper auth context/store)
-      if (data.token) {
-        localStorage.setItem("auth_token", data.token);
-      }
+  const mutation = createMutationHook<LoginResponse, LoginFormData, LoginError>(
+    loginUser,
+    {
+      onSuccess: (data, variables) => {
+        // Check if login was successful based on response_code
+        if (data.response_code === "00") {
+          // Store user in session via auth context
+          setAuthUser({
+            username: variables.username,
+            role: data.role,
+          });
 
-      // Store user data (TODO: use proper auth context/store)
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
+          // Show success message
+          showSuccessToast(
+            "Welcome back!",
+            `Signed in as ${variables.username}`
+          );
 
-      // Show success message
-      showSuccessToast(
-        "Welcome back!",
-        `Signed in as ${data.user?.email || "user"}`
-      );
+          // Redirect to home page
+          navigate("/");
+        } else {
+          // Handle unsuccessful login
+          handleAuthError({
+            message: data.response_desc || "Login failed",
+            code: data.response_code,
+          });
+        }
+      },
+      onError: (error) => {
+        // Handle authentication errors with toast notifications
+        handleAuthError(error);
+      },
+    }
+  );
 
-      // Redirect to home page
-      navigate("/");
-    },
-    onError: (error) => {
-      // Handle authentication errors with toast notifications
-      handleAuthError(error);
-    },
-  });
+  return mutation();
 }
