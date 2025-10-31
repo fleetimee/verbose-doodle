@@ -12,6 +12,7 @@ import { AuthProvider } from "@/features/auth/context";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
 import { queryClient } from "@/lib/query-client";
 import { About } from "@/pages/about";
+import { EndpointDetailPage } from "@/pages/dashboard/endpoint-detail";
 import { EndpointsPage } from "@/pages/dashboard/endpoints";
 import { OverviewPage } from "@/pages/dashboard/overview";
 import { SettingsPage } from "@/pages/dashboard/settings";
@@ -49,6 +50,7 @@ createRoot(rootElement).render(
                 />
                 <Route element={<OverviewPage />} path="overview" />
                 <Route element={<EndpointsPage />} path="endpoints" />
+                <Route element={<EndpointDetailPage />} path="endpoints/:id" />
                 <Route element={<UsersPage />} path="users" />
                 <Route element={<SettingsPage />} path="settings" />
               </Route>

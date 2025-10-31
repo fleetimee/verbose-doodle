@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router";
 import {
   Item,
   ItemActions,
@@ -19,6 +20,16 @@ type EndpointCardProps = {
 };
 
 export function EndpointCard({ endpoint, onClick }: EndpointCardProps) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      navigate(`/dashboard/endpoints/${endpoint.id}`);
+    }
+  };
+
   return (
     <Item
       asChild
@@ -26,7 +37,7 @@ export function EndpointCard({ endpoint, onClick }: EndpointCardProps) {
       size="default"
       variant="default"
     >
-      <button onClick={onClick} type="button">
+      <button onClick={handleClick} type="button">
         <ItemMedia variant="default">
           <span
             className={`rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
