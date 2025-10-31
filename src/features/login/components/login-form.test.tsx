@@ -1,10 +1,10 @@
 import { describe, expect, mock, test } from "bun:test";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginForm } from "@/features/login/components/login-form";
-import type { LoginFormData } from "@/features/login/schemas/login-schema";
 
-const INVALID_EMAIL_PATTERN = /invalid.*email/i;
+const INVALID_USERNAME_PATTERN = /username.*required/i;
+const SIGNING_IN_PATTERN = /Signing in/i;
 
 describe("LoginForm", () => {
   describe("rendering", () => {
@@ -14,22 +14,23 @@ describe("LoginForm", () => {
 
       expect(screen.getByText("Welcome back")).toBeDefined();
       expect(
-        screen.getByText("Enter your email and password to sign in")
+        screen.getByText("Enter your username and password to sign in")
       ).toBeDefined();
-      expect(screen.getByLabelText("Email")).toBeDefined();
+      expect(screen.getByLabelText("Username")).toBeDefined();
       expect(screen.getByLabelText("Password")).toBeDefined();
-      expect(screen.getByLabelText("Remember me for 30 days")).toBeDefined();
       expect(screen.getByRole("button", { name: "Sign in" })).toBeDefined();
     });
 
-    test("should render email input with correct attributes", () => {
+    test("should render username input with correct attributes", () => {
       const mockOnSubmit = mock(() => {});
       render(<LoginForm onSubmit={mockOnSubmit} />);
 
-      const emailInput = screen.getByLabelText("Email") as HTMLInputElement;
-      expect(emailInput.type).toBe("email");
-      expect(emailInput.autocomplete).toBe("email");
-      expect(emailInput.placeholder).toBe("name@example.com");
+      const usernameInput = screen.getByLabelText(
+        "Username"
+      ) as HTMLInputElement;
+      expect(usernameInput.type).toBe("text");
+      expect(usernameInput.autocomplete).toBe("username");
+      expect(usernameInput.placeholder).toBe("Enter your username");
     });
 
     test("should render password input with correct attributes", () => {
@@ -41,21 +42,6 @@ describe("LoginForm", () => {
       ) as HTMLInputElement;
       expect(passwordInput.type).toBe("password");
       expect(passwordInput.autocomplete).toBe("current-password");
-    });
-
-    test("should render forgot password button", () => {
-      const mockOnSubmit = mock(() => {});
-      render(<LoginForm onSubmit={mockOnSubmit} />);
-
-      expect(screen.getByText("Forgot password?")).toBeDefined();
-    });
-
-    test("should render sign up link", () => {
-      const mockOnSubmit = mock(() => {});
-      render(<LoginForm onSubmit={mockOnSubmit} />);
-
-      expect(screen.getByText("Don't have an account?")).toBeDefined();
-      expect(screen.getByText("Sign up")).toBeDefined();
     });
   });
 
@@ -98,7 +84,7 @@ describe("LoginForm", () => {
       render(<LoginForm isLoading={true} onSubmit={mockOnSubmit} />);
 
       expect(
-        screen.getByRole("button", { name: "Signing in..." })
+        screen.getByRole("button", { name: SIGNING_IN_PATTERN })
       ).toBeDefined();
     });
 
@@ -107,7 +93,7 @@ describe("LoginForm", () => {
       render(<LoginForm isLoading={true} onSubmit={mockOnSubmit} />);
 
       const submitButton = screen.getByRole("button", {
-        name: "Signing in...",
+        name: SIGNING_IN_PATTERN,
       }) as HTMLButtonElement;
       expect(submitButton.disabled).toBe(true);
     });
@@ -121,15 +107,17 @@ describe("LoginForm", () => {
   });
 
   describe("user interactions", () => {
-    test("should allow typing in email input", async () => {
+    test("should allow typing in username input", async () => {
       const user = userEvent.setup();
       const mockOnSubmit = mock(() => {});
       render(<LoginForm onSubmit={mockOnSubmit} />);
 
-      const emailInput = screen.getByLabelText("Email") as HTMLInputElement;
-      await user.type(emailInput, "test@example.com");
+      const usernameInput = screen.getByLabelText(
+        "Username"
+      ) as HTMLInputElement;
+      await user.type(usernameInput, "testuser");
 
-      expect(emailInput.value).toBe("test@example.com");
+      expect(usernameInput.value).toBe("testuser");
     });
 
     test("should allow typing in password input", async () => {
@@ -145,42 +133,30 @@ describe("LoginForm", () => {
       expect(passwordInput.value).toBe("password123");
     });
 
-    test("should toggle remember me checkbox", async () => {
-      const user = userEvent.setup();
+    test("should render slider captcha component", () => {
       const mockOnSubmit = mock(() => {});
       render(<LoginForm onSubmit={mockOnSubmit} />);
 
-      const checkbox = screen.getByRole("checkbox", {
-        name: "Remember me for 30 days",
-      });
-
-      expect(checkbox.getAttribute("data-state")).toBe("unchecked");
-
-      await user.click(checkbox);
-      expect(checkbox.getAttribute("data-state")).toBe("checked");
-
-      await user.click(checkbox);
-      expect(checkbox.getAttribute("data-state")).toBe("unchecked");
+      // The slider captcha should be present
+      expect(screen.getByText("Slide to complete the puzzle")).toBeDefined();
     });
   });
 
   describe("form validation", () => {
-    test("should show validation error for invalid email", async () => {
+    test("should show validation error for empty username", async () => {
       const user = userEvent.setup();
       const mockOnSubmit = mock(() => {});
       render(<LoginForm onSubmit={mockOnSubmit} />);
 
-      const emailInput = screen.getByLabelText("Email");
       const submitButton = screen.getByRole("button", { name: "Sign in" });
 
-      await user.type(emailInput, "invalid-email");
       await user.click(submitButton);
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(mockOnSubmit).not.toHaveBeenCalled();
 
-      const errorElement = screen.queryByText(INVALID_EMAIL_PATTERN);
+      const errorElement = screen.queryByText(INVALID_USERNAME_PATTERN);
       if (errorElement) {
         expect(errorElement).toBeDefined();
       }
@@ -191,11 +167,11 @@ describe("LoginForm", () => {
       const mockOnSubmit = mock(() => {});
       render(<LoginForm onSubmit={mockOnSubmit} />);
 
-      const emailInput = screen.getByLabelText("Email");
+      const usernameInput = screen.getByLabelText("Username");
       const passwordInput = screen.getByLabelText("Password");
       const submitButton = screen.getByRole("button", { name: "Sign in" });
 
-      await user.type(emailInput, "invalid");
+      await user.type(usernameInput, "testuser");
       await user.type(passwordInput, "short");
       await user.click(submitButton);
 
@@ -206,54 +182,24 @@ describe("LoginForm", () => {
   });
 
   describe("form submission", () => {
-    test("should call onSubmit with valid data", async () => {
+    test("should require captcha verification before submission", async () => {
       const user = userEvent.setup();
-      const mockOnSubmit = mock((data: LoginFormData) => {
-        expect(data.email).toBe("test@example.com");
-        expect(data.password).toBe("password123");
-        expect(data.rememberMe).toBe(false);
-      });
+      const mockOnSubmit = mock(() => {});
 
       render(<LoginForm onSubmit={mockOnSubmit} />);
 
-      const emailInput = screen.getByLabelText("Email");
+      const usernameInput = screen.getByLabelText("Username");
       const passwordInput = screen.getByLabelText("Password");
       const submitButton = screen.getByRole("button", { name: "Sign in" });
 
-      await user.type(emailInput, "test@example.com");
+      await user.type(usernameInput, "testuser");
       await user.type(passwordInput, "password123");
       await user.click(submitButton);
 
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalledTimes(1);
-      });
-    });
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-    test("should call onSubmit with rememberMe true when checked", async () => {
-      const user = userEvent.setup();
-      const mockOnSubmit = mock((data: LoginFormData) => {
-        expect(data.email).toBe("user@test.com");
-        expect(data.password).toBe("securepass123");
-        expect(data.rememberMe).toBe(true);
-      });
-
-      render(<LoginForm onSubmit={mockOnSubmit} />);
-
-      const emailInput = screen.getByLabelText("Email");
-      const passwordInput = screen.getByLabelText("Password");
-      const rememberMeCheckbox = screen.getByRole("checkbox", {
-        name: "Remember me for 30 days",
-      });
-      const submitButton = screen.getByRole("button", { name: "Sign in" });
-
-      await user.type(emailInput, "user@test.com");
-      await user.type(passwordInput, "securepass123");
-      await user.click(rememberMeCheckbox);
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalledTimes(1);
-      });
+      // Should not submit without captcha verification
+      expect(mockOnSubmit).not.toHaveBeenCalled();
     });
 
     test("should not call onSubmit when form is invalid", async () => {
@@ -262,11 +208,11 @@ describe("LoginForm", () => {
 
       render(<LoginForm onSubmit={mockOnSubmit} />);
 
-      const emailInput = screen.getByLabelText("Email");
+      const usernameInput = screen.getByLabelText("Username");
       const passwordInput = screen.getByLabelText("Password");
       const submitButton = screen.getByRole("button", { name: "Sign in" });
 
-      await user.type(emailInput, "invalid-email");
+      await user.type(usernameInput, "testuser");
       await user.type(passwordInput, "short");
       await user.click(submitButton);
 
@@ -281,9 +227,8 @@ describe("LoginForm", () => {
       const mockOnSubmit = mock(() => {});
       render(<LoginForm onSubmit={mockOnSubmit} />);
 
-      expect(screen.getByLabelText("Email")).toBeDefined();
+      expect(screen.getByLabelText("Username")).toBeDefined();
       expect(screen.getByLabelText("Password")).toBeDefined();
-      expect(screen.getByLabelText("Remember me for 30 days")).toBeDefined();
     });
 
     test("should have proper roles for interactive elements", () => {
@@ -291,22 +236,22 @@ describe("LoginForm", () => {
       render(<LoginForm onSubmit={mockOnSubmit} />);
 
       const submitButton = screen.getByRole("button", { name: "Sign in" });
-      const checkbox = screen.getByRole("checkbox");
 
       expect(submitButton).toBeDefined();
-      expect(checkbox).toBeDefined();
     });
 
     test("should have ARIA attributes ready for validation", () => {
       const mockOnSubmit = mock(() => {});
       render(<LoginForm onSubmit={mockOnSubmit} />);
 
-      const emailInput = screen.getByLabelText("Email") as HTMLInputElement;
+      const usernameInput = screen.getByLabelText(
+        "Username"
+      ) as HTMLInputElement;
       const passwordInput = screen.getByLabelText(
         "Password"
       ) as HTMLInputElement;
 
-      expect(emailInput.getAttribute("aria-invalid")).toBe("false");
+      expect(usernameInput.getAttribute("aria-invalid")).toBe("false");
       expect(passwordInput.getAttribute("aria-invalid")).toBe("false");
     });
   });
