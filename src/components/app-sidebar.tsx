@@ -20,13 +20,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/features/auth/context";
 
 const data = {
-  user: {
-    name: "John Doe",
-    email: "john@example.com",
-    avatar: "/avatars/john.jpg",
-  },
   navMain: [
     {
       title: "Overview",
@@ -64,6 +60,21 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { authState } = useAuth();
+
+  // Construct user object for NavUser component
+  const user = authState.user
+    ? {
+        name: authState.user.username,
+        email: `${authState.user.role.toLowerCase()}@biller-simulator.local`,
+        avatar: "", // No avatar for now, will show initials
+      }
+    : {
+        name: "Guest",
+        email: "guest@biller-simulator.local",
+        avatar: "",
+      };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -90,7 +101,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary className="mt-auto" items={data.navSecondary} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );
