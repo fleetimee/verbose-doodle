@@ -15,10 +15,37 @@ const SIMULATED_API_DELAY_MS = 1500;
  * TODO: Remove when backend is ready
  */
 const MOCK_USER = {
+  user_id: "1",
   username: "admin",
   password: "password123",
   role: "ADMIN" as const,
 };
+
+/**
+ * Generate a mock JWT token for testing
+ * Format: header.payload.signature (all base64url encoded)
+ */
+function generateMockJWT(
+  user_id: string,
+  username: string,
+  role: string
+): string {
+  const header = { alg: "HS256", typ: "JWT" };
+  const payload = { user_id, username, role };
+
+  // Base64url encode
+  const encodeBase64Url = (obj: object) =>
+    btoa(JSON.stringify(obj))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
+
+  const encodedHeader = encodeBase64Url(header);
+  const encodedPayload = encodeBase64Url(payload);
+  const mockSignature = "mock_signature_for_testing";
+
+  return `${encodedHeader}.${encodedPayload}.${mockSignature}`;
+}
 
 /**
  * Login mutation function
@@ -33,9 +60,16 @@ async function loginUser(data: LoginFormData): Promise<LoginResponse> {
     data.username === MOCK_USER.username &&
     data.password === MOCK_USER.password
   ) {
+    const token = generateMockJWT(
+      MOCK_USER.user_id,
+      MOCK_USER.username,
+      MOCK_USER.role
+    );
+
     return {
       response_code: "00",
       response_desc: "success",
+      token,
       role: MOCK_USER.role,
     };
   }
@@ -78,11 +112,8 @@ export function useLogin() {
       onSuccess: (data, variables) => {
         // Check if login was successful based on response_code
         if (data.response_code === "00") {
-          // Store user in session via auth context
-          setAuthUser({
-            username: variables.username,
-            role: data.role,
-          });
+          // Save JWT token and decode to extract user data
+          setAuthUser(data.token);
 
           // Show success message
           showSuccessToast(

@@ -3,6 +3,8 @@
  * These utilities provide a consistent interface for making HTTP requests
  */
 
+import { getAuthToken } from "@/features/auth/utils";
+
 export type ApiError = {
   message: string;
   status?: number;
@@ -61,13 +63,18 @@ export async function apiFetch<T>(
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+  // Build headers with JWT token if available
+  const token = getAuthToken();
+  const requestHeaders: HeadersInit = {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...headers,
+  };
+
   try {
     const response = await fetch(url, {
       ...rest,
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
+      headers: requestHeaders,
       signal: controller.signal,
     });
 

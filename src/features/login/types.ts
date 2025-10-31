@@ -11,13 +11,15 @@ export type UserRole = "ADMIN" | "USER";
 export type LoginResponse = {
   response_code: string;
   response_desc: string;
+  token: string;
   role: UserRole;
 };
 
 /**
- * Authentication user data stored in session
+ * Authentication user data extracted from JWT token payload
  */
 export type AuthUser = {
+  user_id: string;
   username: string;
   role: UserRole;
 };

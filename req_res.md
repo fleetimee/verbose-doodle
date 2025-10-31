@@ -5,6 +5,7 @@
 ### `POST | GET | PUT | PATCH | DELETE /{endpoint}`
 
 **Behavior:**
+
 1. Search for endpoint in database
 2. If not found, return `404`
 3. If found and active response exists, send active response
@@ -23,7 +24,8 @@ All endpoints below require **JWT Bearer Token** authentication.
 ```json
 {
   "user_id": "user_id",
-  "role": "Users.role"
+  "role": "Users.role",
+  "username": "username"
 }
 ```
 
@@ -38,6 +40,7 @@ All endpoints below require **JWT Bearer Token** authentication.
 Authenticates a user and returns a JWT token.
 
 **Request:**
+
 ```json
 {
   "username": "nama",
@@ -46,6 +49,7 @@ Authenticates a user and returns a JWT token.
 ```
 
 **Response:**
+
 ```json
 {
   "response_code": "00",
@@ -65,6 +69,7 @@ Authenticates a user and returns a JWT token.
 Creates a new endpoint configuration.
 
 **Request:**
+
 ```json
 {
   "method": "GET",
@@ -74,6 +79,7 @@ Creates a new endpoint configuration.
 ```
 
 **Response:**
+
 ```json
 {
   "response_code": "00",
@@ -91,6 +97,7 @@ Creates a new endpoint configuration.
 Adds a new response configuration for an endpoint.
 
 **Request:**
+
 ```json
 {
   "endpoint_id": 1,
@@ -102,6 +109,7 @@ Adds a new response configuration for an endpoint.
 ```
 
 **Response:**
+
 ```json
 {
   "response_code": "00",
@@ -119,6 +127,7 @@ Adds a new response configuration for an endpoint.
 Sets a response as the active response for an endpoint.
 
 **Request:**
+
 ```json
 {
   "endpoint_id": 1,
@@ -127,6 +136,7 @@ Sets a response as the active response for an endpoint.
 ```
 
 **Response:**
+
 ```json
 {
   "response_code": "00",
@@ -145,6 +155,7 @@ Sets a response as the active response for an endpoint.
 Returns all configured endpoints with their responses.
 
 **Response:**
+
 ```json
 {
   "response_code": "00",
@@ -198,6 +209,7 @@ Returns all users in the system.
 **Authorization:** Role must be `ADMIN`
 
 **Response:**
+
 ```json
 {
   "response_code": "00",
@@ -230,6 +242,7 @@ Returns details of a specific user.
 **Authorization:** Role must be `ADMIN`
 
 **Response:**
+
 ```json
 {
   "response_code": "00",
@@ -254,6 +267,7 @@ Creates a new user.
 **Authorization:** Role must be `ADMIN`
 
 **Request:**
+
 ```json
 {
   "username": "abcdef",
@@ -262,6 +276,7 @@ Creates a new user.
 ```
 
 **Response:**
+
 ```json
 {
   "response_code": "00",
@@ -279,10 +294,12 @@ Creates a new user.
 Updates user information. Multiple request body formats supported.
 
 **Authorization:**
+
 - Role must be `ADMIN`
 - Cannot edit users with `ADMIN` role
 
 **Request (Update Username):**
+
 ```json
 {
   "username": "abcdef"
@@ -290,6 +307,7 @@ Updates user information. Multiple request body formats supported.
 ```
 
 **Request (Update Active Status):**
+
 ```json
 {
   "active": false
@@ -297,6 +315,7 @@ Updates user information. Multiple request body formats supported.
 ```
 
 **Response:**
+
 ```json
 {
   "response_code": "00",
@@ -313,10 +332,12 @@ Updates user information. Multiple request body formats supported.
 Deletes a user from the system.
 
 **Authorization:**
+
 - Role must be `ADMIN`
 - Cannot delete users with `ADMIN` role
 
 **Response:**
+
 ```json
 {
   "response_code": "00",
@@ -328,9 +349,9 @@ Deletes a user from the system.
 
 ## Response Codes
 
-| Code | Description |
-|------|-------------|
-| `00` | Success |
+| Code  | Description        |
+| ----- | ------------------ |
+| `00`  | Success            |
 | `404` | Endpoint not found |
 
-*Note: Additional error codes may be defined as needed*
+_Note: Additional error codes may be defined as needed_
