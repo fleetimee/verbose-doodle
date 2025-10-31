@@ -4,4 +4,5 @@ export type User = {
   email: string;
   role: "admin" | "user" | "viewer";
   status: "active" | "inactive" | "pending";
+  avatar?: string;
 };
