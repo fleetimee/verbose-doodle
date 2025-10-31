@@ -7,6 +7,7 @@ export const sampleUsers: User[] = [
     email: "john.doe@example.com",
     role: "admin",
     status: "active",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
   },
   {
     id: "2",
@@ -14,6 +15,7 @@ export const sampleUsers: User[] = [
     email: "jane.smith@example.com",
     role: "user",
     status: "active",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane",
   },
   {
     id: "3",
@@ -21,6 +23,7 @@ export const sampleUsers: User[] = [
     email: "bob.johnson@example.com",
     role: "viewer",
     status: "inactive",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob",
   },
   {
     id: "4",
@@ -28,6 +31,7 @@ export const sampleUsers: User[] = [
     email: "alice.williams@example.com",
     role: "user",
     status: "pending",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
   },
   {
     id: "5",
@@ -35,5 +39,6 @@ export const sampleUsers: User[] = [
     email: "charlie.brown@example.com",
     role: "admin",
     status: "active",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie",
   },
 ];
