@@ -125,3 +125,33 @@ export const userRoleData = [
   { role: "ADMIN", count: 2, fill: "var(--chart-1)" },
   { role: "USER", count: 6, fill: "var(--chart-2)" },
 ];
+
+/**
+ * Endpoint usage trend data
+ * Shows total requests and successful responses over the last 6 months
+ */
+export const endpointUsageData = [
+  { month: "Jun", requests: 1240, success: 1186 },
+  { month: "Jul", requests: 1580, success: 1512 },
+  { month: "Aug", requests: 1820, success: 1764 },
+  { month: "Sep", requests: 2140, success: 2076 },
+  { month: "Oct", requests: 2450, success: 2388 },
+  { month: "Nov", requests: 2680, success: 2614 },
+];
+
+/**
+ * Response time trends data
+ * Shows average and P95 response times (ms) over the last 10 weeks
+ */
+export const responseTimeData = [
+  { date: "Week 1", avgResponseTime: 142, p95ResponseTime: 285 },
+  { date: "Week 2", avgResponseTime: 138, p95ResponseTime: 276 },
+  { date: "Week 3", avgResponseTime: 145, p95ResponseTime: 290 },
+  { date: "Week 4", avgResponseTime: 152, p95ResponseTime: 304 },
+  { date: "Week 5", avgResponseTime: 148, p95ResponseTime: 296 },
+  { date: "Week 6", avgResponseTime: 135, p95ResponseTime: 270 },
+  { date: "Week 7", avgResponseTime: 140, p95ResponseTime: 280 },
+  { date: "Week 8", avgResponseTime: 143, p95ResponseTime: 286 },
+  { date: "Week 9", avgResponseTime: 137, p95ResponseTime: 274 },
+  { date: "Week 10", avgResponseTime: 141, p95ResponseTime: 282 },
+];
