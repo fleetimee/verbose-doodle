@@ -44,19 +44,19 @@ export const Login = () => {
             <SlicedText
               className="font-bold text-3xl text-foreground tracking-tight"
               splitSpacing={3}
-              text="Biller Simulator"
+              text="Biller Simulator JSON"
             />
           </div>
           <p className="text-muted-foreground text-sm">
             <Highlighter action="underline" color="#FFA726" isView={true}>
               Create
             </Highlighter>
-            {" and test   "}
+            {" and "}
+            {" manage                "}
             <Highlighter action="highlight" color="#42A5F5" isView={true}>
               <span className="text-white"> billing scenarios</span>
             </Highlighter>
-            {"   "}
-            effortlessly.
+            {" effortlessly."}
           </p>
         </div>
 
