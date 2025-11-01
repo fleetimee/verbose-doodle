@@ -21,6 +21,9 @@
   "registries": {
     "@acme": "https://acme.com/r/{name}.json",
     "@diceui": "https://diceui.com/r/{name}.json",
-    "@kibo-ui": "https://www.kibo-ui.com/r/{name}.json"
+    "@kibo-ui": "https://www.kibo-ui.com/r/{name}.json",
+    "@efferd": "https://efferd.com/r/{name}.json",
+    "@animate-ui": "https://animate-ui.com/r/{name}.json",
+    "@magicui": "https://magicui.design/r/{name}.json"
   }
 }
