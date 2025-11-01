@@ -3,7 +3,11 @@
   "extends": ["ultracite/core"],
   "overrides": [
     {
-      "includes": ["src/components/ui/**", "src/hooks/**"],
+      "includes": [
+        "src/components/ui/**",
+        "src/components/kokonutui/**",
+        "src/hooks/**"
+      ],
       "formatter": {
         "enabled": false
       },
@@ -37,6 +41,7 @@
             "useImportType": "off",
             "useBlockStatements": "off",
             "useConsistentObjectDefinitions": "off",
+            "useConsistentTypeDefinitions": "off",
             "noNegationElse": "off",
             "noNestedTernary": "off",
             "noMagicNumbers": "off"
