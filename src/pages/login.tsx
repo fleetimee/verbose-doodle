@@ -3,7 +3,6 @@ import SlicedText from "@/components/kokonutui/sliced-text";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Highlighter } from "@/components/ui/highlighter";
-import { LightRays } from "@/components/ui/light-rays";
 import { useAuth } from "@/features/auth/context";
 import { LoginForm } from "@/features/login/components/login-form";
 import { useLogin } from "@/features/login/hooks/use-login";
@@ -33,16 +32,6 @@ export const Login = () => {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background p-4">
-      {/* Animated Light Rays Background */}
-      <LightRays
-        blur={40}
-        className="absolute inset-0"
-        color="rgba(160, 210, 255, 0.15)"
-        count={10}
-        length="100vh"
-        speed={12}
-      />
-
       {/* Theme Switcher - Top Right */}
       <div className="fixed top-4 right-4 z-10">
         <ThemeSwitcher onChange={setTheme} value={themeSwitcherValue} />
@@ -55,19 +44,19 @@ export const Login = () => {
             <SlicedText
               className="font-bold text-3xl text-foreground tracking-tight"
               splitSpacing={3}
-              text="Biller Simulator"
+              text="Biller Simulator JSON"
             />
           </div>
           <p className="text-muted-foreground text-sm">
             <Highlighter action="underline" color="#FFA726" isView={true}>
               Create
             </Highlighter>
-            {" and test   "}
+            {" and "}
+            {" manage                "}
             <Highlighter action="highlight" color="#42A5F5" isView={true}>
               <span className="text-white"> billing scenarios</span>
             </Highlighter>
-            {"   "}
-            effortlessly.
+            {" effortlessly."}
           </p>
         </div>
 
