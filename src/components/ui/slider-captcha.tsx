@@ -13,10 +13,10 @@ const PUZZLE_SIZE = 60;
 const PUZZLE_NOTCH = 10;
 
 const CAPTCHA_IMAGES = [
-  "/assets/captcha-images/frieren-ambience.png",
-  "/assets/captcha-images/wuwa-ambience.png",
-  "/assets/captcha-images/wuwa-ambience-2.png",
-  "/assets/captcha-images/wuwa-ambience-3.png",
+  "/assets/captcha-images/frieren-ambience.webp",
+  "/assets/captcha-images/wuwa-ambience.webp",
+  "/assets/captcha-images/wuwa-ambience-2.webp",
+  "/assets/captcha-images/wuwa-ambience-3.webp",
 ];
 
 const getRandomImage = () => {
