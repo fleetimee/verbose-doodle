@@ -1,4 +1,5 @@
 import { Navigate } from "react-router";
+import SlicedText from "@/components/kokonutui/sliced-text";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { useAuth } from "@/features/auth/context";
@@ -38,9 +39,13 @@ export const Login = () => {
       <div className="w-full max-w-md">
         {/* Logo or Brand */}
         <div className="mb-8 text-center">
-          <h1 className="mb-2 font-bold text-3xl tracking-tight">
-            Biller Simulator
-          </h1>
+          <div className="mb-2">
+            <SlicedText
+              className="font-bold text-3xl tracking-tight"
+              splitSpacing={3}
+              text="Biller Simulator"
+            />
+          </div>
           <p className="text-muted-foreground text-sm">
             Prototype billing scenarios with ease
           </p>
