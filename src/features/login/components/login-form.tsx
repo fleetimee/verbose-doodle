@@ -20,6 +20,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { ShineBorder } from "@/components/ui/shine-border";
 import { SliderCaptcha } from "@/components/ui/slider-captcha";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -61,7 +62,12 @@ export const LoginForm = ({
   }, [error, form]);
 
   return (
-    <Card className="w-full max-w-md border-border/40 shadow-xl">
+    <Card className="relative w-full max-w-md border-border/40 shadow-xl">
+      <ShineBorder
+        borderWidth={2}
+        duration={10}
+        shineColor={["#FFA726", "#42A5F5", "#FFA726"]}
+      />
       <CardHeader className="space-y-1">
         <CardTitle className="font-bold text-2xl tracking-tight">
           Welcome back
