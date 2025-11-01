@@ -25,9 +25,7 @@ export function HttpMethodChart() {
     <Card className="md:col-span-2 lg:col-span-2">
       <CardHeader>
         <CardTitle>HTTP Method Distribution</CardTitle>
-        <CardDescription>
-          Request count by HTTP method in the last 30 days
-        </CardDescription>
+        <CardDescription>Endpoint count by HTTP method type</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer
