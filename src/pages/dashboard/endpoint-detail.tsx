@@ -1,4 +1,5 @@
-import { ArrowLeft, Circle } from "lucide-react";
+import { ArrowLeft, Circle, Plus } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
@@ -12,9 +13,9 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AddResponseDialog } from "@/features/endpoints/components/add-response-dialog";
 import { EndpointDetailLayout } from "@/features/endpoints/components/endpoint-detail-layout";
 import { EndpointDetailSkeleton } from "@/features/endpoints/components/endpoint-detail-skeleton";
+import { ResponseStepper } from "@/features/endpoints/components/response-stepper";
 import { useActivateResponse } from "@/features/endpoints/hooks/use-activate-response";
 import { useCreateResponse } from "@/features/endpoints/hooks/use-create-response";
 import { useDeactivateResponse } from "@/features/endpoints/hooks/use-deactivate-response";
@@ -33,7 +34,7 @@ export function EndpointDetailPage() {
   const [selectedResponseId, setSelectedResponseId] = useState<string | null>(
     null
   );
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isStepperOpen, setIsStepperOpen] = useState(false);
 
   const { data: endpoint, isPending: isLoadingEndpoint } = useGetEndpoint(
     id ?? ""
@@ -74,7 +75,7 @@ export function EndpointDetailPage() {
       {
         onSuccess: () => {
           toast.success("Response created successfully");
-          setIsAddDialogOpen(false);
+          setIsStepperOpen(false);
         },
         onError: () => {
           toast.error("Failed to create response");
@@ -203,25 +204,33 @@ export function EndpointDetailPage() {
             </p>
           </div>
         </div>
-        <AddResponseDialog
-          isSubmitting={isCreatingResponse}
-          onOpenChange={setIsAddDialogOpen}
-          onSubmit={handleAddResponse}
-          open={isAddDialogOpen}
-        />
+        <Button onClick={() => setIsStepperOpen(true)} size="sm">
+          <Plus className="mr-2 h-4 w-4" />
+          Add Response
+        </Button>
       </div>
 
       <EndpointDetailLayout
         isActivating={isActivatingResponse}
         isDeactivating={isDeactivatingResponse}
         onActivateResponse={handleActivateResponse}
-        onAddResponse={() => setIsAddDialogOpen(true)}
+        onAddResponse={() => setIsStepperOpen(true)}
         onDeactivateResponse={handleDeactivateResponse}
         onSelectResponse={setSelectedResponseId}
         responses={endpoint.responses}
         selectedResponse={selectedResponse}
         selectedResponseId={selectedResponseId}
       />
+
+      <AnimatePresence>
+        {isStepperOpen && (
+          <ResponseStepper
+            isSubmitting={isCreatingResponse}
+            onCancel={() => setIsStepperOpen(false)}
+            onSubmit={handleAddResponse}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
