@@ -3,12 +3,16 @@ import SlicedText from "@/components/kokonutui/sliced-text";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Highlighter } from "@/components/ui/highlighter";
+import { InteractiveGridPattern } from "@/components/ui/interactive-grid-pattern";
 import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/features/auth/context";
 import { LoginForm } from "@/features/login/components/login-form";
 import { useLogin } from "@/features/login/hooks/use-login";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { getErrorMessage } from "@/lib/error-handler";
+
+const GRID_SQUARES_HORIZONTAL = 50;
+const GRID_SQUARES_VERTICAL = 50;
 
 export const Login = () => {
   const { authState } = useAuth();
@@ -32,7 +36,13 @@ export const Login = () => {
     theme === "light" || theme === "dark" ? theme : undefined;
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4">
+      {/* Interactive Grid Pattern Background */}
+      <InteractiveGridPattern
+        className="absolute inset-x-0 inset-y-[-30%] h-[200%] w-full skew-y-12 [mask-image:radial-gradient(800px_circle_at_center,white,transparent)]"
+        squares={[GRID_SQUARES_HORIZONTAL, GRID_SQUARES_VERTICAL]}
+      />
+
       {/* Theme Switcher - Top Right */}
       <div className="fixed top-4 right-4 z-10">
         <ThemeSwitcher onChange={setTheme} value={themeSwitcherValue} />
