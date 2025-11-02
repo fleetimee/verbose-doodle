@@ -127,19 +127,19 @@ export function EndpointDetailPage() {
 
   if (isLoadingEndpoint) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-10 w-10 rounded-md" />
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-6 w-16 rounded-md" />
-                <Skeleton className="h-8 w-64" />
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-3 md:items-center md:gap-4">
+            <Skeleton className="h-10 w-10 shrink-0 rounded-md" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                <Skeleton className="h-6 w-16 shrink-0 rounded-md" />
+                <Skeleton className="h-6 w-48 rounded-md md:h-8 md:w-64" />
               </div>
-              <Skeleton className="h-4 w-96" />
+              <Skeleton className="h-4 w-full max-w-sm rounded-md" />
             </div>
           </div>
-          <Skeleton className="h-10 w-32 rounded-md" />
+          <Skeleton className="h-10 w-32 shrink-0 rounded-md" />
         </div>
 
         <EndpointDetailSkeleton />
@@ -173,22 +173,27 @@ export function EndpointDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button onClick={handleBack} size="icon" variant="ghost">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-start gap-3 md:items-center md:gap-4">
+          <Button
+            className="mt-1 md:mt-0"
+            onClick={handleBack}
+            size="icon"
+            variant="ghost"
+          >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
               <span
-                className={`rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
+                className={`shrink-0 rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
                   endpoint.method
                 )}`}
               >
                 {abbreviateMethod(endpoint.method)}
               </span>
-              <h1 className="font-bold font-mono text-2xl tracking-tight">
+              <h1 className="break-all font-bold font-mono text-xl tracking-tight md:text-2xl">
                 {endpoint.url}
               </h1>
             </div>
