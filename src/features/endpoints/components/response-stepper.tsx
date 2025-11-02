@@ -296,6 +296,7 @@ export function ResponseStepper({
                             <StatusCodeCombobox
                               field={field}
                               fieldError={fieldState.error}
+                              onAdvance={handleNext}
                               onSelect={handleNext}
                             />
                             <FieldDescription className="mt-4 text-base">
