@@ -3,6 +3,15 @@
   "extends": ["ultracite/core"],
   "overrides": [
     {
+      "includes": ["public/**/*.html"],
+      "linter": {
+        "enabled": false
+      },
+      "formatter": {
+        "enabled": false
+      }
+    },
+    {
       "includes": [
         "src/components/ui/**",
         "src/components/kokonutui/**",
@@ -19,7 +28,9 @@
             "noNoninteractiveElementInteractions": "off",
             "useKeyWithClickEvents": "off",
             "useAriaPropsForRole": "off",
-            "noRedundantRoles": "off"
+            "noRedundantRoles": "off",
+            "noSvgWithoutTitle": "off",
+            "noStaticElementInteractions": "off"
           },
           "correctness": {
             "useExhaustiveDependencies": "off"
