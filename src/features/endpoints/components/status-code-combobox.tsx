@@ -33,12 +33,14 @@ type StatusCodeComboboxProps = {
   field: ControllerRenderProps<ResponseFormData, "statusCode">;
   fieldError?: FieldError;
   onSelect?: () => void;
+  onAdvance?: () => void;
 };
 
 export function StatusCodeCombobox({
   field,
   fieldError,
   onSelect,
+  onAdvance,
 }: StatusCodeComboboxProps) {
   const [open, setOpen] = useState(false);
   const selectedCode = HTTP_STATUS_CODES.find(
@@ -53,6 +55,17 @@ export function StatusCodeCombobox({
     }
   };
 
+  const handleTriggerKeyDown = (e: React.KeyboardEvent) => {
+    // If Enter is pressed, a value is already selected, and popover is closed
+    // then advance to next step instead of opening the popover
+    if (e.key === "Enter" && selectedCode && !open) {
+      e.preventDefault();
+      if (onAdvance) {
+        onAdvance();
+      }
+    }
+  };
+
   return (
     <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>
@@ -64,6 +77,7 @@ export function StatusCodeCombobox({
             !selectedCode && "text-muted-foreground"
           )}
           id="response-status-code"
+          onKeyDown={handleTriggerKeyDown}
           role="combobox"
           variant="outline"
         >
