@@ -2,17 +2,7 @@ import { ArrowLeft, Circle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
-import {
-  CodeBlock,
-  CodeBlockBody,
-  CodeBlockContent,
-  CodeBlockCopyButton,
-  CodeBlockHeader,
-  CodeBlockItem,
-} from "@/components/kibo-ui/code-block";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   Empty,
   EmptyContent,
@@ -21,17 +11,13 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddResponseDialog } from "@/features/endpoints/components/add-response-dialog";
-import { ResponseListItem } from "@/features/endpoints/components/response-list-item";
+import { EndpointDetailLayout } from "@/features/endpoints/components/endpoint-detail-layout";
+import { EndpointDetailSkeleton } from "@/features/endpoints/components/endpoint-detail-skeleton";
 import { useActivateResponse } from "@/features/endpoints/hooks/use-activate-response";
 import { useCreateResponse } from "@/features/endpoints/hooks/use-create-response";
+import { useDeactivateResponse } from "@/features/endpoints/hooks/use-deactivate-response";
 import { useGetEndpoint } from "@/features/endpoints/hooks/use-get-endpoint";
 import type { ResponseFormData } from "@/features/endpoints/schemas/response-schema";
 import type { EndpointResponse } from "@/features/endpoints/types";
@@ -40,8 +26,6 @@ import {
   getMethodBadgeColor,
 } from "@/features/endpoints/utils/http-method-colors";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
-
-const SUCCESS_STATUS_CODE_THRESHOLD = 300;
 
 export function EndpointDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -58,6 +42,8 @@ export function EndpointDetailPage() {
     useCreateResponse();
   const { mutate: activateResponse, isPending: isActivatingResponse } =
     useActivateResponse();
+  const { mutate: deactivateResponse, isPending: isDeactivatingResponse } =
+    useDeactivateResponse();
 
   useDocumentMeta({
     title: endpoint ? `${endpoint.method} ${endpoint.url}` : "Endpoint Detail",
@@ -70,19 +56,6 @@ export function EndpointDetailPage() {
     }
     return endpoint.responses.find((r) => r.id === selectedResponseId) ?? null;
   }, [endpoint, selectedResponseId]);
-
-  const formattedResponseJson = useMemo(() => {
-    if (!selectedResponse) {
-      return "";
-    }
-
-    try {
-      const parsed = JSON.parse(selectedResponse.json);
-      return JSON.stringify(parsed, null, 2);
-    } catch {
-      return selectedResponse.json;
-    }
-  }, [selectedResponse]);
 
   const handleBack = () => {
     navigate("/dashboard/endpoints");
@@ -131,17 +104,45 @@ export function EndpointDetailPage() {
     );
   };
 
+  const handleDeactivateResponse = (response: EndpointResponse) => {
+    if (!endpoint) {
+      return;
+    }
+
+    deactivateResponse(
+      {
+        endpointId: endpoint.id,
+        responseId: response.id,
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Response "${response.name}" deactivated`);
+        },
+        onError: () => {
+          toast.error("Failed to deactivate response");
+        },
+      }
+    );
+  };
+
   if (isLoadingEndpoint) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-4 w-96" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10 rounded-md" />
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-6 w-16 rounded-md" />
+                <Skeleton className="h-8 w-64" />
+              </div>
+              <Skeleton className="h-4 w-96" />
+            </div>
           </div>
+          <Skeleton className="h-10 w-32 rounded-md" />
         </div>
-        <Skeleton className="h-[600px] w-full" />
+
+        <EndpointDetailSkeleton />
       </div>
     );
   }
@@ -205,124 +206,17 @@ export function EndpointDetailPage() {
         />
       </div>
 
-      <Card className="overflow-hidden">
-        <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel defaultSize={35} minSize={25}>
-            <div className="flex h-full flex-col">
-              <div className="border-b px-4 py-3">
-                <h2 className="font-semibold text-sm">Responses</h2>
-              </div>
-              <ScrollArea className="flex-1">
-                {endpoint.responses.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <p className="text-muted-foreground text-sm">
-                      No responses configured yet.
-                    </p>
-                    <Button
-                      className="mt-4"
-                      onClick={() => setIsAddDialogOpen(true)}
-                      size="sm"
-                      variant="outline"
-                    >
-                      Add First Response
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-1 p-2">
-                    {endpoint.responses.map((response) => (
-                      <ResponseListItem
-                        isActivating={isActivatingResponse}
-                        isSelected={selectedResponseId === response.id}
-                        key={response.id}
-                        onActivate={handleActivateResponse}
-                        onSelect={setSelectedResponseId}
-                        response={response}
-                      />
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
-            </div>
-          </ResizablePanel>
-
-          <ResizableHandle withHandle />
-
-          <ResizablePanel defaultSize={65} minSize={35}>
-            <div className="flex h-full flex-col">
-              <div className="border-b px-4 py-3">
-                <h2 className="font-semibold text-sm">Response Preview</h2>
-              </div>
-              <ScrollArea className="flex-1">
-                {selectedResponse ? (
-                  <div className="p-4">
-                    <div className="mb-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-lg">
-                          {selectedResponse.name}
-                        </h3>
-                        {selectedResponse.activated && (
-                          <Badge variant="secondary">Active Response</Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground text-sm">
-                          Status Code:
-                        </span>
-                        <Badge
-                          className="font-mono"
-                          variant={
-                            selectedResponse.statusCode <
-                            SUCCESS_STATUS_CODE_THRESHOLD
-                              ? "default"
-                              : "destructive"
-                          }
-                        >
-                          {selectedResponse.statusCode}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <CodeBlock
-                      data={[
-                        {
-                          language: "json",
-                          filename: "response.json",
-                          code: formattedResponseJson,
-                        },
-                      ]}
-                      defaultValue="json"
-                    >
-                      <CodeBlockHeader>
-                        <div className="flex-1 px-3 py-1 text-muted-foreground text-xs">
-                          Response Body
-                        </div>
-                        <CodeBlockCopyButton />
-                      </CodeBlockHeader>
-                      <CodeBlockBody>
-                        {(item) => (
-                          <CodeBlockItem key={item.language} value="json">
-                            <CodeBlockContent language="json">
-                              {item.code}
-                            </CodeBlockContent>
-                          </CodeBlockItem>
-                        )}
-                      </CodeBlockBody>
-                    </CodeBlock>
-                  </div>
-                ) : (
-                  <div className="flex h-full items-center justify-center p-8">
-                    <div className="text-center">
-                      <p className="text-muted-foreground">
-                        Select a response from the list to preview
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </ScrollArea>
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </Card>
+      <EndpointDetailLayout
+        isActivating={isActivatingResponse}
+        isDeactivating={isDeactivatingResponse}
+        onActivateResponse={handleActivateResponse}
+        onAddResponse={() => setIsAddDialogOpen(true)}
+        onDeactivateResponse={handleDeactivateResponse}
+        onSelectResponse={setSelectedResponseId}
+        responses={endpoint.responses}
+        selectedResponse={selectedResponse}
+        selectedResponseId={selectedResponseId}
+      />
     </div>
   );
 }
