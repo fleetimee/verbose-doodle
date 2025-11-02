@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Ultra-simple favicon - just the essential elements -->
+
+  <!-- Solid document shape -->
+  <rect x="6" y="4" width="20" height="24" rx="2" fill="currentColor"/>
+
+  <!-- White inner space -->
+  <rect x="9" y="7" width="14" height="18" rx="1" fill="white"/>
+
+  <!-- Just the braces - most recognizable element -->
+  <text x="11" y="20" font-family="monospace" font-size="12" font-weight="bold" fill="currentColor">{}</text>
+</svg>

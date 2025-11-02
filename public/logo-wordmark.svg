@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 100" fill="none">
+  <!-- Minimalist horizontal wordmark -->
+  <g>
+    <!-- Icon part - simplified -->
+    <rect x="10" y="15" width="70" height="70" rx="6" fill="currentColor"/>
+    <rect x="16" y="21" width="58" height="58" rx="3" fill="white"/>
+
+    <!-- Document lines in icon -->
+    <line x1="24" y1="30" x2="66" y2="30" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="24" y1="37" x2="55" y2="37" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.4"/>
+    <line x1="24" y1="44" x2="60" y2="44" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.4"/>
+
+    <!-- JSON braces in icon -->
+    <text x="30" y="63" font-family="monospace" font-size="18" font-weight="600" fill="currentColor">{}</text>
+
+    <!-- Total line in icon -->
+    <line x1="24" y1="70" x2="66" y2="70" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Wordmark text -->
+  <text x="100" y="45" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="600" fill="currentColor" letter-spacing="-0.02em">Biller</text>
+  <text x="100" y="70" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="400" fill="currentColor" opacity="0.6">JSON Simulator</text>
+</svg>
