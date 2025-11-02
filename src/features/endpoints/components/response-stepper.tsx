@@ -1,13 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  Code2,
-  FileText,
-  Hash,
-  Sparkles,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -23,6 +15,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { JsonEditor } from "@/features/endpoints/components/json-editor";
+import { ResponseReviewStep } from "@/features/endpoints/components/response-review-step";
+import { StatusCodeCombobox } from "@/features/endpoints/components/status-code-combobox";
+import {
+  ACTIVE_INDICATOR_SCALE,
+  ANIMATION_DURATION,
+  INACTIVE_INDICATOR_OPACITY,
+  INACTIVE_INDICATOR_SCALE,
+  PERCENT_MULTIPLIER,
+  STEP_TRANSITION_DURATION,
+  STEPS,
+} from "@/features/endpoints/constants/stepper-steps";
 import {
   type ResponseFormData,
   responseSchema,
@@ -33,48 +36,6 @@ type ResponseStepperProps = {
   onCancel: () => void;
   isSubmitting?: boolean;
 };
-
-const STEPS = [
-  {
-    id: "name",
-    title: "Response Name",
-    description: "What should we call this response?",
-    icon: FileText,
-    color: "text-blue-500",
-    bgColor: "bg-blue-50 dark:bg-blue-950/30",
-  },
-  {
-    id: "statusCode",
-    title: "Status Code",
-    description: "Which HTTP status code?",
-    icon: Hash,
-    color: "text-emerald-500",
-    bgColor: "bg-emerald-50 dark:bg-emerald-950/30",
-  },
-  {
-    id: "json",
-    title: "JSON Response",
-    description: "What data should it return?",
-    icon: Code2,
-    color: "text-violet-500",
-    bgColor: "bg-violet-50 dark:bg-violet-950/30",
-  },
-  {
-    id: "activated",
-    title: "Activate Response",
-    description: "Set as active response?",
-    icon: Sparkles,
-    color: "text-amber-500",
-    bgColor: "bg-amber-50 dark:bg-amber-950/30",
-  },
-] as const;
-
-const PERCENT_MULTIPLIER = 100;
-const ACTIVE_INDICATOR_SCALE = 1.2;
-const INACTIVE_INDICATOR_SCALE = 1;
-const INACTIVE_INDICATOR_OPACITY = 0.6;
-const ANIMATION_DURATION = 0.2;
-const STEP_TRANSITION_DURATION = 0.3;
 
 export function ResponseStepper({
   onSubmit,
@@ -96,30 +57,34 @@ export function ResponseStepper({
   });
 
   const canProceed = () => {
-    const fieldName = currentStep.id;
-    const value = form.watch(fieldName);
-    const fieldState = form.getFieldState(fieldName);
+    const stepId = currentStep.id;
+
+    // Review and activation steps don't require validation
+    if (stepId === "review" || stepId === "activated") {
+      return true;
+    }
+
+    // For form field steps, check validation
+    const value = form.watch(stepId as keyof ResponseFormData);
+    const fieldState = form.getFieldState(stepId as keyof ResponseFormData);
 
     // Check if field has value and is valid
-    if (fieldName === "name") {
+    if (stepId === "name") {
       return (
         typeof value === "string" &&
         value.trim().length > 0 &&
         !fieldState.invalid
       );
     }
-    if (fieldName === "statusCode") {
+    if (stepId === "statusCode") {
       return typeof value === "number" && !fieldState.invalid;
     }
-    if (fieldName === "json") {
+    if (stepId === "json") {
       return (
         typeof value === "string" &&
         value.trim().length > 0 &&
         !fieldState.invalid
       );
-    }
-    if (fieldName === "activated") {
-      return true; // Always can proceed from activation step
     }
 
     return false;
@@ -139,13 +104,24 @@ export function ResponseStepper({
   };
 
   const handleNext = async () => {
-    const fieldName = currentStep.id;
-    const isValid = await form.trigger(fieldName);
+    const stepId = currentStep.id;
+
+    // For review and activation steps, just proceed
+    if (stepId === "review" || stepId === "activated") {
+      if (currentStepIndex < STEPS.length - 1) {
+        setCurrentStepIndex(currentStepIndex + 1);
+      }
+      return;
+    }
+
+    // For form field steps, validate first
+    const isValid = await form.trigger(stepId as keyof ResponseFormData);
 
     if (isValid && currentStepIndex < STEPS.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
-      // Trigger validation of all fields when reaching the final step
-      if (currentStepIndex + 1 === STEPS.length - 1) {
+      // Trigger validation of all fields when reaching the review step
+      const nextStep = STEPS[currentStepIndex + 1];
+      if (nextStep?.id === "review") {
         await form.trigger();
       }
     }
@@ -293,11 +269,11 @@ export function ResponseStepper({
                               aria-invalid={fieldState.invalid}
                               autoComplete="off"
                               autoFocus
-                              className="h-16 text-2xl"
+                              className="h-20 rounded-none border-0 border-border border-b-2 px-0 text-3xl shadow-none focus-visible:border-primary focus-visible:ring-0 aria-invalid:border-destructive md:text-4xl"
                               id="response-name"
                               placeholder="e.g., success_response, error_response"
                             />
-                            <FieldDescription className="text-base">
+                            <FieldDescription className="mt-4 text-base">
                               Choose a descriptive name that helps identify this
                               response
                             </FieldDescription>
@@ -317,24 +293,13 @@ export function ResponseStepper({
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                           <FieldContent>
-                            <Input
-                              {...field}
-                              aria-invalid={fieldState.invalid}
-                              autoComplete="off"
-                              autoFocus
-                              className="h-16 text-2xl"
-                              id="response-status-code"
-                              inputMode="numeric"
-                              onChange={(e) =>
-                                field.onChange(Number(e.target.value))
-                              }
-                              placeholder="200"
-                              type="number"
-                              value={field.value}
+                            <StatusCodeCombobox
+                              field={field}
+                              fieldError={fieldState.error}
+                              onSelect={handleNext}
                             />
-                            <FieldDescription className="text-base">
-                              Common codes: 200 (Success), 400 (Bad Request),
-                              404 (Not Found), 500 (Server Error)
+                            <FieldDescription className="mt-4 text-base">
+                              Search or select the appropriate HTTP status code
                             </FieldDescription>
                           </FieldContent>
                           {fieldState.invalid && (
@@ -373,6 +338,10 @@ export function ResponseStepper({
                         </Field>
                       )}
                     />
+                  )}
+
+                  {currentStep.id === "review" && (
+                    <ResponseReviewStep formValues={formValues} />
                   )}
 
                   {currentStep.id === "activated" && (
