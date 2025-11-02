@@ -3,6 +3,7 @@ import SlicedText from "@/components/kokonutui/sliced-text";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Highlighter } from "@/components/ui/highlighter";
+import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/features/auth/context";
 import { LoginForm } from "@/features/login/components/login-form";
 import { useLogin } from "@/features/login/hooks/use-login";
@@ -40,6 +41,9 @@ export const Login = () => {
       <div className="relative z-10 w-full max-w-md">
         {/* Logo or Brand */}
         <div className="mb-8 text-center">
+          <div className="mb-3 flex justify-center">
+            <Logo size="md" theme="auto" variant="icon" />
+          </div>
           <div className="mb-2">
             <SlicedText
               className="font-bold text-3xl text-foreground tracking-tight"
