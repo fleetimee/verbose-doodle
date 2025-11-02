@@ -57,7 +57,7 @@ export const SliderCaptcha = ({
       const maxX = width - PUZZLE_SIZE - 20;
       const randomX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
 
-      const imageHeight = 200;
+      const imageHeight = 160;
       const minY = 20;
       const maxY = imageHeight - PUZZLE_SIZE - 20;
       const randomY = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
@@ -114,7 +114,7 @@ export const SliderCaptcha = ({
     const maxX = width - PUZZLE_SIZE - 20;
     const randomX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
 
-    const imageHeight = 200;
+    const imageHeight = 160;
     const minY = 20;
     const maxY = imageHeight - PUZZLE_SIZE - 20;
     const randomY = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
@@ -316,13 +316,13 @@ export const SliderCaptcha = ({
 
         <div
           ref={containerRef}
-          className="relative mb-4 h-[200px] overflow-hidden rounded-md bg-muted"
+          className="relative mb-4 h-[160px] overflow-hidden rounded-md bg-muted"
         >
           <img
             alt="Captcha background"
             className="h-full w-full object-cover"
             draggable={false}
-            height="200"
+            height="160"
             src={currentImage}
             width="400"
           />
@@ -347,7 +347,7 @@ export const SliderCaptcha = ({
               </defs>
               <image
                 clipPath="url(#puzzle-cutout)"
-                height="200"
+                height="160"
                 href={currentImage}
                 width={containerWidth}
                 x={-targetPosition}
@@ -431,7 +431,7 @@ export const SliderCaptcha = ({
               {/* Image clipped to puzzle shape */}
               <image
                 clipPath="url(#puzzle-piece)"
-                height="200"
+                height="160"
                 href={currentImage}
                 width={containerWidth}
                 x={-targetPosition}
