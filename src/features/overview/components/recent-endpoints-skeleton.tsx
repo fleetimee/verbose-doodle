@@ -6,12 +6,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 const SKELETON_ITEMS = Array.from({ length: 5 }, (_, i) => i);
 
-export function RecentEndpointsSkeleton() {
+type RecentEndpointsSkeletonProps = {
+  className?: string;
+};
+
+export function RecentEndpointsSkeleton({
+  className,
+}: RecentEndpointsSkeletonProps) {
   return (
-    <Card className="md:col-span-3 lg:col-span-4">
+    <Card className={cn("md:col-span-3 lg:col-span-3", className)}>
       <CardHeader>
         <CardTitle>
           <Skeleton className="h-6 w-36" />

@@ -18,7 +18,7 @@ const methodColors = {
 
 export function RecentEndpoints() {
   return (
-    <Card className="md:col-span-3 lg:col-span-4">
+    <Card className="md:col-span-3 lg:col-span-3">
       <CardHeader>
         <CardTitle>Recent Endpoints</CardTitle>
         <CardDescription>

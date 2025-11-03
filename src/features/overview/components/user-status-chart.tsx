@@ -50,14 +50,14 @@ export function UserStatusChart() {
   ];
 
   return (
-    <Card className="md:col-span-3 lg:col-span-2">
+    <Card className="group relative overflow-hidden border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 via-background to-background transition-all hover:border-cyan-500/40 hover:shadow-lg md:col-span-3 lg:col-span-1 lg:row-span-2">
       <CardHeader>
         <CardTitle>Active Users</CardTitle>
         <CardDescription>Current active user accounts</CardDescription>
       </CardHeader>
-      <CardContent className="pb-0">
+      <CardContent className="flex items-center justify-center pb-0">
         <ChartContainer
-          className="mx-auto aspect-square max-h-[250px] w-full"
+          className="mx-auto aspect-square max-h-[200px] w-full"
           config={userStatusConfig}
         >
           <RadialBarChart
