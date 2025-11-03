@@ -36,9 +36,17 @@ const responseStatusConfig = {
   },
 } satisfies ChartConfig;
 
-export function EndpointStatusChart() {
+type EndpointStatusChartProps = {
+  className?: string;
+};
+
+export function EndpointStatusChart({
+  className,
+}: EndpointStatusChartProps = {}) {
+  // Default classes for admin layout, can be overridden via className prop
+  const defaultClasses = className || "md:col-span-3 lg:col-span-2";
   return (
-    <Card className="md:col-span-3 lg:col-span-2">
+    <Card className={defaultClasses}>
       <CardHeader>
         <CardTitle>Response Status Code Distribution</CardTitle>
         <CardDescription>

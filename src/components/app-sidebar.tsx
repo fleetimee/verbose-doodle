@@ -21,6 +21,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/features/auth/context";
+import { usePermissions } from "@/features/auth/hooks/use-permissions";
 
 const data = {
   navMain: [
@@ -61,6 +62,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { authState } = useAuth();
+  const { can } = usePermissions({ role: authState.user?.role });
 
   // Construct user object for NavUser component
   const user = authState.user
@@ -74,6 +76,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         email: "guest@biller-simulator.local",
         avatar: "",
       };
+
+  // Filter navigation items based on user permissions
+  const filteredNavMain = data.navMain.filter((item) => {
+    // Users page requires canViewUsers permission
+    if (item.url === "/dashboard/users") {
+      return can("canViewUsers");
+    }
+    // All other pages are accessible to all authenticated users
+    return true;
+  });
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -102,7 +114,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={filteredNavMain} />
         <NavSecondary className="mt-auto" items={data.navSecondary} />
       </SidebarContent>
       <SidebarFooter>

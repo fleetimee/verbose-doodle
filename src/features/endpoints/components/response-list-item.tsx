@@ -11,6 +11,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/features/auth/context";
+import { usePermissions } from "@/features/auth/hooks/use-permissions";
 import type { EndpointResponse } from "@/features/endpoints/types";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +37,10 @@ export function ResponseListItem({
   onActivate,
   onDeactivate,
 }: ResponseListItemProps) {
+  const { authState } = useAuth();
+  const { can } = usePermissions({ role: authState.user?.role });
+  const canActivateResponse = can("canActivateResponse");
+
   const isActive = response.activated;
   const isLoading = isActivating || isDeactivating;
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -85,30 +91,32 @@ export function ResponseListItem({
               </Badge>
             </div>
           </div>
-          <button
-            className={cn(
-              "rounded-full p-0.5 transition-colors",
-              isActive
-                ? "text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400"
-                : "text-muted-foreground hover:text-foreground",
-              isLoading && "cursor-not-allowed opacity-50"
-            )}
-            disabled={isLoading}
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowConfirmDialog(true);
-            }}
-            title={
-              isActive ? "Deactivate this response" : "Activate this response"
-            }
-            type="button"
-          >
-            {isActive ? (
-              <CheckCircle2 className="h-5 w-5" />
-            ) : (
-              <Circle className="h-5 w-5" />
-            )}
-          </button>
+          {canActivateResponse && (
+            <button
+              className={cn(
+                "rounded-full p-0.5 transition-colors",
+                isActive
+                  ? "text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400"
+                  : "text-muted-foreground hover:text-foreground",
+                isLoading && "cursor-not-allowed opacity-50"
+              )}
+              disabled={isLoading}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowConfirmDialog(true);
+              }}
+              title={
+                isActive ? "Deactivate this response" : "Activate this response"
+              }
+              type="button"
+            >
+              {isActive ? (
+                <CheckCircle2 className="h-5 w-5" />
+              ) : (
+                <Circle className="h-5 w-5" />
+              )}
+            </button>
+          )}
         </div>
       </button>
 

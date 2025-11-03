@@ -13,6 +13,9 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProtectedAction } from "@/features/auth/components/protected-action";
+import { useAuth } from "@/features/auth/context";
+import { usePermissions } from "@/features/auth/hooks/use-permissions";
 import { EndpointDetailLayout } from "@/features/endpoints/components/endpoint-detail-layout";
 import { EndpointDetailSkeleton } from "@/features/endpoints/components/endpoint-detail-skeleton";
 import { ResponseStepper } from "@/features/endpoints/components/response-stepper";
@@ -31,6 +34,10 @@ import { useDocumentMeta } from "@/hooks/use-document-meta";
 export function EndpointDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { authState } = useAuth();
+  const { can } = usePermissions({ role: authState.user?.role });
+  const canAddResponse = can("canAddResponse");
+
   const [selectedResponseId, setSelectedResponseId] = useState<string | null>(
     null
   );
@@ -140,7 +147,9 @@ export function EndpointDetailPage() {
               <Skeleton className="h-4 w-full max-w-sm rounded-md" />
             </div>
           </div>
-          <Skeleton className="h-10 w-32 shrink-0 rounded-md" />
+          {canAddResponse && (
+            <Skeleton className="h-10 w-32 shrink-0 rounded-md" />
+          )}
         </div>
 
         <EndpointDetailSkeleton />
@@ -204,10 +213,12 @@ export function EndpointDetailPage() {
             </p>
           </div>
         </div>
-        <Button onClick={() => setIsStepperOpen(true)} size="sm">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Response
-        </Button>
+        <ProtectedAction ability="canAddResponse">
+          <Button onClick={() => setIsStepperOpen(true)} size="sm">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Response
+          </Button>
+        </ProtectedAction>
       </div>
 
       <EndpointDetailLayout

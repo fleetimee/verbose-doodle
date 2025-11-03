@@ -14,12 +14,20 @@ const SIMULATED_API_DELAY_MS = 1500;
  * Mock user credentials for testing
  * TODO: Remove when backend is ready
  */
-const MOCK_USER = {
-  user_id: "1",
-  username: "admin",
-  password: "password123",
-  role: "ADMIN" as const,
-};
+const MOCK_USERS = [
+  {
+    user_id: "1",
+    username: "admin",
+    password: "password123",
+    role: "ADMIN" as const,
+  },
+  {
+    user_id: "2",
+    username: "user",
+    password: "password123",
+    role: "USER" as const,
+  },
+];
 
 /**
  * Generate a mock JWT token for testing
@@ -55,22 +63,23 @@ async function loginUser(data: LoginFormData): Promise<LoginResponse> {
   // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, SIMULATED_API_DELAY_MS));
 
-  // Check credentials against mock user
-  if (
-    data.username === MOCK_USER.username &&
-    data.password === MOCK_USER.password
-  ) {
+  // Check credentials against mock users
+  const matchedUser = MOCK_USERS.find(
+    (user) => user.username === data.username && user.password === data.password
+  );
+
+  if (matchedUser) {
     const token = generateMockJWT(
-      MOCK_USER.user_id,
-      MOCK_USER.username,
-      MOCK_USER.role
+      matchedUser.user_id,
+      matchedUser.username,
+      matchedUser.role
     );
 
     return {
       response_code: "00",
       response_desc: "success",
       token,
-      role: MOCK_USER.role,
+      role: matchedUser.role,
     };
   }
 

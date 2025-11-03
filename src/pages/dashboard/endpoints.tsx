@@ -9,6 +9,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
 import { EndpointCard } from "@/features/endpoints/components/endpoint-card";
 import { EndpointCardSkeleton } from "@/features/endpoints/components/endpoint-card-skeleton";
@@ -111,13 +112,15 @@ export function EndpointsPage() {
             Kelola endpoint API dan integrasi Anda
           </p>
         </div>
-        <AddEndpointSheet
-          isSubmitting={isCreatingEndpoint}
-          onOpenChange={setIsDialogOpen}
-          onSubmit={handleAddEndpoint}
-          open={isDialogOpen}
-          showTrigger={hasEndpoints}
-        />
+        <ProtectedAction ability="canAddEndpoint">
+          <AddEndpointSheet
+            isSubmitting={isCreatingEndpoint}
+            onOpenChange={setIsDialogOpen}
+            onSubmit={handleAddEndpoint}
+            open={isDialogOpen}
+            showTrigger={hasEndpoints}
+          />
+        </ProtectedAction>
       </div>
 
       {isLoadingEndpoints && (
@@ -212,10 +215,12 @@ export function EndpointsPage() {
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={handleCreateEndpoint}>
-              <Plus className="mr-2 h-4 w-4" />
-              Buat Endpoint Pertama
-            </Button>
+            <ProtectedAction ability="canAddEndpoint">
+              <Button onClick={handleCreateEndpoint}>
+                <Plus className="mr-2 h-4 w-4" />
+                Buat Endpoint Pertama
+              </Button>
+            </ProtectedAction>
           </EmptyContent>
         </Empty>
       )}

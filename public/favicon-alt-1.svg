@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
   <!-- Alternative 1: Just a simple "B" in a rounded square -->
-  <rect x="4" y="4" width="24" height="24" rx="6" fill="currentColor"/>
-  <text x="8.5" y="23" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="white">B</text>
+  <rect x="4" y="4" width="24" height="24" rx="6" fill="#1a1a1a"/>
+  <text x="16" y="16" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="white" text-anchor="middle" dominant-baseline="central">B</text>
 </svg>
