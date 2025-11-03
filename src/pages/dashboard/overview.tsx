@@ -12,7 +12,6 @@ import { UserStatsCards } from "@/features/overview/components/user-stats-cards"
 import { UserStatusChart } from "@/features/overview/components/user-status-chart";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 
-const SKELETON_KEYS = Array.from({ length: 4 }, (_, i) => i);
 const LOADING_DELAY_MS = 800;
 
 export function OverviewPage() {
@@ -56,15 +55,21 @@ export function OverviewPage() {
       {/* Bento Grid Layout */}
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {/* Stats Cards Skeletons */}
-          {SKELETON_KEYS.map((key) => (
-            <StatsCardSkeleton key={`stats-skeleton-${key + 1}`} />
-          ))}
+          {/* Large Feature Card - Total Endpoints (2 cols × 2 rows) */}
+          <StatsCardSkeleton className="md:col-span-2 lg:row-span-2" />
+
+          {/* Three compact stats cards stacked vertically */}
+          <StatsCardSkeleton className="md:col-span-1" />
+          <StatsCardSkeleton className="md:col-span-1" />
+          <StatsCardSkeleton className="md:col-span-1" />
 
           {/* Admin User Stats Cards Skeletons */}
           {isAdmin &&
             Array.from({ length: 3 }, (_, i) => i).map((key) => (
-              <StatsCardSkeleton key={`user-stats-skeleton-${key + 1}`} />
+              <StatsCardSkeleton
+                className="md:col-span-1"
+                key={`user-stats-skeleton-${key + 1}`}
+              />
             ))}
 
           {/* Chart Skeletons */}
@@ -72,13 +77,13 @@ export function OverviewPage() {
           <ChartCardSkeleton className="md:col-span-1 lg:col-span-2" />
           <ChartCardSkeleton className="md:col-span-2 lg:col-span-2" />
 
-          {/* Admin User Status Chart Skeleton */}
+          {/* Admin User Status Chart Skeleton (1 col × 2 rows) */}
           {isAdmin && (
-            <ChartCardSkeleton className="md:col-span-1 lg:col-span-2" />
+            <ChartCardSkeleton className="md:col-span-3 lg:col-span-1 lg:row-span-2" />
           )}
 
-          {/* Recent Endpoints Skeleton */}
-          <RecentEndpointsSkeleton />
+          {/* Recent Endpoints Skeleton (3 cols) */}
+          <RecentEndpointsSkeleton className="md:col-span-3 lg:col-span-3" />
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
