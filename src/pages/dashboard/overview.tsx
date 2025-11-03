@@ -14,6 +14,90 @@ import { useDocumentMeta } from "@/hooks/use-document-meta";
 
 const LOADING_DELAY_MS = 800;
 
+type OverviewGridProps = {
+  isAdmin: boolean;
+};
+
+function OverviewLoadingGrid({ isAdmin }: OverviewGridProps) {
+  return (
+    <div
+      className={`grid grid-cols-1 gap-4 ${isAdmin ? "md:grid-cols-3 lg:grid-cols-4" : "md:grid-cols-3"}`}
+    >
+      {/* Large Feature Card - Total Endpoints (2 cols × 2 rows) */}
+      <StatsCardSkeleton className="md:col-span-2 lg:row-span-2" />
+
+      {/* Three compact stats cards stacked vertically */}
+      <StatsCardSkeleton className="md:col-span-1" />
+      <StatsCardSkeleton className="md:col-span-1" />
+      <StatsCardSkeleton className="md:col-span-1" />
+
+      {/* Admin User Stats Cards Skeletons */}
+      {isAdmin &&
+        Array.from({ length: 3 }, (_, i) => i).map((key) => (
+          <StatsCardSkeleton
+            className="md:col-span-1"
+            key={`user-stats-skeleton-${key + 1}`}
+          />
+        ))}
+
+      {/* Chart Skeletons */}
+      <ChartCardSkeleton
+        className={
+          isAdmin
+            ? "md:col-span-2 lg:col-span-2"
+            : "md:col-span-3 lg:col-span-3"
+        }
+      />
+      <ChartCardSkeleton
+        className={
+          isAdmin
+            ? "md:col-span-1 lg:col-span-2"
+            : "md:col-span-3 lg:col-span-3"
+        }
+      />
+      <ChartCardSkeleton
+        className={
+          isAdmin
+            ? "md:col-span-2 lg:col-span-2"
+            : "md:col-span-3 lg:col-span-3"
+        }
+      />
+
+      {/* Admin User Status Chart Skeleton (1 col × 2 rows) */}
+      {isAdmin && (
+        <ChartCardSkeleton className="md:col-span-3 lg:col-span-1 lg:row-span-2" />
+      )}
+
+      {/* Recent Endpoints Skeleton (3 cols) */}
+      <RecentEndpointsSkeleton
+        className={isAdmin ? "md:col-span-3 lg:col-span-3" : "md:col-span-3"}
+      />
+    </div>
+  );
+}
+
+function OverviewContentGrid({ isAdmin }: OverviewGridProps) {
+  return (
+    <div
+      className={`grid grid-cols-1 gap-4 ${isAdmin ? "md:grid-cols-3 lg:grid-cols-4" : "md:grid-cols-3"}`}
+    >
+      <StatsCards />
+      {isAdmin && <UserStatsCards />}
+      <HttpMethodChart
+        className={isAdmin ? undefined : "md:col-span-3 lg:col-span-3"}
+      />
+      <EndpointStatusChart
+        className={isAdmin ? undefined : "md:col-span-3 lg:col-span-3"}
+      />
+      <EndpointsByBillerChart
+        className={isAdmin ? undefined : "md:col-span-3 lg:col-span-3"}
+      />
+      {isAdmin && <UserStatusChart />}
+      <RecentEndpoints />
+    </div>
+  );
+}
+
 export function OverviewPage() {
   const { authState } = useAuth();
   const isAdmin = authState.user?.role === "ADMIN";
@@ -54,47 +138,9 @@ export function OverviewPage() {
 
       {/* Bento Grid Layout */}
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {/* Large Feature Card - Total Endpoints (2 cols × 2 rows) */}
-          <StatsCardSkeleton className="md:col-span-2 lg:row-span-2" />
-
-          {/* Three compact stats cards stacked vertically */}
-          <StatsCardSkeleton className="md:col-span-1" />
-          <StatsCardSkeleton className="md:col-span-1" />
-          <StatsCardSkeleton className="md:col-span-1" />
-
-          {/* Admin User Stats Cards Skeletons */}
-          {isAdmin &&
-            Array.from({ length: 3 }, (_, i) => i).map((key) => (
-              <StatsCardSkeleton
-                className="md:col-span-1"
-                key={`user-stats-skeleton-${key + 1}`}
-              />
-            ))}
-
-          {/* Chart Skeletons */}
-          <ChartCardSkeleton className="md:col-span-2 lg:col-span-2" />
-          <ChartCardSkeleton className="md:col-span-1 lg:col-span-2" />
-          <ChartCardSkeleton className="md:col-span-2 lg:col-span-2" />
-
-          {/* Admin User Status Chart Skeleton (1 col × 2 rows) */}
-          {isAdmin && (
-            <ChartCardSkeleton className="md:col-span-3 lg:col-span-1 lg:row-span-2" />
-          )}
-
-          {/* Recent Endpoints Skeleton (3 cols) */}
-          <RecentEndpointsSkeleton className="md:col-span-3 lg:col-span-3" />
-        </div>
+        <OverviewLoadingGrid isAdmin={isAdmin} />
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          <StatsCards />
-          {isAdmin && <UserStatsCards />}
-          <HttpMethodChart />
-          <EndpointStatusChart />
-          <EndpointsByBillerChart />
-          {isAdmin && <UserStatusChart />}
-          <RecentEndpoints />
-        </div>
+        <OverviewContentGrid isAdmin={isAdmin} />
       )}
     </div>
   );

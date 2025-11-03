@@ -116,6 +116,17 @@
           }
         }
       }
+    },
+    {
+      "includes": ["**/examples/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off",
+            "noAlert": "off"
+          }
+        }
+      }
     }
   ]
 }

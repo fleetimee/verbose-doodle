@@ -20,9 +20,15 @@ const BAR_CORNER_RADIUS_TOP_RIGHT = 8;
 const BAR_CORNER_RADIUS_BOTTOM_RIGHT = 0;
 const BAR_CORNER_RADIUS_BOTTOM_LEFT = 0;
 
-export function HttpMethodChart() {
+type HttpMethodChartProps = {
+  className?: string;
+};
+
+export function HttpMethodChart({ className }: HttpMethodChartProps = {}) {
+  // Default classes for admin layout, can be overridden via className prop
+  const defaultClasses = className || "md:col-span-2 lg:col-span-2";
   return (
-    <Card className="md:col-span-2 lg:col-span-2">
+    <Card className={defaultClasses}>
       <CardHeader>
         <CardTitle>HTTP Method Distribution</CardTitle>
         <CardDescription>Endpoint count by HTTP method type</CardDescription>

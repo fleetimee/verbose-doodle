@@ -42,9 +42,17 @@ const BAR_CORNER_RADIUS_BOTTOM_RIGHT = 8;
 const BAR_CORNER_RADIUS_BOTTOM_LEFT = 0;
 const BAR_CORNER_RADIUS_TOP_LEFT = 0;
 
-export function EndpointsByBillerChart() {
+type EndpointsByBillerChartProps = {
+  className?: string;
+};
+
+export function EndpointsByBillerChart({
+  className,
+}: EndpointsByBillerChartProps = {}) {
+  // Default classes for admin layout, can be overridden via className prop
+  const defaultClasses = className || "md:col-span-3 lg:col-span-2";
   return (
-    <Card className="md:col-span-3 lg:col-span-2">
+    <Card className={defaultClasses}>
       <CardHeader>
         <CardTitle>Endpoints by Biller</CardTitle>
         <CardDescription>

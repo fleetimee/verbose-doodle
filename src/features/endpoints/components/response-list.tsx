@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { ResponseListItem } from "@/features/endpoints/components/response-list-item";
 import type { EndpointResponse } from "@/features/endpoints/types";
 
@@ -35,14 +36,16 @@ export function ResponseList({
             <p className="text-muted-foreground text-sm">
               No responses configured yet.
             </p>
-            <Button
-              className="mt-4"
-              onClick={onAddResponse}
-              size="sm"
-              variant="outline"
-            >
-              Add First Response
-            </Button>
+            <ProtectedAction ability="canAddResponse">
+              <Button
+                className="mt-4"
+                onClick={onAddResponse}
+                size="sm"
+                variant="outline"
+              >
+                Add First Response
+              </Button>
+            </ProtectedAction>
           </div>
         ) : (
           <div className="space-y-1 p-2">
