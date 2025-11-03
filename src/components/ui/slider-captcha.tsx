@@ -9,8 +9,9 @@ type SliderCaptchaProps = {
   imageUrl?: string;
 };
 
-const PUZZLE_SIZE = 60;
-const PUZZLE_NOTCH = 10;
+const PUZZLE_SIZE = 50;
+const PUZZLE_TAB_SIZE = 10;
+const IMAGE_HEIGHT = 160;
 
 const CAPTCHA_IMAGES = [
   "/assets/captcha-images/frieren-ambience.webp",
@@ -22,6 +23,70 @@ const CAPTCHA_IMAGES = [
 const getRandomImage = () => {
   const randomIndex = Math.floor(Math.random() * CAPTCHA_IMAGES.length);
   return CAPTCHA_IMAGES[randomIndex] ?? CAPTCHA_IMAGES[0] ?? "";
+};
+
+const generateRandomPuzzlePath = () => {
+  const size = PUZZLE_SIZE;
+  const tab = PUZZLE_TAB_SIZE;
+  const half = size / 2;
+
+  const topTab = Math.random() > 0.5;
+  const rightTab = Math.random() > 0.5;
+  const bottomTab = Math.random() > 0.5;
+  const leftTab = Math.random() > 0.5;
+
+  const topTabSize = tab + (Math.random() - 0.5) * 4;
+  const rightTabSize = tab + (Math.random() - 0.5) * 4;
+  const bottomTabSize = tab + (Math.random() - 0.5) * 4;
+  const leftTabSize = tab + (Math.random() - 0.5) * 4;
+
+  const topSign = topTab ? -1 : 1;
+  const rightSign = rightTab ? 1 : -1;
+  const bottomSign = bottomTab ? 1 : -1;
+  const leftSign = leftTab ? -1 : 1;
+
+  return `
+    M 0,${half}
+    L 0,${tab}
+    Q 0,0 ${tab},0
+    L ${half - topTabSize},0
+    C ${half - topTabSize},${topSign * topTabSize} ${half - topTabSize / 2},${
+    topSign * topTabSize
+  } ${half},${topSign * topTabSize}
+    C ${half + topTabSize / 2},${topSign * topTabSize} ${half + topTabSize},${
+    topSign * topTabSize
+  } ${half + topTabSize},0
+    L ${size - tab},0
+    Q ${size},0 ${size},${tab}
+    L ${size},${half - rightTabSize}
+    C ${size + rightSign * rightTabSize},${half - rightTabSize} ${
+    size + rightSign * rightTabSize
+  },${half - rightTabSize / 2} ${size + rightSign * rightTabSize},${half}
+    C ${size + rightSign * rightTabSize},${half + rightTabSize / 2} ${
+    size + rightSign * rightTabSize
+  },${half + rightTabSize} ${size},${half + rightTabSize}
+    L ${size},${size - tab}
+    Q ${size},${size} ${size - tab},${size}
+    L ${half + bottomTabSize},${size}
+    C ${half + bottomTabSize},${size + bottomSign * bottomTabSize} ${
+    half + bottomTabSize / 2
+  },${size + bottomSign * bottomTabSize} ${half},${
+    size + bottomSign * bottomTabSize
+  }
+    C ${half - bottomTabSize / 2},${size + bottomSign * bottomTabSize} ${
+    half - bottomTabSize
+  },${size + bottomSign * bottomTabSize} ${half - bottomTabSize},${size}
+    L ${tab},${size}
+    Q 0,${size} 0,${size - tab}
+    L 0,${half + leftTabSize}
+    C ${leftSign * leftTabSize},${half + leftTabSize} ${
+    leftSign * leftTabSize
+  },${half + leftTabSize / 2} ${leftSign * leftTabSize},${half}
+    C ${leftSign * leftTabSize},${half - leftTabSize / 2} ${
+    leftSign * leftTabSize
+  },${half - leftTabSize} 0,${half - leftTabSize}
+    Z
+  `.trim();
 };
 
 export const SliderCaptcha = ({
@@ -39,8 +104,13 @@ export const SliderCaptcha = ({
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragStartX, setDragStartX] = React.useState(0);
   const [dragStartPosition, setDragStartPosition] = React.useState(0);
-  const [currentImage, setCurrentImage] = React.useState(() => imageUrl ?? getRandomImage());
+  const [currentImage, setCurrentImage] = React.useState(
+    () => imageUrl ?? getRandomImage()
+  );
   const [isLocked, setIsLocked] = React.useState(false);
+  const [puzzlePath, setPuzzlePath] = React.useState(() =>
+    generateRandomPuzzlePath()
+  );
 
   React.useEffect(() => {
     if (!imageUrl) return;
@@ -57,9 +127,8 @@ export const SliderCaptcha = ({
       const maxX = width - PUZZLE_SIZE - 20;
       const randomX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
 
-      const imageHeight = 160;
       const minY = 20;
-      const maxY = imageHeight - PUZZLE_SIZE - 20;
+      const maxY = IMAGE_HEIGHT - PUZZLE_SIZE - 20;
       const randomY = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
 
       setTargetPosition(randomX);
@@ -83,7 +152,6 @@ export const SliderCaptcha = ({
       setIsVerified(true);
       onVerify(true);
 
-      // Show success toast
       toast.success("Verification successful!", {
         description: "You have been verified",
       });
@@ -91,21 +159,16 @@ export const SliderCaptcha = ({
       setIsVerified(false);
       onVerify(false);
     }
-  }, [
-    piecePosition,
-    targetPosition,
-    isVerified,
-    onVerify,
-    hasInteracted,
-  ]);
+  }, [piecePosition, targetPosition, isVerified, onVerify, hasInteracted]);
 
   const handleRefresh = () => {
     setPiecePosition(0);
     setIsVerified(false);
     setHasInteracted(false);
 
-    // Pick a new random image
     setCurrentImage(imageUrl ?? getRandomImage());
+
+    setPuzzlePath(generateRandomPuzzlePath());
 
     if (!containerRef.current) return;
     const width = containerRef.current.offsetWidth;
@@ -114,9 +177,8 @@ export const SliderCaptcha = ({
     const maxX = width - PUZZLE_SIZE - 20;
     const randomX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
 
-    const imageHeight = 160;
     const minY = 20;
-    const maxY = imageHeight - PUZZLE_SIZE - 20;
+    const maxY = IMAGE_HEIGHT - PUZZLE_SIZE - 20;
     const randomY = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
 
     setTargetPosition(randomX);
@@ -125,7 +187,7 @@ export const SliderCaptcha = ({
   };
 
   const handlePuzzleDragStart = (clientX: number) => {
-    if (isVerified || isLocked) return; // Lock when verified or during reset
+    if (isVerified || isLocked) return;
     if (!hasInteracted) {
       setHasInteracted(true);
     }
@@ -134,32 +196,36 @@ export const SliderCaptcha = ({
     setDragStartPosition(piecePosition);
   };
 
-  const handlePuzzleDragMove = React.useCallback((clientX: number) => {
-    if (!containerRef.current) return;
+  const handlePuzzleDragMove = React.useCallback(
+    (clientX: number) => {
+      if (!containerRef.current) return;
 
-    const deltaX = clientX - dragStartX;
-    const newPosition = dragStartPosition + deltaX;
-    const clampedPosition = Math.max(0, Math.min(containerWidth - PUZZLE_SIZE, newPosition));
+      const deltaX = clientX - dragStartX;
+      const newPosition = dragStartPosition + deltaX;
+      const clampedPosition = Math.max(
+        -PUZZLE_TAB_SIZE,
+        Math.min(containerWidth - PUZZLE_SIZE + PUZZLE_TAB_SIZE, newPosition)
+      );
 
-    setPiecePosition(clampedPosition);
-  }, [dragStartX, dragStartPosition, containerWidth]);
+      setPiecePosition(clampedPosition);
+    },
+    [dragStartX, dragStartPosition, containerWidth]
+  );
 
   const handlePuzzleDragEnd = React.useCallback(() => {
     setIsDragging(false);
 
-    // Check verification on drag end
     if (hasInteracted && !isVerified) {
       const tolerance = 8;
-      const isCloseEnough = Math.abs(piecePosition - targetPosition) <= tolerance;
+      const isCloseEnough =
+        Math.abs(piecePosition - targetPosition) <= tolerance;
 
       if (!isCloseEnough) {
-        // Failed verification - show error and reset
         setIsLocked(true);
         toast.error("Verification failed", {
           description: "Please try again",
         });
 
-        // Reset after a short delay
         setTimeout(() => {
           handleRefresh();
         }, 1000);
@@ -221,19 +287,20 @@ export const SliderCaptcha = ({
 
   const getProximityColor = () => {
     if (!hasInteracted || isVerified) {
-      return { stroke: "rgba(156, 163, 175, 1)", glow: "rgba(156, 163, 175, 0.3)" };
+      return {
+        stroke: "rgba(156, 163, 175, 1)",
+        glow: "rgba(156, 163, 175, 0.3)",
+      };
     }
 
     const distance = Math.abs(piecePosition - targetPosition);
     const maxDistance = containerWidth;
     const tolerance = 8;
 
-    // Very close - green
     if (distance <= tolerance) {
       return { stroke: "rgba(34, 197, 94, 1)", glow: "rgba(34, 197, 94, 0.6)" };
     }
 
-    // Close (within 30px) - yellow to green gradient
     if (distance <= 30) {
       const ratio = distance / 30;
       const r = Math.round(234 + (34 - 234) * (1 - ratio));
@@ -245,7 +312,6 @@ export const SliderCaptcha = ({
       };
     }
 
-    // Medium distance (30-100px) - red to yellow gradient
     if (distance <= 100) {
       const ratio = (distance - 30) / 70;
       const r = Math.round(239 + (234 - 239) * (1 - ratio));
@@ -257,7 +323,6 @@ export const SliderCaptcha = ({
       };
     }
 
-    // Far away - red
     const opacity = Math.max(0.3, 1 - distance / maxDistance);
     return {
       stroke: "rgba(239, 68, 68, 1)",
@@ -265,64 +330,51 @@ export const SliderCaptcha = ({
     };
   };
 
-  const puzzlePath = `
-    M 0,${PUZZLE_NOTCH}
-    Q 0,0 ${PUZZLE_NOTCH},0
-    L ${PUZZLE_SIZE / 2 - PUZZLE_NOTCH},0
-    Q ${PUZZLE_SIZE / 2},${-PUZZLE_NOTCH} ${PUZZLE_SIZE / 2 + PUZZLE_NOTCH},0
-    L ${PUZZLE_SIZE - PUZZLE_NOTCH},0
-    Q ${PUZZLE_SIZE},0 ${PUZZLE_SIZE},${PUZZLE_NOTCH}
-    L ${PUZZLE_SIZE},${PUZZLE_SIZE - PUZZLE_NOTCH}
-    Q ${PUZZLE_SIZE},${PUZZLE_SIZE} ${PUZZLE_SIZE - PUZZLE_NOTCH},${PUZZLE_SIZE}
-    L ${PUZZLE_NOTCH},${PUZZLE_SIZE}
-    Q 0,${PUZZLE_SIZE} 0,${PUZZLE_SIZE - PUZZLE_NOTCH}
-    Z
-  `;
-
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-2", className)}>
       <div
         className={cn(
-          "relative overflow-hidden rounded-lg border p-4 transition-all duration-300",
+          "relative overflow-hidden rounded-lg border p-3 transition-all duration-300",
           getStatusColor()
         )}
       >
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
             <ShieldCheckIcon
               className={cn(
-                "size-5 transition-colors",
+                "size-4 transition-colors",
                 isVerified ? "text-green-600" : "text-muted-foreground"
               )}
             />
-            <span className="font-medium text-sm">
+            <span className="font-medium text-xs">
               {isVerified ? "Verified" : "Slide to complete the puzzle"}
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {isVerified && (
-              <CheckCircle2Icon className="size-5 animate-in zoom-in-50 text-green-600 duration-300" />
+              <CheckCircle2Icon className="size-4 animate-in zoom-in-50 text-green-600 duration-300" />
             )}
             <button
               aria-label="Generate new puzzle"
-              className="rounded-md p-1 transition-colors hover:bg-muted"
+              className="rounded-md p-0.5 transition-colors hover:bg-muted"
               onClick={handleRefresh}
               type="button"
             >
-              <RefreshCwIcon className="size-4 text-muted-foreground" />
+              <RefreshCwIcon className="size-3.5 text-muted-foreground" />
             </button>
           </div>
         </div>
 
         <div
           ref={containerRef}
-          className="relative mb-4 h-[160px] overflow-hidden rounded-md bg-muted"
+          className="relative mb-2 overflow-hidden rounded-md bg-muted"
+          style={{ height: `${IMAGE_HEIGHT}px` }}
         >
           <img
             alt="Captcha background"
             className="h-full w-full object-cover"
             draggable={false}
-            height="160"
+            height={IMAGE_HEIGHT}
             src={currentImage}
             width="400"
           />
@@ -332,22 +384,37 @@ export const SliderCaptcha = ({
 
             <svg
               aria-label="Puzzle cutout target area"
-              className="absolute inset-0"
+              className="absolute"
               role="img"
               style={{
-                left: `${targetPosition}px`,
-                top: `${targetY}px`,
+                left: `${targetPosition - PUZZLE_TAB_SIZE}px`,
+                top: `${targetY - PUZZLE_TAB_SIZE}px`,
+                width: `${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}px`,
+                height: `${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}px`,
               }}
+              viewBox={`${-PUZZLE_TAB_SIZE} ${-PUZZLE_TAB_SIZE} ${
+                PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2
+              } ${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}`}
             >
               <title>Puzzle piece target location</title>
               <defs>
                 <clipPath id="puzzle-cutout">
                   <path d={puzzlePath} />
                 </clipPath>
+                <filter id="cutout-inner-shadow">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                  <feOffset dx="0" dy="2" result="offsetblur" />
+                  <feFlood floodColor="rgba(0, 0, 0, 0.5)" />
+                  <feComposite in2="offsetblur" operator="in" />
+                  <feMerge>
+                    <feMergeNode />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
               </defs>
               <image
                 clipPath="url(#puzzle-cutout)"
-                height="160"
+                height={IMAGE_HEIGHT}
                 href={currentImage}
                 width={containerWidth}
                 x={-targetPosition}
@@ -356,11 +423,26 @@ export const SliderCaptcha = ({
               <path
                 d={puzzlePath}
                 fill="none"
-                stroke={isVerified ? "rgba(34, 197, 94, 1)" : hasInteracted ? getProximityColor().stroke : "rgba(255, 255, 255, 0.6)"}
-                strokeWidth="2"
+                stroke="rgba(0, 0, 0, 0.3)"
+                strokeWidth="1"
+              />
+              <path
+                d={puzzlePath}
+                fill="none"
+                stroke={
+                  isVerified
+                    ? "rgba(34, 197, 94, 1)"
+                    : hasInteracted
+                    ? getProximityColor().stroke
+                    : "rgba(255, 255, 255, 0.8)"
+                }
+                strokeWidth="3"
                 style={{
                   transition: isDragging ? "none" : "stroke 0.3s ease",
-                  filter: hasInteracted && !isVerified ? `drop-shadow(0 0 6px ${getProximityColor().glow})` : undefined,
+                  filter:
+                    hasInteracted && !isVerified
+                      ? `drop-shadow(0 0 6px ${getProximityColor().glow})`
+                      : "drop-shadow(0 0 4px rgba(255, 255, 255, 0.4))",
                 }}
               />
             </svg>
@@ -380,10 +462,10 @@ export const SliderCaptcha = ({
             onTouchStart={handleTouchStart}
             role="button"
             style={{
-              left: `${piecePosition}px`,
-              top: `${targetY}px`,
-              width: `${PUZZLE_SIZE}px`,
-              height: `${PUZZLE_SIZE}px`,
+              left: `${piecePosition - PUZZLE_TAB_SIZE}px`,
+              top: `${targetY - PUZZLE_TAB_SIZE}px`,
+              width: `${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}px`,
+              height: `${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}px`,
               willChange: isDragging ? "transform" : "auto",
             }}
             tabIndex={isVerified || isLocked ? -1 : 0}
@@ -391,9 +473,12 @@ export const SliderCaptcha = ({
           >
             <svg
               aria-label="Draggable puzzle piece"
-              height={PUZZLE_SIZE}
+              height={PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}
               role="img"
-              width={PUZZLE_SIZE}
+              width={PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}
+              viewBox={`${-PUZZLE_TAB_SIZE} ${-PUZZLE_TAB_SIZE} ${
+                PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2
+              } ${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}`}
             >
               <title>Movable puzzle piece</title>
               <defs>
@@ -419,32 +504,41 @@ export const SliderCaptcha = ({
                   </feMerge>
                 </filter>
               </defs>
-              {/* Solid background shape to make the puzzle piece stand out */}
               <path
                 className={cn(
                   "transition-colors duration-300",
-                  isVerified ? "fill-green-100 dark:fill-green-900/30" : "fill-white dark:fill-gray-800"
+                  isVerified
+                    ? "fill-green-100 dark:fill-green-900/30"
+                    : "fill-white dark:fill-gray-800"
                 )}
                 d={puzzlePath}
                 filter="url(#piece-shadow)"
               />
-              {/* Image clipped to puzzle shape */}
               <image
                 clipPath="url(#puzzle-piece)"
-                height="160"
+                height={IMAGE_HEIGHT}
                 href={currentImage}
                 width={containerWidth}
                 x={-targetPosition}
                 y={-targetY}
                 opacity="0.95"
               />
-              {/* Stroke outline with proximity color */}
+              <path
+                d={puzzlePath}
+                fill="none"
+                stroke="rgba(0, 0, 0, 0.2)"
+                strokeWidth="1"
+              />
               <path
                 d={puzzlePath}
                 fill="none"
                 filter={isVerified ? undefined : "url(#proximity-glow)"}
-                stroke={isVerified ? "rgba(34, 197, 94, 1)" : getProximityColor().stroke}
-                strokeWidth="3"
+                stroke={
+                  isVerified
+                    ? "rgba(34, 197, 94, 1)"
+                    : getProximityColor().stroke
+                }
+                strokeWidth="4"
                 style={{
                   transition: isDragging ? "none" : "stroke 0.3s ease",
                 }}
@@ -453,31 +547,43 @@ export const SliderCaptcha = ({
           </div>
         </div>
 
-        <div className="mt-2 space-y-2">
-          <p className="text-center text-muted-foreground text-xs">
+        <div className="space-y-1.5">
+          <p className="text-center text-muted-foreground text-[11px]">
             {isVerified
               ? "Puzzle completed successfully!"
               : "Drag the puzzle piece to fit it into the cutout"}
           </p>
           {hasInteracted && !isVerified && (
-            <div className="space-y-1">
-              <div className="relative h-1.5 overflow-hidden rounded-full bg-muted">
+            <div className="space-y-0.5">
+              <div className="relative h-1 overflow-hidden rounded-full bg-muted">
                 <div
                   className="h-full transition-all duration-150"
                   style={{
-                    width: `${Math.max(0, Math.min(100, ((containerWidth - Math.abs(piecePosition - targetPosition)) / containerWidth) * 100))}%`,
+                    width: `${Math.max(
+                      0,
+                      Math.min(
+                        100,
+                        ((containerWidth -
+                          Math.abs(piecePosition - targetPosition)) /
+                          containerWidth) *
+                          100
+                      )
+                    )}%`,
                     backgroundColor: getProximityColor().stroke,
                   }}
                 />
               </div>
-              <p className="text-center text-[10px]" style={{ color: getProximityColor().stroke }}>
+              <p
+                className="text-center text-[9px]"
+                style={{ color: getProximityColor().stroke }}
+              >
                 {Math.abs(piecePosition - targetPosition) <= 8
                   ? "Perfect! Release to verify"
                   : Math.abs(piecePosition - targetPosition) <= 30
-                    ? "Very close..."
-                    : Math.abs(piecePosition - targetPosition) <= 100
-                      ? "Getting warmer"
-                      : "Keep trying"}
+                  ? "Very close..."
+                  : Math.abs(piecePosition - targetPosition) <= 100
+                  ? "Getting warmer"
+                  : "Keep trying"}
               </p>
             </div>
           )}
