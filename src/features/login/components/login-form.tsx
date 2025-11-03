@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { OctagonXIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, OctagonXIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -20,6 +20,12 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { ShineBorder } from "@/components/ui/shine-border";
 import { SliderCaptcha } from "@/components/ui/slider-captcha";
 import { Spinner } from "@/components/ui/spinner";
@@ -43,6 +49,7 @@ export const LoginForm = ({
   error = null,
 }: LoginFormProps) => {
   const [captchaKey, setCaptchaKey] = useState(0);
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -130,14 +137,27 @@ export const LoginForm = ({
                     Password
                   </FieldLabel>
                   <FieldContent>
-                    <Input
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                      autoComplete="current-password"
-                      id="login-form-password"
-                      placeholder="Enter your password"
-                      type="password"
-                    />
+                    <InputGroup>
+                      <InputGroupInput
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                        autoComplete="current-password"
+                        id="login-form-password"
+                        placeholder="Enter your password"
+                        type={passwordVisible ? "text" : "password"}
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupButton
+                          aria-label="Toggle password visibility"
+                          onClick={() => setPasswordVisible(!passwordVisible)}
+                          size="icon-xs"
+                          type="button"
+                          variant="ghost"
+                        >
+                          {passwordVisible ? <EyeOffIcon /> : <EyeIcon />}
+                        </InputGroupButton>
+                      </InputGroupAddon>
+                    </InputGroup>
                     <FieldDescription>
                       Use at least 8 characters with letters and numbers.
                     </FieldDescription>

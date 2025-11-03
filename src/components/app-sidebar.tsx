@@ -1,11 +1,4 @@
-import {
-  LayoutDashboard,
-  LifeBuoy,
-  Plug,
-  Send,
-  Settings,
-  Users,
-} from "lucide-react";
+import { Info, LayoutDashboard, Plug, Users } from "lucide-react";
 import type React from "react";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -40,22 +33,12 @@ const data = {
       url: "/dashboard/users",
       icon: Users,
     },
-    {
-      title: "Settings",
-      url: "/dashboard/settings",
-      icon: Settings,
-    },
   ],
   navSecondary: [
     {
-      title: "Support",
-      url: "/support",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "/feedback",
-      icon: Send,
+      title: "About",
+      url: "/about",
+      icon: Info,
     },
   ],
 };
