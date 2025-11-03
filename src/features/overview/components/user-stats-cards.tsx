@@ -5,41 +5,50 @@ import { userStats } from "@/features/overview/data/overview-data";
 export function UserStatsCards() {
   return (
     <>
-      <Card className="md:col-span-1">
+      {/* Compact Card - Total Users */}
+      <Card className="group relative overflow-hidden border-orange-500/20 bg-gradient-to-br from-orange-500/5 via-background to-background transition-all hover:border-orange-500/40 hover:shadow-lg md:col-span-1">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="font-medium text-sm">Total Users</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
+          <div className="rounded-full bg-orange-500/10 p-2 transition-transform group-hover:scale-110">
+            <Users className="h-4 w-4 text-orange-500" />
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="font-bold text-2xl">{userStats.totalUsers}</div>
+          <div className="font-bold text-3xl">{userStats.totalUsers}</div>
           <p className="text-muted-foreground text-xs">
-            Registered user accounts
+            Registered accounts
           </p>
         </CardContent>
       </Card>
 
-      <Card className="md:col-span-1">
+      {/* Compact Card - Active Users */}
+      <Card className="group relative overflow-hidden border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 via-background to-background transition-all hover:border-cyan-500/40 hover:shadow-lg md:col-span-1">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="font-medium text-sm">Active Users</CardTitle>
-          <UserCheck className="h-4 w-4 text-muted-foreground" />
+          <div className="rounded-full bg-cyan-500/10 p-2 transition-transform group-hover:scale-110">
+            <UserCheck className="h-4 w-4 text-cyan-500" />
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="font-bold text-2xl">{userStats.activeUsers}</div>
+          <div className="font-bold text-3xl">{userStats.activeUsers}</div>
           <p className="text-muted-foreground text-xs">
-            {userStats.inactiveUsers} inactive users
+            {userStats.inactiveUsers} inactive
           </p>
         </CardContent>
       </Card>
 
-      <Card className="md:col-span-1">
+      {/* Compact Card - Admin Users */}
+      <Card className="group relative overflow-hidden border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-background to-background transition-all hover:border-amber-500/40 hover:shadow-lg md:col-span-1">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="font-medium text-sm">Admin Users</CardTitle>
-          <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+          <div className="rounded-full bg-amber-500/10 p-2 transition-transform group-hover:scale-110">
+            <ShieldCheck className="h-4 w-4 text-amber-500" />
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="font-bold text-2xl">{userStats.adminUsers}</div>
+          <div className="font-bold text-3xl">{userStats.adminUsers}</div>
           <p className="text-muted-foreground text-xs">
-            {userStats.regularUsers} regular users
+            {userStats.regularUsers} regular
           </p>
         </CardContent>
       </Card>
