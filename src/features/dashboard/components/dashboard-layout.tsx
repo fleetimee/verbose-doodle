@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet, useLocation } from "react-router";
+import { Link, Outlet, useLocation } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -67,8 +67,8 @@ export function DashboardLayout() {
                     {item.isLast ? (
                       <BreadcrumbPage>{item.label}</BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink href={item.href}>
-                        {item.label}
+                      <BreadcrumbLink asChild>
+                        <Link to={item.href}>{item.label}</Link>
                       </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
