@@ -23,15 +23,13 @@ export function StatsCards() {
             Configured endpoint routes across all billers
           </p>
         </CardContent>
-        <div className="absolute right-0 top-0 h-40 w-40 translate-x-8 translate-y-[-50%] rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute top-0 right-0 h-40 w-40 translate-x-8 translate-y-[-50%] rounded-full bg-primary/5 blur-3xl" />
       </Card>
 
       {/* Compact Card - Total Responses */}
       <Card className="group relative overflow-hidden border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-background to-background transition-all hover:border-blue-500/40 hover:shadow-lg md:col-span-1">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="font-medium text-sm">
-            Total Responses
-          </CardTitle>
+          <CardTitle className="font-medium text-sm">Total Responses</CardTitle>
           <div className="rounded-full bg-blue-500/10 p-2 transition-transform group-hover:scale-110">
             <FileJson className="h-4 w-4 text-blue-500" />
           </div>
@@ -40,9 +38,7 @@ export function StatsCards() {
           <div className="font-bold text-3xl">
             {overviewStats.totalResponses}
           </div>
-          <p className="text-muted-foreground text-xs">
-            Response templates
-          </p>
+          <p className="text-muted-foreground text-xs">Response templates</p>
         </CardContent>
       </Card>
 
@@ -65,9 +61,7 @@ export function StatsCards() {
               {overviewStats.activeResponsesPercentage}
             </div>
           </div>
-          <p className="text-muted-foreground text-xs">
-            Active templates
-          </p>
+          <p className="text-muted-foreground text-xs">Active templates</p>
         </CardContent>
       </Card>
 
@@ -80,12 +74,8 @@ export function StatsCards() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="font-bold text-3xl">
-            {overviewStats.totalBillers}
-          </div>
-          <p className="text-muted-foreground text-xs">
-            Biller systems
-          </p>
+          <div className="font-bold text-3xl">{overviewStats.totalBillers}</div>
+          <p className="text-muted-foreground text-xs">Biller systems</p>
         </CardContent>
       </Card>
     </>

@@ -67,7 +67,14 @@ createRoot(rootElement).render(
                     element={<EndpointDetailPage />}
                     path="endpoints/:id"
                   />
-                  <Route element={<UsersPage />} path="users" />
+                  <Route
+                    element={
+                      <ProtectedRoute requiredRole="ADMIN">
+                        <UsersPage />
+                      </ProtectedRoute>
+                    }
+                    path="users"
+                  />
                   <Route element={<SettingsPage />} path="settings" />
                 </Route>
 

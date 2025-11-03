@@ -15,9 +15,7 @@ export function UserStatsCards() {
         </CardHeader>
         <CardContent>
           <div className="font-bold text-3xl">{userStats.totalUsers}</div>
-          <p className="text-muted-foreground text-xs">
-            Registered accounts
-          </p>
+          <p className="text-muted-foreground text-xs">Registered accounts</p>
         </CardContent>
       </Card>
 

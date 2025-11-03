@@ -62,11 +62,15 @@ Authenticates a user and returns a JWT token.
 
 ## Configuration Management
 
+**Authorization:** All configuration endpoints require authentication. Role restrictions apply per endpoint.
+
 ### Add Endpoint
 
 **`POST /config/endpoints/add`**
 
 Creates a new endpoint configuration.
+
+**Authorization:** Role must be `ADMIN`
 
 **Request:**
 
@@ -95,6 +99,8 @@ Creates a new endpoint configuration.
 **`POST /config/response/add`**
 
 Adds a new response configuration for an endpoint.
+
+**Authorization:** Role must be `ADMIN`
 
 **Request:**
 
@@ -126,6 +132,8 @@ Adds a new response configuration for an endpoint.
 
 Sets a response as the active response for an endpoint.
 
+**Authorization:** Role must be `ADMIN`
+
 **Request:**
 
 ```json
@@ -153,6 +161,8 @@ Sets a response as the active response for an endpoint.
 **`GET /endpoints`**
 
 Returns all configured endpoints with their responses.
+
+**Authorization:** Authenticated users (both `ADMIN` and `USER` roles can view)
 
 **Response:**
 
