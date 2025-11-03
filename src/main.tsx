@@ -27,7 +27,6 @@ import { About } from "@/pages/about";
 import { EndpointDetailPage } from "@/pages/dashboard/endpoint-detail";
 import { EndpointsPage } from "@/pages/dashboard/endpoints";
 import { OverviewPage } from "@/pages/dashboard/overview";
-import { SettingsPage } from "@/pages/dashboard/settings";
 import { UsersPage } from "@/pages/dashboard/users";
 import { Login } from "@/pages/login";
 
@@ -75,7 +74,6 @@ createRoot(rootElement).render(
                     }
                     path="users"
                   />
-                  <Route element={<SettingsPage />} path="settings" />
                 </Route>
 
                 <Route element={<NotFoundPage />} path="*" />
