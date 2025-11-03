@@ -1,0 +1,69 @@
+# Dependencies
+node_modules
+bun.lockb.tmp
+
+# Build outputs
+dist
+build
+.vite
+
+# Development files
+.env.local
+.env.development
+.env.test
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Documentation
+README.md
+LICENSE
+CLAUDE.md
+AGENTS.md
+TESTING.md
+*.md
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Test coverage
+coverage
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+bun-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+.editorconfig
+.prettierrc
+.eslintrc*
+# Keep biome.json, tsconfig files, and vite.config.ts - needed for build
+# biome.json
+# tsconfig*.json
+# vite.config.ts
