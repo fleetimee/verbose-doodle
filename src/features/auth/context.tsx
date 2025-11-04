@@ -1,12 +1,22 @@
 import type { ReactNode } from "react";
-import { createContext, useContext, useState } from "react";
 import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import {
+  AUTH_UNAUTHORIZED_EVENT,
   clearAuthToken,
+  clearRefreshToken,
   decodeJWT,
   getAuthToken,
   saveAuthToken,
+  saveRefreshToken,
 } from "@/features/auth/utils";
 import type { AuthUser } from "@/features/login/types";
+import { queryClient } from "@/lib/query-client";
 
 type AuthState = {
   user: AuthUser | null;
@@ -15,8 +25,9 @@ type AuthState = {
 
 type AuthContextValue = {
   authState: AuthState;
-  login: (token: string) => void;
+  login: (accessToken: string, refreshToken?: string) => void;
   logout: () => void;
+  refreshAuth: () => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -33,31 +44,95 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const user = decodeJWT(token);
+
+    if (!user) {
+      clearAuthToken();
+      return {
+        user: null,
+        isAuthenticated: false,
+      };
+    }
+
     return {
       user,
-      isAuthenticated: user !== null,
+      isAuthenticated: true,
     };
   });
 
-  const login = (token: string) => {
-    saveAuthToken(token);
-    const user = decodeJWT(token);
+  const login = useCallback((accessToken: string, refreshToken?: string) => {
+    saveAuthToken(accessToken);
+    if (refreshToken) {
+      saveRefreshToken(refreshToken);
+    }
+    const user = decodeJWT(accessToken);
+    if (!user) {
+      clearAuthToken();
+      clearRefreshToken();
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+      });
+      return;
+    }
+
     setAuthState({
       user,
-      isAuthenticated: user !== null,
+      isAuthenticated: true,
     });
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearAuthToken();
+    clearRefreshToken();
     setAuthState({
       user: null,
       isAuthenticated: false,
     });
-  };
+    // Clear all TanStack Query cache to prevent data leakage between sessions
+    queryClient.clear();
+    // Clear all sessionStorage (including expiration reasons)
+    try {
+      sessionStorage.clear();
+    } catch {
+      // Silently fail if sessionStorage is unavailable
+    }
+  }, []);
+
+  const refreshAuth = useCallback(async (): Promise<boolean> => {
+    // Import dynamically to avoid circular dependency
+    const { refreshToken: refreshTokenFn } = await import(
+      "@/features/auth/api/refresh-token"
+    );
+
+    try {
+      const response = await refreshTokenFn();
+      login(response.accessToken, response.refreshToken);
+      return true;
+    } catch {
+      // If refresh fails, logout user
+      logout();
+      return false;
+    }
+  }, [login, logout]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleUnauthorized = () => {
+      logout();
+    };
+
+    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+
+    return () => {
+      window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+    };
+  }, [logout]);
 
   return (
-    <AuthContext.Provider value={{ authState, login, logout }}>
+    <AuthContext.Provider value={{ authState, login, logout, refreshAuth }}>
       {children}
     </AuthContext.Provider>
   );

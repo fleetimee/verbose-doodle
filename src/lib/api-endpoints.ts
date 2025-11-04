@@ -5,6 +5,7 @@
 
 /**
  * Endpoint configuration
+ * Full URL paths are defined here (including /api prefix where needed)
  */
 export const API_ENDPOINTS = {
   /**
@@ -55,8 +56,8 @@ export const API_ENDPOINTS = {
    */
   auth: {
     login: "/login",
+    refresh: "/refresh",
     logout: "/api/auth/logout",
-    refresh: "/api/auth/refresh",
     register: "/api/auth/register",
   },
 } as const;

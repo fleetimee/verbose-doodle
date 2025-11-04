@@ -142,4 +142,5 @@ export const CODE_LANGUAGE_LABELS: Record<CodeLanguage, string> = {
   wget: "Wget",
 };
 
-export const getCodeLanguageForHighlight = (_language?: CodeLanguage): string => "shell";
+export const getCodeLanguageForHighlight = (_language?: CodeLanguage): string =>
+  "shell";

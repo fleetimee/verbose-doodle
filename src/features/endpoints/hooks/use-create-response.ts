@@ -1,8 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getAuthToken } from "@/features/auth/utils";
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
 import type { EndpointResponse } from "@/features/endpoints/types";
+import { apiPost } from "@/lib/api";
 import { getResponseCreateUrl } from "@/lib/api-endpoints";
 import { createMutationHook } from "@/lib/query-hooks";
 
@@ -45,60 +45,46 @@ type ResponseError = {
 async function createResponse(
   data: CreateResponseRequest
 ): Promise<CreateResponseResponse> {
-  const token = getAuthToken();
-
-  if (!token) {
-    throw {
-      message: "No authentication token found. Please login first.",
-      code: "AUTH_REQUIRED",
-      status: 401,
-    } as ResponseError;
-  }
-
-  const response = await fetch(getResponseCreateUrl(), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
+  try {
+    const apiResponse = await apiPost<
+      ApiCreateResponseResponse,
+      {
+        endpointId: number;
+        json: string;
+        statusCode: string;
+        activated: string;
+        name: string;
+      }
+    >(getResponseCreateUrl(), {
       endpointId: Number(data.endpointId),
       json: data.json,
       statusCode: data.statusCode.toString(),
       activated: "0", // Always create responses as inactive by default
       name: data.name,
-    }),
-  });
+    });
 
-  if (!response.ok) {
-    throw {
-      message: `Failed to create response: ${response.statusText}`,
-      code: "CREATE_FAILED",
-      status: response.status,
-    } as ResponseError;
+    // Validate that we have the expected response structure
+    if (!apiResponse.data?.response) {
+      throw {
+        message: "Invalid response structure from server",
+        code: "INVALID_RESPONSE",
+        status: 500,
+      } as ResponseError;
+    }
+
+    // Transform API response to internal format
+    return {
+      response: {
+        id: apiResponse.data.response.id.toString(),
+        name: apiResponse.data.response.name,
+        json: apiResponse.data.response.json,
+        statusCode: Number(apiResponse.data.response.statusCode),
+        activated: apiResponse.data.response.activated === "1",
+      },
+    };
+  } catch (error) {
+    throw error as ResponseError;
   }
-
-  const apiResponse = (await response.json()) as ApiCreateResponseResponse;
-
-  // Validate that we have the expected response structure
-  if (!apiResponse.data?.response) {
-    throw {
-      message: "Invalid response structure from server",
-      code: "INVALID_RESPONSE",
-      status: 500,
-    } as ResponseError;
-  }
-
-  // Transform API response to internal format
-  return {
-    response: {
-      id: apiResponse.data.response.id.toString(),
-      name: apiResponse.data.response.name,
-      json: apiResponse.data.response.json,
-      statusCode: Number(apiResponse.data.response.statusCode),
-      activated: apiResponse.data.response.activated === "1",
-    },
-  };
 }
 
 /**

@@ -56,15 +56,44 @@ erDiagram
 
 All endpoints below require **JWT Bearer Token** authentication.
 
+### Token System
+
+The application uses a dual-token authentication system:
+
+1. **Access Token** (short-lived, 15 minutes)
+
+   - Used for API authentication
+   - Sent in `Authorization: Bearer {accessToken}` header
+   - Contains `token_type: "access"` claim
+
+2. **Refresh Token** (long-lived, 7 days)
+   - Used to obtain new access tokens
+   - Sent only to `/refresh` endpoint
+   - Contains `token_type: "refresh"` claim
+
 ### Token Payload Structure
+
+Both access and refresh tokens contain the following claims:
 
 ```json
 {
   "user_id": "user_id",
   "role": "Users.role",
-  "username": "username"
+  "username": "username",
+  "token_type": "access | refresh",
+  "iat": 1234567890,
+  "exp": 1234568790
 }
 ```
+
+**Claim Descriptions:**
+
+- `user_id`: The user's unique identifier
+- `role`: User role (ADMIN or USER)
+- `username`: The user's username
+- `token_type`: Token type ("access" or "refresh")
+- `iat`: Issued at timestamp (Unix epoch)
+- `exp`: Expiration timestamp (Unix epoch)
 
 ---
 
@@ -74,7 +103,7 @@ All endpoints below require **JWT Bearer Token** authentication.
 
 **`POST /login`**
 
-Authenticates a user and returns a JWT token.
+Authenticates a user and returns both access and refresh tokens.
 
 **Request:**
 
@@ -89,11 +118,79 @@ Authenticates a user and returns a JWT token.
 
 ```json
 {
-  "response_code": "00",
-  "response_desc": "success",
-  "token": "jwt.token.save"
+  "code": "00",
+  "message": "Success",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
 }
 ```
+
+**Response Fields:**
+
+- `accessToken`: Short-lived token (15 minutes) used for API requests
+- `refreshToken`: Long-lived token (7 days) used to obtain new access tokens
+- `tokenType`: Always "Bearer"
+- `expiresIn`: Access token expiration time in seconds (900 = 15 minutes)
+
+---
+
+### Refresh Token
+
+**`POST /refresh`**
+
+Use a refresh token to obtain new access and refresh tokens without re-authentication.
+
+**Request:**
+
+```json
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiJ9..."
+}
+```
+
+**Response:**
+
+```json
+{
+  "code": "00",
+  "message": "Success",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+    "tokenType": "Bearer",
+    "expiresIn": 900
+  }
+}
+```
+
+**Error Response (Invalid Token):**
+
+```json
+{
+  "code": "401",
+  "message": "Invalid or expired refresh token"
+}
+```
+
+**Error Response (User Deactivated):**
+
+```json
+{
+  "code": "401",
+  "message": "User account is deactivated"
+}
+```
+
+**Notes:**
+
+- Refresh tokens are single-use - each refresh generates new tokens
+- Both access and refresh tokens are rotated on each refresh
+- If refresh token is expired, user must login again
+- Refresh tokens are validated to ensure user still exists and is active
 
 ---
 
