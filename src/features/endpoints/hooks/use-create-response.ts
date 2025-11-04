@@ -1,55 +1,146 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getAuthToken } from "@/features/auth/utils";
+import { endpointQueryKeys } from "@/features/endpoints/query-keys";
 import type { EndpointResponse } from "@/features/endpoints/types";
-import { queryClient } from "@/lib/query-client";
+import { getResponseCreateUrl } from "@/lib/api-endpoints";
 import { createMutationHook } from "@/lib/query-hooks";
-
-const SIMULATED_API_DELAY_MS = 800;
 
 type CreateResponseRequest = {
   endpointId: string;
   name: string;
   json: string;
   statusCode: number;
-  activated: boolean;
+};
+
+type ApiCreateResponseResponse = {
+  responseCode: string;
+  responseDesc: string;
+  data: {
+    response: {
+      id: number;
+      endpointId: number;
+      json: string;
+      statusCode: string;
+      activated: string;
+      name: string;
+    };
+  };
 };
 
 type CreateResponseResponse = {
-  response_code: string;
-  response_desc: string;
   response: EndpointResponse;
 };
 
+type ResponseError = {
+  message: string;
+  code?: string;
+  status?: number;
+};
+
+/**
+ * Create response API call
+ * Makes POST request to backend to create a new response
+ */
 async function createResponse(
   data: CreateResponseRequest
 ): Promise<CreateResponseResponse> {
-  await new Promise((resolve) => setTimeout(resolve, SIMULATED_API_DELAY_MS));
+  const token = getAuthToken();
 
-  const newResponse: EndpointResponse = {
-    id: crypto.randomUUID(),
-    name: data.name,
-    json: data.json,
-    statusCode: data.statusCode,
-    activated: data.activated,
-  };
+  if (!token) {
+    throw {
+      message: "No authentication token found. Please login first.",
+      code: "AUTH_REQUIRED",
+      status: 401,
+    } as ResponseError;
+  }
 
+  const response = await fetch(getResponseCreateUrl(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      endpointId: Number(data.endpointId),
+      json: data.json,
+      statusCode: data.statusCode.toString(),
+      activated: "0", // Always create responses as inactive by default
+      name: data.name,
+    }),
+  });
+
+  if (!response.ok) {
+    throw {
+      message: `Failed to create response: ${response.statusText}`,
+      code: "CREATE_FAILED",
+      status: response.status,
+    } as ResponseError;
+  }
+
+  const apiResponse = (await response.json()) as ApiCreateResponseResponse;
+
+  // Validate that we have the expected response structure
+  if (!apiResponse.data?.response) {
+    throw {
+      message: "Invalid response structure from server",
+      code: "INVALID_RESPONSE",
+      status: 500,
+    } as ResponseError;
+  }
+
+  // Transform API response to internal format
   return {
-    response_code: "00",
-    response_desc: "success",
-    response: newResponse,
+    response: {
+      id: apiResponse.data.response.id.toString(),
+      name: apiResponse.data.response.name,
+      json: apiResponse.data.response.json,
+      statusCode: Number(apiResponse.data.response.statusCode),
+      activated: apiResponse.data.response.activated === "1",
+    },
   };
 }
 
+/**
+ * Custom hook for creating a response
+ * Uses TanStack Query mutation for state management
+ *
+ * @example
+ * ```tsx
+ * const { mutate: createResponse, isPending } = useCreateResponse();
+ *
+ * const handleSubmit = (data: CreateResponseRequest) => {
+ *   createResponse(data);
+ * };
+ * ```
+ */
 export function useCreateResponse() {
-  const useMutation = createMutationHook<
+  const queryClient = useQueryClient();
+
+  const mutation = createMutationHook<
     CreateResponseResponse,
-    CreateResponseRequest
+    CreateResponseRequest,
+    ResponseError
   >(createResponse, {
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["endpoints"] });
+    onSuccess: (data, variables) => {
+      // Show success message
+      toast.success("Response created successfully", {
+        description: `Created response: ${data.response.name}`,
+      });
+
+      // Invalidate and refetch queries to get fresh data from server
+      queryClient.invalidateQueries({ queryKey: endpointQueryKeys.all });
       queryClient.invalidateQueries({
-        queryKey: ["endpoints", variables.endpointId],
+        queryKey: endpointQueryKeys.detail(variables.endpointId),
+      });
+    },
+    onError: (error) => {
+      // Handle errors with toast notification
+      toast.error("Failed to create response", {
+        description: error.message || "An unexpected error occurred",
       });
     },
   });
 
-  return useMutation();
+  return mutation();
 }

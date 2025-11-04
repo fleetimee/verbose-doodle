@@ -9,6 +9,7 @@ import {
   transformerNotationWordHighlight,
 } from "@shikijs/transformers";
 import { CheckIcon, CopyIcon } from "lucide-react";
+import { motion } from "motion/react";
 import type {
   ComponentProps,
   HTMLAttributes,
@@ -302,12 +303,24 @@ type CodeBlockContextType = {
   value: string | undefined;
   onValueChange: ((value: string) => void) | undefined;
   data: CodeBlockData[];
+  lightTheme: string;
+  darkTheme: string;
+  onLightThemeChange: (theme: string) => void;
+  onDarkThemeChange: (theme: string) => void;
 };
 
 const CodeBlockContext = createContext<CodeBlockContextType>({
   value: undefined,
   onValueChange: undefined,
   data: [],
+  lightTheme: "github-light-default",
+  darkTheme: "github-dark-default",
+  onLightThemeChange: () => {
+    // Default no-op
+  },
+  onDarkThemeChange: () => {
+    // Default no-op
+  },
 });
 
 export type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
@@ -315,6 +328,9 @@ export type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
   value?: string;
   onValueChange?: (value: string) => void;
   data: CodeBlockData[];
+  defaultLightTheme?: string;
+  defaultDarkTheme?: string;
+  storageKey?: string;
 };
 
 export const CodeBlock = ({
@@ -323,6 +339,9 @@ export const CodeBlock = ({
   defaultValue,
   className,
   data,
+  defaultLightTheme = "github-light-default",
+  defaultDarkTheme = "github-dark-default",
+  storageKey = "codeblock-themes",
   ...props
 }: CodeBlockProps) => {
   const [value, onValueChange] = useControllableState({
@@ -331,8 +350,50 @@ export const CodeBlock = ({
     onChange: controlledOnValueChange,
   });
 
+  // Initialize themes from localStorage if available
+  const [lightTheme, setLightThemeState] = useState(() => {
+    if (typeof window === "undefined") {
+      return defaultLightTheme;
+    }
+    const stored = localStorage.getItem(`${storageKey}-light`);
+    return stored ?? defaultLightTheme;
+  });
+
+  const [darkTheme, setDarkThemeState] = useState(() => {
+    if (typeof window === "undefined") {
+      return defaultDarkTheme;
+    }
+    const stored = localStorage.getItem(`${storageKey}-dark`);
+    return stored ?? defaultDarkTheme;
+  });
+
+  // Wrapper functions to save to localStorage
+  const setLightTheme = (theme: string) => {
+    setLightThemeState(theme);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`${storageKey}-light`, theme);
+    }
+  };
+
+  const setDarkTheme = (theme: string) => {
+    setDarkThemeState(theme);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`${storageKey}-dark`, theme);
+    }
+  };
+
   return (
-    <CodeBlockContext.Provider value={{ value, onValueChange, data }}>
+    <CodeBlockContext.Provider
+      value={{
+        value,
+        onValueChange,
+        data,
+        lightTheme,
+        darkTheme,
+        onLightThemeChange: setLightTheme,
+        onDarkThemeChange: setDarkTheme,
+      }}
+    >
       <div
         className={cn("size-full overflow-hidden rounded-md border", className)}
         {...props}
@@ -612,27 +673,143 @@ export const CodeBlockContent = ({
   ...props
 }: CodeBlockContentProps) => {
   const [html, setHtml] = useState<string | null>(null);
+  const { lightTheme, darkTheme } = useContext(CodeBlockContext);
+
+  // Create a unique key based on themes to trigger animation
+  const themeKey = `${lightTheme}-${darkTheme}`;
 
   useEffect(() => {
     if (!syntaxHighlighting) {
       return;
     }
 
-    highlight(children as string, language, themes)
+    const effectiveThemes = themes ?? {
+      light: lightTheme,
+      dark: darkTheme,
+    };
+
+    highlight(children as string, language, effectiveThemes)
       .then(setHtml)
       // biome-ignore lint/suspicious/noConsole: "it's fine"
       .catch(console.error);
-  }, [children, themes, syntaxHighlighting, language]);
+  }, [children, themes, syntaxHighlighting, language, lightTheme, darkTheme]);
 
   if (!(syntaxHighlighting && html)) {
     return <CodeBlockFallback>{children}</CodeBlockFallback>;
   }
 
   return (
-    <div
+    <motion.div
+      animate={{ opacity: 1 }}
       // biome-ignore lint/security/noDangerouslySetInnerHtml: "Kinda how Shiki works"
       dangerouslySetInnerHTML={{ __html: html }}
+      exit={{ opacity: 0 }}
+      initial={{ opacity: 0 }}
+      key={themeKey}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
       {...props}
     />
+  );
+};
+
+// Available Shiki bundled themes
+export const SHIKI_THEMES = [
+  { value: "andromeeda", label: "Andromeeda" },
+  { value: "aurora-x", label: "Aurora X" },
+  { value: "ayu-dark", label: "Ayu Dark" },
+  { value: "catppuccin-frappe", label: "Catppuccin Frappé" },
+  { value: "catppuccin-latte", label: "Catppuccin Latte" },
+  { value: "catppuccin-macchiato", label: "Catppuccin Macchiato" },
+  { value: "catppuccin-mocha", label: "Catppuccin Mocha" },
+  { value: "dark-plus", label: "Dark Plus" },
+  { value: "dracula", label: "Dracula Theme" },
+  { value: "dracula-soft", label: "Dracula Theme Soft" },
+  { value: "everforest-dark", label: "Everforest Dark" },
+  { value: "everforest-light", label: "Everforest Light" },
+  { value: "github-dark", label: "GitHub Dark" },
+  { value: "github-dark-default", label: "GitHub Dark Default" },
+  { value: "github-dark-dimmed", label: "GitHub Dark Dimmed" },
+  { value: "github-dark-high-contrast", label: "GitHub Dark High Contrast" },
+  { value: "github-light", label: "GitHub Light" },
+  { value: "github-light-default", label: "GitHub Light Default" },
+  { value: "github-light-high-contrast", label: "GitHub Light High Contrast" },
+  { value: "gruvbox-dark-hard", label: "Gruvbox Dark Hard" },
+  { value: "gruvbox-dark-medium", label: "Gruvbox Dark Medium" },
+  { value: "gruvbox-dark-soft", label: "Gruvbox Dark Soft" },
+  { value: "gruvbox-light-hard", label: "Gruvbox Light Hard" },
+  { value: "gruvbox-light-medium", label: "Gruvbox Light Medium" },
+  { value: "gruvbox-light-soft", label: "Gruvbox Light Soft" },
+  { value: "houston", label: "Houston" },
+  { value: "kanagawa-dragon", label: "Kanagawa Dragon" },
+  { value: "kanagawa-lotus", label: "Kanagawa Lotus" },
+  { value: "kanagawa-wave", label: "Kanagawa Wave" },
+  { value: "laserwave", label: "LaserWave" },
+  { value: "light-plus", label: "Light Plus" },
+  { value: "material-theme", label: "Material Theme" },
+  { value: "material-theme-darker", label: "Material Theme Darker" },
+  { value: "material-theme-lighter", label: "Material Theme Lighter" },
+  { value: "material-theme-ocean", label: "Material Theme Ocean" },
+  { value: "material-theme-palenight", label: "Material Theme Palenight" },
+  { value: "min-dark", label: "Min Dark" },
+  { value: "min-light", label: "Min Light" },
+  { value: "monokai", label: "Monokai" },
+  { value: "night-owl", label: "Night Owl" },
+  { value: "nord", label: "Nord" },
+  { value: "one-dark-pro", label: "One Dark Pro" },
+  { value: "one-light", label: "One Light" },
+  { value: "plastic", label: "Plastic" },
+  { value: "poimandres", label: "Poimandres" },
+  { value: "red", label: "Red" },
+  { value: "rose-pine", label: "Rosé Pine" },
+  { value: "rose-pine-dawn", label: "Rosé Pine Dawn" },
+  { value: "rose-pine-moon", label: "Rosé Pine Moon" },
+  { value: "slack-dark", label: "Slack Dark" },
+  { value: "slack-ochin", label: "Slack Ochin" },
+  { value: "snazzy-light", label: "Snazzy Light" },
+  { value: "solarized-dark", label: "Solarized Dark" },
+  { value: "solarized-light", label: "Solarized Light" },
+  { value: "synthwave-84", label: "Synthwave '84" },
+  { value: "tokyo-night", label: "Tokyo Night" },
+  { value: "vesper", label: "Vesper" },
+  { value: "vitesse-black", label: "Vitesse Black" },
+  { value: "vitesse-dark", label: "Vitesse Dark" },
+  { value: "vitesse-light", label: "Vitesse Light" },
+] as const;
+
+export type CodeBlockThemeSelectorProps = {
+  mode: "light" | "dark";
+  className?: string;
+};
+
+export const CodeBlockThemeSelector = ({
+  mode,
+  className,
+}: CodeBlockThemeSelectorProps) => {
+  const { lightTheme, darkTheme, onLightThemeChange, onDarkThemeChange } =
+    useContext(CodeBlockContext);
+
+  const currentTheme = mode === "light" ? lightTheme : darkTheme;
+  const onChange = mode === "light" ? onLightThemeChange : onDarkThemeChange;
+
+  return (
+    <Select onValueChange={onChange} value={currentTheme}>
+      <SelectTrigger
+        className={cn(
+          "w-fit border-none text-muted-foreground text-xs shadow-none",
+          className
+        )}
+      >
+        <SelectValue
+          placeholder={`${mode === "light" ? "Light" : "Dark"} Theme`}
+        />
+      </SelectTrigger>
+      <SelectContent>
+        {SHIKI_THEMES.map((theme) => (
+          <SelectItem className="text-sm" key={theme.value} value={theme.value}>
+            {theme.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };

@@ -30,7 +30,6 @@ export const responseSchema = z.object({
     .int()
     .min(MIN_STATUS_CODE, "Status code must be between 100-599")
     .max(MAX_STATUS_CODE, "Status code must be between 100-599"),
-  activated: z.boolean(),
 });
 
 export type ResponseFormData = z.infer<typeof responseSchema>;

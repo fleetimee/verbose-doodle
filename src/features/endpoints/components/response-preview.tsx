@@ -7,7 +7,9 @@ import {
   CodeBlockCopyButton,
   CodeBlockHeader,
   CodeBlockItem,
+  CodeBlockThemeSelector,
 } from "@/components/kibo-ui/code-block";
+import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import {
   Empty,
@@ -26,6 +28,18 @@ type ResponsePreviewProps = {
 };
 
 export function ResponsePreview({ response }: ResponsePreviewProps) {
+  const { theme } = useTheme();
+
+  // Resolve the actual theme (handle "system" preference)
+  const resolvedTheme = useMemo(() => {
+    if (theme === "system") {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+    return theme;
+  }, [theme]);
+
   const formattedResponseJson = useMemo(() => {
     if (!response) {
       return "";
@@ -80,10 +94,17 @@ export function ResponsePreview({ response }: ResponsePreviewProps) {
                 },
               ]}
               defaultValue="json"
+              storageKey="response-preview-themes"
             >
               <CodeBlockHeader>
                 <div className="flex-1 px-3 py-1 text-muted-foreground text-xs">
                   Response Body
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground text-xs">Theme:</span>
+                  <CodeBlockThemeSelector
+                    mode={resolvedTheme === "dark" ? "dark" : "light"}
+                  />
                 </div>
                 <CodeBlockCopyButton />
               </CodeBlockHeader>

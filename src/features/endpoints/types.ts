@@ -35,10 +35,13 @@ type ApiCreateEndpointResponse = {
   responseCode: string;
   responseDesc: string;
   data: {
-    endpoint_id: number;
-    method: HttpMethod;
-    url: string;
-    biller_id: number;
+    endpoint: {
+      id: number;
+      method: HttpMethod;
+      url: string;
+      biller_id: number;
+      biller_name: string;
+    };
   };
 };
 

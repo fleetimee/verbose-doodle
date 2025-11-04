@@ -42,8 +42,9 @@ async function createEndpoint(
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
     throw {
-      message: `Failed to create endpoint: ${response.statusText}`,
+      message: `Failed to create endpoint: ${response.statusText}. ${errorText}`,
       code: "CREATE_FAILED",
       status: response.status,
     } as EndpointError;
@@ -51,15 +52,25 @@ async function createEndpoint(
 
   const apiResponse = (await response.json()) as ApiCreateEndpointResponse;
 
+  // Validate that we have the expected response structure
+  if (!apiResponse.data?.endpoint) {
+    throw {
+      message: "Invalid response structure from server",
+      code: "INVALID_RESPONSE",
+      status: 500,
+    } as EndpointError;
+  }
+
   // Transform API response to internal format
   return {
     responseCode: apiResponse.responseCode,
     responseDesc: apiResponse.responseDesc,
     endpoint: {
-      id: apiResponse.data.endpoint_id.toString(),
-      method: apiResponse.data.method,
-      url: apiResponse.data.url,
-      billerId: apiResponse.data.biller_id,
+      id: apiResponse.data.endpoint.id.toString(),
+      method: apiResponse.data.endpoint.method,
+      url: apiResponse.data.endpoint.url,
+      billerId: apiResponse.data.endpoint.biller_id,
+      billerName: apiResponse.data.endpoint.biller_name,
       responses: [],
     },
   };

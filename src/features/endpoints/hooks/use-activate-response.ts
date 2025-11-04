@@ -1,7 +1,9 @@
-import { queryClient } from "@/lib/query-client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getAuthToken } from "@/features/auth/utils";
+import { endpointQueryKeys } from "@/features/endpoints/query-keys";
+import { getResponseActivateUrl } from "@/lib/api-endpoints";
 import { createMutationHook } from "@/lib/query-hooks";
-
-const SIMULATED_API_DELAY_MS = 500;
 
 type ActivateResponseRequest = {
   endpointId: string;
@@ -9,37 +11,86 @@ type ActivateResponseRequest = {
 };
 
 type ActivateResponseResponse = {
-  response_code: string;
-  response_desc: string;
-  endpoint_id: string;
-  response_id: string;
+  endpointId: string;
+  responseId: string;
 };
 
+type ResponseError = {
+  message: string;
+  code?: string;
+  status?: number;
+};
+
+/**
+ * Activate response API call
+ * Makes PUT request to backend to activate a response
+ */
 async function activateResponse(
   data: ActivateResponseRequest
 ): Promise<ActivateResponseResponse> {
-  await new Promise((resolve) => setTimeout(resolve, SIMULATED_API_DELAY_MS));
+  const token = getAuthToken();
+
+  if (!token) {
+    throw {
+      message: "No authentication token found. Please login first.",
+      code: "AUTH_REQUIRED",
+      status: 401,
+    } as ResponseError;
+  }
+
+  const response = await fetch(
+    getResponseActivateUrl(data.endpointId, data.responseId),
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw {
+      message: `Failed to activate response: ${response.statusText}`,
+      code: "ACTIVATE_FAILED",
+      status: response.status,
+    } as ResponseError;
+  }
+
+  await response.json();
 
   return {
-    response_code: "00",
-    response_desc: "success",
-    endpoint_id: data.endpointId,
-    response_id: data.responseId,
+    endpointId: data.endpointId,
+    responseId: data.responseId,
   };
 }
 
+/**
+ * Custom hook for activating a response
+ * Uses TanStack Query mutation for state management
+ */
 export function useActivateResponse() {
-  const useMutation = createMutationHook<
+  const queryClient = useQueryClient();
+
+  const mutation = createMutationHook<
     ActivateResponseResponse,
-    ActivateResponseRequest
+    ActivateResponseRequest,
+    ResponseError
   >(activateResponse, {
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["endpoints"] });
+    onSuccess: (_response, variables) => {
+      // Invalidate and refetch queries to get fresh data from server
+      queryClient.invalidateQueries({ queryKey: endpointQueryKeys.all });
       queryClient.invalidateQueries({
-        queryKey: ["endpoints", variables.endpointId],
+        queryKey: endpointQueryKeys.detail(variables.endpointId),
+      });
+    },
+    onError: (error) => {
+      // Handle errors with toast notification
+      toast.error("Failed to activate response", {
+        description: error.message || "An unexpected error occurred",
       });
     },
   });
 
-  return useMutation();
+  return mutation();
 }

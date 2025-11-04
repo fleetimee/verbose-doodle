@@ -1,4 +1,4 @@
-import { Code2, Eye, FileText, Hash, Sparkles } from "lucide-react";
+import { Code2, Eye, FileText, Hash } from "lucide-react";
 
 export const STEPS = [
   {
@@ -32,14 +32,6 @@ export const STEPS = [
     icon: Eye,
     color: "text-purple-500",
     bgColor: "bg-purple-50 dark:bg-purple-950/30",
-  },
-  {
-    id: "activated",
-    title: "Activate Response",
-    description: "Set as active response?",
-    icon: Sparkles,
-    color: "text-amber-500",
-    bgColor: "bg-amber-50 dark:bg-amber-950/30",
   },
 ] as const;
 
