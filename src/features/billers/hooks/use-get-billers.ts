@@ -1,3 +1,4 @@
+import { getAuthToken } from "@/features/auth/utils";
 import { billerQueryKeys } from "@/features/billers/query-keys";
 import type { Biller } from "@/features/billers/types";
 import { getAdminBillerList } from "@/lib/api-endpoints";
@@ -23,7 +24,11 @@ type ApiResponse = {
 };
 
 async function fetchBillers(): Promise<Biller[]> {
-  const token = import.meta.env.VITE_API_TOKEN;
+  const token = getAuthToken();
+
+  if (!token) {
+    throw new Error("No authentication token found. Please login first.");
+  }
 
   const response = await fetch(getAdminBillerList(), {
     method: "GET",

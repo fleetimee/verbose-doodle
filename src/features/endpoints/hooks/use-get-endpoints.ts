@@ -1,3 +1,4 @@
+import { getAuthToken } from "@/features/auth/utils";
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
 import type { Endpoint } from "@/features/endpoints/types";
 import { getAdminEndpointList } from "@/lib/api-endpoints";
@@ -35,7 +36,11 @@ type ApiResponse = {
 };
 
 async function fetchEndpoints(): Promise<Endpoint[]> {
-  const token = import.meta.env.VITE_API_TOKEN;
+  const token = getAuthToken();
+
+  if (!token) {
+    throw new Error("No authentication token found. Please login first.");
+  }
 
   const response = await fetch(getAdminEndpointList(), {
     method: "GET",

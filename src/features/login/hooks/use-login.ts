@@ -1,100 +1,88 @@
 import { useNavigate } from "react-router";
 import { useAuth } from "@/features/auth/context";
 import type { LoginFormData } from "@/features/login/schemas/login-schema";
-import type { LoginError, LoginResponse } from "@/features/login/types";
+import type {
+  ApiLoginResponse,
+  LoginError,
+  LoginResponse,
+  UserRole,
+} from "@/features/login/types";
+import { getLoginUrl } from "@/lib/api-endpoints";
 import { handleAuthError, showSuccessToast } from "@/lib/error-handler";
 import { createMutationHook } from "@/lib/query-hooks";
 
 /**
- * Simulated API delay for demonstration purposes
+ * Number of parts in a valid JWT token (header.payload.signature)
  */
-const SIMULATED_API_DELAY_MS = 1500;
+const JWT_PARTS_COUNT = 3;
 
 /**
- * Mock user credentials for testing
- * TODO: Remove when backend is ready
+ * Decode JWT token to extract user role
+ * @param token - JWT token string
+ * @returns User role extracted from token payload
  */
-const MOCK_USERS = [
-  {
-    user_id: "1",
-    username: "admin",
-    password: "password123",
-    role: "ADMIN" as const,
-  },
-  {
-    user_id: "2",
-    username: "user",
-    password: "password123",
-    role: "USER" as const,
-  },
-];
+function decodeJWTRole(token: string): UserRole {
+  try {
+    // JWT format: header.payload.signature
+    const parts = token.split(".");
+    if (parts.length !== JWT_PARTS_COUNT) {
+      throw new Error("Invalid JWT format");
+    }
 
-/**
- * Generate a mock JWT token for testing
- * Format: header.payload.signature (all base64url encoded)
- */
-function generateMockJWT(
-  user_id: string,
-  username: string,
-  role: string
-): string {
-  const header = { alg: "HS256", typ: "JWT" };
-  const payload = { user_id, username, role };
+    // Decode the payload (second part)
+    const payload = parts[1];
+    const decodedPayload = JSON.parse(
+      atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
+    );
 
-  // Base64url encode
-  const encodeBase64Url = (obj: object) =>
-    btoa(JSON.stringify(obj))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=/g, "");
+    // Extract role from payload
+    const role = decodedPayload.role as UserRole;
+    if (!role || (role !== "ADMIN" && role !== "USER")) {
+      throw new Error("Invalid role in JWT token");
+    }
 
-  const encodedHeader = encodeBase64Url(header);
-  const encodedPayload = encodeBase64Url(payload);
-  const mockSignature = "mock_signature_for_testing";
-
-  return `${encodedHeader}.${encodedPayload}.${mockSignature}`;
+    return role;
+  } catch {
+    // Default to USER role if decoding fails
+    return "USER";
+  }
 }
 
 /**
  * Login mutation function
- * TODO: Replace with actual API call when backend is ready
+ * Makes API call to authenticate user
  */
 async function loginUser(data: LoginFormData): Promise<LoginResponse> {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, SIMULATED_API_DELAY_MS));
+  const response = await fetch(getLoginUrl(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username: data.username,
+      password: data.password,
+    }),
+  });
 
-  // Check credentials against mock users
-  const matchedUser = MOCK_USERS.find(
-    (user) => user.username === data.username && user.password === data.password
-  );
-
-  if (matchedUser) {
-    const token = generateMockJWT(
-      matchedUser.user_id,
-      matchedUser.username,
-      matchedUser.role
-    );
-
-    return {
-      response_code: "00",
-      response_desc: "success",
-      token,
-      role: matchedUser.role,
-    };
+  if (!response.ok) {
+    throw {
+      message: `Failed to login: ${response.statusText}`,
+      code: "LOGIN_FAILED",
+      status: response.status,
+    } as LoginError;
   }
 
-  // Invalid credentials
-  throw {
-    message: "Invalid username or password",
-    code: "AUTH_FAILED",
-    status: 401,
-  } as LoginError;
+  const apiResponse = (await response.json()) as ApiLoginResponse;
 
-  // Uncomment when backend is ready:
-  // return apiPost<LoginResponse>("/login", {
-  //   username: data.username,
-  //   password: data.password,
-  // });
+  // Extract role from JWT token
+  const role = decodeJWTRole(apiResponse.data.token);
+
+  return {
+    responseCode: apiResponse.responseCode,
+    responseDesc: apiResponse.responseDesc,
+    token: apiResponse.data.token,
+    role,
+  };
 }
 
 /**
@@ -119,8 +107,8 @@ export function useLogin() {
     loginUser,
     {
       onSuccess: (data, variables) => {
-        // Check if login was successful based on response_code
-        if (data.response_code === "00") {
+        // Check if login was successful based on responseCode
+        if (data.responseCode === "00") {
           // Save JWT token and decode to extract user data
           setAuthUser(data.token);
 
@@ -135,8 +123,8 @@ export function useLogin() {
         } else {
           // Handle unsuccessful login
           handleAuthError({
-            message: data.response_desc || "Login failed",
-            code: data.response_code,
+            message: data.responseDesc || "Login failed",
+            code: data.responseCode,
           });
         }
       },

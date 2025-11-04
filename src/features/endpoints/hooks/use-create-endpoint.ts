@@ -1,40 +1,65 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { getAuthToken } from "@/features/auth/utils";
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import type {
+  ApiCreateEndpointResponse,
   CreateEndpointResponse,
   EndpointError,
 } from "@/features/endpoints/types";
+import { getAdminEndpointList } from "@/lib/api-endpoints";
 import { createMutationHook } from "@/lib/query-hooks";
 
 /**
- * Simulated API delay for demonstration purposes
- */
-const SIMULATED_API_DELAY_MS = 800;
-
-/**
  * Create endpoint API call
- * TODO: Replace with actual API endpoint when backend is ready
+ * Makes POST request to backend to create a new endpoint
  */
 async function createEndpoint(
   data: EndpointFormData
 ): Promise<CreateEndpointResponse> {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, SIMULATED_API_DELAY_MS));
+  const token = getAuthToken();
 
-  // TODO: Replace with actual API call
-  // return apiPost<CreateEndpointResponse, EndpointFormData>('/api/endpoints', data);
+  if (!token) {
+    throw {
+      message: "No authentication token found. Please login first.",
+      code: "AUTH_REQUIRED",
+      status: 401,
+    } as EndpointError;
+  }
 
-  // Simulated success response
-  return {
-    response_code: "00",
-    response_desc: "Endpoint created successfully",
-    endpoint: {
-      id: crypto.randomUUID(),
+  const response = await fetch(getAdminEndpointList(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
       method: data.method,
       url: data.url,
       billerId: data.billerId,
+    }),
+  });
+
+  if (!response.ok) {
+    throw {
+      message: `Failed to create endpoint: ${response.statusText}`,
+      code: "CREATE_FAILED",
+      status: response.status,
+    } as EndpointError;
+  }
+
+  const apiResponse = (await response.json()) as ApiCreateEndpointResponse;
+
+  // Transform API response to internal format
+  return {
+    responseCode: apiResponse.responseCode,
+    responseDesc: apiResponse.responseDesc,
+    endpoint: {
+      id: apiResponse.data.endpoint_id.toString(),
+      method: apiResponse.data.method,
+      url: apiResponse.data.url,
+      billerId: apiResponse.data.biller_id,
       responses: [],
     },
   };
@@ -64,7 +89,7 @@ export function useCreateEndpoint() {
     onSuccess: (response) => {
       // Show success message
       toast.success("Success", {
-        description: response.response_desc,
+        description: response.responseDesc,
       });
 
       // Invalidate and refetch endpoints to get fresh data from server
