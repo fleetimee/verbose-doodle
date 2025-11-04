@@ -6,38 +6,38 @@ import type { Endpoint, GroupedEndpoints } from "./types";
  * @returns Array of grouped endpoints sorted alphabetically by biller name
  */
 export function groupEndpointsByBiller(
-	endpoints: Endpoint[],
+  endpoints: Endpoint[]
 ): GroupedEndpoints[] {
-	if (endpoints.length === 0) {
-		return [];
-	}
+  if (endpoints.length === 0) {
+    return [];
+  }
 
-	const groups = new Map<
-		string,
-		{ billerId: number; billerName: string; endpoints: Endpoint[] }
-	>();
+  const groups = new Map<
+    string,
+    { billerId: number; billerName: string; endpoints: Endpoint[] }
+  >();
 
-	for (const endpoint of endpoints) {
-		const billerName = endpoint.billerName || `Biller ID ${endpoint.billerId}`;
-		const existing = groups.get(billerName);
+  for (const endpoint of endpoints) {
+    const billerName = endpoint.billerName || `Biller ID ${endpoint.billerId}`;
+    const existing = groups.get(billerName);
 
-		if (existing) {
-			existing.endpoints.push(endpoint);
-		} else {
-			groups.set(billerName, {
-				billerId: endpoint.billerId,
-				billerName,
-				endpoints: [endpoint],
-			});
-		}
-	}
+    if (existing) {
+      existing.endpoints.push(endpoint);
+    } else {
+      groups.set(billerName, {
+        billerId: endpoint.billerId,
+        billerName,
+        endpoints: [endpoint],
+      });
+    }
+  }
 
-	// Sort groups alphabetically by biller name
-	const sortedGroups = Array.from(groups.values()).sort((a, b) =>
-		a.billerName.localeCompare(b.billerName),
-	);
+  // Sort groups alphabetically by biller name
+  const sortedGroups = Array.from(groups.values()).sort((a, b) =>
+    a.billerName.localeCompare(b.billerName)
+  );
 
-	return sortedGroups;
+  return sortedGroups;
 }
 
 /**
@@ -47,34 +47,32 @@ export function groupEndpointsByBiller(
  * @returns Filtered array of endpoints
  */
 export function filterEndpoints(
-	endpoints: Endpoint[],
-	query: string,
+  endpoints: Endpoint[],
+  query: string
 ): Endpoint[] {
-	const searchQuery = query.trim().toLowerCase();
+  const searchQuery = query.trim().toLowerCase();
 
-	if (searchQuery.length === 0) {
-		return endpoints;
-	}
+  if (searchQuery.length === 0) {
+    return endpoints;
+  }
 
-	return endpoints.filter((endpoint) => {
-		const matchesUrl = endpoint.url.toLowerCase().includes(searchQuery);
-		const matchesMethod = endpoint.method.toLowerCase().includes(searchQuery);
-		const matchesBillerId = endpoint.billerId
-			.toString()
-			.includes(searchQuery);
-		const matchesBillerName = endpoint.billerName
-			?.toLowerCase()
-			.includes(searchQuery);
-		const matchesResponse = endpoint.responses.some((response) =>
-			response.name.toLowerCase().includes(searchQuery),
-		);
+  return endpoints.filter((endpoint) => {
+    const matchesUrl = endpoint.url.toLowerCase().includes(searchQuery);
+    const matchesMethod = endpoint.method.toLowerCase().includes(searchQuery);
+    const matchesBillerId = endpoint.billerId.toString().includes(searchQuery);
+    const matchesBillerName = endpoint.billerName
+      ?.toLowerCase()
+      .includes(searchQuery);
+    const matchesResponse = endpoint.responses.some((response) =>
+      response.name.toLowerCase().includes(searchQuery)
+    );
 
-		return (
-			matchesUrl ||
-			matchesMethod ||
-			matchesBillerId ||
-			matchesBillerName ||
-			matchesResponse
-		);
-	});
+    return (
+      matchesUrl ||
+      matchesMethod ||
+      matchesBillerId ||
+      matchesBillerName ||
+      matchesResponse
+    );
+  });
 }

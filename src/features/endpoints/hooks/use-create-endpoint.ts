@@ -1,9 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { endpointQueryKeys } from "@/features/endpoints/query-keys";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import type {
   CreateEndpointResponse,
-  Endpoint,
   EndpointError,
 } from "@/features/endpoints/types";
 import { createMutationHook } from "@/lib/query-hooks";
@@ -67,9 +67,8 @@ export function useCreateEndpoint() {
         description: response.response_desc,
       });
 
-      queryClient.setQueryData<Endpoint[]>(["endpoints"], (current) =>
-        current ? [...current, response.endpoint] : [response.endpoint]
-      );
+      // Invalidate and refetch endpoints to get fresh data from server
+      queryClient.invalidateQueries({ queryKey: endpointQueryKeys.all });
     },
     onError: (error) => {
       // Handle errors with toast notification

@@ -1,3 +1,4 @@
+import { endpointQueryKeys } from "@/features/endpoints/query-keys";
 import type { Endpoint } from "@/features/endpoints/types";
 import { getAdminEndpointList } from "@/lib/api-endpoints";
 import { createQueryHook } from "@/lib/query-hooks";
@@ -68,7 +69,7 @@ async function fetchEndpoints(): Promise<Endpoint[]> {
 
 export function useGetEndpoints() {
   const useQuery = createQueryHook<Endpoint[]>({
-    queryKey: ["endpoints"],
+    queryKey: endpointQueryKeys.all,
     queryFn: fetchEndpoints,
     options: {
       staleTime: FIVE_MINUTES_IN_MS,
