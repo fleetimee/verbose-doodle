@@ -1,0 +1,8 @@
+services:
+  bun-base:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.kantor.build
+      target: bun-base
+    image: harbor.local/react-app/biller-simulator-json:bun-base

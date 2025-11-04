@@ -1,4 +1,5 @@
 services:
+  # Frontend (React app with Nginx reverse proxy to external backend)
   app:
     build:
       context: .
@@ -11,8 +12,6 @@ services:
       - PORT=3000
       - NODE_ENV=production
     restart: unless-stopped
-    networks:
-      - biller-network
     healthcheck:
       test:
         [
@@ -28,6 +27,5 @@ services:
       retries: 3
       start_period: 10s
 
-networks:
-  biller-network:
-    driver: bridge
+# Note: Backend server is hosted externally at http://143.198.85.201:47382
+# Nginx is configured to proxy /api and /login requests to this external server

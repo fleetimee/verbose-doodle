@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Dialog,
   DialogContent,
@@ -72,6 +73,7 @@ export function AddResponseDialog({
               Cancel
             </Button>
             <Button disabled={isSubmitting} type="submit">
+              {isSubmitting && <Spinner className="mr-2" />}
               {isSubmitting ? "Adding..." : "Add Response"}
             </Button>
           </DialogFooter>

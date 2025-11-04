@@ -11,6 +11,7 @@ import {
 
 export function NavSecondary({
   items,
+  children,
   ...props
 }: {
   items: {
@@ -18,6 +19,7 @@ export function NavSecondary({
     url: string;
     icon: LucideIcon;
   }[];
+  children?: React.ReactNode;
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   const location = useLocation();
 
@@ -40,6 +42,7 @@ export function NavSecondary({
               </SidebarMenuItem>
             );
           })}
+          {children}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

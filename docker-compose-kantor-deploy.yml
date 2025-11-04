@@ -1,0 +1,10 @@
+services:
+  biller-simulator:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.kantor.deploy
+    image: harbor.local/react-app/biller-simulator-json:result
+    ports:
+      - "3000:80"
+    restart: unless-stopped

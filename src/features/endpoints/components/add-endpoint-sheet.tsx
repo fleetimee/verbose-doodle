@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Sheet,
   SheetContent,
@@ -72,6 +73,7 @@ export function AddEndpointSheet({
         >
           <SheetFooter className="px-6 pb-6">
             <Button disabled={isSubmitting} type="submit">
+              {isSubmitting && <Spinner className="mr-2" />}
               {isSubmitting ? "Creating..." : "Create Endpoint"}
             </Button>
           </SheetFooter>

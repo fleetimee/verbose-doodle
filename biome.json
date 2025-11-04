@@ -113,6 +113,9 @@
           },
           "style": {
             "noMagicNumbers": "off"
+          },
+          "performance": {
+            "noNamespaceImport": "off"
           }
         }
       }
