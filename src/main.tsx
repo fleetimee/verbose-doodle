@@ -14,7 +14,13 @@ import "./index.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { AnimatePresence } from "motion/react";
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router";
 import { AuthRedirect } from "@/components/auth-redirect";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { NotFoundPage } from "@/components/not-found";
@@ -50,32 +56,32 @@ function AppContent() {
           <Route element={<Login />} path="/login" />
           <Route element={<About />} path="/about" />
 
-        <Route
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-          path="/dashboard"
-        >
-          <Route
-            element={<Navigate replace to="/dashboard/overview" />}
-            index
-          />
-          <Route element={<OverviewPage />} path="overview" />
-          <Route element={<EndpointsPage />} path="endpoints" />
-          <Route element={<EndpointDetailPage />} path="endpoints/:id" />
           <Route
             element={
-              <ProtectedRoute requiredRole="ADMIN">
-                <UsersPage />
+              <ProtectedRoute>
+                <DashboardLayout />
               </ProtectedRoute>
             }
-            path="users"
-          />
-        </Route>
+            path="/dashboard"
+          >
+            <Route
+              element={<Navigate replace to="/dashboard/overview" />}
+              index
+            />
+            <Route element={<OverviewPage />} path="overview" />
+            <Route element={<EndpointsPage />} path="endpoints" />
+            <Route element={<EndpointDetailPage />} path="endpoints/:id" />
+            <Route
+              element={
+                <ProtectedRoute requiredRole="ADMIN">
+                  <UsersPage />
+                </ProtectedRoute>
+              }
+              path="users"
+            />
+          </Route>
 
-        <Route element={<NotFoundPage />} path="*" />
+          <Route element={<NotFoundPage />} path="*" />
         </Routes>
       </AnimatePresence>
       <TokenExpirationDialog />
