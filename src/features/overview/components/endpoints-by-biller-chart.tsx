@@ -12,29 +12,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { endpointsByBillerData } from "@/features/overview/data/overview-data";
-
-const endpointsByBillerConfig = {
-  count: {
-    label: "Endpoints",
-  },
-  BCA: {
-    label: "BCA",
-    color: "var(--chart-1)",
-  },
-  Mandiri: {
-    label: "Mandiri",
-    color: "var(--chart-2)",
-  },
-  BNI: {
-    label: "BNI",
-    color: "var(--chart-3)",
-  },
-  BRI: {
-    label: "BRI",
-    color: "var(--chart-4)",
-  },
-} satisfies ChartConfig;
+import type { OverviewData } from "@/features/overview/types";
 
 // Bar chart corner radius constants
 const BAR_CORNER_RADIUS_TOP_RIGHT = 8;
@@ -42,15 +20,45 @@ const BAR_CORNER_RADIUS_BOTTOM_RIGHT = 8;
 const BAR_CORNER_RADIUS_BOTTOM_LEFT = 0;
 const BAR_CORNER_RADIUS_TOP_LEFT = 0;
 
+// Chart color constants
+const CHART_COLOR_VARIANTS = 5;
+const CHART_COLOR_OFFSET = 1;
+
 type EndpointsByBillerChartProps = {
+  data: OverviewData;
   className?: string;
 };
 
 export function EndpointsByBillerChart({
+  data,
   className,
-}: EndpointsByBillerChartProps = {}) {
+}: EndpointsByBillerChartProps) {
   // Default classes for admin layout, can be overridden via className prop
   const defaultClasses = className || "md:col-span-3 lg:col-span-2";
+
+  // Transform data to include biller name and add fill property
+  const chartData = data.endpointsByBiller.map((item, index) => ({
+    biller: item.billerName,
+    count: item.endpointCount,
+    fill: `var(--chart-${(index % CHART_COLOR_VARIANTS) + CHART_COLOR_OFFSET})`,
+  }));
+
+  // Dynamically generate chart config from the data
+  const endpointsByBillerConfig = {
+    count: {
+      label: "Endpoints",
+    },
+    ...Object.fromEntries(
+      data.endpointsByBiller.map((item, index) => [
+        item.billerName,
+        {
+          label: item.billerName,
+          color: `var(--chart-${(index % CHART_COLOR_VARIANTS) + CHART_COLOR_OFFSET})`,
+        },
+      ])
+    ),
+  } satisfies ChartConfig;
+
   return (
     <Card className={defaultClasses}>
       <CardHeader>
@@ -66,7 +74,7 @@ export function EndpointsByBillerChart({
         >
           <BarChart
             accessibilityLayer
-            data={endpointsByBillerData}
+            data={chartData}
             layout="vertical"
             margin={{
               left: 0,
@@ -79,7 +87,7 @@ export function EndpointsByBillerChart({
               tickLine={false}
               tickMargin={10}
               type="category"
-              width={60}
+              width={100}
             />
             <XAxis axisLine={false} tickLine={false} type="number" />
             <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
@@ -92,11 +100,8 @@ export function EndpointsByBillerChart({
                 BAR_CORNER_RADIUS_BOTTOM_LEFT,
               ]}
             >
-              {endpointsByBillerData.map((entry) => (
-                <Cell
-                  fill={`var(--color-${entry.biller})`}
-                  key={`cell-${entry.biller}`}
-                />
+              {chartData.map((entry) => (
+                <Cell fill={entry.fill} key={`cell-${entry.biller}`} />
               ))}
             </Bar>
           </BarChart>

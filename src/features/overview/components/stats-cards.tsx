@@ -1,8 +1,9 @@
 import { Activity, Building2, FileJson, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { overviewStats } from "@/features/overview/data/overview-data";
+import type { OverviewData } from "@/features/overview/types";
 
-export function StatsCards() {
+export function StatsCards({ data }: { data: OverviewData }) {
+  const overviewStats = data.stats;
   return (
     <>
       {/* Feature Card - Total Endpoints with split layout */}

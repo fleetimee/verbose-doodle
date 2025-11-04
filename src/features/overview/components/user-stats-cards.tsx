@@ -1,8 +1,20 @@
 import { ShieldCheck, UserCheck, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { userStats } from "@/features/overview/data/overview-data";
+import type { OverviewData } from "@/features/overview/types";
 
-export function UserStatsCards() {
+type UserStatsCardsProps = {
+  data: OverviewData;
+};
+
+export function UserStatsCards({ data }: UserStatsCardsProps) {
+  // Early return if no user stats available
+  if (!data.userStats) {
+    return null;
+  }
+
+  const { totalUsers, activeUsers, inactiveUsers, adminUsers, regularUsers } =
+    data.userStats;
+
   return (
     <>
       {/* Compact Card - Total Users */}
@@ -14,7 +26,7 @@ export function UserStatsCards() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="font-bold text-3xl">{userStats.totalUsers}</div>
+          <div className="font-bold text-3xl">{totalUsers}</div>
           <p className="text-muted-foreground text-xs">Registered accounts</p>
         </CardContent>
       </Card>
@@ -28,9 +40,9 @@ export function UserStatsCards() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="font-bold text-3xl">{userStats.activeUsers}</div>
+          <div className="font-bold text-3xl">{activeUsers}</div>
           <p className="text-muted-foreground text-xs">
-            {userStats.inactiveUsers} inactive
+            {inactiveUsers} inactive
           </p>
         </CardContent>
       </Card>
@@ -44,9 +56,9 @@ export function UserStatsCards() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="font-bold text-3xl">{userStats.adminUsers}</div>
+          <div className="font-bold text-3xl">{adminUsers}</div>
           <p className="text-muted-foreground text-xs">
-            {userStats.regularUsers} regular
+            {regularUsers} regular
           </p>
         </CardContent>
       </Card>

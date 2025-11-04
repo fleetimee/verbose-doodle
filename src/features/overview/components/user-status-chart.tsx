@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import type { ChartConfig } from "@/components/ui/chart";
 import { ChartContainer } from "@/components/ui/chart";
-import { userStatusData } from "@/features/overview/data/overview-data";
+import type { OverviewData } from "@/features/overview/types";
 
 const userStatusConfig = {
   count: {
@@ -33,9 +33,26 @@ const CHART_OUTER_RADIUS = 110;
 const POLAR_RADIUS_OUTER = 86;
 const POLAR_RADIUS_INNER = 74;
 
-export function UserStatusChart() {
-  const activeUsers = userStatusData.find((item) => item.status === "active");
-  const totalUsers = userStatusData.reduce((acc, curr) => acc + curr.count, 0);
+type UserStatusChartProps = {
+  data: OverviewData;
+};
+
+export function UserStatusChart({ data }: UserStatusChartProps) {
+  // Early return if no user status data available
+  if (
+    !data.userStatusDistribution ||
+    data.userStatusDistribution.length === 0
+  ) {
+    return null;
+  }
+
+  const activeUsers = data.userStatusDistribution.find(
+    (item) => item.status === "active"
+  );
+  const totalUsers = data.userStatusDistribution.reduce(
+    (acc, curr) => acc + curr.count,
+    0
+  );
   const activeCount = activeUsers?.count ?? 0;
   const percentage = Math.round(
     (activeCount / totalUsers) * PERCENTAGE_MULTIPLIER

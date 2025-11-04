@@ -23,6 +23,7 @@ export const API_ENDPOINTS = {
       update: (id: string | number) => `/api/biller/${id}`,
       delete: (id: string | number) => `/api/biller/${id}`,
     },
+    overview: "/api/overview",
   },
 
   /**
@@ -88,4 +89,11 @@ export function getEndpointDeleteUrl(id: string | number): string {
  */
 export function getLoginUrl(): string {
   return API_ENDPOINTS.auth.login;
+}
+
+/**
+ * Helper function to get overview URL
+ */
+export function getOverviewUrl(): string {
+  return API_ENDPOINTS.admin.overview;
 }

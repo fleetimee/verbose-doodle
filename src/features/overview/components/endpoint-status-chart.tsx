@@ -12,39 +12,47 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { responseStatusData } from "@/features/overview/data/overview-data";
+import type { OverviewData } from "@/features/overview/types";
 
-const responseStatusConfig = {
-  count: {
-    label: "Responses",
-  },
-  "200": {
-    label: "200 (Success)",
-    color: "var(--chart-2)",
-  },
-  "400": {
-    label: "400 (Bad Request)",
-    color: "var(--chart-3)",
-  },
-  "500": {
-    label: "500 (Server Error)",
-    color: "var(--chart-4)",
-  },
-  "404": {
-    label: "404 (Not Found)",
-    color: "var(--chart-5)",
-  },
-} satisfies ChartConfig;
+// Chart color constants
+const CHART_COLOR_VARIANTS = 5;
+const CHART_COLOR_OFFSET = 2; // Start from chart-2 for better color variety
 
 type EndpointStatusChartProps = {
+  data: OverviewData;
   className?: string;
 };
 
 export function EndpointStatusChart({
+  data,
   className,
-}: EndpointStatusChartProps = {}) {
+}: EndpointStatusChartProps) {
   // Default classes for admin layout, can be overridden via className prop
   const defaultClasses = className || "md:col-span-3 lg:col-span-2";
+
+  // Transform data to include fill property
+  const chartData = data.responseStatusDistribution.map((item, index) => ({
+    status: item.label,
+    count: item.count,
+    fill: `var(--chart-${(index % CHART_COLOR_VARIANTS) + CHART_COLOR_OFFSET})`,
+  }));
+
+  // Dynamically generate chart config from the data
+  const responseStatusConfig = {
+    count: {
+      label: "Responses",
+    },
+    ...Object.fromEntries(
+      data.responseStatusDistribution.map((item, index) => [
+        item.statusCode,
+        {
+          label: item.label,
+          color: `var(--chart-${(index % CHART_COLOR_VARIANTS) + CHART_COLOR_OFFSET})`,
+        },
+      ])
+    ),
+  } satisfies ChartConfig;
+
   return (
     <Card className={defaultClasses}>
       <CardHeader>
@@ -59,7 +67,7 @@ export function EndpointStatusChart({
           config={responseStatusConfig}
         >
           <RadialBarChart
-            data={responseStatusData}
+            data={chartData}
             endAngle={380}
             innerRadius={30}
             outerRadius={110}
