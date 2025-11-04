@@ -11,16 +11,16 @@ RUN mkdir -p /temp/prod
 COPY package.json bun.lock /temp/prod/
 RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-FROM base AS prerelease
+FROM base AS build
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
 ENV NODE_ENV=production
 RUN bun run build
 
-FROM base AS release
-COPY --from=prerelease /usr/src/app/dist ./dist
+FROM nginx:alpine AS release
+COPY --from=build /usr/src/app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-USER bun
-EXPOSE 3000/tcp
-ENTRYPOINT ["bunx", "--bun", "serve", "dist", "-l", "3000", "-s"]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
