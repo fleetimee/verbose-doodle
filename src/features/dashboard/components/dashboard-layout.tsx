@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, Outlet, useLocation } from "react-router";
+import { Link, Outlet, useLocation, useParams } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -17,6 +17,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useGetEndpoint } from "@/features/endpoints/hooks/use-get-endpoint";
 
 const routeLabels: Record<string, string> = {
   overview: "Overview",
@@ -25,9 +26,17 @@ const routeLabels: Record<string, string> = {
   settings: "Settings",
 };
 
+const ENDPOINT_DETAIL_REGEX = /^\/dashboard\/endpoints\/(\d+)$/;
+
 export function DashboardLayout() {
   const location = useLocation();
+  const params = useParams();
   const { theme, setTheme } = useTheme();
+
+  const isEndpointDetail = location.pathname.match(ENDPOINT_DETAIL_REGEX);
+  const endpointId = isEndpointDetail ? params.id : undefined;
+
+  const { data: endpoint } = useGetEndpoint(endpointId || "");
 
   const pathSegments = location.pathname
     .split("/")
@@ -35,15 +44,19 @@ export function DashboardLayout() {
 
   const breadcrumbItems = pathSegments.map((segment, index) => {
     const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
-    const label =
+    let label =
       routeLabels[segment] ||
       segment.charAt(0).toUpperCase() + segment.slice(1);
+
+    if (isEndpointDetail && segment === endpointId && endpoint) {
+      label = endpoint.url;
+    }
+
     const isLast = index === pathSegments.length - 1;
 
     return { label, href, isLast };
   });
 
-  // Filter theme to only pass valid values to ThemeSwitcher (light or dark)
   const themeSwitcherValue =
     theme === "light" || theme === "dark" ? theme : undefined;
 
