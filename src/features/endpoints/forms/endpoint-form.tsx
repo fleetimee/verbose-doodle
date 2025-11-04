@@ -45,7 +45,7 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
       resolver: zodResolver(endpointSchema),
       defaultValues: {
         method: "GET",
-        url: "/",
+        url: "/rest",
         billerId: billers[0]?.id ?? 1,
       },
     });
@@ -126,11 +126,11 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                         id="endpoint-url"
-                        placeholder="/api/users"
+                        placeholder="/rest/api/users"
                       />
                       <FieldDescription>
-                        Provide a path relative to the base URL, including a
-                        leading slash.
+                        Enter a valid API path starting with / (e.g., /rest,
+                        /rest/api, /api/v1/users)
                       </FieldDescription>
                     </FieldContent>
                     {fieldState.invalid && (
