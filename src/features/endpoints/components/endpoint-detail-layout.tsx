@@ -7,7 +7,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponseList } from "@/features/endpoints/components/response-list";
 import { ResponsePreview } from "@/features/endpoints/components/response-preview";
-import type { EndpointResponse } from "@/features/endpoints/types";
+import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 
 type EndpointDetailLayoutProps = {
   responses: EndpointResponse[];
@@ -18,6 +18,8 @@ type EndpointDetailLayoutProps = {
   onSelectResponse: (id: string) => void;
   onActivateResponse: (response: EndpointResponse) => void;
   onDeactivateResponse: (response: EndpointResponse) => void;
+  endpointUrl?: string;
+  endpointMethod?: HttpMethod;
 };
 
 export function EndpointDetailLayout({
@@ -29,6 +31,8 @@ export function EndpointDetailLayout({
   onSelectResponse,
   onActivateResponse,
   onDeactivateResponse,
+  endpointUrl,
+  endpointMethod,
 }: EndpointDetailLayoutProps) {
   return (
     <>
@@ -55,7 +59,11 @@ export function EndpointDetailLayout({
             />
           </TabsContent>
           <TabsContent className="mt-0" value="preview">
-            <ResponsePreview response={selectedResponse} />
+            <ResponsePreview
+              endpointMethod={endpointMethod}
+              endpointUrl={endpointUrl}
+              response={selectedResponse}
+            />
           </TabsContent>
         </Tabs>
       </Card>
@@ -78,7 +86,11 @@ export function EndpointDetailLayout({
           <ResizableHandle withHandle />
 
           <ResizablePanel defaultSize={65} minSize={35}>
-            <ResponsePreview response={selectedResponse} />
+            <ResponsePreview
+              endpointMethod={endpointMethod}
+              endpointUrl={endpointUrl}
+              response={selectedResponse}
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </Card>

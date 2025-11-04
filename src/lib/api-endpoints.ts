@@ -18,6 +18,17 @@ export const API_ENDPOINTS = {
       update: (id: string | number) => `/api/endpoint/${id}`,
       delete: (id: string | number) => `/api/endpoint/${id}`,
     },
+    responses: {
+      list: "/api/response",
+      detail: (id: string | number) => `/api/response/${id}`,
+      create: "/api/response",
+      update: (id: string | number) => `/api/response/${id}`,
+      delete: (id: string | number) => `/api/response/${id}`,
+      activate: (endpointId: string | number, responseId: string | number) =>
+        `/api/response/${endpointId}/${responseId}/activate`,
+      deactivate: (endpointId: string | number, responseId: string | number) =>
+        `/api/response/${endpointId}/${responseId}/deactivate`,
+    },
     billers: {
       list: "/api/biller",
       create: "/api/biller",
@@ -104,4 +115,31 @@ export function getLoginUrl(): string {
  */
 export function getOverviewUrl(): string {
   return API_ENDPOINTS.admin.overview;
+}
+
+/**
+ * Helper function to get response create URL
+ */
+export function getResponseCreateUrl(): string {
+  return API_ENDPOINTS.admin.responses.create;
+}
+
+/**
+ * Helper function to get response activate URL
+ */
+export function getResponseActivateUrl(
+  endpointId: string | number,
+  responseId: string | number
+): string {
+  return API_ENDPOINTS.admin.responses.activate(endpointId, responseId);
+}
+
+/**
+ * Helper function to get response deactivate URL
+ */
+export function getResponseDeactivateUrl(
+  endpointId: string | number,
+  responseId: string | number
+): string {
+  return API_ENDPOINTS.admin.responses.deactivate(endpointId, responseId);
 }

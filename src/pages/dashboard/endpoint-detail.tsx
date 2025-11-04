@@ -222,6 +222,8 @@ export function EndpointDetailPage() {
       </div>
 
       <EndpointDetailLayout
+        endpointMethod={endpoint.method}
+        endpointUrl={endpoint.url}
         isActivating={isActivatingResponse}
         isDeactivating={isDeactivatingResponse}
         onActivateResponse={handleActivateResponse}

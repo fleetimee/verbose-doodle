@@ -8,10 +8,8 @@ import {
   FieldContent,
   FieldDescription,
   FieldError,
-  FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { JsonEditor } from "@/features/endpoints/components/json-editor";
 import { ResponseReviewStep } from "@/features/endpoints/components/response-review-step";
 import { ResponseStepperFooter } from "@/features/endpoints/components/response-stepper-footer";
@@ -48,7 +46,6 @@ export function ResponseStepper({
       name: "",
       json: "{}",
       statusCode: 200,
-      activated: false,
     },
     mode: "onChange",
   });
@@ -56,7 +53,7 @@ export function ResponseStepper({
   const canProceed = () => {
     const stepId = currentStep.id;
 
-    if (stepId === "review" || stepId === "activated") {
+    if (stepId === "review") {
       return true;
     }
 
@@ -87,7 +84,7 @@ export function ResponseStepper({
   const handleNext = async () => {
     const stepId = currentStep.id;
 
-    if (stepId === "review" || stepId === "activated") {
+    if (stepId === "review") {
       if (currentStepIndex < STEPS.length - 1) {
         setCurrentStepIndex(currentStepIndex + 1);
       }
@@ -294,39 +291,6 @@ export function ResponseStepper({
 
                   {currentStep.id === "review" && (
                     <ResponseReviewStep formValues={formValues} />
-                  )}
-
-                  {currentStep.id === "activated" && (
-                    <Controller
-                      control={form.control}
-                      name="activated"
-                      render={({ field }) => (
-                        <Field>
-                          <div className="flex flex-col items-start gap-6 rounded-xl border-2 bg-gradient-to-br from-background to-muted/20 p-8 shadow-sm md:flex-row md:items-center md:justify-between">
-                            <div className="space-y-2">
-                              <FieldLabel
-                                className="font-semibold text-xl"
-                                htmlFor="response-activated"
-                              >
-                                Activate this response
-                              </FieldLabel>
-                              <FieldDescription className="text-base">
-                                When activated, this response will be returned
-                                for all requests to this endpoint. You can
-                                change this later from the endpoint details
-                                page.
-                              </FieldDescription>
-                            </div>
-                            <Switch
-                              checked={field.value}
-                              className="scale-150"
-                              id="response-activated"
-                              onCheckedChange={field.onChange}
-                            />
-                          </div>
-                        </Field>
-                      )}
-                    />
                   )}
                 </div>
               </motion.div>
