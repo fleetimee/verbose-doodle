@@ -5,13 +5,8 @@ import type {
   OverviewData,
 } from "@/features/overview/types";
 import { getOverviewUrl } from "@/lib/api-endpoints";
+import { TIME_DURATIONS } from "@/lib/constants";
 import { createQueryHook } from "@/lib/query-hooks";
-
-const MILLISECONDS_PER_SECOND = 1000;
-const SECONDS_PER_MINUTE = 60;
-const MINUTES_TO_MS = SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
-const STALE_TIME_MINUTES = 5;
-const FIVE_MINUTES_IN_MS = STALE_TIME_MINUTES * MINUTES_TO_MS;
 
 /**
  * Fetch overview data from API
@@ -59,7 +54,7 @@ export function useGetOverview() {
     queryKey: overviewQueryKeys.all,
     queryFn: fetchOverview,
     options: {
-      staleTime: FIVE_MINUTES_IN_MS,
+      staleTime: TIME_DURATIONS.FIVE_MINUTES,
     },
   });
 
