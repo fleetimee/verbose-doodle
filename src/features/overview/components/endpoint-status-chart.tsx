@@ -149,12 +149,18 @@ export function EndpointStatusChart({
                     return null;
                   }
 
+                  // Convert to numbers for arithmetic operations
+                  const xNum = Number(x);
+                  const yNum = Number(y);
+                  const widthNum = Number(width);
+                  const heightNum = Number(height);
+
                   return (
                     <text
                       alignmentBaseline="middle"
                       className="fill-foreground font-medium"
-                      x={x + width + BAR_LABEL_OFFSET}
-                      y={y + height / 2}
+                      x={xNum + widthNum + BAR_LABEL_OFFSET}
+                      y={yNum + heightNum / 2}
                     >
                       {value.toLocaleString()}
                     </text>
