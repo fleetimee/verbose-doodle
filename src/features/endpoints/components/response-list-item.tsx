@@ -1,4 +1,5 @@
 import { CheckCircle2, Circle } from "lucide-react";
+import { motion } from "motion/react";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -17,6 +18,7 @@ import type { EndpointResponse } from "@/features/endpoints/types";
 import { cn } from "@/lib/utils";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
+const SELECTED_ITEM_SCALE = 1.02;
 
 type ResponseListItemProps = {
   response: EndpointResponse;
@@ -56,13 +58,20 @@ export function ResponseListItem({
 
   return (
     <>
-      <div
+      <motion.div
+        animate={{
+          scale: isSelected ? SELECTED_ITEM_SCALE : 1,
+        }}
         className={cn(
-          "w-full rounded-md px-3 py-2.5 text-left transition-colors cursor-pointer",
-          isSelected ? "bg-accent" : "hover:bg-accent/50",
+          "w-full cursor-pointer rounded-md px-3 py-2.5 text-left transition-colors duration-200",
+          isSelected
+            ? "bg-accent text-accent-foreground"
+            : "hover:bg-accent/50",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         )}
+        initial={false}
         key={response.id}
+        layout
         onClick={() => {
           onSelect(response.id);
         }}
@@ -74,6 +83,11 @@ export function ResponseListItem({
         }}
         role="button"
         tabIndex={0}
+        transition={{
+          layout: { duration: 0.2, ease: "easeOut" },
+          scale: { duration: 0.2, ease: "easeOut" },
+        }}
+        whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 space-y-1">
@@ -105,7 +119,7 @@ export function ResponseListItem({
                 isActive
                   ? "text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400"
                   : "text-muted-foreground hover:text-foreground",
-                isLoading && "cursor-not-allowed opacity-50"
+                isLoading ? "cursor-not-allowed opacity-50" : "cursor-pointer"
               )}
               disabled={isLoading}
               onClick={(e) => {
@@ -125,7 +139,7 @@ export function ResponseListItem({
             </button>
           )}
         </div>
-      </div>
+      </motion.div>
 
       <AlertDialog onOpenChange={setShowConfirmDialog} open={showConfirmDialog}>
         <AlertDialogContent>

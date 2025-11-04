@@ -1,4 +1,5 @@
 import { Plug, Plus } from "lucide-react";
+import { motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,10 @@ import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
 const SKELETON_KEYS = Array.from({ length: 6 }, () => crypto.randomUUID());
+
+// Animation constants
+const STAGGER_BASE_DELAY = 0.4;
+const STAGGER_INCREMENT = 0.1;
 
 export function EndpointsPage() {
   useDocumentMeta({
@@ -80,8 +85,18 @@ export function EndpointsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <motion.div
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, y: 20 }}
+        transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+      >
         <div>
           <h1 className="font-bold text-3xl tracking-tight">Endpoint</h1>
           <p className="text-muted-foreground">
@@ -97,10 +112,14 @@ export function EndpointsPage() {
             showTrigger={hasEndpoints}
           />
         </ProtectedAction>
-      </div>
+      </motion.div>
 
       {isLoadingEndpoints && (
-        <>
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+        >
           <EndpointsSearchControls
             onSearchChange={setSearchTerm}
             onViewModeChange={setViewMode}
@@ -119,12 +138,17 @@ export function EndpointsPage() {
               ))}
             </div>
           )}
-        </>
+        </motion.div>
       )}
 
       {!isLoadingEndpoints && hasEndpoints && (
         <>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col gap-4 sm:flex-row sm:items-center"
+            initial={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+          >
             <div className="flex-1">
               <EndpointsSearchControls
                 onSearchChange={setSearchTerm}
@@ -140,7 +164,7 @@ export function EndpointsPage() {
               <Postman className="mr-2 h-4 w-4" />
               Export to Postman
             </Button>
-          </div>
+          </motion.div>
 
           <ExportEndpointsDialog
             groupedEndpoints={groupedEndpoints}
@@ -149,9 +173,24 @@ export function EndpointsPage() {
           />
 
           {hasFilteredEndpoints ? (
-            <div className="space-y-8">
-              {groupedEndpoints.map((group) => (
-                <section className="space-y-4" key={group.billerId}>
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-8"
+              initial={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
+            >
+              {groupedEndpoints.map((group, index) => (
+                <motion.section
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  key={group.billerId}
+                  transition={{
+                    duration: 0.3,
+                    delay: STAGGER_BASE_DELAY + index * STAGGER_INCREMENT,
+                    ease: "easeOut",
+                  }}
+                >
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <h2 className="font-semibold text-lg">
                       {group.billerName}
@@ -176,48 +215,60 @@ export function EndpointsPage() {
                       ))}
                     </div>
                   )}
-                </section>
+                </motion.section>
               ))}
-            </div>
+            </motion.div>
           ) : (
-            <Empty className="border">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Plug />
-                </EmptyMedia>
-                <EmptyTitle>Tidak ada endpoint ditemukan</EmptyTitle>
-                <EmptyDescription>
-                  Ubah kata kunci pencarian atau reset filter untuk melihat
-                  daftar endpoint.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
+            >
+              <Empty className="border">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Plug />
+                  </EmptyMedia>
+                  <EmptyTitle>Tidak ada endpoint ditemukan</EmptyTitle>
+                  <EmptyDescription>
+                    Ubah kata kunci pencarian atau reset filter untuk melihat
+                    daftar endpoint.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            </motion.div>
           )}
         </>
       )}
 
       {!(isLoadingEndpoints || hasEndpoints) && (
-        <Empty className="min-h-[60vh] border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Plug />
-            </EmptyMedia>
-            <EmptyTitle>Belum ada endpoint</EmptyTitle>
-            <EmptyDescription>
-              Mulai dengan membuat endpoint API pertama Anda untuk biller yang
-              tersedia.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <ProtectedAction ability="canAddEndpoint">
-              <Button onClick={handleCreateEndpoint}>
-                <Plus className="mr-2 h-4 w-4" />
-                Buat Endpoint Pertama
-              </Button>
-            </ProtectedAction>
-          </EmptyContent>
-        </Empty>
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+        >
+          <Empty className="min-h-[60vh] border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Plug />
+              </EmptyMedia>
+              <EmptyTitle>Belum ada endpoint</EmptyTitle>
+              <EmptyDescription>
+                Mulai dengan membuat endpoint API pertama Anda untuk biller yang
+                tersedia.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <ProtectedAction ability="canAddEndpoint">
+                <Button onClick={handleCreateEndpoint}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Buat Endpoint Pertama
+                </Button>
+              </ProtectedAction>
+            </EmptyContent>
+          </Empty>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

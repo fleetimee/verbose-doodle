@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { useAuth } from "@/features/auth/context";
 import { ChartCardSkeleton } from "@/features/overview/components/chart-card-skeleton";
 import { EndpointStatusChart } from "@/features/overview/components/endpoint-status-chart";
@@ -80,8 +81,11 @@ function OverviewContentGrid({
   data,
 }: OverviewGridProps & { data: OverviewData }) {
   return (
-    <div
+    <motion.div
+      animate={{ opacity: 1 }}
       className={`grid grid-cols-1 gap-4 ${isAdmin ? "md:grid-cols-3 lg:grid-cols-4" : "md:grid-cols-3"}`}
+      initial={{ opacity: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
     >
       <StatsCards data={data} />
       {isAdmin && data.userStats && <UserStatsCards data={data} />}
@@ -101,7 +105,7 @@ function OverviewContentGrid({
         <UserStatusChart data={data} />
       )}
       <RecentEndpoints data={data} />
-    </div>
+    </motion.div>
   );
 }
 
@@ -125,20 +129,29 @@ export function OverviewPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      >
         <h1 className="mb-2 font-bold text-3xl">Overview</h1>
         <p className="break-words text-muted-foreground">
           View your billing simulator configuration and statistics
         </p>
-      </div>
+      </motion.div>
 
       {/* Error State */}
       {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4">
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-lg border border-red-500/20 bg-red-500/10 p-4"
+          initial={{ opacity: 0, y: 10 }}
+          transition={{ duration: 0.3 }}
+        >
           <p className="text-red-600 dark:text-red-400">
             Failed to load overview data. Please try refreshing the page.
           </p>
-        </div>
+        </motion.div>
       )}
 
       {/* Bento Grid Layout */}
