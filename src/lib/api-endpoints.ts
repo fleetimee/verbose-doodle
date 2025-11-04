@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   admin: {
     endpoints: {
       list: "/api/endpoint",
+      detail: (id: string | number) => `/api/endpoint/${id}`,
       create: "/api/endpoint",
       update: (id: string | number) => `/api/endpoint/${id}`,
       delete: (id: string | number) => `/api/endpoint/${id}`,
@@ -68,6 +69,13 @@ export function getPublicEndpointView(): string {
  */
 export function getAdminBillerList(): string {
   return API_ENDPOINTS.admin.billers.list;
+}
+
+/**
+ * Helper function to get endpoint detail URL
+ */
+export function getEndpointDetailUrl(id: string | number): string {
+  return API_ENDPOINTS.admin.endpoints.detail(id);
 }
 
 /**

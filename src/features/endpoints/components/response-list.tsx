@@ -1,6 +1,12 @@
-import { Button } from "@/components/ui/button";
+import { ListX } from "lucide-react";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { ResponseListItem } from "@/features/endpoints/components/response-list-item";
 import type { EndpointResponse } from "@/features/endpoints/types";
 
@@ -12,7 +18,6 @@ type ResponseListProps = {
   onSelectResponse: (id: string) => void;
   onActivateResponse: (response: EndpointResponse) => void;
   onDeactivateResponse: (response: EndpointResponse) => void;
-  onAddResponse: () => void;
 };
 
 export function ResponseList({
@@ -23,7 +28,6 @@ export function ResponseList({
   onSelectResponse,
   onActivateResponse,
   onDeactivateResponse,
-  onAddResponse,
 }: ResponseListProps) {
   return (
     <div className="flex h-full flex-col">
@@ -32,21 +36,17 @@ export function ResponseList({
       </div>
       <ScrollArea className="flex-1">
         {responses.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-muted-foreground text-sm">
-              No responses configured yet.
-            </p>
-            <ProtectedAction ability="canAddResponse">
-              <Button
-                className="mt-4"
-                onClick={onAddResponse}
-                size="sm"
-                variant="outline"
-              >
-                Add First Response
-              </Button>
-            </ProtectedAction>
-          </div>
+          <Empty className="min-h-[300px] border-0">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ListX />
+              </EmptyMedia>
+              <EmptyTitle>No responses configured yet</EmptyTitle>
+              <EmptyDescription>
+                Add a response using the button above to get started.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <div className="space-y-1 p-2">
             {responses.map((response) => (
