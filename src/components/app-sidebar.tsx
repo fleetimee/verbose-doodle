@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
+import { SessionTimer } from "@/components/session-timer";
 import { Logo } from "@/components/ui/logo";
 import {
   Sidebar,
@@ -99,7 +100,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={filteredNavMain} />
-        <NavSecondary className="mt-auto" items={data.navSecondary} />
+        <NavSecondary className="mt-auto" items={data.navSecondary}>
+          <SessionTimer />
+        </NavSecondary>
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
