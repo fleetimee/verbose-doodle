@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { useNavigate } from "react-router";
 import {
   AUTH_UNAUTHORIZED_EVENT,
   clearAuthToken,
@@ -33,6 +34,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
   const [authState, setAuthState] = useState<AuthState>(() => {
     // Initialize from JWT token in localStorage
     const token = getAuthToken();
@@ -122,6 +124,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const handleUnauthorized = () => {
       logout();
+      // Use React Router navigate instead of window.location.href
+      navigate("/login?reason=expired-during-request");
     };
 
     window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
@@ -129,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
     };
-  }, [logout]);
+  }, [logout, navigate]);
 
   return (
     <AuthContext.Provider value={{ authState, login, logout, refreshAuth }}>

@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router";
+import { Navigate, useSearchParams } from "react-router";
 import SlicedText from "@/components/kokonutui/sliced-text";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import {
-  clearExpirationReason,
-  getExpirationReason,
-} from "@/components/token-expiration-dialog";
 import { Highlighter } from "@/components/ui/highlighter";
 import { InteractiveGridPattern } from "@/components/ui/interactive-grid-pattern";
 import { Logo } from "@/components/ui/logo";
@@ -31,6 +27,7 @@ const EXPIRATION_MESSAGES = {
 export const Login = () => {
   const { authState } = useAuth();
   const { theme, setTheme } = useTheme();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [expirationMessage, setExpirationMessage] = useState<string | null>(
     null
   );
@@ -43,14 +40,18 @@ export const Login = () => {
 
   const { mutate: login, isPending, error, isError } = useLogin();
 
-  // Check for expiration reason on mount
+  // Check for expiration reason from query params
   useEffect(() => {
-    const reason = getExpirationReason();
-    if (reason) {
-      setExpirationMessage(EXPIRATION_MESSAGES[reason]);
-      clearExpirationReason();
+    const reason = searchParams.get("reason");
+    if (reason && reason in EXPIRATION_MESSAGES) {
+      setExpirationMessage(
+        EXPIRATION_MESSAGES[reason as keyof typeof EXPIRATION_MESSAGES]
+      );
+      // Clear the query param after reading it
+      searchParams.delete("reason");
+      setSearchParams(searchParams, { replace: true });
     }
-  }, []);
+  }, [searchParams, setSearchParams]);
 
   // Redirect to dashboard if already authenticated
   if (authState.isAuthenticated) {
