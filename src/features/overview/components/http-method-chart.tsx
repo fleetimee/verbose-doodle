@@ -1,4 +1,4 @@
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { methodDistributionConfig } from "@/features/overview/config/chart-configs";
-import { methodDistributionData } from "@/features/overview/data/overview-data";
+import type { OverviewData } from "@/features/overview/types";
 
 // Bar chart corner radius constants
 const BAR_CORNER_RADIUS_TOP_LEFT = 8;
@@ -21,12 +21,20 @@ const BAR_CORNER_RADIUS_BOTTOM_RIGHT = 0;
 const BAR_CORNER_RADIUS_BOTTOM_LEFT = 0;
 
 type HttpMethodChartProps = {
+  data: OverviewData;
   className?: string;
 };
 
-export function HttpMethodChart({ className }: HttpMethodChartProps = {}) {
+export function HttpMethodChart({ data, className }: HttpMethodChartProps) {
   // Default classes for admin layout, can be overridden via className prop
   const defaultClasses = className || "md:col-span-2 lg:col-span-2";
+
+  // Transform data to include fill colors based on method
+  const chartData = data.methodDistribution.map((item) => ({
+    ...item,
+    fill: `var(--color-${item.method.toLowerCase()})`,
+  }));
+
   return (
     <Card className={defaultClasses}>
       <CardHeader>
@@ -38,7 +46,7 @@ export function HttpMethodChart({ className }: HttpMethodChartProps = {}) {
           className="h-[300px] w-full"
           config={methodDistributionConfig}
         >
-          <BarChart accessibilityLayer data={methodDistributionData}>
+          <BarChart accessibilityLayer data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               axisLine={false}
@@ -56,7 +64,11 @@ export function HttpMethodChart({ className }: HttpMethodChartProps = {}) {
                 BAR_CORNER_RADIUS_BOTTOM_RIGHT,
                 BAR_CORNER_RADIUS_BOTTOM_LEFT,
               ]}
-            />
+            >
+              {chartData.map((entry) => (
+                <Cell fill={entry.fill} key={`cell-${entry.method}`} />
+              ))}
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>

@@ -1,3 +1,4 @@
+import { Eye } from "lucide-react";
 import { useMemo } from "react";
 import {
   CodeBlock,
@@ -8,6 +9,13 @@ import {
   CodeBlockItem,
 } from "@/components/kibo-ui/code-block";
 import { Badge } from "@/components/ui/badge";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { EndpointResponse } from "@/features/endpoints/types";
 
@@ -91,13 +99,17 @@ export function ResponsePreview({ response }: ResponsePreviewProps) {
             </CodeBlock>
           </div>
         ) : (
-          <div className="flex h-full items-center justify-center p-8">
-            <div className="text-center">
-              <p className="text-muted-foreground">
-                Select a response from the list to preview
-              </p>
-            </div>
-          </div>
+          <Empty className="min-h-[300px] border-0">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Eye />
+              </EmptyMedia>
+              <EmptyTitle>No response selected</EmptyTitle>
+              <EmptyDescription>
+                Select a response from the list to preview its details.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
       </ScrollArea>
     </div>

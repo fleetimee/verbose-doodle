@@ -31,10 +31,10 @@ describe("EndpointForm", () => {
     expect(methodLabel.className).toContain("text-blue-600");
 
     const urlInput = screen.getByLabelText("URL") as HTMLInputElement;
-    expect(urlInput.value).toBe("/");
+    expect(urlInput.value).toBe("/rest");
 
-    const billerInput = screen.getByLabelText("Biller ID") as HTMLInputElement;
-    expect(billerInput.value).toBe("1");
+    const billerTrigger = screen.getByLabelText("Biller");
+    expect(billerTrigger).toBeDefined();
   });
 
   test("coerces numeric values before calling onSubmit", async () => {
@@ -47,10 +47,6 @@ describe("EndpointForm", () => {
       </EndpointForm>
     );
 
-    const billerInput = screen.getByLabelText("Biller ID") as HTMLInputElement;
-    await user.clear(billerInput);
-    await user.type(billerInput, "123");
-
     await user.click(screen.getByRole("button", { name: SUBMIT_BUTTON_LABEL }));
 
     expect(handleSubmit).toHaveBeenCalledTimes(1);
@@ -61,7 +57,7 @@ describe("EndpointForm", () => {
     }
 
     const [payload] = firstCall;
-    expect(payload).toEqual({ billerId: 123, method: "GET", url: "/" });
+    expect(payload).toEqual({ billerId: 1, method: "GET", url: "/rest" });
   });
 
   test("displays validation errors from the schema on submit", async () => {
@@ -76,16 +72,15 @@ describe("EndpointForm", () => {
 
     const urlInput = screen.getByLabelText("URL") as HTMLInputElement;
     await user.clear(urlInput);
-    await user.type(urlInput, "api/invalid");
-
-    const billerInput = screen.getByLabelText("Biller ID") as HTMLInputElement;
-    await user.clear(billerInput);
-    await user.type(billerInput, "0");
+    await user.type(urlInput, "/");
 
     await user.click(screen.getByRole("button", { name: SUBMIT_BUTTON_LABEL }));
 
-    expect(screen.getByText("URL must start with /")).toBeDefined();
-    expect(screen.getByText("Biller ID must be at least 1")).toBeDefined();
+    expect(
+      screen.getByText(
+        "URL must be a valid API path (e.g., /rest, /rest/api, /api/v1/users)"
+      )
+    ).toBeDefined();
     expect(handleSubmit).not.toHaveBeenCalled();
   });
 
@@ -117,7 +112,7 @@ describe("EndpointForm", () => {
     expect(formRef.current.getValues()).toEqual({
       billerId: 1,
       method: "GET",
-      url: "/",
+      url: "/rest",
     });
   });
 });

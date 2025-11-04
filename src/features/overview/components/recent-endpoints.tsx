@@ -5,18 +5,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { recentEndpointsData } from "@/features/overview/data/overview-data";
+import type { HttpMethod } from "@/features/endpoints/types";
+import type { OverviewData } from "@/features/overview/types";
 
-const methodColors = {
+const methodColors: Record<HttpMethod, string> = {
   GET: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
   POST: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
   PUT: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
   DELETE: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
   PATCH:
     "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
-} as const;
+};
 
-export function RecentEndpoints() {
+type RecentEndpointsProps = {
+  data: OverviewData;
+};
+
+export function RecentEndpoints({ data }: RecentEndpointsProps) {
   return (
     <Card className="md:col-span-3 lg:col-span-3">
       <CardHeader>
@@ -27,10 +32,10 @@ export function RecentEndpoints() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {recentEndpointsData.map((endpoint) => (
+          {data.recentEndpoints.map((endpoint) => (
             <div
               className="flex items-center justify-between gap-3 border-b pb-4 last:border-0 last:pb-0"
-              key={endpoint.id}
+              key={endpoint.endpointId}
             >
               <div className="min-w-0 flex-1 space-y-1">
                 <p className="break-all font-medium text-sm leading-none">
@@ -38,12 +43,12 @@ export function RecentEndpoints() {
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-muted-foreground text-xs">
-                    {endpoint.biller}
+                    {endpoint.billerName}
                   </p>
                   <span className="text-muted-foreground">•</span>
                   <p className="text-muted-foreground text-xs">
-                    {endpoint.responsesCount} response
-                    {endpoint.responsesCount !== 1 ? "s" : ""}
+                    {endpoint.responseCount} response
+                    {endpoint.responseCount !== 1 ? "s" : ""}
                   </p>
                 </div>
               </div>

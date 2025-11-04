@@ -42,6 +42,58 @@ describe("endpointSchema", () => {
     expect(getIssueMessage(result, "url")).toBe("URL must start with /");
   });
 
+  test("rejects URLs with only a leading slash", () => {
+    const result = endpointSchema.safeParse({
+      ...VALID_ENDPOINT_INPUT,
+      url: "/",
+    });
+
+    expect(getIssueMessage(result, "url")).toBe(
+      "URL must be a valid API path (e.g., /rest, /rest/api, /api/v1/users)"
+    );
+  });
+
+  test("accepts valid API path patterns", () => {
+    const validPaths = [
+      "/rest",
+      "/rest/api",
+      "/api/v1/users",
+      "/api/v2/billers/123",
+      "/rest/api/endpoint",
+    ];
+
+    for (const url of validPaths) {
+      const result = endpointSchema.safeParse({
+        ...VALID_ENDPOINT_INPUT,
+        url,
+      });
+
+      expect(result.success).toBe(true);
+    }
+  });
+
+  test("rejects invalid API path patterns", () => {
+    const invalidPaths = [
+      "/",
+      "//double-slash",
+      "/api//invalid",
+      "/api/spaces are bad",
+      "/api/@special",
+    ];
+
+    for (const url of invalidPaths) {
+      const result = endpointSchema.safeParse({
+        ...VALID_ENDPOINT_INPUT,
+        url,
+      });
+
+      expect(result.success).toBe(false);
+      expect(getIssueMessage(result, "url")).toBe(
+        "URL must be a valid API path (e.g., /rest, /rest/api, /api/v1/users)"
+      );
+    }
+  });
+
   test("rejects URLs longer than 500 characters", () => {
     const overlyLongUrl = `/${"a".repeat(500)}`;
     const result = endpointSchema.safeParse({

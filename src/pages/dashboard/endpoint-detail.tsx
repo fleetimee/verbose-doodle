@@ -225,7 +225,6 @@ export function EndpointDetailPage() {
         isActivating={isActivatingResponse}
         isDeactivating={isDeactivatingResponse}
         onActivateResponse={handleActivateResponse}
-        onAddResponse={() => setIsStepperOpen(true)}
         onDeactivateResponse={handleDeactivateResponse}
         onSelectResponse={setSelectedResponseId}
         responses={endpoint.responses}

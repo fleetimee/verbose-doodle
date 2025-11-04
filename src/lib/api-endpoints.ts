@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   admin: {
     endpoints: {
       list: "/api/endpoint",
+      detail: (id: string | number) => `/api/endpoint/${id}`,
       create: "/api/endpoint",
       update: (id: string | number) => `/api/endpoint/${id}`,
       delete: (id: string | number) => `/api/endpoint/${id}`,
@@ -23,6 +24,7 @@ export const API_ENDPOINTS = {
       update: (id: string | number) => `/api/biller/${id}`,
       delete: (id: string | number) => `/api/biller/${id}`,
     },
+    overview: "/api/overview",
   },
 
   /**
@@ -70,6 +72,13 @@ export function getAdminBillerList(): string {
 }
 
 /**
+ * Helper function to get endpoint detail URL
+ */
+export function getEndpointDetailUrl(id: string | number): string {
+  return API_ENDPOINTS.admin.endpoints.detail(id);
+}
+
+/**
  * Helper function to get endpoint update URL
  */
 export function getEndpointUpdateUrl(id: string | number): string {
@@ -88,4 +97,11 @@ export function getEndpointDeleteUrl(id: string | number): string {
  */
 export function getLoginUrl(): string {
   return API_ENDPOINTS.auth.login;
+}
+
+/**
+ * Helper function to get overview URL
+ */
+export function getOverviewUrl(): string {
+  return API_ENDPOINTS.admin.overview;
 }

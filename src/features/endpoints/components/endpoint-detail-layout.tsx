@@ -18,7 +18,6 @@ type EndpointDetailLayoutProps = {
   onSelectResponse: (id: string) => void;
   onActivateResponse: (response: EndpointResponse) => void;
   onDeactivateResponse: (response: EndpointResponse) => void;
-  onAddResponse: () => void;
 };
 
 export function EndpointDetailLayout({
@@ -30,7 +29,6 @@ export function EndpointDetailLayout({
   onSelectResponse,
   onActivateResponse,
   onDeactivateResponse,
-  onAddResponse,
 }: EndpointDetailLayoutProps) {
   return (
     <>
@@ -50,7 +48,6 @@ export function EndpointDetailLayout({
               isActivating={isActivating}
               isDeactivating={isDeactivating}
               onActivateResponse={onActivateResponse}
-              onAddResponse={onAddResponse}
               onDeactivateResponse={onDeactivateResponse}
               onSelectResponse={onSelectResponse}
               responses={responses}
@@ -71,7 +68,6 @@ export function EndpointDetailLayout({
               isActivating={isActivating}
               isDeactivating={isDeactivating}
               onActivateResponse={onActivateResponse}
-              onAddResponse={onAddResponse}
               onDeactivateResponse={onDeactivateResponse}
               onSelectResponse={onSelectResponse}
               responses={responses}

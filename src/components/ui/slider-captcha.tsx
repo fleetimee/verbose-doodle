@@ -412,13 +412,13 @@ export const SliderCaptcha = ({
                   </feMerge>
                 </filter>
               </defs>
-              <image
+              <rect
                 clipPath="url(#puzzle-cutout)"
-                height={IMAGE_HEIGHT}
-                href={currentImage}
-                width={containerWidth}
-                x={-targetPosition}
-                y={-targetY}
+                fill="white"
+                height={PUZZLE_SIZE}
+                width={PUZZLE_SIZE}
+                x={0}
+                y={0}
               />
               <path
                 d={puzzlePath}

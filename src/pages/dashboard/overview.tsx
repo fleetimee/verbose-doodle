@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/context";
 import { ChartCardSkeleton } from "@/features/overview/components/chart-card-skeleton";
 import { EndpointStatusChart } from "@/features/overview/components/endpoint-status-chart";
@@ -10,9 +9,9 @@ import { StatsCardSkeleton } from "@/features/overview/components/stats-card-ske
 import { StatsCards } from "@/features/overview/components/stats-cards";
 import { UserStatsCards } from "@/features/overview/components/user-stats-cards";
 import { UserStatusChart } from "@/features/overview/components/user-status-chart";
+import { useGetOverview } from "@/features/overview/hooks/use-get-overview";
+import type { OverviewData } from "@/features/overview/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
-
-const LOADING_DELAY_MS = 800;
 
 type OverviewGridProps = {
   isAdmin: boolean;
@@ -76,24 +75,32 @@ function OverviewLoadingGrid({ isAdmin }: OverviewGridProps) {
   );
 }
 
-function OverviewContentGrid({ isAdmin }: OverviewGridProps) {
+function OverviewContentGrid({
+  isAdmin,
+  data,
+}: OverviewGridProps & { data: OverviewData }) {
   return (
     <div
       className={`grid grid-cols-1 gap-4 ${isAdmin ? "md:grid-cols-3 lg:grid-cols-4" : "md:grid-cols-3"}`}
     >
-      <StatsCards />
-      {isAdmin && <UserStatsCards />}
+      <StatsCards data={data} />
+      {isAdmin && data.userStats && <UserStatsCards data={data} />}
       <HttpMethodChart
         className={isAdmin ? undefined : "md:col-span-3 lg:col-span-3"}
+        data={data}
       />
       <EndpointStatusChart
         className={isAdmin ? undefined : "md:col-span-3 lg:col-span-3"}
+        data={data}
       />
       <EndpointsByBillerChart
         className={isAdmin ? undefined : "md:col-span-3 lg:col-span-3"}
+        data={data}
       />
-      {isAdmin && <UserStatusChart />}
-      <RecentEndpoints />
+      {isAdmin && data.userStatusDistribution && (
+        <UserStatusChart data={data} />
+      )}
+      <RecentEndpoints data={data} />
     </div>
   );
 }
@@ -101,7 +108,7 @@ function OverviewContentGrid({ isAdmin }: OverviewGridProps) {
 export function OverviewPage() {
   const { authState } = useAuth();
   const isAdmin = authState.user?.role === "ADMIN";
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading, error } = useGetOverview();
 
   useDocumentMeta({
     title: "Overview",
@@ -116,17 +123,6 @@ export function OverviewPage() {
     ],
   });
 
-  useEffect(() => {
-    // Simulate data fetching
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, LOADING_DELAY_MS);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, []);
-
   return (
     <div className="space-y-6">
       <div>
@@ -136,11 +132,19 @@ export function OverviewPage() {
         </p>
       </div>
 
+      {/* Error State */}
+      {error && (
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4">
+          <p className="text-red-600 dark:text-red-400">
+            Failed to load overview data. Please try refreshing the page.
+          </p>
+        </div>
+      )}
+
       {/* Bento Grid Layout */}
-      {isLoading ? (
-        <OverviewLoadingGrid isAdmin={isAdmin} />
-      ) : (
-        <OverviewContentGrid isAdmin={isAdmin} />
+      {isLoading && <OverviewLoadingGrid isAdmin={isAdmin} />}
+      {!isLoading && data && (
+        <OverviewContentGrid data={data} isAdmin={isAdmin} />
       )}
     </div>
   );
