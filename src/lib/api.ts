@@ -3,7 +3,6 @@
  * These utilities provide a consistent interface for making HTTP requests
  */
 
-import { setExpirationReason } from "@/components/token-expiration-dialog";
 import {
   clearAuthToken,
   emitUnauthorizedEvent,
@@ -87,7 +86,6 @@ export async function apiFetch<T>(
 
     if (!response.ok) {
       if (response.status === HTTP_STATUS_UNAUTHORIZED) {
-        setExpirationReason("expired-during-request");
         clearAuthToken();
         emitUnauthorizedEvent();
       }

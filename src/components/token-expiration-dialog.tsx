@@ -17,36 +17,6 @@ import { useTokenExpiration } from "@/features/auth/hooks/use-token-expiration";
 
 // Show warning dialog 2 minutes before expiration
 const WARNING_THRESHOLD_MS = 120_000;
-const EXPIRATION_REASON_KEY = "auth_expiration_reason";
-
-export type ExpirationReason =
-  | "expired-while-active"
-  | "expired-while-away"
-  | "expired-during-request";
-
-export function setExpirationReason(reason: ExpirationReason): void {
-  try {
-    sessionStorage.setItem(EXPIRATION_REASON_KEY, reason);
-  } catch {
-    // Silently fail if sessionStorage is unavailable
-  }
-}
-
-export function getExpirationReason(): ExpirationReason | null {
-  try {
-    return sessionStorage.getItem(EXPIRATION_REASON_KEY) as ExpirationReason;
-  } catch {
-    return null;
-  }
-}
-
-export function clearExpirationReason(): void {
-  try {
-    sessionStorage.removeItem(EXPIRATION_REASON_KEY);
-  } catch {
-    // Silently fail
-  }
-}
 
 export function TokenExpirationDialog() {
   const tokenExpiration = useTokenExpiration();
@@ -63,9 +33,8 @@ export function TokenExpirationDialog() {
 
     // Check if token is expired
     if (tokenExpiration.isExpired) {
-      setExpirationReason("expired-while-active");
       logout();
-      navigate("/login");
+      navigate("/login?reason=expired-while-active");
       return;
     }
 
@@ -101,9 +70,8 @@ export function TokenExpirationDialog() {
   };
 
   const handleLogoutNow = () => {
-    setExpirationReason("expired-while-active");
     logout();
-    navigate("/login");
+    navigate("/login?reason=expired-while-active");
   };
 
   if (!(showWarning && tokenExpiration)) {

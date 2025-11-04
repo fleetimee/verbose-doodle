@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { setExpirationReason } from "@/components/token-expiration-dialog";
 import { useAuth } from "@/features/auth/context";
 import { getTokenExpiration } from "@/features/auth/utils";
 
@@ -22,9 +21,8 @@ export function useTokenExpirationCheck() {
 
     // If no expiration info or token is expired, logout and redirect
     if (!expiration || expiration <= Date.now()) {
-      setExpirationReason("expired-while-away");
       logout();
-      navigate("/login");
+      navigate("/login?reason=expired-while-away");
     }
   }, [authState.isAuthenticated, logout, navigate]);
 }
