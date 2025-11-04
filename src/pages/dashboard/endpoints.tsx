@@ -19,7 +19,10 @@ import { EndpointsSearchControls } from "@/features/endpoints/components/endpoin
 import { useCreateEndpoint } from "@/features/endpoints/hooks/use-create-endpoint";
 import { useGetEndpoints } from "@/features/endpoints/hooks/use-get-endpoints";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
-import type { Endpoint } from "@/features/endpoints/types";
+import {
+  filterEndpoints,
+  groupEndpointsByBiller,
+} from "@/features/endpoints/utils";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
@@ -44,49 +47,15 @@ export function EndpointsPage() {
   const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
     useCreateEndpoint();
 
-  const filteredEndpoints = useMemo<Endpoint[]>(() => {
-    const query = searchTerm.trim().toLowerCase();
+  const filteredEndpoints = useMemo(
+    () => filterEndpoints(endpoints, searchTerm),
+    [endpoints, searchTerm]
+  );
 
-    if (query.length === 0) {
-      return endpoints;
-    }
-
-    return endpoints.filter((endpoint) => {
-      const matchesUrl = endpoint.url.toLowerCase().includes(query);
-      const matchesMethod = endpoint.method.toLowerCase().includes(query);
-      const matchesBiller = endpoint.billerId.toString().includes(query);
-      const matchesResponse = endpoint.responses.some((response) =>
-        response.name.toLowerCase().includes(query)
-      );
-
-      return matchesUrl || matchesMethod || matchesBiller || matchesResponse;
-    });
-  }, [endpoints, searchTerm]);
-
-  const groupedEndpoints = useMemo(() => {
-    if (filteredEndpoints.length === 0) {
-      return [];
-    }
-
-    const groups = new Map<number, Endpoint[]>();
-
-    for (const endpoint of filteredEndpoints) {
-      const existing = groups.get(endpoint.billerId);
-
-      if (existing) {
-        existing.push(endpoint);
-      } else {
-        groups.set(endpoint.billerId, [endpoint]);
-      }
-    }
-
-    const sortedBillerIds = Array.from(groups.keys()).sort((a, b) => a - b);
-
-    return sortedBillerIds.map((billerId) => ({
-      billerId,
-      endpoints: groups.get(billerId) ?? [],
-    }));
-  }, [filteredEndpoints]);
+  const groupedEndpoints = useMemo(
+    () => groupEndpointsByBiller(filteredEndpoints),
+    [filteredEndpoints]
+  );
 
   const hasEndpoints = endpoints.length > 0;
   const hasFilteredEndpoints = groupedEndpoints.length > 0;
@@ -160,7 +129,7 @@ export function EndpointsPage() {
                 <section className="space-y-4" key={group.billerId}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <h2 className="font-semibold text-lg">
-                      Biller ID {group.billerId}
+                      {group.billerName}
                     </h2>
                     <span className="text-muted-foreground text-sm">
                       {group.endpoints.length} endpoint

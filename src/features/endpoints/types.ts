@@ -22,6 +22,7 @@ export type Endpoint = {
   method: HttpMethod;
   url: string;
   billerId: number;
+  billerName?: string;
   responses: EndpointResponse[];
   createdAt?: string;
   updatedAt?: string;
@@ -44,4 +45,13 @@ export type EndpointError = {
   code?: string;
   status?: number;
   field?: string;
+};
+
+/**
+ * Grouped endpoints by biller
+ */
+export type GroupedEndpoints = {
+  billerId: number;
+  billerName: string;
+  endpoints: Endpoint[];
 };
