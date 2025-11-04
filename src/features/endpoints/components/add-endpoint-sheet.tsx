@@ -10,6 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
 import {
   EndpointForm,
   type EndpointFormHandle,
@@ -32,6 +33,7 @@ export function AddEndpointSheet({
   showTrigger = true,
 }: AddEndpointSheetProps) {
   const formRef = useRef<EndpointFormHandle>(null);
+  const { data: billers = [], isLoading: isLoadingBillers } = useGetBillers();
 
   const handleFormSubmit = (data: EndpointFormData) => {
     onSubmit(data);
@@ -62,7 +64,12 @@ export function AddEndpointSheet({
             Create a new API endpoint for a specific biller ID.
           </SheetDescription>
         </SheetHeader>
-        <EndpointForm onSubmit={handleFormSubmit} ref={formRef}>
+        <EndpointForm
+          billers={billers}
+          isLoadingBillers={isLoadingBillers}
+          onSubmit={handleFormSubmit}
+          ref={formRef}
+        >
           <SheetFooter className="px-6 pb-6">
             <Button disabled={isSubmitting} type="submit">
               {isSubmitting ? "Creating..." : "Create Endpoint"}

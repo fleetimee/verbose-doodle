@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Biller } from "@/features/billers/types";
 import {
   type EndpointFormData,
   endpointSchema,
@@ -27,6 +28,8 @@ import { getMethodTextColor } from "@/features/endpoints/utils/http-method-color
 
 type EndpointFormProps = {
   onSubmit: (data: EndpointFormData) => void;
+  billers?: Biller[];
+  isLoadingBillers?: boolean;
   children?: React.ReactNode;
 };
 
@@ -37,13 +40,13 @@ export type EndpointFormHandle = {
 };
 
 export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
-  ({ onSubmit, children }, ref) => {
+  ({ onSubmit, billers = [], isLoadingBillers = false, children }, ref) => {
     const form = useForm<EndpointFormData>({
       resolver: zodResolver(endpointSchema),
       defaultValues: {
         method: "GET",
         url: "/",
-        billerId: 1,
+        billerId: billers[0]?.id ?? 1,
       },
     });
 
@@ -79,6 +82,7 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                       >
                         <SelectTrigger
                           aria-invalid={fieldState.invalid}
+                          className="w-full"
                           id="endpoint-method"
                         >
                           <SelectValue placeholder="Select method">
@@ -141,21 +145,39 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                 name="billerId"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="endpoint-biller">Biller ID</FieldLabel>
+                    <FieldLabel htmlFor="endpoint-biller">Biller</FieldLabel>
                     <FieldContent>
-                      <Input
-                        {...field}
-                        aria-invalid={fieldState.invalid}
-                        autoComplete="off"
-                        id="endpoint-biller"
-                        inputMode="numeric"
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                        placeholder="1"
-                        type="number"
-                        value={field.value}
-                      />
+                      <Select
+                        disabled={isLoadingBillers || billers.length === 0}
+                        name={field.name}
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        value={field.value?.toString()}
+                      >
+                        <SelectTrigger
+                          aria-invalid={fieldState.invalid}
+                          className="w-full"
+                          id="endpoint-biller"
+                        >
+                          <SelectValue placeholder="Select a biller">
+                            {field.value &&
+                              billers.find((b) => b.id === field.value)?.name}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px]">
+                          {billers.map((biller) => (
+                            <SelectItem
+                              key={biller.id}
+                              value={biller.id.toString()}
+                            >
+                              {biller.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FieldDescription>
-                        Specify the biller ID this endpoint belongs to.
+                        {isLoadingBillers
+                          ? "Loading billers..."
+                          : "Select the biller this endpoint belongs to."}
                       </FieldDescription>
                     </FieldContent>
                     {fieldState.invalid && (
