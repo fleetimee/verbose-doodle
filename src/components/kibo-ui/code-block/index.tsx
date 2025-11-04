@@ -670,6 +670,12 @@ export const CodeBlockContent = ({
   themes,
   language,
   syntaxHighlighting = true,
+  onDrag,
+  onDragEnd,
+  onDragStart,
+  onAnimationStart,
+  onAnimationEnd,
+  onAnimationIteration,
   ...props
 }: CodeBlockContentProps) => {
   const [html, setHtml] = useState<string | null>(null);
