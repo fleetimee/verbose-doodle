@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 
 const teamMembers = [
@@ -39,10 +40,26 @@ const teamMembers = [
   },
 ];
 
+const sectionVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const listItemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0 },
+};
+
 export function AboutContent() {
   return (
     <section className="flex flex-col gap-6 text-pretty leading-relaxed">
-      <div className="flex flex-col gap-4">
+      <motion.div
+        animate="visible"
+        className="flex flex-col gap-4"
+        initial="hidden"
+        transition={{ duration: 0.5, delay: 0.5 }}
+        variants={sectionVariants}
+      >
         <h2 className="font-semibold text-2xl">What is this?</h2>
         <p>
           The Biller Simulator JSON is a powerful tool designed to help teams
@@ -50,38 +67,68 @@ export function AboutContent() {
           interface. Built with modern web technologies, it provides a flexible
           platform for managing billing workflows and API endpoints.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col gap-4">
+      <motion.div
+        animate="visible"
+        className="flex flex-col gap-4"
+        initial="hidden"
+        transition={{ duration: 0.5, delay: 0.6 }}
+        variants={sectionVariants}
+      >
         <h2 className="font-semibold text-2xl">Key Features</h2>
         <ul className="ml-6 flex list-disc flex-col gap-2">
-          <li>
-            <strong>Endpoint Management:</strong> Configure and monitor billing
-            API endpoints with real-time status tracking
-          </li>
-          <li>
-            <strong>User Administration:</strong> Role-based access control with
-            dedicated user management for administrators
-          </li>
-          <li>
-            <strong>JSON-Driven:</strong> Flexible configuration using JSON
-            scenarios for rapid prototyping
-          </li>
-          <li>
-            <strong>Modern Stack:</strong> Built with React 19, TypeScript, and
-            Vite for optimal performance
-          </li>
+          {[
+            {
+              title: "Endpoint Management:",
+              desc: "Configure and monitor billing API endpoints with real-time status tracking",
+            },
+            {
+              title: "User Administration:",
+              desc: "Role-based access control with dedicated user management for administrators",
+            },
+            {
+              title: "JSON-Driven:",
+              desc: "Flexible configuration using JSON scenarios for rapid prototyping",
+            },
+            {
+              title: "Modern Stack:",
+              desc: "Built with React 19, TypeScript, and Vite for optimal performance",
+            },
+          ].map((feature, index) => (
+            <motion.li
+              key={feature.title}
+              animate="visible"
+              initial="hidden"
+              transition={{ duration: 0.4, delay: 0.7 + index * 0.1 }}
+              variants={listItemVariants}
+            >
+              <strong>{feature.title}</strong> {feature.desc}
+            </motion.li>
+          ))}
         </ul>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col gap-4">
+      <motion.div
+        animate="visible"
+        className="flex flex-col gap-4"
+        initial="hidden"
+        transition={{ duration: 0.5, delay: 1.1 }}
+        variants={sectionVariants}
+      >
         <h2 className="font-semibold text-2xl">Our Team</h2>
         <div className="flex flex-row items-center justify-center">
           <AnimatedTooltip items={teamMembers} />
         </div>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col gap-4">
+      <motion.div
+        animate="visible"
+        className="flex flex-col gap-4"
+        initial="hidden"
+        transition={{ duration: 0.5, delay: 1.2 }}
+        variants={sectionVariants}
+      >
         <h2 className="font-semibold text-2xl">Technology</h2>
         <p>
           This application leverages cutting-edge technologies including React
@@ -89,7 +136,7 @@ export function AboutContent() {
           for data fetching, and Tailwind CSS for styling. The component library
           is built on shadcn/ui with Radix UI primitives.
         </p>
-      </div>
+      </motion.div>
     </section>
   );
 }

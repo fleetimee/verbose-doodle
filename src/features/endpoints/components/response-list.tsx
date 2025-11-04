@@ -1,4 +1,5 @@
 import { ListX } from "lucide-react";
+import { motion } from "motion/react";
 import {
   Empty,
   EmptyDescription,
@@ -48,20 +49,46 @@ export function ResponseList({
             </EmptyHeader>
           </Empty>
         ) : (
-          <div className="space-y-1 p-2">
+          <motion.div
+            animate="visible"
+            className="space-y-1 p-2"
+            initial="hidden"
+            variants={{
+              visible: {
+                transition: {
+                  staggerChildren: 0.05,
+                },
+              },
+              hidden: {},
+            }}
+          >
             {responses.map((response) => (
-              <ResponseListItem
-                isActivating={isActivating}
-                isDeactivating={isDeactivating}
-                isSelected={selectedResponseId === response.id}
+              <motion.div
                 key={response.id}
-                onActivate={onActivateResponse}
-                onDeactivate={onDeactivateResponse}
-                onSelect={onSelectResponse}
-                response={response}
-              />
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  visible: {
+                    opacity: 1,
+                    x: 0,
+                    transition: {
+                      duration: 0.3,
+                      ease: "easeOut",
+                    },
+                  },
+                }}
+              >
+                <ResponseListItem
+                  isActivating={isActivating}
+                  isDeactivating={isDeactivating}
+                  isSelected={selectedResponseId === response.id}
+                  onActivate={onActivateResponse}
+                  onDeactivate={onDeactivateResponse}
+                  onSelect={onSelectResponse}
+                  response={response}
+                />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </ScrollArea>
     </div>

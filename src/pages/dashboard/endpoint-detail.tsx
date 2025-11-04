@@ -1,5 +1,5 @@
 import { ArrowLeft, Circle, Plus } from "lucide-react";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
@@ -31,6 +31,10 @@ import {
 } from "@/features/endpoints/utils/http-method-colors";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { decodeId } from "@/lib/id-encoder";
+
+// Animation constants
+const PAGE_ANIMATION_DURATION = 0.4;
+const STAGGER_DELAY = 0.1;
 
 export function EndpointDetailPage() {
   const { id: encodedId } = useParams<{ id: string }>();
@@ -145,33 +149,72 @@ export function EndpointDetailPage() {
   // Show error if the ID cannot be decoded
   if (!decodedId) {
     return (
-      <div className="space-y-6">
-        <Button onClick={handleBack} size="sm" variant="ghost">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Endpoints
-        </Button>
-        <Empty className="min-h-[60vh] border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Circle />
-            </EmptyMedia>
-            <EmptyTitle>Invalid endpoint ID</EmptyTitle>
-            <EmptyDescription>
-              The endpoint URL is invalid or has been tampered with.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button onClick={handleBack}>Back to Endpoints</Button>
-          </EmptyContent>
-        </Empty>
-      </div>
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+        initial={{ opacity: 0, y: 20 }}
+        transition={{ duration: PAGE_ANIMATION_DURATION, ease: "easeOut" }}
+      >
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          transition={{
+            duration: PAGE_ANIMATION_DURATION,
+            delay: STAGGER_DELAY,
+            ease: "easeOut",
+          }}
+        >
+          <Button onClick={handleBack} size="sm" variant="ghost">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Endpoints
+          </Button>
+        </motion.div>
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          transition={{
+            duration: PAGE_ANIMATION_DURATION,
+            delay: STAGGER_DELAY * 2,
+            ease: "easeOut",
+          }}
+        >
+          <Empty className="min-h-[60vh] border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Circle />
+              </EmptyMedia>
+              <EmptyTitle>Invalid endpoint ID</EmptyTitle>
+              <EmptyDescription>
+                The endpoint URL is invalid or has been tampered with.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button onClick={handleBack}>Back to Endpoints</Button>
+            </EmptyContent>
+          </Empty>
+        </motion.div>
+      </motion.div>
     );
   }
 
   if (isLoadingEndpoint) {
     return (
-      <div className="space-y-4 md:space-y-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-4 md:space-y-6"
+        initial={{ opacity: 0, y: 20 }}
+        transition={{ duration: PAGE_ANIMATION_DURATION, ease: "easeOut" }}
+      >
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+          initial={{ opacity: 0, y: 20 }}
+          transition={{
+            duration: PAGE_ANIMATION_DURATION,
+            delay: STAGGER_DELAY,
+            ease: "easeOut",
+          }}
+        >
           <div className="flex items-start gap-3 md:items-center md:gap-4">
             <Skeleton className="h-10 w-10 shrink-0 rounded-md" />
             <div className="min-w-0 flex-1 space-y-2">
@@ -185,41 +228,91 @@ export function EndpointDetailPage() {
           {canAddResponse && (
             <Skeleton className="h-10 w-32 shrink-0 rounded-md" />
           )}
-        </div>
+        </motion.div>
 
-        <EndpointDetailSkeleton />
-      </div>
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          transition={{
+            duration: PAGE_ANIMATION_DURATION,
+            delay: STAGGER_DELAY * 2,
+            ease: "easeOut",
+          }}
+        >
+          <EndpointDetailSkeleton />
+        </motion.div>
+      </motion.div>
     );
   }
 
   if (!endpoint) {
     return (
-      <div className="space-y-6">
-        <Button onClick={handleBack} size="sm" variant="ghost">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Endpoints
-        </Button>
-        <Empty className="min-h-[60vh] border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Circle />
-            </EmptyMedia>
-            <EmptyTitle>Endpoint not found</EmptyTitle>
-            <EmptyDescription>
-              The endpoint you're looking for doesn't exist or has been removed.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button onClick={handleBack}>Back to Endpoints</Button>
-          </EmptyContent>
-        </Empty>
-      </div>
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+        initial={{ opacity: 0, y: 20 }}
+        transition={{ duration: PAGE_ANIMATION_DURATION, ease: "easeOut" }}
+      >
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          transition={{
+            duration: PAGE_ANIMATION_DURATION,
+            delay: STAGGER_DELAY,
+            ease: "easeOut",
+          }}
+        >
+          <Button onClick={handleBack} size="sm" variant="ghost">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Endpoints
+          </Button>
+        </motion.div>
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          transition={{
+            duration: PAGE_ANIMATION_DURATION,
+            delay: STAGGER_DELAY * 2,
+            ease: "easeOut",
+          }}
+        >
+          <Empty className="min-h-[60vh] border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Circle />
+              </EmptyMedia>
+              <EmptyTitle>Endpoint not found</EmptyTitle>
+              <EmptyDescription>
+                The endpoint you're looking for doesn't exist or has been
+                removed.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button onClick={handleBack}>Back to Endpoints</Button>
+            </EmptyContent>
+          </Empty>
+        </motion.div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <motion.div
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-4 md:space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      transition={{ duration: PAGE_ANIMATION_DURATION, ease: "easeOut" }}
+    >
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        initial={{ opacity: 0, y: 20 }}
+        transition={{
+          duration: PAGE_ANIMATION_DURATION,
+          delay: STAGGER_DELAY,
+          ease: "easeOut",
+        }}
+      >
         <div className="flex items-start gap-3 md:items-center md:gap-4">
           <Button
             className="mt-1 md:mt-0"
@@ -254,20 +347,30 @@ export function EndpointDetailPage() {
             Add Response
           </Button>
         </ProtectedAction>
-      </div>
+      </motion.div>
 
-      <EndpointDetailLayout
-        endpointMethod={endpoint.method}
-        endpointUrl={endpoint.url}
-        isActivating={isActivatingResponse}
-        isDeactivating={isDeactivatingResponse}
-        onActivateResponse={handleActivateResponse}
-        onDeactivateResponse={handleDeactivateResponse}
-        onSelectResponse={setSelectedResponseId}
-        responses={endpoint.responses}
-        selectedResponse={selectedResponse}
-        selectedResponseId={selectedResponseId}
-      />
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20 }}
+        transition={{
+          duration: PAGE_ANIMATION_DURATION,
+          delay: STAGGER_DELAY * 2,
+          ease: "easeOut",
+        }}
+      >
+        <EndpointDetailLayout
+          endpointMethod={endpoint.method}
+          endpointUrl={endpoint.url}
+          isActivating={isActivatingResponse}
+          isDeactivating={isDeactivatingResponse}
+          onActivateResponse={handleActivateResponse}
+          onDeactivateResponse={handleDeactivateResponse}
+          onSelectResponse={setSelectedResponseId}
+          responses={endpoint.responses}
+          selectedResponse={selectedResponse}
+          selectedResponseId={selectedResponseId}
+        />
+      </motion.div>
 
       <AnimatePresence>
         {isStepperOpen && (
@@ -278,6 +381,6 @@ export function EndpointDetailPage() {
           />
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
