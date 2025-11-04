@@ -13,6 +13,7 @@ import {
   abbreviateMethod,
   getMethodBadgeColor,
 } from "@/features/endpoints/utils/http-method-colors";
+import { encodeId } from "@/lib/id-encoder";
 
 type EndpointListItemProps = {
   endpoint: Endpoint;
@@ -26,7 +27,7 @@ export function EndpointListItem({ endpoint, onClick }: EndpointListItemProps) {
     if (onClick) {
       onClick();
     } else {
-      navigate(`/dashboard/endpoints/${endpoint.id}`);
+      navigate(`/dashboard/endpoints/${encodeId(endpoint.id)}`);
     }
   };
 

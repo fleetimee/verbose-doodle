@@ -56,9 +56,9 @@ export function ResponseListItem({
 
   return (
     <>
-      <button
+      <div
         className={cn(
-          "w-full rounded-md px-3 py-2.5 text-left transition-colors",
+          "w-full rounded-md px-3 py-2.5 text-left transition-colors cursor-pointer",
           isSelected ? "bg-accent" : "hover:bg-accent/50",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         )}
@@ -66,7 +66,14 @@ export function ResponseListItem({
         onClick={() => {
           onSelect(response.id);
         }}
-        type="button"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSelect(response.id);
+          }
+        }}
+        role="button"
+        tabIndex={0}
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 space-y-1">
@@ -118,7 +125,7 @@ export function ResponseListItem({
             </button>
           )}
         </div>
-      </button>
+      </div>
 
       <AlertDialog onOpenChange={setShowConfirmDialog} open={showConfirmDialog}>
         <AlertDialogContent>

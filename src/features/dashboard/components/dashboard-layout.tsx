@@ -18,6 +18,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useGetEndpoint } from "@/features/endpoints/hooks/use-get-endpoint";
+import { decodeId } from "@/lib/id-encoder";
 
 const routeLabels: Record<string, string> = {
   overview: "Overview",
@@ -26,7 +27,8 @@ const routeLabels: Record<string, string> = {
   settings: "Settings",
 };
 
-const ENDPOINT_DETAIL_REGEX = /^\/dashboard\/endpoints\/(\d+)$/;
+// Updated regex to match encoded IDs (base64 URL-safe characters)
+const ENDPOINT_DETAIL_REGEX = /^\/dashboard\/endpoints\/([A-Za-z0-9_-]+)$/;
 
 export function DashboardLayout() {
   const location = useLocation();
@@ -34,9 +36,12 @@ export function DashboardLayout() {
   const { theme, setTheme } = useTheme();
 
   const isEndpointDetail = location.pathname.match(ENDPOINT_DETAIL_REGEX);
-  const endpointId = isEndpointDetail ? params.id : undefined;
+  const encodedId = isEndpointDetail ? params.id : undefined;
 
-  const { data: endpoint } = useGetEndpoint(endpointId || "");
+  // Decode the ID if we're on an endpoint detail page
+  const decodedId = encodedId ? decodeId(encodedId) : undefined;
+
+  const { data: endpoint } = useGetEndpoint(decodedId || "");
 
   const pathSegments = location.pathname
     .split("/")
@@ -48,8 +53,9 @@ export function DashboardLayout() {
       routeLabels[segment] ||
       segment.charAt(0).toUpperCase() + segment.slice(1);
 
-    if (isEndpointDetail && segment === endpointId && endpoint) {
-      label = endpoint.url;
+    // If this segment is the encoded ID and we have endpoint data, show the endpoint URL
+    if (isEndpointDetail && segment === encodedId && endpoint) {
+      label = `${endpoint.method} ${endpoint.url}`;
     }
 
     const isLast = index === pathSegments.length - 1;

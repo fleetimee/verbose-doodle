@@ -30,13 +30,22 @@ import {
   getMethodBadgeColor,
 } from "@/features/endpoints/utils/http-method-colors";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { decodeId } from "@/lib/id-encoder";
 
 export function EndpointDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id: encodedId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { authState } = useAuth();
   const { can } = usePermissions({ role: authState.user?.role });
   const canAddResponse = can("canAddResponse");
+
+  // Decode the ID from the URL
+  const decodedId = useMemo(() => {
+    if (!encodedId) {
+      return null;
+    }
+    return decodeId(encodedId);
+  }, [encodedId]);
 
   const [selectedResponseId, setSelectedResponseId] = useState<string | null>(
     null
@@ -44,7 +53,7 @@ export function EndpointDetailPage() {
   const [isStepperOpen, setIsStepperOpen] = useState(false);
 
   const { data: endpoint, isPending: isLoadingEndpoint } = useGetEndpoint(
-    id ?? ""
+    decodedId ?? ""
   );
   const { mutate: createResponse, isPending: isCreatingResponse } =
     useCreateResponse();
@@ -132,6 +141,32 @@ export function EndpointDetailPage() {
       }
     );
   };
+
+  // Show error if the ID cannot be decoded
+  if (!decodedId) {
+    return (
+      <div className="space-y-6">
+        <Button onClick={handleBack} size="sm" variant="ghost">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Endpoints
+        </Button>
+        <Empty className="min-h-[60vh] border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Circle />
+            </EmptyMedia>
+            <EmptyTitle>Invalid endpoint ID</EmptyTitle>
+            <EmptyDescription>
+              The endpoint URL is invalid or has been tampered with.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={handleBack}>Back to Endpoints</Button>
+          </EmptyContent>
+        </Empty>
+      </div>
+    );
+  }
 
   if (isLoadingEndpoint) {
     return (

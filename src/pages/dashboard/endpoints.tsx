@@ -9,6 +9,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { Postman } from "@/components/ui/svgs/postman";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
 import { EndpointCard } from "@/features/endpoints/components/endpoint-card";
@@ -16,6 +17,7 @@ import { EndpointCardSkeleton } from "@/features/endpoints/components/endpoint-c
 import { EndpointListItem } from "@/features/endpoints/components/endpoint-list-item";
 import { EndpointListSkeleton } from "@/features/endpoints/components/endpoint-list-skeleton";
 import { EndpointsSearchControls } from "@/features/endpoints/components/endpoints-search-controls";
+import { ExportEndpointsDialog } from "@/features/endpoints/components/export-endpoints-dialog";
 import { useCreateEndpoint } from "@/features/endpoints/hooks/use-create-endpoint";
 import { useGetEndpoints } from "@/features/endpoints/hooks/use-get-endpoints";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
@@ -38,6 +40,7 @@ export function EndpointsPage() {
   const { data: endpoints = [], isPending: isLoadingEndpoints } =
     useGetEndpoints();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useLocalStorage<"grid" | "list">(
     "endpoints-view-mode",
@@ -70,6 +73,10 @@ export function EndpointsPage() {
         setIsDialogOpen(false);
       },
     });
+  };
+
+  const handleOpenExportDialog = () => {
+    setIsExportDialogOpen(true);
   };
 
   return (
@@ -117,10 +124,28 @@ export function EndpointsPage() {
 
       {!isLoadingEndpoints && hasEndpoints && (
         <>
-          <EndpointsSearchControls
-            onSearchChange={setSearchTerm}
-            onViewModeChange={setViewMode}
-            viewMode={viewMode}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="flex-1">
+              <EndpointsSearchControls
+                onSearchChange={setSearchTerm}
+                onViewModeChange={setViewMode}
+                viewMode={viewMode}
+              />
+            </div>
+            <Button
+              disabled={groupedEndpoints.length === 0}
+              onClick={handleOpenExportDialog}
+              variant="outline"
+            >
+              <Postman className="mr-2 h-4 w-4" />
+              Export to Postman
+            </Button>
+          </div>
+
+          <ExportEndpointsDialog
+            groupedEndpoints={groupedEndpoints}
+            onOpenChange={setIsExportDialogOpen}
+            open={isExportDialogOpen}
           />
 
           {hasFilteredEndpoints ? (
