@@ -82,6 +82,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     // Clear all TanStack Query cache to prevent data leakage between sessions
     queryClient.clear();
+    // Clear all sessionStorage (including expiration reasons)
+    try {
+      sessionStorage.clear();
+    } catch {
+      // Silently fail if sessionStorage is unavailable
+    }
   }, []);
 
   useEffect(() => {

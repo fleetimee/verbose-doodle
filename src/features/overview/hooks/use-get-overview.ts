@@ -1,9 +1,9 @@
-import { getAuthToken } from "@/features/auth/utils";
 import { overviewQueryKeys } from "@/features/overview/query-keys";
 import type {
   ApiOverviewResponse,
   OverviewData,
 } from "@/features/overview/types";
+import { apiGet } from "@/lib/api";
 import { getOverviewUrl } from "@/lib/api-endpoints";
 import { TIME_DURATIONS } from "@/lib/constants";
 import { createQueryHook } from "@/lib/query-hooks";
@@ -12,26 +12,7 @@ import { createQueryHook } from "@/lib/query-hooks";
  * Fetch overview data from API
  */
 async function fetchOverview(): Promise<OverviewData> {
-  const token = getAuthToken();
-
-  if (!token) {
-    throw new Error("No authentication token found. Please login first.");
-  }
-
-  const response = await fetch(getOverviewUrl(), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch overview data: ${response.statusText}`);
-  }
-
-  const apiResponse = (await response.json()) as ApiOverviewResponse;
-
+  const apiResponse = await apiGet<ApiOverviewResponse>(getOverviewUrl());
   return apiResponse.data;
 }
 

@@ -1,7 +1,12 @@
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router";
 import SlicedText from "@/components/kokonutui/sliced-text";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import {
+  clearExpirationReason,
+  getExpirationReason,
+} from "@/components/token-expiration-dialog";
 import { Highlighter } from "@/components/ui/highlighter";
 import { InteractiveGridPattern } from "@/components/ui/interactive-grid-pattern";
 import { Logo } from "@/components/ui/logo";
@@ -14,9 +19,21 @@ import { getErrorMessage } from "@/lib/error-handler";
 const GRID_SQUARES_HORIZONTAL = 50;
 const GRID_SQUARES_VERTICAL = 50;
 
+const EXPIRATION_MESSAGES = {
+  "expired-while-active":
+    "Your session has expired. Please log in again to continue.",
+  "expired-while-away":
+    "Your session expired while you were away. Please log in again.",
+  "expired-during-request":
+    "Your session has expired. Please log in again to continue.",
+};
+
 export const Login = () => {
   const { authState } = useAuth();
   const { theme, setTheme } = useTheme();
+  const [expirationMessage, setExpirationMessage] = useState<string | null>(
+    null
+  );
 
   useDocumentMeta({
     title: "Login",
@@ -26,6 +43,15 @@ export const Login = () => {
 
   const { mutate: login, isPending, error, isError } = useLogin();
 
+  // Check for expiration reason on mount
+  useEffect(() => {
+    const reason = getExpirationReason();
+    if (reason) {
+      setExpirationMessage(EXPIRATION_MESSAGES[reason]);
+      clearExpirationReason();
+    }
+  }, []);
+
   // Redirect to dashboard if already authenticated
   if (authState.isAuthenticated) {
     return <Navigate replace to="/dashboard" />;
@@ -34,6 +60,20 @@ export const Login = () => {
   // Filter theme to only pass valid values to ThemeSwitcher (light or dark)
   const themeSwitcherValue =
     theme === "light" || theme === "dark" ? theme : undefined;
+
+  // Determine error state for login form
+  let loginError: { message: string; description?: string } | null = null;
+  if (expirationMessage) {
+    loginError = {
+      message: "Session Expired",
+      description: expirationMessage,
+    };
+  } else if (isError) {
+    loginError = {
+      message: "Login Failed",
+      description: getErrorMessage(error),
+    };
+  }
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4">
@@ -75,18 +115,7 @@ export const Login = () => {
         </div>
 
         {/* Login Form */}
-        <LoginForm
-          error={
-            isError
-              ? {
-                  message: "Login Failed",
-                  description: getErrorMessage(error),
-                }
-              : null
-          }
-          isLoading={isPending}
-          onSubmit={login}
-        />
+        <LoginForm error={loginError} isLoading={isPending} onSubmit={login} />
       </div>
     </div>
   );

@@ -19,8 +19,10 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { NotFoundPage } from "@/components/not-found";
 import { ProtectedRoute } from "@/components/protected-route";
 import { ThemeProvider } from "@/components/theme-provider";
+import { TokenExpirationDialog } from "@/components/token-expiration-dialog";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/features/auth/context";
+import { useTokenExpirationCheck } from "@/features/auth/hooks/use-token-expiration-check";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
 import { queryClient } from "@/lib/query-client";
 import { About } from "@/pages/about";
@@ -29,6 +31,50 @@ import { EndpointsPage } from "@/pages/dashboard/endpoints";
 import { OverviewPage } from "@/pages/dashboard/overview";
 import { UsersPage } from "@/pages/dashboard/users";
 import { Login } from "@/pages/login";
+
+function AppContent() {
+  // Check for expired token on mount/navigation
+  useTokenExpirationCheck();
+
+  return (
+    <>
+      <Routes>
+        <Route element={<AuthRedirect />} path="/" />
+        <Route element={<Login />} path="/login" />
+        <Route element={<About />} path="/about" />
+
+        <Route
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+          path="/dashboard"
+        >
+          <Route
+            element={<Navigate replace to="/dashboard/overview" />}
+            index
+          />
+          <Route element={<OverviewPage />} path="overview" />
+          <Route element={<EndpointsPage />} path="endpoints" />
+          <Route element={<EndpointDetailPage />} path="endpoints/:id" />
+          <Route
+            element={
+              <ProtectedRoute requiredRole="ADMIN">
+                <UsersPage />
+              </ProtectedRoute>
+            }
+            path="users"
+          />
+        </Route>
+
+        <Route element={<NotFoundPage />} path="*" />
+      </Routes>
+      <TokenExpirationDialog />
+      <Toaster position="bottom-center" />
+    </>
+  );
+}
 
 const rootElement = document.getElementById("root");
 
@@ -43,43 +89,8 @@ createRoot(rootElement).render(
         <AuthProvider>
           <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
             <BrowserRouter>
-              <Routes>
-                <Route element={<AuthRedirect />} path="/" />
-                <Route element={<Login />} path="/login" />
-                <Route element={<About />} path="/about" />
-
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout />
-                    </ProtectedRoute>
-                  }
-                  path="/dashboard"
-                >
-                  <Route
-                    element={<Navigate replace to="/dashboard/overview" />}
-                    index
-                  />
-                  <Route element={<OverviewPage />} path="overview" />
-                  <Route element={<EndpointsPage />} path="endpoints" />
-                  <Route
-                    element={<EndpointDetailPage />}
-                    path="endpoints/:id"
-                  />
-                  <Route
-                    element={
-                      <ProtectedRoute requiredRole="ADMIN">
-                        <UsersPage />
-                      </ProtectedRoute>
-                    }
-                    path="users"
-                  />
-                </Route>
-
-                <Route element={<NotFoundPage />} path="*" />
-              </Routes>
+              <AppContent />
             </BrowserRouter>
-            <Toaster position="bottom-center" />
           </ThemeProvider>
         </AuthProvider>
         <ReactQueryDevtools initialIsOpen={false} />

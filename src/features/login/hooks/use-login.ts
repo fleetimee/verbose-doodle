@@ -7,6 +7,7 @@ import type {
   LoginResponse,
   UserRole,
 } from "@/features/login/types";
+import { apiFetch } from "@/lib/api";
 import { getLoginUrl } from "@/lib/api-endpoints";
 import { handleAuthError, showSuccessToast } from "@/lib/error-handler";
 import { createMutationHook } from "@/lib/query-hooks";
@@ -53,36 +54,27 @@ function decodeJWTRole(token: string): UserRole {
  * Makes API call to authenticate user
  */
 async function loginUser(data: LoginFormData): Promise<LoginResponse> {
-  const response = await fetch(getLoginUrl(), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      username: data.username,
-      password: data.password,
-    }),
-  });
+  try {
+    const apiResponse = await apiFetch<ApiLoginResponse>(getLoginUrl(), {
+      method: "POST",
+      body: JSON.stringify({
+        username: data.username,
+        password: data.password,
+      }),
+    });
 
-  if (!response.ok) {
-    throw {
-      message: `Failed to login: ${response.statusText}`,
-      code: "LOGIN_FAILED",
-      status: response.status,
-    } as LoginError;
+    // Extract role from JWT token
+    const role = decodeJWTRole(apiResponse.data.token);
+
+    return {
+      responseCode: apiResponse.responseCode,
+      responseDesc: apiResponse.responseDesc,
+      token: apiResponse.data.token,
+      role,
+    };
+  } catch (error) {
+    throw error as LoginError;
   }
-
-  const apiResponse = (await response.json()) as ApiLoginResponse;
-
-  // Extract role from JWT token
-  const role = decodeJWTRole(apiResponse.data.token);
-
-  return {
-    responseCode: apiResponse.responseCode,
-    responseDesc: apiResponse.responseDesc,
-    token: apiResponse.data.token,
-    role,
-  };
 }
 
 /**

@@ -1,6 +1,7 @@
-import { getAuthToken } from "@/features/auth/utils";
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
 import type { Endpoint } from "@/features/endpoints/types";
+import type { ApiError } from "@/lib/api";
+import { apiGet } from "@/lib/api";
 import { getEndpointDetailUrl } from "@/lib/api-endpoints";
 import { TIME_DURATIONS } from "@/lib/constants";
 import { createQueryHook } from "@/lib/query-hooks";
@@ -33,45 +34,31 @@ type ApiResponse = {
 };
 
 async function fetchEndpoint(id: string): Promise<Endpoint | undefined> {
-  const token = getAuthToken();
+  try {
+    const data = await apiGet<ApiResponse>(getEndpointDetailUrl(id));
+    const apiEndpoint = data.data.endpoint;
 
-  if (!token) {
-    throw new Error("No authentication token found. Please login first.");
-  }
-
-  const response = await fetch(getEndpointDetailUrl(id), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    if (response.status === HTTP_NOT_FOUND) {
+    return {
+      id: apiEndpoint.endpoint_id.toString(),
+      method: apiEndpoint.method,
+      url: apiEndpoint.url,
+      billerId: apiEndpoint.biller_id,
+      billerName: apiEndpoint.biller_name,
+      responses: apiEndpoint.responses.map((apiResponse) => ({
+        id: apiResponse.response_id.toString(),
+        name: apiResponse.name,
+        json: apiResponse.json,
+        statusCode: apiResponse.status_code,
+        activated: apiResponse.activated,
+      })),
+    };
+  } catch (error) {
+    // Return undefined for 404 errors (endpoint not found)
+    if ((error as ApiError).status === HTTP_NOT_FOUND) {
       return;
     }
-    throw new Error(`Failed to fetch endpoint: ${response.statusText}`);
+    throw error;
   }
-
-  const data = (await response.json()) as ApiResponse;
-
-  const apiEndpoint = data.data.endpoint;
-
-  return {
-    id: apiEndpoint.endpoint_id.toString(),
-    method: apiEndpoint.method,
-    url: apiEndpoint.url,
-    billerId: apiEndpoint.biller_id,
-    billerName: apiEndpoint.biller_name,
-    responses: apiEndpoint.responses.map((apiResponse) => ({
-      id: apiResponse.response_id.toString(),
-      name: apiResponse.name,
-      json: apiResponse.json,
-      statusCode: apiResponse.status_code,
-      activated: apiResponse.activated,
-    })),
-  };
 }
 
 export function useGetEndpoint(id: string) {

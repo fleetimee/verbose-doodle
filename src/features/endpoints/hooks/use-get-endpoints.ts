@@ -1,6 +1,6 @@
-import { getAuthToken } from "@/features/auth/utils";
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
 import type { Endpoint } from "@/features/endpoints/types";
+import { apiGet } from "@/lib/api";
 import { getAdminEndpointList } from "@/lib/api-endpoints";
 import { TIME_DURATIONS } from "@/lib/constants";
 import { createQueryHook } from "@/lib/query-hooks";
@@ -31,25 +31,7 @@ type ApiResponse = {
 };
 
 async function fetchEndpoints(): Promise<Endpoint[]> {
-  const token = getAuthToken();
-
-  if (!token) {
-    throw new Error("No authentication token found. Please login first.");
-  }
-
-  const response = await fetch(getAdminEndpointList(), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch endpoints: ${response.statusText}`);
-  }
-
-  const data = (await response.json()) as ApiResponse;
+  const data = await apiGet<ApiResponse>(getAdminEndpointList());
 
   return data.data.endpoints.map((apiEndpoint) => ({
     id: apiEndpoint.endpoint_id.toString(),

@@ -5,6 +5,7 @@
 
 /**
  * Endpoint configuration
+ * Full URL paths are defined here (including /api prefix where needed)
  */
 export const API_ENDPOINTS = {
   /**

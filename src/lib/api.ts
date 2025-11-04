@@ -3,6 +3,7 @@
  * These utilities provide a consistent interface for making HTTP requests
  */
 
+import { setExpirationReason } from "@/components/token-expiration-dialog";
 import {
   clearAuthToken,
   emitUnauthorizedEvent,
@@ -46,7 +47,7 @@ export type FetchConfig = RequestInit & {
 };
 
 const DEFAULT_TIMEOUT = 30_000;
-const DEFAULT_BASE_URL = "/api";
+const DEFAULT_BASE_URL = "";
 const HTTP_STATUS_UNAUTHORIZED = 401;
 
 /**
@@ -63,12 +64,11 @@ export async function apiFetch<T>(
     ...rest
   } = config;
 
-  const url = `${baseUrl}${endpoint}`;
+  const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-  // Build headers with JWT token if available
   const token = getAuthToken();
   const requestHeaders: HeadersInit = {
     "Content-Type": "application/json",
@@ -87,6 +87,7 @@ export async function apiFetch<T>(
 
     if (!response.ok) {
       if (response.status === HTTP_STATUS_UNAUTHORIZED) {
+        setExpirationReason("expired-during-request");
         clearAuthToken();
         emitUnauthorizedEvent();
       }

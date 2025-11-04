@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getAuthToken } from "@/features/auth/utils";
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
+import { apiPut } from "@/lib/api";
 import { getResponseActivateUrl } from "@/lib/api-endpoints";
 import { createMutationHook } from "@/lib/query-hooks";
 
@@ -28,41 +28,16 @@ type ResponseError = {
 async function activateResponse(
   data: ActivateResponseRequest
 ): Promise<ActivateResponseResponse> {
-  const token = getAuthToken();
+  try {
+    await apiPut(getResponseActivateUrl(data.endpointId, data.responseId));
 
-  if (!token) {
-    throw {
-      message: "No authentication token found. Please login first.",
-      code: "AUTH_REQUIRED",
-      status: 401,
-    } as ResponseError;
+    return {
+      endpointId: data.endpointId,
+      responseId: data.responseId,
+    };
+  } catch (error) {
+    throw error as ResponseError;
   }
-
-  const response = await fetch(
-    getResponseActivateUrl(data.endpointId, data.responseId),
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw {
-      message: `Failed to activate response: ${response.statusText}`,
-      code: "ACTIVATE_FAILED",
-      status: response.status,
-    } as ResponseError;
-  }
-
-  await response.json();
-
-  return {
-    endpointId: data.endpointId,
-    responseId: data.responseId,
-  };
 }
 
 /**
