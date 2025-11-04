@@ -145,6 +145,32 @@ describe("API utilities", () => {
       });
     });
 
+    test("clears auth token and emits unauthorized event on 401", async () => {
+      const authUtils = await import("@/features/auth/utils");
+      const clearSpy = spyOn(authUtils, "clearAuthToken");
+      const emitSpy = spyOn(authUtils, "emitUnauthorizedEvent");
+
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        statusText: "Unauthorized",
+        headers: new Headers(),
+        json: async () => ({ message: "Unauthorized" }),
+      } as Response);
+
+      await expect(apiFetch("/test")).rejects.toEqual({
+        message: "Unauthorized",
+        status: 401,
+        code: "401",
+      });
+
+      expect(clearSpy).toHaveBeenCalledTimes(1);
+      expect(emitSpy).toHaveBeenCalledTimes(1);
+
+      clearSpy.mockRestore();
+      emitSpy.mockRestore();
+    });
+
     test("handles timeout", async () => {
       // Mock fetch to respect AbortSignal
       fetchSpy.mockImplementation((_url: string, options?: RequestInit) => {

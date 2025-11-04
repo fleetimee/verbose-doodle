@@ -3,7 +3,11 @@
  * These utilities provide a consistent interface for making HTTP requests
  */
 
-import { getAuthToken } from "@/features/auth/utils";
+import {
+  clearAuthToken,
+  emitUnauthorizedEvent,
+  getAuthToken,
+} from "@/features/auth/utils";
 
 export type ApiError = {
   message: string;
@@ -43,6 +47,7 @@ export type FetchConfig = RequestInit & {
 
 const DEFAULT_TIMEOUT = 30_000;
 const DEFAULT_BASE_URL = "/api";
+const HTTP_STATUS_UNAUTHORIZED = 401;
 
 /**
  * Generic fetch wrapper with error handling and timeout
@@ -81,6 +86,10 @@ export async function apiFetch<T>(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
+      if (response.status === HTTP_STATUS_UNAUTHORIZED) {
+        clearAuthToken();
+        emitUnauthorizedEvent();
+      }
       throw await createApiError(response);
     }
 

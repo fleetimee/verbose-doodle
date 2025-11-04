@@ -7,10 +7,11 @@ import {
   spyOn,
   test,
 } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AuthProvider, useAuth } from "@/features/auth/context";
 import {
+  AUTH_UNAUTHORIZED_EVENT,
   clearAuthToken,
   decodeJWT,
   getAuthToken,
@@ -31,6 +32,7 @@ type JwtPayload = {
   user_id: string;
   username: string;
   role: "ADMIN" | "USER";
+  exp?: number;
 };
 
 const originalLocalStorage = window.localStorage;
@@ -166,6 +168,18 @@ describe("auth utils", () => {
     expect(decodeJWT(token)).toBeNull();
   });
 
+  test("decodeJWT returns null when token is expired", () => {
+    const payload: JwtPayload = {
+      user_id: "user-expired",
+      username: "expired-user",
+      role: "USER",
+      exp: Math.floor(Date.now() / 1000) - 10,
+    };
+    const token = createJwtToken(payload);
+
+    expect(decodeJWT(token)).toBeNull();
+  });
+
   test("saveAuthToken stores token in localStorage", () => {
     const { storage, setItemMock } = stubLocalStorage();
 
@@ -249,6 +263,28 @@ describe("AuthProvider", () => {
     decodeSpy.mockRestore();
   });
 
+  test("clears invalid persisted token during initialization", async () => {
+    const { storage, removeItemMock } = stubLocalStorage();
+    const persistedToken = "invalid-token";
+    storage[TOKEN_STORAGE_KEY] = persistedToken;
+
+    const decodeSpy = await createDecodeSpy();
+    decodeSpy.mockReturnValue(null);
+
+    render(
+      <AuthProvider>
+        <AuthTestConsumer loginToken="unused" />
+      </AuthProvider>
+    );
+
+    expect(removeItemMock).toHaveBeenCalledWith(TOKEN_STORAGE_KEY);
+    expect(storage[TOKEN_STORAGE_KEY]).toBeUndefined();
+    expect(screen.getByTestId("is-authenticated").textContent).toBe("false");
+    expect(screen.getByTestId("username").textContent).toBe("");
+
+    decodeSpy.mockRestore();
+  });
+
   test("login stores token and updates auth state", async () => {
     const { setItemMock } = stubLocalStorage();
     const loginToken = "login-token";
@@ -312,6 +348,45 @@ describe("AuthProvider", () => {
     expect(removeItemMock).toHaveBeenCalledWith(TOKEN_STORAGE_KEY);
     expect(screen.getByTestId("is-authenticated").textContent).toBe("false");
     expect(screen.getByTestId("username").textContent).toBe("");
+
+    decodeSpy.mockRestore();
+  });
+
+  test("handles unauthorized event by logging out", async () => {
+    const { storage, setItemMock, removeItemMock } = stubLocalStorage();
+    const loginToken = "event-token";
+
+    const decodeSpy = await createDecodeSpy();
+    const authedUser = {
+      user_id: "user-event",
+      username: "event-user",
+      role: "ADMIN" as const,
+    };
+
+    decodeSpy.mockReturnValue(authedUser);
+
+    const user = userEvent.setup();
+
+    render(
+      <AuthProvider>
+        <AuthTestConsumer loginToken={loginToken} />
+      </AuthProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: "Trigger Login" }));
+
+    expect(screen.getByTestId("is-authenticated").textContent).toBe("true");
+    expect(storage[TOKEN_STORAGE_KEY]).toBe(loginToken);
+
+    await act(() => {
+      window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT));
+    });
+
+    expect(removeItemMock).toHaveBeenCalledWith(TOKEN_STORAGE_KEY);
+    expect(setItemMock).toHaveBeenCalledWith(TOKEN_STORAGE_KEY, loginToken);
+    expect(screen.getByTestId("is-authenticated").textContent).toBe("false");
+    expect(screen.getByTestId("username").textContent).toBe("");
+    expect(storage[TOKEN_STORAGE_KEY]).toBeUndefined();
 
     decodeSpy.mockRestore();
   });

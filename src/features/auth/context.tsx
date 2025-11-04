@@ -1,12 +1,20 @@
 import type { ReactNode } from "react";
-import { createContext, useContext, useState } from "react";
 import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import {
+  AUTH_UNAUTHORIZED_EVENT,
   clearAuthToken,
   decodeJWT,
   getAuthToken,
   saveAuthToken,
 } from "@/features/auth/utils";
 import type { AuthUser } from "@/features/login/types";
+import { queryClient } from "@/lib/query-client";
 
 type AuthState = {
   user: AuthUser | null;
@@ -33,28 +41,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const user = decodeJWT(token);
+
+    if (!user) {
+      clearAuthToken();
+      return {
+        user: null,
+        isAuthenticated: false,
+      };
+    }
+
     return {
       user,
-      isAuthenticated: user !== null,
+      isAuthenticated: true,
     };
   });
 
-  const login = (token: string) => {
+  const login = useCallback((token: string) => {
     saveAuthToken(token);
     const user = decodeJWT(token);
+    if (!user) {
+      clearAuthToken();
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+      });
+      return;
+    }
+
     setAuthState({
       user,
-      isAuthenticated: user !== null,
+      isAuthenticated: true,
     });
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearAuthToken();
     setAuthState({
       user: null,
       isAuthenticated: false,
     });
-  };
+    // Clear all TanStack Query cache to prevent data leakage between sessions
+    queryClient.clear();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleUnauthorized = () => {
+      logout();
+    };
+
+    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+
+    return () => {
+      window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+    };
+  }, [logout]);
 
   return (
     <AuthContext.Provider value={{ authState, login, logout }}>
