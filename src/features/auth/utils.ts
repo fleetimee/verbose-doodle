@@ -2,6 +2,7 @@ import { jwtDecode } from "jwt-decode";
 import type { AuthUser } from "@/features/login/types";
 
 const TOKEN_STORAGE_KEY = "auth_token";
+const REFRESH_TOKEN_STORAGE_KEY = "refresh_token";
 
 /**
  * JWT payload structure based on backend specification
@@ -82,6 +83,39 @@ export function getAuthToken(): string | null {
 export function clearAuthToken(): void {
   try {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
+  } catch {
+    // Silently fail
+  }
+}
+
+/**
+ * Save refresh token to localStorage
+ */
+export function saveRefreshToken(token: string): void {
+  try {
+    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, token);
+  } catch {
+    // Silently fail - storage might be unavailable
+  }
+}
+
+/**
+ * Get refresh token from localStorage
+ */
+export function getRefreshToken(): string | null {
+  try {
+    return localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Clear refresh token from localStorage
+ */
+export function clearRefreshToken(): void {
+  try {
+    localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
   } catch {
     // Silently fail
   }

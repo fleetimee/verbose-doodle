@@ -63,13 +63,14 @@ async function loginUser(data: LoginFormData): Promise<LoginResponse> {
       }),
     });
 
-    // Extract role from JWT token
-    const role = decodeJWTRole(apiResponse.data.token);
+    // Extract role from JWT access token
+    const role = decodeJWTRole(apiResponse.data.accessToken);
 
     return {
       responseCode: apiResponse.responseCode,
       responseDesc: apiResponse.responseDesc,
-      token: apiResponse.data.token,
+      accessToken: apiResponse.data.accessToken,
+      refreshToken: apiResponse.data.refreshToken,
       role,
     };
   } catch (error) {
@@ -101,8 +102,8 @@ export function useLogin() {
       onSuccess: (data, variables) => {
         // Check if login was successful based on responseCode
         if (data.responseCode === "00") {
-          // Save JWT token and decode to extract user data
-          setAuthUser(data.token);
+          // Save both access and refresh tokens
+          setAuthUser(data.accessToken, data.refreshToken);
 
           // Show success message
           showSuccessToast(

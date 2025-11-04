@@ -22,6 +22,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TokenExpirationDialog } from "@/components/token-expiration-dialog";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/features/auth/context";
+import { useAutoRefresh } from "@/features/auth/hooks/use-auto-refresh";
 import { useTokenExpirationCheck } from "@/features/auth/hooks/use-token-expiration-check";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
 import { queryClient } from "@/lib/query-client";
@@ -35,6 +36,8 @@ import { Login } from "@/pages/login";
 function AppContent() {
   // Check for expired token on mount/navigation
   useTokenExpirationCheck();
+  // Automatically refresh token before expiration
+  useAutoRefresh();
 
   return (
     <>

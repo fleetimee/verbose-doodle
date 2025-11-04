@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,6 +11,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/features/auth/context";
 import { useTokenExpiration } from "@/features/auth/hooks/use-token-expiration";
 
@@ -48,9 +50,10 @@ export function clearExpirationReason(): void {
 
 export function TokenExpirationDialog() {
   const tokenExpiration = useTokenExpiration();
-  const { logout } = useAuth();
+  const { logout, refreshAuth } = useAuth();
   const navigate = useNavigate();
   const [showWarning, setShowWarning] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     if (!tokenExpiration) {
@@ -74,10 +77,27 @@ export function TokenExpirationDialog() {
     }
   }, [tokenExpiration, logout, navigate]);
 
-  const handleStayLoggedIn = () => {
-    // TODO: Implement token refresh when backend supports it
-    // For now, just dismiss the dialog
-    setShowWarning(false);
+  const handleStayLoggedIn = async () => {
+    setIsRefreshing(true);
+    try {
+      const success = await refreshAuth();
+      if (success) {
+        toast.success("Session Refreshed", {
+          description: "Your session has been extended successfully.",
+        });
+        setShowWarning(false);
+      } else {
+        toast.error("Refresh Failed", {
+          description: "Unable to refresh session. Please log in again.",
+        });
+      }
+    } catch {
+      toast.error("Refresh Failed", {
+        description: "Unable to refresh session. Please log in again.",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const handleLogoutNow = () => {
@@ -107,11 +127,19 @@ export function TokenExpirationDialog() {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <Button onClick={handleLogoutNow} variant="outline">
+          <Button
+            disabled={isRefreshing}
+            onClick={handleLogoutNow}
+            variant="outline"
+          >
             Log Out Now
           </Button>
-          <AlertDialogAction onClick={handleStayLoggedIn}>
-            Stay Logged In
+          <AlertDialogAction
+            disabled={isRefreshing}
+            onClick={handleStayLoggedIn}
+          >
+            {isRefreshing && <Spinner className="mr-2" />}
+            {isRefreshing ? "Refreshing..." : "Stay Logged In"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

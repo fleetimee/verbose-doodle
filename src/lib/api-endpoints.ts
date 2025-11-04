@@ -56,8 +56,8 @@ export const API_ENDPOINTS = {
    */
   auth: {
     login: "/login",
+    refresh: "/refresh",
     logout: "/api/auth/logout",
-    refresh: "/api/auth/refresh",
     register: "/api/auth/register",
   },
 } as const;
