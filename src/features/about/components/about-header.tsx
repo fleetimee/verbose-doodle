@@ -1,6 +1,13 @@
 import { motion } from "motion/react";
 import { useTheme } from "@/components/theme-provider";
 
+// Animation easing curve for bounce effect (cubic-bezier control points)
+const EASE_P1 = 0.34;
+const EASE_P2 = 1.56;
+const EASE_P3 = 0.64;
+const EASE_P4 = 1;
+const BOUNCE_EASE_CURVE = [EASE_P1, EASE_P2, EASE_P3, EASE_P4] as const;
+
 export function AboutHeader() {
   const { theme } = useTheme();
 
@@ -25,8 +32,8 @@ export function AboutHeader() {
         src={logoSrc}
         transition={{
           duration: 0.6,
-          ease: [0.34, 1.56, 0.64, 1],
-          delay: 0.1
+          ease: BOUNCE_EASE_CURVE,
+          delay: 0.1,
         }}
         width="200"
       />

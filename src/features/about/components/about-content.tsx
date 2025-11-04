@@ -1,6 +1,10 @@
 import { motion } from "motion/react";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 
+// Animation timing constants
+const FEATURE_LIST_BASE_DELAY = 0.7;
+const FEATURE_LIST_STAGGER_DELAY = 0.1;
+
 const teamMembers = [
   {
     id: 1,
@@ -97,10 +101,14 @@ export function AboutContent() {
             },
           ].map((feature, index) => (
             <motion.li
-              key={feature.title}
               animate="visible"
               initial="hidden"
-              transition={{ duration: 0.4, delay: 0.7 + index * 0.1 }}
+              key={feature.title}
+              transition={{
+                duration: 0.4,
+                delay:
+                  FEATURE_LIST_BASE_DELAY + index * FEATURE_LIST_STAGGER_DELAY,
+              }}
               variants={listItemVariants}
             >
               <strong>{feature.title}</strong> {feature.desc}
