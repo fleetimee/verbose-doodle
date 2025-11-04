@@ -1,4 +1,4 @@
-import { LabelList, RadialBar, RadialBarChart } from "recharts";
+import { Bar, BarChart, Cell, LabelList, XAxis, YAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -18,6 +18,11 @@ import type { OverviewData } from "@/features/overview/types";
 const CHART_COLOR_VARIANTS = 5;
 const CHART_COLOR_OFFSET = 2; // Start from chart-2 for better color variety
 
+// Bar presentation constants
+const BAR_CORNER_RADIUS = 6;
+const BAR_LABEL_OFFSET = 12;
+const Y_AXIS_WIDTH = 124;
+
 type EndpointStatusChartProps = {
   data: OverviewData;
   className?: string;
@@ -32,7 +37,9 @@ export function EndpointStatusChart({
 
   // Transform data to include fill property
   const chartData = data.responseStatusDistribution.map((item, index) => ({
-    status: item.label,
+    statusKey: `status-${item.statusCode}`,
+    statusCode: `HTTP ${item.statusCode}`,
+    statusLabel: item.label,
     count: item.count,
     fill: `var(--chart-${(index % CHART_COLOR_VARIANTS) + CHART_COLOR_OFFSET})`,
   }));
@@ -43,11 +50,11 @@ export function EndpointStatusChart({
       label: "Responses",
     },
     ...Object.fromEntries(
-      data.responseStatusDistribution.map((item, index) => [
-        item.statusCode,
+      chartData.map((item) => [
+        item.statusKey,
         {
-          label: item.label,
-          color: `var(--chart-${(index % CHART_COLOR_VARIANTS) + CHART_COLOR_OFFSET})`,
+          label: `${item.statusCode} · ${item.statusLabel}`,
+          color: item.fill,
         },
       ])
     ),
@@ -63,29 +70,101 @@ export function EndpointStatusChart({
       </CardHeader>
       <CardContent className="pb-0">
         <ChartContainer
-          className="mx-auto aspect-square max-h-[250px] w-full"
+          className="aspect-auto h-[280px] w-full items-center px-4"
           config={responseStatusConfig}
         >
-          <RadialBarChart
+          <BarChart
+            accessibilityLayer
             data={chartData}
-            endAngle={380}
-            innerRadius={30}
-            outerRadius={110}
-            startAngle={-90}
+            layout="vertical"
+            margin={{ left: 0, right: 12 }}
           >
-            <ChartTooltip
-              content={<ChartTooltipContent hideLabel nameKey="status" />}
-              cursor={false}
+            <YAxis
+              axisLine={false}
+              dataKey="statusCode"
+              tick={{ fill: "hsl(var(--muted-foreground))" }}
+              tickLine={false}
+              tickMargin={12}
+              type="category"
+              width={Y_AXIS_WIDTH}
             />
-            <RadialBar background dataKey="count">
+            <XAxis axisLine={false} tickLine={false} type="number" />
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  formatter={(value, _name, item) => {
+                    if (typeof value !== "number") {
+                      return null;
+                    }
+
+                    const payload = item?.payload as
+                      | (typeof chartData)[number]
+                      | undefined;
+
+                    if (!payload) {
+                      return null;
+                    }
+
+                    const indicatorColor =
+                      (item?.color as string | undefined) ?? payload.fill;
+
+                    return (
+                      <div className="flex w-full items-center justify-between gap-4">
+                        <span className="flex items-center gap-2 text-muted-foreground">
+                          <span
+                            aria-hidden
+                            className="h-2.5 w-2.5 rounded-[2px]"
+                            style={{ backgroundColor: indicatorColor }}
+                          />
+                          {`${payload.statusCode} · ${payload.statusLabel}`}
+                        </span>
+                        <span className="font-medium font-mono text-foreground tabular-nums">
+                          {value.toLocaleString()}
+                        </span>
+                      </div>
+                    );
+                  }}
+                  hideLabel
+                />
+              }
+              cursor={{ fill: "hsl(var(--accent))/30" }}
+            />
+            <Bar
+              dataKey="count"
+              radius={[
+                BAR_CORNER_RADIUS,
+                BAR_CORNER_RADIUS,
+                BAR_CORNER_RADIUS,
+                BAR_CORNER_RADIUS,
+              ]}
+            >
+              {chartData.map((entry) => (
+                <Cell fill={entry.fill} key={entry.statusKey} />
+              ))}
               <LabelList
-                className="fill-white capitalize mix-blend-luminosity"
-                dataKey="status"
-                fontSize={11}
-                position="insideStart"
+                content={(props) => {
+                  const { x = 0, y = 0, width = 0, height = 0, value } = props;
+
+                  if (typeof value !== "number") {
+                    return null;
+                  }
+
+                  return (
+                    <text
+                      alignmentBaseline="middle"
+                      className="fill-foreground font-medium"
+                      x={x + width + BAR_LABEL_OFFSET}
+                      y={y + height / 2}
+                    >
+                      {value.toLocaleString()}
+                    </text>
+                  );
+                }}
+                dataKey="count"
+                position="right"
               />
-            </RadialBar>
-          </RadialBarChart>
+            </Bar>
+          </BarChart>
         </ChartContainer>
       </CardContent>
     </Card>

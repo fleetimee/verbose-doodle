@@ -23,7 +23,11 @@ async function createApiError(response: Response): Promise<ApiError> {
 
   try {
     const data = await response.json();
-    if (data.message) {
+    // Check for both 'message' and 'responseDesc' fields
+    // responseDesc is commonly used in the biller API responses
+    if (data.responseDesc) {
+      message = data.responseDesc;
+    } else if (data.message) {
       message = data.message;
     }
   } catch {
