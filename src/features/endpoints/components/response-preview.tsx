@@ -1,5 +1,6 @@
-import { Eye } from "lucide-react";
-import { useMemo } from "react";
+import { Code2, Copy, ExternalLink, Eye } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -11,6 +12,7 @@ import {
 } from "@/components/kibo-ui/code-block";
 import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyDescription,
@@ -19,16 +21,54 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { EndpointResponse } from "@/features/endpoints/types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { CodeGeneratorDialog } from "@/features/endpoints/components/code-generator-dialog";
+import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
 
 type ResponsePreviewProps = {
   response: EndpointResponse | null;
+  endpointUrl?: string;
+  endpointMethod?: HttpMethod;
 };
 
-export function ResponsePreview({ response }: ResponsePreviewProps) {
+export function ResponsePreview({
+  response,
+  endpointUrl,
+  endpointMethod,
+}: ResponsePreviewProps) {
   const { theme } = useTheme();
+  const [isCodeDialogOpen, setIsCodeDialogOpen] = useState(false);
+
+  // Get the base URL from environment variable
+  const baseUrl = import.meta.env.VITE_ENDPOINT_URL || "";
+  const token = import.meta.env.VITE_API_TOKEN;
+
+  const fullUrl = useMemo(() => {
+    if (!(baseUrl && endpointUrl)) {
+      return "";
+    }
+    return `${baseUrl}${endpointUrl}`;
+  }, [endpointUrl]);
+
+  const handleCopyUrl = () => {
+    if (fullUrl) {
+      navigator.clipboard.writeText(fullUrl);
+      toast.success("URL copied to clipboard");
+    }
+  };
+
+  const handleLaunchUrl = () => {
+    if (fullUrl) {
+      window.open(fullUrl, "_blank");
+    }
+  };
 
   // Resolve the actual theme (handle "system" preference)
   const resolvedTheme = useMemo(() => {
@@ -61,7 +101,7 @@ export function ResponsePreview({ response }: ResponsePreviewProps) {
       <ScrollArea className="flex-1">
         {response ? (
           <div className="p-4">
-            <div className="mb-4 space-y-2">
+            <div className="mb-4 space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-lg">{response.name}</h3>
                 {response.activated && (
@@ -83,6 +123,81 @@ export function ResponsePreview({ response }: ResponsePreviewProps) {
                   {response.statusCode}
                 </Badge>
               </div>
+
+              {/* URL Preview and Actions */}
+              {endpointUrl && endpointMethod && baseUrl && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="shrink-0 text-muted-foreground text-sm">
+                      Endpoint URL:
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <input
+                      className="flex-1 rounded-md border border-input bg-background px-3 py-2 font-mono text-xs ring-offset-background file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      readOnly
+                      type="text"
+                      value={fullUrl}
+                    />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => setIsCodeDialogOpen(true)}
+                            size="icon"
+                            variant="outline"
+                          >
+                            <Code2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Generate Code</p>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={handleCopyUrl}
+                            size="icon"
+                            variant="outline"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Copy URL</p>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={handleLaunchUrl}
+                            size="icon"
+                            variant="outline"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Open in Browser</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+
+                  <CodeGeneratorDialog
+                    baseUrl={baseUrl}
+                    method={endpointMethod}
+                    onOpenChange={setIsCodeDialogOpen}
+                    open={isCodeDialogOpen}
+                    path={endpointUrl}
+                    response={response}
+                    token={token}
+                  />
+                </div>
+              )}
             </div>
 
             <CodeBlock
