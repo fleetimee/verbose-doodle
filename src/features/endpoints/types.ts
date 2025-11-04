@@ -29,13 +29,32 @@ export type Endpoint = {
 };
 
 /**
- * API response for creating an endpoint
+ * Raw API response structure for creating an endpoint
+ */
+type ApiCreateEndpointResponse = {
+  responseCode: string;
+  responseDesc: string;
+  data: {
+    endpoint_id: number;
+    method: HttpMethod;
+    url: string;
+    biller_id: number;
+  };
+};
+
+/**
+ * Processed response for creating an endpoint
  */
 export type CreateEndpointResponse = {
-  response_code: string;
-  response_desc: string;
+  responseCode: string;
+  responseDesc: string;
   endpoint: Endpoint;
 };
+
+/**
+ * Raw API response type (exported for use in hooks)
+ */
+export type { ApiCreateEndpointResponse };
 
 /**
  * API error for endpoint operations

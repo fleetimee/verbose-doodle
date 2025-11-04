@@ -13,7 +13,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": {
+      // Proxy all API requests and login endpoint to backend server
+      "^/(api|login)": {
         target: "http://143.198.85.201:47382",
         changeOrigin: true,
         secure: false,

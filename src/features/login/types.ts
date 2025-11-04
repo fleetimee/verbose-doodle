@@ -5,15 +5,32 @@
 export type UserRole = "ADMIN" | "USER";
 
 /**
- * Login response from authentication service
+ * Raw API response from login endpoint
  * Based on backend API: POST /login
  */
+type ApiLoginResponse = {
+  responseCode: string;
+  responseDesc: string;
+  data: {
+    token: string;
+  };
+};
+
+/**
+ * Login response after processing
+ * Includes token and role extracted from JWT
+ */
 export type LoginResponse = {
-  response_code: string;
-  response_desc: string;
+  responseCode: string;
+  responseDesc: string;
   token: string;
   role: UserRole;
 };
+
+/**
+ * Raw API login response type (exported for use in hooks)
+ */
+export type { ApiLoginResponse };
 
 /**
  * Authentication user data extracted from JWT token payload

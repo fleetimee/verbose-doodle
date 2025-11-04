@@ -41,7 +41,7 @@ export const API_ENDPOINTS = {
    * Authentication endpoints
    */
   auth: {
-    login: "/api/auth/login",
+    login: "/login",
     logout: "/api/auth/logout",
     refresh: "/api/auth/refresh",
     register: "/api/auth/register",
@@ -81,4 +81,11 @@ export function getEndpointUpdateUrl(id: string | number): string {
  */
 export function getEndpointDeleteUrl(id: string | number): string {
   return API_ENDPOINTS.admin.endpoints.delete(id);
+}
+
+/**
+ * Helper function to get login URL
+ */
+export function getLoginUrl(): string {
+  return API_ENDPOINTS.auth.login;
 }
