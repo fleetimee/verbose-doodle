@@ -1,6 +1,7 @@
 import { ArrowRight, Check } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   ACTIVE_INDICATOR_OPACITY,
   ACTIVE_INDICATOR_SCALE,
@@ -85,7 +86,10 @@ export function ResponseStepperFooter({
               type="button"
             >
               {isSubmitting ? (
-                "Creating..."
+                <>
+                  <Spinner className="mr-2" />
+                  Creating...
+                </>
               ) : (
                 <>
                   <Check className="mr-2 h-4 w-4" />
