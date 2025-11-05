@@ -21,22 +21,6 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
-        "/login": {
-          target: env.VITE_ENDPOINT_URL,
-          changeOrigin: true,
-          secure: false,
-          // Only proxy POST requests for login API, not GET for the page
-          bypass: (req) => {
-            if (req.method !== "POST") {
-              return req.url;
-            }
-          },
-        },
-        "/refresh": {
-          target: env.VITE_ENDPOINT_URL,
-          changeOrigin: true,
-          secure: false,
-        },
       },
     },
     build: {

@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshAuth = useCallback(async (): Promise<boolean> => {
     // Import dynamically to avoid circular dependency
     const { refreshToken: refreshTokenFn } = await import(
-      "@/features/auth/api/refresh-token"
+      "@/features/auth/hooks/use-refresh-token"
     );
 
     try {
