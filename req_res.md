@@ -26,6 +26,8 @@ erDiagram
         int status_code
         boolean activated
         string name
+        int delay_ms
+        boolean simulate_timeout
     }
 
     Users {
@@ -45,10 +47,28 @@ erDiagram
 
 1. Search for endpoint in database
 2. If not found, return `404`
-3. If found and active response exists, send active response
-4. Otherwise, return empty object `{}`
+3. If found and active response exists:
+   - If `simulateTimeout = true`: Hold connection indefinitely (never send response, client will timeout)
+   - If `delayMs > 0`: Wait for specified milliseconds, then send response
+   - Otherwise: Send response immediately
+4. If no active response exists, return empty object `{}`
 
 **Note:** This endpoint does NOT require authentication
+
+**Simulation Features:**
+
+The dynamic endpoint supports two types of network simulation:
+
+1. **Latency Simulation** (`delayMs`):
+
+   - Delays response by specified milliseconds
+   - Example: `delayMs = 500` waits 500ms before sending response
+   - Useful for testing slow network conditions
+
+2. **Timeout Simulation** (`simulateTimeout`):
+   - Holds the connection indefinitely without sending any response
+   - Client will eventually timeout based on their timeout settings
+   - Useful for testing timeout handling in client applications
 
 ---
 
@@ -495,9 +515,23 @@ Adds a new response configuration for an endpoint.
   "json": "{\"abc\": \"def\"}",
   "statusCode": "200",
   "activated": "0",
-  "name": "response_success"
+  "name": "response_success",
+  "delayMs": 0,
+  "simulateTimeout": false
 }
 ```
+
+**Request Fields:**
+
+- `endpointId` (required): The endpoint ID this response belongs to
+- `json` (required): The JSON response body (as a string)
+- `statusCode` (required): HTTP status code to return
+- `activated` (required): "0" for inactive, "1" for active
+- `name` (required): Name/description of this response
+- `delayMs` (optional): Milliseconds to delay before sending response (default: 0)
+- `simulateTimeout` (optional): Hold connection indefinitely to simulate timeout (default: false)
+
+**Important:** You cannot set both `delayMs > 0` and `simulateTimeout = true` at the same time.
 
 **Response:**
 
@@ -511,10 +545,17 @@ Adds a new response configuration for an endpoint.
     "json": "{\"abc\": \"def\"}",
     "statusCode": "200",
     "activated": "0",
-    "name": "response_success"
+    "name": "response_success",
+    "delayMs": 0,
+    "simulateTimeout": false
   }
 }
 ```
+
+**Special Behaviors:**
+
+- If this is the first response for an endpoint, it will be automatically activated (activated = "1")
+- The `json` field is validated and canonicalized to ensure valid JSON format
 
 ---
 
@@ -539,7 +580,9 @@ Lists all response configurations.
       "json": "{\"abc\": \"def\"}",
       "statusCode": "200",
       "activated": "1",
-      "name": "response_success"
+      "name": "response_success",
+      "delayMs": 0,
+      "simulateTimeout": false
     }
   ]
 }
@@ -567,7 +610,9 @@ Get a specific response configuration by ID.
     "json": "{\"abc\": \"def\"}",
     "statusCode": "200",
     "activated": "1",
-    "name": "response_success"
+    "name": "response_success",
+    "delayMs": 0,
+    "simulateTimeout": false
   }
 }
 ```
@@ -578,7 +623,7 @@ Get a specific response configuration by ID.
 
 **`PUT /api/response/{id}`**
 
-Updates an existing response configuration.
+Updates an existing response configuration (full update - all fields required).
 
 **Authorization:** Role must be `ADMIN`
 
@@ -590,9 +635,13 @@ Updates an existing response configuration.
   "json": "{\"updated\": \"data\"}",
   "statusCode": "201",
   "activated": "0",
-  "name": "response_updated"
+  "name": "response_updated",
+  "delayMs": 500,
+  "simulateTimeout": false
 }
 ```
+
+**Important:** You cannot set both `delayMs > 0` and `simulateTimeout = true` at the same time.
 
 **Response:**
 
@@ -606,10 +655,90 @@ Updates an existing response configuration.
     "json": "{\"updated\": \"data\"}",
     "statusCode": "201",
     "activated": "0",
-    "name": "response_updated"
+    "name": "response_updated",
+    "delayMs": 500,
+    "simulateTimeout": false
   }
 }
 ```
+
+---
+
+#### Update Response Simulation Settings (Partial Update)
+
+**`PATCH /api/response/{id}/simulation`**
+
+Updates only the delay/timeout simulation settings without modifying other fields like JSON content, status code, or name.
+
+**Authorization:** Role must be `ADMIN`
+
+**Request:**
+
+```json
+{
+  "delayMs": 1000,
+  "simulateTimeout": false
+}
+```
+
+**Request Fields (all optional):**
+
+- `delayMs`: Milliseconds to delay before sending response (e.g., 100, 500, 3000)
+- `simulateTimeout`: Boolean to enable/disable timeout simulation
+
+**Important:** You cannot set both `delayMs > 0` and `simulateTimeout = true` at the same time.
+
+**Use Cases:**
+
+1. **Add latency simulation:**
+
+```json
+{
+  "delayMs": 1000
+}
+```
+
+2. **Enable timeout simulation:**
+
+```json
+{
+  "simulateTimeout": true
+}
+```
+
+3. **Reset to normal (no simulation):**
+
+```json
+{
+  "delayMs": 0,
+  "simulateTimeout": false
+}
+```
+
+**Response:**
+
+```json
+{
+  "response_code": "00",
+  "response_desc": "success",
+  "response": {
+    "id": 4,
+    "endpointId": 1,
+    "json": "{\"abc\": \"def\"}",
+    "statusCode": "200",
+    "activated": "1",
+    "name": "response_success",
+    "delayMs": 1000,
+    "simulateTimeout": false
+  }
+}
+```
+
+**Notes:**
+
+- This is a partial update - only provided fields are updated
+- Other response fields (json, statusCode, name, activated, endpointId) remain unchanged
+- Useful for quickly switching between different simulation scenarios without re-uploading the entire response configuration
 
 ---
 
@@ -633,7 +762,9 @@ Sets a response as the active response for an endpoint. Deactivates all other re
     "json": "{\"abc\": \"def\"}",
     "statusCode": "200",
     "activated": "1",
-    "name": "response_success"
+    "name": "response_success",
+    "delayMs": 0,
+    "simulateTimeout": false
   }
 }
 ```
@@ -660,7 +791,9 @@ Deactivates a specific response for an endpoint.
     "json": "{\"abc\": \"def\"}",
     "statusCode": "200",
     "activated": "0",
-    "name": "response_success"
+    "name": "response_success",
+    "delayMs": 0,
+    "simulateTimeout": false
   }
 }
 ```
