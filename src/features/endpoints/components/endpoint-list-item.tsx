@@ -8,6 +8,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
+import { usePrefetchEndpoint } from "@/features/endpoints/hooks/use-prefetch-endpoint";
 import type { Endpoint } from "@/features/endpoints/types";
 import {
   abbreviateMethod,
@@ -22,6 +23,7 @@ type EndpointListItemProps = {
 
 export function EndpointListItem({ endpoint, onClick }: EndpointListItemProps) {
   const navigate = useNavigate();
+  const { prefetchEndpoint } = usePrefetchEndpoint();
 
   const handleClick = () => {
     if (onClick) {
@@ -31,6 +33,11 @@ export function EndpointListItem({ endpoint, onClick }: EndpointListItemProps) {
     }
   };
 
+  const handleMouseEnter = () => {
+    // Prefetch immediately on hover for instant navigation (100ms rule)
+    prefetchEndpoint(endpoint.id);
+  };
+
   return (
     <Item
       asChild
@@ -38,7 +45,12 @@ export function EndpointListItem({ endpoint, onClick }: EndpointListItemProps) {
       size="default"
       variant="default"
     >
-      <button className="w-full" onClick={handleClick} type="button">
+      <button
+        className="w-full"
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        type="button"
+      >
         <ItemMedia variant="default">
           <span
             className={`rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
