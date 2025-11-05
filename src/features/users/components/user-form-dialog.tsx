@@ -40,7 +40,7 @@ const userSchema = z.object({
     .max(USERNAME_MAX_LENGTH, {
       message: "Username must not exceed 20 characters",
     }),
-  role: z.enum(["admin", "user"], { message: "Invalid role" }),
+  role: z.enum(["ADMIN", "USER"], { message: "Invalid role" }),
   active: z.boolean(),
 });
 
@@ -60,7 +60,7 @@ export const UserFormDialog = () => {
     resolver: zodResolver(userSchema),
     defaultValues: {
       username: "",
-      role: "user",
+      role: "USER",
       active: true,
     },
   });
@@ -75,7 +75,7 @@ export const UserFormDialog = () => {
     } else {
       reset({
         username: "",
-        role: "user",
+        role: "USER",
         active: true,
       });
     }
@@ -144,8 +144,8 @@ export const UserFormDialog = () => {
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Role</SelectLabel>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="user">User</SelectItem>
+                          <SelectItem value="ADMIN">Admin</SelectItem>
+                          <SelectItem value="USER">User</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>

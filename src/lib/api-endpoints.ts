@@ -164,3 +164,38 @@ export function getResponseDeactivateUrl(
 ): string {
   return API_ENDPOINTS.admin.responses.deactivate(endpointId, responseId);
 }
+
+/**
+ * Helper function to get admin user list URL
+ */
+export function getAdminUserList(): string {
+  return API_ENDPOINTS.admin.users.list;
+}
+
+/**
+ * Helper function to get user create URL
+ */
+export function getUserCreateUrl(): string {
+  return API_ENDPOINTS.admin.users.create;
+}
+
+/**
+ * Helper function to get user detail URL
+ */
+export function getUserDetailUrl(id: string | number): string {
+  return API_ENDPOINTS.admin.users.detail(id);
+}
+
+/**
+ * Helper function to get user update URL
+ */
+export function getUserUpdateUrl(id: string | number): string {
+  return API_ENDPOINTS.admin.users.update(id);
+}
+
+/**
+ * Helper function to get user delete URL
+ */
+export function getUserDeleteUrl(id: string | number): string {
+  return API_ENDPOINTS.admin.users.delete(id);
+}
