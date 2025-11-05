@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,19 +8,17 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { User } from "@/features/users/types";
+import { useUserFormDialog } from "../context";
 
-const getStatusStyles = (status: string): string => {
-  if (status === "active") {
+const getStatusStyles = (active: string): string => {
+  if (active) {
     return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
-  }
-  if (status === "inactive") {
+  } else {
     return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
   }
-  return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
 };
 
 export const columns: ColumnDef<User>[] = [
@@ -33,9 +31,7 @@ export const columns: ColumnDef<User>[] = [
           tableInstance.getIsAllPageRowsSelected() ||
           (tableInstance.getIsSomePageRowsSelected() && "indeterminate")
         }
-        onCheckedChange={(value) =>
-          tableInstance.toggleAllPageRowsSelected(!!value)
-        }
+        onCheckedChange={(value) => tableInstance.toggleAllPageRowsSelected(!!value)}
       />
     ),
     cell: ({ row }) => (
@@ -53,7 +49,7 @@ export const columns: ColumnDef<User>[] = [
     header: "Avatar",
     cell: ({ row }) => {
       const user = row.original;
-      const initials = user.name
+      const initials = user.username
         .split(" ")
         .map((n) => n[0])
         .join("")
@@ -61,7 +57,7 @@ export const columns: ColumnDef<User>[] = [
 
       return (
         <Avatar>
-          <AvatarImage alt={user.name} src={user.avatar} />
+          <AvatarImage alt={user.username} src={user.avatar} />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
       );
@@ -69,32 +65,14 @@ export const columns: ColumnDef<User>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "username",
     header: ({ column }) => (
-      <Button
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
-      >
+      <Button onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} variant="ghost">
         Name
         <ArrowUpDown />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("name")}</div>
-    ),
-  },
-  {
-    accessorKey: "email",
-    header: ({ column }) => (
-      <Button
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        variant="ghost"
-      >
-        Email
-        <ArrowUpDown />
-      </Button>
-    ),
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    cell: ({ row }) => <div className="font-medium">{row.getValue("username")}</div>,
   },
   {
     accessorKey: "role",
@@ -102,16 +80,18 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => <div className="capitalize">{row.getValue("role")}</div>,
   },
   {
-    accessorKey: "status",
+    accessorKey: "active",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+      const status = row.getValue("active") as string;
 
       return (
         <div
-          className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold text-xs ${getStatusStyles(status)}`}
+          className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold text-xs ${getStatusStyles(
+            status
+          )}`}
         >
-          {status}
+          {status ? "Active" : "Inactive"}
         </div>
       );
     },
@@ -121,6 +101,8 @@ export const columns: ColumnDef<User>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const user = row.original;
+
+      const { openDialog, setFormMode, setUserData, setOpenConfirm } = useUserFormDialog();
 
       return (
         <DropdownMenu>
@@ -133,15 +115,24 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user.id)}
+              onClick={() => {
+                setFormMode("edit");
+                openDialog();
+                setUserData?.(user);
+              }}
+              className="flex items-center hover:cursor-pointer"
             >
-              Copy user ID
+              <Pencil className="w-2" />
+              Edit user
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View details</DropdownMenuItem>
-            <DropdownMenuItem>Edit user</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">
-              Delete user
+            <DropdownMenuItem
+              onClick={() => {
+                setOpenConfirm?.(true);
+                setUserData?.(user);
+              }}
+              className="text-red-600 hover:text-red-600! hover:cursor-pointer"
+            >
+              <Trash className="w-2 text-red-600" /> Delete user
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
