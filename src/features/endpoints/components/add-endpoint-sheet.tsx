@@ -58,26 +58,28 @@ export function AddEndpointSheet({
           </Button>
         </SheetTrigger>
       )}
-      <SheetContent className="w-[400px] sm:w-[640px]">
+      <SheetContent className="flex w-[400px] flex-col sm:w-[640px]">
         <SheetHeader>
           <SheetTitle>Add Endpoint</SheetTitle>
           <SheetDescription>
             Create a new API endpoint for a specific biller ID.
           </SheetDescription>
         </SheetHeader>
-        <EndpointForm
-          billers={billers}
-          isLoadingBillers={isLoadingBillers}
-          onSubmit={handleFormSubmit}
-          ref={formRef}
-        >
-          <SheetFooter className="px-6 pb-6">
-            <Button disabled={isSubmitting} type="submit">
-              {isSubmitting && <Spinner className="mr-2" />}
-              {isSubmitting ? "Creating..." : "Create Endpoint"}
-            </Button>
-          </SheetFooter>
-        </EndpointForm>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <EndpointForm
+            billers={billers}
+            isLoadingBillers={isLoadingBillers}
+            onSubmit={handleFormSubmit}
+            ref={formRef}
+          >
+            <SheetFooter className="border-t px-6 pt-4 pb-6">
+              <Button disabled={isSubmitting} type="submit">
+                {isSubmitting && <Spinner className="mr-2" />}
+                {isSubmitting ? "Creating..." : "Create Endpoint"}
+              </Button>
+            </SheetFooter>
+          </EndpointForm>
+        </div>
       </SheetContent>
     </Sheet>
   );

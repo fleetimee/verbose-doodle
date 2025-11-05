@@ -6,7 +6,7 @@
     },
     {
       "source": "/login",
-      "destination": "/api/proxy?path=login"
+      "destination": "/api/login-proxy"
     },
     {
       "source": "/refresh",
