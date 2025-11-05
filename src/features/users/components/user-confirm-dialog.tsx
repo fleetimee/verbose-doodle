@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useUserFormDialog } from "../context";
+import { useUserFormDialog } from "@/features/users/context";
 
 export const UserConfirmDialog = () => {
   const { openConfirm, setOpenConfirm, setUserData } = useUserFormDialog();
@@ -22,12 +22,13 @@ export const UserConfirmDialog = () => {
   };
 
   return (
-    <AlertDialog open={openConfirm} onOpenChange={setOpenConfirm}>
+    <AlertDialog onOpenChange={setOpenConfirm} open={openConfirm}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete user data from our servers.
+            This action cannot be undone. This will permanently delete user data
+            from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

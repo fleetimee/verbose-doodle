@@ -1,19 +1,19 @@
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useUserFormDialog } from "../context";
+import { Button } from "@/components/ui/button";
+import { useUserFormDialog } from "@/features/users/context";
 
 export const UserFormDialogTrigger = () => {
   const { openDialog, setFormMode } = useUserFormDialog();
 
   return (
     <Button
-      variant="outline"
       onClick={() => {
         setFormMode("add");
         openDialog();
       }}
+      variant="outline"
     >
-      <Plus className="h-4 w-4 mr-2" />
+      <Plus className="mr-2 h-4 w-4" />
       Add User
     </Button>
   );

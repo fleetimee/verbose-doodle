@@ -1,5 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogClose,
@@ -9,7 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -21,19 +26,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useUserFormDialog } from "../context";
+import { useUserFormDialog } from "@/features/users/context";
 
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
-import { useEffect } from "react";
+const USERNAME_MIN_LENGTH = 3;
+const USERNAME_MAX_LENGTH = 20;
 
 const userSchema = z.object({
   username: z
     .string()
-    .min(3, { message: "Username must be at least 3 characters long" })
-    .max(20, { message: "Username must not exceed 20 characters" }),
+    .min(USERNAME_MIN_LENGTH, {
+      message: "Username must be at least 3 characters long",
+    })
+    .max(USERNAME_MAX_LENGTH, {
+      message: "Username must not exceed 20 characters",
+    }),
   role: z.enum(["admin", "user"], { message: "Invalid role" }),
   active: z.boolean(),
 });
@@ -41,7 +47,8 @@ const userSchema = z.object({
 type UserFormData = z.infer<typeof userSchema>;
 
 export const UserFormDialog = () => {
-  const { open, setOpen, formMode, userData, setUserData } = useUserFormDialog();
+  const { open, setOpen, formMode, userData, setUserData } =
+    useUserFormDialog();
 
   const {
     register,
@@ -72,14 +79,12 @@ export const UserFormDialog = () => {
         active: true,
       });
     }
-  }, [formMode, userData, reset, open]);
+  }, [formMode, userData, reset]);
 
   const onSubmit = (data: UserFormData) => {
     if (formMode === "edit") {
-      console.log("Updating user:", data);
       // TODO: call update API here
     } else {
-      console.log("Adding user:", data);
       // TODO: call create API here
     }
 
@@ -89,16 +94,20 @@ export const UserFormDialog = () => {
 
   return (
     <Dialog
-      open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
-        if (!isOpen) setUserData?.(undefined);
+        if (!isOpen) {
+          setUserData?.(undefined);
+        }
       }}
+      open={open}
     >
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>{formMode === "edit" ? "Edit User" : "Add New User"}</DialogTitle>
+            <DialogTitle>
+              {formMode === "edit" ? "Edit User" : "Add New User"}
+            </DialogTitle>
             <DialogDescription>
               {formMode === "edit"
                 ? "Modify user information below."
@@ -106,21 +115,29 @@ export const UserFormDialog = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 mt-4">
+          <div className="mt-4 grid gap-4">
             <div className="grid gap-3">
               <Label htmlFor="username">Username</Label>
-              <Input id="username" placeholder="username" {...register("username")} />
-              {errors.username && <p className="text-sm text-red-500">{errors.username.message}</p>}
+              <Input
+                id="username"
+                placeholder="username"
+                {...register("username")}
+              />
+              {errors.username && (
+                <p className="text-red-500 text-sm">
+                  {errors.username.message}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="role">Role</Label>
                 <Controller
-                  name="role"
                   control={control}
+                  name="role"
                   render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select user role" />
                       </SelectTrigger>
@@ -134,20 +151,22 @@ export const UserFormDialog = () => {
                     </Select>
                   )}
                 />
-                {errors.role && <p className="text-sm text-red-500">{errors.role.message}</p>}
+                {errors.role && (
+                  <p className="text-red-500 text-sm">{errors.role.message}</p>
+                )}
               </div>
 
               <div className="grid gap-3">
                 <Label htmlFor="is_active">Active User</Label>
                 <Controller
-                  name="active"
                   control={control}
+                  name="active"
                   render={({ field }) => (
                     <Checkbox
-                      id="is_active"
                       checked={field.value}
-                      onCheckedChange={(checked) => field.onChange(!!checked)}
                       className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
+                      id="is_active"
+                      onCheckedChange={(checked) => field.onChange(!!checked)}
                     />
                   )}
                 />
@@ -159,7 +178,9 @@ export const UserFormDialog = () => {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit">{formMode === "edit" ? "Save Changes" : "Add User"}</Button>
+            <Button type="submit">
+              {formMode === "edit" ? "Save Changes" : "Add User"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

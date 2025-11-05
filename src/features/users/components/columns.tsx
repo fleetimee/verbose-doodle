@@ -10,15 +10,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useUserFormDialog } from "@/features/users/context";
 import type { User } from "@/features/users/types";
-import { useUserFormDialog } from "../context";
 
 const getStatusStyles = (active: string): string => {
   if (active) {
     return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
-  } else {
-    return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
   }
+  return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
 };
 
 export const columns: ColumnDef<User>[] = [
@@ -31,7 +30,9 @@ export const columns: ColumnDef<User>[] = [
           tableInstance.getIsAllPageRowsSelected() ||
           (tableInstance.getIsSomePageRowsSelected() && "indeterminate")
         }
-        onCheckedChange={(value) => tableInstance.toggleAllPageRowsSelected(!!value)}
+        onCheckedChange={(value) =>
+          tableInstance.toggleAllPageRowsSelected(!!value)
+        }
       />
     ),
     cell: ({ row }) => (
@@ -67,12 +68,17 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "username",
     header: ({ column }) => (
-      <Button onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} variant="ghost">
+      <Button
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        variant="ghost"
+      >
         Name
         <ArrowUpDown />
       </Button>
     ),
-    cell: ({ row }) => <div className="font-medium">{row.getValue("username")}</div>,
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue("username")}</div>
+    ),
   },
   {
     accessorKey: "role",
@@ -102,7 +108,8 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original;
 
-      const { openDialog, setFormMode, setUserData, setOpenConfirm } = useUserFormDialog();
+      const { openDialog, setFormMode, setUserData, setOpenConfirm } =
+        useUserFormDialog();
 
       return (
         <DropdownMenu>
@@ -115,22 +122,22 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
+              className="flex items-center hover:cursor-pointer"
               onClick={() => {
                 setFormMode("edit");
                 openDialog();
                 setUserData?.(user);
               }}
-              className="flex items-center hover:cursor-pointer"
             >
               <Pencil className="w-2" />
               Edit user
             </DropdownMenuItem>
             <DropdownMenuItem
+              className="text-red-600 hover:cursor-pointer hover:text-red-600!"
               onClick={() => {
                 setOpenConfirm?.(true);
                 setUserData?.(user);
               }}
-              className="text-red-600 hover:text-red-600! hover:cursor-pointer"
             >
               <Trash className="w-2 text-red-600" /> Delete user
             </DropdownMenuItem>
