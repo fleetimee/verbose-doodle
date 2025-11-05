@@ -1,11 +1,23 @@
 /**
  * Centralized API endpoint definitions
  * Single source of truth for all API routes
+ *
+ * Architecture:
+ * - Administrative/Management APIs: /api/** prefix
+ *   - /api/login, /api/refresh (public auth)
+ *   - /api/users/** (ADMIN only)
+ *   - /api/overview (authenticated)
+ *   - /api/endpoint/** (GET: authenticated, POST/PUT/DELETE: ADMIN)
+ *   - /api/response/** (ADMIN only)
+ *   - /api/biller/** (ADMIN only)
+ * - Dynamic Simulator Endpoints: Root level (/**)
+ *   - Examples: /inquiry, /payment, /check-status
+ *   - Public access (no authentication required)
  */
 
 /**
  * Endpoint configuration
- * Full URL paths are defined here (including /api prefix where needed)
+ * All administrative and auth endpoints use /api prefix
  */
 export const API_ENDPOINTS = {
   /**
@@ -37,35 +49,36 @@ export const API_ENDPOINTS = {
       delete: (id: string | number) => `/api/biller/${id}`,
     },
     users: {
-      list: "/users",
-      detail: (id: string | number) => `/users/${id}`,
-      create: "/users/add",
-      update: (id: string | number) => `/users/${id}`,
-      delete: (id: string | number) => `/users/${id}`,
+      list: "/api/users",
+      detail: (id: string | number) => `/api/users/${id}`,
+      create: "/api/users",
+      update: (id: string | number) => `/api/users/${id}`,
+      delete: (id: string | number) => `/api/users/${id}`,
     },
     overview: "/api/overview",
   },
 
   /**
    * Public endpoints - no authentication required
+   * These are for viewing public data via the /api prefix
    */
   public: {
     endpoints: {
-      view: "/endpoint",
+      view: "/api/endpoint/public",
     },
     billers: {
-      view: "/biller",
+      view: "/api/biller/public",
     },
   },
 
   /**
-   * Authentication endpoints
+   * Authentication endpoints - all use /api prefix
    */
   auth: {
-    login: "/login",
-    refresh: "/refresh",
-    logout: "/api/auth/logout",
-    register: "/api/auth/register",
+    login: "/api/login",
+    refresh: "/api/refresh",
+    logout: "/api/logout",
+    register: "/api/register",
   },
 } as const;
 
