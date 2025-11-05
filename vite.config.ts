@@ -32,6 +32,11 @@ export default defineConfig(({ mode }) => {
             }
           },
         },
+        "/users": {
+          target: env.VITE_ENDPOINT_URL,
+          changeOrigin: true,
+          secure: false,
+        },
         "/refresh": {
           target: env.VITE_ENDPOINT_URL,
           changeOrigin: true,

@@ -1,5 +1,4 @@
 import { Users as UsersIcon } from "lucide-react";
-import { useState } from "react";
 import { DataTable } from "@/components/ui/data-table";
 import {
   Empty,
@@ -14,9 +13,8 @@ import { UserConfirmDialog } from "@/features/users/components/user-confirm-dial
 import { UserFormDialog } from "@/features/users/components/user-form-dialog";
 import { UserFormDialogTrigger } from "@/features/users/components/user-form-dialog-trigger";
 import { UserProvider } from "@/features/users/context";
-import { sampleUsers } from "@/features/users/data/users-data";
-import type { User } from "@/features/users/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { useGetUsers } from "@/features/users/hooks/use-get-users";
 
 export function UsersPage() {
   useDocumentMeta({
@@ -24,7 +22,7 @@ export function UsersPage() {
     description: "Manage users and their permissions in the billing simulator",
     keywords: ["user management", "permissions", "team", "users"],
   });
-  const [users] = useState<User[]>(sampleUsers);
+  const { data: users = [], isPending: isLoadingEndpoints } = useGetUsers();
 
   return (
     <UserProvider>

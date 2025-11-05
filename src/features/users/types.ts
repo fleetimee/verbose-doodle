@@ -1,8 +1,8 @@
 export type User = {
-  id?: string;
+  id?: string | number;
   name?: string;
   username: string;
-  role: "admin" | "user";
+  role: "ADMIN" | "USER";
   active: boolean;
   avatar?: string;
 };
