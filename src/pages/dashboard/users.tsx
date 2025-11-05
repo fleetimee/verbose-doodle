@@ -10,13 +10,13 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { columns } from "@/features/users/components/columns";
+import { UserConfirmDialog } from "@/features/users/components/user-confirm-dialog";
+import { UserFormDialog } from "@/features/users/components/user-form-dialog";
+import { UserFormDialogTrigger } from "@/features/users/components/user-form-dialog-trigger";
+import { UserProvider } from "@/features/users/context";
 import { sampleUsers } from "@/features/users/data/users-data";
 import type { User } from "@/features/users/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
-import { UserFormDialog } from "@/features/users/components/user-form-dialog";
-import { UserProvider } from "@/features/users/context";
-import { UserConfirmDialog } from "@/features/users/components/user-confirm-dialog";
-import { UserFormDialogTrigger } from "@/features/users/components/user-form-dialog-trigger";
 
 export function UsersPage() {
   useDocumentMeta({
@@ -33,7 +33,9 @@ export function UsersPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-bold text-3xl tracking-tight">Users</h1>
-            <p className="text-muted-foreground">Manage users and their permissions</p>
+            <p className="text-muted-foreground">
+              Manage users and their permissions
+            </p>
           </div>
           <UserFormDialogTrigger />
         </div>
@@ -47,8 +49,8 @@ export function UsersPage() {
               </EmptyMedia>
               <EmptyTitle>No users yet</EmptyTitle>
               <EmptyDescription>
-                Start building your team by adding users. Assign roles and permissions to manage
-                access to your application.
+                Start building your team by adding users. Assign roles and
+                permissions to manage access to your application.
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>

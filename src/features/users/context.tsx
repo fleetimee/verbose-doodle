@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
-import type { User } from "./types";
+import { createContext, type ReactNode, useContext, useState } from "react";
+import type { User } from "@/features/users/types";
 
 type UserDialogContextType = {
   open: boolean;
@@ -48,7 +48,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 export const useUserFormDialog = () => {
   const context = useContext(UserDialogContext);
   if (!context) {
-    throw new Error("useAddUserDialog must be used within AddUserDialogProvider");
+    throw new Error(
+      "useAddUserDialog must be used within AddUserDialogProvider"
+    );
   }
   return context;
 };

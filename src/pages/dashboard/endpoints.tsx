@@ -10,6 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Postman } from "@/components/ui/svgs/postman";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
@@ -29,7 +30,18 @@ import {
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
-const SKELETON_KEYS = Array.from({ length: 6 }, () => crypto.randomUUID());
+// Skeleton loading constants
+const SKELETON_TOTAL_COUNT = 18;
+const SKELETON_GROUP_1_START = 0;
+const SKELETON_GROUP_1_END = 9;
+const SKELETON_GROUP_2_START = 9;
+const SKELETON_GROUP_2_END = 13;
+const SKELETON_GROUP_3_START = 13;
+const SKELETON_GROUP_3_END = 18;
+
+const SKELETON_KEYS = Array.from({ length: SKELETON_TOTAL_COUNT }, () =>
+  crypto.randomUUID()
+);
 
 // Animation constants
 const STAGGER_BASE_DELAY = 0.4;
@@ -115,30 +127,104 @@ export function EndpointsPage() {
       </motion.div>
 
       {isLoadingEndpoints && (
-        <motion.div
-          animate={{ opacity: 1, y: 0 }}
-          initial={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
-        >
-          <EndpointsSearchControls
-            onSearchChange={setSearchTerm}
-            onViewModeChange={setViewMode}
-            viewMode={viewMode}
-          />
-          {viewMode === "grid" ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {SKELETON_KEYS.map((key) => (
-                <EndpointCardSkeleton key={key} />
-              ))}
+        <>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="flex-1">
+              <EndpointsSearchControls
+                onSearchChange={setSearchTerm}
+                onViewModeChange={setViewMode}
+                viewMode={viewMode}
+              />
             </div>
-          ) : (
-            <div className="space-y-3">
-              {SKELETON_KEYS.map((key) => (
-                <EndpointListSkeleton key={key} />
-              ))}
-            </div>
-          )}
-        </motion.div>
+            <Button disabled variant="outline">
+              <Postman className="mr-2 h-4 w-4" />
+              Export to Postman
+            </Button>
+          </div>
+
+          <div className="space-y-8">
+            {/* First group skeleton - 9 items */}
+            <section className="space-y-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <Skeleton className="h-7 w-32" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+              {viewMode === "grid" ? (
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {SKELETON_KEYS.slice(
+                    SKELETON_GROUP_1_START,
+                    SKELETON_GROUP_1_END
+                  ).map((key) => (
+                    <EndpointCardSkeleton key={key} />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {SKELETON_KEYS.slice(
+                    SKELETON_GROUP_1_START,
+                    SKELETON_GROUP_1_END
+                  ).map((key) => (
+                    <EndpointListSkeleton key={key} />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Second group skeleton - 4 items */}
+            <section className="space-y-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <Skeleton className="h-7 w-28" />
+                <Skeleton className="h-5 w-20" />
+              </div>
+              {viewMode === "grid" ? (
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {SKELETON_KEYS.slice(
+                    SKELETON_GROUP_2_START,
+                    SKELETON_GROUP_2_END
+                  ).map((key) => (
+                    <EndpointCardSkeleton key={key} />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {SKELETON_KEYS.slice(
+                    SKELETON_GROUP_2_START,
+                    SKELETON_GROUP_2_END
+                  ).map((key) => (
+                    <EndpointListSkeleton key={key} />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Third group skeleton - 5 items */}
+            <section className="space-y-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <Skeleton className="h-7 w-36" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+              {viewMode === "grid" ? (
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {SKELETON_KEYS.slice(
+                    SKELETON_GROUP_3_START,
+                    SKELETON_GROUP_3_END
+                  ).map((key) => (
+                    <EndpointCardSkeleton key={key} />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {SKELETON_KEYS.slice(
+                    SKELETON_GROUP_3_START,
+                    SKELETON_GROUP_3_END
+                  ).map((key) => (
+                    <EndpointListSkeleton key={key} />
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+        </>
       )}
 
       {!isLoadingEndpoints && hasEndpoints && (
