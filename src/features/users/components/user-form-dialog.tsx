@@ -1,107 +1,64 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useUserFormDialog } from "@/features/users/context";
+  UserForm,
+  type UserFormHandle,
+} from "@/features/users/forms/user-form";
 import {
   type CreateUserRequest,
   useCreateUser,
-} from "../hooks/use-create-user";
-import { useUpdateUser } from "../hooks/use-update-user";
+} from "@/features/users/hooks/use-create-user";
+import { useUpdateUser } from "@/features/users/hooks/use-update-user";
+import type { UserFormData } from "@/features/users/schemas/user-schema";
+import type { User } from "@/features/users/types";
 
-const USERNAME_MIN_LENGTH = 3;
-const USERNAME_MAX_LENGTH = 20;
-const PASSWORD_MIN_LENGTH = 8;
+type UserFormDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  mode: "add" | "edit";
+  userData?: User;
+};
 
-const userSchema = z.object({
-  username: z
-    .string()
-    .min(USERNAME_MIN_LENGTH, {
-      message: "Username must be at least 3 characters long",
-    })
-    .max(USERNAME_MAX_LENGTH, {
-      message: "Username must not exceed 20 characters",
-    }),
-  role: z.enum(["ADMIN", "USER"], { message: "Invalid role" }),
-  active: z.boolean(),
-  password: z
-    .string()
-    .min(PASSWORD_MIN_LENGTH, {
-      message: "Password must be at least 8 characters long",
-    })
-    .regex(/[A-Za-z]/, { message: "Password must contain at least one letter" })
-    .regex(/\d/, { message: "Password must contain at least one number" })
-    .optional(),
-});
+export const UserFormDialog = ({
+  open,
+  onOpenChange,
+  mode,
+  userData,
+}: UserFormDialogProps) => {
+  const formRef = useRef<UserFormHandle>(null);
 
-type UserFormData = z.infer<typeof userSchema>;
+  const { mutate: createUser, isPending: isCreating } = useCreateUser();
+  const { mutate: updateUser, isPending: isUpdating } = useUpdateUser();
 
-export const UserFormDialog = () => {
-  const { open, setOpen, formMode, userData, setUserData } =
-    useUserFormDialog();
-  const [showPassword, setShowPassword] = useState(false);
+  const isSubmitting = isCreating || isUpdating;
 
-  const { mutate: createUser } = useCreateUser();
-  const { mutate: updateUser } = useUpdateUser();
-
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    formState: { errors },
-  } = useForm<UserFormData>({
-    resolver: zodResolver(userSchema),
-    defaultValues: {
-      username: "",
-      role: "USER",
-      active: true,
-      password: "",
-    },
-  });
-
-  useEffect(() => {
-    if (formMode === "edit" && userData) {
-      reset({
-        username: userData.username,
-        role: userData.role,
-        active: userData.active,
-      });
-    } else {
-      reset({
-        username: "",
-        role: "USER",
-        active: true,
-        password: "",
-      });
-    }
-  }, [formMode, userData, reset]);
+  // Create default values based on mode and userData
+  const defaultValues =
+    mode === "edit" && userData
+      ? {
+          username: userData.username,
+          role: userData.role,
+          active: userData.active,
+          password: "",
+        }
+      : {
+          username: "",
+          role: "USER" as const,
+          active: true,
+          password: "",
+        };
 
   const onSubmit = (data: UserFormData) => {
-    if (formMode === "edit" && userData?.id) {
+    if (mode === "edit" && userData?.id) {
       updateUser(
         {
           user_id: userData.id,
@@ -111,9 +68,8 @@ export const UserFormDialog = () => {
         },
         {
           onSuccess: () => {
-            setUserData?.(undefined);
-            setOpen(false);
-            reset();
+            onOpenChange(false);
+            formRef.current?.reset();
           },
           onError: () => {
             // Error is handled by the mutation hook with toast notification
@@ -123,9 +79,8 @@ export const UserFormDialog = () => {
     } else {
       createUser(data as CreateUserRequest, {
         onSuccess: () => {
-          setUserData?.(data);
-          setOpen(false);
-          reset();
+          onOpenChange(false);
+          formRef.current?.reset();
         },
         onError: () => {
           // Error is handled by the mutation hook with toast notification
@@ -135,127 +90,53 @@ export const UserFormDialog = () => {
   };
 
   return (
-    <Dialog
-      onOpenChange={(isOpen) => {
-        setOpen(isOpen);
-        if (!isOpen) {
-          setUserData?.(undefined);
-        }
-      }}
-      open={open}
-    >
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogHeader>
-            <DialogTitle>
-              {formMode === "edit" ? "Edit User" : "Add New User"}
-            </DialogTitle>
-            <DialogDescription>
-              {formMode === "edit"
-                ? "Modify user information below."
-                : "Fill out the form below to add a new user."}
-            </DialogDescription>
-          </DialogHeader>
+    <Dialog onOpenChange={onOpenChange} open={open}>
+      <DialogContent className="sm:max-w-[480px]">
+        <DialogHeader className="space-y-2">
+          <DialogTitle className="font-semibold text-xl">
+            {mode === "edit" ? "Edit User" : "Add New User"}
+          </DialogTitle>
+          <DialogDescription>
+            {mode === "edit"
+              ? "Update user information and permissions."
+              : "Create a new user account with appropriate permissions."}
+          </DialogDescription>
+        </DialogHeader>
 
-          <div className="mt-4 grid gap-4">
-            <div className="grid gap-3">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                placeholder="username"
-                {...register("username")}
-              />
-              {errors.username && (
-                <p className="text-red-500 text-sm">
-                  {errors.username.message}
-                </p>
-              )}
-            </div>
-
-            {formMode === "add" && (
-              <div className="grid gap-3">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    placeholder="password"
-                    type={showPassword ? "text" : "password"}
-                    {...register("password")}
-                    className="pr-10"
-                  />
-                  <button
-                    className="-translate-y-1/2 absolute top-1/2 right-3 cursor-pointer text-gray-500 hover:text-gray-700"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    type="button"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-red-500 text-sm">
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-6">
-              <div className="grid gap-3">
-                <Label htmlFor="role">Role</Label>
-                <Controller
-                  control={control}
-                  name="role"
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select user role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Role</SelectLabel>
-                          <SelectItem value="ADMIN">Admin</SelectItem>
-                          <SelectItem value="USER">User</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.role && (
-                  <p className="text-red-500 text-sm">{errors.role.message}</p>
-                )}
-              </div>
-
-              <div className="grid gap-3">
-                <Label htmlFor="is_active">Active User</Label>
-                <Controller
-                  control={control}
-                  name="active"
-                  render={({ field }) => (
-                    <Checkbox
-                      checked={field.value}
-                      className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
-                      id="is_active"
-                      onCheckedChange={(checked) => field.onChange(!!checked)}
-                    />
-                  )}
-                />
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="mt-4">
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button type="submit">
-              {formMode === "edit" ? "Save Changes" : "Add User"}
-            </Button>
-          </DialogFooter>
-        </form>
+        <div className="mt-4">
+          <UserForm
+            defaultValues={defaultValues}
+            key={userData?.id ?? "new"}
+            onSubmit={onSubmit}
+            ref={formRef}
+            showPassword={mode === "add"}
+          >
+            <DialogFooter className="mt-5 gap-2">
+              <Button
+                className="flex-1 sm:flex-initial"
+                disabled={isSubmitting}
+                onClick={() => onOpenChange(false)}
+                type="button"
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 sm:flex-initial"
+                disabled={isSubmitting}
+                type="submit"
+              >
+                {isSubmitting && <Spinner className="mr-2" />}
+                {(() => {
+                  if (isSubmitting) {
+                    return mode === "edit" ? "Saving..." : "Creating...";
+                  }
+                  return mode === "edit" ? "Save Changes" : "Add User";
+                })()}
+              </Button>
+            </DialogFooter>
+          </UserForm>
+        </div>
       </DialogContent>
     </Dialog>
   );

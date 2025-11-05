@@ -1,9 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { userQueryKeys } from "@/features/users/query-key";
 import { type ApiError, apiPost } from "@/lib/api";
 import { getUserCreateUrl } from "@/lib/api-endpoints";
 import { createMutationHook } from "@/lib/query-hooks";
-import { userQueryKeys } from "../query-key";
 
 export type CreateUserRequest = {
   username: string;

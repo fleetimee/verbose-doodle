@@ -1,9 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { userQueryKeys } from "@/features/users/query-key";
 import { type ApiError, apiDelete } from "@/lib/api";
 import { getUserDeleteUrl } from "@/lib/api-endpoints";
 import { createMutationHook } from "@/lib/query-hooks";
-import { userQueryKeys } from "../query-key";
 
 type DeleteUserRequest = {
   user_id: string | number;

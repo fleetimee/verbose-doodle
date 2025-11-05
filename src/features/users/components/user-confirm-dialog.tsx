@@ -9,31 +9,38 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useUserFormDialog } from "@/features/users/context";
-import { useDeleteUser } from "../hooks/use-delete-user";
+import { useDeleteUser } from "@/features/users/hooks/use-delete-user";
+import type { User } from "@/features/users/types";
 
-export const UserConfirmDialog = () => {
-  const { openConfirm, setOpenConfirm, userData, setUserData } =
-    useUserFormDialog();
+type UserConfirmDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  user?: User;
+};
+
+export const UserConfirmDialog = ({
+  open,
+  onOpenChange,
+  user,
+}: UserConfirmDialogProps) => {
   const { mutate: deleteUser } = useDeleteUser();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!userData?.id) {
+    if (!user?.id) {
       return;
     }
 
     setIsDeleting(true);
 
     deleteUser(
-      { user_id: userData.id },
+      { user_id: user.id },
       {
         onSuccess: () => {
           setIsDeleting(false);
-          setUserData?.(undefined);
-          setOpenConfirm?.(false);
+          onOpenChange(false);
         },
         onError: () => {
           setIsDeleting(false);
@@ -43,7 +50,7 @@ export const UserConfirmDialog = () => {
   };
 
   return (
-    <AlertDialog onOpenChange={setOpenConfirm} open={openConfirm}>
+    <AlertDialog onOpenChange={onOpenChange} open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>

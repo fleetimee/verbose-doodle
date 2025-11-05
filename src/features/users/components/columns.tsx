@@ -10,8 +10,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useUserFormDialog } from "@/features/users/context";
 import type { User } from "@/features/users/types";
+
+type ColumnActions = {
+  onEdit: (user: User) => void;
+  onDelete: (user: User) => void;
+};
 
 const getStatusStyles = (active: string): string => {
   if (active) {
@@ -20,7 +24,7 @@ const getStatusStyles = (active: string): string => {
   return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
 };
 
-export const columns: ColumnDef<User>[] = [
+export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
   {
     id: "select",
     header: ({ table: tableInstance }) => (
@@ -108,9 +112,6 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const user = row.original;
 
-      const { openDialog, setFormMode, setUserData, setOpenConfirm } =
-        useUserFormDialog();
-
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -123,21 +124,14 @@ export const columns: ColumnDef<User>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               className="flex items-center hover:cursor-pointer"
-              onClick={() => {
-                setFormMode("edit");
-                openDialog();
-                setUserData?.(user);
-              }}
+              onClick={() => actions.onEdit(user)}
             >
               <Pencil className="w-2" />
               Edit user
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-red-600 hover:cursor-pointer hover:text-red-600!"
-              onClick={() => {
-                setOpenConfirm?.(true);
-                setUserData?.(user);
-              }}
+              onClick={() => actions.onDelete(user)}
             >
               <Trash className="w-2 text-red-600" /> Delete user
             </DropdownMenuItem>
