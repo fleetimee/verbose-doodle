@@ -16,22 +16,21 @@ export function EndpointCardSkeleton() {
       variant="default"
     >
       <ItemMedia variant="default">
-        <Skeleton className="h-8 w-16 rounded-md" />
+        <Skeleton className="h-7 w-[52px] rounded-md" />
       </ItemMedia>
       <ItemContent>
         <ItemTitle>
-          <Skeleton className="h-6 w-full max-w-[85%]" />
+          <Skeleton className="h-5 w-[180px]" />
         </ItemTitle>
-        <ItemDescription>
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-4 w-36" />
-            <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-4 w-40" />
+        <ItemDescription className="text-left">
+          <div className="flex flex-col gap-0.5">
+            <Skeleton className="h-3.5 w-[85px]" />
+            <Skeleton className="h-4 w-[75px]" />
           </div>
         </ItemDescription>
       </ItemContent>
       <ItemActions>
-        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-5 w-5" />
       </ItemActions>
     </Item>
   );
