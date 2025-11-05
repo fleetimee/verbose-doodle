@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -25,12 +26,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUserFormDialog } from "@/features/users/context";
-import { useCreateUser, type CreateUserRequest } from "../hooks/use-create-user";
+import {
+  type CreateUserRequest,
+  useCreateUser,
+} from "../hooks/use-create-user";
 import { useUpdateUser } from "../hooks/use-update-user";
-import { Eye, EyeOff } from "lucide-react";
 
 const USERNAME_MIN_LENGTH = 3;
 const USERNAME_MAX_LENGTH = 20;
+const PASSWORD_MIN_LENGTH = 8;
 
 const userSchema = z.object({
   username: z
@@ -45,7 +49,9 @@ const userSchema = z.object({
   active: z.boolean(),
   password: z
     .string()
-    .min(8, { message: "Password must be at least 8 characters long" })
+    .min(PASSWORD_MIN_LENGTH, {
+      message: "Password must be at least 8 characters long",
+    })
     .regex(/[A-Za-z]/, { message: "Password must contain at least one letter" })
     .regex(/\d/, { message: "Password must contain at least one number" })
     .optional(),
@@ -54,7 +60,8 @@ const userSchema = z.object({
 type UserFormData = z.infer<typeof userSchema>;
 
 export const UserFormDialog = () => {
-  const { open, setOpen, formMode, userData, setUserData } = useUserFormDialog();
+  const { open, setOpen, formMode, userData, setUserData } =
+    useUserFormDialog();
   const [showPassword, setShowPassword] = useState(false);
 
   const { mutate: createUser } = useCreateUser();
@@ -108,8 +115,8 @@ export const UserFormDialog = () => {
             setOpen(false);
             reset();
           },
-          onError: (error) => {
-            console.error("User update failed:", error);
+          onError: () => {
+            // Error is handled by the mutation hook with toast notification
           },
         }
       );
@@ -120,8 +127,8 @@ export const UserFormDialog = () => {
           setOpen(false);
           reset();
         },
-        onError: (error) => {
-          console.error("User creation failed:", error);
+        onError: () => {
+          // Error is handled by the mutation hook with toast notification
         },
       });
     }
@@ -140,7 +147,9 @@ export const UserFormDialog = () => {
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>{formMode === "edit" ? "Edit User" : "Add New User"}</DialogTitle>
+            <DialogTitle>
+              {formMode === "edit" ? "Edit User" : "Add New User"}
+            </DialogTitle>
             <DialogDescription>
               {formMode === "edit"
                 ? "Modify user information below."
@@ -151,8 +160,16 @@ export const UserFormDialog = () => {
           <div className="mt-4 grid gap-4">
             <div className="grid gap-3">
               <Label htmlFor="username">Username</Label>
-              <Input id="username" placeholder="username" {...register("username")} />
-              {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
+              <Input
+                id="username"
+                placeholder="username"
+                {...register("username")}
+              />
+              {errors.username && (
+                <p className="text-red-500 text-sm">
+                  {errors.username.message}
+                </p>
+              )}
             </div>
 
             {formMode === "add" && (
@@ -161,21 +178,27 @@ export const UserFormDialog = () => {
                 <div className="relative">
                   <Input
                     id="password"
-                    type={showPassword ? "text" : "password"}
                     placeholder="password"
+                    type={showPassword ? "text" : "password"}
                     {...register("password")}
                     className="pr-10"
                   />
                   <button
-                    type="button"
+                    className="-translate-y-1/2 absolute top-1/2 right-3 cursor-pointer text-gray-500 hover:text-gray-700"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                    type="button"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-red-500 text-sm">{errors.password.message}</p>
+                  <p className="text-red-500 text-sm">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
             )}
@@ -201,7 +224,9 @@ export const UserFormDialog = () => {
                     </Select>
                   )}
                 />
-                {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
+                {errors.role && (
+                  <p className="text-red-500 text-sm">{errors.role.message}</p>
+                )}
               </div>
 
               <div className="grid gap-3">
@@ -226,7 +251,9 @@ export const UserFormDialog = () => {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit">{formMode === "edit" ? "Save Changes" : "Add User"}</Button>
+            <Button type="submit">
+              {formMode === "edit" ? "Save Changes" : "Add User"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

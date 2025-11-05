@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
 import type { EndpointResponse } from "@/features/endpoints/types";
-import { apiPost } from "@/lib/api";
+import { type ApiError, apiPost } from "@/lib/api";
 import { getResponseCreateUrl } from "@/lib/api-endpoints";
 import { createMutationHook } from "@/lib/query-hooks";
 
@@ -30,12 +30,6 @@ type ApiCreateResponseResponse = {
 
 type CreateResponseResponse = {
   response: EndpointResponse;
-};
-
-type ResponseError = {
-  message: string;
-  code?: string;
-  status?: number;
 };
 
 /**
@@ -69,7 +63,7 @@ async function createResponse(
         message: "Invalid response structure from server",
         code: "INVALID_RESPONSE",
         status: 500,
-      } as ResponseError;
+      } as ApiError;
     }
 
     // Transform API response to internal format
@@ -83,7 +77,7 @@ async function createResponse(
       },
     };
   } catch (error) {
-    throw error as ResponseError;
+    throw error as ApiError;
   }
 }
 
@@ -106,7 +100,7 @@ export function useCreateResponse() {
   const mutation = createMutationHook<
     CreateResponseResponse,
     CreateResponseRequest,
-    ResponseError
+    ApiError
   >(createResponse, {
     onSuccess: (data, variables) => {
       // Show success message

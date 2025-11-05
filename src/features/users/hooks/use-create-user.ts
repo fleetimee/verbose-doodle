@@ -1,9 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { apiPost } from "@/lib/api";
+import { type ApiError, apiPost } from "@/lib/api";
 import { getUserCreateUrl } from "@/lib/api-endpoints";
 import { createMutationHook } from "@/lib/query-hooks";
-import { userQueryKeys } from "../queryKey";
+import { userQueryKeys } from "../query-key";
 
 export type CreateUserRequest = {
   username: string;
@@ -24,17 +24,13 @@ type CreateUserResponse = {
   user_id: string;
 };
 
-type ResponseError = {
-  message: string;
-  code?: string;
-  status?: number;
-};
-
 /**
  * Create User API call
  * Makes POST request to backend to create a new user
  */
-async function createUser(data: CreateUserRequest): Promise<CreateUserResponse> {
+async function createUser(
+  data: CreateUserRequest
+): Promise<CreateUserResponse> {
   try {
     const apiResponse = await apiPost<
       ApiCreateUserResponse,
@@ -57,7 +53,7 @@ async function createUser(data: CreateUserRequest): Promise<CreateUserResponse> 
         message: "Invalid response structure from server",
         code: "INVALID_RESPONSE",
         status: 500,
-      } as ResponseError;
+      } as ApiError;
     }
 
     // Transform API response to internal format
@@ -65,33 +61,34 @@ async function createUser(data: CreateUserRequest): Promise<CreateUserResponse> 
       user_id: apiResponse.data.user_id,
     };
   } catch (error) {
-    throw error as ResponseError;
+    throw error as ApiError;
   }
 }
 
 export function useCreateUser() {
   const queryClient = useQueryClient();
 
-  const mutation = createMutationHook<CreateUserResponse, CreateUserRequest, ResponseError>(
-    createUser,
-    {
-      onSuccess: (data) => {
-        // Show success message
-        toast.success("Response created successfully", {
-          description: `Created response: ${data.user_id}`,
-        });
+  const mutation = createMutationHook<
+    CreateUserResponse,
+    CreateUserRequest,
+    ApiError
+  >(createUser, {
+    onSuccess: (data) => {
+      // Show success message
+      toast.success("Response created successfully", {
+        description: `Created response: ${data.user_id}`,
+      });
 
-        // Invalidate and refetch queries to get fresh data from server
-        queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
-      },
-      onError: (error) => {
-        // Handle errors with toast notification
-        toast.error("Failed to create response", {
-          description: error.message || "An unexpected error occurred",
-        });
-      },
-    }
-  );
+      // Invalidate and refetch queries to get fresh data from server
+      queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
+    },
+    onError: (error) => {
+      // Handle errors with toast notification
+      toast.error("Failed to create response", {
+        description: error.message || "An unexpected error occurred",
+      });
+    },
+  });
 
   return mutation();
 }

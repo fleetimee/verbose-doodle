@@ -2,8 +2,8 @@ import { apiGet } from "@/lib/api";
 import { getAdminUserList } from "@/lib/api-endpoints";
 import { TIME_DURATIONS } from "@/lib/constants";
 import { createQueryHook } from "@/lib/query-hooks";
+import { userQueryKeys } from "../query-key";
 import type { User } from "../types";
-import { userQueryKeys } from "../queryKey";
 
 type ApiUserResponse = {
   userId: number;

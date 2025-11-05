@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
-import { apiPut } from "@/lib/api";
+import { type ApiError, apiPut } from "@/lib/api";
 import { getResponseActivateUrl } from "@/lib/api-endpoints";
 import { createMutationHook } from "@/lib/query-hooks";
 
@@ -13,12 +13,6 @@ type ActivateResponseRequest = {
 type ActivateResponseResponse = {
   endpointId: string;
   responseId: string;
-};
-
-type ResponseError = {
-  message: string;
-  code?: string;
-  status?: number;
 };
 
 /**
@@ -36,7 +30,7 @@ async function activateResponse(
       responseId: data.responseId,
     };
   } catch (error) {
-    throw error as ResponseError;
+    throw error as ApiError;
   }
 }
 
@@ -50,7 +44,7 @@ export function useActivateResponse() {
   const mutation = createMutationHook<
     ActivateResponseResponse,
     ActivateResponseRequest,
-    ResponseError
+    ApiError
   >(activateResponse, {
     onSuccess: (_response, variables) => {
       // Invalidate and refetch queries to get fresh data from server

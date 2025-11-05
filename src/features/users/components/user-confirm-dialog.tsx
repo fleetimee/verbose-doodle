@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,17 +11,19 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useUserFormDialog } from "@/features/users/context";
 import { useDeleteUser } from "../hooks/use-delete-user";
-import { useState } from "react";
 
 export const UserConfirmDialog = () => {
-  const { openConfirm, setOpenConfirm, userData, setUserData } = useUserFormDialog();
+  const { openConfirm, setOpenConfirm, userData, setUserData } =
+    useUserFormDialog();
   const { mutate: deleteUser } = useDeleteUser();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!userData?.id) return;
+    if (!userData?.id) {
+      return;
+    }
 
     setIsDeleting(true);
 
@@ -32,8 +35,7 @@ export const UserConfirmDialog = () => {
           setUserData?.(undefined);
           setOpenConfirm?.(false);
         },
-        onError: (error) => {
-          console.error("Failed to delete user:", error);
+        onError: () => {
           setIsDeleting(false);
         },
       }
@@ -46,16 +48,16 @@ export const UserConfirmDialog = () => {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the user and all associated
-            data.
+            This action cannot be undone. This will permanently delete the user
+            and all associated data.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             className="bg-red-500 hover:bg-red-600"
-            onClick={handleDelete}
             disabled={isDeleting}
+            onClick={handleDelete}
           >
             {isDeleting ? "Deleting..." : "Delete"}
           </AlertDialogAction>
