@@ -51,7 +51,7 @@ export const API_ENDPOINTS = {
     users: {
       list: "/api/users",
       detail: (id: string | number) => `/api/users/${id}`,
-      create: "/api/users",
+      create: "/api/users/add",
       update: (id: string | number) => `/api/users/${id}`,
       delete: (id: string | number) => `/api/users/${id}`,
     },
