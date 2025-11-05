@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
+import { overviewQueryKeys } from "@/features/overview/query-keys";
 import { type ApiError, apiPut } from "@/lib/api";
 import { getResponseDeactivateUrl } from "@/lib/api-endpoints";
 import { createMutationHook } from "@/lib/query-hooks";
@@ -52,6 +53,8 @@ export function useDeactivateResponse() {
       queryClient.invalidateQueries({
         queryKey: endpointQueryKeys.detail(variables.endpointId),
       });
+      // Invalidate overview to update active response count statistics
+      queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
     },
     onError: (error) => {
       // Handle errors with toast notification

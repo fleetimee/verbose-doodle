@@ -25,9 +25,11 @@ export function NavMain({
     url: string;
     icon: LucideIcon;
     isActive?: boolean;
+    onPrefetch?: () => void;
     items?: {
       title: string;
       url: string;
+      onPrefetch?: () => void;
     }[];
   }[];
 }) {
@@ -57,7 +59,7 @@ export function NavMain({
                   isActive={isActive}
                   tooltip={item.title}
                 >
-                  <Link to={item.url}>
+                  <Link onMouseEnter={item.onPrefetch} to={item.url}>
                     <item.icon />
                     <span>{item.title}</span>
                   </Link>
@@ -81,7 +83,10 @@ export function NavMain({
                                 asChild
                                 isActive={isSubItemActive}
                               >
-                                <Link to={subItem.url}>
+                                <Link
+                                  onMouseEnter={subItem.onPrefetch}
+                                  to={subItem.url}
+                                >
                                   <span>{subItem.title}</span>
                                 </Link>
                               </SidebarMenuSubButton>

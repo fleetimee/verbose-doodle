@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { overviewQueryKeys } from "@/features/overview/query-keys";
 import { userQueryKeys } from "@/features/users/query-key";
 import { type ApiError, apiPost } from "@/lib/api";
 import { getUserCreateUrl } from "@/lib/api-endpoints";
@@ -81,6 +82,8 @@ export function useCreateUser() {
 
       // Invalidate and refetch queries to get fresh data from server
       queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
+      // Invalidate overview to update user count statistics
+      queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
     },
     onError: (error) => {
       // Handle errors with toast notification

@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
+import { overviewQueryKeys } from "@/features/overview/query-keys";
 import type { EndpointResponse } from "@/features/endpoints/types";
 import { type ApiError, apiPost } from "@/lib/api";
 import { getResponseCreateUrl } from "@/lib/api-endpoints";
@@ -113,6 +114,8 @@ export function useCreateResponse() {
       queryClient.invalidateQueries({
         queryKey: endpointQueryKeys.detail(variables.endpointId),
       });
+      // Invalidate overview to update response count statistics
+      queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
     },
     onError: (error) => {
       // Handle errors with toast notification

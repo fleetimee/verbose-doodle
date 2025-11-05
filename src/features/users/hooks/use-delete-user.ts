@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { overviewQueryKeys } from "@/features/overview/query-keys";
 import { userQueryKeys } from "@/features/users/query-key";
 import { type ApiError, apiDelete } from "@/lib/api";
 import { getUserDeleteUrl } from "@/lib/api-endpoints";
@@ -63,6 +64,8 @@ export function useDeleteUser() {
       toast.success("User deleted successfully");
 
       queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
+      // Invalidate overview to update user count statistics
+      queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
     },
     onError: (error) => {
       toast.error("Failed to delete user", {

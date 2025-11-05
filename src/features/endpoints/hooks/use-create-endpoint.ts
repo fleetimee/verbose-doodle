@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
+import { overviewQueryKeys } from "@/features/overview/query-keys";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import type {
   ApiCreateEndpointResponse,
@@ -89,6 +90,8 @@ export function useCreateEndpoint() {
 
       // Invalidate and refetch endpoints to get fresh data from server
       queryClient.invalidateQueries({ queryKey: endpointQueryKeys.all });
+      // Invalidate overview to update endpoint count statistics
+      queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
     },
     onError: (error) => {
       // Handle errors with toast notification

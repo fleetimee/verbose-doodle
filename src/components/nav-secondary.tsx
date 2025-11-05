@@ -18,6 +18,7 @@ export function NavSecondary({
     title: string;
     url: string;
     icon: LucideIcon;
+    onPrefetch?: () => void;
   }[];
   children?: React.ReactNode;
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
@@ -34,7 +35,7 @@ export function NavSecondary({
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild isActive={isActive} size="sm">
-                  <Link to={item.url}>
+                  <Link onMouseEnter={item.onPrefetch} to={item.url}>
                     <item.icon />
                     <span>{item.title}</span>
                   </Link>

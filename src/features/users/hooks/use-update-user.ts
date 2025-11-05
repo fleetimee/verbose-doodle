@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { overviewQueryKeys } from "@/features/overview/query-keys";
 import { userQueryKeys } from "@/features/users/query-key";
 import { type ApiError, apiPatch } from "@/lib/api";
 import { getUserUpdateUrl } from "@/lib/api-endpoints";
@@ -75,6 +76,8 @@ export function useUpdateUser() {
 
       // Refresh relevant user queries
       queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
+      // Invalidate overview to update user statistics (e.g., active/inactive counts)
+      queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
       // queryClient.invalidateQueries({ queryKey: userQueryKeys.detail(data.user_id) });
     },
     onError: (error) => {

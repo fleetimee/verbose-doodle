@@ -17,6 +17,9 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/features/auth/context";
 import { usePermissions } from "@/features/auth/hooks/use-permissions";
+import { usePrefetchEndpoints } from "@/features/endpoints/hooks/use-prefetch-endpoints";
+import { usePrefetchOverview } from "@/features/overview/hooks/use-prefetch-overview";
+import { usePrefetchUsers } from "@/features/users/hooks/use-prefetch-users";
 
 const data = {
   navMain: [
@@ -49,6 +52,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { authState } = useAuth();
   const { can } = usePermissions({ role: authState.user?.role });
 
+  // Prefetch hooks for hover behavior
+  const { prefetchOverview } = usePrefetchOverview();
+  const { prefetchEndpoints } = usePrefetchEndpoints();
+  const { prefetchUsers } = usePrefetchUsers();
+
   // Construct user object for NavUser component
   const user = authState.user
     ? {
@@ -62,15 +70,32 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         avatar: "",
       };
 
-  // Filter navigation items based on user permissions
-  const filteredNavMain = data.navMain.filter((item) => {
-    // Users page requires canViewUsers permission
-    if (item.url === "/dashboard/users") {
-      return can("canViewUsers");
-    }
-    // All other pages are accessible to all authenticated users
-    return true;
-  });
+  // Map navigation items with prefetch handlers and filter based on permissions
+  const filteredNavMain = data.navMain
+    .map((item) => {
+      // Add prefetch handler based on the route
+      let onPrefetch: (() => void) | undefined;
+      if (item.url === "/dashboard/overview") {
+        onPrefetch = prefetchOverview;
+      } else if (item.url === "/dashboard/endpoints") {
+        onPrefetch = prefetchEndpoints;
+      } else if (item.url === "/dashboard/users") {
+        onPrefetch = prefetchUsers;
+      }
+
+      return {
+        ...item,
+        onPrefetch,
+      };
+    })
+    .filter((item) => {
+      // Users page requires canViewUsers permission
+      if (item.url === "/dashboard/users") {
+        return can("canViewUsers");
+      }
+      // All other pages are accessible to all authenticated users
+      return true;
+    });
 
   return (
     <Sidebar collapsible="icon" {...props}>
