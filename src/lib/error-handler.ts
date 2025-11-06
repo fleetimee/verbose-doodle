@@ -128,7 +128,8 @@ export function handleAuthError(error: unknown) {
   // Handle specific auth error cases
   if (apiError.status === HTTP_STATUS.UNAUTHORIZED) {
     // Use the actual error message from the API if available
-    const message = apiError.message || "Invalid username or password. Please try again.";
+    const message =
+      apiError.message || "Invalid username or password. Please try again.";
     showErrorToast(error, message);
     return;
   }

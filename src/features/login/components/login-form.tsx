@@ -191,11 +191,7 @@ export const LoginForm = ({
             )}
           />
 
-          <Button
-            className="w-full"
-            disabled={isLoading}
-            type="submit"
-          >
+          <Button className="w-full" disabled={isLoading} type="submit">
             {isLoading && <Spinner className="mr-2" />}
             {isLoading ? "Signing in..." : "Sign in"}
           </Button>

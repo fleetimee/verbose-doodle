@@ -1,6 +1,6 @@
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
-import type { ControllerRenderProps, FieldError } from "react-hook-form";
+import type { FieldError } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -26,11 +26,15 @@ import {
   STATUS_SUCCESS_MIN,
 } from "@/features/endpoints/constants/http-status-codes";
 import { AUTO_ADVANCE_DELAY } from "@/features/endpoints/constants/stepper-steps";
-import type { ResponseFormData } from "@/features/endpoints/schemas/response-schema";
 import { cn } from "@/lib/utils";
 
 type StatusCodeComboboxProps = {
-  field: ControllerRenderProps<ResponseFormData, "statusCode">;
+  field: {
+    value: number;
+    onChange: (value: number) => void;
+    onBlur: () => void;
+    name: string;
+  };
   fieldError?: FieldError;
   onSelect?: () => void;
   onAdvance?: () => void;

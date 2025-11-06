@@ -124,7 +124,11 @@ export const Login = () => {
         </div>
 
         {/* Login Form */}
-        <LoginForm error={loginError} isLoading={isPending} onSubmit={handleLogin} />
+        <LoginForm
+          error={loginError}
+          isLoading={isPending}
+          onSubmit={handleLogin}
+        />
       </div>
     </div>
   );
