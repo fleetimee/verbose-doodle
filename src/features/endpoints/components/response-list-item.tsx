@@ -23,6 +23,15 @@ import { cn } from "@/lib/utils";
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
 const SELECTED_ITEM_SCALE = 1.02;
 
+// Animation constants for smooth transitions
+const ANIMATION_DURATION = 0.3;
+const HOVER_SCALE = 1.01;
+const SCALE_SPRING = {
+  type: "spring",
+  stiffness: 400,
+  damping: 30,
+} as const;
+
 type ResponseListItemProps = {
   response: EndpointResponse;
   isSelected: boolean;
@@ -65,11 +74,12 @@ export function ResponseListItem({
       <motion.div
         animate={{
           scale: isSelected ? SELECTED_ITEM_SCALE : 1,
+          opacity: 1,
         }}
         className={cn(
-          "w-full cursor-pointer rounded-md px-3 py-2.5 text-left transition-colors duration-200",
+          "w-full cursor-pointer rounded-md px-3 py-2.5 text-left transition-colors",
           isSelected
-            ? "bg-accent text-accent-foreground"
+            ? "bg-accent text-accent-foreground shadow-sm"
             : "hover:bg-accent/50",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         )}
@@ -86,24 +96,51 @@ export function ResponseListItem({
           }
         }}
         role="button"
+        style={{
+          transition: `background-color ${ANIMATION_DURATION}s cubic-bezier(0.4, 0, 0.2, 1), box-shadow ${ANIMATION_DURATION}s cubic-bezier(0.4, 0, 0.2, 1)`,
+        }}
         tabIndex={0}
         transition={{
-          layout: { duration: 0.2, ease: "easeOut" },
-          scale: { duration: 0.2, ease: "easeOut" },
+          layout: { type: "spring", stiffness: 400, damping: 30 },
+          scale: SCALE_SPRING,
+          opacity: { duration: ANIMATION_DURATION, ease: "easeOut" },
         }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ scale: isSelected ? SELECTED_ITEM_SCALE : HOVER_SCALE }}
+        whileTap={{ scale: 0.99 }}
       >
         <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 space-y-2">
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            className="flex-1 space-y-2"
+            initial={false}
+            transition={{
+              duration: ANIMATION_DURATION,
+              ease: "easeOut",
+            }}
+          >
             <div className="flex items-center gap-2">
               <span className="font-medium text-sm">{response.name}</span>
               {isActive && (
-                <Badge className="text-xs" variant="secondary">
-                  Active
-                </Badge>
+                <motion.div
+                  animate={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                >
+                  <Badge className="text-xs" variant="secondary">
+                    Active
+                  </Badge>
+                </motion.div>
               )}
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
+            <motion.div
+              animate={{ opacity: 1 }}
+              className="flex flex-wrap items-center gap-1.5"
+              initial={false}
+              transition={{
+                duration: ANIMATION_DURATION,
+                ease: "easeOut",
+              }}
+            >
               <Badge
                 className="font-mono text-xs"
                 variant={
@@ -115,18 +152,23 @@ export function ResponseListItem({
                 {response.statusCode}
               </Badge>
               <ResponseSimulationBadge response={response} />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
           {canActivateResponse && (
             <div className="flex items-center gap-1">
               <Button
-                className="h-7 w-7 cursor-pointer"
+                className="h-7 w-7"
+                disabled={!isSelected}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowSimulateDialog(true);
                 }}
                 size="icon"
-                title="Simulate timeout or delay"
+                title={
+                  isSelected
+                    ? "Simulate timeout or delay"
+                    : "Select this response to configure simulation"
+                }
                 type="button"
                 variant="ghost"
               >

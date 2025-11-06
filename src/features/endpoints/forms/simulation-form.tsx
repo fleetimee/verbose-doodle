@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Clock, Timer, Zap } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { forwardRef, useImperativeHandle } from "react";
 import { Controller, type UseFormReturn, useForm } from "react-hook-form";
 import {
@@ -29,6 +30,12 @@ import {
 
 const MS_PER_SECOND = 1000;
 const DELAY_DISPLAY_DECIMAL_PLACES = 2;
+
+// Animation constants
+const SECTION_ANIMATION_DURATION = 0.4;
+const BUTTON_ANIMATION_DURATION = 0.2;
+const BUTTON_STAGGER_DELAY = 0.05;
+const PREVIEW_ANIMATION_DURATION = 0.3;
 
 type SimulationFormProps = {
   defaultValues?: SimulationFormValues;
@@ -188,83 +195,135 @@ export const SimulationForm = forwardRef<
             />
 
             {/* Step 2: Delay Configuration (Conditional) */}
-            {simulationType === SIMULATION_TYPE.DELAY && (
-              <Controller
-                control={form.control}
-                name="delayMs"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Delay Duration</FieldLabel>
-                    <FieldContent>
-                      <FieldDescription>
-                        Choose a preset or enter a custom delay value
-                      </FieldDescription>
+            <AnimatePresence mode="wait">
+              {simulationType === SIMULATION_TYPE.DELAY && (
+                <motion.div
+                  animate={{ opacity: 1, height: "auto", y: 0 }}
+                  exit={{ opacity: 0, height: 0, y: -20 }}
+                  initial={{ opacity: 0, height: 0, y: -20 }}
+                  key="delay-config"
+                  transition={{
+                    duration: SECTION_ANIMATION_DURATION,
+                    ease: "easeOut",
+                  }}
+                >
+                  <Controller
+                    control={form.control}
+                    name="delayMs"
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel>Delay Duration</FieldLabel>
+                        <FieldContent>
+                          <FieldDescription>
+                            Choose a preset or enter a custom delay value
+                          </FieldDescription>
 
-                      {/* Preset Buttons */}
-                      <div className="mb-4 grid grid-cols-3 gap-2">
-                        {DELAY_PRESETS.map((preset) => (
-                          <Button
-                            key={preset.value}
-                            onClick={() => field.onChange(preset.value)}
-                            size="sm"
-                            type="button"
-                            variant={
-                              delayMs === preset.value ? "default" : "outline"
-                            }
-                          >
-                            {preset.label}
-                          </Button>
-                        ))}
-                      </div>
+                          {/* Preset Buttons */}
+                          <div className="mb-4 grid grid-cols-3 gap-2">
+                            {DELAY_PRESETS.map((preset, index) => (
+                              <motion.div
+                                animate={{ opacity: 1, scale: 1 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                key={preset.value}
+                                transition={{
+                                  duration: BUTTON_ANIMATION_DURATION,
+                                  delay: index * BUTTON_STAGGER_DELAY,
+                                  ease: "easeOut",
+                                }}
+                              >
+                                <Button
+                                  className="w-full transition-all duration-200"
+                                  onClick={() => field.onChange(preset.value)}
+                                  size="sm"
+                                  type="button"
+                                  variant={
+                                    delayMs === preset.value
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                >
+                                  {preset.label}
+                                </Button>
+                              </motion.div>
+                            ))}
+                          </div>
 
-                      {/* Custom Delay Input */}
-                      <div className="flex items-end gap-2">
-                        <div className="flex-1">
-                          <FieldLabel htmlFor="custom-delay">
-                            Custom Delay
-                          </FieldLabel>
-                          <Input
-                            id="custom-delay"
-                            max={MAX_DELAY_MS}
-                            min={0}
-                            onChange={(e) => {
-                              const value = Number.parseInt(e.target.value, 10);
-                              if (!Number.isNaN(value)) {
-                                field.onChange(value);
-                              }
-                            }}
-                            placeholder="Enter delay in ms"
-                            type="number"
-                            value={field.value || ""}
-                          />
-                        </div>
-                        <div className="text-muted-foreground text-sm">ms</div>
-                      </div>
+                          {/* Custom Delay Input */}
+                          <div className="flex items-end gap-2">
+                            <div className="flex-1">
+                              <FieldLabel htmlFor="custom-delay">
+                                Custom Delay
+                              </FieldLabel>
+                              <Input
+                                id="custom-delay"
+                                max={MAX_DELAY_MS}
+                                min={0}
+                                onChange={(e) => {
+                                  const value = Number.parseInt(
+                                    e.target.value,
+                                    10
+                                  );
+                                  if (!Number.isNaN(value)) {
+                                    field.onChange(value);
+                                  }
+                                }}
+                                placeholder="Enter delay in ms"
+                                type="number"
+                                value={field.value || ""}
+                              />
+                            </div>
+                            <div className="text-muted-foreground text-sm">
+                              ms
+                            </div>
+                          </div>
 
-                      {/* Preview */}
-                      {delayMs && delayMs > 0 && (
-                        <div className="mt-4 rounded-lg border bg-muted/50 p-4">
-                          <p className="font-medium text-sm">Preview</p>
-                          <p className="mt-1 text-muted-foreground text-sm">
-                            Response will be delayed by{" "}
-                            <span className="font-semibold">
-                              {delayMs >= MS_PER_SECOND
-                                ? `${(delayMs / MS_PER_SECOND).toFixed(
-                                    DELAY_DISPLAY_DECIMAL_PLACES
-                                  )}s`
-                                : `${delayMs}ms`}
-                            </span>
-                          </p>
-                        </div>
-                      )}
-                    </FieldContent>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                          {/* Preview */}
+                          <AnimatePresence mode="wait">
+                            {delayMs && delayMs > 0 && (
+                              <motion.div
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                className="mt-4 rounded-lg border bg-muted/50 p-4"
+                                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                                key={`preview-${delayMs}`}
+                                transition={{
+                                  duration: PREVIEW_ANIMATION_DURATION,
+                                  ease: "easeOut",
+                                }}
+                              >
+                                <p className="font-medium text-sm">Preview</p>
+                                <p className="mt-1 text-muted-foreground text-sm">
+                                  Response will be delayed by{" "}
+                                  <motion.span
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="font-semibold"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    key={delayMs}
+                                    transition={{
+                                      duration: 0.2,
+                                      ease: "easeOut",
+                                    }}
+                                  >
+                                    {delayMs >= MS_PER_SECOND
+                                      ? `${(delayMs / MS_PER_SECOND).toFixed(
+                                          DELAY_DISPLAY_DECIMAL_PLACES
+                                        )}s`
+                                      : `${delayMs}ms`}
+                                  </motion.span>
+                                </p>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </FieldContent>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
                     )}
-                  </Field>
-                )}
-              />
-            )}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </FieldGroup>
         </div>
 

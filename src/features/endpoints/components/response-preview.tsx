@@ -1,6 +1,6 @@
 import { Code2, Copy, ExternalLink, Eye } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   CodeBlock,
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/tooltip";
 import { CodeGeneratorDialog } from "@/features/endpoints/components/code-generator-dialog";
 import { ResponseSimulationAlert } from "@/features/endpoints/components/response-simulation-alert";
+import { ServerSettlingLayer } from "@/features/endpoints/components/server-settling-layer";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
@@ -52,10 +53,54 @@ export function ResponsePreview({
 }: ResponsePreviewProps) {
   const { theme } = useTheme();
   const [isCodeDialogOpen, setIsCodeDialogOpen] = useState(false);
+  const [isServerSettling, setIsServerSettling] = useState(false);
+
+  // Track previous simulation settings to detect changes
+  const prevSimulationRef = useRef<{
+    responseId: string;
+    delayMs?: number | null;
+    simulateTimeout?: boolean;
+  } | null>(null);
 
   // Get the base URL from environment variable
   const baseUrl = import.meta.env.VITE_ENDPOINT_URL || "";
   const token = import.meta.env.VITE_API_TOKEN;
+
+  // Detect when simulation settings change for the SAME response
+  useEffect(() => {
+    if (!response) {
+      prevSimulationRef.current = null;
+      return;
+    }
+
+    const currentSimulation = {
+      responseId: response.id,
+      delayMs: response.delayMs,
+      simulateTimeout: response.simulateTimeout,
+    };
+
+    // Check if this is the same response and settings have changed
+    if (prevSimulationRef.current !== null) {
+      const prevSettings = prevSimulationRef.current;
+
+      // Only show settling screen if it's the SAME response with CHANGED settings
+      const isSameResponse =
+        prevSettings.responseId === currentSimulation.responseId;
+      const hasSimulationChanged =
+        prevSettings.delayMs !== currentSimulation.delayMs ||
+        prevSettings.simulateTimeout !== currentSimulation.simulateTimeout;
+
+      if (isSameResponse && hasSimulationChanged) {
+        setIsServerSettling(true);
+      }
+    }
+
+    prevSimulationRef.current = currentSimulation;
+  }, [response]);
+
+  const handleSettlingComplete = () => {
+    setIsServerSettling(false);
+  };
 
   const fullUrl = useMemo(() => {
     if (!(baseUrl && endpointUrl)) {
@@ -105,7 +150,13 @@ export function ResponsePreview({
       <div className="border-b px-4 py-3">
         <h2 className="font-semibold text-sm">Response Preview</h2>
       </div>
-      <ScrollArea className="flex-1">
+      <ScrollArea className="relative flex-1">
+        {/* Server Settling Layer */}
+        <AnimatePresence>
+          {isServerSettling && (
+            <ServerSettlingLayer onComplete={handleSettlingComplete} />
+          )}
+        </AnimatePresence>
         <AnimatePresence mode="wait">
           {response ? (
             <motion.div
