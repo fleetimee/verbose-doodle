@@ -1,8 +1,18 @@
-import { ArrowLeft, Circle, Plus } from "lucide-react";
+import { ArrowLeft, Check, Circle, Pen, Plus, Trash2, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -12,6 +22,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useAuth } from "@/features/auth/context";
@@ -22,9 +40,11 @@ import { ResponseStepper } from "@/features/endpoints/components/response-steppe
 import { useActivateResponse } from "@/features/endpoints/hooks/use-activate-response";
 import { useCreateResponse } from "@/features/endpoints/hooks/use-create-response";
 import { useDeactivateResponse } from "@/features/endpoints/hooks/use-deactivate-response";
+import { useDeleteEndpoint } from "@/features/endpoints/hooks/use-delete-endpoint";
 import { useGetEndpoint } from "@/features/endpoints/hooks/use-get-endpoint";
+import { useUpdateEndpoint } from "@/features/endpoints/hooks/use-update-endpoint";
 import type { ResponseFormData } from "@/features/endpoints/schemas/response-schema";
-import type { EndpointResponse } from "@/features/endpoints/types";
+import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 import {
   abbreviateMethod,
   getMethodBadgeColor,
@@ -55,6 +75,12 @@ export function EndpointDetailPage() {
     null
   );
   const [isStepperOpen, setIsStepperOpen] = useState(false);
+  const [isEditingUrl, setIsEditingUrl] = useState(false);
+  const [editedUrl, setEditedUrl] = useState("");
+  const [editedMethod, setEditedMethod] = useState<HttpMethod>("GET");
+  const [showDeleteEndpointDialog, setShowDeleteEndpointDialog] =
+    useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: endpoint, isPending: isLoadingEndpoint } = useGetEndpoint(
     decodedId ?? ""
@@ -65,6 +91,10 @@ export function EndpointDetailPage() {
     useActivateResponse();
   const { mutate: deactivateResponse, isPending: isDeactivatingResponse } =
     useDeactivateResponse();
+  const { mutate: updateEndpoint, isPending: isUpdatingEndpoint } =
+    useUpdateEndpoint();
+  const { mutate: deleteEndpoint, isPending: isDeletingEndpoint } =
+    useDeleteEndpoint();
 
   useDocumentMeta({
     title: endpoint ? `${endpoint.method} ${endpoint.url}` : "Endpoint Detail",
@@ -141,6 +171,98 @@ export function EndpointDetailPage() {
         },
         onError: () => {
           toast.error("Failed to deactivate response");
+        },
+      }
+    );
+  };
+
+  const handleEditUrl = () => {
+    if (!endpoint) {
+      return;
+    }
+    setEditedUrl(endpoint.url);
+    setEditedMethod(endpoint.method);
+    setIsEditingUrl(true);
+    // Focus input after state update
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 0);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingUrl(false);
+    setEditedUrl("");
+    setEditedMethod("GET");
+  };
+
+  const handleSaveUrl = () => {
+    if (!(endpoint && editedUrl.trim())) {
+      return;
+    }
+
+    // Don't update if nothing changed
+    if (editedUrl === endpoint.url && editedMethod === endpoint.method) {
+      setIsEditingUrl(false);
+      return;
+    }
+
+    // Build update payload - only include changed fields
+    const updatePayload: {
+      endpointId: string;
+      url?: string;
+      method?: string;
+    } = {
+      endpointId: endpoint.id,
+    };
+
+    if (editedUrl.trim() !== endpoint.url) {
+      updatePayload.url = editedUrl.trim();
+    }
+
+    if (editedMethod !== endpoint.method) {
+      updatePayload.method = editedMethod;
+    }
+
+    updateEndpoint(updatePayload, {
+      onSuccess: () => {
+        setIsEditingUrl(false);
+        setEditedUrl("");
+        setEditedMethod("GET");
+      },
+      onError: () => {
+        // Error toast is handled by the hook
+        // Keep editing mode open so user can correct the error
+      },
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSaveUrl();
+    } else if (e.key === "Escape") {
+      handleCancelEdit();
+    }
+  };
+
+  const handleDeleteEndpointClick = () => {
+    setShowDeleteEndpointDialog(true);
+  };
+
+  const handleConfirmDeleteEndpoint = () => {
+    if (!endpoint) {
+      return;
+    }
+
+    deleteEndpoint(
+      {
+        endpointId: endpoint.id,
+      },
+      {
+        onSuccess: () => {
+          setShowDeleteEndpointDialog(false);
+          // Redirect to endpoints page after deletion
+          navigate("/dashboard/endpoints");
         },
       }
     );
@@ -324,16 +446,93 @@ export function EndpointDetailPage() {
           </Button>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 md:gap-3">
-              <span
-                className={`shrink-0 rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
-                  endpoint.method
-                )}`}
-              >
-                {abbreviateMethod(endpoint.method)}
-              </span>
-              <h1 className="break-all font-bold font-mono text-xl tracking-tight md:text-2xl">
-                {endpoint.url}
-              </h1>
+              {isEditingUrl ? (
+                <div className="flex w-full flex-wrap items-center gap-2">
+                  <Select
+                    disabled={isUpdatingEndpoint}
+                    onValueChange={(value) =>
+                      setEditedMethod(value as HttpMethod)
+                    }
+                    value={editedMethod}
+                  >
+                    <SelectTrigger className="h-9 w-[100px] font-mono text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GET">GET</SelectItem>
+                      <SelectItem value="POST">POST</SelectItem>
+                      <SelectItem value="PUT">PUT</SelectItem>
+                      <SelectItem value="PATCH">PATCH</SelectItem>
+                      <SelectItem value="DELETE">DELETE</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    className="flex-1 font-mono text-sm md:text-base"
+                    disabled={isUpdatingEndpoint}
+                    onChange={(e) => setEditedUrl(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    ref={inputRef}
+                    value={editedUrl}
+                  />
+                  <div className="flex gap-1">
+                    <Button
+                      disabled={isUpdatingEndpoint || !editedUrl.trim()}
+                      onClick={handleSaveUrl}
+                      size="icon"
+                      title="Save (Enter)"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <Check className="h-4 w-4 text-green-600" />
+                    </Button>
+                    <Button
+                      disabled={isUpdatingEndpoint}
+                      onClick={handleCancelEdit}
+                      size="icon"
+                      title="Cancel (Esc)"
+                      type="button"
+                      variant="ghost"
+                    >
+                      <X className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <span
+                    className={`shrink-0 rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
+                      endpoint.method
+                    )}`}
+                  >
+                    {abbreviateMethod(endpoint.method)}
+                  </span>
+                  <h1 className="break-all font-bold font-mono text-xl tracking-tight md:text-2xl">
+                    {endpoint.url}
+                  </h1>
+                  <ProtectedAction ability="canEditEndpoint">
+                    <div className="flex items-center gap-1">
+                      <Button
+                        onClick={handleEditUrl}
+                        size="icon"
+                        title="Edit endpoint URL and method"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <Pen className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={handleDeleteEndpointClick}
+                        size="icon"
+                        title="Delete endpoint and all responses"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </Button>
+                    </div>
+                  </ProtectedAction>
+                </>
+              )}
             </div>
             <p className="mt-1 text-muted-foreground text-sm">
               Biller ID: {endpoint.billerId} • {endpoint.responses.length}{" "}
@@ -381,6 +580,44 @@ export function EndpointDetailPage() {
           />
         )}
       </AnimatePresence>
+
+      <AlertDialog
+        onOpenChange={setShowDeleteEndpointDialog}
+        open={showDeleteEndpointDialog}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Endpoint?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this endpoint{" "}
+              <span className="font-semibold">
+                {endpoint?.method} {endpoint?.url}
+              </span>
+              ? This action cannot be undone and will permanently remove:
+              <ul className="mt-2 list-inside list-disc space-y-1">
+                <li>The endpoint configuration</li>
+                <li>
+                  All {endpoint?.responses.length || 0} response
+                  {endpoint?.responses.length !== 1 ? "s" : ""} associated with
+                  this endpoint
+                </li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingEndpoint}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              disabled={isDeletingEndpoint}
+              onClick={handleConfirmDeleteEndpoint}
+            >
+              {isDeletingEndpoint ? "Deleting..." : "Delete Endpoint"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 }

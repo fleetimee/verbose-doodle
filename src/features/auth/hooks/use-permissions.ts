@@ -9,6 +9,7 @@ export const ROLE_ABILITIES = {
     // Configuration
     canViewEndpoints: true,
     canAddEndpoint: true,
+    canEditEndpoint: true,
     canAddResponse: true,
     canActivateResponse: true,
 
@@ -25,6 +26,7 @@ export const ROLE_ABILITIES = {
     // Configuration
     canViewEndpoints: true, // Read-only
     canAddEndpoint: false,
+    canEditEndpoint: false,
     canAddResponse: false,
     canActivateResponse: false,
 

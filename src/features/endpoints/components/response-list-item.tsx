@@ -5,6 +5,7 @@ import {
   Pen,
   TextCursor,
   Timer,
+  Trash2,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
@@ -24,6 +25,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/features/auth/context";
@@ -31,6 +33,7 @@ import { usePermissions } from "@/features/auth/hooks/use-permissions";
 import { EditResponseStepper } from "@/features/endpoints/components/edit-response-stepper";
 import { ResponseSimulationBadge } from "@/features/endpoints/components/response-simulation-badge";
 import { SimulateTimeoutDialog } from "@/features/endpoints/components/simulate-timeout-dialog";
+import { useDeleteResponse } from "@/features/endpoints/hooks/use-delete-response";
 import { useUpdateResponse } from "@/features/endpoints/hooks/use-update-response";
 import type { EndpointResponse } from "@/features/endpoints/types";
 import { cn } from "@/lib/utils";
@@ -100,6 +103,7 @@ export function ResponseListItem({
   const isActive = response.activated;
   const isLoading = isActivating || isDeactivating;
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showSimulateDialog, setShowSimulateDialog] = useState(false);
   const [showEditStepper, setShowEditStepper] = useState(false);
   const [editType, setEditType] = useState<"name" | "statusCode" | "json">(
@@ -107,6 +111,7 @@ export function ResponseListItem({
   );
 
   const { mutate: updateResponse, isPending: isUpdating } = useUpdateResponse();
+  const { mutate: deleteResponse, isPending: isDeleting } = useDeleteResponse();
 
   const handleConfirm = () => {
     if (isActive) {
@@ -135,6 +140,23 @@ export function ResponseListItem({
       {
         onSuccess: () => {
           setShowEditStepper(false);
+        },
+      }
+    );
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteResponse(
+      {
+        responseId: response.id,
+      },
+      {
+        onSuccess: () => {
+          setShowDeleteDialog(false);
         },
       }
     );
@@ -280,6 +302,17 @@ export function ResponseListItem({
                     <FileJson className="h-4 w-4" />
                     Edit JSON Response
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-red-600 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-950"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteClick();
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-600" />
+                    Delete Response
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button
@@ -362,6 +395,30 @@ export function ResponseListItem({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirm}>
               {isActive ? "Deactivate" : "Activate"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog onOpenChange={setShowDeleteDialog} open={showDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Response?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete{" "}
+              <span className="font-semibold">"{response.name}"</span>? This
+              action cannot be undone and will permanently remove this response
+              configuration.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              disabled={isDeleting}
+              onClick={handleConfirmDelete}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
