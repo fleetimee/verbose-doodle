@@ -77,10 +77,11 @@ function Stepper({
     setTriggerNodes((prev) => {
       if (node && !prev.includes(node)) {
         return [...prev, node];
-      }if (!node && prev.includes(node!)) {
+      }
+      if (!node) {
         return prev.filter((n) => n !== node);
       }
-        return prev;
+      return prev;
     });
   }, []);
 
@@ -234,6 +235,9 @@ function StepperTrigger({ asChild = false, className, children, tabIndex, ...pro
       case ' ':
         e.preventDefault();
         setActiveStep(step);
+        break;
+      default:
+        // No action for other keys
         break;
     }
   };
