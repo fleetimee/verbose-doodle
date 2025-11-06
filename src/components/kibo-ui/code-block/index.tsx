@@ -593,13 +593,13 @@ type CodeBlockFallbackProps = HTMLAttributes<HTMLDivElement>;
 
 const CodeBlockFallback = ({ children, ...props }: CodeBlockFallbackProps) => (
   <div {...props}>
-    <pre className="w-full">
-      <code>
+    <pre className="w-full whitespace-pre-wrap">
+      <code className="whitespace-pre-wrap break-all">
         {children
           ?.toString()
           .split("\n")
           .map((line, i) => (
-            <span className="line" key={i}>
+            <span className="line break-all" key={i}>
               {line}
             </span>
           ))}
@@ -712,7 +712,7 @@ export const CodeBlockContent = ({
       exit={{ opacity: 0 }}
       initial={{ opacity: 0 }}
       key={themeKey}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
+      transition={{ duration: 0.15, ease: "easeInOut" }}
       {...props}
     />
   );
