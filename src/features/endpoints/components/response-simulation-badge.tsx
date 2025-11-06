@@ -45,7 +45,7 @@ export function ResponseSimulationBadge({
             Delay: {formatDelayValue(response.delayMs ?? 0)}
           </Badge>
         )}
-        {mode === SIMULATION_MODE.NONE && (
+        {mode === SIMULATION_MODE.NORMAL && (
           <Badge className="text-xs" variant="outline">
             Normal
           </Badge>
