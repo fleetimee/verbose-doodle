@@ -12,6 +12,8 @@ export type EndpointResponse = {
   json: string;
   statusCode: number;
   activated: boolean;
+  delayMs?: number;
+  simulateTimeout?: boolean;
 };
 
 /**

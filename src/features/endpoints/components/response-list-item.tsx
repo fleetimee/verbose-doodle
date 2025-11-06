@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle, Timer } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import {
@@ -12,13 +12,17 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context";
 import { usePermissions } from "@/features/auth/hooks/use-permissions";
+import { SimulateTimeoutDialog } from "@/features/endpoints/components/simulate-timeout-dialog";
 import type { EndpointResponse } from "@/features/endpoints/types";
 import { cn } from "@/lib/utils";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
 const SELECTED_ITEM_SCALE = 1.02;
+const MS_PER_SECOND = 1000;
+const DELAY_DISPLAY_DECIMAL_PLACES = 1;
 
 type ResponseListItemProps = {
   response: EndpointResponse;
@@ -46,6 +50,7 @@ export function ResponseListItem({
   const isActive = response.activated;
   const isLoading = isActivating || isDeactivating;
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showSimulateDialog, setShowSimulateDialog] = useState(false);
 
   const handleConfirm = () => {
     if (isActive) {
@@ -110,36 +115,73 @@ export function ResponseListItem({
               >
                 {response.statusCode}
               </Badge>
+              {response.simulateTimeout && (
+                <Badge className="text-xs" variant="outline">
+                  Timeout
+                </Badge>
+              )}
+              {response.delayMs && response.delayMs > 0 && (
+                <Badge className="text-xs" variant="outline">
+                  {response.delayMs >= MS_PER_SECOND
+                    ? `${(response.delayMs / MS_PER_SECOND).toFixed(
+                        DELAY_DISPLAY_DECIMAL_PLACES
+                      )}s`
+                    : `${response.delayMs}ms`}
+                </Badge>
+              )}
             </div>
           </div>
           {canActivateResponse && (
-            <button
-              className={cn(
-                "rounded-full p-0.5 transition-colors",
-                isActive
-                  ? "text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400"
-                  : "text-muted-foreground hover:text-foreground",
-                isLoading ? "cursor-not-allowed opacity-50" : "cursor-pointer"
-              )}
-              disabled={isLoading}
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowConfirmDialog(true);
-              }}
-              title={
-                isActive ? "Deactivate this response" : "Activate this response"
-              }
-              type="button"
-            >
-              {isActive ? (
-                <CheckCircle2 className="h-5 w-5" />
-              ) : (
-                <Circle className="h-5 w-5" />
-              )}
-            </button>
+            <div className="flex items-center gap-1">
+              <Button
+                className="h-7 w-7"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowSimulateDialog(true);
+                }}
+                size="icon"
+                title="Simulate timeout or delay"
+                type="button"
+                variant="ghost"
+              >
+                <Timer className="h-4 w-4" />
+              </Button>
+              <button
+                className={cn(
+                  "rounded-full p-0.5 transition-colors",
+                  isActive
+                    ? "text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400"
+                    : "text-muted-foreground hover:text-foreground",
+                  isLoading ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                )}
+                disabled={isLoading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowConfirmDialog(true);
+                }}
+                title={
+                  isActive
+                    ? "Deactivate this response"
+                    : "Activate this response"
+                }
+                type="button"
+              >
+                {isActive ? (
+                  <CheckCircle2 className="h-5 w-5" />
+                ) : (
+                  <Circle className="h-5 w-5" />
+                )}
+              </button>
+            </div>
           )}
         </div>
       </motion.div>
+
+      <SimulateTimeoutDialog
+        onOpenChange={setShowSimulateDialog}
+        open={showSimulateDialog}
+        response={response}
+      />
 
       <AlertDialog onOpenChange={setShowConfirmDialog} open={showConfirmDialog}>
         <AlertDialogContent>

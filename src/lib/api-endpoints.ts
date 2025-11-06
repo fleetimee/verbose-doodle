@@ -41,6 +41,7 @@ export const API_ENDPOINTS = {
         `/api/response/${endpointId}/${responseId}/activate`,
       deactivate: (endpointId: string | number, responseId: string | number) =>
         `/api/response/${endpointId}/${responseId}/deactivate`,
+      updateSimulation: (id: string | number) => `/api/response/${id}/simulation`,
     },
     billers: {
       list: "/api/biller",
@@ -198,4 +199,11 @@ export function getUserUpdateUrl(id: string | number): string {
  */
 export function getUserDeleteUrl(id: string | number): string {
   return API_ENDPOINTS.admin.users.delete(id);
+}
+
+/**
+ * Helper function to get response simulation update URL
+ */
+export function getResponseSimulationUrl(id: string | number): string {
+  return API_ENDPOINTS.admin.responses.updateSimulation(id);
 }

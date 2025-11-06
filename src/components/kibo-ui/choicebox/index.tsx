@@ -1,12 +1,11 @@
 "use client";
 
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { cn } from "@/lib/utils";
 import {
   type ComponentProps,
   createContext,
   type HTMLAttributes,
   useContext,
+  useId,
 } from "react";
 import {
   Field,
@@ -15,6 +14,8 @@ import {
   FieldLabel,
   FieldTitle,
 } from "@/components/ui/field";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
 
 export type ChoiceboxProps = ComponentProps<typeof RadioGroup>;
 
@@ -24,7 +25,7 @@ export const Choicebox = ({ className, ...props }: ChoiceboxProps) => (
 
 type ChoiceboxItemContextValue = {
   value: ChoiceboxItemProps["value"];
-  id?: ChoiceboxItemProps["id"];
+  id: string;
 };
 
 const ChoiceboxItemContext = createContext<ChoiceboxItemContextValue | null>(
@@ -49,16 +50,21 @@ export const ChoiceboxItem = ({
   className,
   children,
   value,
-  id,
-}: ChoiceboxItemProps) => (
-  <ChoiceboxItemContext.Provider value={{ value, id }}>
-    <FieldLabel htmlFor={id}>
-      <Field className={className} orientation="horizontal">
-        {children}
-      </Field>
-    </FieldLabel>
-  </ChoiceboxItemContext.Provider>
-);
+  id: providedId,
+}: ChoiceboxItemProps) => {
+  const generatedId = useId();
+  const id = providedId || generatedId;
+
+  return (
+    <ChoiceboxItemContext.Provider value={{ value, id }}>
+      <FieldLabel className="w-full" htmlFor={id}>
+        <Field className={cn("w-full", className)} orientation="horizontal">
+          {children}
+        </Field>
+      </FieldLabel>
+    </ChoiceboxItemContext.Provider>
+  );
+};
 
 export type ChoiceboxItemHeaderProps = ComponentProps<typeof FieldContent>;
 
@@ -74,7 +80,9 @@ export type ChoiceboxItemTitleProps = ComponentProps<typeof FieldTitle>;
 export const ChoiceboxItemTitle = ({
   className,
   ...props
-}: ChoiceboxItemTitleProps) => <FieldTitle className={className} {...props} />;
+}: ChoiceboxItemTitleProps) => (
+  <FieldTitle className={cn("block", className)} {...props} />
+);
 
 export type ChoiceboxItemSubtitleProps = HTMLAttributes<HTMLSpanElement>;
 
@@ -83,7 +91,10 @@ export const ChoiceboxItemSubtitle = ({
   ...props
 }: ChoiceboxItemSubtitleProps) => (
   <span
-    className={cn("font-normal text-muted-foreground text-xs", className)}
+    className={cn(
+      "mt-0.5 block font-normal text-muted-foreground text-xs",
+      className
+    )}
     {...props}
   />
 );
@@ -106,5 +117,5 @@ export type ChoiceboxIndicatorProps = Partial<
 export const ChoiceboxIndicator = (props: ChoiceboxIndicatorProps) => {
   const context = useChoiceboxItemContext();
 
-  return <RadioGroupItem {...props} value={context.value} />;
+  return <RadioGroupItem {...props} id={context.id} value={context.value} />;
 };
