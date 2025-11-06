@@ -41,7 +41,8 @@ export const API_ENDPOINTS = {
         `/api/response/${endpointId}/${responseId}/activate`,
       deactivate: (endpointId: string | number, responseId: string | number) =>
         `/api/response/${endpointId}/${responseId}/deactivate`,
-      updateSimulation: (id: string | number) => `/api/response/${id}/simulation`,
+      updateSimulation: (id: string | number) =>
+        `/api/response/${id}/simulation`,
     },
     billers: {
       list: "/api/biller",

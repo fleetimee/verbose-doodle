@@ -57,8 +57,11 @@ export const ChoiceboxItem = ({
 
   return (
     <ChoiceboxItemContext.Provider value={{ value, id }}>
-      <FieldLabel className="w-full" htmlFor={id}>
-        <Field className={cn("w-full", className)} orientation="horizontal">
+      <FieldLabel
+        className={cn("w-full cursor-pointer", className)}
+        htmlFor={id}
+      >
+        <Field className="w-full" orientation="horizontal">
           {children}
         </Field>
       </FieldLabel>

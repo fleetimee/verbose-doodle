@@ -15,14 +15,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context";
 import { usePermissions } from "@/features/auth/hooks/use-permissions";
+import { ResponseSimulationBadge } from "@/features/endpoints/components/response-simulation-badge";
 import { SimulateTimeoutDialog } from "@/features/endpoints/components/simulate-timeout-dialog";
 import type { EndpointResponse } from "@/features/endpoints/types";
 import { cn } from "@/lib/utils";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
 const SELECTED_ITEM_SCALE = 1.02;
-const MS_PER_SECOND = 1000;
-const DELAY_DISPLAY_DECIMAL_PLACES = 1;
 
 type ResponseListItemProps = {
   response: EndpointResponse;
@@ -94,8 +93,8 @@ export function ResponseListItem({
         }}
         whileTap={{ scale: 0.98 }}
       >
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 space-y-1">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 space-y-2">
             <div className="flex items-center gap-2">
               <span className="font-medium text-sm">{response.name}</span>
               {isActive && (
@@ -104,7 +103,7 @@ export function ResponseListItem({
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
               <Badge
                 className="font-mono text-xs"
                 variant={
@@ -115,26 +114,13 @@ export function ResponseListItem({
               >
                 {response.statusCode}
               </Badge>
-              {response.simulateTimeout && (
-                <Badge className="text-xs" variant="outline">
-                  Timeout
-                </Badge>
-              )}
-              {response.delayMs && response.delayMs > 0 && (
-                <Badge className="text-xs" variant="outline">
-                  {response.delayMs >= MS_PER_SECOND
-                    ? `${(response.delayMs / MS_PER_SECOND).toFixed(
-                        DELAY_DISPLAY_DECIMAL_PLACES
-                      )}s`
-                    : `${response.delayMs}ms`}
-                </Badge>
-              )}
+              <ResponseSimulationBadge response={response} />
             </div>
           </div>
           {canActivateResponse && (
             <div className="flex items-center gap-1">
               <Button
-                className="h-7 w-7"
+                className="h-7 w-7 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowSimulateDialog(true);

@@ -26,7 +26,10 @@ export function EndpointDetailSkeleton() {
               key={`skeleton-response-${index + 1}`}
             >
               <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-3 w-16" />
+              <div className="flex gap-1.5">
+                <Skeleton className="h-5 w-12" />
+                <Skeleton className="h-5 w-16" />
+              </div>
             </div>
           ))}
         </div>
@@ -47,7 +50,10 @@ export function EndpointDetailSkeleton() {
                     key={`skeleton-response-${index + 1}`}
                   >
                     <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-3 w-16" />
+                    <div className="flex gap-1.5">
+                      <Skeleton className="h-5 w-12" />
+                      <Skeleton className="h-5 w-16" />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -66,7 +72,14 @@ export function EndpointDetailSkeleton() {
                   <Skeleton className="h-6 w-48" />
                   <Skeleton className="h-5 w-24" />
                 </div>
-                <Skeleton className="h-[400px] w-full rounded-lg" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-10 w-full rounded-md" />
+                </div>
+                {/* Simulation Alert Skeleton */}
+                <Skeleton className="h-24 w-full rounded-lg" />
+                {/* Code Block Skeleton */}
+                <Skeleton className="h-[300px] w-full rounded-lg" />
               </div>
             </div>
           </ResizablePanel>

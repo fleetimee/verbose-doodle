@@ -29,6 +29,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CodeGeneratorDialog } from "@/features/endpoints/components/code-generator-dialog";
+import { ResponseSimulationAlert } from "@/features/endpoints/components/response-simulation-alert";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
@@ -36,6 +37,7 @@ const SUCCESS_STATUS_CODE_THRESHOLD = 300;
 // Animation constants
 const RESPONSE_ANIMATION_DURATION = 0.3;
 const STAGGER_DELAY = 0.05;
+const ALERT_STAGGER_MULTIPLIER = 3;
 
 type ResponsePreviewProps = {
   response: EndpointResponse | null;
@@ -225,12 +227,26 @@ export function ResponsePreview({
                 )}
               </motion.div>
 
+              {/* Simulation Explanation Alert */}
+              <motion.div
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4"
+                initial={{ opacity: 0, y: 10 }}
+                transition={{
+                  duration: RESPONSE_ANIMATION_DURATION,
+                  delay: STAGGER_DELAY * 2,
+                  ease: "easeOut",
+                }}
+              >
+                <ResponseSimulationAlert response={response} />
+              </motion.div>
+
               <motion.div
                 animate={{ opacity: 1, y: 0 }}
                 initial={{ opacity: 0, y: 10 }}
                 transition={{
                   duration: RESPONSE_ANIMATION_DURATION,
-                  delay: STAGGER_DELAY * 2,
+                  delay: STAGGER_DELAY * ALERT_STAGGER_MULTIPLIER,
                   ease: "easeOut",
                 }}
               >

@@ -14,6 +14,8 @@ type ApiEndpointResponse = {
   status_code: number;
   activated: boolean;
   name: string;
+  delay_ms?: number;
+  simulate_timeout?: boolean;
 };
 
 type ApiEndpoint = {
@@ -50,6 +52,8 @@ async function fetchEndpoint(id: string): Promise<Endpoint | undefined> {
         json: apiResponse.json,
         statusCode: apiResponse.status_code,
         activated: apiResponse.activated,
+        delayMs: apiResponse.delay_ms,
+        simulateTimeout: apiResponse.simulate_timeout,
       })),
     };
   } catch (error) {
