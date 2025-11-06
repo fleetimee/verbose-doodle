@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Navigate, useSearchParams } from "react-router";
 import SlicedText from "@/components/kokonutui/sliced-text";
 import { useTheme } from "@/components/theme-provider";
@@ -31,6 +31,7 @@ export const Login = () => {
   const [expirationMessage, setExpirationMessage] = useState<string | null>(
     null
   );
+  const hasAttemptedLogin = useRef(false);
 
   useDocumentMeta({
     title: "Login",
@@ -53,6 +54,12 @@ export const Login = () => {
     }
   }, [searchParams, setSearchParams]);
 
+  // Track when login attempt is made
+  const handleLogin = (data: Parameters<typeof login>[0]) => {
+    hasAttemptedLogin.current = true;
+    login(data);
+  };
+
   // Redirect to dashboard if already authenticated
   if (authState.isAuthenticated) {
     return <Navigate replace to="/dashboard" />;
@@ -63,16 +70,17 @@ export const Login = () => {
     theme === "light" || theme === "dark" ? theme : undefined;
 
   // Determine error state for login form
+  // Only show expiration message if user hasn't attempted to login yet
   let loginError: { message: string; description?: string } | null = null;
-  if (expirationMessage) {
-    loginError = {
-      message: "Session Expired",
-      description: expirationMessage,
-    };
-  } else if (isError) {
+  if (isError) {
     loginError = {
       message: "Login Failed",
       description: getErrorMessage(error),
+    };
+  } else if (expirationMessage && !hasAttemptedLogin.current) {
+    loginError = {
+      message: "Session Expired",
+      description: expirationMessage,
     };
   }
 
@@ -116,7 +124,7 @@ export const Login = () => {
         </div>
 
         {/* Login Form */}
-        <LoginForm error={loginError} isLoading={isPending} onSubmit={login} />
+        <LoginForm error={loginError} isLoading={isPending} onSubmit={handleLogin} />
       </div>
     </div>
   );

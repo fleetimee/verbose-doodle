@@ -331,7 +331,7 @@ export function ResponsePreview({
                     {(item) => (
                       <CodeBlockItem key={item.language} value="json">
                         <CodeBlockContent
-                          className="[&_pre]:max-w-full [&_pre]:whitespace-pre-wrap [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_.line]:max-w-full [&_.line]:break-all"
+                          className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
                           language="json"
                         >
                           {item.code}

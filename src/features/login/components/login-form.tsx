@@ -194,7 +194,6 @@ export const LoginForm = ({
           <Button
             className="w-full"
             disabled={isLoading}
-            form="login-form"
             type="submit"
           >
             {isLoading && <Spinner className="mr-2" />}

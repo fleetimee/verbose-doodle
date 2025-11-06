@@ -63,6 +63,16 @@ async function loginUser(data: LoginFormData): Promise<LoginResponse> {
       }),
     });
 
+    // Check if login was successful
+    if (apiResponse.responseCode !== "00") {
+      // Throw error with the API's response description
+      throw {
+        message: apiResponse.responseDesc || "Login failed",
+        code: apiResponse.responseCode,
+        status: 401,
+      } as LoginError;
+    }
+
     // Extract role from JWT access token
     const role = decodeJWTRole(apiResponse.data.accessToken);
 
@@ -113,13 +123,9 @@ export function useLogin() {
 
           // Redirect to home page
           navigate("/");
-        } else {
-          // Handle unsuccessful login
-          handleAuthError({
-            message: data.responseDesc || "Login failed",
-            code: data.responseCode,
-          });
         }
+        // Note: If responseCode is not "00", the mutation should throw an error
+        // This is handled in the loginUser function
       },
       onError: (error) => {
         // Handle authentication errors with toast notifications

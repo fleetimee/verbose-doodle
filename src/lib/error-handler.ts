@@ -51,20 +51,20 @@ export function getErrorMessage(error: unknown): string {
   if (error && typeof error === "object" && "message" in error) {
     const apiError = error as ApiError;
 
-    // Use error code if available
+    // Prioritize the actual error message from the API first
+    if (typeof apiError.message === "string" && apiError.message) {
+      return apiError.message;
+    }
+
+    // Fall back to error code mapping if no message
     if (apiError.code && ERROR_MESSAGES[apiError.code]) {
       return ERROR_MESSAGES[apiError.code];
     }
 
-    // Use status code if available
+    // Fall back to status code mapping if no code
     if (apiError.status && STATUS_TO_ERROR_CODE[apiError.status]) {
       const errorCode = STATUS_TO_ERROR_CODE[apiError.status];
       return ERROR_MESSAGES[errorCode];
-    }
-
-    // Use the error message directly
-    if (typeof apiError.message === "string") {
-      return apiError.message;
     }
   }
 
@@ -127,7 +127,9 @@ export function handleAuthError(error: unknown) {
 
   // Handle specific auth error cases
   if (apiError.status === HTTP_STATUS.UNAUTHORIZED) {
-    showErrorToast(error, "Invalid email or password. Please try again.");
+    // Use the actual error message from the API if available
+    const message = apiError.message || "Invalid username or password. Please try again.";
+    showErrorToast(error, message);
     return;
   }
 
