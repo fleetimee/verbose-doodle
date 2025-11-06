@@ -478,6 +478,79 @@ Updates an existing endpoint.
 
 ---
 
+#### Update Endpoint (Partial Update)
+
+**`PATCH /api/endpoint/{id}`**
+
+Updates any subset of fields in an existing endpoint (partial update). Only provided fields are updated, others remain unchanged.
+
+**Authorization:** Role must be `ADMIN`
+
+**Request (Update method only):**
+
+```json
+{
+  "method": "GET"
+}
+```
+
+**Request (Update URL only):**
+
+```json
+{
+  "url": "/payment/status"
+}
+```
+
+**Request (Update billerId only):**
+
+```json
+{
+  "billerId": 2
+}
+```
+
+**Request (Update multiple fields):**
+
+```json
+{
+  "method": "POST",
+  "url": "/payment/verify",
+  "billerId": 2
+}
+```
+
+**Available Fields (all optional):**
+
+- `method`: HTTP method (GET, POST, PUT, PATCH, DELETE)
+- `url`: Endpoint URL path (must start with / and contain only valid path characters)
+- `billerId`: The biller ID this endpoint belongs to
+
+**Response:**
+
+```json
+{
+  "response_code": "00",
+  "response_desc": "success",
+  "endpoint": {
+    "id": 1,
+    "method": "POST",
+    "url": "/payment/verify",
+    "biller_id": 2,
+    "biller_name": "PDAM"
+  }
+}
+```
+
+**Notes:**
+
+- This is a partial update - only provided fields are updated
+- Other fields remain unchanged
+- Duplicate checking applies: cannot create duplicate method+URL combination
+- More flexible than PUT (full update) which requires all fields
+
+---
+
 #### Delete Endpoint
 
 **`DELETE /api/endpoint/{id}`**
@@ -661,6 +734,88 @@ Updates an existing response configuration (full update - all fields required).
   }
 }
 ```
+
+---
+
+#### Update Response (Partial Update)
+
+**`PATCH /api/response/{id}`**
+
+Updates any subset of fields in an existing response configuration (partial update). Only provided fields are updated, others remain unchanged.
+
+**Authorization:** Role must be `ADMIN`
+
+**Request (Update JSON only):**
+
+```json
+{
+  "json": "{\"updated\": \"response\"}"
+}
+```
+
+**Request (Update status code only):**
+
+```json
+{
+  "statusCode": "201"
+}
+```
+
+**Request (Update multiple fields):**
+
+```json
+{
+  "json": "{\"success\": true, \"message\": \"Updated\"}",
+  "statusCode": "200",
+  "name": "Updated Response Name"
+}
+```
+
+**Request (Update simulation settings):**
+
+```json
+{
+  "delayMs": 1000,
+  "simulateTimeout": false
+}
+```
+
+**Available Fields (all optional):**
+
+- `endpointId`: Change which endpoint this response belongs to
+- `json`: The JSON response body (as a string)
+- `statusCode`: HTTP status code to return
+- `activated`: "0" for inactive, "1" for active
+- `name`: Name/description of this response
+- `delayMs`: Milliseconds to delay before sending response
+- `simulateTimeout`: Hold connection indefinitely to simulate timeout
+
+**Important:** You cannot set both `delayMs > 0` and `simulateTimeout = true` at the same time.
+
+**Response:**
+
+```json
+{
+  "response_code": "00",
+  "response_desc": "success",
+  "response": {
+    "id": 4,
+    "endpointId": 1,
+    "json": "{\"updated\": \"response\"}",
+    "statusCode": "200",
+    "activated": "1",
+    "name": "Updated Response Name",
+    "delayMs": 1000,
+    "simulateTimeout": false
+  }
+}
+```
+
+**Notes:**
+
+- This is a partial update - only provided fields are updated
+- Other fields remain unchanged
+- More flexible than PUT (full update) or PATCH /simulation (simulation-only update)
 
 ---
 
