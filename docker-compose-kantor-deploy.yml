@@ -5,6 +5,22 @@ services:
       context: .
       dockerfile: Dockerfile.kantor.deploy
     image: harbor.local/react-app/biller-simulator-json:result
+    container_name: biller-simulator-frontend
     ports:
       - "3000:80"
     restart: unless-stopped
+    networks:
+      - biller-simulator-json-net
+    depends_on:
+      - biller-simulator-app
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  biller-simulator-json-net:
+    external: true
+    name: biller-simulator-json-net

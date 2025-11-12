@@ -27,5 +27,5 @@ services:
       retries: 3
       start_period: 10s
 
-# Note: Backend server is hosted externally at http://143.198.85.201:47382
+# Note: Backend server is hosted externally at http://192.168.4.79:37847
 # Nginx is configured to proxy /api and /login requests to this external server

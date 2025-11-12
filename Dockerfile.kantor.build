@@ -1,4 +1,4 @@
-FROM oven/bun:1-alpine AS base
+FROM --platform=linux/amd64 oven/bun:1-debian AS base
 WORKDIR /usr/src/app
 LABEL maintainer="Novian Andika"
 

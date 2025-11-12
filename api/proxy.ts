@@ -6,7 +6,7 @@ const HTTP_INTERNAL_SERVER_ERROR = 500;
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Get backend URL from environment variable
   const backendUrl =
-    process.env.VITE_ENDPOINT_URL || "http://143.198.85.201:47382";
+    process.env.VITE_ENDPOINT_URL || "http://192.168.4.79:37847";
 
   // Get the path from the query parameter
   const path = Array.isArray(req.query.path)
