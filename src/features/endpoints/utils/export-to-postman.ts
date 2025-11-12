@@ -1,4 +1,5 @@
 import type { Endpoint, GroupedEndpoints } from "@/features/endpoints/types";
+import { generateUUID } from "@/lib/utils";
 
 /**
  * Postman Collection v2.1 format types
@@ -137,7 +138,7 @@ export function convertToPostmanCollection(
       description: `Exported from Biller Simulator on ${new Date().toISOString()}`,
       schema:
         "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-      _postman_id: crypto.randomUUID(),
+      _postman_id: generateUUID(),
     },
     item: folders,
   };
@@ -197,7 +198,7 @@ export function createPostmanEnvironment(
   const baseUrl = getBaseUrl();
 
   return {
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     name: environmentName,
     values: [
       {

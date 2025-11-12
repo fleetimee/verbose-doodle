@@ -39,8 +39,9 @@ const SKELETON_GROUP_2_END = 13;
 const SKELETON_GROUP_3_START = 13;
 const SKELETON_GROUP_3_END = 18;
 
-const SKELETON_KEYS = Array.from({ length: SKELETON_TOTAL_COUNT }, () =>
-  crypto.randomUUID()
+const SKELETON_KEYS = Array.from(
+  { length: SKELETON_TOTAL_COUNT },
+  (_, i) => `skeleton-${i}`
 );
 
 // Animation constants
