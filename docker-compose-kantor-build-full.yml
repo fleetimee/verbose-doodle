@@ -1,0 +1,23 @@
+# Docker Compose for building images locally
+# This file is used to build both base and deployment images on the host machine
+# After building, images are pushed to Harbor and pulled on the server
+
+services:
+  # Build base image with Bun and node_modules
+  bun-base:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.kantor.build
+      target: bun-base
+    image: harbor.local/react-app/biller-simulator-json:bun-base
+
+  # Build deployment image with compiled app and nginx
+  biller-simulator:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.kantor.deploy
+    image: harbor.local/react-app/biller-simulator-json:result
+    depends_on:
+      - bun-base
