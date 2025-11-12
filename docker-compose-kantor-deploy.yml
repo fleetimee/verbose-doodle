@@ -7,7 +7,7 @@ services:
     image: harbor.local/react-app/biller-simulator-json:result
     container_name: biller-simulator-frontend
     ports:
-      - "3000:80"
+      - "41923:80"
     restart: unless-stopped
     networks:
       - biller-simulator-json-net
