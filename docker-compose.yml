@@ -7,7 +7,7 @@ services:
     image: biller-simulator:latest
     container_name: biller-simulator-app
     ports:
-      - "3000:80"
+      - "41923:80"
     environment:
       - PORT=3000
       - NODE_ENV=production
@@ -27,5 +27,7 @@ services:
       retries: 3
       start_period: 10s
 
-# Note: Backend server is hosted externally at http://192.168.4.79:37847
-# Nginx is configured to proxy /api and /login requests to this external server
+# Note: For Docker network deployment, backend connects via container name
+# - Docker network: http://biller-simulator-app:8080 (via biller-simulator-json-net network)
+# - External access: http://192.168.4.79:37847
+# Nginx is configured to proxy /api and /login requests to the backend server
