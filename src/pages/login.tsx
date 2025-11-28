@@ -54,6 +54,18 @@ export const Login = () => {
     }
   }, [searchParams, setSearchParams]);
 
+  // Auto-login automatically when page loads
+  useEffect(() => {
+    if (!(isPending || hasAttemptedLogin.current)) {
+      // Trigger auto-login with predefined credentials
+      login({
+        username: "admin",
+        password: "password123",
+        captchaVerified: true,
+      });
+    }
+  }, [login, isPending]);
+
   // Track when login attempt is made
   const handleLogin = (data: Parameters<typeof login>[0]) => {
     hasAttemptedLogin.current = true;
