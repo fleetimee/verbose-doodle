@@ -1,10 +1,4 @@
-import {
-  Label,
-  PolarGrid,
-  PolarRadiusAxis,
-  RadialBar,
-  RadialBarChart,
-} from "recharts";
+import { Label, Pie, PieChart } from "recharts";
 import {
   Card,
   CardContent,
@@ -24,14 +18,15 @@ const userStatusConfig = {
     label: "Active Users",
     color: "var(--chart-2)",
   },
+  inactive: {
+    label: "Inactive Users",
+    color: "var(--muted)",
+  },
 } satisfies ChartConfig;
 
 const PERCENTAGE_MULTIPLIER = 100;
-const FULL_CIRCLE_DEGREES = 360;
-const CHART_INNER_RADIUS = 80;
-const CHART_OUTER_RADIUS = 110;
-const POLAR_RADIUS_OUTER = 86;
-const POLAR_RADIUS_INNER = 74;
+const CHART_INNER_RADIUS = 64;
+const CHART_OUTER_RADIUS = 88;
 
 type UserStatusChartProps = {
   data: OverviewData;
@@ -49,11 +44,15 @@ export function UserStatusChart({ data }: UserStatusChartProps) {
   const activeUsers = data.userStatusDistribution.find(
     (item) => item.status === "active"
   );
+  const inactiveUsers = data.userStatusDistribution.find(
+    (item) => item.status === "inactive"
+  );
   const totalUsers = data.userStatusDistribution.reduce(
     (acc, curr) => acc + curr.count,
     0
   );
   const activeCount = activeUsers?.count ?? 0;
+  const inactiveCount = inactiveUsers?.count ?? 0;
   const percentage = Math.round(
     (activeCount / totalUsers) * PERCENTAGE_MULTIPLIER
   );
@@ -63,6 +62,11 @@ export function UserStatusChart({ data }: UserStatusChartProps) {
       status: "active",
       count: activeCount,
       fill: "var(--color-active)",
+    },
+    {
+      status: "inactive",
+      count: inactiveCount,
+      fill: "var(--color-inactive)",
     },
   ];
 
@@ -77,22 +81,16 @@ export function UserStatusChart({ data }: UserStatusChartProps) {
           className="mx-auto aspect-square max-h-[200px] w-full"
           config={userStatusConfig}
         >
-          <RadialBarChart
-            data={chartData}
-            endAngle={(activeCount / totalUsers) * FULL_CIRCLE_DEGREES}
-            innerRadius={CHART_INNER_RADIUS}
-            outerRadius={CHART_OUTER_RADIUS}
-            startAngle={0}
-          >
-            <PolarGrid
-              className="first:fill-muted last:fill-background"
-              gridType="circle"
-              polarRadius={[POLAR_RADIUS_OUTER, POLAR_RADIUS_INNER]}
-              radialLines={false}
+          <PieChart>
+            <Pie
+              data={chartData}
+              dataKey="count"
+              endAngle={-270}
+              innerRadius={CHART_INNER_RADIUS}
+              outerRadius={CHART_OUTER_RADIUS}
+              startAngle={90}
               stroke="none"
-            />
-            <RadialBar background cornerRadius={10} dataKey="count" />
-            <PolarRadiusAxis axisLine={false} tick={false} tickLine={false}>
+            >
               <Label
                 content={({ viewBox }) => {
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
@@ -123,8 +121,8 @@ export function UserStatusChart({ data }: UserStatusChartProps) {
                   return null;
                 }}
               />
-            </PolarRadiusAxis>
-          </RadialBarChart>
+            </Pie>
+          </PieChart>
         </ChartContainer>
       </CardContent>
     </Card>

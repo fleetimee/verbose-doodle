@@ -82,7 +82,6 @@ export function EndpointStatusChart({
             <YAxis
               axisLine={false}
               dataKey="statusCode"
-              tick={{ fill: "hsl(var(--muted-foreground))" }}
               tickLine={false}
               tickMargin={12}
               type="category"
@@ -127,7 +126,9 @@ export function EndpointStatusChart({
                   hideLabel
                 />
               }
-              cursor={{ fill: "hsl(var(--accent))/30" }}
+              cursor={{
+                fill: "color-mix(in oklab, var(--accent) 30%, transparent)",
+              }}
             />
             <Bar
               dataKey="count"
@@ -158,7 +159,7 @@ export function EndpointStatusChart({
                   return (
                     <text
                       alignmentBaseline="middle"
-                      className="fill-foreground font-medium"
+                      className="fill-muted-foreground tabular-nums"
                       x={xNum + widthNum + BAR_LABEL_OFFSET}
                       y={yNum + heightNum / 2}
                     >

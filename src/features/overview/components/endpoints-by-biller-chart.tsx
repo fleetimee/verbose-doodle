@@ -83,7 +83,6 @@ export function EndpointsByBillerChart({
             <YAxis
               axisLine={false}
               dataKey="biller"
-              tick={{ fill: "hsl(var(--foreground))" }}
               tickLine={false}
               tickMargin={10}
               type="category"
