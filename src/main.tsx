@@ -40,6 +40,10 @@ import { OverviewPage } from "@/pages/dashboard/overview";
 import { UsersPage } from "@/pages/dashboard/users";
 import { Login } from "@/pages/login";
 
+if (import.meta.env.DEV) {
+  await import("react-grab");
+}
+
 function AppContent() {
   const location = useLocation();
 
