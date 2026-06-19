@@ -2,26 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" >
   <title>Biller JSON Simulator - Logo Preview</title>
   <style>
     * {
-      margin: 0;
-      padding: 0;
       box-sizing: border-box;
+      padding: 0;
+      margin: 0;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: #fafafa;
       padding: 3rem 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       line-height: 1.6;
       color: #0a0a0a;
+      background: #fafafa;
     }
 
     body.dark-mode {
-      background: #0a0a0a;
       color: #fafafa;
+      background: #0a0a0a;
     }
 
     .container {
@@ -30,17 +30,17 @@
     }
 
     h1 {
+      margin-bottom: 0.5rem;
       font-size: 2.5rem;
       font-weight: 600;
-      margin-bottom: 0.5rem;
       letter-spacing: -0.03em;
     }
 
     .subtitle {
-      color: #737373;
       margin-bottom: 3rem;
       font-size: 1.1rem;
       font-weight: 400;
+      color: #737373;
     }
 
     body.dark-mode .subtitle {
@@ -55,10 +55,10 @@
     }
 
     .logo-card {
+      padding: 2.5rem;
       background: white;
       border: 1px solid #e5e5e5;
       border-radius: 16px;
-      padding: 2.5rem;
       transition: border-color 0.2s;
     }
 
@@ -76,17 +76,17 @@
     }
 
     .logo-card h2 {
+      margin-bottom: 0.5rem;
       font-size: 1.125rem;
       font-weight: 600;
-      margin-bottom: 0.5rem;
       letter-spacing: -0.01em;
     }
 
     .logo-card p {
-      color: #737373;
-      font-size: 0.875rem;
       margin-bottom: 2rem;
+      font-size: 0.875rem;
       font-weight: 400;
+      color: #737373;
     }
 
     body.dark-mode .logo-card p {
@@ -97,11 +97,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      min-height: 200px;
       padding: 3rem;
       background: #fafafa;
-      border-radius: 12px;
-      min-height: 200px;
       border: 1px solid #f5f5f5;
+      border-radius: 12px;
     }
 
     body.dark-mode .logo-preview {
@@ -137,11 +137,11 @@
     }
 
     .usage {
+      padding: 2.5rem;
+      margin-bottom: 2rem;
       background: white;
       border: 1px solid #e5e5e5;
       border-radius: 16px;
-      padding: 2.5rem;
-      margin-bottom: 2rem;
     }
 
     body.dark-mode .usage {
@@ -150,22 +150,22 @@
     }
 
     .usage h2 {
+      margin-bottom: 1.5rem;
       font-size: 1.5rem;
       font-weight: 600;
-      margin-bottom: 1.5rem;
       letter-spacing: -0.02em;
     }
 
     .usage ul {
-      list-style: none;
       padding-left: 0;
+      list-style: none;
     }
 
     .usage li {
       padding: 1rem 0;
-      border-bottom: 1px solid #f5f5f5;
-      color: #525252;
       line-height: 1.7;
+      color: #525252;
+      border-bottom: 1px solid #f5f5f5;
     }
 
     body.dark-mode .usage li {
@@ -178,18 +178,18 @@
     }
 
     .usage code {
-      background: #f5f5f5;
       padding: 0.2rem 0.5rem;
-      border-radius: 4px;
       font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
       font-size: 0.875rem;
       color: #0a0a0a;
+      background: #f5f5f5;
       border: 1px solid #e5e5e5;
+      border-radius: 4px;
     }
 
     body.dark-mode .usage code {
-      background: #262626;
       color: #fafafa;
+      background: #262626;
       border-color: #404040;
     }
 
@@ -197,27 +197,27 @@
       position: fixed;
       top: 2rem;
       right: 2rem;
-      background: #0a0a0a;
-      color: white;
-      border: 1px solid #0a0a0a;
       padding: 0.625rem 1.25rem;
-      border-radius: 8px;
-      cursor: pointer;
       font-size: 0.875rem;
       font-weight: 500;
-      transition: all 0.15s;
+      color: white;
+      cursor: pointer;
+      background: #0a0a0a;
+      border: 1px solid #0a0a0a;
+      border-radius: 8px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      transition: all 0.15s;
     }
 
     .toggle-theme:hover {
       background: #171717;
-      transform: translateY(-1px);
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
     }
 
     body.dark-mode .toggle-theme {
-      background: white;
       color: #0a0a0a;
+      background: white;
       border-color: white;
     }
 
@@ -235,8 +235,8 @@
     .feature {
       padding: 1.5rem;
       background: #fafafa;
-      border-radius: 12px;
       border: 1px solid #f5f5f5;
+      border-radius: 12px;
     }
 
     body.dark-mode .feature {
@@ -245,12 +245,12 @@
     }
 
     .feature h3 {
+      margin-bottom: 0.5rem;
       font-size: 0.875rem;
       font-weight: 600;
-      margin-bottom: 0.5rem;
+      color: #737373;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #737373;
     }
 
     body.dark-mode .feature h3 {
@@ -281,7 +281,7 @@
         <h2>Main Logo</h2>
         <p>Primary logo using currentColor</p>
         <div class="logo-preview medium">
-          <img src="logo.svg" alt="Biller JSON Simulator Logo">
+          <img alt="Biller JSON Simulator Logo" src="logo.svg" >
         </div>
       </div>
 
@@ -289,7 +289,7 @@
         <h2>Dark Mode</h2>
         <p>Automatically adapts to theme</p>
         <div class="logo-preview medium">
-          <img src="logo-dark.svg" alt="Biller JSON Simulator Dark Logo">
+          <img alt="Biller JSON Simulator Dark Logo" src="logo-dark.svg" >
         </div>
       </div>
 
@@ -297,7 +297,7 @@
         <h2>Icon</h2>
         <p>Square format for favicons & apps</p>
         <div class="logo-preview small">
-          <img src="logo-icon.svg" alt="Biller JSON Simulator Icon">
+          <img alt="Biller JSON Simulator Icon" src="logo-icon.svg" >
         </div>
       </div>
 
@@ -305,7 +305,7 @@
         <h2>Wordmark</h2>
         <p>Horizontal with text for headers</p>
         <div class="logo-preview large">
-          <img src="logo-wordmark.svg" alt="Biller JSON Simulator Wordmark">
+          <img alt="Biller JSON Simulator Wordmark" src="logo-wordmark.svg" >
         </div>
       </div>
     </div>
@@ -318,7 +318,7 @@
         <h2>Current ⭐</h2>
         <p>Document + braces</p>
         <div class="logo-preview" style="min-height: 100px;">
-          <img src="favicon.svg" alt="Favicon" style="width: 16px; height: 16px; image-rendering: crisp-edges;">
+          <img alt="Favicon" src="favicon.svg" style="width: 16px; height: 16px; image-rendering: crisp-edges;">
         </div>
         <div style="text-align: center; margin-top: 1rem; padding: 0.5rem; background: #f5f5f5; border-radius: 6px; font-family: monospace; font-size: 0.75rem;">favicon.svg</div>
       </div>
@@ -327,7 +327,7 @@
         <h2>Letter B</h2>
         <p>Simple, bold initial</p>
         <div class="logo-preview" style="min-height: 100px;">
-          <img src="favicon-alt-1.svg" alt="Favicon Alt 1" style="width: 16px; height: 16px; image-rendering: crisp-edges;">
+          <img alt="Favicon Alt 1" src="favicon-alt-1.svg" style="width: 16px; height: 16px; image-rendering: crisp-edges;">
         </div>
         <div style="text-align: center; margin-top: 1rem; padding: 0.5rem; background: #f5f5f5; border-radius: 6px; font-family: monospace; font-size: 0.75rem;">favicon-alt-1.svg</div>
       </div>
@@ -336,7 +336,7 @@
         <h2>JSON Braces</h2>
         <p>Just {} symbol</p>
         <div class="logo-preview" style="min-height: 100px;">
-          <img src="favicon-alt-2.svg" alt="Favicon Alt 2" style="width: 16px; height: 16px; image-rendering: crisp-edges;">
+          <img alt="Favicon Alt 2" src="favicon-alt-2.svg" style="width: 16px; height: 16px; image-rendering: crisp-edges;">
         </div>
         <div style="text-align: center; margin-top: 1rem; padding: 0.5rem; background: #f5f5f5; border-radius: 6px; font-family: monospace; font-size: 0.75rem;">favicon-alt-2.svg</div>
       </div>
@@ -345,7 +345,7 @@
         <h2>Document Only</h2>
         <p>Pure minimal document</p>
         <div class="logo-preview" style="min-height: 100px;">
-          <img src="favicon-alt-3.svg" alt="Favicon Alt 3" style="width: 16px; height: 16px; image-rendering: crisp-edges;">
+          <img alt="Favicon Alt 3" src="favicon-alt-3.svg" style="width: 16px; height: 16px; image-rendering: crisp-edges;">
         </div>
         <div style="text-align: center; margin-top: 1rem; padding: 0.5rem; background: #f5f5f5; border-radius: 6px; font-family: monospace; font-size: 0.75rem;">favicon-alt-3.svg</div>
       </div>

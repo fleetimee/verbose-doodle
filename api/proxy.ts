@@ -46,7 +46,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const data = await response.text();
     res.status(response.status).send(data);
   } catch (error) {
-    // biome-ignore lint/suspicious/noConsole: Serverless function error logging required for debugging
     console.error("Proxy error:", error);
     res
       .status(HTTP_INTERNAL_SERVER_ERROR)

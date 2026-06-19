@@ -1,6 +1,13 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite/core"],
+  "extends": ["ultracite/biome/core"],
+  "linter": {
+    "rules": {
+      "style": {
+        "useConsistentTypeDefinitions": "off"
+      }
+    }
+  },
   "overrides": [
     {
       "includes": ["public/**/*.html"],
@@ -8,6 +15,18 @@
         "enabled": false
       },
       "formatter": {
+        "enabled": false
+      }
+    },
+    {
+      "includes": ["public/**/*.svg"],
+      "linter": {
+        "enabled": false
+      },
+      "formatter": {
+        "enabled": false
+      },
+      "assist": {
         "enabled": false
       }
     },
@@ -43,10 +62,7 @@
             "noNamespaceImport": "off"
           },
           "nursery": {
-            "useSortedClasses": "off",
-            "useConsistentArrowReturn": "off",
-            "noShadow": "off",
-            "noUselessUndefined": "off"
+            "useSortedClasses": "off"
           },
           "style": {
             "useImportType": "off",

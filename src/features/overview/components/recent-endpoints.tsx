@@ -48,7 +48,7 @@ export function RecentEndpoints({ data }: RecentEndpointsProps) {
                   <span className="text-muted-foreground">•</span>
                   <p className="text-muted-foreground text-xs">
                     {endpoint.responseCount} response
-                    {endpoint.responseCount !== 1 ? "s" : ""}
+                    {endpoint.responseCount === 1 ? "" : "s"}
                   </p>
                 </div>
               </div>

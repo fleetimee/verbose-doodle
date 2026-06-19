@@ -144,7 +144,7 @@ export function ExportEndpointsDialog({
                     </Label>
                     <p className="text-muted-foreground text-xs">
                       {group.endpoints.length} endpoint
-                      {group.endpoints.length !== 1 ? "s" : ""}
+                      {group.endpoints.length === 1 ? "" : "s"}
                     </p>
                   </div>
                 </div>
@@ -156,9 +156,9 @@ export function ExportEndpointsDialog({
           <div className="rounded-lg bg-muted p-3 text-sm">
             <p className="font-medium">
               Selected: {selectedBillerIds.size} biller
-              {selectedBillerIds.size !== 1 ? "s" : ""} • {selectedEndpoints}{" "}
+              {selectedBillerIds.size === 1 ? "" : "s"} • {selectedEndpoints}{" "}
               endpoint
-              {selectedEndpoints !== 1 ? "s" : ""}
+              {selectedEndpoints === 1 ? "" : "s"}
             </p>
           </div>
         </div>

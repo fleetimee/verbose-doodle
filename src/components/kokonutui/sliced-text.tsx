@@ -25,8 +25,7 @@ const SlicedText: React.FC<SlicedTextProps> = ({
     className = "",
     containerClassName = "",
     splitSpacing = 2,
-}) => {
-    return (
+}) => (
         <motion.div
             className={cn(
                 "w-full text-center relative inline-block",
@@ -75,6 +74,5 @@ const SlicedText: React.FC<SlicedTextProps> = ({
             <div className={cn("invisible text-4xl", className)}>{text}</div>
         </motion.div>
     );
-};
 
 export default SlicedText;

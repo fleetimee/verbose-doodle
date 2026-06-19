@@ -536,7 +536,7 @@ export function EndpointDetailPage() {
             </div>
             <p className="mt-1 text-muted-foreground text-sm">
               Biller ID: {endpoint.billerId} • {endpoint.responses.length}{" "}
-              response{endpoint.responses.length !== 1 ? "s" : ""}
+              response{endpoint.responses.length === 1 ? "" : "s"}
             </p>
           </div>
         </div>
@@ -598,7 +598,7 @@ export function EndpointDetailPage() {
                 <li>The endpoint configuration</li>
                 <li>
                   All {endpoint?.responses.length || 0} response
-                  {endpoint?.responses.length !== 1 ? "s" : ""} associated with
+                  {endpoint?.responses.length === 1 ? "" : "s"} associated with
                   this endpoint
                 </li>
               </ul>

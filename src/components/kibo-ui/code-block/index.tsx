@@ -696,7 +696,6 @@ export const CodeBlockContent = ({
 
     highlight(children as string, language, effectiveThemes)
       .then(setHtml)
-      // biome-ignore lint/suspicious/noConsole: "it's fine"
       .catch(console.error);
   }, [children, themes, syntaxHighlighting, language, lightTheme, darkTheme]);
 
