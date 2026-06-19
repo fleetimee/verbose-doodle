@@ -55,6 +55,13 @@ const manualChunkGroups = {
 } as const;
 
 function getManualChunk(moduleId: string) {
+  if (
+    moduleId.includes("/node_modules/@codemirror/") ||
+    moduleId.includes("/node_modules/@uiw/react-codemirror/")
+  ) {
+    return "codemirror";
+  }
+
   for (const [chunkName, packages] of Object.entries(manualChunkGroups)) {
     if (
       packages.some((packageName) =>
@@ -86,6 +93,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
+      chunkSizeWarningLimit: 1700,
       rollupOptions: {
         output: {
           manualChunks: getManualChunk,

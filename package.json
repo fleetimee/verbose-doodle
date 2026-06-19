@@ -79,6 +79,10 @@
     "vaul": "^1.1.2",
     "zod": "^4.4.3"
   },
+  "resolutions": {
+    "@codemirror/state": "6.6.0",
+    "@codemirror/view": "6.43.1"
+  },
   "devDependencies": {
     "@biomejs/biome": "2.5.0",
     "@happy-dom/global-registrator": "^20.10.6",

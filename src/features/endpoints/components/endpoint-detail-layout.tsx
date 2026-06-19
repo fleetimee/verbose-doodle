@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Card } from "@/components/ui/card";
 import {
   ResizableHandle,
@@ -6,8 +7,13 @@ import {
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponseList } from "@/features/endpoints/components/response-list";
-import { ResponsePreview } from "@/features/endpoints/components/response-preview";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
+
+const ResponsePreview = lazy(() =>
+  import("@/features/endpoints/components/response-preview").then(
+    ({ ResponsePreview }) => ({ default: ResponsePreview })
+  )
+);
 
 type EndpointDetailLayoutProps = {
   responses: EndpointResponse[];
@@ -59,11 +65,13 @@ export function EndpointDetailLayout({
             />
           </TabsContent>
           <TabsContent className="mt-0" value="preview">
-            <ResponsePreview
-              endpointMethod={endpointMethod}
-              endpointUrl={endpointUrl}
-              response={selectedResponse}
-            />
+            <Suspense fallback={<ResponsePreviewFallback />}>
+              <ResponsePreview
+                endpointMethod={endpointMethod}
+                endpointUrl={endpointUrl}
+                response={selectedResponse}
+              />
+            </Suspense>
           </TabsContent>
         </Tabs>
       </Card>
@@ -86,14 +94,20 @@ export function EndpointDetailLayout({
           <ResizableHandle withHandle />
 
           <ResizablePanel defaultSize={65} minSize={35}>
-            <ResponsePreview
-              endpointMethod={endpointMethod}
-              endpointUrl={endpointUrl}
-              response={selectedResponse}
-            />
+            <Suspense fallback={<ResponsePreviewFallback />}>
+              <ResponsePreview
+                endpointMethod={endpointMethod}
+                endpointUrl={endpointUrl}
+                response={selectedResponse}
+              />
+            </Suspense>
           </ResizablePanel>
         </ResizablePanelGroup>
       </Card>
     </>
   );
+}
+
+function ResponsePreviewFallback() {
+  return <div className="min-h-[480px] bg-background" />;
 }

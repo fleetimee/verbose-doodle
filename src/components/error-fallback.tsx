@@ -1,5 +1,4 @@
 import { AlertTriangle, Home, RotateCcw } from "lucide-react";
-import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -47,9 +46,9 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                 </Button>
 
                 <Button asChild variant="outline">
-                  <Link to="/">
+                  <a href="/">
                     <Home /> Go Home
-                  </Link>
+                  </a>
                 </Button>
               </div>
             </EmptyContent>

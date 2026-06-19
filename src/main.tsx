@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { lazy, StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import "@fontsource/montserrat/400.css";
 import "@fontsource/montserrat/500.css";
@@ -33,12 +33,35 @@ import { useAutoRefresh } from "@/features/auth/hooks/use-auto-refresh";
 import { useTokenExpirationCheck } from "@/features/auth/hooks/use-token-expiration-check";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
 import { queryClient } from "@/lib/query-client";
-import { About } from "@/pages/about";
-import { EndpointDetailPage } from "@/pages/dashboard/endpoint-detail";
-import { EndpointsPage } from "@/pages/dashboard/endpoints";
-import { OverviewPage } from "@/pages/dashboard/overview";
-import { UsersPage } from "@/pages/dashboard/users";
-import { Login } from "@/pages/login";
+
+const About = lazy(() =>
+  import("@/pages/about").then(({ About }) => ({ default: About }))
+);
+const Login = lazy(() =>
+  import("@/pages/login").then(({ Login }) => ({ default: Login }))
+);
+const OverviewPage = lazy(() =>
+  import("@/pages/dashboard/overview").then(({ OverviewPage }) => ({
+    default: OverviewPage,
+  }))
+);
+const EndpointsPage = lazy(() =>
+  import("@/pages/dashboard/endpoints").then(({ EndpointsPage }) => ({
+    default: EndpointsPage,
+  }))
+);
+const EndpointDetailPage = lazy(() =>
+  import("@/pages/dashboard/endpoint-detail").then(
+    ({ EndpointDetailPage }) => ({
+      default: EndpointDetailPage,
+    })
+  )
+);
+const UsersPage = lazy(() =>
+  import("@/pages/dashboard/users").then(({ UsersPage }) => ({
+    default: UsersPage,
+  }))
+);
 
 if (import.meta.env.DEV) {
   await import("react-grab");
@@ -54,44 +77,50 @@ function AppContent() {
 
   return (
     <>
-      <AnimatePresence mode="wait">
-        <Routes key={location.pathname} location={location}>
-          <Route element={<AuthRedirect />} path="/" />
-          <Route element={<Login />} path="/login" />
-          <Route element={<About />} path="/about" />
+      <Suspense fallback={<RouteFallback />}>
+        <AnimatePresence mode="wait">
+          <Routes key={location.pathname} location={location}>
+            <Route element={<AuthRedirect />} path="/" />
+            <Route element={<Login />} path="/login" />
+            <Route element={<About />} path="/about" />
 
-          <Route
-            element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }
-            path="/dashboard"
-          >
-            <Route
-              element={<Navigate replace to="/dashboard/overview" />}
-              index
-            />
-            <Route element={<OverviewPage />} path="overview" />
-            <Route element={<EndpointsPage />} path="endpoints" />
-            <Route element={<EndpointDetailPage />} path="endpoints/:id" />
             <Route
               element={
-                <ProtectedRoute requiredRole="ADMIN">
-                  <UsersPage />
+                <ProtectedRoute>
+                  <DashboardLayout />
                 </ProtectedRoute>
               }
-              path="users"
-            />
-          </Route>
+              path="/dashboard"
+            >
+              <Route
+                element={<Navigate replace to="/dashboard/overview" />}
+                index
+              />
+              <Route element={<OverviewPage />} path="overview" />
+              <Route element={<EndpointsPage />} path="endpoints" />
+              <Route element={<EndpointDetailPage />} path="endpoints/:id" />
+              <Route
+                element={
+                  <ProtectedRoute requiredRole="ADMIN">
+                    <UsersPage />
+                  </ProtectedRoute>
+                }
+                path="users"
+              />
+            </Route>
 
-          <Route element={<NotFoundPage />} path="*" />
-        </Routes>
-      </AnimatePresence>
+            <Route element={<NotFoundPage />} path="*" />
+          </Routes>
+        </AnimatePresence>
+      </Suspense>
       <TokenExpirationDialog />
       <Toaster position="bottom-center" />
     </>
   );
+}
+
+function RouteFallback() {
+  return <div className="min-h-screen bg-background" />;
 }
 
 const rootElement = document.getElementById("root");

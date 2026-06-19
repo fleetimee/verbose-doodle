@@ -1,13 +1,6 @@
 "use client";
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import {
-  transformerNotationDiff,
-  transformerNotationErrorLevel,
-  transformerNotationFocus,
-  transformerNotationHighlight,
-  transformerNotationWordHighlight,
-} from "@shikijs/transformers";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { motion } from "motion/react";
 import type {
@@ -94,11 +87,7 @@ import {
   SiVuedotjs,
   SiWebassembly,
 } from "react-icons/si";
-import {
-  type BundledLanguage,
-  type CodeOptionsMultipleThemes,
-  codeToHtml,
-} from "shiki";
+import type { BundledLanguage, CodeOptionsMultipleThemes } from "shiki";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -263,12 +252,23 @@ const codeBlockClassName = cn(
   "[&_.line]:relative"
 );
 
-const highlight = (
+const highlight = async (
   html: string,
   language?: BundledLanguage,
   themes?: CodeOptionsMultipleThemes["themes"]
-) =>
-  codeToHtml(html, {
+) => {
+  const [
+    { codeToHtml },
+    {
+      transformerNotationDiff,
+      transformerNotationErrorLevel,
+      transformerNotationFocus,
+      transformerNotationHighlight,
+      transformerNotationWordHighlight,
+    },
+  ] = await Promise.all([import("shiki"), import("@shikijs/transformers")]);
+
+  return codeToHtml(html, {
     lang: language ?? "typescript",
     themes: themes ?? {
       light: "github-light",
@@ -292,6 +292,7 @@ const highlight = (
       }),
     ],
   });
+};
 
 type CodeBlockData = {
   language: string;

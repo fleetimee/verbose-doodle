@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Card } from "@/components/ui/card";
 import {
@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { JsonEditor } from "@/features/endpoints/components/json-editor";
-import { ResponseReviewStep } from "@/features/endpoints/components/response-review-step";
 import { ResponseStepperFooter } from "@/features/endpoints/components/response-stepper-footer";
 import { ResponseStepperHeader } from "@/features/endpoints/components/response-stepper-header";
 import { StatusCodeCombobox } from "@/features/endpoints/components/status-code-combobox";
@@ -25,6 +24,12 @@ import {
   type ResponseFormData,
   responseSchema,
 } from "@/features/endpoints/schemas/response-schema";
+
+const ResponseReviewStep = lazy(() =>
+  import("@/features/endpoints/components/response-review-step").then(
+    ({ ResponseReviewStep }) => ({ default: ResponseReviewStep })
+  )
+);
 
 type ResponseStepperProps = {
   onSubmit: (data: ResponseFormData) => void;
@@ -290,7 +295,9 @@ export function ResponseStepper({
                   )}
 
                   {currentStep.id === "review" && (
-                    <ResponseReviewStep formValues={formValues} />
+                    <Suspense fallback={<EditorFallback />}>
+                      <ResponseReviewStep formValues={formValues} />
+                    </Suspense>
                   )}
                 </div>
               </motion.div>
@@ -310,4 +317,8 @@ export function ResponseStepper({
       />
     </motion.div>
   );
+}
+
+function EditorFallback() {
+  return <div className="min-h-[360px] rounded-md border bg-muted/20" />;
 }
