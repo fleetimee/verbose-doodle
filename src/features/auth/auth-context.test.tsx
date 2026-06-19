@@ -9,6 +9,7 @@ import {
 } from "bun:test";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router";
 import { AuthProvider, useAuth } from "@/features/auth/context";
 import {
   AUTH_UNAUTHORIZED_EVENT,
@@ -135,6 +136,16 @@ function AuthTestConsumer({ loginToken }: { loginToken: string }) {
   );
 }
 
+function renderAuthProvider(loginToken: string) {
+  return render(
+    <MemoryRouter>
+      <AuthProvider>
+        <AuthTestConsumer loginToken={loginToken} />
+      </AuthProvider>
+    </MemoryRouter>
+  );
+}
+
 beforeEach(() => {
   restoreLocalStorage();
 });
@@ -249,11 +260,7 @@ describe("AuthProvider", () => {
 
     decodeSpy.mockReturnValue(mockUser);
 
-    render(
-      <AuthProvider>
-        <AuthTestConsumer loginToken="new-token" />
-      </AuthProvider>
-    );
+    renderAuthProvider("new-token");
 
     expect(getItemMock).toHaveBeenCalledWith(TOKEN_STORAGE_KEY);
     expect(decodeSpy).toHaveBeenCalledWith(persistedToken);
@@ -271,11 +278,7 @@ describe("AuthProvider", () => {
     const decodeSpy = await createDecodeSpy();
     decodeSpy.mockReturnValue(null);
 
-    render(
-      <AuthProvider>
-        <AuthTestConsumer loginToken="unused" />
-      </AuthProvider>
-    );
+    renderAuthProvider("unused");
 
     expect(removeItemMock).toHaveBeenCalledWith(TOKEN_STORAGE_KEY);
     expect(storage[TOKEN_STORAGE_KEY]).toBeUndefined();
@@ -302,11 +305,7 @@ describe("AuthProvider", () => {
 
     const user = userEvent.setup();
 
-    render(
-      <AuthProvider>
-        <AuthTestConsumer loginToken={loginToken} />
-      </AuthProvider>
-    );
+    renderAuthProvider(loginToken);
 
     await user.click(screen.getByRole("button", { name: "Trigger Login" }));
 
@@ -335,11 +334,7 @@ describe("AuthProvider", () => {
 
     const user = userEvent.setup();
 
-    render(
-      <AuthProvider>
-        <AuthTestConsumer loginToken={loginToken} />
-      </AuthProvider>
-    );
+    renderAuthProvider(loginToken);
 
     await user.click(screen.getByRole("button", { name: "Trigger Login" }));
     await user.click(screen.getByRole("button", { name: "Trigger Logout" }));
@@ -367,11 +362,7 @@ describe("AuthProvider", () => {
 
     const user = userEvent.setup();
 
-    render(
-      <AuthProvider>
-        <AuthTestConsumer loginToken={loginToken} />
-      </AuthProvider>
-    );
+    renderAuthProvider(loginToken);
 
     await user.click(screen.getByRole("button", { name: "Trigger Login" }));
 
