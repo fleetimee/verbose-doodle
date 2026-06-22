@@ -32,6 +32,7 @@ import { CodeGeneratorDialog } from "@/features/endpoints/components/code-genera
 import { ResponseSimulationAlert } from "@/features/endpoints/components/response-simulation-alert";
 import { ServerSettlingLayer } from "@/features/endpoints/components/server-settling-layer";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
+import { copyToClipboard } from "@/lib/clipboard";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
 
@@ -109,10 +110,20 @@ export function ResponsePreview({
     return `${baseUrl}${endpointUrl}`;
   }, [endpointUrl]);
 
-  const handleCopyUrl = () => {
-    if (fullUrl) {
-      navigator.clipboard.writeText(fullUrl);
+  const handleCopyUrl = async () => {
+    if (!fullUrl) {
+      return;
+    }
+
+    try {
+      const copied = await copyToClipboard(fullUrl);
+      if (!copied) {
+        toast.error("Unable to copy URL");
+        return;
+      }
       toast.success("URL copied to clipboard");
+    } catch {
+      toast.error("Unable to copy URL");
     }
   };
 

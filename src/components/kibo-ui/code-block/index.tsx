@@ -88,6 +88,7 @@ import {
   SiWebassembly,
 } from "react-icons/si";
 import type { BundledLanguage, CodeOptionsMultipleThemes } from "shiki";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -96,6 +97,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { copyToClipboard } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
 
 export type { BundledLanguage } from "shiki";
@@ -551,27 +553,33 @@ export const CodeBlockCopyButton = ({
   const { data, value } = useContext(CodeBlockContext);
   const code = data.find((item) => item.language === value)?.code;
 
-  const copyToClipboard = () => {
-    if (
-      typeof window === "undefined" ||
-      !navigator.clipboard.writeText ||
-      !code
-    ) {
+  const handleCopyToClipboard = async () => {
+    if (typeof window === "undefined" || !code) {
       return;
     }
 
-    navigator.clipboard.writeText(code).then(() => {
+    try {
+      const copied = await copyToClipboard(code);
+      if (!copied) {
+        toast.error("Unable to copy code");
+        return;
+      }
+
       setIsCopied(true);
       onCopy?.();
+      toast.success("Code copied to clipboard");
 
       setTimeout(() => setIsCopied(false), timeout);
-    }, onError);
+    } catch (error) {
+      onError?.(error instanceof Error ? error : new Error("Copy failed"));
+      toast.error("Unable to copy code");
+    }
   };
 
   if (asChild) {
     return cloneElement(children as ReactElement, {
       // @ts-expect-error - we know this is a button
-      onClick: copyToClipboard,
+      onClick: handleCopyToClipboard,
     });
   }
 
@@ -580,7 +588,7 @@ export const CodeBlockCopyButton = ({
   return (
     <Button
       className={cn("shrink-0", className)}
-      onClick={copyToClipboard}
+      onClick={handleCopyToClipboard}
       size="icon"
       variant="ghost"
       {...props}

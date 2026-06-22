@@ -47,6 +47,7 @@ import type {
   EndpointTrafficLogsFilters,
 } from "@/features/endpoints/types";
 import { getEndpointTrafficLogsDownloadUrl } from "@/lib/api-endpoints";
+import { copyToClipboard } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
 
 const LOG_LINE_LIMITS = [50, 100, 250, 500, 1000] as const;
@@ -119,8 +120,16 @@ async function copyText(text: string, successMessage: string) {
     return;
   }
 
-  await navigator.clipboard.writeText(text);
-  toast.success(successMessage);
+  try {
+    const copied = await copyToClipboard(text);
+    if (!copied) {
+      toast.error("Unable to copy logs");
+      return;
+    }
+    toast.success(successMessage);
+  } catch {
+    toast.error("Unable to copy logs");
+  }
 }
 
 export function EndpointTrafficLogViewer({
