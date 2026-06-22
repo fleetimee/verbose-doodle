@@ -79,3 +79,61 @@ export type GroupedEndpoints = {
   billerName: string;
   endpoints: Endpoint[];
 };
+
+export type EndpointTrafficLogStatus =
+  | "matched_success"
+  | "matched_empty"
+  | "matched_timeout"
+  | "matched_delayed"
+  | "unmatched_endpoint"
+  | "backend_error";
+
+export type EndpointTrafficLog = {
+  readonly id: string;
+  readonly requestId: string;
+  readonly occurredAt: string;
+  readonly endpointId: string | null;
+  readonly responseId: string | null;
+  readonly billerId: string | null;
+  readonly method: string;
+  readonly path: string;
+  readonly queryString: string | null;
+  readonly matched: boolean;
+  readonly hitStatus: EndpointTrafficLogStatus;
+  readonly httpStatusCode: number | null;
+  readonly responseName: string | null;
+  readonly sourceIp: string;
+  readonly sourcePort: number | null;
+  readonly destinationIp: string | null;
+  readonly destinationPort: number | null;
+  readonly forwardedFor: string | null;
+  readonly userAgent: string | null;
+  readonly durationMs: number | null;
+  readonly delayMs: number | null;
+  readonly simulateTimeout: boolean;
+  readonly requestBodyPreview: string | null;
+  readonly responseBodyPreview: string | null;
+};
+
+export type EndpointTrafficLogDetail = EndpointTrafficLog & {
+  readonly requestHeaders: Record<string, unknown> | null;
+  readonly requestBody: unknown;
+  readonly responseHeaders: Record<string, unknown> | null;
+  readonly responseBody: unknown;
+  readonly errorMessage: string | null;
+};
+
+export type EndpointTrafficLogStatusFilter = "all" | EndpointTrafficLogStatus;
+
+export type EndpointTrafficLogsFilters = {
+  readonly limit: number;
+  readonly status: EndpointTrafficLogStatusFilter;
+  readonly search: string;
+  readonly includeBody: boolean;
+};
+
+export type EndpointTrafficLogsResult = {
+  readonly items: EndpointTrafficLog[];
+  readonly nextCursor: string | null;
+  readonly hasMore: boolean;
+};

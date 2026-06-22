@@ -15,6 +15,18 @@ export const endpointQueryKeys = {
   detail: (id: string | number) => ["endpoints", id] as const,
 
   /**
+   * Query key for endpoint traffic logs
+   */
+  trafficLogs: (id: string | number, filters: Record<string, unknown>) =>
+    ["endpoints", id, "traffic-logs", filters] as const,
+
+  /**
+   * Query key for endpoint traffic log detail
+   */
+  trafficLogDetail: (id: string | number, logId: string | number) =>
+    ["endpoints", id, "traffic-logs", logId] as const,
+
+  /**
    * Query key for endpoints filtered by biller
    */
   byBiller: (billerId: number) => ["endpoints", "biller", billerId] as const,

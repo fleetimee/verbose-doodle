@@ -1,9 +1,6 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { cn as cnfast } from "cnfast";
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+export const cn = cnfast;
 
 /**
  * Generates a UUID using crypto.randomUUID() if available,

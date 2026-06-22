@@ -30,6 +30,13 @@ export const API_ENDPOINTS = {
       create: "/api/endpoint",
       update: (id: string | number) => `/api/endpoint/${id}`,
       delete: (id: string | number) => `/api/endpoint/${id}`,
+      trafficLogs: {
+        list: (id: string | number) => `/api/endpoint/${id}/traffic-logs`,
+        detail: (id: string | number, logId: string | number) =>
+          `/api/endpoint/${id}/traffic-logs/${logId}`,
+        download: (id: string | number) =>
+          `/api/endpoint/${id}/traffic-logs/download`,
+      },
     },
     responses: {
       list: "/api/response",
@@ -124,6 +131,30 @@ export function getEndpointUpdateUrl(id: string | number): string {
  */
 export function getEndpointDeleteUrl(id: string | number): string {
   return API_ENDPOINTS.admin.endpoints.delete(id);
+}
+
+/**
+ * Helper function to get endpoint traffic logs URL
+ */
+export function getEndpointTrafficLogsUrl(id: string | number): string {
+  return API_ENDPOINTS.admin.endpoints.trafficLogs.list(id);
+}
+
+/**
+ * Helper function to get endpoint traffic log detail URL
+ */
+export function getEndpointTrafficLogDetailUrl(
+  id: string | number,
+  logId: string | number
+): string {
+  return API_ENDPOINTS.admin.endpoints.trafficLogs.detail(id, logId);
+}
+
+/**
+ * Helper function to get endpoint traffic logs download URL
+ */
+export function getEndpointTrafficLogsDownloadUrl(id: string | number): string {
+  return API_ENDPOINTS.admin.endpoints.trafficLogs.download(id);
 }
 
 /**

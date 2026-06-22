@@ -36,6 +36,7 @@ import { useAuth } from "@/features/auth/context";
 import { usePermissions } from "@/features/auth/hooks/use-permissions";
 import { EndpointDetailLayout } from "@/features/endpoints/components/endpoint-detail-layout";
 import { EndpointDetailSkeleton } from "@/features/endpoints/components/endpoint-detail-skeleton";
+import { EndpointTrafficLogViewer } from "@/features/endpoints/components/endpoint-traffic-log-viewer";
 import { ResponseStepper } from "@/features/endpoints/components/response-stepper";
 import { useActivateResponse } from "@/features/endpoints/hooks/use-activate-response";
 import { useCreateResponse } from "@/features/endpoints/hooks/use-create-response";
@@ -569,6 +570,18 @@ export function EndpointDetailPage() {
           selectedResponse={selectedResponse}
           selectedResponseId={selectedResponseId}
         />
+      </motion.div>
+
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20 }}
+        transition={{
+          duration: PAGE_ANIMATION_DURATION,
+          delay: STAGGER_DELAY * 3,
+          ease: "easeOut",
+        }}
+      >
+        <EndpointTrafficLogViewer endpointId={endpoint.id} />
       </motion.div>
 
       <AnimatePresence>
