@@ -34,7 +34,12 @@ export function NavSecondary({
               location.pathname.startsWith(`${item.url}/`);
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={isActive} size="sm">
+                <SidebarMenuButton
+                  asChild
+                  className="rounded-lg text-sidebar-foreground/75"
+                  isActive={isActive}
+                  size="sm"
+                >
                   <Link onMouseEnter={item.onPrefetch} to={item.url}>
                     <item.icon />
                     <span>{item.title}</span>

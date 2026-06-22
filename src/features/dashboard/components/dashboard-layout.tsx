@@ -69,9 +69,9 @@ export function DashboardLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
-          <SidebarTrigger className="-ml-1" />
+      <SidebarInset className="overflow-hidden border border-border/70 bg-card shadow-sm">
+        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-3 border-b bg-card/95 px-4 backdrop-blur supports-backdrop-filter:bg-card/80">
+          <SidebarTrigger className="-ml-1 rounded-md" />
           <Separator
             className="mr-2 data-[orientation=vertical]:h-4"
             orientation="vertical"
@@ -102,7 +102,7 @@ export function DashboardLayout() {
             <ThemeSwitcher onChange={setTheme} value={themeSwitcherValue} />
           </div>
         </header>
-        <main className="flex flex-1 flex-col gap-4 overflow-auto p-6">
+        <main className="flex flex-1 flex-col gap-4 overflow-auto bg-background/70 p-4 md:p-6">
           <Outlet />
         </main>
       </SidebarInset>

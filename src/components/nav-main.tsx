@@ -10,6 +10,7 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuAction,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -24,6 +25,7 @@ export function NavMain({
     title: string;
     url: string;
     icon: LucideIcon;
+    badge?: string;
     isActive?: boolean;
     onPrefetch?: () => void;
     items?: {
@@ -56,6 +58,7 @@ export function NavMain({
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
+                  className="h-9 rounded-lg data-[active=true]:shadow-xs"
                   isActive={isActive}
                   tooltip={item.title}
                 >
@@ -64,6 +67,11 @@ export function NavMain({
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
+                {item.badge ? (
+                  <SidebarMenuBadge className="text-sidebar-foreground/55">
+                    {item.badge}
+                  </SidebarMenuBadge>
+                ) : null}
                 {item.items?.length ? (
                   <>
                     <CollapsibleTrigger asChild>

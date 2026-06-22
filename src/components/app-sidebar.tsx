@@ -14,6 +14,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/features/auth/context";
 import { usePermissions } from "@/features/auth/hooks/use-permissions";
@@ -27,11 +29,13 @@ const data = {
       title: "Overview",
       url: "/dashboard/overview",
       icon: LayoutDashboard,
+      badge: "Live",
     },
     {
       title: "Endpoints",
       url: "/dashboard/endpoints",
       icon: Plug,
+      badge: "API",
     },
     {
       title: "Users",
@@ -98,13 +102,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     });
 
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="icon" variant="inset" {...props}>
+      <SidebarHeader className="p-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild size="lg">
+            <SidebarMenuButton
+              asChild
+              className="h-14 rounded-lg border border-sidebar-border/70 bg-sidebar-accent/45 px-2.5 shadow-xs"
+              size="lg"
+            >
               <Link to="/dashboard/overview">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="flex aspect-square size-9 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
                   <Logo
                     className="size-6"
                     size="sm"
@@ -113,25 +121,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
-                    Biller Simulator JSON
+                  <span className="truncate font-semibold">Biller SIM</span>
+                  <span className="truncate text-sidebar-foreground/65 text-xs">
+                    BPDDIY JSON Lab
                   </span>
-                  <span className="truncate text-xs">BPDDIY</span>
                 </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+      <SidebarSeparator />
       <SidebarContent>
         <NavMain items={filteredNavMain} />
         <NavSecondary className="mt-auto" items={data.navSecondary}>
           <SessionTimer />
         </NavSecondary>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarSeparator />
+      <SidebarFooter className="p-3">
         <NavUser user={user} />
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }
