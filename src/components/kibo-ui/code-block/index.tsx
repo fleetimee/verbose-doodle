@@ -551,7 +551,9 @@ export const CodeBlockCopyButton = ({
 }: CodeBlockCopyButtonProps) => {
   const [isCopied, setIsCopied] = useState(false);
   const { data, value } = useContext(CodeBlockContext);
-  const code = data.find((item) => item.language === value)?.code;
+  const selectedItem = data.find((item) => item.language === value);
+  const fallbackItem = data.length === 1 ? data[0] : undefined;
+  const code = selectedItem?.code ?? fallbackItem?.code;
 
   const handleCopyToClipboard = async () => {
     if (typeof window === "undefined" || !code) {
@@ -563,6 +565,10 @@ export const CodeBlockCopyButton = ({
       if (!copied) {
         toast.error("Unable to copy code");
         return;
+      }
+
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
       }
 
       setIsCopied(true);
