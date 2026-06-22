@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Link, Outlet, useLocation, useParams } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useTheme } from "@/components/theme-provider";
@@ -103,9 +103,15 @@ export function DashboardLayout() {
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 overflow-auto bg-background/70 p-4 md:p-6">
-          <Outlet />
+          <Suspense fallback={<DashboardPageFallback />}>
+            <Outlet />
+          </Suspense>
         </main>
       </SidebarInset>
     </SidebarProvider>
   );
+}
+
+function DashboardPageFallback() {
+  return <div className="min-h-[360px]" />;
 }
