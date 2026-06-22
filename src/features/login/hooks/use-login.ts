@@ -88,6 +88,12 @@ async function loginUser(data: LoginFormData): Promise<LoginResponse> {
   }
 }
 
+type UseLoginOptions = {
+  navigateOnSuccess?: boolean;
+  onSuccess?: (data: LoginResponse, variables: LoginFormData) => void;
+  showToast?: boolean;
+};
+
 /**
  * Custom hook for handling user login
  * Uses TanStack Query mutation for state management
@@ -102,7 +108,11 @@ async function loginUser(data: LoginFormData): Promise<LoginResponse> {
  * };
  * ```
  */
-export function useLogin() {
+export function useLogin({
+  navigateOnSuccess = true,
+  onSuccess,
+  showToast = true,
+}: UseLoginOptions = {}) {
   const navigate = useNavigate();
   const { login: setAuthUser } = useAuth();
 
@@ -116,13 +126,19 @@ export function useLogin() {
           setAuthUser(data.accessToken, data.refreshToken);
 
           // Show success message
-          showSuccessToast(
-            "Welcome back!",
-            `Signed in as ${variables.username}`
-          );
+          if (showToast) {
+            showSuccessToast(
+              "Welcome back!",
+              `Signed in as ${variables.username}`
+            );
+          }
+
+          onSuccess?.(data, variables);
 
           // Redirect to home page
-          navigate("/");
+          if (navigateOnSuccess) {
+            navigate("/");
+          }
         }
         // Note: If responseCode is not "00", the mutation should throw an error
         // This is handled in the loginUser function
