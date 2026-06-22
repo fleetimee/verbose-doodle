@@ -59,12 +59,10 @@ function OverviewLoadingGrid({ isAdmin }: OverviewGridProps) {
         }
       />
 
-      {isAdmin && (
-        <ChartCardSkeleton className="md:col-span-3 lg:col-span-1 lg:row-span-2" />
-      )}
+      {isAdmin && <ChartCardSkeleton className="md:col-span-3 lg:col-span-1" />}
 
       <RecentEndpointsSkeleton
-        className={isAdmin ? "md:col-span-3 lg:col-span-3" : "md:col-span-3"}
+        className={isAdmin ? "md:col-span-3 lg:col-span-4" : "md:col-span-3"}
       />
     </div>
   );
@@ -98,7 +96,10 @@ function OverviewContentGrid({
       {isAdmin && data.userStatusDistribution && (
         <UserStatusChart data={data} />
       )}
-      <RecentEndpoints data={data} />
+      <RecentEndpoints
+        className={isAdmin ? "md:col-span-3 lg:col-span-4" : undefined}
+        data={data}
+      />
     </motion.div>
   );
 }

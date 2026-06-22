@@ -71,14 +71,14 @@ export function UserStatusChart({ data }: UserStatusChartProps) {
   ];
 
   return (
-    <Card className="border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-1 lg:row-span-2">
+    <Card className="border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-1">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Active Users</CardTitle>
         <CardDescription className="text-xs">
           Current active user accounts
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex items-center justify-center pb-0">
+      <CardContent className="flex min-h-[260px] items-center justify-center pb-0">
         <ChartContainer
           className="mx-auto aspect-square max-h-[200px] w-full"
           config={userStatusConfig}
