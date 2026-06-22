@@ -257,11 +257,21 @@ export function EndpointTrafficLogViewer({
     );
   } else {
     logContent = (
-      <div className="max-h-[560px] overflow-auto">
-        <div className="min-w-max p-3 font-mono text-sm">
+      <div
+        className={cn(
+          "max-h-[560px] overflow-auto",
+          wrapLines && "overflow-x-hidden"
+        )}
+      >
+        <div
+          className={cn(
+            "p-3 font-mono text-sm",
+            wrapLines ? "w-full" : "min-w-max"
+          )}
+        >
           {logs.map((log) => (
             <div
-              className="group grid grid-cols-[28px_96px_1fr] items-start gap-2 rounded px-2 py-1 hover:bg-muted"
+              className="group grid min-w-0 grid-cols-[28px_96px_minmax(0,1fr)] items-start gap-2 rounded px-2 py-1 hover:bg-muted"
               key={log.id}
             >
               <Checkbox
@@ -278,8 +288,8 @@ export function EndpointTrafficLogViewer({
               </button>
               <button
                 className={cn(
-                  "text-left leading-6",
-                  wrapLines ? "whitespace-pre-wrap" : "whitespace-pre"
+                  "min-w-0 text-left leading-6",
+                  wrapLines ? "whitespace-pre-wrap break-all" : "whitespace-pre"
                 )}
                 onClick={() => setSelectedLogId(log.id)}
                 type="button"
