@@ -1,84 +1,93 @@
+import type { LucideIcon } from "lucide-react";
 import { Activity, Building2, FileJson, Globe } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import type { OverviewData } from "@/features/overview/types";
+import { cn } from "@/lib/utils";
 
-export function StatsCards({ data }: { data: OverviewData }) {
+type MetricCardProps = {
+  readonly title: string;
+  readonly value: number | string;
+  readonly description: string;
+  readonly icon: LucideIcon;
+  readonly className?: string;
+  readonly meta?: string;
+};
+
+function MetricCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+  className,
+  meta,
+}: MetricCardProps) {
+  return (
+    <Card
+      className={cn(
+        "group overflow-hidden border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] transition-[border-color,box-shadow,transform] duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-[0_24px_55px_-34px_color-mix(in_oklab,var(--primary)_65%,transparent)] active:translate-y-px",
+        className
+      )}
+    >
+      <CardContent className="flex min-h-40 flex-col justify-between gap-8 p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="truncate font-semibold text-foreground text-sm">
+              {title}
+            </p>
+            <p className="mt-1 max-w-[28ch] text-muted-foreground text-xs leading-relaxed">
+              {description}
+            </p>
+          </div>
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border/70 bg-background text-muted-foreground transition-colors group-hover:border-primary/35 group-hover:text-primary">
+            <Icon />
+          </div>
+        </div>
+        <div className="flex items-end justify-between gap-4">
+          <p className="font-bold font-mono text-4xl tabular-nums tracking-tight">
+            {value}
+          </p>
+          {meta ? (
+            <p className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 font-medium text-primary text-xs">
+              {meta}
+            </p>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function StatsCards({ data }: { readonly data: OverviewData }) {
   const overviewStats = data.stats;
+
   return (
     <>
-      {/* Feature Card - Total Endpoints with split layout */}
-      <Card className="group relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background transition-all hover:border-primary/40 hover:shadow-lg md:col-span-2 lg:row-span-2">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="font-semibold text-base">
-            Total Endpoints
-          </CardTitle>
-          <div className="rounded-full bg-primary/10 p-2.5 transition-transform group-hover:scale-110">
-            <Globe className="h-5 w-5 text-primary" />
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="font-bold text-5xl tracking-tight">
-            {overviewStats.totalEndpoints}
-          </div>
-          <p className="text-muted-foreground">
-            Configured endpoint routes across all billers
-          </p>
-        </CardContent>
-        <div className="absolute top-0 right-0 h-40 w-40 translate-x-8 translate-y-[-50%] rounded-full bg-primary/5 blur-3xl" />
-      </Card>
-
-      {/* Compact Card - Total Responses */}
-      <Card className="group relative overflow-hidden border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-background to-background transition-all hover:border-blue-500/40 hover:shadow-lg md:col-span-1">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="font-medium text-sm">Total Responses</CardTitle>
-          <div className="rounded-full bg-blue-500/10 p-2 transition-transform group-hover:scale-110">
-            <FileJson className="h-4 w-4 text-blue-500" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="font-bold text-3xl">
-            {overviewStats.totalResponses}
-          </div>
-          <p className="text-muted-foreground text-xs">Response templates</p>
-        </CardContent>
-      </Card>
-
-      {/* Compact Card - Active Responses */}
-      <Card className="group relative overflow-hidden border-green-500/20 bg-gradient-to-br from-green-500/5 via-background to-background transition-all hover:border-green-500/40 hover:shadow-lg md:col-span-1">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="font-medium text-sm">
-            Active Responses
-          </CardTitle>
-          <div className="rounded-full bg-green-500/10 p-2 transition-transform group-hover:scale-110">
-            <Activity className="h-4 w-4 text-green-500" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-baseline gap-2">
-            <div className="font-bold text-3xl">
-              {overviewStats.activeResponses}
-            </div>
-            <div className="font-semibold text-green-600 text-lg dark:text-green-400">
-              {overviewStats.activeResponsesPercentage}
-            </div>
-          </div>
-          <p className="text-muted-foreground text-xs">Active templates</p>
-        </CardContent>
-      </Card>
-
-      {/* Compact Card - Total Billers */}
-      <Card className="group relative overflow-hidden border-purple-500/20 bg-gradient-to-br from-purple-500/5 via-background to-background transition-all hover:border-purple-500/40 hover:shadow-lg md:col-span-1">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="font-medium text-sm">Total Billers</CardTitle>
-          <div className="rounded-full bg-purple-500/10 p-2 transition-transform group-hover:scale-110">
-            <Building2 className="h-4 w-4 text-purple-500" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="font-bold text-3xl">{overviewStats.totalBillers}</div>
-          <p className="text-muted-foreground text-xs">Biller systems</p>
-        </CardContent>
-      </Card>
+      <MetricCard
+        className="md:col-span-2"
+        description="Configured endpoint routes across all billers"
+        icon={Globe}
+        title="Total Endpoints"
+        value={overviewStats.totalEndpoints}
+      />
+      <MetricCard
+        description="Response templates"
+        icon={FileJson}
+        title="Total Responses"
+        value={overviewStats.totalResponses}
+      />
+      <MetricCard
+        description="Active templates"
+        icon={Activity}
+        meta={overviewStats.activeResponsesPercentage}
+        title="Active Responses"
+        value={overviewStats.activeResponses}
+      />
+      <MetricCard
+        description="Biller systems"
+        icon={Building2}
+        title="Total Billers"
+        value={overviewStats.totalBillers}
+      />
     </>
   );
 }

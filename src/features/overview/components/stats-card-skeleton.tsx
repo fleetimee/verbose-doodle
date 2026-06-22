@@ -8,8 +8,8 @@ type StatsCardSkeletonProps = {
 
 export function StatsCardSkeleton({ className }: StatsCardSkeletonProps) {
   return (
-    <Card className={cn("md:col-span-1", className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card className={cn("border-border/70 md:col-span-1", className)}>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-4 w-4 rounded" />
       </CardHeader>

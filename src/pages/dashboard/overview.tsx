@@ -21,17 +21,14 @@ type OverviewGridProps = {
 function OverviewLoadingGrid({ isAdmin }: OverviewGridProps) {
   return (
     <div
-      className={`grid grid-cols-1 gap-4 ${isAdmin ? "md:grid-cols-3 lg:grid-cols-4" : "md:grid-cols-3"}`}
+      className={`grid grid-cols-1 gap-4 lg:gap-5 ${isAdmin ? "md:grid-cols-3 lg:grid-cols-4" : "md:grid-cols-3"}`}
     >
-      {/* Large Feature Card - Total Endpoints (2 cols × 2 rows) */}
-      <StatsCardSkeleton className="md:col-span-2 lg:row-span-2" />
+      <StatsCardSkeleton className="md:col-span-2" />
 
-      {/* Three compact stats cards stacked vertically */}
       <StatsCardSkeleton className="md:col-span-1" />
       <StatsCardSkeleton className="md:col-span-1" />
       <StatsCardSkeleton className="md:col-span-1" />
 
-      {/* Admin User Stats Cards Skeletons */}
       {isAdmin &&
         Array.from({ length: 3 }, (_, i) => i).map((key) => (
           <StatsCardSkeleton
@@ -40,7 +37,6 @@ function OverviewLoadingGrid({ isAdmin }: OverviewGridProps) {
           />
         ))}
 
-      {/* Chart Skeletons */}
       <ChartCardSkeleton
         className={
           isAdmin
@@ -63,12 +59,10 @@ function OverviewLoadingGrid({ isAdmin }: OverviewGridProps) {
         }
       />
 
-      {/* Admin User Status Chart Skeleton (1 col × 2 rows) */}
       {isAdmin && (
         <ChartCardSkeleton className="md:col-span-3 lg:col-span-1 lg:row-span-2" />
       )}
 
-      {/* Recent Endpoints Skeleton (3 cols) */}
       <RecentEndpointsSkeleton
         className={isAdmin ? "md:col-span-3 lg:col-span-3" : "md:col-span-3"}
       />
@@ -83,7 +77,7 @@ function OverviewContentGrid({
   return (
     <motion.div
       animate={{ opacity: 1 }}
-      className={`grid grid-cols-1 gap-4 ${isAdmin ? "md:grid-cols-3 lg:grid-cols-4" : "md:grid-cols-3"}`}
+      className={`grid grid-cols-1 gap-4 lg:gap-5 ${isAdmin ? "md:grid-cols-3 lg:grid-cols-4" : "md:grid-cols-3"}`}
       initial={{ opacity: 0 }}
       transition={{ duration: 0.5, delay: 0.1 }}
     >
@@ -128,33 +122,45 @@ export function OverviewPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-6">
       <motion.div
         animate={{ opacity: 1, y: 0 }}
+        className="grid gap-4 border-border/70 border-b pb-6 md:grid-cols-[minmax(0,1fr)_auto]"
         initial={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
-        <h1 className="mb-2 font-bold text-3xl">Overview</h1>
-        <p className="break-words text-muted-foreground">
-          View your billing simulator configuration and statistics
-        </p>
+        <div>
+          <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-[0.18em]">
+            Billing Simulator
+          </p>
+          <h1 className="font-bold text-4xl tracking-tight md:text-5xl">
+            Overview
+          </h1>
+          <p className="mt-3 max-w-[62ch] break-words text-muted-foreground text-sm leading-relaxed md:text-base">
+            Inspect endpoint coverage, response templates, and account activity
+            without leaving the simulator workspace.
+          </p>
+        </div>
+        <div className="flex items-end md:justify-end">
+          <div className="rounded-full border border-border/70 bg-card px-4 py-2 font-medium text-muted-foreground text-xs shadow-[0_12px_30px_-24px_color-mix(in_oklab,var(--foreground)_55%,transparent)]">
+            Read-only analytics
+          </div>
+        </div>
       </motion.div>
 
-      {/* Error State */}
       {error && (
         <motion.div
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-lg border border-red-500/20 bg-red-500/10 p-4"
+          className="rounded-lg border border-destructive/25 bg-destructive/10 p-4"
           initial={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.3 }}
         >
-          <p className="text-red-600 dark:text-red-400">
+          <p className="font-medium text-destructive text-sm">
             Failed to load overview data. Please try refreshing the page.
           </p>
         </motion.div>
       )}
 
-      {/* Bento Grid Layout */}
       {isLoading && <OverviewLoadingGrid isAdmin={isAdmin} />}
       {!isLoading && data && (
         <OverviewContentGrid data={data} isAdmin={isAdmin} />

@@ -36,14 +36,18 @@ export function HttpMethodChart({ data, className }: HttpMethodChartProps) {
   }));
 
   return (
-    <Card className={defaultClasses}>
-      <CardHeader>
-        <CardTitle>HTTP Method Distribution</CardTitle>
-        <CardDescription>Endpoint count by HTTP method type</CardDescription>
+    <Card
+      className={`${defaultClasses} border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)]`}
+    >
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">HTTP Method Distribution</CardTitle>
+        <CardDescription className="text-xs">
+          Endpoint count by HTTP method type
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer
-          className="h-[300px] w-full"
+          className="h-[260px] w-full"
           config={methodDistributionConfig}
         >
           <BarChart accessibilityLayer data={chartData}>

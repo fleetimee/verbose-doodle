@@ -60,10 +60,12 @@ export function EndpointsByBillerChart({
   } satisfies ChartConfig;
 
   return (
-    <Card className={defaultClasses}>
-      <CardHeader>
-        <CardTitle>Endpoints by Biller</CardTitle>
-        <CardDescription>
+    <Card
+      className={`${defaultClasses} border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)]`}
+    >
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Endpoints by Biller</CardTitle>
+        <CardDescription className="text-xs">
           Distribution of endpoints across billers
         </CardDescription>
       </CardHeader>

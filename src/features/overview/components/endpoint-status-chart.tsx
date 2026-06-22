@@ -61,16 +61,20 @@ export function EndpointStatusChart({
   } satisfies ChartConfig;
 
   return (
-    <Card className={defaultClasses}>
-      <CardHeader>
-        <CardTitle>Response Status Code Distribution</CardTitle>
-        <CardDescription>
+    <Card
+      className={`${defaultClasses} border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)]`}
+    >
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">
+          Response Status Code Distribution
+        </CardTitle>
+        <CardDescription className="text-xs">
           Configured responses by HTTP status code
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-0">
         <ChartContainer
-          className="aspect-auto h-[280px] w-full items-center px-4"
+          className="aspect-auto h-[260px] w-full items-center px-4"
           config={responseStatusConfig}
         >
           <BarChart

@@ -14,7 +14,7 @@ type ChartCardSkeletonProps = {
 export function ChartCardSkeleton({ className }: ChartCardSkeletonProps) {
   return (
     <Card className={className}>
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle>
           <Skeleton className="h-6 w-48" />
         </CardTitle>
@@ -23,8 +23,8 @@ export function ChartCardSkeleton({ className }: ChartCardSkeletonProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex h-[300px] w-full items-center justify-center">
-          <Skeleton className="h-full w-full" />
+        <div className="flex h-[260px] w-full items-center justify-center">
+          <Skeleton className="h-full w-full rounded-lg" />
         </div>
       </CardContent>
     </Card>

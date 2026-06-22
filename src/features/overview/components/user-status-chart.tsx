@@ -71,10 +71,12 @@ export function UserStatusChart({ data }: UserStatusChartProps) {
   ];
 
   return (
-    <Card className="group relative overflow-hidden border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 via-background to-background transition-all hover:border-cyan-500/40 hover:shadow-lg md:col-span-3 lg:col-span-1 lg:row-span-2">
-      <CardHeader>
-        <CardTitle>Active Users</CardTitle>
-        <CardDescription>Current active user accounts</CardDescription>
+    <Card className="border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-1 lg:row-span-2">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Active Users</CardTitle>
+        <CardDescription className="text-xs">
+          Current active user accounts
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex items-center justify-center pb-0">
         <ChartContainer
