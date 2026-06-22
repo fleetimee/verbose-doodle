@@ -27,6 +27,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -573,14 +574,16 @@ export function EndpointTrafficLogViewer({
         }}
         open={!!selectedLogId}
       >
-        <DialogContent className="max-h-[88vh] overflow-auto sm:max-w-4xl">
+        <DialogContent className="flex h-[88vh] flex-col overflow-hidden sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle>Traffic log detail</DialogTitle>
             <DialogDescription>
               Request, response, and network metadata for one simulator hit.
             </DialogDescription>
           </DialogHeader>
-          {detailContent}
+          <ScrollArea className="min-h-0 flex-1 pr-4">
+            {detailContent}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </section>
@@ -622,9 +625,11 @@ function LogDetailCode({
   return (
     <div className="rounded-md border">
       <div className="border-b px-3 py-2 font-medium text-sm">{title}</div>
-      <pre className="max-h-72 overflow-auto p-3 text-sm">
-        <code>{formatJson(value)}</code>
-      </pre>
+      <ScrollArea className="h-72">
+        <pre className="p-3 text-sm">
+          <code>{formatJson(value)}</code>
+        </pre>
+      </ScrollArea>
     </div>
   );
 }
