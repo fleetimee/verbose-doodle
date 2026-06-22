@@ -34,6 +34,7 @@ export const API_ENDPOINTS = {
         list: (id: string | number) => `/api/endpoint/${id}/traffic-logs`,
         detail: (id: string | number, logId: string | number) =>
           `/api/endpoint/${id}/traffic-logs/${logId}`,
+        clear: (id: string | number) => `/api/endpoint/${id}/traffic-logs`,
         download: (id: string | number) =>
           `/api/endpoint/${id}/traffic-logs/download`,
       },
@@ -148,6 +149,13 @@ export function getEndpointTrafficLogDetailUrl(
   logId: string | number
 ): string {
   return API_ENDPOINTS.admin.endpoints.trafficLogs.detail(id, logId);
+}
+
+/**
+ * Helper function to get endpoint traffic logs clear URL
+ */
+export function getEndpointTrafficLogsClearUrl(id: string | number): string {
+  return API_ENDPOINTS.admin.endpoints.trafficLogs.clear(id);
 }
 
 /**

@@ -5,10 +5,21 @@ import {
   FileClock,
   RefreshCw,
   Search,
+  Trash2,
   X,
 } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -39,6 +50,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { getAuthToken } from "@/features/auth/utils";
+import { useClearEndpointTrafficLogs } from "@/features/endpoints/hooks/use-clear-endpoint-traffic-logs";
 import { useGetEndpointTrafficLogDetail } from "@/features/endpoints/hooks/use-get-endpoint-traffic-log-detail";
 import { useGetEndpointTrafficLogs } from "@/features/endpoints/hooks/use-get-endpoint-traffic-logs";
 import type {
@@ -145,6 +157,7 @@ export function EndpointTrafficLogViewer({
     useState<(typeof LOG_LINE_LIMITS)[number]>(100);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
+  const [showClearLogsDialog, setShowClearLogsDialog] = useState(false);
 
   const filters = useMemo<EndpointTrafficLogsFilters>(
     () => ({
@@ -165,6 +178,8 @@ export function EndpointTrafficLogViewer({
   } = useGetEndpointTrafficLogs(endpointId, filters, autoRefresh);
   const { data: selectedLogDetail, isPending: isLoadingDetail } =
     useGetEndpointTrafficLogDetail(endpointId, selectedLogId);
+  const { mutate: clearTrafficLogs, isPending: isClearingTrafficLogs } =
+    useClearEndpointTrafficLogs();
 
   const logs = data?.items ?? [];
   const visibleLines = useMemo(
@@ -193,6 +208,19 @@ export function EndpointTrafficLogViewer({
 
   const handleClearSelection = () => {
     setSelectedIds(new Set());
+  };
+
+  const handleClearTrafficLogs = () => {
+    clearTrafficLogs(
+      { endpointId },
+      {
+        onSuccess: () => {
+          setSelectedIds(new Set());
+          setSelectedLogId(null);
+          setShowClearLogsDialog(false);
+        },
+      }
+    );
   };
 
   const handleDownload = async (format: LogDownloadFormat) => {
@@ -559,6 +587,16 @@ export function EndpointTrafficLogViewer({
           >
             CSV
           </Button>
+          <Button
+            disabled={logs.length === 0 || isClearingTrafficLogs}
+            onClick={() => setShowClearLogsDialog(true)}
+            size="sm"
+            type="button"
+            variant="destructive"
+          >
+            <Trash2 data-icon="inline-start" />
+            Clear
+          </Button>
         </div>
       </div>
 
@@ -586,6 +624,32 @@ export function EndpointTrafficLogViewer({
           </ScrollArea>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        onOpenChange={setShowClearLogsDialog}
+        open={showClearLogsDialog}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear traffic logs?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes all stored traffic logs for this endpoint. Download a
+              copy first if you need to keep them.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isClearingTrafficLogs}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isClearingTrafficLogs}
+              onClick={handleClearTrafficLogs}
+            >
+              Clear logs
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
