@@ -175,7 +175,7 @@ export function CodeGeneratorDialog({
                       mode={resolvedTheme === "dark" ? "dark" : "light"}
                     />
                   </div>
-                  <CodeBlockCopyButton />
+                  <CodeBlockCopyButton text={generatedCode} />
                 </CodeBlockHeader>
                 <CodeBlockBody className="flex-1">
                   {(item) => (

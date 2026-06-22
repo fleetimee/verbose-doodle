@@ -537,6 +537,7 @@ export const CodeBlockSelectItem = ({
 export type CodeBlockCopyButtonProps = ComponentProps<typeof Button> & {
   onCopy?: () => void;
   onError?: (error: Error) => void;
+  text?: string;
   timeout?: number;
 };
 
@@ -544,6 +545,7 @@ export const CodeBlockCopyButton = ({
   asChild,
   onCopy,
   onError,
+  text,
   timeout = 2000,
   children,
   className,
@@ -553,7 +555,7 @@ export const CodeBlockCopyButton = ({
   const { data, value } = useContext(CodeBlockContext);
   const selectedItem = data.find((item) => item.language === value);
   const fallbackItem = data.length === 1 ? data[0] : undefined;
-  const code = selectedItem?.code ?? fallbackItem?.code;
+  const code = text ?? selectedItem?.code ?? fallbackItem?.code;
 
   const handleCopyToClipboard = async () => {
     if (typeof window === "undefined" || !code) {

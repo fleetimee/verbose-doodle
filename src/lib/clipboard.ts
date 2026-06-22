@@ -4,6 +4,21 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     return true;
   }
 
+  let copied = false;
+  const handleCopy = (event: ClipboardEvent) => {
+    event.preventDefault();
+    event.clipboardData?.setData("text/plain", text);
+    copied = true;
+  };
+
+  document.addEventListener("copy", handleCopy);
+  const copyCommandSucceeded = document.execCommand("copy");
+  document.removeEventListener("copy", handleCopy);
+
+  if (copyCommandSucceeded && copied) {
+    return true;
+  }
+
   const textarea = document.createElement("textarea");
   textarea.value = text;
   textarea.setAttribute("readonly", "");
