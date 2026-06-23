@@ -31,6 +31,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useAuth } from "@/features/auth/context";
 import { usePermissions } from "@/features/auth/hooks/use-permissions";
@@ -52,12 +57,20 @@ import {
   getMethodTextColor,
 } from "@/features/endpoints/utils/http-method-colors";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { messages } from "@/lib/i18n";
 import { decodeId } from "@/lib/id-encoder";
 
 // Animation constants
 const PAGE_ANIMATION_DURATION = 0.4;
 const HEADER_TOGGLE_ANIMATION_DURATION = 0.18;
 const STAGGER_DELAY = 0.1;
+const HTTP_METHODS: readonly HttpMethod[] = [
+  "GET",
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE",
+];
 
 export function EndpointDetailPage() {
   const { id: encodedId } = useParams<{ id: string }>();
@@ -470,39 +483,45 @@ export function EndpointDetailPage() {
                       }
                       value={editedMethod}
                     >
-                      <SelectTrigger className="h-10 w-[100px] bg-background font-mono font-semibold text-xs shadow-xs">
-                        <SelectValue>
-                          <span className={getMethodTextColor(editedMethod)}>
-                            {editedMethod}
-                          </span>
-                        </SelectValue>
-                      </SelectTrigger>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SelectTrigger
+                            className={`h-auto w-auto gap-1 rounded-md px-2 py-1 font-mono font-semibold text-xs shadow-none focus:ring-0 focus-visible:ring-0 ${getMethodBadgeColor(
+                              editedMethod
+                            )}`}
+                          >
+                            <SelectValue>
+                              <span
+                                className={getMethodTextColor(editedMethod)}
+                              >
+                                {editedMethod}
+                              </span>
+                            </SelectValue>
+                          </SelectTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          {messages.endpoints.methodTooltip[editedMethod]}
+                        </TooltipContent>
+                      </Tooltip>
                       <SelectContent>
-                        <SelectItem value="GET">
-                          <span className={getMethodTextColor("GET")}>GET</span>
-                        </SelectItem>
-                        <SelectItem value="POST">
-                          <span className={getMethodTextColor("POST")}>
-                            POST
-                          </span>
-                        </SelectItem>
-                        <SelectItem value="PUT">
-                          <span className={getMethodTextColor("PUT")}>PUT</span>
-                        </SelectItem>
-                        <SelectItem value="PATCH">
-                          <span className={getMethodTextColor("PATCH")}>
-                            PATCH
-                          </span>
-                        </SelectItem>
-                        <SelectItem value="DELETE">
-                          <span className={getMethodTextColor("DELETE")}>
-                            DELETE
-                          </span>
-                        </SelectItem>
+                        {HTTP_METHODS.map((method) => (
+                          <SelectItem key={method} value={method}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className={getMethodTextColor(method)}>
+                                  {method}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="z-[60]" side="right">
+                                {messages.endpoints.methodTooltip[method]}
+                              </TooltipContent>
+                            </Tooltip>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <Input
-                      className="h-10 min-w-[260px] flex-1 bg-background font-bold font-mono text-xl tracking-tight shadow-xs md:h-11 md:text-2xl"
+                      className="h-auto min-w-[260px] flex-1 rounded-none border-0 bg-transparent px-0 py-0 font-bold font-mono text-xl tracking-tight shadow-none focus-visible:ring-0 md:text-2xl"
                       disabled={isUpdatingEndpoint}
                       onChange={(e) => setEditedUrl(e.target.value)}
                       onKeyDown={handleKeyDown}
@@ -510,28 +529,44 @@ export function EndpointDetailPage() {
                       value={editedUrl}
                     />
                     <div className="flex gap-2">
-                      <Button
-                        className="border-green-600/40 bg-green-50 text-green-700 shadow-xs hover:bg-green-100 hover:text-green-800 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/50"
-                        disabled={isUpdatingEndpoint || !editedUrl.trim()}
-                        onClick={handleSaveUrl}
-                        size="icon-sm"
-                        title="Save (Enter)"
-                        type="button"
-                        variant="outline"
-                      >
-                        <Check />
-                      </Button>
-                      <Button
-                        className="border-destructive/40 bg-destructive/10 text-destructive shadow-xs hover:bg-destructive/15 hover:text-destructive"
-                        disabled={isUpdatingEndpoint}
-                        onClick={handleCancelEdit}
-                        size="icon-sm"
-                        title="Cancel (Esc)"
-                        type="button"
-                        variant="outline"
-                      >
-                        <X />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            aria-label={messages.endpoints.saveEndpointTooltip}
+                            className="border-green-600/40 bg-green-50 text-green-700 shadow-xs hover:bg-green-100 hover:text-green-800 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/50"
+                            disabled={isUpdatingEndpoint || !editedUrl.trim()}
+                            onClick={handleSaveUrl}
+                            size="icon-sm"
+                            type="button"
+                            variant="outline"
+                          >
+                            <Check />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          {messages.endpoints.saveEndpointTooltip}
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            aria-label={
+                              messages.endpoints.cancelEndpointEditTooltip
+                            }
+                            className="border-destructive/40 bg-destructive/10 text-destructive shadow-xs hover:bg-destructive/15 hover:text-destructive"
+                            disabled={isUpdatingEndpoint}
+                            onClick={handleCancelEdit}
+                            size="icon-sm"
+                            type="button"
+                            variant="outline"
+                          >
+                            <X />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          {messages.endpoints.cancelEndpointEditTooltip}
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </motion.div>
                 ) : (
@@ -559,26 +594,44 @@ export function EndpointDetailPage() {
                     </h1>
                     <ProtectedAction ability="canEditEndpoint">
                       <div className="flex items-center gap-1">
-                        <Button
-                          className="bg-background/80 shadow-xs"
-                          onClick={handleEditUrl}
-                          size="icon-sm"
-                          title="Edit endpoint URL and method"
-                          type="button"
-                          variant="outline"
-                        >
-                          <Pen />
-                        </Button>
-                        <Button
-                          className="border-destructive/40 bg-background/80 text-destructive shadow-xs hover:bg-destructive/10 hover:text-destructive"
-                          onClick={handleDeleteEndpointClick}
-                          size="icon-sm"
-                          title="Delete endpoint and all responses"
-                          type="button"
-                          variant="outline"
-                        >
-                          <Trash2 />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              aria-label={
+                                messages.endpoints.editEndpointTooltip
+                              }
+                              className="bg-background/80 shadow-xs"
+                              onClick={handleEditUrl}
+                              size="icon-sm"
+                              type="button"
+                              variant="outline"
+                            >
+                              <Pen />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            {messages.endpoints.editEndpointTooltip}
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              aria-label={
+                                messages.endpoints.deleteEndpointTooltip
+                              }
+                              className="border-destructive/40 bg-background/80 text-destructive shadow-xs hover:bg-destructive/10 hover:text-destructive"
+                              onClick={handleDeleteEndpointClick}
+                              size="icon-sm"
+                              type="button"
+                              variant="outline"
+                            >
+                              <Trash2 />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            {messages.endpoints.deleteEndpointTooltip}
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     </ProtectedAction>
                   </motion.div>

@@ -255,6 +255,10 @@ export const messages = {
     addEndpoint: "Add Endpoint",
     addEndpointDescription:
       "Create a new API endpoint for a specific biller ID.",
+    saveEndpointTooltip: "Save endpoint changes",
+    cancelEndpointEditTooltip: "Cancel endpoint edit",
+    editEndpointTooltip: "Edit endpoint URL and method",
+    deleteEndpointTooltip: "Delete endpoint and all responses",
     creating: "Creating...",
     createEndpoint: "Create Endpoint",
     addResponse: "Add Response",
@@ -269,6 +273,13 @@ export const messages = {
     methodPlaceholder: "Select method",
     methodDescription:
       "Choose the HTTP method this endpoint should respond to.",
+    methodTooltip: {
+      GET: "GET reads data without changing server state.",
+      POST: "POST creates or submits data to the server.",
+      PUT: "PUT replaces an existing resource with a full update.",
+      PATCH: "PATCH applies a partial update to an existing resource.",
+      DELETE: "DELETE removes a resource from the server.",
+    },
     urlLabel: "URL",
     urlPlaceholder: "/rest/api/users",
     urlDescription:
