@@ -80,8 +80,8 @@ export function ExportEndpointsDialog({
     if (selectedGroups.length > 0) {
       exportPostmanWithEnvironment(
         selectedGroups,
-        "Biller Simulator API",
-        "Biller Simulator"
+        "Fleetime Labs API",
+        "Fleetime Labs"
       );
       onOpenChange(false);
     }

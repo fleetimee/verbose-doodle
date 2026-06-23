@@ -21,7 +21,7 @@ import { useDocumentMeta } from "@/hooks/use-document-meta";
 export function UsersPage() {
   useDocumentMeta({
     title: "Users",
-    description: "Manage users and their permissions in the billing simulator",
+    description: "Manage users and their permissions in Fleetime Labs",
     keywords: ["user management", "permissions", "team", "users"],
   });
 

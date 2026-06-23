@@ -5,7 +5,7 @@ const DEFAULT_RETRY_COUNT = 1;
 
 /**
  * Default configuration for React Query
- * Optimized for the Biller Simulator application
+ * Optimized for the Fleetime Labs application
  */
 export const queryClient = new QueryClient({
   defaultOptions: {

@@ -65,12 +65,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = authState.user
     ? {
         name: authState.user.username,
-        email: `${authState.user.role.toLowerCase()}@biller-simulator.local`,
+        email: `${authState.user.role.toLowerCase()}@fleetime-labs.local`,
         avatar: "", // No avatar for now, will show initials
       }
     : {
         name: "Guest",
-        email: "guest@biller-simulator.local",
+        email: "guest@fleetime-labs.local",
         avatar: "",
       };
 
@@ -121,9 +121,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Biller SIM</span>
+                  <span className="truncate font-semibold">
+                    BPDDIY DevTools
+                  </span>
                   <span className="truncate text-sidebar-foreground/65 text-xs">
-                    BPDDIY JSON Lab
+                    Fleetime Labs
                   </span>
                 </div>
               </Link>

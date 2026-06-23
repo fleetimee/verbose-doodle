@@ -62,7 +62,7 @@ export const Login = () => {
 
   useDocumentMeta({
     title: "Login",
-    description: "Sign in to your billing simulator account",
+    description: "Sign in to your Fleetime Labs account",
     keywords: ["login", "sign in", "authentication"],
   });
 
@@ -180,7 +180,7 @@ export const Login = () => {
             <SlicedText
               className="font-bold text-3xl text-foreground tracking-tight"
               splitSpacing={3}
-              text="Biller Simulator JSON"
+              text="Fleetime Labs"
             />
           </div>
           <p className="text-muted-foreground text-sm">

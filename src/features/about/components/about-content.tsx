@@ -66,10 +66,10 @@ export function AboutContent() {
       >
         <h2 className="font-semibold text-2xl">What is this?</h2>
         <p>
-          The Biller Simulator JSON is a powerful tool designed to help teams
-          prototype, test, and visualize billing scenarios through an intuitive
-          interface. Built with modern web technologies, it provides a flexible
-          platform for managing billing workflows and API endpoints.
+          Fleetime Labs is a powerful tool designed to help teams prototype,
+          test, and visualize billing scenarios through an intuitive interface.
+          Built with modern web technologies, it provides a flexible platform
+          for managing billing workflows and API endpoints.
         </p>
       </motion.div>
 

@@ -24,7 +24,7 @@ export function AboutHeader() {
   return (
     <header className="flex w-full flex-col items-center gap-8 text-center">
       <motion.img
-        alt="Biller JSON Simulator"
+        alt="Fleetime Labs"
         animate={{ opacity: 1, scale: 1, rotate: 0 }}
         className="h-32 w-32 md:h-40 md:w-40"
         height="200"
@@ -52,7 +52,7 @@ export function AboutHeader() {
           initial={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
         >
-          The biller simulator helps teams prototype billing journeys using
+          Fleetime Labs helps teams prototype billing journeys using
           configurable JSON scenarios and reusable interface components.
         </motion.p>
       </div>

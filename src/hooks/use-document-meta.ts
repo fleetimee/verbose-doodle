@@ -9,9 +9,9 @@ type DocumentMetaProps = {
   ogImage?: string;
 };
 
-const DEFAULT_TITLE = "Biller Simulator";
+const DEFAULT_TITLE = "Fleetime Labs";
 const DEFAULT_DESCRIPTION =
-  "A powerful billing simulator application for prototyping billing scenarios";
+  "Fleetime Labs helps teams prototype billing scenarios";
 
 export function useDocumentMeta({
   title,

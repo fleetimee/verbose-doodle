@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "biller-simulator-json",
+      "name": "fleetime-labs",
       "dependencies": {
         "@codemirror/lang-json": "^6.0.2",
         "@codemirror/view": "^6.43.1",

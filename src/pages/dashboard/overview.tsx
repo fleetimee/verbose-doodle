@@ -115,7 +115,7 @@ export function OverviewPage() {
   useDocumentMeta({
     title: "Overview",
     description:
-      "View your billing simulator statistics, configured endpoints, and response distributions",
+      "View your Fleetime Labs statistics, configured endpoints, and response distributions",
     keywords: [
       "dashboard",
       "overview",

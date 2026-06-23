@@ -33,7 +33,7 @@ export function LoggedOut() {
 
   useDocumentMeta({
     title: "Logged out",
-    description: "You have signed out of Biller Simulator JSON",
+    description: "You have signed out of Fleetime Labs",
     keywords: ["logout", "sign out", "authentication"],
   });
 
@@ -64,7 +64,7 @@ export function LoggedOut() {
             <SlicedText
               className="font-bold text-3xl text-foreground tracking-tight"
               splitSpacing={3}
-              text="Biller Simulator JSON"
+              text="Fleetime Labs"
             />
           </div>
           <p className="text-muted-foreground text-sm">

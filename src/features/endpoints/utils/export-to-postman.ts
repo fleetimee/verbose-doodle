@@ -125,7 +125,7 @@ function endpointToPostmanItem(endpoint: Endpoint): PostmanItem {
  */
 export function convertToPostmanCollection(
   groupedEndpoints: GroupedEndpoints[],
-  collectionName = "Biller Simulator API"
+  collectionName = "Fleetime Labs API"
 ): PostmanCollection {
   const folders: PostmanFolder[] = groupedEndpoints.map((group) => ({
     name: group.billerName,
@@ -135,7 +135,7 @@ export function convertToPostmanCollection(
   return {
     info: {
       name: collectionName,
-      description: `Exported from Biller Simulator on ${new Date().toISOString()}`,
+      description: `Exported from Fleetime Labs on ${new Date().toISOString()}`,
       schema:
         "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
       _postman_id: generateUUID(),
@@ -193,7 +193,7 @@ function getBaseUrl(): string {
  * Create Postman environment with baseUrl variable
  */
 export function createPostmanEnvironment(
-  environmentName = "Biller Simulator"
+  environmentName = "Fleetime Labs"
 ): PostmanEnvironment {
   const baseUrl = getBaseUrl();
 
@@ -217,7 +217,7 @@ export function createPostmanEnvironment(
  */
 export function exportToPostman(
   groupedEndpoints: GroupedEndpoints[],
-  collectionName = "Biller Simulator API"
+  collectionName = "Fleetime Labs API"
 ) {
   const collection = convertToPostmanCollection(
     groupedEndpoints,
@@ -232,7 +232,7 @@ export function exportToPostman(
 /**
  * Export Postman environment and download as JSON
  */
-export function exportPostmanEnvironment(environmentName = "Biller Simulator") {
+export function exportPostmanEnvironment(environmentName = "Fleetime Labs") {
   const environment = createPostmanEnvironment(environmentName);
   const timestamp = Math.floor(Date.now() / MS_TO_SECONDS);
   const filename = `${environmentName.toLowerCase().replaceAll(" ", "-")}-${timestamp}.postman_environment.json`;
@@ -250,8 +250,8 @@ const DOWNLOAD_DELAY_MS = 100;
  */
 export function exportPostmanWithEnvironment(
   groupedEndpoints: GroupedEndpoints[],
-  collectionName = "Biller Simulator API",
-  environmentName = "Biller Simulator"
+  collectionName = "Fleetime Labs API",
+  environmentName = "Fleetime Labs"
 ) {
   // Generate timestamp once for both files
   const timestamp = Math.floor(Date.now() / MS_TO_SECONDS);

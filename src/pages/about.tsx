@@ -5,7 +5,7 @@ export function About() {
   useDocumentMeta({
     title: "About",
     description:
-      "Learn more about the Biller Simulator - a powerful tool for prototyping billing scenarios",
+      "Learn more about Fleetime Labs - a powerful tool for prototyping billing scenarios",
     keywords: ["about", "billing simulator", "information"],
   });
 
