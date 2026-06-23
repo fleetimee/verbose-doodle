@@ -7,9 +7,8 @@
       "dependencies": {
         "@codemirror/lang-json": "^6.0.2",
         "@codemirror/view": "^6.43.1",
-        "@fontsource/fira-code": "^5.2.7",
-        "@fontsource/inter": "^5.2.8",
-        "@fontsource/montserrat": "^5.2.8",
+        "@fontsource/geist-mono": "^5.2.8",
+        "@fontsource/mona-sans": "^5.2.8",
         "@hookform/resolvers": "^5.4.0",
         "@radix-ui/react-accordion": "^1.2.14",
         "@radix-ui/react-alert-dialog": "^1.1.17",
@@ -279,11 +278,9 @@
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.10", "", {}, "sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ=="],
 
-    "@fontsource/fira-code": ["@fontsource/fira-code@5.2.7", "", {}, "sha512-tnB9NNund9TwIym8/7DMJe573nlPEQb+fKUV5GL8TBYXjIhDvL0D7mgmNVNQUPhXp+R7RylQeiBdkA4EbOHPGQ=="],
+    "@fontsource/geist-mono": ["@fontsource/geist-mono@5.2.8", "", {}, "sha512-YqZUb3X42GjRaHkibUNyE8K4Rk9A6I9Ez81YpJYiuJN4ggmTW2ixoQpa9EWCPfXZtIsCQJTyrDoV9OJOZO/UcA=="],
 
-    "@fontsource/inter": ["@fontsource/inter@5.2.8", "", {}, "sha512-P6r5WnJoKiNVV+zvW2xM13gNdFhAEpQ9dQJHt3naLvfg+LkF2ldgSLiF4T41lf1SQCM9QmkqPTn4TH568IRagg=="],
-
-    "@fontsource/montserrat": ["@fontsource/montserrat@5.2.8", "", {}, "sha512-xTjLxSbSfCycDB0pwmNsfNvdfWPaDaRQ2LC6yt/ZI7SdvXG52zHnzNYC/09mzuAuWNJyShkteutfCoDgym56hQ=="],
+    "@fontsource/mona-sans": ["@fontsource/mona-sans@5.2.8", "", {}, "sha512-xsZE75lQlcPx/WzAuz7EfOHyPbaOMoHU6FAeLUB3J4f8zjPe8g5Ifh8JCWID9vjpQM9Ty1UxqLXgCMVSktlOlw=="],
 
     "@happy-dom/global-registrator": ["@happy-dom/global-registrator@20.10.6", "", { "dependencies": { "@types/node": ">=20.0.0", "happy-dom": "^20.10.6" } }, "sha512-Nu/IjRkkNxmeG2ywWsyJSO4d1BrWTqVzxCPL+gXj0b97klhmjd6wLzt6Bx/laNpkZ3WLW7zNCqmtMIbIlahqug=="],
 
