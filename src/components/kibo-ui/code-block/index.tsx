@@ -1,8 +1,8 @@
 "use client";
 
-import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { motion } from "motion/react";
+import { useControllableState } from "radix-ui/internal";
 import type {
   ComponentProps,
   HTMLAttributes,

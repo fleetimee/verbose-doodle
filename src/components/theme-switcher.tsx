@@ -1,8 +1,8 @@
 "use client";
 
-import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { Moon, Sun } from "lucide-react";
 import { motion } from "motion/react";
+import { useControllableState } from "radix-ui/internal";
 import { useCallback, useEffect, useState } from "react";
 import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
