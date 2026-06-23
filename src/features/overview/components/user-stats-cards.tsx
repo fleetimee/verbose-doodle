@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import { ShieldCheck, UserCheck, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { OverviewData } from "@/features/overview/types";
+import { formatMessage, messages } from "@/lib/i18n";
 
 type UserMetricProps = {
   readonly title: string;
@@ -46,21 +47,25 @@ export function UserStatsCards({ data }: UserStatsCardsProps) {
   return (
     <>
       <UserMetric
-        detail="Registered accounts"
+        detail={messages.overview.registeredAccounts}
         icon={Users}
-        title="Total Users"
+        title={messages.overview.totalUsersTitle}
         value={totalUsers}
       />
       <UserMetric
-        detail={`${inactiveUsers} inactive`}
+        detail={formatMessage(messages.overview.inactiveUsers, {
+          count: inactiveUsers,
+        })}
         icon={UserCheck}
-        title="Active Users"
+        title={messages.overview.activeUsersTitle}
         value={activeUsers}
       />
       <UserMetric
-        detail={`${regularUsers} regular`}
+        detail={formatMessage(messages.overview.regularUsers, {
+          count: regularUsers,
+        })}
         icon={ShieldCheck}
-        title="Admin Users"
+        title={messages.overview.adminUsersTitle}
         value={adminUsers}
       />
     </>

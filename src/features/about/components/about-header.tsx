@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { useTheme } from "@/components/theme-provider";
+import { messages } from "@/lib/i18n";
 
 // Animation easing curve for bounce effect (cubic-bezier control points)
 const EASE_P1 = 0.34;
@@ -24,7 +25,7 @@ export function AboutHeader() {
   return (
     <header className="flex w-full flex-col items-center gap-8 text-center">
       <motion.img
-        alt="Fleetime Labs"
+        alt={messages.about.logoAlt}
         animate={{ opacity: 1, scale: 1, rotate: 0 }}
         className="h-32 w-32 md:h-40 md:w-40"
         height="200"
@@ -44,7 +45,7 @@ export function AboutHeader() {
           initial={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
         >
-          About This Project
+          {messages.about.headerTitle}
         </motion.h1>
         <motion.p
           animate={{ opacity: 1, y: 0 }}
@@ -52,8 +53,7 @@ export function AboutHeader() {
           initial={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
         >
-          Fleetime Labs helps teams prototype billing journeys using
-          configurable JSON scenarios and reusable interface components.
+          {messages.about.headerDescription}
         </motion.p>
       </div>
     </header>

@@ -10,6 +10,7 @@ import { EditResponseNameForm } from "@/features/endpoints/forms/edit-response-n
 import { EditResponseStatusCodeForm } from "@/features/endpoints/forms/edit-response-status-code-form";
 import { useUpdateResponse } from "@/features/endpoints/hooks/use-update-response";
 import type { EndpointResponse } from "@/features/endpoints/types";
+import { messages } from "@/lib/i18n";
 
 type EditType = "name" | "statusCode" | "json";
 
@@ -49,26 +50,26 @@ export function EditResponseDialog({
   const getDialogTitle = () => {
     switch (editType) {
       case "name":
-        return "Edit Response Name";
+        return messages.endpoints.editResponseName;
       case "statusCode":
-        return "Edit Status Code";
+        return messages.endpoints.editStatusCode;
       case "json":
-        return "Edit JSON Response";
+        return messages.endpoints.editJsonResponse;
       default:
-        return "Edit Response";
+        return messages.endpoints.editResponse;
     }
   };
 
   const getDialogDescription = () => {
     switch (editType) {
       case "name":
-        return "Update the name of this response configuration.";
+        return messages.endpoints.editResponseNameDescription;
       case "statusCode":
-        return "Update the HTTP status code for this response.";
+        return messages.endpoints.editStatusCodeDescription;
       case "json":
-        return "Update the JSON response body.";
+        return messages.endpoints.editJsonResponseDescription;
       default:
-        return "Update this response configuration.";
+        return messages.endpoints.editResponseDescription;
     }
   };
 

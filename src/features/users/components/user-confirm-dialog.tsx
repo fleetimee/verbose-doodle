@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useDeleteUser } from "@/features/users/hooks/use-delete-user";
 import type { User } from "@/features/users/types";
+import { messages } from "@/lib/i18n";
 
 type UserConfirmDialogProps = {
   open: boolean;
@@ -53,20 +54,23 @@ export const UserConfirmDialog = ({
     <AlertDialog onOpenChange={onOpenChange} open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>
+            {messages.users.deleteConfirmTitle}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the user
-            and all associated data.
+            {messages.users.deleteConfirmDescription}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>
+            {messages.common.cancel}
+          </AlertDialogCancel>
           <AlertDialogAction
             className="bg-red-500 hover:bg-red-600"
             disabled={isDeleting}
             onClick={handleDelete}
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            {isDeleting ? messages.common.deleting : messages.common.delete}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

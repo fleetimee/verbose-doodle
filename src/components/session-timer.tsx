@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/popover";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { useTokenExpiration } from "@/features/auth/hooks/use-token-expiration";
+import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 // Show warning when token expires in less than 5 minutes
@@ -68,14 +69,18 @@ export function SessionTimer() {
             size="sm"
           >
             <Clock className={cn(isWarning && "animate-pulse")} />
-            <span>Session: {timeDisplay}</span>
+            <span>
+              {formatMessage(messages.auth.sessionLabel, { time: timeDisplay })}
+            </span>
             <Info className="ml-auto opacity-60" />
           </SidebarMenuButton>
         </PopoverTrigger>
         <PopoverContent align="start" className="w-80" side="right">
           <div className="space-y-3">
             <div className="space-y-1">
-              <h4 className="font-semibold leading-none">Session Timer</h4>
+              <h4 className="font-semibold leading-none">
+                {messages.auth.sessionTimerTitle}
+              </h4>
               <div className="mt-3 flex justify-center font-mono">
                 <div className="flex items-center gap-2 rounded-lg border bg-muted/50 p-4">
                   <div className="text-center">
@@ -88,7 +93,7 @@ export function SessionTimer() {
                       {hours}
                     </div>
                     <div className="mt-1 text-muted-foreground text-xs">
-                      hours
+                      {messages.auth.hours}
                     </div>
                   </div>
                   <span className="font-bold text-2xl">:</span>
@@ -102,7 +107,7 @@ export function SessionTimer() {
                       {minutes}
                     </div>
                     <div className="mt-1 text-muted-foreground text-xs">
-                      minutes
+                      {messages.auth.minutes}
                     </div>
                   </div>
                   <span className="font-bold text-2xl">:</span>
@@ -116,21 +121,19 @@ export function SessionTimer() {
                       {seconds}
                     </div>
                     <div className="mt-1 text-muted-foreground text-xs">
-                      seconds
+                      {messages.auth.seconds}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <p className="text-muted-foreground text-sm">
-              Your session will automatically refresh before expiration. You'll
-              be logged out when the timer reaches zero.
+              {messages.auth.sessionTimerDescription}
             </p>
             {isWarning && (
               <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
                 <p className="font-medium text-destructive text-sm">
-                  ⚠️ Session expiring soon! Your work will be saved
-                  automatically.
+                  {messages.auth.sessionExpiringSoonWarning}
                 </p>
               </div>
             )}

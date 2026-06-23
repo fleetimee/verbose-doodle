@@ -14,6 +14,7 @@ import { UserStatusChart } from "@/features/overview/components/user-status-char
 import { useGetOverview } from "@/features/overview/hooks/use-get-overview";
 import type { OverviewData } from "@/features/overview/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { messages } from "@/lib/i18n";
 
 type OverviewGridProps = {
   isAdmin: boolean;
@@ -113,9 +114,8 @@ export function OverviewPage() {
   const { data, isLoading, error } = useGetOverview();
 
   useDocumentMeta({
-    title: "Overview",
-    description:
-      "View your Fleetime Labs statistics, configured endpoints, and response distributions",
+    title: messages.overview.documentTitle,
+    description: messages.overview.documentDescription,
     keywords: [
       "dashboard",
       "overview",
@@ -135,19 +135,18 @@ export function OverviewPage() {
       >
         <div>
           <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-[0.18em]">
-            Billing Simulator
+            {messages.overview.eyebrow}
           </p>
           <h1 className="font-bold text-4xl tracking-tight md:text-5xl">
-            Overview
+            {messages.overview.pageTitle}
           </h1>
           <p className="mt-3 max-w-[62ch] break-words text-muted-foreground text-sm leading-relaxed md:text-base">
-            Inspect endpoint coverage, response templates, and account activity
-            without leaving the simulator workspace.
+            {messages.overview.pageDescription}
           </p>
         </div>
         <div className="flex items-end md:justify-end">
           <div className="rounded-full border border-border/70 bg-card px-4 py-2 font-medium text-muted-foreground text-xs shadow-[0_12px_30px_-24px_color-mix(in_oklab,var(--foreground)_55%,transparent)]">
-            Read-only analytics
+            {messages.overview.readOnlyAnalytics}
           </div>
         </div>
       </motion.div>
@@ -160,7 +159,7 @@ export function OverviewPage() {
           transition={{ duration: 0.3 }}
         >
           <p className="font-medium text-destructive text-sm">
-            Failed to load overview data. Please try refreshing the page.
+            {messages.overview.loadError}
           </p>
         </motion.div>
       )}

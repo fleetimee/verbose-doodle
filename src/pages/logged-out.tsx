@@ -23,6 +23,7 @@ import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/features/auth/context";
 import { clearManualLogout } from "@/features/auth/utils";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { messages } from "@/lib/i18n";
 
 const GRID_SQUARES_HORIZONTAL = 50;
 const GRID_SQUARES_VERTICAL = 50;
@@ -32,8 +33,8 @@ export function LoggedOut() {
   const { theme, setTheme } = useTheme();
 
   useDocumentMeta({
-    title: "Logged out",
-    description: "You have signed out of Fleetime Labs",
+    title: messages.auth.loggedOutTitle,
+    description: messages.auth.loggedOutDocumentDescription,
     keywords: ["logout", "sign out", "authentication"],
   });
 
@@ -64,16 +65,18 @@ export function LoggedOut() {
             <SlicedText
               className="font-bold text-3xl text-foreground tracking-tight"
               splitSpacing={3}
-              text="Fleetime Labs"
+              text={messages.common.appName}
             />
           </div>
           <p className="text-muted-foreground text-sm">
             <Highlighter action="underline" color="#FFA726" isView={true}>
-              Session closed
+              {messages.auth.sessionClosed}
             </Highlighter>
-            {" with "}
+            {messages.auth.sessionClosedConnector}
             <Highlighter action="highlight" color="#42A5F5" isView={true}>
-              <span className="text-white"> local access cleared</span>
+              <span className="text-white">
+                {messages.auth.localAccessCleared}
+              </span>
             </Highlighter>
             {"."}
           </p>
@@ -84,17 +87,16 @@ export function LoggedOut() {
             <div className="flex items-center justify-between gap-3">
               <Badge variant="secondary">
                 <DoorClosedIcon />
-                Signed out
+                {messages.auth.signedOutBadge}
               </Badge>
               <CheckCircle2Icon className="text-primary" />
             </div>
             <div className="flex flex-col gap-1">
               <CardTitle className="font-bold text-2xl tracking-tight">
-                You are logged out
+                {messages.auth.loggedOutHeading}
               </CardTitle>
               <CardDescription>
-                Your local session is cleared. This page will stay here until
-                you choose to open a new demo session.
+                {messages.auth.loggedOutDescription}
               </CardDescription>
             </div>
           </CardHeader>
@@ -102,17 +104,17 @@ export function LoggedOut() {
             <div className="grid gap-3 text-sm">
               <div className="flex items-center gap-3 text-muted-foreground">
                 <ShieldCheckIcon className="text-primary" />
-                <span>No active account is connected in this browser.</span>
+                <span>{messages.auth.noActiveAccount}</span>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
                 <DoorClosedIcon className="text-primary" />
-                <span>Automatic demo login is paused on this screen.</span>
+                <span>{messages.auth.demoLoginPaused}</span>
               </div>
             </div>
             <Button asChild className="w-full">
               <Link onClick={clearManualLogout} to="/login">
                 <LogInIcon data-icon="inline-start" />
-                Login again
+                {messages.auth.loginAgain}
               </Link>
             </Button>
           </CardContent>

@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
+import { messages } from "@/lib/i18n";
 
 // Animation timing constants
 const FEATURE_LIST_BASE_DELAY = 0.7;
@@ -64,13 +65,10 @@ export function AboutContent() {
         transition={{ duration: 0.5, delay: 0.5 }}
         variants={sectionVariants}
       >
-        <h2 className="font-semibold text-2xl">What is this?</h2>
-        <p>
-          Fleetime Labs is a powerful tool designed to help teams prototype,
-          test, and visualize billing scenarios through an intuitive interface.
-          Built with modern web technologies, it provides a flexible platform
-          for managing billing workflows and API endpoints.
-        </p>
+        <h2 className="font-semibold text-2xl">
+          {messages.about.whatIsThisTitle}
+        </h2>
+        <p>{messages.about.whatIsThisDescription}</p>
       </motion.div>
 
       <motion.div
@@ -80,24 +78,26 @@ export function AboutContent() {
         transition={{ duration: 0.5, delay: 0.6 }}
         variants={sectionVariants}
       >
-        <h2 className="font-semibold text-2xl">Key Features</h2>
+        <h2 className="font-semibold text-2xl">
+          {messages.about.keyFeaturesTitle}
+        </h2>
         <ul className="ml-6 flex list-disc flex-col gap-2">
           {[
             {
-              title: "Endpoint Management:",
-              desc: "Configure and monitor billing API endpoints with real-time status tracking",
+              title: messages.about.endpointManagementTitle,
+              desc: messages.about.endpointManagementDescription,
             },
             {
-              title: "User Administration:",
-              desc: "Role-based access control with dedicated user management for administrators",
+              title: messages.about.userAdministrationTitle,
+              desc: messages.about.userAdministrationDescription,
             },
             {
-              title: "JSON-Driven:",
-              desc: "Flexible configuration using JSON scenarios for rapid prototyping",
+              title: messages.about.jsonDrivenTitle,
+              desc: messages.about.jsonDrivenDescription,
             },
             {
-              title: "Modern Stack:",
-              desc: "Built with React 19, TypeScript, and Vite for optimal performance",
+              title: messages.about.modernStackTitle,
+              desc: messages.about.modernStackDescription,
             },
           ].map((feature, index) => (
             <motion.li
@@ -124,7 +124,9 @@ export function AboutContent() {
         transition={{ duration: 0.5, delay: 1.1 }}
         variants={sectionVariants}
       >
-        <h2 className="font-semibold text-2xl">Our Team</h2>
+        <h2 className="font-semibold text-2xl">
+          {messages.about.ourTeamTitle}
+        </h2>
         <div className="flex flex-row items-center justify-center">
           <AnimatedTooltip items={teamMembers} />
         </div>
@@ -137,13 +139,10 @@ export function AboutContent() {
         transition={{ duration: 0.5, delay: 1.2 }}
         variants={sectionVariants}
       >
-        <h2 className="font-semibold text-2xl">Technology</h2>
-        <p>
-          This application leverages cutting-edge technologies including React
-          19 with the new compiler, TypeScript for type safety, TanStack Query
-          for data fetching, and Tailwind CSS for styling. The component library
-          is built on shadcn/ui with Radix UI primitives.
-        </p>
+        <h2 className="font-semibold text-2xl">
+          {messages.about.technologyTitle}
+        </h2>
+        <p>{messages.about.technologyDescription}</p>
       </motion.div>
     </section>
   );

@@ -10,6 +10,7 @@ import type {
 import { apiFetch } from "@/lib/api";
 import { getLoginUrl } from "@/lib/api-endpoints";
 import { handleAuthError, showSuccessToast } from "@/lib/error-handler";
+import { formatMessage, messages } from "@/lib/i18n";
 import { createMutationHook } from "@/lib/query-hooks";
 
 /**
@@ -27,7 +28,7 @@ function decodeJWTRole(token: string): UserRole {
     // JWT format: header.payload.signature
     const parts = token.split(".");
     if (parts.length !== JWT_PARTS_COUNT) {
-      throw new Error("Invalid JWT format");
+      throw new Error(messages.auth.jwtFormatError);
     }
 
     // Decode the payload (second part)
@@ -39,7 +40,7 @@ function decodeJWTRole(token: string): UserRole {
     // Extract role from payload
     const role = decodedPayload.role as UserRole;
     if (!role || (role !== "ADMIN" && role !== "USER")) {
-      throw new Error("Invalid role in JWT token");
+      throw new Error(messages.auth.jwtRoleError);
     }
 
     return role;
@@ -67,7 +68,7 @@ async function loginUser(data: LoginFormData): Promise<LoginResponse> {
     if (apiResponse.responseCode !== "00") {
       // Throw error with the API's response description
       throw {
-        message: apiResponse.responseDesc || "Login failed",
+        message: apiResponse.responseDesc || messages.auth.loginFailed,
         code: apiResponse.responseCode,
         status: 401,
       } as LoginError;
@@ -128,8 +129,10 @@ export function useLogin({
           // Show success message
           if (showToast) {
             showSuccessToast(
-              "Welcome back!",
-              `Signed in as ${variables.username}`
+              messages.auth.loginSuccessTitle,
+              formatMessage(messages.auth.loginSuccessDescription, {
+                username: variables.username,
+              })
             );
           }
 

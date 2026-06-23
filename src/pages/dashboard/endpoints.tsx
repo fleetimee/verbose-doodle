@@ -29,6 +29,7 @@ import {
 } from "@/features/endpoints/utils";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { messages } from "@/lib/i18n";
 
 // Skeleton loading constants
 const SKELETON_TOTAL_COUNT = 18;
@@ -51,7 +52,7 @@ const STAGGER_INCREMENT = 0.1;
 export function EndpointsPage() {
   useDocumentMeta({
     title: "Endpoint",
-    description: "Kelola endpoint API dan integrasi untuk simulasi billing",
+    description: messages.endpoints.documentDescription,
     keywords: ["api endpoints", "integrations", "api management", "endpoints"],
   });
 
@@ -113,7 +114,7 @@ export function EndpointsPage() {
         <div>
           <h1 className="font-bold text-3xl tracking-tight">Endpoint</h1>
           <p className="text-muted-foreground">
-            Kelola endpoint API dan integrasi Anda
+            {messages.endpoints.pageDescription}
           </p>
         </div>
         <ProtectedAction ability="canAddEndpoint">
@@ -316,10 +317,11 @@ export function EndpointsPage() {
                   <EmptyMedia variant="icon">
                     <Plug />
                   </EmptyMedia>
-                  <EmptyTitle>Tidak ada endpoint ditemukan</EmptyTitle>
+                  <EmptyTitle>
+                    {messages.endpoints.noSearchResultsTitle}
+                  </EmptyTitle>
                   <EmptyDescription>
-                    Ubah kata kunci pencarian atau reset filter untuk melihat
-                    daftar endpoint.
+                    {messages.endpoints.noSearchResultsDescription}
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
@@ -339,17 +341,16 @@ export function EndpointsPage() {
               <EmptyMedia variant="icon">
                 <Plug />
               </EmptyMedia>
-              <EmptyTitle>Belum ada endpoint</EmptyTitle>
+              <EmptyTitle>{messages.endpoints.emptyTitle}</EmptyTitle>
               <EmptyDescription>
-                Mulai dengan membuat endpoint API pertama Anda untuk biller yang
-                tersedia.
+                {messages.endpoints.emptyDescription}
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <ProtectedAction ability="canAddEndpoint">
                 <Button onClick={handleCreateEndpoint}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Buat Endpoint Pertama
+                  {messages.endpoints.createFirstButton}
                 </Button>
               </ProtectedAction>
             </EmptyContent>

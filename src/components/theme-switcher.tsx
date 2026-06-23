@@ -4,18 +4,19 @@ import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { Moon, Sun } from "lucide-react";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
+import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const themes = [
   {
     key: "light",
     icon: Sun,
-    label: "Light theme",
+    label: messages.theme.lightTheme,
   },
   {
     key: "dark",
     icon: Moon,
-    label: "Dark theme",
+    label: messages.theme.darkTheme,
   },
 ];
 

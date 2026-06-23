@@ -17,6 +17,7 @@ import {
   type ResponseFormData,
   responseSchema,
 } from "@/features/endpoints/schemas/response-schema";
+import { messages } from "@/lib/i18n";
 
 type ResponseFormProps = {
   onSubmit: (data: ResponseFormData) => void;
@@ -60,17 +61,19 @@ export const ResponseForm = forwardRef<ResponseFormHandle, ResponseFormProps>(
               name="name"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="response-name">Name</FieldLabel>
+                  <FieldLabel htmlFor="response-name">
+                    {messages.endpoints.responseNameLabel}
+                  </FieldLabel>
                   <FieldContent>
                     <Input
                       {...field}
                       aria-invalid={fieldState.invalid}
                       autoComplete="off"
                       id="response-name"
-                      placeholder="e.g., success_response, error_response"
+                      placeholder={messages.endpoints.responseNamePlaceholder}
                     />
                     <FieldDescription>
-                      A descriptive name for this response
+                      {messages.endpoints.responseNameDescription}
                     </FieldDescription>
                   </FieldContent>
                   {fieldState.invalid && (
@@ -86,7 +89,7 @@ export const ResponseForm = forwardRef<ResponseFormHandle, ResponseFormProps>(
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="response-status-code">
-                    Status Code
+                    {messages.endpoints.statusCodeLabel}
                   </FieldLabel>
                   <FieldContent>
                     <Input
@@ -96,12 +99,12 @@ export const ResponseForm = forwardRef<ResponseFormHandle, ResponseFormProps>(
                       id="response-status-code"
                       inputMode="numeric"
                       onChange={(e) => field.onChange(Number(e.target.value))}
-                      placeholder="200"
+                      placeholder={messages.endpoints.statusCodePlaceholder}
                       type="number"
                       value={field.value}
                     />
                     <FieldDescription>
-                      HTTP status code (100-599)
+                      {messages.endpoints.statusCodeDescription}
                     </FieldDescription>
                   </FieldContent>
                   {fieldState.invalid && (
@@ -116,18 +119,20 @@ export const ResponseForm = forwardRef<ResponseFormHandle, ResponseFormProps>(
               name="json"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="response-json">JSON Response</FieldLabel>
+                  <FieldLabel htmlFor="response-json">
+                    {messages.endpoints.jsonResponseLabel}
+                  </FieldLabel>
                   <FieldContent>
                     <Textarea
                       {...field}
                       aria-invalid={fieldState.invalid}
                       className="font-mono text-sm"
                       id="response-json"
-                      placeholder='{"key": "value"}'
+                      placeholder={messages.endpoints.jsonResponsePlaceholder}
                       rows={10}
                     />
                     <FieldDescription>
-                      The JSON response body (must be valid JSON)
+                      {messages.endpoints.jsonResponseDescription}
                     </FieldDescription>
                   </FieldContent>
                   {fieldState.invalid && (
@@ -148,10 +153,10 @@ export const ResponseForm = forwardRef<ResponseFormHandle, ResponseFormProps>(
                         className="text-base"
                         htmlFor="response-activated"
                       >
-                        Activate
+                        {messages.endpoints.activateLabel}
                       </FieldLabel>
                       <FieldDescription>
-                        Set this as the active response for the endpoint
+                        {messages.endpoints.activateDescription}
                       </FieldDescription>
                     </div>
                     <Switch

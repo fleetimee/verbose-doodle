@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import { Activity, Building2, FileJson, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { OverviewData } from "@/features/overview/types";
+import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type MetricCardProps = {
@@ -64,28 +65,28 @@ export function StatsCards({ data }: { readonly data: OverviewData }) {
     <>
       <MetricCard
         className="md:col-span-2"
-        description="Configured endpoint routes across all billers"
+        description={messages.overview.totalEndpointsDescription}
         icon={Globe}
-        title="Total Endpoints"
+        title={messages.overview.totalEndpointsTitle}
         value={overviewStats.totalEndpoints}
       />
       <MetricCard
-        description="Response templates"
+        description={messages.overview.totalResponsesDescription}
         icon={FileJson}
-        title="Total Responses"
+        title={messages.overview.totalResponsesTitle}
         value={overviewStats.totalResponses}
       />
       <MetricCard
-        description="Active templates"
+        description={messages.overview.activeResponsesDescription}
         icon={Activity}
         meta={overviewStats.activeResponsesPercentage}
-        title="Active Responses"
+        title={messages.overview.activeResponsesTitle}
         value={overviewStats.activeResponses}
       />
       <MetricCard
-        description="Biller systems"
+        description={messages.overview.totalBillersDescription}
         icon={Building2}
-        title="Total Billers"
+        title={messages.overview.totalBillersTitle}
         value={overviewStats.totalBillers}
       />
     </>

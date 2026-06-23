@@ -2,6 +2,7 @@ import { LayoutGrid, List, Search } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { messages } from "@/lib/i18n";
 
 type EndpointsSearchControlsProps = {
   onSearchChange?: (search: string) => void;
@@ -12,7 +13,7 @@ type EndpointsSearchControlsProps = {
 
 export function EndpointsSearchControls({
   onSearchChange,
-  searchPlaceholder = "Cari endpoint...",
+  searchPlaceholder = messages.endpoints.searchPlaceholder,
   onViewModeChange,
   viewMode,
 }: EndpointsSearchControlsProps) {
@@ -38,17 +39,23 @@ export function EndpointsSearchControls({
       </div>
       {onViewModeChange && viewMode ? (
         <ToggleGroup
-          aria-label="Pilih tampilan endpoint"
+          aria-label={messages.endpoints.viewAriaLabel}
           onValueChange={handleViewModeChange}
           type="single"
           value={viewMode}
           variant="outline"
         >
-          <ToggleGroupItem aria-label="Tampilan grid" value="grid">
+          <ToggleGroupItem
+            aria-label={messages.endpoints.gridViewAriaLabel}
+            value="grid"
+          >
             <LayoutGrid className="mr-2 h-4 w-4" />
             Grid
           </ToggleGroupItem>
-          <ToggleGroupItem aria-label="Tampilan daftar" value="list">
+          <ToggleGroupItem
+            aria-label={messages.endpoints.listViewAriaLabel}
+            value="list"
+          >
             <List className="mr-2 h-4 w-4" />
             List
           </ToggleGroupItem>

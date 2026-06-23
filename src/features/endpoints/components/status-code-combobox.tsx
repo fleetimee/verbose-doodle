@@ -26,6 +26,7 @@ import {
   STATUS_SUCCESS_MIN,
 } from "@/features/endpoints/constants/http-status-codes";
 import { AUTO_ADVANCE_DELAY } from "@/features/endpoints/constants/stepper-steps";
+import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type StatusCodeComboboxProps = {
@@ -85,7 +86,9 @@ export function StatusCodeCombobox({
           role="combobox"
           variant="outline"
         >
-          {selectedCode ? selectedCode.label : "Select a status code"}
+          {selectedCode
+            ? selectedCode.label
+            : messages.endpoints.selectStatusCode}
           <ChevronsUpDown className="ml-2 h-6 w-6 shrink-0 opacity-50 md:h-8 md:w-8" />
         </Button>
       </PopoverTrigger>
@@ -94,10 +97,10 @@ export function StatusCodeCombobox({
         className="w-[var(--radix-popover-trigger-width)] p-0"
       >
         <Command>
-          <CommandInput placeholder="Search status codes..." />
+          <CommandInput placeholder={messages.endpoints.searchStatusCodes} />
           <CommandList>
-            <CommandEmpty>No status code found.</CommandEmpty>
-            <CommandGroup heading="Success (2xx)">
+            <CommandEmpty>{messages.endpoints.noStatusCodeFound}</CommandEmpty>
+            <CommandGroup heading={messages.endpoints.successStatusGroup}>
               {HTTP_STATUS_CODES.filter(
                 (code) =>
                   code.value >= STATUS_SUCCESS_MIN &&
@@ -118,7 +121,7 @@ export function StatusCodeCombobox({
                 </CommandItem>
               ))}
             </CommandGroup>
-            <CommandGroup heading="Redirection (3xx)">
+            <CommandGroup heading={messages.endpoints.redirectionStatusGroup}>
               {HTTP_STATUS_CODES.filter(
                 (code) =>
                   code.value >= STATUS_REDIRECT_MIN &&
@@ -139,7 +142,7 @@ export function StatusCodeCombobox({
                 </CommandItem>
               ))}
             </CommandGroup>
-            <CommandGroup heading="Client Errors (4xx)">
+            <CommandGroup heading={messages.endpoints.clientErrorStatusGroup}>
               {HTTP_STATUS_CODES.filter(
                 (code) =>
                   code.value >= STATUS_CLIENT_ERROR_MIN &&
@@ -160,7 +163,7 @@ export function StatusCodeCombobox({
                 </CommandItem>
               ))}
             </CommandGroup>
-            <CommandGroup heading="Server Errors (5xx)">
+            <CommandGroup heading={messages.endpoints.serverErrorStatusGroup}>
               {HTTP_STATUS_CODES.filter(
                 (code) => code.value >= STATUS_SERVER_ERROR_MIN
               ).map((code) => (

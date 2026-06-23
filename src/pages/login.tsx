@@ -23,17 +23,15 @@ import { LoginForm } from "@/features/login/components/login-form";
 import { useLogin } from "@/features/login/hooks/use-login";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { getErrorMessage } from "@/lib/error-handler";
+import { messages } from "@/lib/i18n";
 
 const GRID_SQUARES_HORIZONTAL = 50;
 const GRID_SQUARES_VERTICAL = 50;
 
 const EXPIRATION_MESSAGES = {
-  "expired-while-active":
-    "Your session has expired. Please log in again to continue.",
-  "expired-while-away":
-    "Your session expired while you were away. Please log in again.",
-  "expired-during-request":
-    "Your session has expired. Please log in again to continue.",
+  "expired-while-active": messages.auth.expiredWhileActive,
+  "expired-while-away": messages.auth.expiredWhileAway,
+  "expired-during-request": messages.auth.expiredWhileActive,
 };
 
 const AUTO_LOGIN_CREDENTIALS = {
@@ -61,8 +59,8 @@ export const Login = () => {
   const hasAttemptedLogin = useRef(false);
 
   useDocumentMeta({
-    title: "Login",
-    description: "Sign in to your Fleetime Labs account",
+    title: messages.auth.loginDocumentTitle,
+    description: messages.auth.loginDocumentDescription,
     keywords: ["login", "sign in", "authentication"],
   });
 
@@ -147,12 +145,12 @@ export const Login = () => {
   let loginError: { message: string; description?: string } | null = null;
   if (isError) {
     loginError = {
-      message: "Login Failed",
+      message: messages.auth.loginFailedTitle,
       description: getErrorMessage(error),
     };
   } else if (expirationMessage && !hasAttemptedLogin.current) {
     loginError = {
-      message: "Session Expired",
+      message: messages.auth.sessionExpiredTitle,
       description: expirationMessage,
     };
   }
@@ -180,19 +178,21 @@ export const Login = () => {
             <SlicedText
               className="font-bold text-3xl text-foreground tracking-tight"
               splitSpacing={3}
-              text="Fleetime Labs"
+              text={messages.common.appName}
             />
           </div>
           <p className="text-muted-foreground text-sm">
             <Highlighter action="underline" color="#FFA726" isView={true}>
-              Create
+              {messages.auth.heroCreate}
             </Highlighter>
-            {" and "}
-            {" manage                "}
+            {messages.auth.heroConnector}
+            {messages.auth.heroManage}
             <Highlighter action="highlight" color="#42A5F5" isView={true}>
-              <span className="text-white"> billing scenarios</span>
+              <span className="text-white">
+                {messages.auth.heroBillingScenarios}
+              </span>
             </Highlighter>
-            {" effortlessly."}
+            {messages.auth.heroSuffix}
           </p>
         </div>
 
@@ -208,7 +208,7 @@ export const Login = () => {
               <div className="flex items-center justify-between gap-3">
                 <Badge variant="secondary">
                   <ShieldCheckIcon />
-                  Demo access
+                  {messages.auth.demoAccess}
                 </Badge>
                 {isAutoLoginComplete ? (
                   <CheckCircle2Icon className="text-primary" />
@@ -218,30 +218,29 @@ export const Login = () => {
               </div>
               <div className="flex flex-col gap-1">
                 <CardTitle className="font-bold text-2xl tracking-tight">
-                  Opening your workspace
+                  {messages.auth.openingWorkspace}
                 </CardTitle>
                 <CardDescription>
-                  We are preparing an admin demo session so you can get straight
-                  to the simulator.
+                  {messages.auth.openingWorkspaceDescription}
                 </CardDescription>
               </div>
             </CardHeader>
             <CardContent className="flex flex-col gap-5">
               <Progress
-                aria-label="Preparing demo session"
+                aria-label={messages.auth.preparingDemoSessionAriaLabel}
                 value={autoLoginProgress}
               />
               <div className="grid gap-3 text-sm">
                 <div className="flex items-center gap-3 text-muted-foreground">
                   <KeyRoundIcon className="text-primary" />
-                  <span>Validating demo credentials</span>
+                  <span>{messages.auth.validatingDemoCredentials}</span>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
                   <ShieldCheckIcon className="text-primary" />
                   <span>
                     {isAutoLoginComplete
-                      ? "Session ready. Redirecting..."
-                      : "Creating a secure simulator session"}
+                      ? messages.auth.sessionReadyRedirecting
+                      : messages.auth.creatingSecureSession}
                   </span>
                 </div>
               </div>

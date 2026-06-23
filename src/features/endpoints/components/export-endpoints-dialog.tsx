@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Postman } from "@/components/ui/svgs/postman";
 import type { GroupedEndpoints } from "@/features/endpoints/types";
 import { exportPostmanWithEnvironment } from "@/features/endpoints/utils/export-to-postman";
+import { messages } from "@/lib/i18n";
 
 type ExportEndpointsDialogProps = {
   groupedEndpoints: GroupedEndpoints[];
@@ -100,11 +101,9 @@ export function ExportEndpointsDialog({
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Export to Postman</DialogTitle>
+          <DialogTitle>{messages.endpoints.exportToPostman}</DialogTitle>
           <DialogDescription>
-            Select which biller groups you want to export. Both the collection
-            and environment files will be downloaded. The environment includes
-            the base URL configured in your application.
+            {messages.endpoints.exportToPostmanDescription}
           </DialogDescription>
         </DialogHeader>
 

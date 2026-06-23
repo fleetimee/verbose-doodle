@@ -8,6 +8,7 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { messages } from "@/lib/i18n";
 
 export function NotFoundPage() {
   return (
@@ -18,24 +19,24 @@ export function NotFoundPage() {
           <Empty>
             <EmptyHeader>
               <EmptyTitle className="font-black font-mono text-8xl">
-                404
+                {messages.errors.notFoundTitle}
               </EmptyTitle>
               <EmptyDescription className="text-nowrap">
-                The page you're looking for might have been <br />
-                moved or doesn't exist.
+                {messages.errors.notFoundDescriptionLine1} <br />
+                {messages.errors.notFoundDescriptionLine2}
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <div className="flex gap-2">
                 <Button asChild>
                   <Link to="/">
-                    <Home /> Go Home
+                    <Home /> {messages.common.goHome}
                   </Link>
                 </Button>
 
                 <Button asChild variant="outline">
                   <Link to="/dashboard">
-                    <Compass /> Explore
+                    <Compass /> {messages.common.explore}
                   </Link>
                 </Button>
               </div>

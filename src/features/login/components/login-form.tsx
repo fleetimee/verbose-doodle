@@ -33,6 +33,7 @@ import {
   type LoginFormData,
   loginSchema,
 } from "@/features/login/schemas/login-schema";
+import { messages } from "@/lib/i18n";
 
 type LoginFormProps = {
   onSubmit: (data: LoginFormData) => void;
@@ -77,10 +78,10 @@ export const LoginForm = ({
       />
       <CardHeader className="space-y-1">
         <CardTitle className="font-bold text-2xl tracking-tight">
-          Welcome back
+          {messages.auth.welcomeBack}
         </CardTitle>
         <CardDescription className="text-muted-foreground">
-          Enter your username and password to sign in
+          {messages.auth.signInDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -106,7 +107,7 @@ export const LoginForm = ({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="login-form-username">
-                    Username
+                    {messages.auth.usernameLabel}
                   </FieldLabel>
                   <FieldContent>
                     <Input
@@ -114,11 +115,11 @@ export const LoginForm = ({
                       aria-invalid={fieldState.invalid}
                       autoComplete="username"
                       id="login-form-username"
-                      placeholder="Enter your username"
+                      placeholder={messages.auth.usernamePlaceholder}
                       type="text"
                     />
                     <FieldDescription>
-                      Your unique username for the biller simulator.
+                      {messages.auth.usernameDescription}
                     </FieldDescription>
                   </FieldContent>
                   {fieldState.invalid && (
@@ -134,7 +135,7 @@ export const LoginForm = ({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="login-form-password">
-                    Password
+                    {messages.auth.passwordLabel}
                   </FieldLabel>
                   <FieldContent>
                     <InputGroup>
@@ -143,12 +144,12 @@ export const LoginForm = ({
                         aria-invalid={fieldState.invalid}
                         autoComplete="current-password"
                         id="login-form-password"
-                        placeholder="Enter your password"
+                        placeholder={messages.auth.passwordPlaceholder}
                         type={passwordVisible ? "text" : "password"}
                       />
                       <InputGroupAddon align="inline-end">
                         <InputGroupButton
-                          aria-label="Toggle password visibility"
+                          aria-label={messages.auth.passwordVisibilityAriaLabel}
                           onClick={() => setPasswordVisible(!passwordVisible)}
                           size="icon-xs"
                           type="button"
@@ -159,7 +160,7 @@ export const LoginForm = ({
                       </InputGroupAddon>
                     </InputGroup>
                     <FieldDescription>
-                      Use at least 8 characters with letters and numbers.
+                      {messages.auth.passwordDescription}
                     </FieldDescription>
                   </FieldContent>
                   {fieldState.invalid && (
@@ -193,7 +194,7 @@ export const LoginForm = ({
 
           <Button className="w-full" disabled={isLoading} type="submit">
             {isLoading && <Spinner className="mr-2" />}
-            {isLoading ? "Signing in..." : "Sign in"}
+            {isLoading ? messages.auth.signingIn : messages.auth.signIn}
           </Button>
         </form>
       </CardContent>

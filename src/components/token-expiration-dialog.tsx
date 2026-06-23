@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/features/auth/context";
 import { useTokenExpiration } from "@/features/auth/hooks/use-token-expiration";
+import { formatMessage, messages } from "@/lib/i18n";
 
 // Show warning dialog 2 minutes before expiration
 const WARNING_THRESHOLD_MS = 120_000;
@@ -51,18 +52,18 @@ export function TokenExpirationDialog() {
     try {
       const success = await refreshAuth();
       if (success) {
-        toast.success("Session Refreshed", {
-          description: "Your session has been extended successfully.",
+        toast.success(messages.auth.sessionRefreshedTitle, {
+          description: messages.auth.sessionRefreshedDescription,
         });
         setShowWarning(false);
       } else {
-        toast.error("Refresh Failed", {
-          description: "Unable to refresh session. Please log in again.",
+        toast.error(messages.auth.refreshFailedTitle, {
+          description: messages.auth.refreshFailedDescription,
         });
       }
     } catch {
-      toast.error("Refresh Failed", {
-        description: "Unable to refresh session. Please log in again.",
+      toast.error(messages.auth.refreshFailedTitle, {
+        description: messages.auth.refreshFailedDescription,
       });
     } finally {
       setIsRefreshing(false);
@@ -82,15 +83,18 @@ export function TokenExpirationDialog() {
     <AlertDialog open={showWarning}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Session Expiring Soon</AlertDialogTitle>
+          <AlertDialogTitle>
+            {messages.auth.sessionExpiringTitle}
+          </AlertDialogTitle>
           <AlertDialogDescription className="space-y-2">
-            <p>Your session is about to expire.</p>
+            <p>{messages.auth.sessionExpiringLead}</p>
             <p className="font-semibold text-destructive text-lg">
-              Time remaining: {tokenExpiration.formattedTime}
+              {formatMessage(messages.auth.timeRemaining, {
+                time: tokenExpiration.formattedTime,
+              })}
             </p>
             <p className="text-muted-foreground text-sm">
-              You will be automatically logged out when the timer reaches zero.
-              Please save your work.
+              {messages.auth.sessionExpiringDescription}
             </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -100,14 +104,16 @@ export function TokenExpirationDialog() {
             onClick={handleLogoutNow}
             variant="outline"
           >
-            Log Out Now
+            {messages.auth.logOutNow}
           </Button>
           <AlertDialogAction
             disabled={isRefreshing}
             onClick={handleStayLoggedIn}
           >
             {isRefreshing && <Spinner className="mr-2" />}
-            {isRefreshing ? "Refreshing..." : "Stay Logged In"}
+            {isRefreshing
+              ? messages.auth.refreshing
+              : messages.auth.stayLoggedIn}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

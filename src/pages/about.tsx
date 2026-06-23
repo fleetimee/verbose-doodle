@@ -1,11 +1,11 @@
 import { AboutPage } from "@/features/about/components/about-page";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { messages } from "@/lib/i18n";
 
 export function About() {
   useDocumentMeta({
-    title: "About",
-    description:
-      "Learn more about Fleetime Labs - a powerful tool for prototyping billing scenarios",
+    title: messages.about.documentTitle,
+    description: messages.about.documentDescription,
     keywords: ["about", "billing simulator", "information"],
   });
 

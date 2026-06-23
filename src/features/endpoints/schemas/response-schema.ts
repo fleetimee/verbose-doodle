@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { messages } from "@/lib/i18n";
 
 const MAX_NAME_LENGTH = 100;
 const MIN_STATUS_CODE = 100;
@@ -7,11 +8,11 @@ const MAX_STATUS_CODE = 599;
 export const responseSchema = z.object({
   name: z
     .string()
-    .min(1, "Name is required")
-    .max(MAX_NAME_LENGTH, "Name is too long"),
+    .min(1, messages.endpoints.nameRequiredError)
+    .max(MAX_NAME_LENGTH, messages.endpoints.nameTooLongError),
   json: z
     .string()
-    .min(1, "JSON content is required")
+    .min(1, messages.endpoints.jsonRequiredError)
     .refine(
       (value) => {
         try {
@@ -22,14 +23,14 @@ export const responseSchema = z.object({
         }
       },
       {
-        message: "Invalid JSON format",
+        message: messages.endpoints.invalidJsonError,
       }
     ),
   statusCode: z
     .number()
     .int()
-    .min(MIN_STATUS_CODE, "Status code must be between 100-599")
-    .max(MAX_STATUS_CODE, "Status code must be between 100-599"),
+    .min(MIN_STATUS_CODE, messages.endpoints.statusCodeRangeError)
+    .max(MAX_STATUS_CODE, messages.endpoints.statusCodeRangeError),
   activated: z.boolean().optional(),
 });
 

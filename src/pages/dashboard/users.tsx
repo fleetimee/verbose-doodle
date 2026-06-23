@@ -17,11 +17,12 @@ import { UserFormDialogTrigger } from "@/features/users/components/user-form-dia
 import { useGetUsers } from "@/features/users/hooks/use-get-users";
 import type { User } from "@/features/users/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { messages } from "@/lib/i18n";
 
 export function UsersPage() {
   useDocumentMeta({
-    title: "Users",
-    description: "Manage users and their permissions in Fleetime Labs",
+    title: messages.users.documentTitle,
+    description: messages.users.documentDescription,
     keywords: ["user management", "permissions", "team", "users"],
   });
 
@@ -59,9 +60,11 @@ export function UsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-bold text-3xl tracking-tight">Users</h1>
+          <h1 className="font-bold text-3xl tracking-tight">
+            {messages.users.pageTitle}
+          </h1>
           <p className="text-muted-foreground">
-            Manage users and their permissions
+            {messages.users.pageDescription}
           </p>
         </div>
         {!isLoadingUsers && <UserFormDialogTrigger onClick={handleAddUser} />}
@@ -77,10 +80,9 @@ export function UsersPage() {
             <EmptyMedia variant="icon">
               <UsersIcon />
             </EmptyMedia>
-            <EmptyTitle>No users yet</EmptyTitle>
+            <EmptyTitle>{messages.users.emptyTitle}</EmptyTitle>
             <EmptyDescription>
-              Start building your team by adding users. Assign roles and
-              permissions to manage access to your application.
+              {messages.users.emptyDescription}
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
@@ -94,7 +96,7 @@ export function UsersPage() {
           columns={columns}
           data={users}
           filterColumn="username"
-          filterPlaceholder="Filter by username..."
+          filterPlaceholder={messages.users.filterPlaceholder}
         />
       )}
 

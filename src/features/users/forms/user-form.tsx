@@ -46,6 +46,7 @@ import {
   type UserFormData,
   userSchema,
 } from "@/features/users/schemas/user-schema";
+import { messages } from "@/lib/i18n";
 
 // Animation constants
 const ANIMATION_DURATION = 0.3;
@@ -119,7 +120,7 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                       htmlFor="user-username"
                     >
                       <User className="h-4 w-4" />
-                      Username
+                      {messages.users.usernameLabel}
                     </FieldLabel>
                     <FieldContent>
                       <Input
@@ -127,10 +128,10 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                         aria-invalid={fieldState.invalid}
                         autoComplete="username"
                         id="user-username"
-                        placeholder="Enter username"
+                        placeholder={messages.users.usernamePlaceholder}
                       />
                       <FieldDescription>
-                        Choose a unique username for this user account.
+                        {messages.users.usernameDescription}
                       </FieldDescription>
                     </FieldContent>
                     {fieldState.invalid && (
@@ -157,7 +158,7 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                         htmlFor="user-password"
                       >
                         <KeyRound className="h-4 w-4" />
-                        Password
+                        {messages.users.passwordLabel}
                       </FieldLabel>
                       <FieldContent>
                         <InputGroup>
@@ -166,13 +167,15 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                             aria-invalid={fieldState.invalid}
                             autoComplete="new-password"
                             id="user-password"
-                            placeholder="Enter password"
+                            placeholder={messages.users.passwordPlaceholder}
                             type={showPassword ? "text" : "password"}
                           />
                           <InputGroupAddon align="inline-end">
                             <InputGroupButton
                               aria-label={
-                                showPassword ? "Hide password" : "Show password"
+                                showPassword
+                                  ? messages.users.hidePassword
+                                  : messages.users.showPassword
                               }
                               className="rounded-full"
                               onClick={() => setShowPassword((prev) => !prev)}
@@ -188,8 +191,7 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                           </InputGroupAddon>
                         </InputGroup>
                         <FieldDescription>
-                          Must be at least 8 characters with letters and
-                          numbers.
+                          {messages.users.passwordDescription}
                         </FieldDescription>
                       </FieldContent>
                       {fieldState.invalid && (
@@ -221,7 +223,7 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                       htmlFor="user-role"
                     >
                       <UserCog className="h-4 w-4" />
-                      Role
+                      {messages.users.roleLabel}
                     </FieldLabel>
                     <FieldContent>
                       <TooltipProvider>
@@ -235,7 +237,9 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                             className="w-full"
                             id="user-role"
                           >
-                            <SelectValue placeholder="Select user role" />
+                            <SelectValue
+                              placeholder={messages.users.rolePlaceholder}
+                            />
                           </SelectTrigger>
                           <SelectContent>
                             <Tooltip delayDuration={300}>
@@ -243,14 +247,13 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                                 <SelectItem value="ADMIN">
                                   <div className="flex items-center gap-2">
                                     <ShieldCheck className="h-4 w-4" />
-                                    Admin
+                                    {messages.users.adminRole}
                                   </div>
                                 </SelectItem>
                               </TooltipTrigger>
                               <TooltipContent side="right">
                                 <p className="max-w-xs text-sm">
-                                  Full access to manage users, endpoints, and
-                                  system settings
+                                  {messages.users.adminRoleDescription}
                                 </p>
                               </TooltipContent>
                             </Tooltip>
@@ -259,13 +262,13 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                                 <SelectItem value="USER">
                                   <div className="flex items-center gap-2">
                                     <Shield className="h-4 w-4" />
-                                    User
+                                    {messages.users.userRole}
                                   </div>
                                 </SelectItem>
                               </TooltipTrigger>
                               <TooltipContent side="right">
                                 <p className="max-w-xs text-sm">
-                                  Standard access to view endpoints only
+                                  {messages.users.userRoleDescription}
                                 </p>
                               </TooltipContent>
                             </Tooltip>
@@ -273,7 +276,7 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                         </Select>
                       </TooltipProvider>
                       <FieldDescription>
-                        Assign appropriate permissions to this user.
+                        {messages.users.roleDescription}
                       </FieldDescription>
                     </FieldContent>
                     {fieldState.invalid && (
@@ -309,10 +312,10 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                         htmlFor="user-active"
                       >
                         <CheckCircle className="h-4 w-4" />
-                        Active Status
+                        {messages.users.activeStatusLabel}
                       </FieldLabel>
                       <FieldDescription>
-                        Enable or disable access to this user account.
+                        {messages.users.activeStatusDescription}
                       </FieldDescription>
                     </FieldContent>
                     <Checkbox

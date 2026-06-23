@@ -14,6 +14,7 @@ import {
   abbreviateMethod,
   getMethodBadgeColor,
 } from "@/features/endpoints/utils/http-method-colors";
+import { formatPluralMessage, messages } from "@/lib/i18n";
 import { encodeId } from "@/lib/id-encoder";
 
 type EndpointCardProps = {
@@ -69,9 +70,14 @@ export function EndpointCard({ endpoint, onClick }: EndpointCardProps) {
                 Biller ID: {endpoint.billerId}
               </span>
               {endpoint.responses.length > 0 ? (
-                <span>{endpoint.responses.length} respon</span>
+                <span>
+                  {formatPluralMessage(
+                    messages.endpoints.responseCount,
+                    endpoint.responses.length
+                  )}
+                </span>
               ) : (
-                <span>Belum ada respon terkonfigurasi</span>
+                <span>{messages.endpoints.noConfiguredResponses}</span>
               )}
             </div>
           </ItemDescription>

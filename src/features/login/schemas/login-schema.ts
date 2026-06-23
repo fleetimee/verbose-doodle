@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { messages } from "@/lib/i18n";
 
 /**
  * Minimum password length for login validation
@@ -10,13 +11,11 @@ const MIN_PASSWORD_LENGTH = 8;
  * Validates username and password requirements
  */
 export const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z
-    .string()
-    .min(MIN_PASSWORD_LENGTH, "Password must be at least 8 characters"),
+  username: z.string().min(1, messages.auth.usernameRequiredError),
+  password: z.string().min(MIN_PASSWORD_LENGTH, messages.auth.passwordMinError),
   captchaVerified: z
     .boolean()
-    .refine((val) => val === true, "Please complete the captcha verification"),
+    .refine((val) => val === true, messages.auth.captchaRequiredError),
 });
 
 /**

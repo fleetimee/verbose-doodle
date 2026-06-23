@@ -6,6 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
@@ -42,7 +43,7 @@ export function ThemeToggle() {
             )}
           />
           <Switch
-            aria-label="Toggle theme"
+            aria-label={messages.theme.toggleAriaLabel}
             checked={isDark}
             className="data-[state=checked]:bg-slate-950 data-[state=unchecked]:bg-amber-500"
             onCheckedChange={handleToggle}
@@ -58,7 +59,7 @@ export function ThemeToggle() {
         </div>
       </TooltipTrigger>
       <TooltipContent>
-        <p>Toggle light/dark mode</p>
+        <p>{messages.theme.toggleTooltip}</p>
       </TooltipContent>
     </Tooltip>
   );

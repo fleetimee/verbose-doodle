@@ -13,6 +13,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/features/auth/context";
 import { markManualLogout } from "@/features/auth/utils";
+import { messages } from "@/lib/i18n";
 
 /**
  * Simulated logout delay for demonstration purposes
@@ -52,17 +53,20 @@ export function LogoutDialog({ open, onOpenChange }: LogoutDialogProps) {
     <AlertDialog onOpenChange={onOpenChange} open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+          <AlertDialogTitle>
+            {messages.auth.logoutConfirmTitle}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Your local session will be cleared. You can sign in again from the
-            logged-out page.
+            {messages.auth.logoutConfirmDescription}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoggingOut}>
+            {messages.common.cancel}
+          </AlertDialogCancel>
           <AlertDialogAction disabled={isLoggingOut} onClick={handleLogout}>
             {isLoggingOut && <Spinner className="mr-2" />}
-            {isLoggingOut ? "Logging out..." : "Log out"}
+            {isLoggingOut ? messages.auth.loggingOut : messages.auth.logOut}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

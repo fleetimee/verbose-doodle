@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { User } from "@/features/users/types";
+import { messages } from "@/lib/i18n";
 
 type ColumnActions = {
   onEdit: (user: User) => void;
@@ -29,7 +30,7 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
     id: "select",
     header: ({ table: tableInstance }) => (
       <Checkbox
-        aria-label="Select all"
+        aria-label={messages.users.selectAllAriaLabel}
         checked={
           tableInstance.getIsAllPageRowsSelected() ||
           (tableInstance.getIsSomePageRowsSelected() && "indeterminate")
@@ -41,7 +42,7 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
     ),
     cell: ({ row }) => (
       <Checkbox
-        aria-label="Select row"
+        aria-label={messages.users.selectRowAriaLabel}
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
       />
@@ -51,7 +52,7 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
   },
   {
     accessorKey: "avatar",
-    header: "Avatar",
+    header: messages.users.avatarColumn,
     cell: ({ row }) => {
       const user = row.original;
       const initials = user.username
@@ -76,7 +77,7 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         variant="ghost"
       >
-        Name
+        {messages.users.nameColumn}
         <ArrowUpDown />
       </Button>
     ),
@@ -86,12 +87,12 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
   },
   {
     accessorKey: "role",
-    header: "Role",
+    header: messages.users.roleColumn,
     cell: ({ row }) => <div className="capitalize">{row.getValue("role")}</div>,
   },
   {
     accessorKey: "active",
-    header: "Status",
+    header: messages.users.statusColumn,
     cell: ({ row }) => {
       const status = row.getValue("active") as string;
 
@@ -101,7 +102,7 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
             status
           )}`}
         >
-          {status ? "Active" : "Inactive"}
+          {status ? messages.users.activeStatus : messages.users.inactiveStatus}
         </div>
       );
     },
@@ -116,24 +117,24 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button className="h-8 w-8 p-0" variant="ghost">
-              <span className="sr-only">Open menu</span>
+              <span className="sr-only">{messages.users.openMenu}</span>
               <MoreHorizontal />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>{messages.users.actions}</DropdownMenuLabel>
             <DropdownMenuItem
               className="flex items-center hover:cursor-pointer"
               onClick={() => actions.onEdit(user)}
             >
               <Pencil className="w-2" />
-              Edit user
+              {messages.users.editUser}
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-red-600 hover:cursor-pointer hover:text-red-600!"
               onClick={() => actions.onDelete(user)}
             >
-              <Trash className="w-2 text-red-600" /> Delete user
+              <Trash className="w-2 text-red-600" /> {messages.users.deleteUser}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

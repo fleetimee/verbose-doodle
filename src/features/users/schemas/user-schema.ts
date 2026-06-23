@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { messages } from "@/lib/i18n";
 
 const USERNAME_MIN_LENGTH = 3;
 const USERNAME_MAX_LENGTH = 20;
@@ -8,20 +9,20 @@ export const userSchema = z.object({
   username: z
     .string()
     .min(USERNAME_MIN_LENGTH, {
-      message: "Username must be at least 3 characters long",
+      message: messages.users.usernameMinError,
     })
     .max(USERNAME_MAX_LENGTH, {
-      message: "Username must not exceed 20 characters",
+      message: messages.users.usernameMaxError,
     }),
-  role: z.enum(["ADMIN", "USER"], { message: "Invalid role" }),
+  role: z.enum(["ADMIN", "USER"], { message: messages.users.invalidRoleError }),
   active: z.boolean(),
   password: z
     .string()
     .min(PASSWORD_MIN_LENGTH, {
-      message: "Password must be at least 8 characters long",
+      message: messages.users.passwordMinError,
     })
-    .regex(/[A-Za-z]/, { message: "Password must contain at least one letter" })
-    .regex(/\d/, { message: "Password must contain at least one number" })
+    .regex(/[A-Za-z]/, { message: messages.users.passwordLetterError })
+    .regex(/\d/, { message: messages.users.passwordNumberError })
     .or(z.literal(""))
     .optional(),
 });

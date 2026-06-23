@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { AboutContent } from "@/features/about/components/about-content";
 import { AboutHeader } from "@/features/about/components/about-header";
+import { messages } from "@/lib/i18n";
 
 export function AboutPage() {
   return (
@@ -22,7 +23,7 @@ export function AboutPage() {
         transition={{ duration: 0.5, delay: 1.3 }}
       >
         <Button asChild variant="link">
-          <Link to="/">Return home</Link>
+          <Link to="/">{messages.about.returnHome}</Link>
         </Button>
       </motion.div>
     </motion.main>

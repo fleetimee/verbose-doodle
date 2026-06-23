@@ -20,6 +20,7 @@ import {
 import { useUpdateUser } from "@/features/users/hooks/use-update-user";
 import type { UserFormData } from "@/features/users/schemas/user-schema";
 import type { User } from "@/features/users/types";
+import { messages } from "@/lib/i18n";
 
 type UserFormDialogProps = {
   open: boolean;
@@ -94,12 +95,14 @@ export const UserFormDialog = ({
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader className="space-y-2">
           <DialogTitle className="font-semibold text-xl">
-            {mode === "edit" ? "Edit User" : "Add New User"}
+            {mode === "edit"
+              ? messages.users.editTitle
+              : messages.users.addTitle}
           </DialogTitle>
           <DialogDescription>
             {mode === "edit"
-              ? "Update user information and permissions."
-              : "Create a new user account with appropriate permissions."}
+              ? messages.users.editDescription
+              : messages.users.addDescription}
           </DialogDescription>
         </DialogHeader>
 
@@ -119,7 +122,7 @@ export const UserFormDialog = ({
                 type="button"
                 variant="outline"
               >
-                Cancel
+                {messages.common.cancel}
               </Button>
               <Button
                 className="flex-1 sm:flex-initial"
@@ -129,9 +132,13 @@ export const UserFormDialog = ({
                 {isSubmitting && <Spinner className="mr-2" />}
                 {(() => {
                   if (isSubmitting) {
-                    return mode === "edit" ? "Saving..." : "Creating...";
+                    return mode === "edit"
+                      ? messages.users.saving
+                      : messages.users.creating;
                   }
-                  return mode === "edit" ? "Save Changes" : "Add User";
+                  return mode === "edit"
+                    ? messages.users.saveChanges
+                    : messages.users.addUser;
                 })()}
               </Button>
             </DialogFooter>

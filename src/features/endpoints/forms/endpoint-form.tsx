@@ -25,6 +25,7 @@ import {
   httpMethods,
 } from "@/features/endpoints/schemas/endpoint-schema";
 import { getMethodTextColor } from "@/features/endpoints/utils/http-method-colors";
+import { messages } from "@/lib/i18n";
 
 type EndpointFormProps = {
   onSubmit: (data: EndpointFormData) => void;
@@ -73,7 +74,9 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                 name="method"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="endpoint-method">Method</FieldLabel>
+                    <FieldLabel htmlFor="endpoint-method">
+                      {messages.endpoints.methodLabel}
+                    </FieldLabel>
                     <FieldContent>
                       <Select
                         name={field.name}
@@ -85,7 +88,9 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                           className="w-full"
                           id="endpoint-method"
                         >
-                          <SelectValue placeholder="Select method">
+                          <SelectValue
+                            placeholder={messages.endpoints.methodPlaceholder}
+                          >
                             {field.value && (
                               <span className={getMethodTextColor(field.value)}>
                                 {field.value}
@@ -104,7 +109,7 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                         </SelectContent>
                       </Select>
                       <FieldDescription>
-                        Choose the HTTP method this endpoint should respond to.
+                        {messages.endpoints.methodDescription}
                       </FieldDescription>
                     </FieldContent>
                     {fieldState.invalid && (
@@ -119,18 +124,19 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                 name="url"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="endpoint-url">URL</FieldLabel>
+                    <FieldLabel htmlFor="endpoint-url">
+                      {messages.endpoints.urlLabel}
+                    </FieldLabel>
                     <FieldContent>
                       <Input
                         {...field}
                         aria-invalid={fieldState.invalid}
                         autoComplete="off"
                         id="endpoint-url"
-                        placeholder="/rest/api/users"
+                        placeholder={messages.endpoints.urlPlaceholder}
                       />
                       <FieldDescription>
-                        Enter a valid API path starting with / (e.g., /rest,
-                        /rest/api, /api/v1/users)
+                        {messages.endpoints.urlDescription}
                       </FieldDescription>
                     </FieldContent>
                     {fieldState.invalid && (
@@ -145,7 +151,9 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                 name="billerId"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="endpoint-biller">Biller</FieldLabel>
+                    <FieldLabel htmlFor="endpoint-biller">
+                      {messages.endpoints.billerLabel}
+                    </FieldLabel>
                     <FieldContent>
                       <Select
                         disabled={isLoadingBillers || billers.length === 0}
@@ -158,7 +166,9 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                           className="w-full"
                           id="endpoint-biller"
                         >
-                          <SelectValue placeholder="Select a biller">
+                          <SelectValue
+                            placeholder={messages.endpoints.billerPlaceholder}
+                          >
                             {field.value &&
                               billers.find((b) => b.id === field.value)?.name}
                           </SelectValue>
@@ -176,8 +186,8 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                       </Select>
                       <FieldDescription>
                         {isLoadingBillers
-                          ? "Loading billers..."
-                          : "Select the biller this endpoint belongs to."}
+                          ? messages.endpoints.billersLoading
+                          : messages.endpoints.billerDescription}
                       </FieldDescription>
                     </FieldContent>
                     {fieldState.invalid && (

@@ -17,6 +17,7 @@ import {
   type EndpointFormHandle,
 } from "@/features/endpoints/forms/endpoint-form";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
+import { messages } from "@/lib/i18n";
 
 type AddEndpointSheetProps = {
   onSubmit: (data: EndpointFormData) => void;
@@ -54,15 +55,15 @@ export function AddEndpointSheet({
         <SheetTrigger asChild>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Add Endpoint
+            {messages.endpoints.addEndpoint}
           </Button>
         </SheetTrigger>
       )}
       <SheetContent className="flex w-[400px] flex-col sm:w-[640px]">
         <SheetHeader>
-          <SheetTitle>Add Endpoint</SheetTitle>
+          <SheetTitle>{messages.endpoints.addEndpoint}</SheetTitle>
           <SheetDescription>
-            Create a new API endpoint for a specific biller ID.
+            {messages.endpoints.addEndpointDescription}
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-1 flex-col overflow-hidden">
@@ -75,7 +76,9 @@ export function AddEndpointSheet({
             <SheetFooter className="border-t px-6 pt-4 pb-6">
               <Button disabled={isSubmitting} type="submit">
                 {isSubmitting && <Spinner className="mr-2" />}
-                {isSubmitting ? "Creating..." : "Create Endpoint"}
+                {isSubmitting
+                  ? messages.endpoints.creating
+                  : messages.endpoints.createEndpoint}
               </Button>
             </SheetFooter>
           </EndpointForm>

@@ -7,6 +7,7 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { messages } from "@/lib/i18n";
 
 type ErrorFallbackProps = {
   error: Error;
@@ -25,11 +26,11 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                 <AlertTriangle className="h-16 w-16 text-destructive" />
               </div>
               <EmptyTitle className="font-black text-4xl">
-                Something went wrong
+                {messages.errors.fallbackTitle}
               </EmptyTitle>
               <EmptyDescription className="text-nowrap">
-                An unexpected error occurred. <br />
-                We apologize for the inconvenience.
+                {messages.errors.fallbackDescriptionLine1} <br />
+                {messages.errors.fallbackDescriptionLine2}
               </EmptyDescription>
               {import.meta.env.DEV && error.message && (
                 <div className="mt-4 max-w-md rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-left">
@@ -42,12 +43,12 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             <EmptyContent>
               <div className="flex gap-2">
                 <Button onClick={resetError}>
-                  <RotateCcw /> Try Again
+                  <RotateCcw /> {messages.common.tryAgain}
                 </Button>
 
                 <Button asChild variant="outline">
                   <a href="/">
-                    <Home /> Go Home
+                    <Home /> {messages.common.goHome}
                   </a>
                 </Button>
               </div>
