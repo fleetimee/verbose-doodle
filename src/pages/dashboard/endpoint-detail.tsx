@@ -49,12 +49,14 @@ import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 import {
   abbreviateMethod,
   getMethodBadgeColor,
+  getMethodTextColor,
 } from "@/features/endpoints/utils/http-method-colors";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { decodeId } from "@/lib/id-encoder";
 
 // Animation constants
 const PAGE_ANIMATION_DURATION = 0.4;
+const HEADER_TOGGLE_ANIMATION_DURATION = 0.18;
 const STAGGER_DELAY = 0.1;
 
 export function EndpointDetailPage() {
@@ -447,95 +449,141 @@ export function EndpointDetailPage() {
           </Button>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 md:gap-3">
-              {isEditingUrl ? (
-                <div className="flex w-full flex-wrap items-center gap-2">
-                  <Select
-                    disabled={isUpdatingEndpoint}
-                    onValueChange={(value) =>
-                      setEditedMethod(value as HttpMethod)
-                    }
-                    value={editedMethod}
+              <AnimatePresence initial={false} mode="wait">
+                {isEditingUrl ? (
+                  <motion.div
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    className="flex w-full flex-wrap items-center gap-2"
+                    exit={{ opacity: 0, scale: 0.98, y: -6 }}
+                    initial={{ opacity: 0, scale: 0.98, y: 6 }}
+                    key="endpoint-edit"
+                    layout
+                    transition={{
+                      duration: HEADER_TOGGLE_ANIMATION_DURATION,
+                      ease: "easeOut",
+                    }}
                   >
-                    <SelectTrigger className="h-9 w-[100px] font-mono text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="GET">GET</SelectItem>
-                      <SelectItem value="POST">POST</SelectItem>
-                      <SelectItem value="PUT">PUT</SelectItem>
-                      <SelectItem value="PATCH">PATCH</SelectItem>
-                      <SelectItem value="DELETE">DELETE</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    className="flex-1 font-mono text-sm md:text-base"
-                    disabled={isUpdatingEndpoint}
-                    onChange={(e) => setEditedUrl(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    ref={inputRef}
-                    value={editedUrl}
-                  />
-                  <div className="flex gap-1">
-                    <Button
-                      disabled={isUpdatingEndpoint || !editedUrl.trim()}
-                      onClick={handleSaveUrl}
-                      size="icon"
-                      title="Save (Enter)"
-                      type="button"
-                      variant="ghost"
-                    >
-                      <Check className="h-4 w-4 text-green-600" />
-                    </Button>
-                    <Button
+                    <Select
                       disabled={isUpdatingEndpoint}
-                      onClick={handleCancelEdit}
-                      size="icon"
-                      title="Cancel (Esc)"
-                      type="button"
-                      variant="ghost"
+                      onValueChange={(value) =>
+                        setEditedMethod(value as HttpMethod)
+                      }
+                      value={editedMethod}
                     >
-                      <X className="h-4 w-4 text-red-600" />
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <span
-                    className={`shrink-0 rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
-                      endpoint.method
-                    )}`}
-                  >
-                    {abbreviateMethod(endpoint.method)}
-                  </span>
-                  <h1 className="break-all font-bold font-mono text-xl tracking-tight md:text-2xl">
-                    {endpoint.url}
-                  </h1>
-                  <ProtectedAction ability="canEditEndpoint">
-                    <div className="flex items-center gap-1">
+                      <SelectTrigger className="h-10 w-[100px] bg-background font-mono font-semibold text-xs shadow-xs">
+                        <SelectValue>
+                          <span className={getMethodTextColor(editedMethod)}>
+                            {editedMethod}
+                          </span>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="GET">
+                          <span className={getMethodTextColor("GET")}>GET</span>
+                        </SelectItem>
+                        <SelectItem value="POST">
+                          <span className={getMethodTextColor("POST")}>
+                            POST
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="PUT">
+                          <span className={getMethodTextColor("PUT")}>PUT</span>
+                        </SelectItem>
+                        <SelectItem value="PATCH">
+                          <span className={getMethodTextColor("PATCH")}>
+                            PATCH
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="DELETE">
+                          <span className={getMethodTextColor("DELETE")}>
+                            DELETE
+                          </span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      className="h-10 min-w-[260px] flex-1 bg-background font-bold font-mono text-xl tracking-tight shadow-xs md:h-11 md:text-2xl"
+                      disabled={isUpdatingEndpoint}
+                      onChange={(e) => setEditedUrl(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      ref={inputRef}
+                      value={editedUrl}
+                    />
+                    <div className="flex gap-2">
                       <Button
-                        className="bg-background/80 shadow-xs"
-                        onClick={handleEditUrl}
+                        className="border-green-600/40 bg-green-50 text-green-700 shadow-xs hover:bg-green-100 hover:text-green-800 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/50"
+                        disabled={isUpdatingEndpoint || !editedUrl.trim()}
+                        onClick={handleSaveUrl}
                         size="icon-sm"
-                        title="Edit endpoint URL and method"
+                        title="Save (Enter)"
                         type="button"
                         variant="outline"
                       >
-                        <Pen />
+                        <Check />
                       </Button>
                       <Button
-                        className="border-destructive/40 bg-background/80 text-destructive shadow-xs hover:bg-destructive/10 hover:text-destructive"
-                        onClick={handleDeleteEndpointClick}
+                        className="border-destructive/40 bg-destructive/10 text-destructive shadow-xs hover:bg-destructive/15 hover:text-destructive"
+                        disabled={isUpdatingEndpoint}
+                        onClick={handleCancelEdit}
                         size="icon-sm"
-                        title="Delete endpoint and all responses"
+                        title="Cancel (Esc)"
                         type="button"
                         variant="outline"
                       >
-                        <Trash2 />
+                        <X />
                       </Button>
                     </div>
-                  </ProtectedAction>
-                </>
-              )}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    className="flex flex-wrap items-center gap-2 md:gap-3"
+                    exit={{ opacity: 0, scale: 0.98, y: -6 }}
+                    initial={{ opacity: 0, scale: 0.98, y: 6 }}
+                    key="endpoint-display"
+                    layout
+                    transition={{
+                      duration: HEADER_TOGGLE_ANIMATION_DURATION,
+                      ease: "easeOut",
+                    }}
+                  >
+                    <span
+                      className={`shrink-0 rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
+                        endpoint.method
+                      )}`}
+                    >
+                      {abbreviateMethod(endpoint.method)}
+                    </span>
+                    <h1 className="break-all font-bold font-mono text-xl tracking-tight md:text-2xl">
+                      {endpoint.url}
+                    </h1>
+                    <ProtectedAction ability="canEditEndpoint">
+                      <div className="flex items-center gap-1">
+                        <Button
+                          className="bg-background/80 shadow-xs"
+                          onClick={handleEditUrl}
+                          size="icon-sm"
+                          title="Edit endpoint URL and method"
+                          type="button"
+                          variant="outline"
+                        >
+                          <Pen />
+                        </Button>
+                        <Button
+                          className="border-destructive/40 bg-background/80 text-destructive shadow-xs hover:bg-destructive/10 hover:text-destructive"
+                          onClick={handleDeleteEndpointClick}
+                          size="icon-sm"
+                          title="Delete endpoint and all responses"
+                          type="button"
+                          variant="outline"
+                        >
+                          <Trash2 />
+                        </Button>
+                      </div>
+                    </ProtectedAction>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             <p className="mt-1 text-muted-foreground text-sm">
               Biller ID: {endpoint.billerId} • {endpoint.responses.length}{" "}
@@ -583,7 +631,13 @@ export function EndpointDetailPage() {
           ease: "easeOut",
         }}
       >
-        <EndpointTrafficLogViewer endpointId={endpoint.id} />
+        <EndpointTrafficLogViewer
+          endpointId={endpoint.id}
+          hasActiveResponse={endpoint.responses.some(
+            (response) => response.activated
+          )}
+          responseCount={endpoint.responses.length}
+        />
       </motion.div>
 
       <AnimatePresence>

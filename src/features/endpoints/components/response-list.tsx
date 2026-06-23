@@ -1,4 +1,4 @@
-import { ListX } from "lucide-react";
+import { CircleAlert, ListX } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo } from "react";
 import {
@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ResponseListItem } from "@/features/endpoints/components/response-list-item";
 import type { EndpointResponse } from "@/features/endpoints/types";
+import { messages } from "@/lib/i18n";
 
 // Animation constants
 const ITEM_EXIT_DURATION = 0.2;
@@ -140,12 +141,32 @@ export function ResponseList({
 
                   {/* Show label only when no active responses */}
                   {activeResponses.length === 0 && (
-                    <motion.div
-                      className="px-2 py-1 font-medium text-muted-foreground text-xs uppercase tracking-wide"
-                      layout
-                    >
-                      Inactive
-                    </motion.div>
+                    <>
+                      <motion.div
+                        className="mb-3 rounded-md border border-primary/25 bg-primary/10 p-3 text-sm shadow-xs"
+                        layout
+                      >
+                        <div className="flex gap-3">
+                          <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-background/80 text-primary shadow-xs">
+                            <CircleAlert className="size-4" />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <p className="font-semibold">
+                              {messages.endpoints.noActiveResponseTitle}
+                            </p>
+                            <p className="text-muted-foreground text-xs leading-relaxed">
+                              {messages.endpoints.noActiveResponseDescription}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        className="px-2 py-1 font-medium text-muted-foreground text-xs uppercase tracking-wide"
+                        layout
+                      >
+                        {messages.endpoints.inactiveResponsesLabel}
+                      </motion.div>
+                    </>
                   )}
 
                   <AnimatePresence mode="popLayout">

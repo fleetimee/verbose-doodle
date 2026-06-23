@@ -237,6 +237,21 @@ export const messages = {
       "Start by creating your first API endpoint for an available biller.",
     createFirstButton: "Create First Endpoint",
     noConfiguredResponses: "No configured responses yet",
+    noActiveResponseTitle: "No active response set",
+    noActiveResponseDescription:
+      "Choose a response below, then activate it so this endpoint knows what to return.",
+    inactiveResponsesLabel: "Inactive responses",
+    trafficLogsLoadErrorTitle: "Failed to load traffic logs",
+    trafficLogsEmptyTitle: "No traffic logs yet",
+    trafficLogsEmptyDescription:
+      "Send a request to this simulator endpoint to see it here.",
+    trafficLogsNoResponsesTitle: "No response configured",
+    trafficLogsNoResponsesDescription:
+      "Create and activate a response before sending traffic to this endpoint.",
+    trafficLogsNoActiveResponseTitle: "No active response set",
+    trafficLogsNoActiveResponseDescription:
+      "Activate one response before sending traffic, or requests will not have a configured simulator result.",
+    trafficLogsEmergencyFooter: "simulator blocked: response unset.",
     addEndpoint: "Add Endpoint",
     addEndpointDescription:
       "Create a new API endpoint for a specific biller ID.",
@@ -289,6 +304,12 @@ export const messages = {
     editStatusCodeDescription: "Update the HTTP status code for this response.",
     editJsonResponseDescription: "Update the JSON response body.",
     editResponseDescription: "Update this response configuration.",
+    editResponseTooltip: "Edit {name}",
+    selectResponseToEditTooltip: "Select {name} to edit",
+    simulateResponseTooltip: "Simulate timeout or delay for {name}",
+    selectResponseToSimulateTooltip: "Select {name} to configure simulation",
+    activateResponseTooltip: "Activate {name}",
+    deactivateResponseTooltip: "Deactivate {name}",
     urlRequiredError: "URL is required",
     urlMaxError: "URL must not exceed {max} characters",
     urlStartError: "URL must start with /",

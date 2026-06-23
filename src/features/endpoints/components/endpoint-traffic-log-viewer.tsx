@@ -1,4 +1,5 @@
 import {
+  CircleAlert,
   Clipboard,
   Copy,
   Download,
@@ -53,15 +54,19 @@ import type {
 } from "@/features/endpoints/types";
 import { getEndpointTrafficLogsDownloadUrl } from "@/lib/api-endpoints";
 import { copyToClipboard } from "@/lib/clipboard";
+import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const LOG_LINE_LIMITS = [50, 100, 250, 500, 1000] as const;
 
 type EndpointTrafficLogViewerProps = {
   readonly endpointId: string;
+  readonly hasActiveResponse: boolean;
+  readonly responseCount: number;
 };
 
 type LogDownloadFormat = "text" | "csv" | "json";
+type TerminalTone = "empty" | "error" | "emergency";
 
 const STATUS_LABELS: Record<EndpointTrafficLogStatus, string> = {
   matched_success: "Success",
@@ -137,8 +142,37 @@ async function copyText(text: string, successMessage: string) {
   }
 }
 
+function getEmptyTrafficLogState(
+  hasActiveResponse: boolean,
+  responseCount: number
+) {
+  if (hasActiveResponse) {
+    return {
+      message: messages.endpoints.trafficLogsEmptyDescription,
+      title: messages.endpoints.trafficLogsEmptyTitle,
+      tone: "empty" as const,
+    };
+  }
+
+  if (responseCount > 0) {
+    return {
+      message: messages.endpoints.trafficLogsNoActiveResponseDescription,
+      title: messages.endpoints.trafficLogsNoActiveResponseTitle,
+      tone: "emergency" as const,
+    };
+  }
+
+  return {
+    message: messages.endpoints.trafficLogsNoResponsesDescription,
+    title: messages.endpoints.trafficLogsNoResponsesTitle,
+    tone: "emergency" as const,
+  };
+}
+
 export function EndpointTrafficLogViewer({
   endpointId,
+  hasActiveResponse,
+  responseCount,
 }: EndpointTrafficLogViewerProps) {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [wrapLines, setWrapLines] = useState(false);
@@ -266,15 +300,20 @@ export function EndpointTrafficLogViewer({
     logContent = (
       <TerminalState
         message={error.message}
-        title="Failed to load traffic logs"
+        title={messages.endpoints.trafficLogsLoadErrorTitle}
         tone="error"
       />
     );
   } else if (logs.length === 0) {
+    const emptyState = getEmptyTrafficLogState(
+      hasActiveResponse,
+      responseCount
+    );
     logContent = (
       <TerminalState
-        message="Send a request to this simulator endpoint to see it here."
-        title="No traffic logs yet"
+        message={emptyState.message}
+        title={emptyState.title}
+        tone={emptyState.tone}
       />
     );
   } else {
@@ -667,15 +706,33 @@ function TerminalState({
 }: {
   readonly message: string;
   readonly title: string;
-  readonly tone?: "empty" | "error";
+  readonly tone?: TerminalTone;
 }) {
   const promptColor = tone === "error" ? "text-[#fca5a5]" : "text-[#60a5fa]";
+  const isEmergency = tone === "emergency";
+  const Icon = isEmergency ? CircleAlert : FileClock;
 
   return (
-    <div className="flex h-[560px] items-center justify-center bg-[#151515] px-6">
-      <div className="w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner">
-        <div className="mb-3 flex items-center gap-2 text-[#d4d4d4]">
-          <FileClock />
+    <div
+      className={cn(
+        "flex h-[560px] items-center justify-center bg-[#151515] px-6",
+        isEmergency &&
+          "bg-[radial-gradient(circle_at_center,#3a1c18_0%,#151515_48%)]"
+      )}
+    >
+      <div
+        className={cn(
+          "w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner",
+          isEmergency && "border-red-400/35 bg-red-950/15"
+        )}
+      >
+        <div
+          className={cn(
+            "mb-3 flex items-center gap-2 text-[#d4d4d4]",
+            isEmergency && "text-red-200"
+          )}
+        >
+          <Icon />
           <span className="font-semibold">{title}</span>
         </div>
         <div className="grid gap-1 text-[#a3a3a3]">
@@ -686,6 +743,11 @@ function TerminalState({
           <p className="pl-0 text-[#b8b8b8]">{message}</p>
           {tone === "empty" && (
             <p className="text-[#737373]">waiting for incoming requests...</p>
+          )}
+          {isEmergency && (
+            <p className="text-red-300/70">
+              {messages.endpoints.trafficLogsEmergencyFooter}
+            </p>
           )}
         </div>
       </div>

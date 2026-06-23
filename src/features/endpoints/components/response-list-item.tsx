@@ -28,6 +28,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useAuth } from "@/features/auth/context";
 import { usePermissions } from "@/features/auth/hooks/use-permissions";
 import { EditResponseStepper } from "@/features/endpoints/components/edit-response-stepper";
@@ -36,6 +41,7 @@ import { SimulateTimeoutDialog } from "@/features/endpoints/components/simulate-
 import { useDeleteResponse } from "@/features/endpoints/hooks/use-delete-response";
 import { useUpdateResponse } from "@/features/endpoints/hooks/use-update-response";
 import type { EndpointResponse } from "@/features/endpoints/types";
+import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
@@ -170,16 +176,28 @@ export function ResponseListItem({
   };
 
   const editButtonTitle = isSelected
-    ? "Edit response fields"
-    : "Select this response to edit";
+    ? formatMessage(messages.endpoints.editResponseTooltip, {
+        name: response.name,
+      })
+    : formatMessage(messages.endpoints.selectResponseToEditTooltip, {
+        name: response.name,
+      });
 
   const simulateButtonTitle = isSelected
-    ? "Simulate timeout or delay"
-    : "Select this response to configure simulation";
+    ? formatMessage(messages.endpoints.simulateResponseTooltip, {
+        name: response.name,
+      })
+    : formatMessage(messages.endpoints.selectResponseToSimulateTooltip, {
+        name: response.name,
+      });
 
   const activationButtonTitle = isActive
-    ? "Deactivate this response"
-    : "Activate this response";
+    ? formatMessage(messages.endpoints.deactivateResponseTooltip, {
+        name: response.name,
+      })
+    : formatMessage(messages.endpoints.activateResponseTooltip, {
+        name: response.name,
+      });
 
   return (
     <>
@@ -259,21 +277,26 @@ export function ResponseListItem({
           {canActivateResponse && (
             <div className="flex items-center gap-1">
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    className="bg-background/80 shadow-xs"
-                    disabled={!isSelected}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    size="icon-sm"
-                    title={editButtonTitle}
-                    type="button"
-                    variant="outline"
-                  >
-                    <Pen />
-                  </Button>
-                </DropdownMenuTrigger>
+                <Tooltip>
+                  <DropdownMenuTrigger asChild>
+                    <TooltipTrigger asChild>
+                      <Button
+                        aria-label={editButtonTitle}
+                        className="bg-background/80 shadow-xs"
+                        disabled={!isSelected}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        <Pen />
+                      </Button>
+                    </TooltipTrigger>
+                  </DropdownMenuTrigger>
+                  <TooltipContent side="top">{editButtonTitle}</TooltipContent>
+                </Tooltip>
                 <DropdownMenuContent
                   align="end"
                   onClick={(e) => e.stopPropagation()}
@@ -320,34 +343,48 @@ export function ResponseListItem({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button
-                className="bg-background/80 shadow-xs"
-                disabled={!isSelected}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowSimulateDialog(true);
-                }}
-                size="icon-sm"
-                title={simulateButtonTitle}
-                type="button"
-                variant="outline"
-              >
-                <Timer />
-              </Button>
-              <Button
-                className={getActivationButtonClasses(isActive, isLoading)}
-                disabled={isLoading}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowConfirmDialog(true);
-                }}
-                size="icon-sm"
-                title={activationButtonTitle}
-                type="button"
-                variant="outline"
-              >
-                {isActive ? <CheckCircle2 /> : <Circle />}
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label={simulateButtonTitle}
+                    className="bg-background/80 shadow-xs"
+                    disabled={!isSelected}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowSimulateDialog(true);
+                    }}
+                    size="icon-sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    <Timer />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {simulateButtonTitle}
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label={activationButtonTitle}
+                    className={getActivationButtonClasses(isActive, isLoading)}
+                    disabled={isLoading}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowConfirmDialog(true);
+                    }}
+                    size="icon-sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    {isActive ? <CheckCircle2 /> : <Circle />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {activationButtonTitle}
+                </TooltipContent>
+              </Tooltip>
             </div>
           )}
         </div>
