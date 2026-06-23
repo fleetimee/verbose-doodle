@@ -8,6 +8,7 @@ import { RecentEndpoints } from "@/features/overview/components/recent-endpoints
 import { RecentEndpointsSkeleton } from "@/features/overview/components/recent-endpoints-skeleton";
 import { StatsCardSkeleton } from "@/features/overview/components/stats-card-skeleton";
 import { StatsCards } from "@/features/overview/components/stats-cards";
+import { UserRoleCard } from "@/features/overview/components/user-role-card";
 import { UserStatsCards } from "@/features/overview/components/user-stats-cards";
 import { UserStatusChart } from "@/features/overview/components/user-status-chart";
 import { useGetOverview } from "@/features/overview/hooks/use-get-overview";
@@ -60,6 +61,7 @@ function OverviewLoadingGrid({ isAdmin }: OverviewGridProps) {
       />
 
       {isAdmin && <ChartCardSkeleton className="md:col-span-3 lg:col-span-1" />}
+      {isAdmin && <ChartCardSkeleton className="md:col-span-3 lg:col-span-1" />}
 
       <RecentEndpointsSkeleton
         className={isAdmin ? "md:col-span-3 lg:col-span-4" : "md:col-span-3"}
@@ -96,6 +98,7 @@ function OverviewContentGrid({
       {isAdmin && data.userStatusDistribution && (
         <UserStatusChart data={data} />
       )}
+      {isAdmin && data.userStats && <UserRoleCard data={data} />}
       <RecentEndpoints
         className={isAdmin ? "md:col-span-3 lg:col-span-4" : undefined}
         data={data}
