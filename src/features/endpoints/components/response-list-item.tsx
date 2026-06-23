@@ -39,7 +39,7 @@ import type { EndpointResponse } from "@/features/endpoints/types";
 import { cn } from "@/lib/utils";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
-const SELECTED_ITEM_SCALE = 1.02;
+const SELECTED_ITEM_SCALE = 1.01;
 
 // Animation constants for smooth transitions
 const ANIMATION_DURATION = 0.3;
@@ -68,10 +68,10 @@ function getStatusCodeVariant(statusCode: number) {
 // Helper to get item container classes
 function getItemContainerClasses(isSelected: boolean) {
   return cn(
-    "w-full cursor-pointer rounded-md px-3 py-2.5 text-left transition-colors",
+    "relative w-full cursor-pointer overflow-hidden rounded-md border px-4 py-3 text-left transition-[background-color,border-color,box-shadow,color]",
     isSelected
-      ? "bg-accent text-accent-foreground shadow-sm"
-      : "hover:bg-accent/50",
+      ? "border-primary/35 bg-primary/10 text-accent-foreground shadow-md before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-r-full before:bg-primary dark:bg-primary/15"
+      : "border-transparent hover:border-border hover:bg-accent/50 hover:shadow-xs",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
   );
 }
@@ -79,11 +79,11 @@ function getItemContainerClasses(isSelected: boolean) {
 // Helper to get activation button classes
 function getActivationButtonClasses(isActive: boolean, isLoading: boolean) {
   return cn(
-    "rounded-full p-0.5 transition-colors",
+    "border bg-background/80 shadow-xs",
     isActive
-      ? "text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400"
+      ? "border-green-600 text-green-600 hover:bg-green-50 hover:text-green-700 dark:border-green-500 dark:text-green-500 dark:hover:bg-green-950/40 dark:hover:text-green-400"
       : "text-muted-foreground hover:text-foreground",
-    isLoading ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+    isLoading ? "opacity-50" : ""
   );
 }
 
@@ -209,10 +209,10 @@ export function ResponseListItem({
         whileHover={{ scale: isSelected ? SELECTED_ITEM_SCALE : HOVER_SCALE }}
         whileTap={{ scale: 0.99 }}
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="relative flex items-start justify-between gap-3">
           <motion.div
             animate={{ opacity: 1, y: 0 }}
-            className="flex-1 space-y-2"
+            className="flex flex-1 flex-col gap-2.5"
             initial={false}
             transition={{
               duration: ANIMATION_DURATION,
@@ -220,14 +220,19 @@ export function ResponseListItem({
             }}
           >
             <div className="flex items-center gap-2">
-              <span className="font-medium text-sm">{response.name}</span>
+              <span className="font-semibold text-base leading-none">
+                {response.name}
+              </span>
               {isActive && (
                 <motion.div
                   animate={{ opacity: 1, scale: 1 }}
                   initial={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
                 >
-                  <Badge className="text-xs" variant="secondary">
+                  <Badge
+                    className="bg-background/70 text-xs shadow-xs"
+                    variant="secondary"
+                  >
                     Active
                   </Badge>
                 </motion.div>
@@ -243,7 +248,7 @@ export function ResponseListItem({
               }}
             >
               <Badge
-                className="font-mono text-xs"
+                className="font-mono text-xs shadow-xs"
                 variant={getStatusCodeVariant(response.statusCode)}
               >
                 {response.statusCode}
@@ -256,17 +261,17 @@ export function ResponseListItem({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    className="h-7 w-7"
+                    className="bg-background/80 shadow-xs"
                     disabled={!isSelected}
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
-                    size="icon"
+                    size="icon-sm"
                     title={editButtonTitle}
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                   >
-                    <Pen className="h-4 w-4" />
+                    <Pen />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -316,35 +321,33 @@ export function ResponseListItem({
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button
-                className="h-7 w-7"
+                className="bg-background/80 shadow-xs"
                 disabled={!isSelected}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowSimulateDialog(true);
                 }}
-                size="icon"
+                size="icon-sm"
                 title={simulateButtonTitle}
                 type="button"
-                variant="ghost"
+                variant="outline"
               >
-                <Timer className="h-4 w-4" />
+                <Timer />
               </Button>
-              <button
+              <Button
                 className={getActivationButtonClasses(isActive, isLoading)}
                 disabled={isLoading}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowConfirmDialog(true);
                 }}
+                size="icon-sm"
                 title={activationButtonTitle}
                 type="button"
+                variant="outline"
               >
-                {isActive ? (
-                  <CheckCircle2 className="h-5 w-5" />
-                ) : (
-                  <Circle className="h-5 w-5" />
-                )}
-              </button>
+                {isActive ? <CheckCircle2 /> : <Circle />}
+              </Button>
             </div>
           )}
         </div>

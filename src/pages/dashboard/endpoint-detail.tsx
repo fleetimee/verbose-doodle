@@ -513,22 +513,24 @@ export function EndpointDetailPage() {
                   <ProtectedAction ability="canEditEndpoint">
                     <div className="flex items-center gap-1">
                       <Button
+                        className="bg-background/80 shadow-xs"
                         onClick={handleEditUrl}
-                        size="icon"
+                        size="icon-sm"
                         title="Edit endpoint URL and method"
                         type="button"
-                        variant="ghost"
+                        variant="outline"
                       >
-                        <Pen className="h-4 w-4" />
+                        <Pen />
                       </Button>
                       <Button
+                        className="border-destructive/40 bg-background/80 text-destructive shadow-xs hover:bg-destructive/10 hover:text-destructive"
                         onClick={handleDeleteEndpointClick}
-                        size="icon"
+                        size="icon-sm"
                         title="Delete endpoint and all responses"
                         type="button"
-                        variant="ghost"
+                        variant="outline"
                       >
-                        <Trash2 className="h-4 w-4 text-red-600" />
+                        <Trash2 />
                       </Button>
                     </div>
                   </ProtectedAction>
