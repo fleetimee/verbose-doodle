@@ -3,6 +3,7 @@ import { Navigate } from "react-router";
 import { useAuth } from "@/features/auth/context";
 import { usePermissions } from "@/features/auth/hooks/use-permissions";
 import type { Role } from "@/features/auth/types";
+import { hasManualLogout } from "@/features/auth/utils";
 
 type ProtectedRouteProps = {
   children: ReactNode;
@@ -39,6 +40,9 @@ export function ProtectedRoute({
 
   // First check: User must be authenticated
   if (!authState.isAuthenticated) {
+    if (hasManualLogout()) {
+      return <Navigate replace to="/logged-out" />;
+    }
     return <Navigate replace to="/login" />;
   }
 

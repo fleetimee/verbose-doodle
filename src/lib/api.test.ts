@@ -14,11 +14,13 @@ describe("API utilities", () => {
   beforeEach(() => {
     // Create spy on global fetch
     fetchSpy = spyOn(global, "fetch");
+    localStorage.clear();
   });
 
   afterEach(() => {
     // Restore original fetch after each test
     fetchSpy.mockRestore();
+    localStorage.clear();
   });
 
   describe("apiFetch", () => {
@@ -166,6 +168,111 @@ describe("API utilities", () => {
 
       expect(clearSpy).toHaveBeenCalledTimes(1);
       expect(emitSpy).toHaveBeenCalledTimes(1);
+
+      clearSpy.mockRestore();
+      emitSpy.mockRestore();
+    });
+
+    test("refreshes token and retries once on 401", async () => {
+      const authUtils = await import("@/features/auth/utils");
+      const clearSpy = spyOn(authUtils, "clearAuthToken");
+      const emitSpy = spyOn(authUtils, "emitUnauthorizedEvent");
+      const mockData = { ok: true };
+
+      localStorage.setItem("auth_token", "old-access-token");
+      localStorage.setItem("refresh_token", "refresh-token");
+
+      fetchSpy
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 401,
+          statusText: "Unauthorized",
+          headers: new Headers(),
+          json: async () => ({ message: "Unauthorized" }),
+        } as Response)
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          headers: new Headers({ "content-type": "application/json" }),
+          json: async () => ({
+            responseCode: "00",
+            responseDesc: "Success",
+            data: {
+              accessToken: "new-access-token",
+              refreshToken: "new-refresh-token",
+              tokenType: "Bearer",
+              expiresIn: 900,
+            },
+          }),
+        } as Response)
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          headers: new Headers({ "content-type": "application/json" }),
+          json: async () => mockData,
+        } as Response);
+
+      const result = await apiFetch("/test");
+
+      expect(result).toEqual(mockData);
+      expect(fetchSpy).toHaveBeenCalledTimes(3);
+      expect(fetchSpy.mock.calls[0]?.[1]).toEqual(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: "Bearer old-access-token",
+          }),
+        })
+      );
+      expect(fetchSpy.mock.calls[1]?.[1]).toEqual(
+        expect.objectContaining({
+          headers: expect.not.objectContaining({
+            Authorization: expect.any(String),
+          }),
+        })
+      );
+      expect(fetchSpy.mock.calls[2]?.[1]).toEqual(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: "Bearer new-access-token",
+          }),
+        })
+      );
+      expect(localStorage.getItem("auth_token")).toBe("new-access-token");
+      expect(localStorage.getItem("refresh_token")).toBe("new-refresh-token");
+      expect(clearSpy).not.toHaveBeenCalled();
+      expect(emitSpy).not.toHaveBeenCalled();
+
+      clearSpy.mockRestore();
+      emitSpy.mockRestore();
+    });
+
+    test("does not emit unauthorized event when disabled", async () => {
+      const authUtils = await import("@/features/auth/utils");
+      const clearSpy = spyOn(authUtils, "clearAuthToken");
+      const emitSpy = spyOn(authUtils, "emitUnauthorizedEvent");
+
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        statusText: "Unauthorized",
+        headers: new Headers(),
+        json: async () => ({ message: "Unauthorized" }),
+      } as Response);
+
+      await expect(
+        apiFetch("/api/refresh", {
+          auth: false,
+          emitUnauthorized: false,
+          retryOnUnauthorized: false,
+        })
+      ).rejects.toEqual({
+        message: "Unauthorized",
+        status: 401,
+        code: "401",
+      });
+
+      expect(clearSpy).not.toHaveBeenCalled();
+      expect(emitSpy).not.toHaveBeenCalled();
 
       clearSpy.mockRestore();
       emitSpy.mockRestore();

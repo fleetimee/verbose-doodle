@@ -3,6 +3,7 @@ import type { AuthUser } from "@/features/login/types";
 
 const TOKEN_STORAGE_KEY = "auth_token";
 const REFRESH_TOKEN_STORAGE_KEY = "refresh_token";
+const MANUAL_LOGOUT_STORAGE_KEY = "manual_logout";
 
 /**
  * JWT payload structure based on backend specification
@@ -17,6 +18,30 @@ type JWTPayload = {
 const MILLISECONDS_PER_SECOND = 1000;
 
 export const AUTH_UNAUTHORIZED_EVENT = "auth:unauthorized";
+
+export function markManualLogout(): void {
+  try {
+    sessionStorage.setItem(MANUAL_LOGOUT_STORAGE_KEY, "true");
+  } catch {
+    // Silently fail
+  }
+}
+
+export function clearManualLogout(): void {
+  try {
+    sessionStorage.removeItem(MANUAL_LOGOUT_STORAGE_KEY);
+  } catch {
+    // Silently fail
+  }
+}
+
+export function hasManualLogout(): boolean {
+  try {
+    return sessionStorage.getItem(MANUAL_LOGOUT_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
 
 export function emitUnauthorizedEvent() {
   if (typeof window === "undefined") {

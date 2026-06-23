@@ -42,7 +42,10 @@ export async function refreshToken(): Promise<RefreshTokenResult> {
   const response = await apiFetch<RefreshTokenResponse>(
     API_ENDPOINTS.auth.refresh,
     {
+      auth: false,
+      emitUnauthorized: false,
       method: "POST",
+      retryOnUnauthorized: false,
       body: JSON.stringify({
         refreshToken: refreshTokenValue,
       }),

@@ -18,6 +18,7 @@ import { Logo } from "@/components/ui/logo";
 import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/features/auth/context";
+import { hasManualLogout } from "@/features/auth/utils";
 import { LoginForm } from "@/features/login/components/login-form";
 import { useLogin } from "@/features/login/hooks/use-login";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
@@ -48,6 +49,7 @@ const AUTO_LOGIN_MAX_PENDING_PROGRESS = 86;
 
 export const Login = () => {
   const { authState } = useAuth();
+  const isManualLogout = hasManualLogout();
   const { theme, setTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const [expirationMessage, setExpirationMessage] = useState<string | null>(
@@ -93,11 +95,14 @@ export const Login = () => {
   }, [searchParams, setSearchParams]);
 
   useEffect(() => {
+    if (isManualLogout) {
+      return;
+    }
     if (!(isPending || hasAttemptedLogin.current)) {
       hasAttemptedLogin.current = true;
       login(AUTO_LOGIN_CREDENTIALS);
     }
-  }, [login, isPending]);
+  }, [isManualLogout, login, isPending]);
 
   useEffect(() => {
     if (!(isPending && !isAutoLoginComplete)) {
@@ -127,6 +132,10 @@ export const Login = () => {
   // Redirect to dashboard if already authenticated
   if (authState.isAuthenticated && redirectReady) {
     return <Navigate replace to="/dashboard" />;
+  }
+
+  if (isManualLogout) {
+    return <Navigate replace to="/logged-out" />;
   }
 
   // Filter theme to only pass valid values to ThemeSwitcher (light or dark)

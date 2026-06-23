@@ -33,6 +33,11 @@ const About = lazy(() =>
 const Login = lazy(() =>
   import("@/pages/login").then(({ Login }) => ({ default: Login }))
 );
+const LoggedOut = lazy(() =>
+  import("@/pages/logged-out").then(({ LoggedOut }) => ({
+    default: LoggedOut,
+  }))
+);
 const OverviewPage = lazy(() =>
   import("@/pages/dashboard/overview").then(({ OverviewPage }) => ({
     default: OverviewPage,
@@ -72,6 +77,7 @@ function AppContent() {
         <Routes>
           <Route element={<AuthRedirect />} path="/" />
           <Route element={<Login />} path="/login" />
+          <Route element={<LoggedOut />} path="/logged-out" />
           <Route element={<About />} path="/about" />
 
           <Route

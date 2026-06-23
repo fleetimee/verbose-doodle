@@ -13,6 +13,8 @@ import {
   clearRefreshToken,
   decodeJWT,
   getAuthToken,
+  hasManualLogout,
+  markManualLogout,
   saveAuthToken,
   saveRefreshToken,
 } from "@/features/auth/utils";
@@ -84,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    const shouldKeepManualLogout = hasManualLogout();
     clearAuthToken();
     clearRefreshToken();
     setAuthState({
@@ -95,6 +98,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Clear all sessionStorage (including expiration reasons)
     try {
       sessionStorage.clear();
+      if (shouldKeepManualLogout) {
+        markManualLogout();
+      }
     } catch {
       // Silently fail if sessionStorage is unavailable
     }

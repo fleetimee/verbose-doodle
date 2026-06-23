@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/features/auth/context";
+import { markManualLogout } from "@/features/auth/utils";
 
 /**
  * Simulated logout delay for demonstration purposes
@@ -37,13 +38,14 @@ export function LogoutDialog({ open, onOpenChange }: LogoutDialogProps) {
 
     await new Promise((resolve) => setTimeout(resolve, LOGOUT_DELAY_MS));
 
+    markManualLogout();
     logout();
 
     onOpenChange(false);
 
     setIsLoggingOut(false);
 
-    navigate("/login");
+    navigate("/logged-out");
   };
 
   return (
@@ -52,8 +54,8 @@ export function LogoutDialog({ open, onOpenChange }: LogoutDialogProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
           <AlertDialogDescription>
-            You will be redirected to the login page and will need to sign in
-            again to access your account.
+            Your local session will be cleared. You can sign in again from the
+            logged-out page.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

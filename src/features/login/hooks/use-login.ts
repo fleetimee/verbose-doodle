@@ -137,7 +137,7 @@ export function useLogin({
 
           // Redirect to home page
           if (navigateOnSuccess) {
-            navigate("/");
+            navigate("/dashboard/overview");
           }
         }
         // Note: If responseCode is not "00", the mutation should throw an error

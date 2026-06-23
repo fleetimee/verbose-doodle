@@ -7,6 +7,8 @@ import {
   clearAuthToken,
   emitUnauthorizedEvent,
   getAuthToken,
+  saveAuthToken,
+  saveRefreshToken,
 } from "@/features/auth/utils";
 
 export type ApiError = {
@@ -45,13 +47,78 @@ async function createApiError(response: Response): Promise<ApiError> {
  * Configuration options for API requests
  */
 export type FetchConfig = RequestInit & {
+  auth?: boolean;
   baseUrl?: string;
+  emitUnauthorized?: boolean;
+  retryOnUnauthorized?: boolean;
   timeout?: number;
 };
 
 const DEFAULT_TIMEOUT = 30_000;
 const DEFAULT_BASE_URL = "";
 const HTTP_STATUS_UNAUTHORIZED = 401;
+
+type UnauthorizedResult<T> =
+  | {
+      readonly data: T;
+      readonly retried: true;
+    }
+  | {
+      readonly retried: false;
+    };
+
+async function refreshAndRetry<T>(
+  endpoint: string,
+  config: FetchConfig
+): Promise<T> {
+  const { refreshToken } = await import(
+    "@/features/auth/hooks/use-refresh-token"
+  );
+  const refreshResult = await refreshToken();
+  saveAuthToken(refreshResult.accessToken);
+  saveRefreshToken(refreshResult.refreshToken);
+
+  return await apiFetch<T>(endpoint, {
+    ...config,
+    retryOnUnauthorized: false,
+  });
+}
+
+async function handleUnauthorized<T>({
+  auth,
+  config,
+  emitUnauthorized,
+  endpoint,
+  retryOnUnauthorized,
+}: {
+  readonly auth: boolean;
+  readonly config: FetchConfig;
+  readonly emitUnauthorized: boolean;
+  readonly endpoint: string;
+  readonly retryOnUnauthorized: boolean;
+}): Promise<UnauthorizedResult<T>> {
+  if (retryOnUnauthorized && auth) {
+    try {
+      return {
+        data: await refreshAndRetry<T>(endpoint, config),
+        retried: true,
+      };
+    } catch {
+      if (emitUnauthorized) {
+        clearAuthToken();
+        emitUnauthorizedEvent();
+      }
+      return { retried: false };
+    }
+  }
+
+  if (emitUnauthorized) {
+    clearAuthToken();
+    emitUnauthorizedEvent();
+  }
+
+  return { retried: false };
+}
 
 /**
  * Generic fetch wrapper with error handling and timeout
@@ -61,7 +128,10 @@ export async function apiFetch<T>(
   config: FetchConfig = {}
 ): Promise<T> {
   const {
+    auth = true,
     baseUrl = DEFAULT_BASE_URL,
+    emitUnauthorized = true,
+    retryOnUnauthorized = true,
     timeout = DEFAULT_TIMEOUT,
     headers = {},
     ...rest
@@ -72,7 +142,7 @@ export async function apiFetch<T>(
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-  const token = getAuthToken();
+  const token = auth ? getAuthToken() : null;
   const requestHeaders: HeadersInit = {
     "Content-Type": "application/json",
     ...(token && { Authorization: `Bearer ${token}` }),
@@ -90,8 +160,16 @@ export async function apiFetch<T>(
 
     if (!response.ok) {
       if (response.status === HTTP_STATUS_UNAUTHORIZED) {
-        clearAuthToken();
-        emitUnauthorizedEvent();
+        const retryResult = await handleUnauthorized<T>({
+          auth,
+          config,
+          emitUnauthorized,
+          endpoint,
+          retryOnUnauthorized,
+        });
+        if (retryResult.retried) {
+          return retryResult.data;
+        }
       }
       throw await createApiError(response);
     }
