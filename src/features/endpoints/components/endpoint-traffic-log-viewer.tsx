@@ -20,7 +20,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -30,15 +29,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -261,60 +253,48 @@ export function EndpointTrafficLogViewer({
   let logContent: ReactNode = null;
   if (isPending) {
     logContent = (
-      <div className="flex flex-col gap-2 p-4">
+      <div className="flex h-[560px] flex-col gap-2 bg-[#151515] p-4">
         {Array.from({ length: 10 }).map((_, index) => (
-          <Skeleton className="h-5 w-full" key={`traffic-log-${index}`} />
+          <Skeleton
+            className="h-5 w-full bg-white/10"
+            key={`traffic-log-${index}`}
+          />
         ))}
       </div>
     );
   } else if (error) {
     logContent = (
-      <Empty className="min-h-[360px]">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <FileClock />
-          </EmptyMedia>
-          <EmptyTitle>Failed to load traffic logs</EmptyTitle>
-          <EmptyDescription>{error.message}</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <TerminalState
+        message={error.message}
+        title="Failed to load traffic logs"
+        tone="error"
+      />
     );
   } else if (logs.length === 0) {
     logContent = (
-      <Empty className="min-h-[360px]">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <FileClock />
-          </EmptyMedia>
-          <EmptyTitle>No traffic logs yet</EmptyTitle>
-          <EmptyDescription>
-            Send a request to this simulator endpoint to see it here.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <TerminalState
+        message="Send a request to this simulator endpoint to see it here."
+        title="No traffic logs yet"
+      />
     );
   } else {
     logContent = (
-      <div
-        className={cn(
-          "max-h-[560px] overflow-auto",
-          wrapLines && "overflow-x-hidden"
-        )}
-      >
+      <ScrollArea className="h-[560px] bg-[#151515]">
         <div
           className={cn(
-            "p-3 font-mono text-sm",
+            "p-4 font-mono text-[#e7e7e7] text-[13px] leading-5",
             wrapLines ? "w-full" : "min-w-max"
           )}
         >
           {logs.map((log) => (
             <div
-              className="group grid min-w-0 grid-cols-[28px_96px_minmax(0,1fr)] items-start gap-2 rounded px-2 py-1 hover:bg-muted"
+              className="group grid min-w-0 grid-cols-[24px_88px_minmax(0,1fr)] items-start gap-2 px-2 py-0.5 transition-colors hover:bg-white/7"
               key={log.id}
             >
               <Checkbox
                 aria-label={`Select traffic log ${log.requestId}`}
                 checked={selectedIds.has(log.id)}
+                className="mt-0.5 border-[#5b5b5b] bg-[#1f1f1f] data-[state=checked]:border-[#60a5fa] data-[state=checked]:bg-[#2563eb]"
                 onCheckedChange={() => handleToggleSelected(log.id)}
               />
               <button
@@ -322,11 +302,11 @@ export function EndpointTrafficLogViewer({
                 onClick={() => setSelectedLogId(log.id)}
                 type="button"
               >
-                <StatusBadge status={log.hitStatus} />
+                <TerminalStatus status={log.hitStatus} />
               </button>
               <button
                 className={cn(
-                  "min-w-0 text-left leading-6",
+                  "min-w-0 text-left tabular-nums",
                   wrapLines ? "whitespace-pre-wrap break-all" : "whitespace-pre"
                 )}
                 onClick={() => setSelectedLogId(log.id)}
@@ -337,7 +317,8 @@ export function EndpointTrafficLogViewer({
             </div>
           ))}
         </div>
-      </div>
+        {!wrapLines && <ScrollBar orientation="horizontal" />}
+      </ScrollArea>
     );
   }
 
@@ -423,18 +404,13 @@ export function EndpointTrafficLogViewer({
 
   return (
     <section className="flex flex-col gap-3">
-      <div className="flex flex-col gap-3 rounded-lg border bg-card p-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-md bg-muted">
-              <FileClock />
-            </div>
-            <div>
-              <h2 className="font-semibold text-lg">Traffic logs</h2>
-              <p className="text-muted-foreground text-sm">
-                Inspect requests that hit this simulator endpoint.
-              </p>
-            </div>
+      <div className="flex flex-col gap-4 rounded-lg border bg-card p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h2 className="font-semibold text-lg">Traffic logs</h2>
+            <p className="text-muted-foreground text-sm">
+              Inspect requests that hit this simulator endpoint.
+            </p>
           </div>
           <Button
             disabled={isFetching}
@@ -448,159 +424,169 @@ export function EndpointTrafficLogViewer({
           </Button>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-[1fr_1fr] xl:grid-cols-[1fr_1fr_160px]">
-          <label
-            className="flex items-center gap-3 rounded-md border px-3 py-2"
-            htmlFor="traffic-log-auto-refresh"
-          >
-            <Switch
-              checked={autoRefresh}
-              id="traffic-log-auto-refresh"
-              onCheckedChange={setAutoRefresh}
-            />
-            <span className="font-medium text-sm">Auto-refresh</span>
-          </label>
-          <label
-            className="flex items-center gap-3 rounded-md border px-3 py-2"
-            htmlFor="traffic-log-wrap-lines"
-          >
-            <Switch
-              checked={wrapLines}
-              id="traffic-log-wrap-lines"
-              onCheckedChange={setWrapLines}
-            />
-            <span className="font-medium text-sm">Wrap lines</span>
-          </label>
-          <label
-            className="flex items-center gap-3 rounded-md border px-3 py-2"
-            htmlFor="traffic-log-timestamps"
-          >
-            <Switch
-              checked={showTimestamps}
-              id="traffic-log-timestamps"
-              onCheckedChange={setShowTimestamps}
-            />
-            <span className="font-medium text-sm">Timestamps</span>
-          </label>
-        </div>
-
-        <div className="grid gap-3 lg:grid-cols-[220px_1fr_140px]">
-          <Select
-            onValueChange={(value) =>
-              setStatus(value as EndpointTrafficLogStatusFilter)
-            }
-            value={status}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {Object.entries(STATUS_FILTER_LABELS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <div className="relative">
-            <Search className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="pl-9"
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search IP, method, URL, request ID, status, body..."
-              value={search}
-            />
+        <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+          <div className="flex flex-col gap-3">
+            <label
+              className="grid grid-cols-[1fr_auto] items-center gap-3 text-sm"
+              htmlFor="traffic-log-auto-refresh"
+            >
+              <span className="font-medium">Auto-refresh logs</span>
+              <Switch
+                checked={autoRefresh}
+                id="traffic-log-auto-refresh"
+                onCheckedChange={setAutoRefresh}
+              />
+            </label>
+            <label
+              className="grid grid-cols-[1fr_auto] items-center gap-3 text-sm"
+              htmlFor="traffic-log-wrap-lines"
+            >
+              <span className="font-medium">Wrap lines</span>
+              <Switch
+                checked={wrapLines}
+                id="traffic-log-wrap-lines"
+                onCheckedChange={setWrapLines}
+              />
+            </label>
+            <label
+              className="grid grid-cols-[1fr_auto] items-center gap-3 text-sm"
+              htmlFor="traffic-log-timestamps"
+            >
+              <span className="font-medium">Display timestamps</span>
+              <Switch
+                checked={showTimestamps}
+                id="traffic-log-timestamps"
+                onCheckedChange={setShowTimestamps}
+              />
+            </label>
           </div>
 
-          <Select
-            onValueChange={(value) =>
-              setLineLimit(Number(value) as (typeof LOG_LINE_LIMITS)[number])
-            }
-            value={lineLimit.toString()}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {LOG_LINE_LIMITS.map((limit) => (
-                  <SelectItem key={limit} value={limit.toString()}>
-                    {limit} lines
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="grid gap-3">
+            <div className="grid gap-3 sm:grid-cols-[280px_1fr]">
+              <Select
+                onValueChange={(value) =>
+                  setStatus(value as EndpointTrafficLogStatusFilter)
+                }
+                value={status}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {Object.entries(STATUS_FILTER_LABELS).map(
+                      ([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
 
-        <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={() =>
-              copyText(visibleLines.join("\n"), "Visible logs copied")
-            }
-            size="sm"
-            type="button"
-            variant="secondary"
-          >
-            <Copy data-icon="inline-start" />
-            Copy
-          </Button>
-          <Button
-            disabled={selectedIds.size === 0}
-            onClick={() =>
-              copyText(selectedLines.join("\n"), "Selected logs copied")
-            }
-            size="sm"
-            type="button"
-            variant="secondary"
-          >
-            <Clipboard data-icon="inline-start" />
-            Copy selected
-          </Button>
-          <Button
-            disabled={selectedIds.size === 0}
-            onClick={handleClearSelection}
-            size="sm"
-            type="button"
-            variant="secondary"
-          >
-            <X data-icon="inline-start" />
-            Unselect
-          </Button>
-          <Button
-            onClick={() => handleDownload("text")}
-            size="sm"
-            type="button"
-            variant="outline"
-          >
-            <Download data-icon="inline-start" />
-            Download
-          </Button>
-          <Button
-            onClick={() => handleDownload("csv")}
-            size="sm"
-            type="button"
-            variant="outline"
-          >
-            CSV
-          </Button>
-          <Button
-            disabled={logs.length === 0 || isClearingTrafficLogs}
-            onClick={() => setShowClearLogsDialog(true)}
-            size="sm"
-            type="button"
-            variant="destructive"
-          >
-            <Trash2 data-icon="inline-start" />
-            Clear
-          </Button>
+              <div className="relative">
+                <Search className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search IP, method, URL, request ID, status, body..."
+                  value={search}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-[180px_1fr]">
+              <Select
+                onValueChange={(value) =>
+                  setLineLimit(
+                    Number(value) as (typeof LOG_LINE_LIMITS)[number]
+                  )
+                }
+                value={lineLimit.toString()}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {LOG_LINE_LIMITS.map((limit) => (
+                      <SelectItem key={limit} value={limit.toString()}>
+                        {limit} lines
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={() =>
+                    copyText(visibleLines.join("\n"), "Visible logs copied")
+                  }
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                >
+                  <Copy data-icon="inline-start" />
+                  Copy
+                </Button>
+                <Button
+                  disabled={selectedIds.size === 0}
+                  onClick={() =>
+                    copyText(selectedLines.join("\n"), "Selected logs copied")
+                  }
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                >
+                  <Clipboard data-icon="inline-start" />
+                  Copy selected
+                </Button>
+                <Button
+                  disabled={selectedIds.size === 0}
+                  onClick={handleClearSelection}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                >
+                  <X data-icon="inline-start" />
+                  Unselect
+                </Button>
+                <Button
+                  onClick={() => handleDownload("text")}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  <Download data-icon="inline-start" />
+                  Download
+                </Button>
+                <Button
+                  onClick={() => handleDownload("csv")}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  CSV
+                </Button>
+                <Button
+                  disabled={logs.length === 0 || isClearingTrafficLogs}
+                  onClick={() => setShowClearLogsDialog(true)}
+                  size="sm"
+                  type="button"
+                  variant="destructive"
+                >
+                  <Trash2 data-icon="inline-start" />
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="min-h-[360px] overflow-hidden rounded-lg border bg-background">
+      <div className="min-h-[420px] overflow-hidden rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner">
         {logContent}
       </div>
 
@@ -654,14 +640,57 @@ export function EndpointTrafficLogViewer({
   );
 }
 
-function StatusBadge({
+function TerminalStatus({
   status,
 }: {
   readonly status: EndpointTrafficLogStatus;
 }) {
-  const variant = status === "backend_error" ? "destructive" : "secondary";
+  let className = "text-[#d4d4d4]";
+  if (status === "backend_error") {
+    className = "text-[#fca5a5]";
+  }
+  if (status === "matched_timeout") {
+    className = "text-[#fbbf24]";
+  }
 
-  return <Badge variant={variant}>{STATUS_LABELS[status]}</Badge>;
+  return (
+    <span className={cn("font-semibold text-xs", className)}>
+      {STATUS_LABELS[status]}
+    </span>
+  );
+}
+
+function TerminalState({
+  message,
+  title,
+  tone = "empty",
+}: {
+  readonly message: string;
+  readonly title: string;
+  readonly tone?: "empty" | "error";
+}) {
+  const promptColor = tone === "error" ? "text-[#fca5a5]" : "text-[#60a5fa]";
+
+  return (
+    <div className="flex h-[560px] items-center justify-center bg-[#151515] px-6">
+      <div className="w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner">
+        <div className="mb-3 flex items-center gap-2 text-[#d4d4d4]">
+          <FileClock />
+          <span className="font-semibold">{title}</span>
+        </div>
+        <div className="grid gap-1 text-[#a3a3a3]">
+          <p>
+            <span className={promptColor}>simulator@traffic</span>
+            <span className="text-[#737373]">:~$</span> tail -f endpoint.log
+          </p>
+          <p className="pl-0 text-[#b8b8b8]">{message}</p>
+          {tone === "empty" && (
+            <p className="text-[#737373]">waiting for incoming requests...</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function DetailItem({
