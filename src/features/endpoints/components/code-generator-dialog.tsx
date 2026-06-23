@@ -44,7 +44,19 @@ type CodeGeneratorDialogProps = {
   onOpenChange?: (open: boolean) => void;
 };
 
-const CODE_LANGUAGES: CodeLanguage[] = ["curl", "httpie", "wget"];
+const CODE_LANGUAGES: CodeLanguage[] = [
+  "curl",
+  "httpie",
+  "wget",
+  "javascript-fetch",
+  "javascript-axios",
+  "python",
+  "ruby",
+  "php",
+  "go",
+  "java",
+  "rust",
+];
 
 export function CodeGeneratorDialog({
   baseUrl,
@@ -92,8 +104,8 @@ export function CodeGeneratorDialog({
 
   return (
     <Drawer onOpenChange={setOpen} open={open}>
-      <DrawerContent className="max-h-[96vh]">
-        <div className="mx-auto flex h-full w-full max-w-6xl flex-col">
+      <DrawerContent className="h-[96vh] max-h-[96vh]">
+        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col">
           <DrawerHeader className="shrink-0">
             <DrawerTitle>Generate Request Code</DrawerTitle>
             <DrawerDescription>
@@ -102,7 +114,7 @@ export function CodeGeneratorDialog({
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="flex flex-1 flex-col space-y-4 overflow-hidden p-4">
+          <div className="flex min-h-0 flex-1 flex-col space-y-4 overflow-hidden p-4">
             {/* URL Preview */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -162,6 +174,7 @@ export function CodeGeneratorDialog({
                 ]}
                 defaultValue={highlightLanguage}
                 storageKey="code-generator-themes"
+                value={highlightLanguage}
               >
                 <CodeBlockHeader>
                   <div className="flex-1 px-3 py-1 text-muted-foreground text-xs">
@@ -177,14 +190,14 @@ export function CodeGeneratorDialog({
                   </div>
                   <CodeBlockCopyButton text={generatedCode} />
                 </CodeBlockHeader>
-                <CodeBlockBody className="flex-1">
+                <CodeBlockBody className="min-h-0 flex-1 overflow-hidden">
                   {(item) => (
                     <CodeBlockItem
-                      className="h-full"
+                      className="h-full overflow-hidden"
                       key={item.language}
                       value={highlightLanguage}
                     >
-                      <ScrollArea className="h-full">
+                      <ScrollArea className="h-full min-h-0">
                         <CodeBlockContent language={highlightLanguage as never}>
                           {item.code}
                         </CodeBlockContent>

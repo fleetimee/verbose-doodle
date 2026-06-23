@@ -4,6 +4,8 @@ import {
   Copy,
   Download,
   FileClock,
+  MonitorDown,
+  MonitorUp,
   RefreshCw,
   Search,
   Trash2,
@@ -11,6 +13,14 @@ import {
 } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
 import { toast } from "sonner";
+import {
+  CodeBlock,
+  CodeBlockBody,
+  CodeBlockContent,
+  CodeBlockCopyButton,
+  CodeBlockHeader,
+  CodeBlockItem,
+} from "@/components/kibo-ui/code-block";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,12 +35,18 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -67,6 +83,7 @@ type EndpointTrafficLogViewerProps = {
 
 type LogDownloadFormat = "text" | "csv" | "json";
 type TerminalTone = "empty" | "error" | "emergency";
+type ExchangeTone = "request" | "response";
 
 const STATUS_LABELS: Record<EndpointTrafficLogStatus, string> = {
   matched_success: "Success",
@@ -101,6 +118,11 @@ function formatLogLine(log: EndpointTrafficLog, showTimestamp: boolean) {
   ];
 
   return parts.filter(Boolean).join("  ");
+}
+
+function getLogTime(log: EndpointTrafficLog): number {
+  const time = Date.parse(log.occurredAt);
+  return Number.isNaN(time) ? 0 : time;
 }
 
 function formatIp(ip: string | null, port: number | null) {
@@ -207,7 +229,11 @@ export function EndpointTrafficLogViewer({
   const { mutate: clearTrafficLogs, isPending: isClearingTrafficLogs } =
     useClearEndpointTrafficLogs();
 
-  const logs = data?.items ?? [];
+  const logs = useMemo(
+    () =>
+      [...(data?.items ?? [])].sort((a, b) => getLogTime(a) - getLogTime(b)),
+    [data?.items]
+  );
   const visibleLines = useMemo(
     () => logs.map((log) => formatLogLine(log, showTimestamps)),
     [logs, showTimestamps]
@@ -318,7 +344,7 @@ export function EndpointTrafficLogViewer({
     );
   } else {
     logContent = (
-      <ScrollArea className="h-[560px] bg-[#151515]">
+      <ScrollArea className="h-[560px] w-full max-w-full bg-[#151515]">
         <div
           className={cn(
             "p-4 font-mono text-[#e7e7e7] text-[13px] leading-5",
@@ -371,78 +397,126 @@ export function EndpointTrafficLogViewer({
       </div>
     );
   } else if (selectedLogDetail) {
+    const requestMeta = [
+      { label: "Method", value: selectedLogDetail.method },
+      { label: "Path", value: selectedLogDetail.path },
+      {
+        label: "Source",
+        value: formatIp(
+          selectedLogDetail.sourceIp,
+          selectedLogDetail.sourcePort
+        ),
+      },
+      { label: "Forwarded", value: selectedLogDetail.forwardedFor ?? "-" },
+    ];
+    const responseMeta = [
+      { label: "HTTP", value: selectedLogDetail.httpStatusCode ?? "-" },
+      {
+        label: "Duration",
+        value: `${selectedLogDetail.durationMs ?? "-"} ms`,
+      },
+      { label: "Response", value: selectedLogDetail.responseName ?? "-" },
+      {
+        label: "Delay",
+        value: selectedLogDetail.delayMs
+          ? `${selectedLogDetail.delayMs} ms`
+          : "-",
+      },
+    ];
+
     detailContent = (
-      <div className="grid gap-4">
-        <div className="grid gap-2 rounded-md border p-3 md:grid-cols-2">
-          <DetailItem label="Request ID" value={selectedLogDetail.requestId} />
-          <DetailItem
-            label="Occurred at"
-            value={selectedLogDetail.occurredAt}
-          />
-          <DetailItem
-            label="Source"
-            value={formatIp(
-              selectedLogDetail.sourceIp,
-              selectedLogDetail.sourcePort
-            )}
-          />
-          <DetailItem
-            label="Destination"
-            value={formatIp(
-              selectedLogDetail.destinationIp,
-              selectedLogDetail.destinationPort
-            )}
-          />
-          <DetailItem label="Method" value={selectedLogDetail.method} />
-          <DetailItem label="Path" value={selectedLogDetail.path} />
-          <DetailItem label="Status" value={selectedLogDetail.hitStatus} />
-          <DetailItem
-            label="HTTP status"
-            value={selectedLogDetail.httpStatusCode ?? "-"}
-          />
-          <DetailItem
-            label="Response"
-            value={selectedLogDetail.responseName ?? "-"}
-          />
-          <DetailItem
-            label="Duration"
-            value={`${selectedLogDetail.durationMs ?? "-"} ms`}
-          />
-          <DetailItem
-            label="Forwarded for"
-            value={selectedLogDetail.forwardedFor ?? "-"}
-          />
-          <DetailItem
-            label="User agent"
-            value={selectedLogDetail.userAgent ?? "-"}
-          />
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <div className="relative grid gap-3 border-b bg-slate-100 px-5 py-4 text-slate-950 md:grid-cols-[minmax(0,1fr)_auto] dark:border-[#2b2f37] dark:bg-[#10141b] dark:text-slate-100">
+          <div className="min-w-0">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="rounded bg-sky-500/15 px-2 py-1 font-mono text-sky-700 text-xs dark:bg-sky-400/15 dark:text-sky-200">
+                {selectedLogDetail.method}
+              </span>
+              <span className="rounded bg-slate-900/8 px-2 py-1 font-mono text-xs dark:bg-white/8">
+                {selectedLogDetail.hitStatus}
+              </span>
+              {selectedLogDetail.simulateTimeout && (
+                <span className="rounded bg-amber-500/15 px-2 py-1 font-mono text-amber-700 text-xs dark:bg-amber-400/15 dark:text-amber-200">
+                  timeout simulation
+                </span>
+              )}
+            </div>
+            <h3 className="truncate font-mono font-semibold text-base">
+              {selectedLogDetail.path}
+            </h3>
+            <p className="truncate text-slate-600 text-xs dark:text-slate-400">
+              {selectedLogDetail.requestId} / {selectedLogDetail.occurredAt}
+            </p>
+          </div>
+          <div className="grid min-w-0 gap-2 pr-12 text-right text-xs">
+            <span className="font-mono text-slate-500 dark:text-slate-400">
+              USER AGENT
+            </span>
+            <span className="max-w-[420px] truncate text-slate-800 dark:text-slate-200">
+              {selectedLogDetail.userAgent ?? "-"}
+            </span>
+          </div>
+          <DialogClose asChild>
+            <button
+              aria-label="Close traffic log detail"
+              className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md border border-slate-300 bg-white/80 text-slate-600 shadow-xs transition-colors hover:bg-white hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-[#344156] dark:bg-[#0b1020]/80 dark:text-slate-300 dark:hover:bg-[#111827] dark:hover:text-white"
+              type="button"
+            >
+              <X className="size-4" />
+            </button>
+          </DialogClose>
         </div>
 
-        <LogDetailCode
-          title="Request headers"
-          value={selectedLogDetail.requestHeaders}
-        />
-        <LogDetailCode
-          title="Request body"
-          value={selectedLogDetail.requestBody}
-        />
-        <LogDetailCode
-          title="Response headers"
-          value={selectedLogDetail.responseHeaders}
-        />
-        <LogDetailCode
-          title="Response body"
-          value={selectedLogDetail.responseBody}
-        />
+        <div className="min-h-0 flex-1 px-5 pb-5">
+          <ResizablePanelGroup
+            className="min-h-[620px] overflow-hidden rounded-md border bg-white dark:border-[#2b2f37] dark:bg-[#0d1117]"
+            direction="horizontal"
+          >
+            <ResizablePanel defaultSize={50} minSize={28}>
+              <LogExchangePane
+                body={selectedLogDetail.requestBody}
+                headers={selectedLogDetail.requestHeaders}
+                icon={<MonitorUp className="size-4" />}
+                meta={requestMeta}
+                title="Request"
+                tone="request"
+                wrapLines={wrapLines}
+              />
+            </ResizablePanel>
+            <ResizableHandle
+              className="w-1 bg-slate-300 transition-colors hover:bg-sky-500 dark:bg-[#2b2f37] dark:hover:bg-sky-400"
+              withHandle
+            />
+            <ResizablePanel defaultSize={50} minSize={28}>
+              <LogExchangePane
+                body={selectedLogDetail.responseBody}
+                headers={selectedLogDetail.responseHeaders}
+                icon={<MonitorDown className="size-4" />}
+                meta={responseMeta}
+                title="Response"
+                tone="response"
+                wrapLines={wrapLines}
+              />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
+
         {selectedLogDetail.errorMessage && (
-          <LogDetailCode title="Error" value={selectedLogDetail.errorMessage} />
+          <div className="px-5 pb-5">
+            <ShikiJsonBlock
+              defaultWrapLines={wrapLines}
+              filename="error.txt"
+              title="Error"
+              value={selectedLogDetail.errorMessage}
+            />
+          </div>
         )}
       </div>
     );
   }
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex min-w-0 flex-col gap-3">
       <div className="flex flex-col gap-4 rounded-lg border bg-card p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -625,7 +699,7 @@ export function EndpointTrafficLogViewer({
         </div>
       </div>
 
-      <div className="min-h-[420px] overflow-hidden rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner">
+      <div className="min-h-[420px] min-w-0 overflow-hidden rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner">
         {logContent}
       </div>
 
@@ -637,16 +711,17 @@ export function EndpointTrafficLogViewer({
         }}
         open={!!selectedLogId}
       >
-        <DialogContent className="flex h-[88vh] flex-col overflow-hidden sm:max-w-4xl">
-          <DialogHeader>
+        <DialogContent
+          className="flex h-[90vh] flex-col overflow-hidden bg-white p-0 text-slate-950 sm:max-w-[min(1400px,96vw)] dark:border-[#2b2f37] dark:bg-[#0b0f14] dark:text-slate-100"
+          showCloseButton={false}
+        >
+          <DialogHeader className="sr-only">
             <DialogTitle>Traffic log detail</DialogTitle>
             <DialogDescription>
               Request, response, and network metadata for one simulator hit.
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="min-h-0 flex-1 pr-4">
-            {detailContent}
-          </ScrollArea>
+          {detailContent}
         </DialogContent>
       </Dialog>
 
@@ -755,36 +830,150 @@ function TerminalState({
   );
 }
 
-function DetailItem({
-  label,
-  value,
+function LogExchangePane({
+  body,
+  headers,
+  icon,
+  meta,
+  title,
+  tone,
+  wrapLines,
 }: {
-  readonly label: string;
-  readonly value: string | number;
+  readonly body: unknown;
+  readonly headers: Record<string, unknown> | null;
+  readonly icon: ReactNode;
+  readonly meta: readonly {
+    readonly label: string;
+    readonly value: string | number;
+  }[];
+  readonly title: string;
+  readonly tone: ExchangeTone;
+  readonly wrapLines: boolean;
 }) {
+  const accentClass =
+    tone === "request"
+      ? "border-sky-500/45 bg-sky-500/10 text-sky-700 dark:border-sky-400/45 dark:bg-sky-400/10 dark:text-sky-200"
+      : "border-emerald-500/45 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/45 dark:bg-emerald-400/10 dark:text-emerald-200";
+
   return (
-    <div className="min-w-0">
-      <p className="text-muted-foreground text-xs">{label}</p>
-      <p className="truncate font-mono text-sm">{value}</p>
+    <div className="flex h-full min-h-0 flex-col bg-white dark:bg-[#0d1117]">
+      <div className="flex items-center justify-between gap-3 border-b px-4 py-3 dark:border-[#2b2f37]">
+        <div className="flex items-center gap-2">
+          <span className={cn("rounded border p-1.5", accentClass)}>
+            {icon}
+          </span>
+          <div>
+            <h4 className="font-semibold text-sm">{title}</h4>
+            <p className="text-slate-600 text-xs dark:text-slate-400">
+              Headers and JSON body
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-px border-b bg-slate-200 md:grid-cols-4 dark:border-[#2b2f37] dark:bg-[#2b2f37]">
+        {meta.map((item) => (
+          <div
+            className="min-w-0 bg-slate-50 px-3 py-2 dark:bg-[#111722]"
+            key={item.label}
+          >
+            <p className="font-mono text-[10px] text-slate-500 uppercase dark:text-slate-400">
+              {item.label}
+            </p>
+            <p className="truncate font-mono text-slate-900 text-xs dark:text-slate-100">
+              {item.value}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="grid gap-4 p-4">
+          <ShikiJsonBlock
+            defaultWrapLines={wrapLines}
+            filename={`${title.toLowerCase()}-headers.json`}
+            title="Headers"
+            value={headers}
+          />
+          <ShikiJsonBlock
+            defaultWrapLines={wrapLines}
+            filename={`${title.toLowerCase()}-body.json`}
+            title="Body"
+            value={body}
+          />
+        </div>
+      </ScrollArea>
     </div>
   );
 }
 
-function LogDetailCode({
+function ShikiJsonBlock({
+  defaultWrapLines,
+  filename,
   title,
   value,
 }: {
+  readonly defaultWrapLines: boolean;
+  readonly filename: string;
   readonly title: string;
   readonly value: unknown;
 }) {
+  const [wrapLines, setWrapLines] = useState(defaultWrapLines);
+  const code = formatJson(value);
+
   return (
-    <div className="rounded-md border">
-      <div className="border-b px-3 py-2 font-medium text-sm">{title}</div>
-      <ScrollArea className="h-72">
-        <pre className="p-3 text-sm">
-          <code>{formatJson(value)}</code>
-        </pre>
-      </ScrollArea>
-    </div>
+    <CodeBlock
+      className="overflow-hidden rounded-md border-slate-300 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.08)] dark:border-[#273244] dark:bg-[#0b1020] dark:shadow-[0_14px_40px_rgba(0,0,0,0.22)]"
+      data={[{ code, filename, language: "json" }]}
+      defaultDarkTheme="github-dark-high-contrast"
+      defaultLightTheme="github-light-high-contrast"
+      defaultValue="json"
+      storageKey={`traffic-log-detail-${filename}`}
+    >
+      <CodeBlockHeader className="border-slate-300 bg-slate-100 px-3 py-2 dark:border-[#273244] dark:bg-[#141b2a]">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+          <span className="truncate font-medium text-slate-900 text-xs dark:text-slate-100">
+            {title}
+          </span>
+          <span className="truncate font-mono text-[11px] text-slate-600 dark:text-slate-400">
+            {filename}
+          </span>
+        </div>
+        <CodeBlockCopyButton className="size-7 text-slate-500 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white" />
+        <label
+          className="ml-1 inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-2 py-1 font-medium text-[11px] text-slate-700 dark:border-[#344156] dark:bg-[#0b1020] dark:text-slate-200"
+          htmlFor={`wrap-lines-${filename}`}
+        >
+          <span>Wrap</span>
+          <Switch
+            checked={wrapLines}
+            className="scale-75"
+            id={`wrap-lines-${filename}`}
+            onCheckedChange={setWrapLines}
+          />
+        </label>
+      </CodeBlockHeader>
+      <div className="h-80 overflow-y-auto overflow-x-hidden">
+        <div className="overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <CodeBlockBody>
+            {(item) => (
+              <CodeBlockItem
+                className={cn(
+                  "bg-white text-[12px] text-slate-950 dark:bg-[#0b1020] dark:text-slate-100 [&_.line]:min-h-5 [&_.line]:text-slate-950 [&_.line]:before:text-slate-500 dark:[&_.line]:text-slate-100 dark:[&_.line]:before:text-slate-400 [&_.shiki_span]:font-medium",
+                  wrapLines
+                    ? "[&_code]:!overflow-visible [&_code]:!whitespace-pre-wrap [&_pre]:!whitespace-pre-wrap [&_.line]:!whitespace-pre-wrap [&_.line]:break-all"
+                    : "[&_code]:!w-max [&_code]:!overflow-visible [&_code]:!whitespace-pre [&_pre]:!w-max [&_pre]:!whitespace-pre [&_.line]:!w-max [&_.line]:!whitespace-pre [&_.line]:!break-normal [&_.line]:min-w-full [&_code]:min-w-full [&_pre]:min-w-full"
+                )}
+                key={item.language}
+                value={item.language}
+              >
+                <CodeBlockContent language="json">{item.code}</CodeBlockContent>
+              </CodeBlockItem>
+            )}
+          </CodeBlockBody>
+        </div>
+      </div>
+    </CodeBlock>
   );
 }

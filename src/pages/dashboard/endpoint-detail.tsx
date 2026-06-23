@@ -1,4 +1,14 @@
-import { ArrowLeft, Check, Circle, Pen, Plus, Trash2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Circle,
+  Hash,
+  List,
+  Pen,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -638,10 +648,24 @@ export function EndpointDetailPage() {
                 )}
               </AnimatePresence>
             </div>
-            <p className="mt-1 text-muted-foreground text-sm">
-              Biller ID: {endpoint.billerId} • {endpoint.responses.length}{" "}
-              response{endpoint.responses.length === 1 ? "" : "s"}
-            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 bg-background/70 px-2.5 font-medium text-muted-foreground text-xs shadow-xs">
+                <Hash className="h-3.5 w-3.5 text-primary" />
+                <span>Biller ID</span>
+                <span className="font-mono text-foreground">
+                  {endpoint.billerId}
+                </span>
+              </span>
+              <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 bg-background/70 px-2.5 font-medium text-muted-foreground text-xs shadow-xs">
+                <List className="h-3.5 w-3.5 text-primary" />
+                <span className="font-mono text-foreground">
+                  {endpoint.responses.length}
+                </span>
+                <span>
+                  response{endpoint.responses.length === 1 ? "" : "s"}
+                </span>
+              </span>
+            </div>
           </div>
         </div>
         <ProtectedAction ability="canAddResponse">
