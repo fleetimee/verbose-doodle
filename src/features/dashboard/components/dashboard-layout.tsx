@@ -18,7 +18,9 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { HttpMethodBadge } from "@/features/endpoints/components/http-method-badge";
 import { useGetEndpoint } from "@/features/endpoints/hooks/use-get-endpoint";
+import type { HttpMethod } from "@/features/endpoints/types";
 import { decodeId } from "@/lib/id-encoder";
 
 const routeLabels: Record<string, string> = {
@@ -53,15 +55,19 @@ export function DashboardLayout() {
     let label =
       routeLabels[segment] ||
       segment.charAt(0).toUpperCase() + segment.slice(1);
+    let method: HttpMethod | undefined;
+    let url: string | undefined;
 
     // If this segment is the encoded ID and we have endpoint data, show the endpoint URL
     if (isEndpointDetail && segment === encodedId && endpoint) {
       label = `${endpoint.method} ${endpoint.url}`;
+      method = endpoint.method;
+      url = endpoint.url;
     }
 
     const isLast = index === pathSegments.length - 1;
 
-    return { label, href, isLast };
+    return { href, isLast, label, method, url };
   });
 
   const themeSwitcherValue =
@@ -86,7 +92,20 @@ export function DashboardLayout() {
                       className={item.isLast ? "" : "hidden md:block"}
                     >
                       {item.isLast ? (
-                        <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                        <BreadcrumbPage>
+                          {item.method && item.url ? (
+                            <span className="inline-flex items-center gap-1.5">
+                              <HttpMethodBadge
+                                className="shrink-0"
+                                method={item.method}
+                                variant="text"
+                              />
+                              <span>{item.url}</span>
+                            </span>
+                          ) : (
+                            item.label
+                          )}
+                        </BreadcrumbPage>
                       ) : (
                         <BreadcrumbLink asChild>
                           <Link to={item.href}>{item.label}</Link>
