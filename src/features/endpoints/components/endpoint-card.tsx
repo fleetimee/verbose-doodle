@@ -20,9 +20,10 @@ import { encodeId } from "@/lib/id-encoder";
 type EndpointCardProps = {
   endpoint: Endpoint;
   onClick?: () => void;
+  tourId?: string;
 };
 
-export function EndpointCard({ endpoint, onClick }: EndpointCardProps) {
+export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
   const navigate = useNavigate();
   const { prefetchEndpoint } = usePrefetchEndpoint();
 
@@ -42,16 +43,17 @@ export function EndpointCard({ endpoint, onClick }: EndpointCardProps) {
   return (
     <Item
       asChild
-      className="cursor-pointer rounded-lg border bg-card shadow-sm transition-shadow hover:shadow-md"
+      className="min-h-28 w-full cursor-pointer items-start gap-4 rounded-lg border border-border/60 bg-card/95 p-4 shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
       size="default"
       variant="default"
     >
       <button
+        id={tourId}
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         type="button"
       >
-        <ItemMedia variant="default">
+        <ItemMedia className="pt-0.5" variant="default">
           <span
             className={`rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
               endpoint.method
@@ -60,9 +62,11 @@ export function EndpointCard({ endpoint, onClick }: EndpointCardProps) {
             {abbreviateMethod(endpoint.method)}
           </span>
         </ItemMedia>
-        <ItemContent>
-          <ItemTitle>
-            <span className="font-mono text-base">{endpoint.url}</span>
+        <ItemContent className="min-w-0 gap-1.5 text-left">
+          <ItemTitle className="w-full">
+            <span className="line-clamp-2 break-all font-mono text-base leading-snug">
+              {endpoint.url}
+            </span>
           </ItemTitle>
           <ItemDescription className="text-left">
             <div className="flex flex-col gap-0.5">
@@ -82,8 +86,8 @@ export function EndpointCard({ endpoint, onClick }: EndpointCardProps) {
             </div>
           </ItemDescription>
         </ItemContent>
-        <ItemActions>
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+        <ItemActions className="ml-auto self-center">
+          <ChevronRight className="text-muted-foreground transition-transform group-hover/item:translate-x-0.5" />
         </ItemActions>
       </button>
     </Item>

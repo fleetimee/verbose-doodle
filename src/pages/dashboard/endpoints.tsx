@@ -1,6 +1,7 @@
-import { Plug, Plus } from "lucide-react";
+import { CircleHelp, Plug, Plus } from "lucide-react";
 import { motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type TourStep, useTour } from "@/components/tour";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -13,6 +14,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Postman } from "@/components/ui/svgs/postman";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
+import { useAuth } from "@/features/auth/context";
+import { usePermissions } from "@/features/auth/hooks/use-permissions";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
 import { EndpointCard } from "@/features/endpoints/components/endpoint-card";
 import { EndpointCardSkeleton } from "@/features/endpoints/components/endpoint-card-skeleton";
@@ -48,6 +51,33 @@ const SKELETON_KEYS = Array.from(
 // Animation constants
 const STAGGER_BASE_DELAY = 0.4;
 const STAGGER_INCREMENT = 0.1;
+const ENDPOINTS_TOUR_ID = "endpoints-intro";
+const ENDPOINTS_TOUR_TARGETS = {
+  header: "endpoints-tour-header",
+  addEndpoint: "endpoints-tour-add-endpoint",
+  createFirstEndpoint: "endpoints-tour-create-first-endpoint",
+  search: "endpoints-tour-search",
+  viewMode: "endpoints-tour-view-mode",
+  export: "endpoints-tour-export",
+  firstEndpoint: "endpoints-tour-first-endpoint",
+} as const;
+
+function TourStepContent({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2 pr-10">
+      <h2 className="font-semibold text-base">{title}</h2>
+      <p className="text-muted-foreground text-sm leading-relaxed">
+        {description}
+      </p>
+    </div>
+  );
+}
 
 export function EndpointsPage() {
   useDocumentMeta({
@@ -58,6 +88,8 @@ export function EndpointsPage() {
 
   const { data: endpoints = [], isPending: isLoadingEndpoints } =
     useGetEndpoints();
+  const { authState } = useAuth();
+  const { can } = usePermissions({ role: authState.user?.role });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,6 +97,13 @@ export function EndpointsPage() {
     "endpoints-view-mode",
     "grid"
   );
+  const [hasSeenEndpointsTour, setHasSeenEndpointsTour] = useLocalStorage(
+    "endpoints-tour-seen",
+    false
+  );
+  const hasAutoStartedTour = useRef(false);
+  const shouldMarkTourSeenOnEnd = useRef(false);
+  const { activeTourId, isActive, setSteps, startTour } = useTour();
 
   const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
     useCreateEndpoint();
@@ -81,6 +120,7 @@ export function EndpointsPage() {
 
   const hasEndpoints = endpoints.length > 0;
   const hasFilteredEndpoints = groupedEndpoints.length > 0;
+  const canAddEndpoint = can("canAddEndpoint");
 
   const handleCreateEndpoint = () => {
     setIsDialogOpen(true);
@@ -98,6 +138,141 @@ export function EndpointsPage() {
     setIsExportDialogOpen(true);
   };
 
+  const tourSteps = useMemo<TourStep[]>(() => {
+    const baseSteps: TourStep[] = [
+      {
+        selectorId: ENDPOINTS_TOUR_TARGETS.header,
+        position: "bottom",
+        content: (
+          <TourStepContent
+            description={messages.endpoints.tour.workspaceDescription}
+            title={messages.endpoints.tour.workspaceTitle}
+          />
+        ),
+      },
+    ];
+
+    if (!hasEndpoints && canAddEndpoint) {
+      return [
+        ...baseSteps,
+        {
+          selectorId: ENDPOINTS_TOUR_TARGETS.createFirstEndpoint,
+          position: "top",
+          content: (
+            <TourStepContent
+              description={messages.endpoints.tour.createFirstDescription}
+              title={messages.endpoints.tour.createFirstTitle}
+            />
+          ),
+        },
+      ];
+    }
+
+    return [
+      ...baseSteps,
+      ...(canAddEndpoint
+        ? [
+            {
+              selectorId: ENDPOINTS_TOUR_TARGETS.addEndpoint,
+              position: "left" as const,
+              content: (
+                <TourStepContent
+                  description={messages.endpoints.tour.addEndpointDescription}
+                  title={messages.endpoints.tour.addEndpointTitle}
+                />
+              ),
+            },
+          ]
+        : []),
+      {
+        selectorId: ENDPOINTS_TOUR_TARGETS.search,
+        position: "bottom",
+        content: (
+          <TourStepContent
+            description={messages.endpoints.tour.searchDescription}
+            title={messages.endpoints.tour.searchTitle}
+          />
+        ),
+      },
+      {
+        selectorId: ENDPOINTS_TOUR_TARGETS.viewMode,
+        position: "bottom",
+        content: (
+          <TourStepContent
+            description={messages.endpoints.tour.viewModeDescription}
+            title={messages.endpoints.tour.viewModeTitle}
+          />
+        ),
+      },
+      {
+        selectorId: ENDPOINTS_TOUR_TARGETS.export,
+        position: "left",
+        content: (
+          <TourStepContent
+            description={messages.endpoints.tour.exportDescription}
+            title={messages.endpoints.tour.exportTitle}
+          />
+        ),
+      },
+      ...(hasFilteredEndpoints
+        ? [
+            {
+              selectorId: ENDPOINTS_TOUR_TARGETS.firstEndpoint,
+              position: "top" as const,
+              content: (
+                <TourStepContent
+                  description={messages.endpoints.tour.detailsDescription}
+                  title={messages.endpoints.tour.detailsTitle}
+                />
+              ),
+            },
+          ]
+        : []),
+    ];
+  }, [canAddEndpoint, hasEndpoints, hasFilteredEndpoints]);
+
+  const handleStartTour = useCallback(() => {
+    setSteps(tourSteps);
+    startTour(ENDPOINTS_TOUR_ID);
+  }, [setSteps, startTour, tourSteps]);
+
+  useEffect(() => {
+    if (
+      isLoadingEndpoints ||
+      hasSeenEndpointsTour ||
+      hasAutoStartedTour.current ||
+      tourSteps.length === 0
+    ) {
+      return;
+    }
+
+    hasAutoStartedTour.current = true;
+
+    const timeoutId = window.setTimeout(() => {
+      shouldMarkTourSeenOnEnd.current = true;
+      handleStartTour();
+    }, 350);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    handleStartTour,
+    hasSeenEndpointsTour,
+    isLoadingEndpoints,
+    setHasSeenEndpointsTour,
+    tourSteps.length,
+  ]);
+
+  useEffect(() => {
+    if (
+      shouldMarkTourSeenOnEnd.current &&
+      activeTourId === ENDPOINTS_TOUR_ID &&
+      !isActive
+    ) {
+      shouldMarkTourSeenOnEnd.current = false;
+      setHasSeenEndpointsTour(true);
+    }
+  }, [activeTourId, isActive, setHasSeenEndpointsTour]);
+
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
@@ -108,6 +283,7 @@ export function EndpointsPage() {
       <motion.div
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center justify-between"
+        id={ENDPOINTS_TOUR_TARGETS.header}
         initial={{ opacity: 0, y: 20 }}
         transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
       >
@@ -117,15 +293,30 @@ export function EndpointsPage() {
             {messages.endpoints.pageDescription}
           </p>
         </div>
-        <ProtectedAction ability="canAddEndpoint">
-          <AddEndpointSheet
-            isSubmitting={isCreatingEndpoint}
-            onOpenChange={setIsDialogOpen}
-            onSubmit={handleAddEndpoint}
-            open={isDialogOpen}
-            showTrigger={hasEndpoints}
-          />
-        </ProtectedAction>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleStartTour}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            <CircleHelp data-icon="inline-start" />
+            {messages.endpoints.tour.startButton}
+          </Button>
+          <ProtectedAction ability="canAddEndpoint">
+            <div
+              id={hasEndpoints ? ENDPOINTS_TOUR_TARGETS.addEndpoint : undefined}
+            >
+              <AddEndpointSheet
+                isSubmitting={isCreatingEndpoint}
+                onOpenChange={setIsDialogOpen}
+                onSubmit={handleAddEndpoint}
+                open={isDialogOpen}
+                showTrigger={hasEndpoints}
+              />
+            </div>
+          </ProtectedAction>
+        </div>
       </motion.div>
 
       {isLoadingEndpoints && (
@@ -135,12 +326,14 @@ export function EndpointsPage() {
               <EndpointsSearchControls
                 onSearchChange={setSearchTerm}
                 onViewModeChange={setViewMode}
+                searchId={ENDPOINTS_TOUR_TARGETS.search}
                 viewMode={viewMode}
+                viewModeId={ENDPOINTS_TOUR_TARGETS.viewMode}
               />
             </div>
             <Button disabled variant="outline">
               <Postman className="mr-2 h-4 w-4" />
-              Export to Postman
+              {messages.endpoints.exportToPostman}
             </Button>
           </div>
 
@@ -241,16 +434,19 @@ export function EndpointsPage() {
               <EndpointsSearchControls
                 onSearchChange={setSearchTerm}
                 onViewModeChange={setViewMode}
+                searchId={ENDPOINTS_TOUR_TARGETS.search}
                 viewMode={viewMode}
+                viewModeId={ENDPOINTS_TOUR_TARGETS.viewMode}
               />
             </div>
             <Button
               disabled={groupedEndpoints.length === 0}
+              id={ENDPOINTS_TOUR_TARGETS.export}
               onClick={handleOpenExportDialog}
               variant="outline"
             >
               <Postman className="mr-2 h-4 w-4" />
-              Export to Postman
+              {messages.endpoints.exportToPostman}
             </Button>
           </motion.div>
 
@@ -289,16 +485,29 @@ export function EndpointsPage() {
                   </div>
                   {viewMode === "grid" ? (
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                      {group.endpoints.map((endpoint) => (
-                        <EndpointCard endpoint={endpoint} key={endpoint.id} />
+                      {group.endpoints.map((endpoint, endpointIndex) => (
+                        <EndpointCard
+                          endpoint={endpoint}
+                          key={endpoint.id}
+                          tourId={
+                            index === 0 && endpointIndex === 0
+                              ? ENDPOINTS_TOUR_TARGETS.firstEndpoint
+                              : undefined
+                          }
+                        />
                       ))}
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {group.endpoints.map((endpoint) => (
+                      {group.endpoints.map((endpoint, endpointIndex) => (
                         <EndpointListItem
                           endpoint={endpoint}
                           key={endpoint.id}
+                          tourId={
+                            index === 0 && endpointIndex === 0
+                              ? ENDPOINTS_TOUR_TARGETS.firstEndpoint
+                              : undefined
+                          }
                         />
                       ))}
                     </div>
@@ -348,7 +557,10 @@ export function EndpointsPage() {
             </EmptyHeader>
             <EmptyContent>
               <ProtectedAction ability="canAddEndpoint">
-                <Button onClick={handleCreateEndpoint}>
+                <Button
+                  id={ENDPOINTS_TOUR_TARGETS.createFirstEndpoint}
+                  onClick={handleCreateEndpoint}
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   {messages.endpoints.createFirstButton}
                 </Button>

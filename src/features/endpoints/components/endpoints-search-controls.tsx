@@ -9,6 +9,8 @@ type EndpointsSearchControlsProps = {
   searchPlaceholder?: string;
   onViewModeChange?: (viewMode: "grid" | "list") => void;
   viewMode?: "grid" | "list";
+  searchId?: string;
+  viewModeId?: string;
 };
 
 export function EndpointsSearchControls({
@@ -16,6 +18,8 @@ export function EndpointsSearchControls({
   searchPlaceholder = messages.endpoints.searchPlaceholder,
   onViewModeChange,
   viewMode,
+  searchId,
+  viewModeId,
 }: EndpointsSearchControlsProps) {
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSearchChange?.(event.target.value);
@@ -29,7 +33,7 @@ export function EndpointsSearchControls({
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <div className="relative min-w-[220px] flex-1">
+      <div className="relative min-w-[220px] flex-1" id={searchId}>
         <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           className="pl-9"
@@ -40,6 +44,7 @@ export function EndpointsSearchControls({
       {onViewModeChange && viewMode ? (
         <ToggleGroup
           aria-label={messages.endpoints.viewAriaLabel}
+          id={viewModeId}
           onValueChange={handleViewModeChange}
           type="single"
           value={viewMode}

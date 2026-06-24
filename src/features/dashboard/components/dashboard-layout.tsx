@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useParams } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { TourProvider } from "@/components/tour";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -67,48 +68,50 @@ export function DashboardLayout() {
     theme === "light" || theme === "dark" ? theme : undefined;
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="overflow-hidden border border-border/70 bg-card shadow-sm">
-        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-3 border-b bg-card/95 px-4 backdrop-blur supports-backdrop-filter:bg-card/80">
-          <SidebarTrigger className="-ml-1 rounded-md" />
-          <Separator
-            className="mr-2 data-[orientation=vertical]:h-4"
-            orientation="vertical"
-          />
-          <Breadcrumb>
-            <BreadcrumbList>
-              {breadcrumbItems.map((item) => (
-                <React.Fragment key={item.href}>
-                  <BreadcrumbItem
-                    className={item.isLast ? "" : "hidden md:block"}
-                  >
-                    {item.isLast ? (
-                      <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                    ) : (
-                      <BreadcrumbLink asChild>
-                        <Link to={item.href}>{item.label}</Link>
-                      </BreadcrumbLink>
+    <TourProvider closeable>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset className="overflow-hidden border border-border/70 bg-card shadow-sm">
+          <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-3 border-b bg-card/95 px-4 backdrop-blur supports-backdrop-filter:bg-card/80">
+            <SidebarTrigger className="-ml-1 rounded-md" />
+            <Separator
+              className="mr-2 data-[orientation=vertical]:h-4"
+              orientation="vertical"
+            />
+            <Breadcrumb>
+              <BreadcrumbList>
+                {breadcrumbItems.map((item) => (
+                  <React.Fragment key={item.href}>
+                    <BreadcrumbItem
+                      className={item.isLast ? "" : "hidden md:block"}
+                    >
+                      {item.isLast ? (
+                        <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                      ) : (
+                        <BreadcrumbLink asChild>
+                          <Link to={item.href}>{item.label}</Link>
+                        </BreadcrumbLink>
+                      )}
+                    </BreadcrumbItem>
+                    {!item.isLast && (
+                      <BreadcrumbSeparator className="hidden md:block" />
                     )}
-                  </BreadcrumbItem>
-                  {!item.isLast && (
-                    <BreadcrumbSeparator className="hidden md:block" />
-                  )}
-                </React.Fragment>
-              ))}
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="ml-auto">
-            <ThemeSwitcher onChange={setTheme} value={themeSwitcherValue} />
-          </div>
-        </header>
-        <main className="flex flex-1 flex-col gap-4 overflow-auto bg-background/70 p-4 md:p-6">
-          <Suspense fallback={<DashboardPageFallback />}>
-            <Outlet />
-          </Suspense>
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+                  </React.Fragment>
+                ))}
+              </BreadcrumbList>
+            </Breadcrumb>
+            <div className="ml-auto">
+              <ThemeSwitcher onChange={setTheme} value={themeSwitcherValue} />
+            </div>
+          </header>
+          <main className="flex flex-1 flex-col gap-4 overflow-auto bg-background/70 p-4 md:p-6">
+            <Suspense fallback={<DashboardPageFallback />}>
+              <Outlet />
+            </Suspense>
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </TourProvider>
   );
 }
 

@@ -20,9 +20,14 @@ import { encodeId } from "@/lib/id-encoder";
 type EndpointListItemProps = {
   endpoint: Endpoint;
   onClick?: () => void;
+  tourId?: string;
 };
 
-export function EndpointListItem({ endpoint, onClick }: EndpointListItemProps) {
+export function EndpointListItem({
+  endpoint,
+  onClick,
+  tourId,
+}: EndpointListItemProps) {
   const navigate = useNavigate();
   const { prefetchEndpoint } = usePrefetchEndpoint();
 
@@ -48,6 +53,7 @@ export function EndpointListItem({ endpoint, onClick }: EndpointListItemProps) {
     >
       <button
         className="w-full"
+        id={tourId}
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         type="button"
@@ -61,9 +67,9 @@ export function EndpointListItem({ endpoint, onClick }: EndpointListItemProps) {
             {abbreviateMethod(endpoint.method)}
           </span>
         </ItemMedia>
-        <ItemContent>
-          <ItemTitle>
-            <span className="font-mono text-base">{endpoint.url}</span>
+        <ItemContent className="min-w-0">
+          <ItemTitle className="w-full">
+            <span className="truncate font-mono text-base">{endpoint.url}</span>
           </ItemTitle>
           <ItemDescription className="text-left">
             <div className="flex flex-col gap-0.5">

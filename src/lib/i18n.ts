@@ -269,6 +269,30 @@ export const messages = {
     exportToPostman: "Export to Postman",
     exportToPostmanDescription:
       "Select which biller groups you want to export. Both the collection and environment files will be downloaded. The environment includes the base URL configured in your application.",
+    tour: {
+      startButton: "Start tour",
+      workspaceTitle: "Endpoint workspace",
+      workspaceDescription:
+        "This is the main workspace for managing simulated biller API endpoints.",
+      createFirstTitle: "Create the first endpoint",
+      createFirstDescription:
+        "Start here when the workspace is empty. This opens the endpoint form so you can define the first simulated API.",
+      addEndpointTitle: "Add endpoints",
+      addEndpointDescription:
+        "Use this to add another endpoint with a biller, method, path, and responses.",
+      searchTitle: "Search endpoints",
+      searchDescription:
+        "Filter the endpoint catalog quickly by URL, method, biller, or response details.",
+      viewModeTitle: "Change the view",
+      viewModeDescription:
+        "Switch between grid and list layouts depending on whether you want cards or denser scanning.",
+      exportTitle: "Export to Postman",
+      exportDescription:
+        "Export the visible endpoint groups into a Postman collection for quick testing.",
+      detailsTitle: "Open endpoint details",
+      detailsDescription:
+        "Open an endpoint to edit its method or URL, add responses, and inspect traffic logs.",
+    },
     methodLabel: "Method",
     methodPlaceholder: "Select method",
     methodDescription:
