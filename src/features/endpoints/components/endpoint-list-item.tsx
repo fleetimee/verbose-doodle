@@ -8,13 +8,13 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
+import { EndpointMetaStrip } from "@/features/endpoints/components/endpoint-meta-strip";
 import { usePrefetchEndpoint } from "@/features/endpoints/hooks/use-prefetch-endpoint";
 import type { Endpoint } from "@/features/endpoints/types";
 import {
   abbreviateMethod,
   getMethodBadgeColor,
 } from "@/features/endpoints/utils/http-method-colors";
-import { formatPluralMessage, messages } from "@/lib/i18n";
 import { encodeId } from "@/lib/id-encoder";
 
 type EndpointListItemProps = {
@@ -72,21 +72,10 @@ export function EndpointListItem({
             <span className="truncate font-mono text-base">{endpoint.url}</span>
           </ItemTitle>
           <ItemDescription className="text-left">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-muted-foreground text-xs">
-                Biller ID: {endpoint.billerId}
-              </span>
-              {endpoint.responses.length > 0 ? (
-                <span>
-                  {formatPluralMessage(
-                    messages.endpoints.responseCount,
-                    endpoint.responses.length
-                  )}
-                </span>
-              ) : (
-                <span>{messages.endpoints.noConfiguredResponses}</span>
-              )}
-            </div>
+            <EndpointMetaStrip
+              billerId={endpoint.billerId}
+              responseCount={endpoint.responses.length}
+            />
           </ItemDescription>
         </ItemContent>
         <ItemActions className="ml-auto">

@@ -1,5 +1,5 @@
-import { CircleHelp, Plug, Plus } from "lucide-react";
-import { motion } from "motion/react";
+import { CircleHelp, Layers3, Plug, Plus } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type TourStep, useTour } from "@/components/tour";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ import { ExportEndpointsDialog } from "@/features/endpoints/components/export-en
 import { useCreateEndpoint } from "@/features/endpoints/hooks/use-create-endpoint";
 import { useGetEndpoints } from "@/features/endpoints/hooks/use-get-endpoints";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
+import type { Endpoint, GroupedEndpoints } from "@/features/endpoints/types";
 import {
   filterEndpoints,
   groupEndpointsByBiller,
@@ -51,6 +52,8 @@ const SKELETON_KEYS = Array.from(
 // Animation constants
 const STAGGER_BASE_DELAY = 0.4;
 const STAGGER_INCREMENT = 0.1;
+const VIEW_ITEM_STAGGER = 0.035;
+const VIEW_ITEM_STAGGER_LIMIT = 9;
 const ENDPOINTS_TOUR_ID = "endpoints-intro";
 const ENDPOINTS_TOUR_TARGETS = {
   header: "endpoints-tour-header",
@@ -61,6 +64,8 @@ const ENDPOINTS_TOUR_TARGETS = {
   export: "endpoints-tour-export",
   firstEndpoint: "endpoints-tour-first-endpoint",
 } as const;
+
+type EndpointViewMode = "grid" | "list";
 
 function TourStepContent({
   title,
@@ -75,6 +80,198 @@ function TourStepContent({
       <p className="text-muted-foreground text-sm leading-relaxed">
         {description}
       </p>
+    </div>
+  );
+}
+
+function ViewModeSweep({ viewMode }: { viewMode: EndpointViewMode }) {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 overflow-hidden">
+      <motion.div
+        animate={{
+          opacity: [0, 1, 0],
+          scaleX: [0.15, 1, 0.75],
+          y: [-8, 42, 96],
+        }}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent shadow-[0_0_28px_hsl(var(--primary)/0.45)]"
+        exit={{ opacity: 0 }}
+        initial={{ opacity: 0, scaleX: 0.15, y: -8 }}
+        key={`sweep-${viewMode}`}
+        transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+      />
+    </div>
+  );
+}
+
+type AnimatedEndpointGroupProps = {
+  readonly group: GroupedEndpoints;
+  readonly groupIndex: number;
+  readonly prefersReducedMotion: boolean;
+  readonly viewMode: EndpointViewMode;
+};
+
+type AnimatedEndpointItemsProps = {
+  readonly endpoints: Endpoint[];
+  readonly groupIndex: number;
+  readonly prefersReducedMotion: boolean;
+};
+
+function getEndpointTourId(groupIndex: number, endpointIndex: number) {
+  return groupIndex === 0 && endpointIndex === 0
+    ? ENDPOINTS_TOUR_TARGETS.firstEndpoint
+    : undefined;
+}
+
+function getViewItemDelay(
+  endpointIndex: number,
+  prefersReducedMotion: boolean
+) {
+  if (prefersReducedMotion) {
+    return 0;
+  }
+
+  return Math.min(endpointIndex, VIEW_ITEM_STAGGER_LIMIT) * VIEW_ITEM_STAGGER;
+}
+
+function AnimatedGridEndpoints({
+  endpoints,
+  groupIndex,
+  prefersReducedMotion,
+}: AnimatedEndpointItemsProps) {
+  return (
+    <motion.div
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+      exit={{
+        opacity: 0,
+        scale: prefersReducedMotion ? 1 : 0.98,
+        y: prefersReducedMotion ? 0 : -10,
+      }}
+      initial={{
+        opacity: 0,
+        scale: prefersReducedMotion ? 1 : 0.96,
+        y: prefersReducedMotion ? 0 : 14,
+      }}
+      key="grid"
+      layout
+      transition={{
+        duration: prefersReducedMotion ? 0.12 : 0.34,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+    >
+      {endpoints.map((endpoint, endpointIndex) => (
+        <motion.div
+          animate={{ opacity: 1, rotateX: 0, y: 0 }}
+          exit={{
+            opacity: 0,
+            rotateX: prefersReducedMotion ? 0 : 8,
+            y: prefersReducedMotion ? 0 : -10,
+          }}
+          initial={{
+            opacity: 0,
+            rotateX: prefersReducedMotion ? 0 : -10,
+            y: prefersReducedMotion ? 0 : 18,
+          }}
+          key={endpoint.id}
+          layout
+          transition={{
+            delay: getViewItemDelay(endpointIndex, prefersReducedMotion),
+            duration: prefersReducedMotion ? 0.1 : 0.32,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+        >
+          <EndpointCard
+            endpoint={endpoint}
+            tourId={getEndpointTourId(groupIndex, endpointIndex)}
+          />
+        </motion.div>
+      ))}
+    </motion.div>
+  );
+}
+
+function AnimatedListEndpoints({
+  endpoints,
+  groupIndex,
+  prefersReducedMotion,
+}: AnimatedEndpointItemsProps) {
+  return (
+    <motion.div
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      className="space-y-3"
+      exit={{
+        opacity: 0,
+        scale: prefersReducedMotion ? 1 : 1.01,
+        y: prefersReducedMotion ? 0 : 10,
+      }}
+      initial={{
+        opacity: 0,
+        scale: prefersReducedMotion ? 1 : 1.02,
+        y: prefersReducedMotion ? 0 : -14,
+      }}
+      key="list"
+      layout
+      transition={{
+        duration: prefersReducedMotion ? 0.12 : 0.34,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+    >
+      {endpoints.map((endpoint, endpointIndex) => (
+        <motion.div
+          animate={{ opacity: 1, x: 0 }}
+          exit={{
+            opacity: 0,
+            x: prefersReducedMotion ? 0 : 18,
+          }}
+          initial={{
+            opacity: 0,
+            x: prefersReducedMotion ? 0 : -18,
+          }}
+          key={endpoint.id}
+          layout
+          transition={{
+            delay: getViewItemDelay(endpointIndex, prefersReducedMotion),
+            duration: prefersReducedMotion ? 0.1 : 0.28,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+        >
+          <EndpointListItem
+            endpoint={endpoint}
+            tourId={getEndpointTourId(groupIndex, endpointIndex)}
+          />
+        </motion.div>
+      ))}
+    </motion.div>
+  );
+}
+
+function AnimatedEndpointGroup({
+  group,
+  groupIndex,
+  prefersReducedMotion,
+  viewMode,
+}: AnimatedEndpointGroupProps) {
+  return (
+    <div className="relative rounded-lg">
+      {!prefersReducedMotion && <ViewModeSweep viewMode={viewMode} />}
+      <AnimatePresence initial={false} mode="popLayout">
+        {viewMode === "grid" ? (
+          <AnimatedGridEndpoints
+            endpoints={group.endpoints}
+            groupIndex={groupIndex}
+            key="grid"
+            prefersReducedMotion={prefersReducedMotion}
+          />
+        ) : (
+          <AnimatedListEndpoints
+            endpoints={group.endpoints}
+            groupIndex={groupIndex}
+            key="list"
+            prefersReducedMotion={prefersReducedMotion}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -104,6 +301,8 @@ export function EndpointsPage() {
   const hasAutoStartedTour = useRef(false);
   const shouldMarkTourSeenOnEnd = useRef(false);
   const { activeTourId, isActive, setSteps, startTour } = useTour();
+  const prefersReducedMotion = useReducedMotion();
+  const shouldReduceMotion = prefersReducedMotion ?? false;
 
   const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
     useCreateEndpoint();
@@ -479,39 +678,18 @@ export function EndpointsPage() {
                     <h2 className="font-semibold text-lg">
                       {group.billerName}
                     </h2>
-                    <span className="text-muted-foreground text-sm">
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-muted/35 px-2.5 py-1 font-medium text-muted-foreground text-xs">
+                      <Layers3 className="h-3.5 w-3.5" />
                       {group.endpoints.length} endpoint
+                      {group.endpoints.length === 1 ? "" : "s"}
                     </span>
                   </div>
-                  {viewMode === "grid" ? (
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                      {group.endpoints.map((endpoint, endpointIndex) => (
-                        <EndpointCard
-                          endpoint={endpoint}
-                          key={endpoint.id}
-                          tourId={
-                            index === 0 && endpointIndex === 0
-                              ? ENDPOINTS_TOUR_TARGETS.firstEndpoint
-                              : undefined
-                          }
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {group.endpoints.map((endpoint, endpointIndex) => (
-                        <EndpointListItem
-                          endpoint={endpoint}
-                          key={endpoint.id}
-                          tourId={
-                            index === 0 && endpointIndex === 0
-                              ? ENDPOINTS_TOUR_TARGETS.firstEndpoint
-                              : undefined
-                          }
-                        />
-                      ))}
-                    </div>
-                  )}
+                  <AnimatedEndpointGroup
+                    group={group}
+                    groupIndex={index}
+                    prefersReducedMotion={shouldReduceMotion}
+                    viewMode={viewMode}
+                  />
                 </motion.section>
               ))}
             </motion.div>

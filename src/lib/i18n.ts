@@ -269,6 +269,37 @@ export const messages = {
     exportToPostman: "Export to Postman",
     exportToPostmanDescription:
       "Select which biller groups you want to export. Both the collection and environment files will be downloaded. The environment includes the base URL configured in your application.",
+    postmanExport: {
+      activeLabel: "Active",
+      billersLabel: "Billers",
+      cancelButton: "Cancel",
+      clearButton: "Clear",
+      collectionEnvironmentBadge: "Collection + environment",
+      collectionFilenameFallback: "postman-export",
+      collectionNameLabel: "Collection name",
+      defaultCollectionName: "Fleetime Labs API",
+      defaultEnvironmentName: "Fleetime Labs",
+      description:
+        "Build a clean Postman collection and matching environment file from the billers you select.",
+      downloadManifestDescription:
+        "Collection requests use the generated environment baseUrl variable.",
+      downloadManifestTitle: "Download manifest",
+      endpointsLabel: "Endpoints",
+      environmentNameLabel: "Environment name",
+      exportButton: "Export Postman files",
+      methodCoverageDescription: "Selected requests grouped by HTTP method.",
+      methodCoverageTitle: "Method coverage",
+      noSearchResults: "No billers or endpoints match this search.",
+      packagedFolder: {
+        one: "{count} endpoint packaged as a Postman folder",
+        other: "{count} endpoints packaged as a Postman folder",
+      },
+      responsesLabel: "Responses",
+      searchPlaceholder: "Search biller or endpoint path",
+      selectAllBillers: "Select all billers",
+      selectVisibleButton: "Select visible",
+      visibleSelected: "{selected}/{total} visible selected",
+    },
     tour: {
       startButton: "Start tour",
       workspaceTitle: "Endpoint workspace",
