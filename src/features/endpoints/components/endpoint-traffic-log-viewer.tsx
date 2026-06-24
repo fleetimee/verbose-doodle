@@ -59,6 +59,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { getAuthToken } from "@/features/auth/utils";
+import { UserAgentClientBadge } from "@/features/endpoints/components/user-agent-client-badge";
 import { useClearEndpointTrafficLogs } from "@/features/endpoints/hooks/use-clear-endpoint-traffic-logs";
 import { useGetEndpointTrafficLogDetail } from "@/features/endpoints/hooks/use-get-endpoint-traffic-log-detail";
 import { useGetEndpointTrafficLogs } from "@/features/endpoints/hooks/use-get-endpoint-traffic-logs";
@@ -454,6 +455,10 @@ export function EndpointTrafficLogViewer({
             <span className="font-mono text-slate-500 dark:text-slate-400">
               USER AGENT
             </span>
+            <UserAgentClientBadge
+              className="justify-self-end"
+              userAgent={selectedLogDetail.userAgent}
+            />
             <span className="max-w-[420px] truncate text-slate-800 dark:text-slate-200">
               {selectedLogDetail.userAgent ?? "-"}
             </span>

@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { CodeLanguageOption } from "@/features/endpoints/components/code-language-option";
 import type { EndpointResponse } from "@/features/endpoints/types";
 import {
   CODE_LANGUAGE_LABELS,
@@ -149,12 +150,14 @@ export function CodeGeneratorDialog({
                 value={selectedLanguage}
               >
                 <SelectTrigger className="w-[240px]" id="language">
-                  <SelectValue />
+                  <SelectValue>
+                    <CodeLanguageOption language={selectedLanguage} />
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {CODE_LANGUAGES.map((lang) => (
                     <SelectItem key={lang} value={lang}>
-                      {CODE_LANGUAGE_LABELS[lang]}
+                      <CodeLanguageOption language={lang} />
                     </SelectItem>
                   ))}
                 </SelectContent>
