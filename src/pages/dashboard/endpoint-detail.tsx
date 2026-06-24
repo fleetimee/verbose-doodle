@@ -622,10 +622,12 @@ export function EndpointDetailPage() {
       >
         <div className="flex items-start gap-3 md:items-center md:gap-4">
           <Button
-            className="mt-1 md:mt-0"
+            aria-label="Back to Endpoints"
+            className="mt-1 bg-background/80 shadow-xs md:mt-0"
             onClick={handleBack}
-            size="icon"
-            variant="ghost"
+            size="icon-sm"
+            type="button"
+            variant="outline"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
