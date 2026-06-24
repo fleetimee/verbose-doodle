@@ -79,6 +79,7 @@ type EndpointTrafficLogViewerProps = {
   readonly endpointId: string;
   readonly hasActiveResponse: boolean;
   readonly responseCount: number;
+  readonly tourId?: string;
 };
 
 type LogDownloadFormat = "text" | "csv" | "json";
@@ -195,6 +196,7 @@ export function EndpointTrafficLogViewer({
   endpointId,
   hasActiveResponse,
   responseCount,
+  tourId,
 }: EndpointTrafficLogViewerProps) {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [wrapLines, setWrapLines] = useState(false);
@@ -516,7 +518,7 @@ export function EndpointTrafficLogViewer({
   }
 
   return (
-    <section className="flex min-w-0 flex-col gap-3">
+    <section className="flex min-w-0 flex-col gap-3" id={tourId}>
       <div className="flex flex-col gap-4 rounded-lg border bg-card p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>

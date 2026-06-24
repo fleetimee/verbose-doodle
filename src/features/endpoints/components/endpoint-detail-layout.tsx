@@ -26,6 +26,8 @@ type EndpointDetailLayoutProps = {
   onDeactivateResponse: (response: EndpointResponse) => void;
   endpointUrl?: string;
   endpointMethod?: HttpMethod;
+  previewTourId?: string;
+  responsesTourId?: string;
 };
 
 export function EndpointDetailLayout({
@@ -39,6 +41,8 @@ export function EndpointDetailLayout({
   onDeactivateResponse,
   endpointUrl,
   endpointMethod,
+  previewTourId,
+  responsesTourId,
 }: EndpointDetailLayoutProps) {
   return (
     <>
@@ -79,7 +83,7 @@ export function EndpointDetailLayout({
       {/* Desktop: Resizable panels */}
       <Card className="hidden overflow-hidden md:block">
         <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel defaultSize={35} minSize={25}>
+          <ResizablePanel defaultSize={35} id={responsesTourId} minSize={25}>
             <ResponseList
               isActivating={isActivating}
               isDeactivating={isDeactivating}
@@ -93,7 +97,7 @@ export function EndpointDetailLayout({
 
           <ResizableHandle withHandle />
 
-          <ResizablePanel defaultSize={65} minSize={35}>
+          <ResizablePanel defaultSize={65} id={previewTourId} minSize={35}>
             <Suspense fallback={<ResponsePreviewFallback />}>
               <ResponsePreview
                 endpointMethod={endpointMethod}

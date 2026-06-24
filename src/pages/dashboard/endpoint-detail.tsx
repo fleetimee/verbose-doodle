@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   Check,
   Circle,
+  CircleHelp,
   Hash,
   List,
   Pen,
@@ -10,9 +11,10 @@ import {
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
+import { type TourStep, useTour } from "@/components/tour";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -67,6 +69,7 @@ import {
   getMethodTextColor,
 } from "@/features/endpoints/utils/http-method-colors";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { messages } from "@/lib/i18n";
 import { decodeId } from "@/lib/id-encoder";
 
@@ -81,6 +84,32 @@ const HTTP_METHODS: readonly HttpMethod[] = [
   "PATCH",
   "DELETE",
 ];
+const ENDPOINT_DETAIL_TOUR_ID = "endpoint-detail-intro";
+const ENDPOINT_DETAIL_TOUR_TARGETS = {
+  header: "endpoint-detail-tour-header",
+  editActions: "endpoint-detail-tour-edit-actions",
+  addResponse: "endpoint-detail-tour-add-response",
+  responses: "endpoint-detail-tour-responses",
+  preview: "endpoint-detail-tour-preview",
+  trafficLogs: "endpoint-detail-tour-traffic-logs",
+} as const;
+
+function TourStepContent({
+  title,
+  description,
+}: {
+  readonly title: string;
+  readonly description: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2 pr-10">
+      <h2 className="font-semibold text-base">{title}</h2>
+      <p className="text-muted-foreground text-sm leading-relaxed">
+        {description}
+      </p>
+    </div>
+  );
+}
 
 export function EndpointDetailPage() {
   const { id: encodedId } = useParams<{ id: string }>();
@@ -106,7 +135,12 @@ export function EndpointDetailPage() {
   const [editedMethod, setEditedMethod] = useState<HttpMethod>("GET");
   const [showDeleteEndpointDialog, setShowDeleteEndpointDialog] =
     useState(false);
+  const [hasSeenEndpointDetailTour, setHasSeenEndpointDetailTour] =
+    useLocalStorage("endpoint-detail-tour-seen", false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const hasAutoStartedTour = useRef(false);
+  const shouldMarkTourSeenOnEnd = useRef(false);
+  const { activeTourId, isActive, setSteps, startTour } = useTour();
 
   const { data: endpoint, isPending: isLoadingEndpoint } = useGetEndpoint(
     decodedId ?? ""
@@ -133,6 +167,130 @@ export function EndpointDetailPage() {
     }
     return endpoint.responses.find((r) => r.id === selectedResponseId) ?? null;
   }, [endpoint, selectedResponseId]);
+
+  const tourSteps = useMemo<TourStep[]>(() => {
+    if (!endpoint) {
+      return [];
+    }
+
+    return [
+      {
+        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.header,
+        position: "bottom",
+        content: (
+          <TourStepContent
+            description={messages.endpoints.detailTour.headerDescription}
+            title={messages.endpoints.detailTour.headerTitle}
+          />
+        ),
+      },
+      ...(can("canEditEndpoint")
+        ? [
+            {
+              selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.editActions,
+              position: "bottom" as const,
+              content: (
+                <TourStepContent
+                  description={
+                    messages.endpoints.detailTour.editActionsDescription
+                  }
+                  title={messages.endpoints.detailTour.editActionsTitle}
+                />
+              ),
+            },
+          ]
+        : []),
+      ...(canAddResponse
+        ? [
+            {
+              selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.addResponse,
+              position: "left" as const,
+              content: (
+                <TourStepContent
+                  description={
+                    messages.endpoints.detailTour.addResponseDescription
+                  }
+                  title={messages.endpoints.detailTour.addResponseTitle}
+                />
+              ),
+            },
+          ]
+        : []),
+      {
+        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.responses,
+        position: "right",
+        content: (
+          <TourStepContent
+            description={messages.endpoints.detailTour.responsesDescription}
+            title={messages.endpoints.detailTour.responsesTitle}
+          />
+        ),
+      },
+      {
+        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.preview,
+        position: "left",
+        content: (
+          <TourStepContent
+            description={messages.endpoints.detailTour.previewDescription}
+            title={messages.endpoints.detailTour.previewTitle}
+          />
+        ),
+      },
+      {
+        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.trafficLogs,
+        position: "top",
+        content: (
+          <TourStepContent
+            description={messages.endpoints.detailTour.trafficLogsDescription}
+            title={messages.endpoints.detailTour.trafficLogsTitle}
+          />
+        ),
+      },
+    ];
+  }, [can, canAddResponse, endpoint]);
+
+  const handleStartTour = useCallback(() => {
+    setSteps(tourSteps);
+    startTour(ENDPOINT_DETAIL_TOUR_ID);
+  }, [setSteps, startTour, tourSteps]);
+
+  useEffect(() => {
+    if (
+      isLoadingEndpoint ||
+      !endpoint ||
+      hasSeenEndpointDetailTour ||
+      hasAutoStartedTour.current ||
+      tourSteps.length === 0
+    ) {
+      return;
+    }
+
+    hasAutoStartedTour.current = true;
+
+    const timeoutId = window.setTimeout(() => {
+      shouldMarkTourSeenOnEnd.current = true;
+      handleStartTour();
+    }, 350);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    endpoint,
+    handleStartTour,
+    hasSeenEndpointDetailTour,
+    isLoadingEndpoint,
+    tourSteps.length,
+  ]);
+
+  useEffect(() => {
+    if (
+      shouldMarkTourSeenOnEnd.current &&
+      activeTourId === ENDPOINT_DETAIL_TOUR_ID &&
+      !isActive
+    ) {
+      shouldMarkTourSeenOnEnd.current = false;
+      setHasSeenEndpointDetailTour(true);
+    }
+  }, [activeTourId, isActive, setHasSeenEndpointDetailTour]);
 
   const handleBack = () => {
     navigate("/dashboard/endpoints");
@@ -454,6 +612,7 @@ export function EndpointDetailPage() {
       <motion.div
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        id={ENDPOINT_DETAIL_TOUR_TARGETS.header}
         initial={{ opacity: 0, y: 20 }}
         transition={{
           duration: PAGE_ANIMATION_DURATION,
@@ -603,7 +762,10 @@ export function EndpointDetailPage() {
                       {endpoint.url}
                     </h1>
                     <ProtectedAction ability="canEditEndpoint">
-                      <div className="flex items-center gap-1">
+                      <div
+                        className="flex items-center gap-1"
+                        id={ENDPOINT_DETAIL_TOUR_TARGETS.editActions}
+                      >
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
@@ -668,12 +830,28 @@ export function EndpointDetailPage() {
             </div>
           </div>
         </div>
-        <ProtectedAction ability="canAddResponse">
-          <Button onClick={() => setIsStepperOpen(true)} size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Response
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            onClick={handleStartTour}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            <CircleHelp data-icon="inline-start" />
+            {messages.endpoints.tour.startButton}
           </Button>
-        </ProtectedAction>
+          <ProtectedAction ability="canAddResponse">
+            <Button
+              id={ENDPOINT_DETAIL_TOUR_TARGETS.addResponse}
+              onClick={() => setIsStepperOpen(true)}
+              size="sm"
+              type="button"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Response
+            </Button>
+          </ProtectedAction>
+        </div>
       </motion.div>
 
       <motion.div
@@ -693,7 +871,9 @@ export function EndpointDetailPage() {
           onActivateResponse={handleActivateResponse}
           onDeactivateResponse={handleDeactivateResponse}
           onSelectResponse={setSelectedResponseId}
+          previewTourId={ENDPOINT_DETAIL_TOUR_TARGETS.preview}
           responses={endpoint.responses}
+          responsesTourId={ENDPOINT_DETAIL_TOUR_TARGETS.responses}
           selectedResponse={selectedResponse}
           selectedResponseId={selectedResponseId}
         />
@@ -714,6 +894,7 @@ export function EndpointDetailPage() {
             (response) => response.activated
           )}
           responseCount={endpoint.responses.length}
+          tourId={ENDPOINT_DETAIL_TOUR_TARGETS.trafficLogs}
         />
       </motion.div>
 

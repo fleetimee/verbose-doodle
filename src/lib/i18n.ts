@@ -293,6 +293,26 @@ export const messages = {
       detailsDescription:
         "Open an endpoint to edit its method or URL, add responses, and inspect traffic logs.",
     },
+    detailTour: {
+      headerTitle: "Endpoint details",
+      headerDescription:
+        "This header shows the endpoint method, path, biller ID, response count, and quick actions.",
+      editActionsTitle: "Edit endpoint",
+      editActionsDescription:
+        "Use these controls to update the endpoint method or path, or remove the endpoint when it is no longer needed.",
+      addResponseTitle: "Add responses",
+      addResponseDescription:
+        "Create another response variant for this endpoint, including status code, JSON body, delay, and timeout simulation.",
+      responsesTitle: "Manage responses",
+      responsesDescription:
+        "Select a response, activate the one the simulator should return, or switch between active and inactive variants.",
+      previewTitle: "Preview the result",
+      previewDescription:
+        "Review the selected response body, copy the simulator URL, and generate request code for quick testing.",
+      trafficLogsTitle: "Inspect traffic",
+      trafficLogsDescription:
+        "Watch requests that hit this endpoint, filter by status, copy or download logs, and open individual request details.",
+    },
     methodLabel: "Method",
     methodPlaceholder: "Select method",
     methodDescription:
