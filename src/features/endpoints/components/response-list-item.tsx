@@ -2,6 +2,7 @@ import {
   CheckCircle2,
   Circle,
   FileJson,
+  Hash,
   Pen,
   TextCursor,
   Timer,
@@ -282,7 +283,7 @@ export function ResponseListItem({
                     <TooltipTrigger asChild>
                       <Button
                         aria-label={editButtonTitle}
-                        className="bg-background/80 shadow-xs"
+                        className="cursor-pointer bg-background/80 shadow-xs"
                         disabled={!isSelected}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -316,9 +317,7 @@ export function ResponseListItem({
                       handleEditClick("statusCode");
                     }}
                   >
-                    <Badge className="flex h-4 w-4 items-center justify-center p-0 text-[10px]">
-                      200
-                    </Badge>
+                    <Hash className="h-4 w-4" />
                     Edit Status Code
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -347,7 +346,7 @@ export function ResponseListItem({
                 <TooltipTrigger asChild>
                   <Button
                     aria-label={simulateButtonTitle}
-                    className="bg-background/80 shadow-xs"
+                    className="cursor-pointer bg-background/80 shadow-xs"
                     disabled={!isSelected}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -368,7 +367,10 @@ export function ResponseListItem({
                 <TooltipTrigger asChild>
                   <Button
                     aria-label={activationButtonTitle}
-                    className={getActivationButtonClasses(isActive, isLoading)}
+                    className={cn(
+                      "cursor-pointer",
+                      getActivationButtonClasses(isActive, isLoading)
+                    )}
                     disabled={isLoading}
                     onClick={(e) => {
                       e.stopPropagation();
