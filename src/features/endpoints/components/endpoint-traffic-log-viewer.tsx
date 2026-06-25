@@ -668,7 +668,7 @@ export function EndpointTrafficLogViewer({
           </div>
 
           <div className="grid gap-3">
-            <div className="grid gap-3 sm:grid-cols-[280px_1fr]">
+            <div className="grid items-center gap-3 sm:grid-cols-[280px_1fr]">
               <Select
                 onValueChange={(value) =>
                   setStatus(value as EndpointTrafficLogStatusFilter)
@@ -693,7 +693,7 @@ export function EndpointTrafficLogViewer({
               </Select>
 
               <div className="relative">
-                <Search className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
+                <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-9"
                   onChange={(event) => setSearch(event.target.value)}
@@ -703,7 +703,7 @@ export function EndpointTrafficLogViewer({
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-[180px_1fr]">
+            <div className="grid items-center gap-3 sm:grid-cols-[180px_1fr]">
               <Select
                 onValueChange={(value) =>
                   setLineLimit(

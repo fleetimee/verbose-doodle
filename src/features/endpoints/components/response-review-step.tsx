@@ -1,3 +1,4 @@
+import { CheckCircle2, Code2, FileText, Hash } from "lucide-react";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -6,6 +7,7 @@ import {
   CodeBlockHeader,
   CodeBlockItem,
 } from "@/components/kibo-ui/code-block";
+import { Badge } from "@/components/ui/badge";
 import { HTTP_STATUS_CODES } from "@/features/endpoints/constants/http-status-codes";
 import type { ResponseFormData } from "@/features/endpoints/schemas/response-schema";
 
@@ -14,63 +16,86 @@ type ResponseReviewStepProps = {
 };
 
 export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
+  const statusLabel =
+    HTTP_STATUS_CODES.find((code) => code.value === formValues.statusCode)
+      ?.label || String(formValues.statusCode);
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="rounded-lg border bg-muted/30 p-6">
-          <div className="mb-2 font-medium text-muted-foreground text-sm uppercase tracking-wide">
+    <div className="flex flex-col gap-5">
+      <div className="rounded-lg border bg-primary/5 p-5">
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <CheckCircle2 className="size-5" />
+          </div>
+          <div className="min-w-0">
+            <div className="font-semibold text-lg">Ready to create</div>
+            <p className="mt-1 text-muted-foreground text-sm">
+              Check the response contract before adding it to the endpoint.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="rounded-lg border bg-background p-4 shadow-xs">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <FileText className="size-4" />
             Response Name
           </div>
-          <div className="font-semibold text-2xl">{formValues.name}</div>
+          <div className="mt-3 truncate font-mono font-semibold text-xl">
+            {formValues.name}
+          </div>
         </div>
 
-        <div className="rounded-lg border bg-muted/30 p-6">
-          <div className="mb-2 font-medium text-muted-foreground text-sm uppercase tracking-wide">
+        <div className="rounded-lg border bg-background p-4 shadow-xs">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <Hash className="size-4" />
             Status Code
           </div>
-          <div className="font-semibold text-2xl">
-            {HTTP_STATUS_CODES.find(
-              (code) => code.value === formValues.statusCode
-            )?.label || formValues.statusCode}
+          <div className="mt-3 flex min-w-0 items-center gap-2">
+            <Badge variant="secondary">{formValues.statusCode}</Badge>
+            <span className="truncate font-semibold text-xl">
+              {statusLabel.replace(`${formValues.statusCode} `, "")}
+            </span>
           </div>
         </div>
+      </div>
 
-        <div className="rounded-lg border bg-muted/30 p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="font-medium text-muted-foreground text-sm uppercase tracking-wide">
-              JSON Response
-            </div>
+      <div className="rounded-lg border bg-background p-4 shadow-xs">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <Code2 className="size-4" />
+            JSON Response
           </div>
-          <CodeBlock
-            data={[
-              {
-                language: "json",
-                filename: "response.json",
-                code: formValues.json,
-              },
-            ]}
-            defaultValue="json"
-          >
-            <CodeBlockHeader>
-              <div className="ml-auto">
-                <CodeBlockCopyButton type="button" />
-              </div>
-            </CodeBlockHeader>
-            <CodeBlockBody>
-              {(item) => (
-                <CodeBlockItem
-                  key={item.language}
-                  lineNumbers={false}
-                  value={item.language}
-                >
-                  <CodeBlockContent language="json">
-                    {item.code}
-                  </CodeBlockContent>
-                </CodeBlockItem>
-              )}
-            </CodeBlockBody>
-          </CodeBlock>
+          <Badge variant="outline">response.json</Badge>
         </div>
+        <CodeBlock
+          data={[
+            {
+              language: "json",
+              filename: "response.json",
+              code: formValues.json,
+            },
+          ]}
+          defaultValue="json"
+        >
+          <CodeBlockHeader>
+            <div className="ml-auto">
+              <CodeBlockCopyButton type="button" />
+            </div>
+          </CodeBlockHeader>
+          <CodeBlockBody>
+            {(item) => (
+              <CodeBlockItem
+                key={item.language}
+                lineNumbers={false}
+                value={item.language}
+              >
+                <CodeBlockContent language="json">{item.code}</CodeBlockContent>
+              </CodeBlockItem>
+            )}
+          </CodeBlockBody>
+        </CodeBlock>
       </div>
     </div>
   );

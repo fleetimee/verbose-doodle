@@ -17,6 +17,7 @@ import { JsonEditor } from "@/features/endpoints/components/json-editor";
 import { StatusCodeCombobox } from "@/features/endpoints/components/status-code-combobox";
 import {
   ANIMATION_DURATION,
+  JSON_PRESETS,
   STEP_TRANSITION_DURATION,
 } from "@/features/endpoints/constants/stepper-steps";
 import type { EndpointResponse } from "@/features/endpoints/types";
@@ -34,6 +35,14 @@ type EditResponseStepperProps = {
   onCancel: () => void;
   isSubmitting?: boolean;
 };
+
+const COMMON_STATUS_CODES = [
+  { code: 200, label: "OK" },
+  { code: 201, label: "Created" },
+  { code: 400, label: "Bad Request" },
+  { code: 404, label: "Not Found" },
+  { code: 500, label: "Server Error" },
+] as const;
 
 const MIN_STATUS_CODE = 100;
 const MAX_STATUS_CODE = 599;
@@ -66,22 +75,22 @@ const stepConfig = {
     title: "Edit Response Name",
     description: "Update the name of this response configuration",
     icon: FileText,
-    color: "text-blue-500",
-    bgColor: "bg-blue-50 dark:bg-blue-950/30",
+    color: "text-primary",
+    bgColor: "bg-primary/10 dark:bg-primary/20",
   },
   statusCode: {
     title: "Edit Status Code",
     description: "Update the HTTP status code for this response",
     icon: Hash,
-    color: "text-emerald-500",
-    bgColor: "bg-emerald-50 dark:bg-emerald-950/30",
+    color: "text-primary",
+    bgColor: "bg-primary/10 dark:bg-primary/20",
   },
   json: {
     title: "Edit JSON Response",
     description: "Update the JSON response body",
     icon: Code2,
-    color: "text-violet-500",
-    bgColor: "bg-violet-50 dark:bg-violet-950/30",
+    color: "text-primary",
+    bgColor: "bg-primary/10 dark:bg-primary/20",
   },
 };
 
@@ -156,40 +165,43 @@ export function EditResponseStepper({
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 items-center justify-center overflow-auto px-4 py-8 md:px-8 md:pb-8">
-        <Card className="w-full max-w-3xl border-0 p-8 shadow-none md:p-12">
+      <div className="flex flex-1 items-center justify-center overflow-auto bg-muted/20 px-4 py-8 md:px-8 md:pb-8">
+        <Card className="w-full max-w-3xl border bg-card shadow-sm">
           {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: Form needs keyboard navigation for stepper UX */}
-          <form onKeyDown={handleKeyDown} onSubmit={handleSubmit}>
+          <form
+            className="flex min-h-[34rem] flex-col"
+            onKeyDown={handleKeyDown}
+            onSubmit={handleSubmit}
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 animate={{ opacity: 1, x: 0 }}
-                className="space-y-8"
+                className="flex flex-1 flex-col gap-8 p-5 md:p-8"
                 exit={{ opacity: 0, x: -20 }}
                 initial={{ opacity: 0, x: 20 }}
+                key={editType}
                 transition={{
                   duration: STEP_TRANSITION_DURATION,
                   ease: "easeInOut",
                 }}
               >
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${step.bgColor}`}
-                    >
-                      <step.icon className={`h-7 w-7 ${step.color}`} />
-                    </div>
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <h2 className="font-semibold text-3xl tracking-tight md:text-4xl">
-                        {step.title}
-                      </h2>
-                      <p className="text-lg text-muted-foreground">
-                        {step.description}
-                      </p>
-                    </div>
+                <div className="flex items-start gap-3 border-b pb-5">
+                  <div
+                    className={`flex size-9 shrink-0 items-center justify-center rounded-md ${step.bgColor}`}
+                  >
+                    <step.icon className={`size-5 ${step.color}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="font-semibold text-2xl tracking-tight md:text-3xl">
+                      {step.title}
+                    </h2>
+                    <p className="mt-2 text-muted-foreground text-sm">
+                      {step.description}
+                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="flex-1 space-y-4">
                   {editType === "name" && (
                     <Controller
                       control={form.control}
@@ -202,11 +214,30 @@ export function EditResponseStepper({
                               aria-invalid={fieldState.invalid}
                               autoComplete="off"
                               autoFocus
-                              className="h-20 rounded-none border-0 border-border border-b-2 px-0 text-3xl shadow-none focus-visible:border-primary focus-visible:ring-0 aria-invalid:border-destructive md:text-4xl"
+                              className="h-16 rounded-md border bg-background px-4 font-mono text-2xl shadow-xs focus-visible:ring-2 aria-invalid:border-destructive md:text-3xl"
                               id="edit-response-name"
                               placeholder="e.g., success_response, error_response"
                             />
-                            <FieldDescription className="mt-4 text-base">
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              {[
+                                "success_response",
+                                "validation_error",
+                                "timeout_fallback",
+                              ].map((example) => (
+                                <button
+                                  className="rounded-md border bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+                                  key={example}
+                                  onClick={() => {
+                                    field.onChange(example);
+                                    form.trigger("name").catch(() => undefined);
+                                  }}
+                                  type="button"
+                                >
+                                  {example}
+                                </button>
+                              ))}
+                            </div>
+                            <FieldDescription className="mt-4">
                               Choose a descriptive name that helps identify this
                               response
                             </FieldDescription>
@@ -226,12 +257,39 @@ export function EditResponseStepper({
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                           <FieldContent>
+                            <div className="mb-4 grid gap-2 sm:grid-cols-5">
+                              {COMMON_STATUS_CODES.map((status) => (
+                                <Button
+                                  className="h-auto min-h-16 flex-col gap-1 px-3 py-3"
+                                  key={status.code}
+                                  onClick={() => {
+                                    field.onChange(status.code);
+                                    form
+                                      .trigger("statusCode")
+                                      .catch(() => undefined);
+                                  }}
+                                  type="button"
+                                  variant={
+                                    field.value === status.code
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                >
+                                  <span className="font-mono text-base">
+                                    {status.code}
+                                  </span>
+                                  <span className="max-w-full truncate text-xs">
+                                    {status.label}
+                                  </span>
+                                </Button>
+                              ))}
+                            </div>
                             <StatusCodeCombobox
                               field={field}
                               fieldError={fieldState.error}
                               onSelect={handleSubmit}
                             />
-                            <FieldDescription className="mt-4 text-base">
+                            <FieldDescription className="mt-4">
                               Search or select the appropriate HTTP status code
                             </FieldDescription>
                           </FieldContent>
@@ -253,13 +311,29 @@ export function EditResponseStepper({
                             <JsonEditor
                               aria-invalid={fieldState.invalid}
                               autoFocus
+                              height="280px"
                               id="edit-response-json"
                               onBlur={field.onBlur}
                               onChange={field.onChange}
                               placeholder='{\n  "name": "Novian Andika",\n  "age": 17,\n  "gender": true,\n  "jobs": ["fishing", "running"]\n}'
                               value={field.value}
                             />
-                            <FieldDescription className="text-base">
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              {JSON_PRESETS.map((preset) => (
+                                <button
+                                  className="rounded-md border bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+                                  key={preset.name}
+                                  onClick={() => {
+                                    field.onChange(preset.value);
+                                    form.trigger("json").catch(() => undefined);
+                                  }}
+                                  type="button"
+                                >
+                                  {preset.name}
+                                </button>
+                              ))}
+                            </div>
+                            <FieldDescription className="mt-4">
                               Full-featured JSON editor with syntax
                               highlighting, autocomplete, and bracket matching.
                               Click the wand to format.
