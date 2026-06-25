@@ -1,4 +1,4 @@
-import { Info, LayoutDashboard, Plug, Users } from "lucide-react";
+import { Info, LayoutDashboard, Plug } from "lucide-react";
 import type React from "react";
 import { Link } from "react-router";
 import { NavMain } from "@/components/nav-main";
@@ -18,10 +18,8 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/features/auth/context";
-import { usePermissions } from "@/features/auth/hooks/use-permissions";
 import { usePrefetchEndpoints } from "@/features/endpoints/hooks/use-prefetch-endpoints";
 import { usePrefetchOverview } from "@/features/overview/hooks/use-prefetch-overview";
-import { usePrefetchUsers } from "@/features/users/hooks/use-prefetch-users";
 
 const data = {
   navMain: [
@@ -37,11 +35,6 @@ const data = {
       icon: Plug,
       badge: "API",
     },
-    {
-      title: "Users",
-      url: "/dashboard/users",
-      icon: Users,
-    },
   ],
   navSecondary: [
     {
@@ -54,12 +47,10 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { authState } = useAuth();
-  const { can } = usePermissions({ role: authState.user?.role });
 
   // Prefetch hooks for hover behavior
   const { prefetchOverview } = usePrefetchOverview();
   const { prefetchEndpoints } = usePrefetchEndpoints();
-  const { prefetchUsers } = usePrefetchUsers();
 
   // Construct user object for NavUser component
   const user = authState.user
@@ -74,32 +65,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         avatar: "",
       };
 
-  // Map navigation items with prefetch handlers and filter based on permissions
-  const filteredNavMain = data.navMain
-    .map((item) => {
-      // Add prefetch handler based on the route
-      let onPrefetch: (() => void) | undefined;
-      if (item.url === "/dashboard/overview") {
-        onPrefetch = prefetchOverview;
-      } else if (item.url === "/dashboard/endpoints") {
-        onPrefetch = prefetchEndpoints;
-      } else if (item.url === "/dashboard/users") {
-        onPrefetch = prefetchUsers;
-      }
+  const navMain = data.navMain.map((item) => {
+    let onPrefetch: (() => void) | undefined;
+    if (item.url === "/dashboard/overview") {
+      onPrefetch = prefetchOverview;
+    } else if (item.url === "/dashboard/endpoints") {
+      onPrefetch = prefetchEndpoints;
+    }
 
-      return {
-        ...item,
-        onPrefetch,
-      };
-    })
-    .filter((item) => {
-      // Users page requires canViewUsers permission
-      if (item.url === "/dashboard/users") {
-        return can("canViewUsers");
-      }
-      // All other pages are accessible to all authenticated users
-      return true;
-    });
+    return {
+      ...item,
+      onPrefetch,
+    };
+  });
 
   return (
     <Sidebar collapsible="icon" variant="inset" {...props}>
@@ -135,7 +113,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarSeparator />
       <SidebarContent className="group-data-[collapsible=icon]:items-center">
-        <NavMain items={filteredNavMain} />
+        <NavMain items={navMain} />
         <NavSecondary className="mt-auto" items={data.navSecondary}>
           <SessionTimer />
         </NavSecondary>

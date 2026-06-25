@@ -51,12 +51,6 @@ const EndpointDetailPage = lazy(() =>
     })
   )
 );
-const UsersPage = lazy(() =>
-  import("@/pages/dashboard/users").then(({ UsersPage }) => ({
-    default: UsersPage,
-  }))
-);
-
 if (import.meta.env.DEV) {
   await import("react-grab");
 }
@@ -92,11 +86,7 @@ function AppContent() {
             <Route element={<EndpointsPage />} path="endpoints" />
             <Route element={<EndpointDetailPage />} path="endpoints/:id" />
             <Route
-              element={
-                <ProtectedRoute requiredRole="ADMIN">
-                  <UsersPage />
-                </ProtectedRoute>
-              }
+              element={<Navigate replace to="/dashboard/overview" />}
               path="users"
             />
           </Route>
