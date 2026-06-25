@@ -36,6 +36,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -422,78 +423,80 @@ export function RequestSimulatorSheet({
         </SheetHeader>
 
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-0 overflow-hidden lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-          <div className="flex min-h-0 flex-col gap-4 overflow-y-auto border-b bg-muted/10 p-4 lg:border-r lg:border-b-0">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-start gap-3">
-                <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">
-                  <Route aria-hidden="true" className="size-4" />
+          <ScrollArea className="h-full min-h-0 border-b bg-muted/10 lg:border-r lg:border-b-0">
+            <div className="flex min-h-0 flex-col gap-4 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                    <Route aria-hidden="true" className="size-4" />
+                  </div>
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <h3 className="font-medium text-sm">
+                      {SIMULATOR_MESSAGES.requestLabel}
+                    </h3>
+                    <p className="text-muted-foreground text-xs">
+                      {SIMULATOR_MESSAGES.configureRequestDescription}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex min-w-0 flex-col gap-1">
-                  <h3 className="font-medium text-sm">
-                    {SIMULATOR_MESSAGES.requestLabel}
-                  </h3>
-                  <p className="text-muted-foreground text-xs">
-                    {SIMULATOR_MESSAGES.configureRequestDescription}
-                  </p>
-                </div>
-              </div>
-              <Badge
-                className="max-w-[45%] rounded-md px-2.5 py-1 font-mono text-[11px]"
-                variant="secondary"
-              >
-                <span className="truncate">{simulatorUrl}</span>
-              </Badge>
-            </div>
-
-            <FieldGroup className="gap-5">
-              <Field data-invalid={headerError ? true : undefined}>
-                <FieldLabel className="gap-2" htmlFor="request-headers">
-                  <ShieldCheck className="size-3.5 text-muted-foreground" />
-                  {SIMULATOR_MESSAGES.headersLabel}
-                </FieldLabel>
-                <JsonEditor
-                  aria-invalid={headerError ? true : undefined}
-                  className="min-h-0"
-                  height="180px"
-                  id="request-headers"
-                  onChange={setHeadersJson}
-                  placeholder={SIMULATOR_MESSAGES.headersPlaceholder}
-                  value={headersJson}
-                />
-                <FieldDescription>
-                  {SIMULATOR_MESSAGES.tokenAppliedDescription}
-                </FieldDescription>
-                <FieldError>{headerError}</FieldError>
-              </Field>
-
-              {canSendBody && (
-                <Field
-                  className="min-h-0 flex-1"
-                  data-invalid={bodyError ? true : undefined}
+                <Badge
+                  className="max-w-[45%] rounded-md px-2.5 py-1 font-mono text-[11px]"
+                  variant="secondary"
                 >
-                  <FieldLabel className="gap-2" htmlFor="request-body">
-                    <Braces className="size-3.5 text-muted-foreground" />
-                    {SIMULATOR_MESSAGES.bodyLabel}
+                  <span className="truncate">{simulatorUrl}</span>
+                </Badge>
+              </div>
+
+              <FieldGroup className="gap-5">
+                <Field data-invalid={headerError ? true : undefined}>
+                  <FieldLabel className="gap-2" htmlFor="request-headers">
+                    <ShieldCheck className="size-3.5 text-muted-foreground" />
+                    {SIMULATOR_MESSAGES.headersLabel}
                   </FieldLabel>
                   <JsonEditor
-                    aria-invalid={bodyError ? true : undefined}
-                    className="min-h-0 flex-1"
-                    height="320px"
-                    id="request-body"
-                    onChange={setBodyJson}
-                    placeholder={SIMULATOR_MESSAGES.bodyPlaceholder}
-                    value={bodyJson}
+                    aria-invalid={headerError ? true : undefined}
+                    className="min-h-0"
+                    height="180px"
+                    id="request-headers"
+                    onChange={setHeadersJson}
+                    placeholder={SIMULATOR_MESSAGES.headersPlaceholder}
+                    value={headersJson}
                   />
                   <FieldDescription>
-                    {formatMessage(SIMULATOR_MESSAGES.sentAsJsonDescription, {
-                      method,
-                    })}
+                    {SIMULATOR_MESSAGES.tokenAppliedDescription}
                   </FieldDescription>
-                  <FieldError>{bodyError}</FieldError>
+                  <FieldError>{headerError}</FieldError>
                 </Field>
-              )}
-            </FieldGroup>
-          </div>
+
+                {canSendBody && (
+                  <Field
+                    className="min-h-0 flex-1"
+                    data-invalid={bodyError ? true : undefined}
+                  >
+                    <FieldLabel className="gap-2" htmlFor="request-body">
+                      <Braces className="size-3.5 text-muted-foreground" />
+                      {SIMULATOR_MESSAGES.bodyLabel}
+                    </FieldLabel>
+                    <JsonEditor
+                      aria-invalid={bodyError ? true : undefined}
+                      className="min-h-0 flex-1"
+                      height="320px"
+                      id="request-body"
+                      onChange={setBodyJson}
+                      placeholder={SIMULATOR_MESSAGES.bodyPlaceholder}
+                      value={bodyJson}
+                    />
+                    <FieldDescription>
+                      {formatMessage(SIMULATOR_MESSAGES.sentAsJsonDescription, {
+                        method,
+                      })}
+                    </FieldDescription>
+                    <FieldError>{bodyError}</FieldError>
+                  </Field>
+                )}
+              </FieldGroup>
+            </div>
+          </ScrollArea>
 
           <div className="flex min-h-0 flex-col gap-4 overflow-hidden p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -573,9 +576,11 @@ export function RequestSimulatorSheet({
                           {responseHeadersReturnedLabel}
                         </p>
                       </div>
-                      <pre className="max-h-72 overflow-auto p-3 font-mono text-xs leading-relaxed">
-                        {responseHeadersJson}
-                      </pre>
+                      <ScrollArea className="max-h-72">
+                        <pre className="p-3 font-mono text-xs leading-relaxed">
+                          {responseHeadersJson}
+                        </pre>
+                      </ScrollArea>
                     </HoverCardContent>
                   </HoverCard>
                 </div>
@@ -598,20 +603,24 @@ export function RequestSimulatorSheet({
                         {SIMULATOR_MESSAGES.responseBodyFilename}
                       </span>
                     </CodeBlockHeader>
-                    <CodeBlockBody className="min-h-0 flex-1 overflow-auto">
+                    <CodeBlockBody className="min-h-0 flex-1">
                       {(item) => (
-                        <CodeBlockItem
-                          className="min-h-full"
+                        <ScrollArea
+                          className="h-full min-h-0"
                           key={item.filename}
-                          value={item.language}
                         >
-                          <CodeBlockContent
-                            className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
-                            language="json"
+                          <CodeBlockItem
+                            className="min-h-full"
+                            value={item.language}
                           >
-                            {item.code}
-                          </CodeBlockContent>
-                        </CodeBlockItem>
+                            <CodeBlockContent
+                              className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
+                              language="json"
+                            >
+                              {item.code}
+                            </CodeBlockContent>
+                          </CodeBlockItem>
+                        </ScrollArea>
                       )}
                     </CodeBlockBody>
                   </CodeBlock>

@@ -1,11 +1,37 @@
 import { json } from "@codemirror/lang-json";
 import type { Extension } from "@codemirror/state";
-import { placeholder as placeholderExtension } from "@codemirror/view";
+import {
+  EditorView,
+  placeholder as placeholderExtension,
+} from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import { Wand2 } from "lucide-react";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+const jsonEditorScrollTheme = EditorView.theme({
+  ".cm-scroller": {
+    scrollbarColor: "var(--border) transparent",
+    scrollbarWidth: "thin",
+  },
+  ".cm-scroller::-webkit-scrollbar": {
+    height: "0.625rem",
+    width: "0.625rem",
+  },
+  ".cm-scroller::-webkit-scrollbar-corner": {
+    backgroundColor: "transparent",
+  },
+  ".cm-scroller::-webkit-scrollbar-thumb": {
+    backgroundClip: "content-box",
+    backgroundColor: "var(--border)",
+    border: "1px solid transparent",
+    borderRadius: "9999px",
+  },
+  ".cm-scroller::-webkit-scrollbar-track": {
+    backgroundColor: "transparent",
+  },
+});
 
 type JsonEditorProps = {
   value: string;
@@ -86,7 +112,7 @@ export const JsonEditor = forwardRef<HTMLDivElement, JsonEditorProps>(
     const canFormat = value.trim().length > 0 && isValidJson();
 
     const extensions = useMemo(() => {
-      const exts: Extension[] = [json()];
+      const exts: Extension[] = [json(), jsonEditorScrollTheme];
       if (placeholder) {
         exts.push(placeholderExtension(placeholder));
       }
