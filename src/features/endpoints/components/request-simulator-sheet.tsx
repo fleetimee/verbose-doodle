@@ -18,6 +18,11 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -62,6 +67,7 @@ const DEFAULT_HEADERS = JSON.stringify(
 const REQUEST_TIMEOUT_MS = 30_000;
 const SUCCESS_STATUS_THRESHOLD = 300;
 const FETCH_FAILURE_STATUS = 0;
+const BYTES_PER_KILOBYTE = 1024;
 
 const getSimulatorUrl = (endpointUrl: string): string => {
   const normalizedPath = endpointUrl.startsWith("/")
@@ -78,6 +84,22 @@ const formatJson = (value: string): string => {
     return value;
   }
 };
+
+const formatByteSize = (value: string): string => {
+  const bytes = new TextEncoder().encode(value).length;
+
+  if (bytes < BYTES_PER_KILOBYTE) {
+    return `${bytes} B`;
+  }
+
+  return `${(bytes / BYTES_PER_KILOBYTE).toFixed(1)} KB`;
+};
+
+const getContentTypeLabel = (headers: Record<string, string>): string =>
+  headers["content-type"]?.split(";")[0] ?? "unknown";
+
+const getStatusTone = (result: SimulatorResult): string =>
+  result.ok ? "Matched" : "Attention";
 
 const formatHeaders = (headers: Headers): Record<string, string> => {
   const formattedHeaders: Record<string, string> = {};
@@ -148,6 +170,27 @@ const createFailureResult = ({
   statusText,
 });
 
+const showRequestResultToast = ({
+  durationMs,
+  ok,
+  status,
+  statusText,
+}: {
+  readonly durationMs: number;
+  readonly ok: boolean;
+  readonly status: number;
+  readonly statusText: string;
+}) => {
+  const description = `${status} ${statusText || (ok ? "OK" : "HTTP error")} in ${durationMs} ms`;
+
+  if (ok) {
+    toast.success("Request succeeded", { description });
+    return;
+  }
+
+  toast.error("Request returned an error", { description });
+};
+
 export function RequestSimulatorSheet({
   baseUrl,
   endpointUrl,
@@ -168,37 +211,25 @@ export function RequestSimulatorSheet({
   const simulatorUrl = getSimulatorUrl(endpointUrl);
   const canSendBody = METHODS_WITH_BODY.includes(method);
 
-  const resultJson = useMemo(() => {
+  const responseBody = useMemo(() => {
     if (!result) {
       return "";
     }
 
-    const parsedBody = (() => {
-      if (!result.body) {
-        return null;
-      }
+    if (!result.body) {
+      return "";
+    }
 
-      try {
-        return JSON.parse(result.body) as unknown;
-      } catch {
-        return result.body;
-      }
-    })();
-
-    return JSON.stringify(
-      {
-        ok: result.ok,
-        status: result.status,
-        statusText: result.statusText,
-        durationMs: result.durationMs,
-        error: result.error ?? null,
-        headers: result.headers,
-        body: parsedBody,
-      },
-      null,
-      2
-    );
+    return formatJson(result.body);
   }, [result]);
+  const responseSize = result ? formatByteSize(result.body) : "0 B";
+  const responseContentType = result
+    ? getContentTypeLabel(result.headers)
+    : "unknown";
+  const responseHeaderCount = result ? Object.keys(result.headers).length : 0;
+  const responseHeadersJson = result
+    ? JSON.stringify(result.headers, null, 2)
+    : "{}";
 
   useEffect(() => {
     setBodyJson(formatJson(response.json));
@@ -255,11 +286,19 @@ export function RequestSimulatorSheet({
         signal: controller.signal,
       });
       const responseBody = await requestResult.text();
+      const durationMs = Math.round(performance.now() - startedAt);
 
       setResult({
         body: responseBody,
-        durationMs: Math.round(performance.now() - startedAt),
+        durationMs,
         headers: formatHeaders(requestResult.headers),
+        ok: requestResult.ok,
+        status: requestResult.status,
+        statusText: requestResult.statusText,
+      });
+
+      showRequestResultToast({
+        durationMs,
         ok: requestResult.ok,
         status: requestResult.status,
         statusText: requestResult.statusText,
@@ -377,57 +416,100 @@ export function RequestSimulatorSheet({
                   Result appears here after execution.
                 </p>
               </div>
-              {result && (
-                <div className="flex flex-wrap items-center gap-2">
+            </div>
+
+            {result ? (
+              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+                <div className="flex flex-wrap gap-2 rounded-md border bg-muted/30 p-2">
                   <Badge
+                    className="gap-1 rounded-sm px-2.5 py-1 font-mono"
                     variant={
                       result.status < SUCCESS_STATUS_THRESHOLD
                         ? "default"
                         : "destructive"
                     }
                   >
+                    <span className="text-[10px] uppercase opacity-70">
+                      {getStatusTone(result)}
+                    </span>
                     {result.status} {result.statusText}
                   </Badge>
-                  <Badge variant="secondary">{result.durationMs} ms</Badge>
-                </div>
-              )}
-            </div>
-
-            {result ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border bg-muted/30">
-                <CodeBlock
-                  className="flex min-h-0 flex-1 flex-col"
-                  data={[
-                    {
-                      code: resultJson,
-                      filename: "simulation-result.json",
-                      language: "json",
-                    },
-                  ]}
-                  defaultValue="json"
-                >
-                  <CodeBlockHeader>
-                    <span className="px-3 py-1 text-muted-foreground text-xs">
-                      simulation-result.json
-                    </span>
-                  </CodeBlockHeader>
-                  <CodeBlockBody className="min-h-0 flex-1 overflow-auto">
-                    {(item) => (
-                      <CodeBlockItem
-                        className="min-h-full"
-                        key={item.filename}
-                        value={item.language}
+                  <Badge
+                    className="rounded-sm px-2.5 py-1 font-mono"
+                    variant="secondary"
+                  >
+                    {result.durationMs} ms
+                  </Badge>
+                  <Badge
+                    className="rounded-sm px-2.5 py-1 font-mono"
+                    variant="outline"
+                  >
+                    {responseSize}
+                  </Badge>
+                  <Badge
+                    className="rounded-sm px-2.5 py-1 font-mono"
+                    variant="outline"
+                  >
+                    {responseContentType}
+                  </Badge>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Badge
+                        className="cursor-default rounded-sm px-2.5 py-1 font-mono"
+                        variant="outline"
                       >
-                        <CodeBlockContent
-                          className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
-                          language="json"
+                        {responseHeaderCount} headers
+                      </Badge>
+                    </HoverCardTrigger>
+                    <HoverCardContent align="end" className="w-96 p-0">
+                      <div className="border-b px-3 py-2">
+                        <p className="font-medium text-sm">Response Headers</p>
+                        <p className="text-muted-foreground text-xs">
+                          {responseHeaderCount} headers returned
+                        </p>
+                      </div>
+                      <pre className="max-h-72 overflow-auto p-3 font-mono text-xs leading-relaxed">
+                        {responseHeadersJson}
+                      </pre>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
+
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border bg-muted/30">
+                  <CodeBlock
+                    className="flex min-h-0 flex-1 flex-col"
+                    data={[
+                      {
+                        code: responseBody,
+                        filename: "response-body.json",
+                        language: "json",
+                      },
+                    ]}
+                    defaultValue="json"
+                  >
+                    <CodeBlockHeader>
+                      <span className="px-3 py-1 text-muted-foreground text-xs">
+                        response-body.json
+                      </span>
+                    </CodeBlockHeader>
+                    <CodeBlockBody className="min-h-0 flex-1 overflow-auto">
+                      {(item) => (
+                        <CodeBlockItem
+                          className="min-h-full"
+                          key={item.filename}
+                          value={item.language}
                         >
-                          {item.code}
-                        </CodeBlockContent>
-                      </CodeBlockItem>
-                    )}
-                  </CodeBlockBody>
-                </CodeBlock>
+                          <CodeBlockContent
+                            className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
+                            language="json"
+                          >
+                            {item.code}
+                          </CodeBlockContent>
+                        </CodeBlockItem>
+                      )}
+                    </CodeBlockBody>
+                  </CodeBlock>
+                </div>
               </div>
             ) : (
               <div className="flex min-h-72 flex-1 flex-col items-center justify-center gap-3 rounded-md border border-dashed bg-muted/20 p-6 text-center">
