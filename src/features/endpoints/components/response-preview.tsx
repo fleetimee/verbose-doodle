@@ -29,6 +29,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CodeGeneratorDialog } from "@/features/endpoints/components/code-generator-dialog";
+import { RequestSimulatorSheet } from "@/features/endpoints/components/request-simulator-sheet";
 import { ResponseSimulationAlert } from "@/features/endpoints/components/response-simulation-alert";
 import { ServerSettlingLayer } from "@/features/endpoints/components/server-settling-layer";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
@@ -54,6 +55,7 @@ export function ResponsePreview({
 }: ResponsePreviewProps) {
   const { theme } = useTheme();
   const [isCodeDialogOpen, setIsCodeDialogOpen] = useState(false);
+  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [isServerSettling, setIsServerSettling] = useState(false);
 
   // Track previous simulation settings to detect changes
@@ -124,12 +126,6 @@ export function ResponsePreview({
       toast.success("URL copied to clipboard");
     } catch {
       toast.error("Unable to copy URL");
-    }
-  };
-
-  const handleLaunchUrl = () => {
-    if (fullUrl) {
-      window.open(fullUrl, "_blank");
     }
   };
 
@@ -262,7 +258,7 @@ export function ResponsePreview({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
-                              onClick={handleLaunchUrl}
+                              onClick={() => setIsSimulatorOpen(true)}
                               size="icon"
                               variant="outline"
                             >
@@ -270,7 +266,7 @@ export function ResponsePreview({
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Open in Browser</p>
+                            <p>Simulate Request</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -282,6 +278,15 @@ export function ResponsePreview({
                       onOpenChange={setIsCodeDialogOpen}
                       open={isCodeDialogOpen}
                       path={endpointUrl}
+                      response={response}
+                      token={token}
+                    />
+                    <RequestSimulatorSheet
+                      baseUrl={baseUrl}
+                      endpointUrl={endpointUrl}
+                      method={endpointMethod}
+                      onOpenChange={setIsSimulatorOpen}
+                      open={isSimulatorOpen}
                       response={response}
                       token={token}
                     />

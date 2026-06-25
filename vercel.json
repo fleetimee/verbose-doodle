@@ -6,6 +6,10 @@
       "destination": "/api/proxy?path=api/:path*"
     },
     {
+      "source": "/simulate/:path*",
+      "destination": "/api/proxy?path=:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

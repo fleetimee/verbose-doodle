@@ -54,6 +54,8 @@ const manualChunkGroups = {
   ],
 } as const;
 
+const SIMULATE_PROXY_PREFIX_REGEX = /^\/simulate/;
+
 function getManualChunk(moduleId: string) {
   if (
     moduleId.includes("/node_modules/@codemirror/") ||
@@ -85,6 +87,13 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy: {
+        "/simulate": {
+          target: env.VITE_ENDPOINT_URL,
+          changeOrigin: true,
+          rewrite: (requestPath) =>
+            requestPath.replace(SIMULATE_PROXY_PREFIX_REGEX, ""),
+          secure: false,
+        },
         "/api": {
           target: env.VITE_ENDPOINT_URL,
           changeOrigin: true,
