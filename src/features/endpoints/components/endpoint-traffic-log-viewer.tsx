@@ -940,7 +940,18 @@ function TerminalState({
           </p>
           <p className="pl-0 text-[#b8b8b8]">{message}</p>
           {tone === "empty" && (
-            <p className="text-[#737373]">waiting for incoming requests...</p>
+            <p className="flex items-center gap-1.5 text-[#737373]">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              <span>waiting for incoming requests</span>
+              <span className="loading-dots inline-flex gap-[1px]">
+                <span>.</span>
+                <span>.</span>
+                <span>.</span>
+              </span>
+            </p>
           )}
           {isEmergency && (
             <p className="text-red-300/70">
