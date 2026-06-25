@@ -1,4 +1,4 @@
-import { Play, RotateCcw } from "lucide-react";
+import { Inbox, Play, RotateCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -25,7 +25,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
+import { JsonEditor } from "@/features/endpoints/components/json-editor";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 
 type RequestSimulatorSheetProps = {
@@ -297,7 +297,7 @@ export function RequestSimulatorSheet({
 
   return (
     <Sheet onOpenChange={onOpenChange} open={open}>
-      <SheetContent className="w-full gap-0 overflow-hidden p-0 sm:max-w-3xl">
+      <SheetContent className="w-full gap-0 overflow-hidden p-0 sm:max-w-6xl">
         <SheetHeader className="border-b">
           <div className="flex flex-wrap items-center gap-2 pr-8">
             <Badge className="font-mono" variant="outline">
@@ -310,89 +310,140 @@ export function RequestSimulatorSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-4">
-          <FieldGroup>
-            <Field data-invalid={headerError ? true : undefined}>
-              <FieldLabel htmlFor="request-headers">Headers</FieldLabel>
-              <Textarea
-                aria-invalid={headerError ? true : undefined}
-                className="min-h-28 resize-y font-mono text-xs"
-                id="request-headers"
-                onChange={(event) => setHeadersJson(event.target.value)}
-                spellCheck={false}
-                value={headersJson}
-              />
-              <FieldDescription>
-                JSON object. The environment token is applied automatically when
-                available.
-              </FieldDescription>
-              <FieldError>{headerError}</FieldError>
-            </Field>
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-0 overflow-hidden lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+          <div className="flex min-h-0 flex-col gap-4 overflow-y-auto border-b p-4 lg:border-r lg:border-b-0">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-1">
+                <h3 className="font-medium text-sm">Request</h3>
+                <p className="text-muted-foreground text-xs">
+                  Configure headers and JSON payload.
+                </p>
+              </div>
+              <Badge variant="secondary">{simulatorUrl}</Badge>
+            </div>
 
-            {canSendBody && (
-              <Field data-invalid={bodyError ? true : undefined}>
-                <FieldLabel htmlFor="request-body">Body</FieldLabel>
-                <Textarea
-                  aria-invalid={bodyError ? true : undefined}
-                  className="min-h-44 resize-y font-mono text-xs"
-                  id="request-body"
-                  onChange={(event) => setBodyJson(event.target.value)}
-                  spellCheck={false}
-                  value={bodyJson}
+            <FieldGroup className="gap-5">
+              <Field data-invalid={headerError ? true : undefined}>
+                <FieldLabel htmlFor="request-headers">Headers</FieldLabel>
+                <JsonEditor
+                  aria-invalid={headerError ? true : undefined}
+                  className="min-h-0"
+                  height="180px"
+                  id="request-headers"
+                  onChange={setHeadersJson}
+                  placeholder='{
+  "Content-Type": "application/json"
+}'
+                  value={headersJson}
                 />
                 <FieldDescription>
-                  Sent as JSON for {method} requests.
+                  Environment token is applied automatically when available.
                 </FieldDescription>
-                <FieldError>{bodyError}</FieldError>
+                <FieldError>{headerError}</FieldError>
               </Field>
-            )}
-          </FieldGroup>
 
-          {result && (
-            <div className="flex flex-col gap-3 rounded-md border bg-muted/30 p-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge
-                  variant={
-                    result.status < SUCCESS_STATUS_THRESHOLD
-                      ? "default"
-                      : "destructive"
-                  }
+              {canSendBody && (
+                <Field
+                  className="min-h-0 flex-1"
+                  data-invalid={bodyError ? true : undefined}
                 >
-                  {result.status} {result.statusText}
-                </Badge>
-                <Badge variant="secondary">{result.durationMs} ms</Badge>
-              </div>
+                  <FieldLabel htmlFor="request-body">Body</FieldLabel>
+                  <JsonEditor
+                    aria-invalid={bodyError ? true : undefined}
+                    className="min-h-0 flex-1"
+                    height="320px"
+                    id="request-body"
+                    onChange={setBodyJson}
+                    placeholder='{
+  "customerId": "12345",
+  "amount": 10000
+}'
+                    value={bodyJson}
+                  />
+                  <FieldDescription>
+                    Sent as JSON for {method} requests.
+                  </FieldDescription>
+                  <FieldError>{bodyError}</FieldError>
+                </Field>
+              )}
+            </FieldGroup>
+          </div>
 
-              <CodeBlock
-                data={[
-                  {
-                    code: resultJson,
-                    filename: "simulation-result.json",
-                    language: "json",
-                  },
-                ]}
-                defaultValue="json"
-              >
-                <CodeBlockHeader>
-                  <span className="px-3 py-1 text-muted-foreground text-xs">
-                    Response
-                  </span>
-                </CodeBlockHeader>
-                <CodeBlockBody>
-                  {(item) => (
-                    <CodeBlockItem key={item.filename} value={item.language}>
-                      <CodeBlockContent
-                        className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
-                        language="json"
-                      >
-                        {item.code}
-                      </CodeBlockContent>
-                    </CodeBlockItem>
-                  )}
-                </CodeBlockBody>
-              </CodeBlock>
+          <div className="flex min-h-0 flex-col gap-4 overflow-hidden p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-col gap-1">
+                <h3 className="font-medium text-sm">Response</h3>
+                <p className="text-muted-foreground text-xs">
+                  Result appears here after execution.
+                </p>
+              </div>
+              {result && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge
+                    variant={
+                      result.status < SUCCESS_STATUS_THRESHOLD
+                        ? "default"
+                        : "destructive"
+                    }
+                  >
+                    {result.status} {result.statusText}
+                  </Badge>
+                  <Badge variant="secondary">{result.durationMs} ms</Badge>
+                </div>
+              )}
             </div>
-          )}
+
+            {result ? (
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border bg-muted/30">
+                <CodeBlock
+                  className="flex min-h-0 flex-1 flex-col"
+                  data={[
+                    {
+                      code: resultJson,
+                      filename: "simulation-result.json",
+                      language: "json",
+                    },
+                  ]}
+                  defaultValue="json"
+                >
+                  <CodeBlockHeader>
+                    <span className="px-3 py-1 text-muted-foreground text-xs">
+                      simulation-result.json
+                    </span>
+                  </CodeBlockHeader>
+                  <CodeBlockBody className="min-h-0 flex-1 overflow-auto">
+                    {(item) => (
+                      <CodeBlockItem
+                        className="min-h-full"
+                        key={item.filename}
+                        value={item.language}
+                      >
+                        <CodeBlockContent
+                          className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
+                          language="json"
+                        >
+                          {item.code}
+                        </CodeBlockContent>
+                      </CodeBlockItem>
+                    )}
+                  </CodeBlockBody>
+                </CodeBlock>
+              </div>
+            ) : (
+              <div className="flex min-h-72 flex-1 flex-col items-center justify-center gap-3 rounded-md border border-dashed bg-muted/20 p-6 text-center">
+                <div className="rounded-md border bg-background p-3 text-muted-foreground">
+                  <Inbox data-icon="inline-start" />
+                </div>
+                <div className="flex max-w-sm flex-col gap-1">
+                  <p className="font-medium text-sm">No response yet</p>
+                  <p className="text-muted-foreground text-sm">
+                    Send the request to inspect the status, duration, headers,
+                    and body here.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <SheetFooter className="border-t">

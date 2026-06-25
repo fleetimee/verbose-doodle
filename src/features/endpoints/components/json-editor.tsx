@@ -14,6 +14,7 @@ type JsonEditorProps = {
   placeholder?: string;
   className?: string;
   id?: string;
+  height?: string;
   autoFocus?: boolean;
   "aria-invalid"?: boolean;
 };
@@ -27,6 +28,7 @@ export const JsonEditor = forwardRef<HTMLDivElement, JsonEditorProps>(
       placeholder,
       className,
       id,
+      height = "400px",
       autoFocus,
       "aria-invalid": ariaInvalid,
     },
@@ -113,7 +115,7 @@ export const JsonEditor = forwardRef<HTMLDivElement, JsonEditorProps>(
               highlightSelectionMatches: true,
             }}
             extensions={extensions}
-            height="400px"
+            height={height}
             onBlur={onBlur}
             onChange={handleChange}
             theme={theme}
