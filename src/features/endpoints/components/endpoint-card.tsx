@@ -5,17 +5,16 @@ import {
   ItemActions,
   ItemContent,
   ItemDescription,
-  ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
 import { EndpointMetaStrip } from "@/features/endpoints/components/endpoint-meta-strip";
+import { EndpointPathTitle } from "@/features/endpoints/components/endpoint-path-title";
+import { HttpMethodBadge } from "@/features/endpoints/components/http-method-badge";
 import { usePrefetchEndpoint } from "@/features/endpoints/hooks/use-prefetch-endpoint";
 import type { Endpoint } from "@/features/endpoints/types";
-import {
-  abbreviateMethod,
-  getMethodBadgeColor,
-} from "@/features/endpoints/utils/http-method-colors";
+import { getMethodColor } from "@/features/endpoints/utils/http-method-colors";
 import { encodeId } from "@/lib/id-encoder";
+import { cn } from "@/lib/utils";
 
 type EndpointCardProps = {
   endpoint: Endpoint;
@@ -26,6 +25,7 @@ type EndpointCardProps = {
 export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
   const navigate = useNavigate();
   const { prefetchEndpoint } = usePrefetchEndpoint();
+  const methodColors = getMethodColor(endpoint.method);
 
   const handleClick = () => {
     if (onClick) {
@@ -43,31 +43,39 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
   return (
     <Item
       asChild
-      className="min-h-28 w-full cursor-pointer items-start gap-4 rounded-lg border border-border/60 bg-card/95 p-4 shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+      className={cn(
+        "relative min-h-24 w-full cursor-pointer items-stretch overflow-hidden rounded-lg border border-border/60 bg-card/95 p-0 shadow-sm transition-[border-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md active:scale-[0.99]",
+        "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/45"
+      )}
       size="default"
       variant="default"
     >
       <button
+        className="w-full text-left"
         id={tourId}
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         type="button"
       >
-        <ItemMedia className="pt-0.5" variant="default">
-          <span
-            className={`rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
-              endpoint.method
-            )}`}
-          >
-            {abbreviateMethod(endpoint.method)}
-          </span>
-        </ItemMedia>
-        <ItemContent className="min-w-0 gap-1.5 text-left">
-          <ItemTitle className="w-full">
-            <span className="line-clamp-2 break-all font-mono text-base leading-snug">
-              {endpoint.url}
-            </span>
-          </ItemTitle>
+        <span
+          aria-hidden="true"
+          className={cn(
+            "absolute inset-y-0 left-0 w-1",
+            methodColors.bg,
+            methodColors.border
+          )}
+        />
+        <ItemContent className="min-w-0 gap-3 py-4 pr-3 pl-5">
+          <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-3">
+            <HttpMethodBadge
+              className="mt-0.5 min-w-14 justify-center font-mono"
+              method={endpoint.method}
+              variant="badge"
+            />
+            <ItemTitle className="min-w-0 flex-1">
+              <EndpointPathTitle path={endpoint.url} />
+            </ItemTitle>
+          </div>
           <ItemDescription className="text-left">
             <EndpointMetaStrip
               billerId={endpoint.billerId}
@@ -75,8 +83,10 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
             />
           </ItemDescription>
         </ItemContent>
-        <ItemActions className="ml-auto self-center">
-          <ChevronRight className="text-muted-foreground transition-transform group-hover/item:translate-x-0.5" />
+        <ItemActions className="self-center pr-4">
+          <span className="flex size-8 items-center justify-center rounded-md border border-transparent text-muted-foreground transition-[border-color,background-color,color,transform] duration-150 ease-out group-hover/item:translate-x-0.5 group-hover/item:border-border group-hover/item:bg-muted/70 group-hover/item:text-foreground">
+            <ChevronRight className="size-4" />
+          </span>
         </ItemActions>
       </button>
     </Item>

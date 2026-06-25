@@ -1,4 +1,18 @@
-import { Inbox, Play, RotateCcw } from "lucide-react";
+import {
+  Braces,
+  CheckCircle2,
+  Clock3,
+  FileJson,
+  Gauge,
+  Inbox,
+  LoaderCircle,
+  Play,
+  RotateCcw,
+  Route,
+  Server,
+  ShieldCheck,
+  TriangleAlert,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -33,6 +47,7 @@ import {
 import { JsonEditor } from "@/features/endpoints/components/json-editor";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 import { formatMessage, formatPluralMessage, messages } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 type RequestSimulatorSheetProps = {
   readonly baseUrl: string;
@@ -69,6 +84,15 @@ const REQUEST_TIMEOUT_MS = 30_000;
 const SUCCESS_STATUS_THRESHOLD = 300;
 const FETCH_FAILURE_STATUS = 0;
 const BYTES_PER_KILOBYTE = 1024;
+const METHOD_TONE_CLASS_NAMES: Record<HttpMethod, string> = {
+  DELETE:
+    "border-red-200 bg-red-50 text-red-700 dark:border-red-900/70 dark:bg-red-950/30 dark:text-red-300",
+  GET: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/30 dark:text-emerald-300",
+  PATCH:
+    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/70 dark:bg-amber-950/30 dark:text-amber-300",
+  POST: "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900/70 dark:bg-sky-950/30 dark:text-sky-300",
+  PUT: "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900/70 dark:bg-violet-950/30 dark:text-violet-300",
+};
 
 const getSimulatorUrl = (endpointUrl: string): string => {
   const normalizedPath = endpointUrl.startsWith("/")
@@ -106,6 +130,13 @@ const getStatusTone = (result: SimulatorResult): string =>
   result.ok
     ? SIMULATOR_MESSAGES.matchedStatus
     : SIMULATOR_MESSAGES.attentionStatus;
+
+const getStatusIcon = (result: SimulatorResult) =>
+  result.ok ? (
+    <CheckCircle2 data-icon="inline-start" />
+  ) : (
+    <TriangleAlert data-icon="inline-start" />
+  );
 
 const formatHeaders = (headers: Headers): Record<string, string> => {
   const formattedHeaders: Record<string, string> = {};
@@ -362,36 +393,62 @@ export function RequestSimulatorSheet({
 
   return (
     <Sheet onOpenChange={onOpenChange} open={open}>
-      <SheetContent className="w-full gap-0 overflow-hidden p-0 sm:max-w-6xl">
-        <SheetHeader className="border-b">
-          <div className="flex flex-wrap items-center gap-2 pr-8">
-            <Badge className="font-mono" variant="outline">
-              {method}
-            </Badge>
-            <SheetTitle>{SIMULATOR_MESSAGES.requestSimulatorTitle}</SheetTitle>
+      <SheetContent className="w-full gap-0 overflow-hidden bg-background p-0 sm:max-w-6xl">
+        <SheetHeader className="border-b bg-muted/20 px-5 py-4">
+          <div className="flex flex-wrap items-start gap-3 pr-8">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-background text-primary shadow-xs">
+              <Gauge aria-hidden="true" className="size-5" />
+            </div>
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge
+                  className={cn(
+                    "rounded-md border px-2.5 py-1 font-mono font-semibold",
+                    METHOD_TONE_CLASS_NAMES[method]
+                  )}
+                  variant="outline"
+                >
+                  {method}
+                </Badge>
+                <SheetTitle className="text-lg">
+                  {SIMULATOR_MESSAGES.requestSimulatorTitle}
+                </SheetTitle>
+              </div>
+              <SheetDescription className="break-all font-mono text-xs">
+                {fullUrl}
+              </SheetDescription>
+            </div>
           </div>
-          <SheetDescription className="break-all font-mono">
-            {fullUrl}
-          </SheetDescription>
         </SheetHeader>
 
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-0 overflow-hidden lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-          <div className="flex min-h-0 flex-col gap-4 overflow-y-auto border-b p-4 lg:border-r lg:border-b-0">
+          <div className="flex min-h-0 flex-col gap-4 overflow-y-auto border-b bg-muted/10 p-4 lg:border-r lg:border-b-0">
             <div className="flex items-center justify-between gap-3">
-              <div className="flex flex-col gap-1">
-                <h3 className="font-medium text-sm">
-                  {SIMULATOR_MESSAGES.requestLabel}
-                </h3>
-                <p className="text-muted-foreground text-xs">
-                  {SIMULATOR_MESSAGES.configureRequestDescription}
-                </p>
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                  <Route aria-hidden="true" className="size-4" />
+                </div>
+                <div className="flex min-w-0 flex-col gap-1">
+                  <h3 className="font-medium text-sm">
+                    {SIMULATOR_MESSAGES.requestLabel}
+                  </h3>
+                  <p className="text-muted-foreground text-xs">
+                    {SIMULATOR_MESSAGES.configureRequestDescription}
+                  </p>
+                </div>
               </div>
-              <Badge variant="secondary">{simulatorUrl}</Badge>
+              <Badge
+                className="max-w-[45%] rounded-md px-2.5 py-1 font-mono text-[11px]"
+                variant="secondary"
+              >
+                <span className="truncate">{simulatorUrl}</span>
+              </Badge>
             </div>
 
             <FieldGroup className="gap-5">
               <Field data-invalid={headerError ? true : undefined}>
-                <FieldLabel htmlFor="request-headers">
+                <FieldLabel className="gap-2" htmlFor="request-headers">
+                  <ShieldCheck className="size-3.5 text-muted-foreground" />
                   {SIMULATOR_MESSAGES.headersLabel}
                 </FieldLabel>
                 <JsonEditor
@@ -414,7 +471,8 @@ export function RequestSimulatorSheet({
                   className="min-h-0 flex-1"
                   data-invalid={bodyError ? true : undefined}
                 >
-                  <FieldLabel htmlFor="request-body">
+                  <FieldLabel className="gap-2" htmlFor="request-body">
+                    <Braces className="size-3.5 text-muted-foreground" />
                     {SIMULATOR_MESSAGES.bodyLabel}
                   </FieldLabel>
                   <JsonEditor
@@ -439,56 +497,70 @@ export function RequestSimulatorSheet({
 
           <div className="flex min-h-0 flex-col gap-4 overflow-hidden p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-col gap-1">
-                <h3 className="font-medium text-sm">
-                  {SIMULATOR_MESSAGES.responseLabel}
-                </h3>
-                <p className="text-muted-foreground text-xs">
-                  {SIMULATOR_MESSAGES.responsePlaceholderDescription}
-                </p>
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                  <Server aria-hidden="true" className="size-4" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <h3 className="font-medium text-sm">
+                    {SIMULATOR_MESSAGES.responseLabel}
+                  </h3>
+                  <p className="text-muted-foreground text-xs">
+                    {SIMULATOR_MESSAGES.responsePlaceholderDescription}
+                  </p>
+                </div>
               </div>
             </div>
 
             {result ? (
               <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
-                <div className="flex flex-wrap gap-2 rounded-md border bg-muted/30 p-2">
+                <div className="flex flex-wrap gap-2 rounded-md border bg-muted/25 p-2">
                   <Badge
-                    className="gap-1 rounded-sm px-2.5 py-1 font-mono"
+                    className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
                     variant={
                       result.status < SUCCESS_STATUS_THRESHOLD
                         ? "default"
                         : "destructive"
                     }
                   >
-                    <span className="text-[10px] uppercase opacity-70">
+                    {getStatusIcon(result)}
+                    <span className="text-[10px] uppercase opacity-75">
                       {getStatusTone(result)}
                     </span>
-                    {result.status} {result.statusText}
+                    <span className="truncate">
+                      {result.status} {result.statusText}
+                    </span>
                   </Badge>
                   <Badge
-                    className="rounded-sm px-2.5 py-1 font-mono"
+                    className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
                     variant="secondary"
                   >
+                    <Clock3 data-icon="inline-start" />
                     {result.durationMs} ms
                   </Badge>
                   <Badge
-                    className="rounded-sm px-2.5 py-1 font-mono"
+                    className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
                     variant="outline"
                   >
+                    <FileJson data-icon="inline-start" />
                     {responseSize}
                   </Badge>
                   <Badge
-                    className="rounded-sm px-2.5 py-1 font-mono"
+                    className="h-9 min-w-0 max-w-full justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono sm:max-w-52"
                     variant="outline"
                   >
-                    {responseContentType}
+                    <Server data-icon="inline-start" />
+                    <span className="min-w-0 truncate">
+                      {responseContentType}
+                    </span>
                   </Badge>
                   <HoverCard>
                     <HoverCardTrigger asChild>
                       <Badge
-                        className="cursor-default rounded-sm px-2.5 py-1 font-mono"
+                        className="h-9 min-w-0 cursor-default justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
                         variant="outline"
                       >
+                        <ShieldCheck data-icon="inline-start" />
                         {responseHeaderCountLabel}
                       </Badge>
                     </HoverCardTrigger>
@@ -508,7 +580,7 @@ export function RequestSimulatorSheet({
                   </HoverCard>
                 </div>
 
-                <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border bg-muted/30">
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border bg-muted/30 shadow-xs">
                   <CodeBlock
                     className="flex min-h-0 flex-1 flex-col"
                     data={[
@@ -521,7 +593,8 @@ export function RequestSimulatorSheet({
                     defaultValue="json"
                   >
                     <CodeBlockHeader>
-                      <span className="px-3 py-1 text-muted-foreground text-xs">
+                      <span className="flex items-center gap-2 px-3 py-1 text-muted-foreground text-xs">
+                        <FileJson aria-hidden="true" className="size-3.5" />
                         {SIMULATOR_MESSAGES.responseBodyFilename}
                       </span>
                     </CodeBlockHeader>
@@ -545,8 +618,8 @@ export function RequestSimulatorSheet({
                 </div>
               </div>
             ) : (
-              <div className="flex min-h-72 flex-1 flex-col items-center justify-center gap-3 rounded-md border border-dashed bg-muted/20 p-6 text-center">
-                <div className="rounded-md border bg-background p-3 text-muted-foreground">
+              <div className="flex min-h-72 flex-1 flex-col items-center justify-center gap-3 rounded-md border border-dashed bg-muted/20 p-6 text-center shadow-inner">
+                <div className="rounded-md border bg-background p-3 text-muted-foreground shadow-xs">
                   <Inbox data-icon="inline-start" />
                 </div>
                 <div className="flex max-w-sm flex-col gap-1">
@@ -562,14 +635,31 @@ export function RequestSimulatorSheet({
           </div>
         </div>
 
-        <SheetFooter className="border-t">
+        <SheetFooter className="border-t bg-muted/20">
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button onClick={resetRequest} type="button" variant="outline">
+            <Button
+              className="transition-transform duration-150 ease-out active:scale-[0.97]"
+              onClick={resetRequest}
+              type="button"
+              variant="outline"
+            >
               <RotateCcw data-icon="inline-start" />
               {SIMULATOR_MESSAGES.resetButton}
             </Button>
-            <Button disabled={isSending} onClick={sendRequest} type="button">
-              <Play data-icon="inline-start" />
+            <Button
+              className="transition-transform duration-150 ease-out active:scale-[0.97]"
+              disabled={isSending}
+              onClick={sendRequest}
+              type="button"
+            >
+              {isSending ? (
+                <LoaderCircle
+                  className="animate-spin"
+                  data-icon="inline-start"
+                />
+              ) : (
+                <Play data-icon="inline-start" />
+              )}
               {isSending
                 ? SIMULATOR_MESSAGES.sendingButton
                 : SIMULATOR_MESSAGES.sendButton}

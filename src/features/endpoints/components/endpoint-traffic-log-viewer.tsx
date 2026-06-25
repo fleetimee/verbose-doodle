@@ -1,13 +1,18 @@
 import {
+  Activity,
   CircleAlert,
+  CircleCheck,
+  CircleDashed,
   Clipboard,
   Copy,
   Download,
   FileClock,
+  ListFilter,
   MonitorDown,
   MonitorUp,
   RefreshCw,
   Search,
+  TimerReset,
   Trash2,
   X,
 } from "lucide-react";
@@ -100,6 +105,49 @@ const STATUS_FILTER_LABELS: Record<EndpointTrafficLogStatusFilter, string> = {
   all: "All logs",
   ...STATUS_LABELS,
 };
+
+const STATUS_TONE_CLASS_NAMES: Record<EndpointTrafficLogStatus, string> = {
+  backend_error: "text-red-300",
+  matched_delayed: "text-amber-200",
+  matched_empty: "text-slate-300",
+  matched_success: "text-emerald-300",
+  matched_timeout: "text-amber-300",
+  unmatched_endpoint: "text-rose-300",
+};
+
+const STATUS_DOT_CLASS_NAMES: Record<EndpointTrafficLogStatus, string> = {
+  backend_error: "bg-red-400 shadow-[0_0_12px_rgba(248,113,113,0.75)]",
+  matched_delayed: "bg-amber-300 shadow-[0_0_12px_rgba(252,211,77,0.65)]",
+  matched_empty: "bg-slate-400 shadow-[0_0_10px_rgba(148,163,184,0.55)]",
+  matched_success: "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.75)]",
+  matched_timeout: "bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.7)]",
+  unmatched_endpoint: "bg-rose-400 shadow-[0_0_12px_rgba(251,113,133,0.7)]",
+};
+
+function getSuccessRate(logs: readonly EndpointTrafficLog[]) {
+  if (logs.length === 0) {
+    return "0%";
+  }
+
+  const successfulLogs = logs.filter(
+    (log) =>
+      log.hitStatus === "matched_success" || log.hitStatus === "matched_delayed"
+  ).length;
+
+  return `${Math.round((successfulLogs / logs.length) * 100)}%`;
+}
+
+function getLogCountLabel(count: number) {
+  return `${count} ${count === 1 ? "log" : "logs"}`;
+}
+
+function getLatestDurationLabel(log: EndpointTrafficLog | undefined) {
+  if (log?.durationMs === null || log?.durationMs === undefined) {
+    return "-";
+  }
+
+  return `${log.durationMs} ms`;
+}
 
 function formatLogLine(log: EndpointTrafficLog, showTimestamp: boolean) {
   const parts = [
@@ -237,6 +285,10 @@ export function EndpointTrafficLogViewer({
       [...(data?.items ?? [])].sort((a, b) => getLogTime(a) - getLogTime(b)),
     [data?.items]
   );
+  const totalLogsLabel = getLogCountLabel(logs.length);
+  const selectedLogsLabel = `${selectedIds.size} selected`;
+  const successRate = getSuccessRate(logs);
+  const latestLog = logs.at(-1);
   const visibleLines = useMemo(
     () => logs.map((log) => formatLogLine(log, showTimestamps)),
     [logs, showTimestamps]
@@ -356,7 +408,7 @@ export function EndpointTrafficLogViewer({
         >
           {logs.map((log) => (
             <div
-              className="group grid min-w-0 grid-cols-[24px_88px_minmax(0,1fr)] items-start gap-2 px-2 py-0.5 transition-colors hover:bg-white/7"
+              className="group grid min-w-0 grid-cols-[24px_116px_minmax(0,1fr)] items-start gap-2 rounded px-2 py-1 transition-[background-color,transform] duration-150 ease-out hover:bg-white/7 active:scale-[0.997]"
               key={log.id}
             >
               <Checkbox
@@ -527,12 +579,20 @@ export function EndpointTrafficLogViewer({
       <div className="flex flex-col gap-4 rounded-lg border bg-card p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="font-semibold text-lg">Traffic logs</h2>
-            <p className="text-muted-foreground text-sm">
-              Inspect requests that hit this simulator endpoint.
-            </p>
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-md border bg-background text-primary shadow-xs">
+                <Activity aria-hidden="true" className="size-5" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-lg">Traffic logs</h2>
+                <p className="text-muted-foreground text-sm">
+                  Inspect requests that hit this simulator endpoint.
+                </p>
+              </div>
+            </div>
           </div>
           <Button
+            className="transition-transform duration-150 ease-out active:scale-[0.97]"
             disabled={isFetching}
             onClick={() => refetchLogs()}
             size="sm"
@@ -544,12 +604,36 @@ export function EndpointTrafficLogViewer({
           </Button>
         </div>
 
+        <div className="grid gap-2 sm:grid-cols-4">
+          <TrafficMetric
+            icon={<CircleDashed className="size-3.5" />}
+            label="Visible"
+            value={totalLogsLabel}
+          />
+          <TrafficMetric
+            icon={<CircleCheck className="size-3.5" />}
+            label="Success"
+            value={successRate}
+          />
+          <TrafficMetric
+            icon={<Clipboard className="size-3.5" />}
+            label="Selection"
+            value={selectedLogsLabel}
+          />
+          <TrafficMetric
+            icon={<TimerReset className="size-3.5" />}
+            label="Latest"
+            value={getLatestDurationLabel(latestLog)}
+          />
+        </div>
+
         <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2 rounded-md border bg-muted/20 p-3">
             <label
-              className="grid grid-cols-[1fr_auto] items-center gap-3 text-sm"
+              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm"
               htmlFor="traffic-log-auto-refresh"
             >
+              <RefreshCw className="size-4 text-muted-foreground" />
               <span className="font-medium">Auto-refresh logs</span>
               <Switch
                 checked={autoRefresh}
@@ -558,9 +642,10 @@ export function EndpointTrafficLogViewer({
               />
             </label>
             <label
-              className="grid grid-cols-[1fr_auto] items-center gap-3 text-sm"
+              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm"
               htmlFor="traffic-log-wrap-lines"
             >
+              <ListFilter className="size-4 text-muted-foreground" />
               <span className="font-medium">Wrap lines</span>
               <Switch
                 checked={wrapLines}
@@ -569,9 +654,10 @@ export function EndpointTrafficLogViewer({
               />
             </label>
             <label
-              className="grid grid-cols-[1fr_auto] items-center gap-3 text-sm"
+              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm"
               htmlFor="traffic-log-timestamps"
             >
+              <FileClock className="size-4 text-muted-foreground" />
               <span className="font-medium">Display timestamps</span>
               <Switch
                 checked={showTimestamps}
@@ -590,6 +676,7 @@ export function EndpointTrafficLogViewer({
                 value={status}
               >
                 <SelectTrigger className="w-full">
+                  <ListFilter data-icon="inline-start" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -641,6 +728,7 @@ export function EndpointTrafficLogViewer({
 
               <div className="flex flex-wrap gap-2">
                 <Button
+                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
                   onClick={() =>
                     copyText(visibleLines.join("\n"), "Visible logs copied")
                   }
@@ -652,6 +740,7 @@ export function EndpointTrafficLogViewer({
                   Copy
                 </Button>
                 <Button
+                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
                   disabled={selectedIds.size === 0}
                   onClick={() =>
                     copyText(selectedLines.join("\n"), "Selected logs copied")
@@ -664,6 +753,7 @@ export function EndpointTrafficLogViewer({
                   Copy selected
                 </Button>
                 <Button
+                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
                   disabled={selectedIds.size === 0}
                   onClick={handleClearSelection}
                   size="sm"
@@ -674,6 +764,7 @@ export function EndpointTrafficLogViewer({
                   Unselect
                 </Button>
                 <Button
+                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
                   onClick={() => handleDownload("text")}
                   size="sm"
                   type="button"
@@ -683,6 +774,7 @@ export function EndpointTrafficLogViewer({
                   Download
                 </Button>
                 <Button
+                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
                   onClick={() => handleDownload("csv")}
                   size="sm"
                   type="button"
@@ -691,6 +783,7 @@ export function EndpointTrafficLogViewer({
                   CSV
                 </Button>
                 <Button
+                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
                   disabled={logs.length === 0 || isClearingTrafficLogs}
                   onClick={() => setShowClearLogsDialog(true)}
                   size="sm"
@@ -766,18 +859,41 @@ function TerminalStatus({
 }: {
   readonly status: EndpointTrafficLogStatus;
 }) {
-  let className = "text-[#d4d4d4]";
-  if (status === "backend_error") {
-    className = "text-[#fca5a5]";
-  }
-  if (status === "matched_timeout") {
-    className = "text-[#fbbf24]";
-  }
-
   return (
-    <span className={cn("font-semibold text-xs", className)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-2 font-semibold text-xs",
+        STATUS_TONE_CLASS_NAMES[status]
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cn("size-1.5 rounded-full", STATUS_DOT_CLASS_NAMES[status])}
+      />
       {STATUS_LABELS[status]}
     </span>
+  );
+}
+
+function TrafficMetric({
+  icon,
+  label,
+  value,
+}: {
+  readonly icon: ReactNode;
+  readonly label: string;
+  readonly value: string;
+}) {
+  return (
+    <div className="flex min-w-0 items-center gap-2 rounded-md border bg-background px-3 py-2 shadow-xs">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="text-[11px] text-muted-foreground uppercase">{label}</p>
+        <p className="truncate font-mono font-semibold text-sm">{value}</p>
+      </div>
+    </div>
   );
 }
 

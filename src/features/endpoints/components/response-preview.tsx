@@ -1,4 +1,4 @@
-import { Code2, Copy, ExternalLink, Eye } from "lucide-react";
+import { Code2, Copy, Eye, Play } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -262,7 +262,7 @@ export function ResponsePreview({
                               size="icon"
                               variant="outline"
                             >
-                              <ExternalLink className="h-4 w-4" />
+                              <Play className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
