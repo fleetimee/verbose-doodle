@@ -189,8 +189,25 @@ export function ResponsePreview({
               >
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-lg">{response.name}</h3>
-                  {response.activated && (
-                    <Badge variant="secondary">Active Response</Badge>
+                  {response.activated ? (
+                    <Badge
+                      className="flex items-center gap-1.5"
+                      variant="secondary"
+                    >
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      </span>
+                      Active Response
+                    </Badge>
+                  ) : (
+                    <Badge
+                      className="flex items-center gap-1.5 text-muted-foreground"
+                      variant="outline"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                      Inactive Response
+                    </Badge>
                   )}
                 </div>
                 <div className="flex items-center gap-2">

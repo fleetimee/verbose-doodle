@@ -249,9 +249,13 @@ export function ResponseListItem({
                   transition={{ duration: 0.2, ease: "easeOut" }}
                 >
                   <Badge
-                    className="bg-background/70 text-xs shadow-xs"
+                    className="flex items-center gap-1.5 bg-background/70 text-xs shadow-xs"
                     variant="secondary"
                   >
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    </span>
                     Active
                   </Badge>
                 </motion.div>
