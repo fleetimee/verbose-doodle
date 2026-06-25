@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/sheet";
 import { JsonEditor } from "@/features/endpoints/components/json-editor";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
+import { formatMessage, formatPluralMessage, messages } from "@/lib/i18n";
 
 type RequestSimulatorSheetProps = {
   readonly baseUrl: string;
@@ -95,11 +96,16 @@ const formatByteSize = (value: string): string => {
   return `${(bytes / BYTES_PER_KILOBYTE).toFixed(1)} KB`;
 };
 
+const SIMULATOR_MESSAGES = messages.endpoints.requestSimulator;
+
 const getContentTypeLabel = (headers: Record<string, string>): string =>
-  headers["content-type"]?.split(";")[0] ?? "unknown";
+  headers["content-type"]?.split(";")[0] ??
+  SIMULATOR_MESSAGES.unknownContentType;
 
 const getStatusTone = (result: SimulatorResult): string =>
-  result.ok ? "Matched" : "Attention";
+  result.ok
+    ? SIMULATOR_MESSAGES.matchedStatus
+    : SIMULATOR_MESSAGES.attentionStatus;
 
 const formatHeaders = (headers: Headers): Record<string, string> => {
   const formattedHeaders: Record<string, string> = {};
@@ -115,14 +121,14 @@ const parseHeaders = (value: string): Record<string, string> => {
   const parsed = JSON.parse(value) as unknown;
 
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error("Headers must be a JSON object.");
+    throw new Error(SIMULATOR_MESSAGES.headersMustBeObjectError);
   }
 
   const headers: Record<string, string> = {};
 
   for (const [key, headerValue] of Object.entries(parsed)) {
     if (typeof headerValue !== "string") {
-      throw new Error("Header values must be strings.");
+      throw new Error(SIMULATOR_MESSAGES.headerValuesMustBeStringsError);
     }
 
     headers[key] = headerValue;
@@ -181,14 +187,22 @@ const showRequestResultToast = ({
   readonly status: number;
   readonly statusText: string;
 }) => {
-  const description = `${status} ${statusText || (ok ? "OK" : "HTTP error")} in ${durationMs} ms`;
+  const description = formatMessage(SIMULATOR_MESSAGES.toastDescription, {
+    durationMs,
+    status,
+    statusText:
+      statusText ||
+      (ok
+        ? SIMULATOR_MESSAGES.okFallback
+        : SIMULATOR_MESSAGES.httpErrorFallback),
+  });
 
   if (ok) {
-    toast.success("Request succeeded", { description });
+    toast.success(SIMULATOR_MESSAGES.requestSucceededToast, { description });
     return;
   }
 
-  toast.error("Request returned an error", { description });
+  toast.error(SIMULATOR_MESSAGES.requestReturnedErrorToast, { description });
 };
 
 export function RequestSimulatorSheet({
@@ -225,8 +239,16 @@ export function RequestSimulatorSheet({
   const responseSize = result ? formatByteSize(result.body) : "0 B";
   const responseContentType = result
     ? getContentTypeLabel(result.headers)
-    : "unknown";
+    : SIMULATOR_MESSAGES.unknownContentType;
   const responseHeaderCount = result ? Object.keys(result.headers).length : 0;
+  const responseHeaderCountLabel = formatPluralMessage(
+    SIMULATOR_MESSAGES.headerCount,
+    responseHeaderCount
+  );
+  const responseHeadersReturnedLabel = formatPluralMessage(
+    SIMULATOR_MESSAGES.headersReturned,
+    responseHeaderCount
+  );
   const responseHeadersJson = result
     ? JSON.stringify(result.headers, null, 2)
     : "{}";
@@ -260,7 +282,9 @@ export function RequestSimulatorSheet({
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Request must be valid JSON.";
+        error instanceof Error
+          ? error.message
+          : SIMULATOR_MESSAGES.requestValidJsonError;
       if (message.toLowerCase().includes("header")) {
         setHeaderError(message);
       } else {
@@ -310,23 +334,25 @@ export function RequestSimulatorSheet({
         setResult(
           createFailureResult({
             durationMs,
-            error: "Request timed out.",
-            statusText: "Timeout",
+            error: SIMULATOR_MESSAGES.requestTimedOutError,
+            statusText: SIMULATOR_MESSAGES.timeoutStatus,
           })
         );
-        toast.error("Request timed out");
+        toast.error(SIMULATOR_MESSAGES.requestTimedOutToast);
       } else {
         const message =
-          error instanceof Error ? error.message : "Browser request failed.";
+          error instanceof Error
+            ? error.message
+            : SIMULATOR_MESSAGES.browserRequestFailed;
 
         setResult(
           createFailureResult({
             durationMs,
-            error: `${message}. If this keeps happening, check that the dev server/proxy is running and that the backend is reachable.`,
-            statusText: "Fetch failed",
+            error: `${message}. ${SIMULATOR_MESSAGES.networkFailureHelp}`,
+            statusText: SIMULATOR_MESSAGES.fetchFailedStatus,
           })
         );
-        toast.error("Request failed");
+        toast.error(SIMULATOR_MESSAGES.requestFailedToast);
       }
     } finally {
       window.clearTimeout(timeoutId);
@@ -342,7 +368,7 @@ export function RequestSimulatorSheet({
             <Badge className="font-mono" variant="outline">
               {method}
             </Badge>
-            <SheetTitle>Request Simulator</SheetTitle>
+            <SheetTitle>{SIMULATOR_MESSAGES.requestSimulatorTitle}</SheetTitle>
           </div>
           <SheetDescription className="break-all font-mono">
             {fullUrl}
@@ -353,9 +379,11 @@ export function RequestSimulatorSheet({
           <div className="flex min-h-0 flex-col gap-4 overflow-y-auto border-b p-4 lg:border-r lg:border-b-0">
             <div className="flex items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
-                <h3 className="font-medium text-sm">Request</h3>
+                <h3 className="font-medium text-sm">
+                  {SIMULATOR_MESSAGES.requestLabel}
+                </h3>
                 <p className="text-muted-foreground text-xs">
-                  Configure headers and JSON payload.
+                  {SIMULATOR_MESSAGES.configureRequestDescription}
                 </p>
               </div>
               <Badge variant="secondary">{simulatorUrl}</Badge>
@@ -363,20 +391,20 @@ export function RequestSimulatorSheet({
 
             <FieldGroup className="gap-5">
               <Field data-invalid={headerError ? true : undefined}>
-                <FieldLabel htmlFor="request-headers">Headers</FieldLabel>
+                <FieldLabel htmlFor="request-headers">
+                  {SIMULATOR_MESSAGES.headersLabel}
+                </FieldLabel>
                 <JsonEditor
                   aria-invalid={headerError ? true : undefined}
                   className="min-h-0"
                   height="180px"
                   id="request-headers"
                   onChange={setHeadersJson}
-                  placeholder='{
-  "Content-Type": "application/json"
-}'
+                  placeholder={SIMULATOR_MESSAGES.headersPlaceholder}
                   value={headersJson}
                 />
                 <FieldDescription>
-                  Environment token is applied automatically when available.
+                  {SIMULATOR_MESSAGES.tokenAppliedDescription}
                 </FieldDescription>
                 <FieldError>{headerError}</FieldError>
               </Field>
@@ -386,21 +414,22 @@ export function RequestSimulatorSheet({
                   className="min-h-0 flex-1"
                   data-invalid={bodyError ? true : undefined}
                 >
-                  <FieldLabel htmlFor="request-body">Body</FieldLabel>
+                  <FieldLabel htmlFor="request-body">
+                    {SIMULATOR_MESSAGES.bodyLabel}
+                  </FieldLabel>
                   <JsonEditor
                     aria-invalid={bodyError ? true : undefined}
                     className="min-h-0 flex-1"
                     height="320px"
                     id="request-body"
                     onChange={setBodyJson}
-                    placeholder='{
-  "customerId": "12345",
-  "amount": 10000
-}'
+                    placeholder={SIMULATOR_MESSAGES.bodyPlaceholder}
                     value={bodyJson}
                   />
                   <FieldDescription>
-                    Sent as JSON for {method} requests.
+                    {formatMessage(SIMULATOR_MESSAGES.sentAsJsonDescription, {
+                      method,
+                    })}
                   </FieldDescription>
                   <FieldError>{bodyError}</FieldError>
                 </Field>
@@ -411,9 +440,11 @@ export function RequestSimulatorSheet({
           <div className="flex min-h-0 flex-col gap-4 overflow-hidden p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
-                <h3 className="font-medium text-sm">Response</h3>
+                <h3 className="font-medium text-sm">
+                  {SIMULATOR_MESSAGES.responseLabel}
+                </h3>
                 <p className="text-muted-foreground text-xs">
-                  Result appears here after execution.
+                  {SIMULATOR_MESSAGES.responsePlaceholderDescription}
                 </p>
               </div>
             </div>
@@ -458,14 +489,16 @@ export function RequestSimulatorSheet({
                         className="cursor-default rounded-sm px-2.5 py-1 font-mono"
                         variant="outline"
                       >
-                        {responseHeaderCount} headers
+                        {responseHeaderCountLabel}
                       </Badge>
                     </HoverCardTrigger>
                     <HoverCardContent align="end" className="w-96 p-0">
                       <div className="border-b px-3 py-2">
-                        <p className="font-medium text-sm">Response Headers</p>
+                        <p className="font-medium text-sm">
+                          {SIMULATOR_MESSAGES.responseHeadersTitle}
+                        </p>
                         <p className="text-muted-foreground text-xs">
-                          {responseHeaderCount} headers returned
+                          {responseHeadersReturnedLabel}
                         </p>
                       </div>
                       <pre className="max-h-72 overflow-auto p-3 font-mono text-xs leading-relaxed">
@@ -481,7 +514,7 @@ export function RequestSimulatorSheet({
                     data={[
                       {
                         code: responseBody,
-                        filename: "response-body.json",
+                        filename: SIMULATOR_MESSAGES.responseBodyFilename,
                         language: "json",
                       },
                     ]}
@@ -489,7 +522,7 @@ export function RequestSimulatorSheet({
                   >
                     <CodeBlockHeader>
                       <span className="px-3 py-1 text-muted-foreground text-xs">
-                        response-body.json
+                        {SIMULATOR_MESSAGES.responseBodyFilename}
                       </span>
                     </CodeBlockHeader>
                     <CodeBlockBody className="min-h-0 flex-1 overflow-auto">
@@ -517,10 +550,11 @@ export function RequestSimulatorSheet({
                   <Inbox data-icon="inline-start" />
                 </div>
                 <div className="flex max-w-sm flex-col gap-1">
-                  <p className="font-medium text-sm">No response yet</p>
+                  <p className="font-medium text-sm">
+                    {SIMULATOR_MESSAGES.emptyResponseTitle}
+                  </p>
                   <p className="text-muted-foreground text-sm">
-                    Send the request to inspect the status, duration, headers,
-                    and body here.
+                    {SIMULATOR_MESSAGES.emptyResponseDescription}
                   </p>
                 </div>
               </div>
@@ -532,11 +566,13 @@ export function RequestSimulatorSheet({
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button onClick={resetRequest} type="button" variant="outline">
               <RotateCcw data-icon="inline-start" />
-              Reset
+              {SIMULATOR_MESSAGES.resetButton}
             </Button>
             <Button disabled={isSending} onClick={sendRequest} type="button">
               <Play data-icon="inline-start" />
-              {isSending ? "Sending..." : "Send Request"}
+              {isSending
+                ? SIMULATOR_MESSAGES.sendingButton
+                : SIMULATOR_MESSAGES.sendButton}
             </Button>
           </div>
         </SheetFooter>
