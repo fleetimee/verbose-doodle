@@ -16,6 +16,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { type ReactNode, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -407,9 +408,13 @@ export function EndpointTrafficLogViewer({
           )}
         >
           {logs.map((log) => (
-            <div
+            <motion.div
+              animate={{ opacity: 1, x: 0 }}
               className="group grid min-w-0 grid-cols-[24px_116px_minmax(0,1fr)] items-start gap-2 rounded px-2 py-1 transition-[background-color,transform] duration-150 ease-out hover:bg-white/7 active:scale-[0.997]"
+              initial={{ opacity: 0, x: -8 }}
               key={log.id}
+              layout="position"
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
               <Checkbox
                 aria-label={`Select traffic log ${log.requestId}`}
@@ -434,7 +439,7 @@ export function EndpointTrafficLogViewer({
               >
                 {formatLogLine(log, showTimestamps)}
               </button>
-            </div>
+            </motion.div>
           ))}
         </div>
         {!wrapLines && <ScrollBar orientation="horizontal" />}
