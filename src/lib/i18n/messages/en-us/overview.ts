@@ -1,0 +1,25 @@
+export const overviewMessages = {
+  documentTitle: "Overview",
+  documentDescription:
+    "View your Fleetime Labs statistics, configured endpoints, and response distributions",
+  eyebrow: "Billing Simulator",
+  pageTitle: "Overview",
+  pageDescription:
+    "Inspect endpoint coverage, response templates, and account activity without leaving the simulator workspace.",
+  readOnlyAnalytics: "Read-only analytics",
+  loadError: "Failed to load overview data. Please try refreshing the page.",
+  totalEndpointsTitle: "Total Endpoints",
+  totalEndpointsDescription: "Configured endpoint routes across all billers",
+  totalResponsesTitle: "Total Responses",
+  totalResponsesDescription: "Response templates",
+  activeResponsesTitle: "Active Responses",
+  activeResponsesDescription: "Active templates",
+  totalBillersTitle: "Total Billers",
+  totalBillersDescription: "Biller systems",
+  registeredAccounts: "Registered accounts",
+  inactiveUsers: "{count} inactive",
+  regularUsers: "{count} regular",
+  totalUsersTitle: "Total Users",
+  activeUsersTitle: "Active Users",
+  adminUsersTitle: "Admin Users",
+} as const;
