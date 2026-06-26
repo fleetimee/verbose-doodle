@@ -42,12 +42,15 @@ export function NavMain({
       <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
-          const isActive =
-            location.pathname === item.url ||
-            location.pathname.startsWith(`${item.url}/`);
+          const hasSubItems = Boolean(item.items?.length);
+          const isItemActive =
+            !hasSubItems &&
+            (location.pathname === item.url ||
+              location.pathname.startsWith(`${item.url}/`));
           const hasActiveSubItem = item.items?.some(
             (subItem) => location.pathname === subItem.url
           );
+          const isActive = isItemActive || hasActiveSubItem;
 
           return (
             <Collapsible
@@ -56,23 +59,38 @@ export function NavMain({
               key={item.title}
             >
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  className="h-9 rounded-lg data-[active=true]:shadow-xs"
-                  isActive={isActive}
-                  tooltip={item.title}
-                >
-                  <Link onMouseEnter={item.onPrefetch} to={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
+                {hasSubItems ? (
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      className="h-9 rounded-lg data-[active=true]:shadow-xs"
+                      isActive={isItemActive}
+                      onMouseEnter={item.onPrefetch}
+                      tooltip={item.title}
+                      type="button"
+                    >
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                ) : (
+                  <SidebarMenuButton
+                    asChild
+                    className="h-9 rounded-lg data-[active=true]:shadow-xs"
+                    isActive={isActive}
+                    tooltip={item.title}
+                  >
+                    <Link onMouseEnter={item.onPrefetch} to={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                )}
                 {item.badge ? (
                   <SidebarMenuBadge className="text-sidebar-foreground/55">
                     {item.badge}
                   </SidebarMenuBadge>
                 ) : null}
-                {item.items?.length ? (
+                {hasSubItems ? (
                   <>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuAction className="data-[state=open]:rotate-90">

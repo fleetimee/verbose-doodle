@@ -51,6 +51,26 @@ const EndpointDetailPage = lazy(() =>
     })
   )
 );
+const SocketTesterPage = lazy(() =>
+  import("@/pages/dashboard/socket-tester").then(({ SocketTesterPage }) => ({
+    default: SocketTesterPage,
+  }))
+);
+const TcpClientPage = lazy(() =>
+  import("@/pages/dashboard/tcp-client").then(({ TcpClientPage }) => ({
+    default: TcpClientPage,
+  }))
+);
+const TcpServerPage = lazy(() =>
+  import("@/pages/dashboard/tcp-server").then(({ TcpServerPage }) => ({
+    default: TcpServerPage,
+  }))
+);
+const UdpPage = lazy(() =>
+  import("@/pages/dashboard/udp").then(({ UdpPage }) => ({
+    default: UdpPage,
+  }))
+);
 if (import.meta.env.DEV) {
   await import("react-grab");
 }
@@ -85,6 +105,10 @@ function AppContent() {
             <Route element={<OverviewPage />} path="overview" />
             <Route element={<EndpointsPage />} path="endpoints" />
             <Route element={<EndpointDetailPage />} path="endpoints/:id" />
+            <Route element={<SocketTesterPage />} path="socket-tester" />
+            <Route element={<TcpClientPage />} path="socket-test/tcp-client" />
+            <Route element={<TcpServerPage />} path="socket-test/tcp-server" />
+            <Route element={<UdpPage />} path="socket-test/udp" />
             <Route
               element={<Navigate replace to="/dashboard/overview" />}
               path="users"

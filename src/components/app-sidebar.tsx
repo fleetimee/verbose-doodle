@@ -1,4 +1,4 @@
-import { Info, LayoutDashboard, Plug } from "lucide-react";
+import { Info, LayoutDashboard, Plug, RadioTower } from "lucide-react";
 import type React from "react";
 import { Link } from "react-router";
 import { NavMain } from "@/components/nav-main";
@@ -34,6 +34,25 @@ const data = {
       url: "/dashboard/endpoints",
       icon: Plug,
       badge: "API",
+    },
+    {
+      title: "SocketTest",
+      url: "/dashboard/socket-test/tcp-client",
+      icon: RadioTower,
+      items: [
+        {
+          title: "TCP Client",
+          url: "/dashboard/socket-test/tcp-client",
+        },
+        {
+          title: "TCP Server",
+          url: "/dashboard/socket-test/tcp-server",
+        },
+        {
+          title: "UDP",
+          url: "/dashboard/socket-test/udp",
+        },
+      ],
     },
   ],
   navSecondary: [
