@@ -129,6 +129,11 @@ function formatClientAddress(payload: Record<string, unknown>) {
 
 export function useSocketBridge() {
   const socketRef = useRef<WebSocket | null>(null);
+  const pendingTcpClientRef = useRef<{
+    readonly connectionId: string;
+    readonly host: string;
+    readonly port: number;
+  } | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
@@ -183,20 +188,36 @@ export function useSocketBridge() {
       const normalizedType = type.replaceAll("-", "_");
 
       if (normalizedType.includes("error")) {
+        const errorScope = readString(
+          payload,
+          ["scope", "connectionId", "serverId"],
+          "bridge"
+        );
+        const errorMessage = readString(
+          payload,
+          ["message", "error", "data"],
+          JSON.stringify(event)
+        );
+
+        if (
+          pendingTcpClientRef.current &&
+          (errorScope === pendingTcpClientRef.current.connectionId ||
+            normalizedType.includes("tcp_client"))
+        ) {
+          const { host, port } = pendingTcpClientRef.current;
+          pendingTcpClientRef.current = null;
+          setTcpClient((current) => ({ ...current, connected: false }));
+          toast.error("TCP connection failed", {
+            description: `${host}:${port} refused the connection. ${errorMessage}`,
+          });
+        }
+
         appendLog(
           toLogEntry(
             "err",
             "tcp-client",
-            readString(
-              payload,
-              ["scope", "connectionId", "serverId"],
-              "bridge"
-            ),
-            readString(
-              payload,
-              ["message", "error", "data"],
-              JSON.stringify(event)
-            ),
+            errorScope,
+            errorMessage,
             "text",
             payload
           )
@@ -205,6 +226,13 @@ export function useSocketBridge() {
       }
 
       if (normalizedType.includes("tcp_client_connected")) {
+        const connectedTarget = pendingTcpClientRef.current;
+        if (connectedTarget) {
+          toast.success("TCP connected", {
+            description: `Connected to ${connectedTarget.host}:${connectedTarget.port}`,
+          });
+          pendingTcpClientRef.current = null;
+        }
         setTcpClient((current) => ({ ...current, connected: true }));
         appendLog(
           toLogEntry(
@@ -223,7 +251,15 @@ export function useSocketBridge() {
         normalizedType.includes("tcp_client_disconnected") ||
         normalizedType.includes("tcp_client_closed")
       ) {
+        const wasPending = Boolean(pendingTcpClientRef.current);
+        const failedTarget = pendingTcpClientRef.current;
+        pendingTcpClientRef.current = null;
         setTcpClient((current) => ({ ...current, connected: false }));
+        if (wasPending && failedTarget) {
+          toast.error("TCP connection failed", {
+            description: `Could not connect to ${failedTarget.host}:${failedTarget.port}`,
+          });
+        }
         appendLog(
           toLogEntry(
             "sys",
@@ -478,6 +514,7 @@ export function useSocketBridge() {
   const connectTcpClient = useCallback(
     (host: string, port: number) => {
       const connectionId = createId("tcp-client");
+      pendingTcpClientRef.current = { connectionId, host, port };
       setTcpClient({ connectionId, connected: false, host, port });
       if (
         sendCommand({
@@ -494,6 +531,8 @@ export function useSocketBridge() {
             "text"
           )
         );
+      } else {
+        pendingTcpClientRef.current = null;
       }
     },
     [appendLog, sendCommand]

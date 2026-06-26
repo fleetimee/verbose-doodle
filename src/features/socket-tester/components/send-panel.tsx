@@ -1,14 +1,21 @@
-import { SendHorizontal } from "lucide-react";
+import { CircleHelp, Eraser, SendHorizontal } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type {
   MessageDelimiter,
   PayloadFormat,
@@ -24,6 +31,14 @@ type SendPanelProps = {
   readonly showDelimiter?: boolean;
 };
 
+type DelimiterOption = "crlf" | "lf" | "none";
+
+const delimiterByOption: Record<DelimiterOption, MessageDelimiter> = {
+  crlf: "\r\n",
+  lf: "\n",
+  none: "",
+};
+
 export function SendPanel({
   disabled = false,
   onSend,
@@ -31,62 +46,113 @@ export function SendPanel({
 }: SendPanelProps) {
   const [data, setData] = useState("");
   const [format, setFormat] = useState<PayloadFormat>("ascii");
-  const [delimiter, setDelimiter] = useState<MessageDelimiter>("\r\n");
+  const [delimiter, setDelimiter] = useState<DelimiterOption>("crlf");
+  const selectedDelimiter = delimiterByOption[delimiter];
 
   return (
-    <section className="grid gap-3">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="mr-auto">
-          <h2 className="font-semibold text-sm">Send panel</h2>
-          <p className="text-muted-foreground text-xs">
-            Compose payloads as ASCII, hex, or base64.
-          </p>
-        </div>
-        <Select
-          onValueChange={(value) => setFormat(value as PayloadFormat)}
-          value={format}
-        >
-          <SelectTrigger className="w-[118px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ascii">ASCII</SelectItem>
-            <SelectItem value="hex">Hex</SelectItem>
-            <SelectItem value="base64">Base64</SelectItem>
-          </SelectContent>
-        </Select>
-        {showDelimiter && (
-          <Select
-            onValueChange={(value) => setDelimiter(value as MessageDelimiter)}
-            value={delimiter}
-          >
-            <SelectTrigger className="w-[124px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="\r\n">CRLF</SelectItem>
-              <SelectItem value="\n">LF</SelectItem>
-              <SelectItem value="">None</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
+    <section className="flex flex-col gap-3">
+      <div>
+        <h2 className="font-semibold text-sm">Send panel</h2>
+        <p className="text-muted-foreground text-xs">
+          Compose payloads as ASCII, hex, or base64.
+        </p>
       </div>
-      <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
         <Textarea
-          className="min-h-24 resize-y font-mono"
+          className="h-40 min-h-40 resize-none overflow-y-auto font-mono leading-relaxed [field-sizing:fixed]"
           onChange={(event) => setData(event.target.value)}
           placeholder="Type a payload..."
           value={data}
         />
-        <Button
-          className="h-full min-h-12 gap-2 md:w-28"
-          disabled={disabled || data.length === 0}
-          onClick={() => onSend(data, format, showDelimiter ? delimiter : "")}
-          type="button"
-        >
-          <SendHorizontal className="size-4" />
-          Send
-        </Button>
+        <div className="flex flex-col gap-3 md:w-[184px]">
+          <div className="flex flex-col gap-1.5">
+            <span className="font-medium text-muted-foreground text-xs">
+              Payload format
+            </span>
+            <Select
+              onValueChange={(value) => setFormat(value as PayloadFormat)}
+              value={format}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Encode as</SelectLabel>
+                  <SelectItem value="ascii">ASCII</SelectItem>
+                  <SelectItem value="hex">Hex</SelectItem>
+                  <SelectItem value="base64">Base64</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {showDelimiter ? (
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="font-medium text-muted-foreground text-xs">
+                  Line ending
+                </span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      aria-label="What line ending does"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                      type="button"
+                    >
+                      <CircleHelp data-icon="inline-start" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-64" side="top">
+                    Appends CRLF, LF, or nothing after the payload. CRLF is
+                    common for text protocols; None sends the payload as-is.
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Select
+                onValueChange={(value) =>
+                  setDelimiter(value as DelimiterOption)
+                }
+                value={delimiter}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Append after payload</SelectLabel>
+                    <SelectItem value="crlf">CRLF</SelectItem>
+                    <SelectItem value="lf">LF</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              className="h-10"
+              disabled={data.length === 0}
+              onClick={() => setData("")}
+              type="button"
+              variant="outline"
+            >
+              <Eraser data-icon="inline-start" />
+              Clear
+            </Button>
+            <Button
+              className="h-10"
+              disabled={disabled || data.length === 0}
+              onClick={() =>
+                onSend(data, format, showDelimiter ? selectedDelimiter : "")
+              }
+              type="button"
+            >
+              <SendHorizontal data-icon="inline-start" />
+              Send
+            </Button>
+          </div>
+        </div>
       </div>
     </section>
   );

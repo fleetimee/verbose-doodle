@@ -18,13 +18,6 @@ import { TrafficConsole } from "@/features/socket-tester/components/traffic-cons
 import { UdpPanel } from "@/features/socket-tester/components/udp-panel";
 import { useSocketBridgeContext } from "@/features/socket-tester/context/socket-bridge-context";
 import type { TrafficLogEntry } from "@/features/socket-tester/types";
-import { cn } from "@/lib/utils";
-
-const bridgeTone = {
-  connected: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-  connecting: "border-amber-500/30 bg-amber-500/10 text-amber-300",
-  disconnected: "border-zinc-500/30 bg-zinc-500/10 text-zinc-400",
-};
 
 type SocketTestMode = "tcp-client" | "tcp-server" | "udp";
 
@@ -77,18 +70,11 @@ export function SocketTesterLayout({
                 <PlugZap className="size-3" />
                 WebSocket Bridge
               </Badge>
-              <span
-                className={cn(
-                  "rounded-full border px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.16em]",
-                  bridgeTone[bridge.bridgeStatus]
-                )}
-              >
+              <span className="rounded-md border border-border/70 bg-muted/35 px-2.5 py-0.5 font-medium text-muted-foreground text-xs">
                 {bridge.bridgeStatus}
               </span>
             </div>
-            <h1 className="font-bold text-4xl tracking-tight md:text-5xl">
-              {copy.title}
-            </h1>
+            <h1 className="font-bold text-3xl tracking-tight">{copy.title}</h1>
             <p className="mt-3 max-w-[72ch] text-muted-foreground text-sm leading-relaxed md:text-base">
               {copy.description}
             </p>
@@ -121,25 +107,21 @@ export function SocketTesterLayout({
           <SocketStatusCard
             icon={Network}
             label="Active"
-            tone="green"
             value={bridge.metrics.activeConnections}
           />
           <SocketStatusCard
             icon={Activity}
             label="Inbound"
-            tone="blue"
             value={bridge.metrics.packetsIn}
           />
           <SocketStatusCard
             icon={SendHorizontal}
             label="Outbound"
-            tone="yellow"
             value={bridge.metrics.packetsOut}
           />
           <SocketStatusCard
             icon={CircleAlert}
             label="Errors"
-            tone="red"
             value={bridge.metrics.errors}
           />
         </section>

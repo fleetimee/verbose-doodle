@@ -1,6 +1,17 @@
-import { Download, Eraser, MousePointerClick } from "lucide-react";
+import {
+  Activity,
+  CircleAlert,
+  CircleDashed,
+  Download,
+  Eraser,
+  MousePointerClick,
+  Radio,
+  TimerReset,
+} from "lucide-react";
+import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import type {
   TrafficDirection,
@@ -17,8 +28,15 @@ type TrafficConsoleProps = {
 const directionStyles: Record<TrafficDirection, string> = {
   err: "text-red-300",
   in: "text-emerald-300",
-  out: "text-amber-300",
-  sys: "text-sky-300",
+  out: "text-sky-300",
+  sys: "text-slate-300",
+};
+
+const directionDotStyles: Record<TrafficDirection, string> = {
+  err: "bg-red-400",
+  in: "bg-emerald-400",
+  out: "bg-sky-400",
+  sys: "bg-slate-400",
 };
 
 const directionLabels: Record<TrafficDirection, string> = {
@@ -44,106 +62,209 @@ function exportLogs(logs: readonly TrafficLogEntry[]) {
   URL.revokeObjectURL(url);
 }
 
+function getLatestLabel(logs: readonly TrafficLogEntry[]) {
+  return logs.at(-1)?.timestamp ?? "-";
+}
+
+function getDirectionCount(
+  logs: readonly TrafficLogEntry[],
+  direction: TrafficDirection
+) {
+  return logs.filter((entry) => entry.direction === direction).length;
+}
+
+function ConsoleMetric({
+  icon,
+  label,
+  value,
+}: {
+  readonly icon: ReactNode;
+  readonly label: string;
+  readonly value: string | number;
+}) {
+  return (
+    <div className="flex min-w-0 items-center gap-2 rounded-md border bg-background px-3 py-2 shadow-xs">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="text-[11px] text-muted-foreground uppercase">{label}</p>
+        <p className="truncate font-mono font-semibold text-sm">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function DirectionBadge({
+  direction,
+}: {
+  readonly direction: TrafficDirection;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-2 font-semibold text-xs",
+        directionStyles[direction]
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cn("size-1.5 rounded-full", directionDotStyles[direction])}
+      />
+      {directionLabels[direction]}
+    </span>
+  );
+}
+
 export function TrafficConsole({
   logs,
   onClear,
   onInspect,
 }: TrafficConsoleProps) {
-  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const [autoScroll, setAutoScroll] = useState(true);
+  const inboundCount = getDirectionCount(logs, "in");
+  const outboundCount = getDirectionCount(logs, "out");
+  const errorCount = getDirectionCount(logs, "err");
 
   useEffect(() => {
     if (!autoScroll) {
       return;
     }
 
-    viewportRef.current?.scrollTo({
-      top: viewportRef.current.scrollHeight,
+    const viewport = scrollAreaRef.current?.querySelector<HTMLElement>(
+      '[data-slot="scroll-area-viewport"]'
+    );
+
+    viewport?.scrollTo({
+      top: viewport.scrollHeight,
       behavior: "smooth",
     });
   }, [autoScroll, logs.length]);
 
   return (
-    <section className="grid min-h-[440px] overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm">
-      <header className="flex flex-wrap items-center gap-3 border-b px-4 py-3">
-        <div className="mr-auto">
-          <h2 className="font-semibold text-sm">Traffic console</h2>
-          <p className="text-[11px] text-muted-foreground">
-            Click any frame to inspect bytes and metadata.
-          </p>
+    <section className="flex min-w-0 flex-col gap-3">
+      <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-md border bg-background text-primary shadow-xs">
+              <Radio aria-hidden="true" className="size-5" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-lg">Traffic console</h2>
+              <p className="text-muted-foreground text-sm">
+                Inspect socket frames, payloads, and bridge metadata.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <label
+              className="inline-flex h-8 items-center gap-2 rounded-md border bg-muted/20 px-3 font-medium text-sm"
+              htmlFor="socket-traffic-auto-scroll"
+            >
+              <Activity className="size-4 text-muted-foreground" />
+              <span>Auto-scroll</span>
+              <Switch
+                checked={autoScroll}
+                id="socket-traffic-auto-scroll"
+                onCheckedChange={setAutoScroll}
+              />
+            </label>
+            <Button
+              className="h-8 gap-2 transition-transform duration-150 ease-out active:scale-[0.97]"
+              onClick={() => exportLogs(logs)}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              <Download className="size-3.5" />
+              Save
+            </Button>
+            <Button
+              className="h-8 gap-2 transition-transform duration-150 ease-out active:scale-[0.97]"
+              onClick={onClear}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              <Eraser className="size-3.5" />
+              Clear
+            </Button>
+          </div>
         </div>
-        <div className="inline-flex items-center gap-2 font-medium text-[11px] text-muted-foreground uppercase tracking-[0.14em]">
-          Auto
-          <Switch
-            aria-label="Toggle traffic console auto scroll"
-            checked={autoScroll}
-            onCheckedChange={setAutoScroll}
+
+        <div className="grid gap-2 sm:grid-cols-4">
+          <ConsoleMetric
+            icon={<CircleDashed className="size-3.5" />}
+            label="Frames"
+            value={logs.length}
+          />
+          <ConsoleMetric
+            icon={<Download className="size-3.5" />}
+            label="Inbound"
+            value={inboundCount}
+          />
+          <ConsoleMetric
+            icon={<Activity className="size-3.5" />}
+            label="Outbound"
+            value={outboundCount}
+          />
+          <ConsoleMetric
+            icon={
+              errorCount > 0 ? (
+                <CircleAlert className="size-3.5" />
+              ) : (
+                <TimerReset className="size-3.5" />
+              )
+            }
+            label={errorCount > 0 ? "Errors" : "Latest"}
+            value={errorCount > 0 ? errorCount : getLatestLabel(logs)}
           />
         </div>
-        <Button
-          className="h-8 gap-2"
-          onClick={() => exportLogs(logs)}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          <Download className="size-3.5" />
-          Save
-        </Button>
-        <Button
-          className="h-8 gap-2"
-          onClick={onClear}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          <Eraser className="size-3.5" />
-          Clear
-        </Button>
-      </header>
-      <div
-        className="min-h-0 overflow-auto bg-background/70 p-3"
-        ref={viewportRef}
+      </div>
+
+      <ScrollArea
+        className="h-[560px] min-h-[480px] min-w-0 rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner xl:h-[64vh]"
+        ref={scrollAreaRef}
       >
         {logs.length === 0 ? (
-          <div className="grid min-h-[320px] place-items-center text-center">
-            <div>
-              <MousePointerClick className="mx-auto mb-3 size-8 text-muted-foreground/50" />
-              <p className="font-mono text-muted-foreground text-sm">
-                No frames captured
-              </p>
-              <p className="mt-1 text-muted-foreground text-xs">
+          <div className="grid h-full place-items-center bg-[#151515] px-6 text-center">
+            <div className="w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner">
+              <div className="mb-3 flex items-center justify-center gap-2 text-[#d4d4d4]">
+                <MousePointerClick className="size-5" />
+                <span className="font-semibold">No frames captured</span>
+              </div>
+              <p className="text-[#a3a3a3]">
                 Connect the bridge, start a socket, then send traffic.
+              </p>
+              <p className="mt-3 text-[#60a5fa]">
+                socket-console --waiting-for-frames
               </p>
             </div>
           </div>
         ) : (
-          <div className="grid gap-1">
+          <div className="min-w-max p-4 font-mono text-[#e7e7e7] text-[13px] leading-5">
             {logs.map((entry) => (
               <button
-                className="grid grid-cols-[76px_54px_minmax(88px,140px)_1fr] gap-2 rounded-md px-2 py-1.5 text-left font-mono text-xs transition-[background-color,transform] duration-150 ease-out hover:bg-accent/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 active:scale-[0.997]"
+                className="group grid w-full min-w-0 grid-cols-[76px_64px_92px_minmax(140px,1fr)] items-start gap-2 rounded px-2 py-1 text-left tabular-nums transition-[background-color,transform] duration-150 ease-out hover:bg-white/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 active:scale-[0.997]"
                 key={entry.id}
                 onClick={() => onInspect(entry)}
                 type="button"
               >
-                <span className="text-muted-foreground">{entry.timestamp}</span>
-                <span
-                  className={cn(
-                    "font-semibold",
-                    directionStyles[entry.direction]
-                  )}
-                >
-                  {directionLabels[entry.direction]}
+                <span className="text-[#858585]">{entry.timestamp}</span>
+                <DirectionBadge direction={entry.direction} />
+                <span className="truncate text-[#a3a3a3]">{entry.scope}</span>
+                <span className="whitespace-pre-wrap break-all text-[#f5f5f5]">
+                  <span className="text-[#6b7280]">{entry.protocol}</span>
+                  <span className="px-2 text-[#525252]">/</span>
+                  {entry.data}
                 </span>
-                <span className="truncate text-muted-foreground">
-                  {entry.scope}
-                </span>
-                <span className="break-all text-foreground">{entry.data}</span>
               </button>
             ))}
           </div>
         )}
-      </div>
+        <ScrollBar className="hidden" orientation="horizontal" />
+      </ScrollArea>
     </section>
   );
 }
