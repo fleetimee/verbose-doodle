@@ -35,14 +35,12 @@ const data = {
       url: "/dashboard/overview",
       icon: LayoutDashboard,
       groupLabel: "Overview",
-      badge: "Live",
     },
     {
       title: "Endpoints",
       url: "/dashboard/endpoints",
       icon: Plug,
       groupLabel: "Biller Simulator",
-      badge: "API",
     },
     {
       title: "TCP Client",
