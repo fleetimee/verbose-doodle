@@ -29,6 +29,7 @@ type SendPanelProps = {
     delimiter: MessageDelimiter
   ) => void;
   readonly showDelimiter?: boolean;
+  readonly tourId?: string;
 };
 
 type DelimiterOption = "crlf" | "lf" | "none";
@@ -43,6 +44,7 @@ export function SendPanel({
   disabled = false,
   onSend,
   showDelimiter = true,
+  tourId,
 }: SendPanelProps) {
   const [data, setData] = useState("");
   const [format, setFormat] = useState<PayloadFormat>("ascii");
@@ -50,7 +52,7 @@ export function SendPanel({
   const selectedDelimiter = delimiterByOption[delimiter];
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-3" id={tourId}>
       <div>
         <h2 className="font-semibold text-sm">Send panel</h2>
         <p className="text-muted-foreground text-xs">

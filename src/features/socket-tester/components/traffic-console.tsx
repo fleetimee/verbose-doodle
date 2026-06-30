@@ -23,6 +23,7 @@ type TrafficConsoleProps = {
   readonly logs: readonly TrafficLogEntry[];
   readonly onClear: () => void;
   readonly onInspect: (entry: TrafficLogEntry) => void;
+  readonly tourId?: string;
 };
 
 const directionStyles: Record<TrafficDirection, string> = {
@@ -120,6 +121,7 @@ export function TrafficConsole({
   logs,
   onClear,
   onInspect,
+  tourId,
 }: TrafficConsoleProps) {
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -143,7 +145,7 @@ export function TrafficConsole({
   }, [autoScroll, logs.length]);
 
   return (
-    <section className="flex min-w-0 flex-col gap-3">
+    <section className="flex min-w-0 flex-col gap-3" id={tourId}>
       <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-center gap-3">

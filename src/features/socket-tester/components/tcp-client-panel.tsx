@@ -25,6 +25,11 @@ type TcpClientPanelProps = {
     format: PayloadFormat,
     delimiter: "\r\n" | "\n" | ""
   ) => void;
+  readonly tourIds?: {
+    readonly connection: string;
+    readonly sendPanel: string;
+    readonly status: string;
+  };
 };
 
 export function TcpClientPanel({
@@ -33,6 +38,7 @@ export function TcpClientPanel({
   onDisconnect,
   onSend,
   state,
+  tourIds,
 }: TcpClientPanelProps) {
   const [host, setHost] = useState(state.host);
   const [port, setPort] = useState(String(state.port));
@@ -48,7 +54,10 @@ export function TcpClientPanel({
   return (
     <div className="flex flex-col gap-4">
       <section className="flex flex-col gap-4 border-border/70 border-b pb-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border/70 bg-muted/30 px-3 py-2">
+        <div
+          className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border/70 bg-muted/30 px-3 py-2"
+          id={tourIds?.status}
+        >
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="font-medium text-muted-foreground text-xs">
               TCP client status
@@ -70,7 +79,10 @@ export function TcpClientPanel({
           </Badge>
         </div>
 
-        <FieldGroup className="gap-3 md:grid md:grid-cols-[1fr_140px_auto] md:items-start">
+        <FieldGroup
+          className="gap-3 md:grid md:grid-cols-[1fr_140px_auto] md:items-start"
+          id={tourIds?.connection}
+        >
           <Field data-disabled={state.connected} data-invalid={!hostIsValid}>
             <FieldLabel htmlFor="tcp-client-host">Host</FieldLabel>
             <Input
@@ -130,6 +142,7 @@ export function TcpClientPanel({
       <SendPanel
         disabled={!(bridgeConnected && state.connected)}
         onSend={onSend}
+        tourId={tourIds?.sendPanel}
       />
     </div>
   );

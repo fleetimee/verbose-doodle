@@ -20,6 +20,12 @@ type TcpServerPanelProps = {
   ) => void;
   readonly onStart: (port: number) => void;
   readonly onStop: () => void;
+  readonly tourIds?: {
+    readonly clients: string;
+    readonly listener: string;
+    readonly sendPanel: string;
+    readonly status: string;
+  };
 };
 
 export function TcpServerPanel({
@@ -28,6 +34,7 @@ export function TcpServerPanel({
   onStart,
   onStop,
   state,
+  tourIds,
 }: TcpServerPanelProps) {
   const [port, setPort] = useState(String(state.port));
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
@@ -43,7 +50,7 @@ export function TcpServerPanel({
   return (
     <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
       <section className="grid content-start gap-4 border-border/70 border-b pb-4 xl:border-r xl:border-b-0 xl:pr-4 xl:pb-0">
-        <div className="grid gap-3">
+        <div className="grid gap-3" id={tourIds?.listener}>
           <label className="grid gap-1.5" htmlFor="tcp-server-port">
             <span className="font-medium text-muted-foreground text-xs">
               Listen port
@@ -77,7 +84,10 @@ export function TcpServerPanel({
             </Button>
           )}
         </div>
-        <div className="rounded-md border border-border/70 bg-muted/35 px-3 py-2 font-mono text-xs">
+        <div
+          className="rounded-md border border-border/70 bg-muted/35 px-3 py-2 font-mono text-xs"
+          id={tourIds?.status}
+        >
           <span
             className={
               state.listening ? "text-emerald-400" : "text-muted-foreground"
@@ -87,7 +97,7 @@ export function TcpServerPanel({
           </span>{" "}
           {state.listening ? `LISTENING :${state.port}` : "SERVER STOPPED"}
         </div>
-        <div className="grid gap-2">
+        <div className="grid gap-2" id={tourIds?.clients}>
           <div className="flex items-center gap-2 text-muted-foreground text-xs">
             <UsersRound className="size-4" />
             Active clients
@@ -132,6 +142,7 @@ export function TcpServerPanel({
             onSend(clientId, data, format, delimiter);
           }
         }}
+        tourId={tourIds?.sendPanel}
       />
     </div>
   );

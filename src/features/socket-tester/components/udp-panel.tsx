@@ -19,6 +19,12 @@ type UdpPanelProps = {
   ) => void;
   readonly onStart: (port: number) => void;
   readonly onStop: () => void;
+  readonly tourIds?: {
+    readonly listener: string;
+    readonly sendPanel: string;
+    readonly status: string;
+    readonly target: string;
+  };
 };
 
 export function UdpPanel({
@@ -27,6 +33,7 @@ export function UdpPanel({
   onStart,
   onStop,
   state,
+  tourIds,
 }: UdpPanelProps) {
   const [host, setHost] = useState("127.0.0.1");
   const [targetPort, setTargetPort] = useState("9002");
@@ -38,28 +45,33 @@ export function UdpPanel({
     <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
       <section className="grid content-start gap-4 border-border/70 border-b pb-4 xl:border-r xl:border-b-0 xl:pr-4 xl:pb-0">
         <div className="grid gap-3">
-          <label className="grid gap-1.5" htmlFor="udp-target-host">
-            <span className="font-medium text-muted-foreground text-xs">
-              Target host
-            </span>
-            <Input
-              id="udp-target-host"
-              onChange={(event) => setHost(event.target.value)}
-              value={host}
-            />
-          </label>
-          <label className="grid gap-1.5" htmlFor="udp-target-port">
-            <span className="font-medium text-muted-foreground text-xs">
-              Target port
-            </span>
-            <Input
-              id="udp-target-port"
-              inputMode="numeric"
-              onChange={(event) => setTargetPort(event.target.value)}
-              value={targetPort}
-            />
-          </label>
-          <div className="grid grid-cols-[1fr_auto] gap-2">
+          <div className="grid gap-3" id={tourIds?.target}>
+            <label className="grid gap-1.5" htmlFor="udp-target-host">
+              <span className="font-medium text-muted-foreground text-xs">
+                Target host
+              </span>
+              <Input
+                id="udp-target-host"
+                onChange={(event) => setHost(event.target.value)}
+                value={host}
+              />
+            </label>
+            <label className="grid gap-1.5" htmlFor="udp-target-port">
+              <span className="font-medium text-muted-foreground text-xs">
+                Target port
+              </span>
+              <Input
+                id="udp-target-port"
+                inputMode="numeric"
+                onChange={(event) => setTargetPort(event.target.value)}
+                value={targetPort}
+              />
+            </label>
+          </div>
+          <div
+            className="grid grid-cols-[1fr_auto] gap-2"
+            id={tourIds?.listener}
+          >
             <label className="grid gap-1.5" htmlFor="udp-listen-port">
               <span className="font-medium text-muted-foreground text-xs">
                 Listen port
@@ -98,7 +110,10 @@ export function UdpPanel({
             </div>
           </div>
         </div>
-        <div className="rounded-md border border-border/70 bg-muted/35 px-3 py-2 font-mono text-xs">
+        <div
+          className="rounded-md border border-border/70 bg-muted/35 px-3 py-2 font-mono text-xs"
+          id={tourIds?.status}
+        >
           <span
             className={
               state.listening ? "text-emerald-400" : "text-muted-foreground"
@@ -131,6 +146,7 @@ export function UdpPanel({
             onSend(host, parsedTargetPort, data, format)
           }
           showDelimiter={false}
+          tourId={tourIds?.sendPanel}
         />
       </div>
     </div>
