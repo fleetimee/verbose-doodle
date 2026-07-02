@@ -28,6 +28,9 @@ import { decodeId } from "@/lib/id-encoder";
 const routeLabels: Record<string, string> = {
   overview: "Overview",
   endpoints: "Endpoints",
+  "socks-relay": "Socks Relay",
+  "rest-api": "REST API",
+  "iso-8583": "ISO 8583",
   "socket-test": "SocketTest",
   "socket-tester": "Socket Tester",
   "tcp-client": "TCP Client",
@@ -53,6 +56,9 @@ export function DashboardLayout() {
   const location = useLocation();
   const params = useParams();
   const { theme, setTheme } = useTheme();
+  const isSocksRelayRoute = location.pathname.startsWith(
+    "/dashboard/socks-relay"
+  );
 
   const isEndpointDetail = location.pathname.match(ENDPOINT_DETAIL_REGEX);
   const encodedId = isEndpointDetail ? params.id : undefined;
@@ -131,7 +137,7 @@ export function DashboardLayout() {
             </main>
           </SidebarInset>
         </SidebarProvider>
-        <SocketBridgeFloatingStatus />
+        {isSocksRelayRoute ? null : <SocketBridgeFloatingStatus />}
       </SocketBridgeProvider>
     </TourProvider>
   );

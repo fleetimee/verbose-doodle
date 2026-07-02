@@ -1,4 +1,5 @@
 import { Activity, Binary, Clock, Copy, FileJson, Hash } from "lucide-react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ type HexInspectorProps = {
 };
 
 const BYTE_COLUMNS = 16;
+const textEncoder = new TextEncoder();
 
 const directionTone: Record<TrafficLogEntry["direction"], string> = {
   err: "border-destructive/30 bg-destructive/10 text-destructive",
@@ -34,8 +36,7 @@ const directionTone: Record<TrafficLogEntry["direction"], string> = {
   sys: "border-muted-foreground/25 bg-muted text-muted-foreground",
 };
 
-function toHexRows(value: string) {
-  const bytes = new TextEncoder().encode(value);
+function toHexRows(bytes: Uint8Array) {
   const rows: string[] = [];
 
   for (let index = 0; index < bytes.length; index += BYTE_COLUMNS) {
@@ -77,11 +78,26 @@ function getRenderedData(value: string) {
 
 export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
   const open = Boolean(entry);
-  const metadata = entry?.metadata
-    ? JSON.stringify(entry.metadata, null, 2)
-    : "No metadata captured for this frame.";
-  const payloadSize = entry ? new TextEncoder().encode(entry.data).length : 0;
-  const renderedData = entry ? getRenderedData(entry.data) : null;
+  const payloadBytes = useMemo(
+    () => (entry ? textEncoder.encode(entry.data) : new Uint8Array()),
+    [entry?.data]
+  );
+  const hexDump = useMemo(
+    () => (entry ? toHexRows(payloadBytes).join("\n") : ""),
+    [entry, payloadBytes]
+  );
+  const metadata = useMemo(
+    () =>
+      entry?.metadata
+        ? JSON.stringify(entry.metadata, null, 2)
+        : "No metadata captured for this frame.",
+    [entry?.metadata]
+  );
+  const payloadSize = payloadBytes.length;
+  const renderedData = useMemo(
+    () => (entry ? getRenderedData(entry.data) : null),
+    [entry?.data]
+  );
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
@@ -197,7 +213,7 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                         action={
                           <CopyButton
                             label="Copy hex"
-                            text={toHexRows(entry.data).join("\n")}
+                            text={hexDump}
                             toastMessage="Hex dump copied"
                           />
                         }
@@ -205,7 +221,7 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                         title="Hex dump"
                       >
                         <CodeSurface className="max-h-[300px]" tone="hex">
-                          {toHexRows(entry.data).join("\n")}
+                          {hexDump}
                         </CodeSurface>
                       </InspectorBlock>
 

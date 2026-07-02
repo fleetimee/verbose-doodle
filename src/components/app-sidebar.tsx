@@ -1,8 +1,10 @@
 import {
   Info,
   LayoutDashboard,
+  Network,
   Plug,
   RadioTower,
+  Route,
   Server,
   Waves,
 } from "lucide-react";
@@ -60,6 +62,20 @@ const data = {
       icon: Waves,
       groupLabel: "Socket Test",
     },
+    {
+      title: "REST API",
+      url: "/dashboard/socks-relay/rest-api",
+      icon: Route,
+      groupLabel: "Socks Relay",
+      adminOnly: true,
+    },
+    {
+      title: "ISO 8583",
+      url: "/dashboard/socks-relay/iso-8583",
+      icon: Network,
+      groupLabel: "Socks Relay",
+      adminOnly: true,
+    },
   ],
   navSecondary: [
     {
@@ -90,19 +106,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         avatar: "",
       };
 
-  const navMain = data.navMain.map((item) => {
-    let onPrefetch: (() => void) | undefined;
-    if (item.url === "/dashboard/overview") {
-      onPrefetch = prefetchOverview;
-    } else if (item.url === "/dashboard/endpoints") {
-      onPrefetch = prefetchEndpoints;
-    }
+  const isAdmin = authState.user?.role === "ADMIN";
+  const navMain = data.navMain
+    .filter((item) => !item.adminOnly || isAdmin)
+    .map((item) => {
+      let onPrefetch: (() => void) | undefined;
+      if (item.url === "/dashboard/overview") {
+        onPrefetch = prefetchOverview;
+      } else if (item.url === "/dashboard/endpoints") {
+        onPrefetch = prefetchEndpoints;
+      }
 
-    return {
-      ...item,
-      onPrefetch,
-    };
-  });
+      return {
+        ...item,
+        onPrefetch,
+      };
+    });
 
   return (
     <Sidebar collapsible="icon" variant="inset" {...props}>

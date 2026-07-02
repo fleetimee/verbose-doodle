@@ -97,6 +97,7 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: env.VITE_ENDPOINT_URL,
           changeOrigin: true,
+          ws: true,
           secure: false,
         },
       },

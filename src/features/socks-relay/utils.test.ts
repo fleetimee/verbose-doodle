@@ -1,0 +1,95 @@
+import { describe, expect, test } from "bun:test";
+import type { RelayStartInput } from "@/features/socks-relay/types";
+import {
+  buildRelayWebSocketUrl,
+  parseRelayEvent,
+  validateRelayStartInput,
+} from "@/features/socks-relay/utils";
+
+const VALID_INPUT: RelayStartInput = {
+  relayId: "relay-1",
+  mode: "REST_API",
+  listeningPort: 8080,
+  hostAddress: "127.0.0.1",
+  hostPort: 8081,
+  holdClient: false,
+  holdHost: false,
+  dropClient: false,
+  dropHost: false,
+  removeHeaders: false,
+  timerMs: 1000,
+};
+
+describe("socks relay validation", () => {
+  test("accepts valid relay start input", () => {
+    expect(validateRelayStartInput(VALID_INPUT)).toEqual({});
+  });
+
+  test("rejects required fields, invalid ports, and short timer", () => {
+    const errors = validateRelayStartInput({
+      ...VALID_INPUT,
+      relayId: "",
+      listeningPort: 0,
+      hostAddress: "",
+      hostPort: 70_000,
+      timerMs: 999,
+    });
+
+    expect(errors.relayId).toBeDefined();
+    expect(errors.listeningPort).toBeDefined();
+    expect(errors.hostAddress).toBeDefined();
+    expect(errors.hostPort).toBeDefined();
+    expect(errors.timerMs).toBeDefined();
+  });
+
+  test("rejects multiple hold or drop options", () => {
+    const errors = validateRelayStartInput({
+      ...VALID_INPUT,
+      holdClient: true,
+      dropHost: true,
+    });
+
+    expect(errors.options).toBeDefined();
+  });
+});
+
+describe("socks relay events", () => {
+  test("parses a valid relay event", () => {
+    const event = parseRelayEvent(
+      JSON.stringify({
+        type: "relay_message",
+        payload: {
+          relayId: "relay-1",
+          mode: "REST_API",
+          flow: "RC",
+          data: "hello",
+        },
+      }),
+      "event-1"
+    );
+
+    expect(event?.id).toBe("event-1");
+    expect(event?.type).toBe("relay_message");
+    expect(event?.payload.flow).toBe("RC");
+  });
+
+  test("returns null for malformed events", () => {
+    expect(parseRelayEvent("{", "event-1")).toBeNull();
+    expect(
+      parseRelayEvent(JSON.stringify({ type: "relay_message" }), "event-2")
+    ).toBeNull();
+  });
+});
+
+describe("socks relay websocket url", () => {
+  test("builds a tokenized websocket url on the current host", () => {
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: new URL("http://localhost:5173/dashboard"),
+    });
+
+    expect(buildRelayWebSocketUrl("token value")).toBe(
+      "ws://localhost:5173/api/relay/events?token=token+value"
+    );
+  });
+});

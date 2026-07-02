@@ -9,7 +9,7 @@ import "@fontsource/geist-mono/latin-500.css";
 import "./index.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
 import { AuthRedirect } from "@/components/auth-redirect";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { NotFoundPage } from "@/components/not-found";
@@ -21,6 +21,8 @@ import { AuthProvider } from "@/features/auth/context";
 import { useAutoRefresh } from "@/features/auth/hooks/use-auto-refresh";
 import { useTokenExpirationCheck } from "@/features/auth/hooks/use-token-expiration-check";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
+import { ForbiddenPage } from "@/features/socks-relay/components/forbidden-page";
+import { SocksRelayProvider } from "@/features/socks-relay/context/socks-relay-context";
 import { queryClient } from "@/lib/query-client";
 
 const About = lazy(() =>
@@ -71,8 +73,32 @@ const UdpPage = lazy(() =>
     default: UdpPage,
   }))
 );
+const SocksRelayRestApiPage = lazy(() =>
+  import("@/pages/dashboard/socks-relay-rest-api").then(
+    ({ SocksRelayRestApiPage }) => ({
+      default: SocksRelayRestApiPage,
+    })
+  )
+);
+const SocksRelayIso8583Page = lazy(() =>
+  import("@/pages/dashboard/socks-relay-iso-8583").then(
+    ({ SocksRelayIso8583Page }) => ({
+      default: SocksRelayIso8583Page,
+    })
+  )
+);
 if (import.meta.env.DEV) {
   await import("react-grab");
+}
+
+function SocksRelayRouteGroup() {
+  return (
+    <ProtectedRoute fallback={<ForbiddenPage />} requiredRole="ADMIN">
+      <SocksRelayProvider>
+        <Outlet />
+      </SocksRelayProvider>
+    </ProtectedRoute>
+  );
 }
 
 function AppContent() {
@@ -109,6 +135,16 @@ function AppContent() {
             <Route element={<TcpClientPage />} path="socket-test/tcp-client" />
             <Route element={<TcpServerPage />} path="socket-test/tcp-server" />
             <Route element={<UdpPage />} path="socket-test/udp" />
+            <Route element={<SocksRelayRouteGroup />} path="socks-relay">
+              <Route
+                element={
+                  <Navigate replace to="/dashboard/socks-relay/rest-api" />
+                }
+                index
+              />
+              <Route element={<SocksRelayRestApiPage />} path="rest-api" />
+              <Route element={<SocksRelayIso8583Page />} path="iso-8583" />
+            </Route>
             <Route
               element={<Navigate replace to="/dashboard/overview" />}
               path="users"

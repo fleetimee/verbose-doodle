@@ -4,7 +4,6 @@ import {
   CircleAlert,
   CircleHelp,
   Network,
-  PlugZap,
   SendHorizontal,
   Unplug,
 } from "lucide-react";
@@ -12,7 +11,6 @@ import type { Transition } from "motion/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type TourStep, useTour } from "@/components/tour";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { HexInspector } from "@/features/socket-tester/components/hex-inspector";
 import { SocketStatusCard } from "@/features/socket-tester/components/socket-status-card";
@@ -404,18 +402,6 @@ export function SocketTesterLayout({
         />
         <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <Badge
-                className="gap-1.5 border-border/70 bg-muted/35 text-muted-foreground"
-                variant="outline"
-              >
-                <PlugZap className="size-3" />
-                WebSocket Bridge
-              </Badge>
-              <span className="rounded-md border border-border/70 bg-muted/35 px-2.5 py-0.5 font-medium text-muted-foreground text-xs">
-                {bridge.bridgeStatus}
-              </span>
-            </div>
             <h1 className="font-bold text-3xl tracking-tight">{copy.title}</h1>
             <p className="mt-3 max-w-[72ch] text-muted-foreground text-sm leading-relaxed md:text-base">
               {copy.description}
