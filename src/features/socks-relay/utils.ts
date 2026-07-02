@@ -44,10 +44,6 @@ export function validateRelayStartInput(
 ): RelayFormErrors {
   const errors: RelayFormErrors = {};
 
-  if (!input.relayId.trim()) {
-    errors.relayId = "Relay ID is required.";
-  }
-
   if (!isValidPort(input.listeningPort)) {
     errors.listeningPort = "Listening port must be between 1 and 65535.";
   }

@@ -25,7 +25,16 @@ describe("socks relay validation", () => {
     expect(validateRelayStartInput(VALID_INPUT)).toEqual({});
   });
 
-  test("rejects required fields, invalid ports, and short timer", () => {
+  test("accepts blank relay ID because the backend can generate it", () => {
+    expect(
+      validateRelayStartInput({
+        ...VALID_INPUT,
+        relayId: "",
+      })
+    ).toEqual({});
+  });
+
+  test("rejects required host fields, invalid ports, and short timer", () => {
     const errors = validateRelayStartInput({
       ...VALID_INPUT,
       relayId: "",
@@ -35,7 +44,6 @@ describe("socks relay validation", () => {
       timerMs: 999,
     });
 
-    expect(errors.relayId).toBeDefined();
     expect(errors.listeningPort).toBeDefined();
     expect(errors.hostAddress).toBeDefined();
     expect(errors.hostPort).toBeDefined();

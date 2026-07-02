@@ -307,9 +307,12 @@ function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
                   relayId: event.target.value,
                 }))
               }
-              placeholder="rest-main-01"
+              placeholder="Auto-generated if blank"
               value={form.relayId}
             />
+            <p className="text-muted-foreground text-xs">
+              Leave blank and the backend will create one automatically.
+            </p>
             <FieldError message={errors.relayId} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">

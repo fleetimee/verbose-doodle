@@ -81,6 +81,30 @@ describe("relay api", () => {
     );
   });
 
+  test("passes blank relay ID through for backend generation", async () => {
+    const input: RelayStartInput = {
+      ...relay.options,
+      relayId: "",
+      mode: "REST_API",
+      listeningPort: 9090,
+      hostAddress: "10.0.0.5",
+      hostPort: 9091,
+    };
+    globalThis.fetch = mock(() =>
+      Promise.resolve(jsonResponse({ data: { relay } }))
+    ) as unknown as typeof fetch;
+
+    await startRelay(input);
+
+    expect(getFetchMock()).toHaveBeenCalledWith(
+      "/api/relay/start",
+      expect.objectContaining({
+        body: JSON.stringify(input),
+        method: "POST",
+      })
+    );
+  });
+
   test("stops a relay using encoded relay id", async () => {
     globalThis.fetch = mock(() =>
       Promise.resolve(jsonResponse({ data: { relay } }))
