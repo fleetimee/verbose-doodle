@@ -14,6 +14,7 @@ import type {
   PayloadFormat,
   TcpClientState,
 } from "@/features/socket-tester/types";
+import { messages } from "@/lib/i18n";
 
 type TcpClientPanelProps = {
   readonly bridgeConnected: boolean;
@@ -50,6 +51,7 @@ export function TcpClientPanel({
   const canConnect =
     bridgeConnected && hostIsValid && portIsValid && !state.connected;
   const endpoint = `${state.host}:${state.port}`;
+  const socketMessages = messages.socketTester;
 
   return (
     <div className="flex flex-col gap-4">
@@ -60,10 +62,10 @@ export function TcpClientPanel({
         >
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="font-medium text-muted-foreground text-xs">
-              TCP client status
+              {socketMessages.tcpClientStatusLabel}
             </span>
             <span className="truncate font-mono text-sm">
-              {state.connected ? endpoint : "No active connection"}
+              {state.connected ? endpoint : socketMessages.noActiveConnection}
             </span>
           </div>
           <Badge
@@ -75,7 +77,9 @@ export function TcpClientPanel({
             ) : (
               <CircleOff data-icon="inline-start" />
             )}
-            {state.connected ? "Connected" : "Disconnected"}
+            {state.connected
+              ? socketMessages.connectedStatus
+              : socketMessages.disconnectedStatus}
           </Badge>
         </div>
 
@@ -84,7 +88,9 @@ export function TcpClientPanel({
           id={tourIds?.connection}
         >
           <Field data-disabled={state.connected} data-invalid={!hostIsValid}>
-            <FieldLabel htmlFor="tcp-client-host">Host</FieldLabel>
+            <FieldLabel htmlFor="tcp-client-host">
+              {socketMessages.hostLabel}
+            </FieldLabel>
             <Input
               aria-invalid={!hostIsValid}
               disabled={state.connected}
@@ -95,12 +101,14 @@ export function TcpClientPanel({
             />
             {hostIsValid ? null : (
               <FieldDescription>
-                Enter a hostname or IP address.
+                {socketMessages.hostRequiredDescription}
               </FieldDescription>
             )}
           </Field>
           <Field data-disabled={state.connected} data-invalid={!portIsValid}>
-            <FieldLabel htmlFor="tcp-client-port">Port</FieldLabel>
+            <FieldLabel htmlFor="tcp-client-port">
+              {socketMessages.portLabel}
+            </FieldLabel>
             <Input
               aria-invalid={!portIsValid}
               disabled={state.connected}
@@ -111,7 +119,9 @@ export function TcpClientPanel({
               value={port}
             />
             {portIsValid ? null : (
-              <FieldDescription>Use port 1-65535.</FieldDescription>
+              <FieldDescription>
+                {socketMessages.portRangeDescription}
+              </FieldDescription>
             )}
           </Field>
           <div className="flex items-end md:pt-6">
@@ -123,7 +133,7 @@ export function TcpClientPanel({
                 variant="destructive"
               >
                 <Unplug data-icon="inline-start" />
-                Disconnect
+                {socketMessages.disconnectButton}
               </Button>
             ) : (
               <Button
@@ -133,7 +143,7 @@ export function TcpClientPanel({
                 type="button"
               >
                 <Cable data-icon="inline-start" />
-                Connect
+                {socketMessages.connectButton}
               </Button>
             )}
           </div>

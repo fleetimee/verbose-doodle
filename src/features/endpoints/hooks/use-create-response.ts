@@ -5,6 +5,7 @@ import type { EndpointResponse } from "@/features/endpoints/types";
 import { overviewQueryKeys } from "@/features/overview/query-keys";
 import { type ApiError, apiPost } from "@/lib/api";
 import { getResponseCreateUrl } from "@/lib/api-endpoints";
+import { formatMessage, messages } from "@/lib/i18n";
 import { createMutationHook } from "@/lib/query-hooks";
 
 type CreateResponseRequest = {
@@ -61,7 +62,7 @@ async function createResponse(
     // Validate that we have the expected response structure
     if (!apiResponse.data?.response) {
       throw {
-        message: "Invalid response structure from server",
+        message: messages.errors.invalidResponseStructure,
         code: "INVALID_RESPONSE",
         status: 500,
       } as ApiError;
@@ -105,8 +106,13 @@ export function useCreateResponse() {
   >(createResponse, {
     onSuccess: (data, variables) => {
       // Show success message
-      toast.success("Response created successfully", {
-        description: `Created response: ${data.response.name}`,
+      toast.success(messages.endpoints.responseCreateSuccess, {
+        description: formatMessage(
+          messages.endpoints.responseCreateDescription,
+          {
+            name: data.response.name,
+          }
+        ),
       });
 
       // Invalidate and refetch queries to get fresh data from server
@@ -119,8 +125,8 @@ export function useCreateResponse() {
     },
     onError: (error) => {
       // Handle errors with toast notification
-      toast.error("Failed to create response", {
-        description: error.message || "An unexpected error occurred",
+      toast.error(messages.endpoints.responseCreateError, {
+        description: error.message || messages.common.unexpectedError,
       });
     },
   });

@@ -15,6 +15,7 @@ import type {
   UdpServerState,
 } from "@/features/socket-tester/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { formatMessage, messages } from "@/lib/i18n";
 
 const DEFAULT_TCP_CLIENT_PORT = 8080;
 const DEFAULT_TCP_SERVER_PORT = 9000;
@@ -207,8 +208,11 @@ export function useSocketBridge() {
           const { host, port } = pendingTcpClientRef.current;
           pendingTcpClientRef.current = null;
           setTcpClient((current) => ({ ...current, connected: false }));
-          toast.error("TCP connection failed", {
-            description: `${host}:${port} refused the connection. ${errorMessage}`,
+          toast.error(messages.socketTester.tcpConnectionFailed, {
+            description: formatMessage(
+              messages.socketTester.tcpConnectionRefusedDescription,
+              { host, message: errorMessage, port }
+            ),
           });
         }
 
@@ -228,8 +232,14 @@ export function useSocketBridge() {
       if (normalizedType.includes("tcp_client_connected")) {
         const connectedTarget = pendingTcpClientRef.current;
         if (connectedTarget) {
-          toast.success("TCP connected", {
-            description: `Connected to ${connectedTarget.host}:${connectedTarget.port}`,
+          toast.success(messages.socketTester.tcpConnected, {
+            description: formatMessage(
+              messages.socketTester.tcpConnectedDescription,
+              {
+                host: connectedTarget.host,
+                port: connectedTarget.port,
+              }
+            ),
           });
           pendingTcpClientRef.current = null;
         }
@@ -256,8 +266,14 @@ export function useSocketBridge() {
         pendingTcpClientRef.current = null;
         setTcpClient((current) => ({ ...current, connected: false }));
         if (wasPending && failedTarget) {
-          toast.error("TCP connection failed", {
-            description: `Could not connect to ${failedTarget.host}:${failedTarget.port}`,
+          toast.error(messages.socketTester.tcpConnectionFailed, {
+            description: formatMessage(
+              messages.socketTester.tcpConnectionUnableDescription,
+              {
+                host: failedTarget.host,
+                port: failedTarget.port,
+              }
+            ),
           });
         }
         appendLog(
@@ -457,7 +473,7 @@ export function useSocketBridge() {
         )
       );
       if (!autoConnectRef.current) {
-        toast.error("Socket bridge connection failed");
+        toast.error(messages.socketTester.bridgeConnectionFailed);
       }
     });
 
@@ -491,7 +507,7 @@ export function useSocketBridge() {
   const sendCommand = useCallback(
     (command: SocketCommand) => {
       if (socketRef.current?.readyState !== WebSocket.OPEN) {
-        toast.error("Connect the WebSocket bridge first");
+        toast.error(messages.socketTester.bridgeConnectFirstError);
         appendLog(
           toLogEntry(
             "err",

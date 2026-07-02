@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/chart";
 import { methodDistributionConfig } from "@/features/overview/config/chart-configs";
 import type { OverviewData } from "@/features/overview/types";
+import { messages } from "@/lib/i18n";
 
 // Bar chart corner radius constants
 const BAR_CORNER_RADIUS_TOP_LEFT = 8;
@@ -40,9 +41,11 @@ export function HttpMethodChart({ data, className }: HttpMethodChartProps) {
       className={`${defaultClasses} border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)]`}
     >
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">HTTP Method Distribution</CardTitle>
+        <CardTitle className="text-base">
+          {messages.overview.httpMethodDistributionTitle}
+        </CardTitle>
         <CardDescription className="text-xs">
-          Endpoint count by HTTP method type
+          {messages.overview.httpMethodDistributionDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -7,6 +7,7 @@ import type {
   PayloadFormat,
   UdpServerState,
 } from "@/features/socket-tester/types";
+import { formatMessage, messages } from "@/lib/i18n";
 
 type UdpPanelProps = {
   readonly bridgeConnected: boolean;
@@ -40,6 +41,7 @@ export function UdpPanel({
   const [listenPort, setListenPort] = useState(String(state.port));
   const parsedTargetPort = Number(targetPort);
   const parsedListenPort = Number(listenPort);
+  const socketMessages = messages.socketTester;
 
   return (
     <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
@@ -48,7 +50,7 @@ export function UdpPanel({
           <div className="grid gap-3" id={tourIds?.target}>
             <label className="grid gap-1.5" htmlFor="udp-target-host">
               <span className="font-medium text-muted-foreground text-xs">
-                Target host
+                {socketMessages.targetHostLabel}
               </span>
               <Input
                 id="udp-target-host"
@@ -58,7 +60,7 @@ export function UdpPanel({
             </label>
             <label className="grid gap-1.5" htmlFor="udp-target-port">
               <span className="font-medium text-muted-foreground text-xs">
-                Target port
+                {socketMessages.targetPortLabel}
               </span>
               <Input
                 id="udp-target-port"
@@ -74,7 +76,7 @@ export function UdpPanel({
           >
             <label className="grid gap-1.5" htmlFor="udp-listen-port">
               <span className="font-medium text-muted-foreground text-xs">
-                Listen port
+                {socketMessages.listenPortLabel}
               </span>
               <Input
                 id="udp-listen-port"
@@ -92,7 +94,9 @@ export function UdpPanel({
                   variant="destructive"
                 >
                   <Square className="size-4" />
-                  <span className="sr-only">Stop UDP listener</span>
+                  <span className="sr-only">
+                    {socketMessages.stopUdpListenerSrLabel}
+                  </span>
                 </Button>
               ) : (
                 <Button
@@ -104,7 +108,9 @@ export function UdpPanel({
                   type="button"
                 >
                   <RadioReceiver className="size-4" />
-                  <span className="sr-only">Start UDP listener</span>
+                  <span className="sr-only">
+                    {socketMessages.startUdpListenerSrLabel}
+                  </span>
                 </Button>
               )}
             </div>
@@ -122,8 +128,10 @@ export function UdpPanel({
             ●
           </span>{" "}
           {state.listening
-            ? `UDP LISTENING :${state.port}`
-            : "UDP LISTENER OFF"}
+            ? formatMessage(socketMessages.udpListeningStatus, {
+                port: state.port,
+              })
+            : socketMessages.udpListenerOffStatus}
         </div>
       </section>
       <div className="grid gap-4">

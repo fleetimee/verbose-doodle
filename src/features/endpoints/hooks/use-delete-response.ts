@@ -4,6 +4,7 @@ import { endpointQueryKeys } from "@/features/endpoints/query-keys";
 import type { EndpointError } from "@/features/endpoints/types";
 import { overviewQueryKeys } from "@/features/overview/query-keys";
 import { apiDelete } from "@/lib/api";
+import { messages } from "@/lib/i18n";
 import { createMutationHook } from "@/lib/query-hooks";
 
 /**
@@ -63,8 +64,10 @@ export function useDeleteResponse() {
   >(deleteResponse, {
     onSuccess: (response) => {
       // Show success message
-      toast.success("Success", {
-        description: response.responseDesc || "Response deleted successfully",
+      toast.success(messages.endpoints.responseDeleteSuccessTitle, {
+        description:
+          response.responseDesc ||
+          messages.endpoints.responseDeleteSuccessDescription,
       });
 
       // Invalidate and refetch endpoints to get fresh data from server
@@ -74,8 +77,8 @@ export function useDeleteResponse() {
     },
     onError: (error) => {
       // Handle errors with toast notification
-      toast.error("Failed to delete response", {
-        description: error.message || "An unexpected error occurred",
+      toast.error(messages.endpoints.responseDeleteError, {
+        description: error.message || messages.common.unexpectedError,
       });
     },
   });

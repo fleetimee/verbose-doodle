@@ -20,6 +20,7 @@ import type {
   MessageDelimiter,
   PayloadFormat,
 } from "@/features/socket-tester/types";
+import { messages } from "@/lib/i18n";
 
 type SendPanelProps = {
   readonly disabled?: boolean;
@@ -50,26 +51,29 @@ export function SendPanel({
   const [format, setFormat] = useState<PayloadFormat>("ascii");
   const [delimiter, setDelimiter] = useState<DelimiterOption>("crlf");
   const selectedDelimiter = delimiterByOption[delimiter];
+  const socketMessages = messages.socketTester;
 
   return (
     <section className="flex flex-col gap-3" id={tourId}>
       <div>
-        <h2 className="font-semibold text-sm">Send panel</h2>
+        <h2 className="font-semibold text-sm">
+          {socketMessages.sendPanelTitle}
+        </h2>
         <p className="text-muted-foreground text-xs">
-          Compose payloads as ASCII, hex, or base64.
+          {socketMessages.sendPanelDescription}
         </p>
       </div>
       <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
         <Textarea
           className="h-40 min-h-40 resize-none overflow-y-auto font-mono leading-relaxed [field-sizing:fixed]"
           onChange={(event) => setData(event.target.value)}
-          placeholder="Type a payload..."
+          placeholder={socketMessages.payloadPlaceholder}
           value={data}
         />
         <div className="flex flex-col gap-3 md:w-[184px]">
           <div className="flex flex-col gap-1.5">
             <span className="font-medium text-muted-foreground text-xs">
-              Payload format
+              {socketMessages.payloadFormatLabel}
             </span>
             <Select
               onValueChange={(value) => setFormat(value as PayloadFormat)}
@@ -80,10 +84,14 @@ export function SendPanel({
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Encode as</SelectLabel>
+                  <SelectLabel>{socketMessages.encodeAsLabel}</SelectLabel>
                   <SelectItem value="ascii">ASCII</SelectItem>
-                  <SelectItem value="hex">Hex</SelectItem>
-                  <SelectItem value="base64">Base64</SelectItem>
+                  <SelectItem value="hex">
+                    {socketMessages.hexFormatLabel}
+                  </SelectItem>
+                  <SelectItem value="base64">
+                    {socketMessages.base64FormatLabel}
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -93,12 +101,12 @@ export function SendPanel({
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center gap-1.5">
                 <span className="font-medium text-muted-foreground text-xs">
-                  Line ending
+                  {socketMessages.lineEndingLabel}
                 </span>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      aria-label="What line ending does"
+                      aria-label={socketMessages.lineEndingHelpAriaLabel}
                       className="text-muted-foreground transition-colors hover:text-foreground"
                       type="button"
                     >
@@ -106,8 +114,7 @@ export function SendPanel({
                     </button>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-64" side="top">
-                    Appends CRLF, LF, or nothing after the payload. CRLF is
-                    common for text protocols; None sends the payload as-is.
+                    {socketMessages.lineEndingDescription}
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -122,10 +129,14 @@ export function SendPanel({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Append after payload</SelectLabel>
+                    <SelectLabel>
+                      {socketMessages.appendAfterPayloadLabel}
+                    </SelectLabel>
                     <SelectItem value="crlf">CRLF</SelectItem>
                     <SelectItem value="lf">LF</SelectItem>
-                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="none">
+                      {socketMessages.noneDelimiterLabel}
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -140,7 +151,7 @@ export function SendPanel({
               variant="outline"
             >
               <Eraser data-icon="inline-start" />
-              Clear
+              {socketMessages.clearButton}
             </Button>
             <Button
               className="h-10"
@@ -151,7 +162,7 @@ export function SendPanel({
               type="button"
             >
               <SendHorizontal data-icon="inline-start" />
-              Send
+              {socketMessages.sendButton}
             </Button>
           </div>
         </div>

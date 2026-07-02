@@ -65,6 +65,7 @@ import {
   summarizeRelayOptions,
   validateRelayStartInput,
 } from "@/features/socks-relay/utils";
+import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type SocksRelayPageProps = {
@@ -78,10 +79,26 @@ const HOLD_DROP_CONTROLS: {
   readonly label: string;
   readonly shortLabel: string;
 }[] = [
-  { key: "holdClient", label: "Hold client", shortLabel: "HC" },
-  { key: "holdHost", label: "Hold host", shortLabel: "HH" },
-  { key: "dropClient", label: "Drop client", shortLabel: "DC" },
-  { key: "dropHost", label: "Drop host", shortLabel: "DH" },
+  {
+    key: "holdClient",
+    label: messages.socksRelay.holdClientLabel,
+    shortLabel: "HC",
+  },
+  {
+    key: "holdHost",
+    label: messages.socksRelay.holdHostLabel,
+    shortLabel: "HH",
+  },
+  {
+    key: "dropClient",
+    label: messages.socksRelay.dropClientLabel,
+    shortLabel: "DC",
+  },
+  {
+    key: "dropHost",
+    label: messages.socksRelay.dropHostLabel,
+    shortLabel: "DH",
+  },
 ];
 
 const RELAY_FLOW_LEGEND = [
@@ -220,7 +237,9 @@ function RelayConnectionBadge() {
             isConnected ? "bg-emerald-500" : "bg-amber-500"
           )}
         />
-        <span className="font-medium">Relay events</span>
+        <span className="font-medium">
+          {messages.socksRelay.relayEventsLabel}
+        </span>
         <span className="text-muted-foreground capitalize">
           {connectionStatus}
         </span>
@@ -288,17 +307,19 @@ function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Play className="size-4" />
-          Start relay
+          {messages.socksRelay.startRelayTitle}
         </CardTitle>
         <CardDescription>
-          Mode is fixed to {getModeLabel(mode)} for this page.
+          {formatMessage(messages.socksRelay.startRelayDescription, {
+            modeLabel: getModeLabel(mode),
+          })}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form className="grid gap-4" onSubmit={submit}>
           <FieldError message={errors.options} />
           <div className="grid gap-2">
-            <Label htmlFor="relay-id">Relay ID</Label>
+            <Label htmlFor="relay-id">{messages.socksRelay.relayIdLabel}</Label>
             <Input
               id="relay-id"
               onChange={(event) =>
@@ -307,17 +328,19 @@ function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
                   relayId: event.target.value,
                 }))
               }
-              placeholder="Auto-generated if blank"
+              placeholder={messages.socksRelay.relayIdPlaceholder}
               value={form.relayId}
             />
             <p className="text-muted-foreground text-xs">
-              Leave blank and the backend will create one automatically.
+              {messages.socksRelay.relayIdDescription}
             </p>
             <FieldError message={errors.relayId} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="listening-port">Listening port</Label>
+              <Label htmlFor="listening-port">
+                {messages.socksRelay.listeningPortLabel}
+              </Label>
               <Input
                 id="listening-port"
                 inputMode="numeric"
@@ -332,7 +355,9 @@ function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
               <FieldError message={errors.listeningPort} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="timer-ms">Timer ms</Label>
+              <Label htmlFor="timer-ms">
+                {messages.socksRelay.timerMsLabel}
+              </Label>
               <Input
                 id="timer-ms"
                 inputMode="numeric"
@@ -349,7 +374,9 @@ function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
           </div>
           <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_120px]">
             <div className="grid gap-2">
-              <Label htmlFor="host-address">Host address</Label>
+              <Label htmlFor="host-address">
+                {messages.socksRelay.hostAddressLabel}
+              </Label>
               <Input
                 id="host-address"
                 onChange={(event) =>
@@ -364,7 +391,9 @@ function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
               <FieldError message={errors.hostAddress} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="host-port">Host port</Label>
+              <Label htmlFor="host-port">
+                {messages.socksRelay.hostPortLabel}
+              </Label>
               <Input
                 id="host-port"
                 inputMode="numeric"
@@ -392,7 +421,9 @@ function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
             type="submit"
           >
             <Play className="size-4" />
-            {startRelay.isPending ? "Starting..." : "Start relay"}
+            {startRelay.isPending
+              ? messages.socksRelay.startingRelayButton
+              : messages.socksRelay.startRelayButton}
           </Button>
         </form>
       </CardContent>
@@ -426,7 +457,7 @@ function RelayOptionsControls({
       </div>
       <SwitchRow
         checked={options.removeHeaders}
-        label="Remove headers"
+        label={messages.socksRelay.removeHeadersLabel}
         onCheckedChange={onRemoveHeadersChange}
         shortLabel="REST"
       />
@@ -488,9 +519,11 @@ function RelayTable({
       <div className="grid min-h-56 place-items-center rounded-lg border border-dashed bg-muted/20 p-6 text-center">
         <div className="flex max-w-sm flex-col items-center gap-2">
           <CircleOff className="size-8 text-muted-foreground" />
-          <p className="font-medium">No {modeLabel} relays</p>
+          <p className="font-medium">
+            {formatMessage(messages.socksRelay.noRelaysTitle, { modeLabel })}
+          </p>
           <p className="text-muted-foreground text-sm">
-            Start an instance to see it here and focus its live logs.
+            {messages.socksRelay.noRelaysDescription}
           </p>
         </div>
       </div>
@@ -502,12 +535,14 @@ function RelayTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Relay</TableHead>
-            <TableHead>Listen</TableHead>
-            <TableHead>Target</TableHead>
-            <TableHead>Options</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{messages.socksRelay.relayHeader}</TableHead>
+            <TableHead>{messages.socksRelay.listenHeader}</TableHead>
+            <TableHead>{messages.socksRelay.targetHeader}</TableHead>
+            <TableHead>{messages.socksRelay.optionsHeader}</TableHead>
+            <TableHead>{messages.socksRelay.statusHeader}</TableHead>
+            <TableHead className="text-right">
+              {messages.socksRelay.actionsHeader}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -574,10 +609,12 @@ function RelayTable({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Cable className="size-4" />
-          Relay instances
+          {messages.socksRelay.relayInstancesTitle}
         </CardTitle>
         <CardDescription>
-          Running {modeLabel} listeners and their active simulation options.
+          {formatMessage(messages.socksRelay.relayInstancesDescription, {
+            modeLabel,
+          })}
         </CardDescription>
       </CardHeader>
       <CardContent>{relayTableContent}</CardContent>
@@ -631,9 +668,12 @@ function RelayOptionsDialog({
     >
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Edit relay options</DialogTitle>
+          <DialogTitle>{messages.socksRelay.editRelayOptionsTitle}</DialogTitle>
           <DialogDescription>
-            {relay?.relayId ?? "Relay"} updates apply to new relay traffic.
+            {formatMessage(messages.socksRelay.editRelayOptionsDescription, {
+              relayId:
+                relay?.relayId ?? messages.socksRelay.editRelayOptionsFallback,
+            })}
           </DialogDescription>
         </DialogHeader>
         <RelayOptionsControls
@@ -644,7 +684,9 @@ function RelayOptionsDialog({
           options={options}
         />
         <div className="grid gap-2">
-          <Label htmlFor="edit-timer-ms">Timer ms</Label>
+          <Label htmlFor="edit-timer-ms">
+            {messages.socksRelay.timerMsLabel}
+          </Label>
           <Input
             id="edit-timer-ms"
             inputMode="numeric"
@@ -678,7 +720,7 @@ function RelayOptionsDialog({
             }}
             type="button"
           >
-            Save options
+            {messages.socksRelay.saveOptionsButton}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -716,11 +758,18 @@ function RelayLogConsole({
   const lifecycleEvents = scopedEvents.filter(
     (event) => !isRelayMessageEvent(event)
   );
-  let logScopeDescription = "Select a relay row to focus its logs";
+  let logScopeDescription: string = messages.socksRelay.selectedLogScope;
   if (showAllLogs) {
-    logScopeDescription = `Showing all ${getModeLabel(mode)} relays`;
+    logScopeDescription = formatMessage(
+      messages.socksRelay.showingAllLogScope,
+      {
+        modeLabel: getModeLabel(mode),
+      }
+    );
   } else if (focusedRelayId) {
-    logScopeDescription = `Focused on ${focusedRelayId}`;
+    logScopeDescription = formatMessage(messages.socksRelay.focusedLogScope, {
+      relayId: focusedRelayId,
+    });
   }
 
   return (
@@ -729,14 +778,16 @@ function RelayLogConsole({
         <div>
           <CardTitle className="flex items-center gap-2">
             <FileTerminal className="size-4" />
-            Relay logs
+            {messages.socksRelay.relayLogsTitle}
           </CardTitle>
           <CardDescription>{logScopeDescription}</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background px-3 py-2 text-sm">
             <ListFilter className="size-4" />
-            <Label htmlFor={showAllLogsSwitchId}>All relays</Label>
+            <Label htmlFor={showAllLogsSwitchId}>
+              {messages.socksRelay.allRelaysLabel}
+            </Label>
             <Switch
               checked={showAllLogs}
               id={showAllLogsSwitchId}
@@ -745,26 +796,32 @@ function RelayLogConsole({
           </div>
           <Button onClick={clearLogs} type="button" variant="outline">
             <Eraser className="size-4" />
-            Clear
+            {messages.socksRelay.clearButton}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="message">
           <TabsList>
-            <TabsTrigger value="message">Message</TabsTrigger>
-            <TabsTrigger value="event">Event</TabsTrigger>
-            <TabsTrigger value="legend">Legend</TabsTrigger>
+            <TabsTrigger value="message">
+              {messages.socksRelay.messageTab}
+            </TabsTrigger>
+            <TabsTrigger value="event">
+              {messages.socksRelay.eventTab}
+            </TabsTrigger>
+            <TabsTrigger value="legend">
+              {messages.socksRelay.legendTab}
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="message">
             <RelayEventList
-              emptyLabel="No relay messages yet."
+              emptyLabel={messages.socksRelay.noRelayMessages}
               events={messageEvents}
             />
           </TabsContent>
           <TabsContent value="event">
             <RelayEventList
-              emptyLabel="No lifecycle or error events yet."
+              emptyLabel={messages.socksRelay.noLifecycleEvents}
               events={lifecycleEvents}
             />
           </TabsContent>
@@ -784,9 +841,9 @@ function RelayLegend() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Code</TableHead>
-              <TableHead>Meaning</TableHead>
-              <TableHead>Note</TableHead>
+              <TableHead>{messages.socksRelay.codeHeader}</TableHead>
+              <TableHead>{messages.socksRelay.meaningHeader}</TableHead>
+              <TableHead>{messages.socksRelay.noteHeader}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -810,7 +867,9 @@ function RelayLegend() {
         </Table>
       </div>
       <div className="rounded-lg border border-border/70 bg-background/70 p-4">
-        <h3 className="font-semibold text-sm">Behavior notes</h3>
+        <h3 className="font-semibold text-sm">
+          {messages.socksRelay.behaviorNotesTitle}
+        </h3>
         <ul className="mt-3 grid gap-2 text-muted-foreground text-sm">
           {RELAY_BEHAVIOR_NOTES.map((note) => (
             <li className="flex gap-2" key={note}>

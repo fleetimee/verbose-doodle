@@ -447,22 +447,22 @@ export function SocketTesterLayout({
           {[
             {
               icon: Network,
-              label: "Active",
+              label: messages.socketTester.activeMetric,
               value: bridge.metrics.activeConnections,
             },
             {
               icon: Activity,
-              label: "Inbound",
+              label: messages.socketTester.inboundMetric,
               value: bridge.metrics.packetsIn,
             },
             {
               icon: SendHorizontal,
-              label: "Outbound",
+              label: messages.socketTester.outboundMetric,
               value: bridge.metrics.packetsOut,
             },
             {
               icon: CircleAlert,
-              label: "Errors",
+              label: messages.socketTester.errorsMetric,
               value: bridge.metrics.errors,
             },
           ].map((metric, index) => (

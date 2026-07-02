@@ -15,6 +15,7 @@ import type {
 import { getModeLabel } from "@/features/socks-relay/utils";
 import type { ApiError } from "@/lib/api";
 import { TIME_DURATIONS } from "@/lib/constants";
+import { formatMessage, messages } from "@/lib/i18n";
 import { createMutationHook, createQueryHook } from "@/lib/query-hooks";
 
 export function useGetRelays() {
@@ -35,13 +36,23 @@ export function useStartRelay() {
     startRelay,
     {
       onSuccess: (relay) => {
-        toast.success(`${getModeLabel(relay.mode)} relay started`, {
-          description: `${relay.relayId} is listening on ${relay.listeningPort}.`,
-        });
+        const modeLabel = getModeLabel(relay.mode);
+        toast.success(
+          formatMessage(messages.socksRelay.relayStarted, { modeLabel }),
+          {
+            description: formatMessage(
+              messages.socksRelay.relayStartedDescription,
+              {
+                port: relay.listeningPort,
+                relayId: relay.relayId,
+              }
+            ),
+          }
+        );
         queryClient.invalidateQueries({ queryKey: socksRelayQueryKeys.all });
       },
       onError: (error) => {
-        toast.error("Failed to start relay", {
+        toast.error(messages.socksRelay.failedStartRelay, {
           description: error.message,
         });
       },
@@ -57,13 +68,13 @@ export function useStopRelay() {
     stopRelay,
     {
       onSuccess: (relay) => {
-        toast.success("Relay stopped", {
+        toast.success(messages.socksRelay.relayStopped, {
           description: relay.relayId,
         });
         queryClient.invalidateQueries({ queryKey: socksRelayQueryKeys.all });
       },
       onError: (error) => {
-        toast.error("Failed to stop relay", {
+        toast.error(messages.socksRelay.failedStopRelay, {
           description: error.message,
         });
       },
@@ -81,7 +92,7 @@ export function useUpdateRelayOptions() {
     ApiError
   >(updateRelayOptions, {
     onSuccess: (relay) => {
-      toast.success("Relay options updated", {
+      toast.success(messages.socksRelay.relayUpdated, {
         description: relay.relayId,
       });
       queryClient.invalidateQueries({ queryKey: socksRelayQueryKeys.all });
@@ -90,7 +101,7 @@ export function useUpdateRelayOptions() {
       });
     },
     onError: (error) => {
-      toast.error("Failed to update relay options", {
+      toast.error(messages.socksRelay.failedUpdateRelayOptions, {
         description: error.message,
       });
     },

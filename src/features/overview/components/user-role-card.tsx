@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { OverviewData } from "@/features/overview/types";
+import { formatMessage, messages } from "@/lib/i18n";
 
 const PERCENTAGE_MULTIPLIER = 100;
 
@@ -22,12 +23,12 @@ export function UserRoleCard({ data }: UserRoleCardProps) {
   const totalUsers = data.userStats.totalUsers;
   const roles = [
     {
-      label: "Admin",
+      label: messages.overview.userRoleAdmin,
       value: data.userStats.adminUsers,
       icon: ShieldCheck,
     },
     {
-      label: "Regular",
+      label: messages.overview.userRoleRegular,
       value: data.userStats.regularUsers,
       icon: User,
     },
@@ -36,9 +37,11 @@ export function UserRoleCard({ data }: UserRoleCardProps) {
   return (
     <Card className="border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-1">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">User Roles</CardTitle>
+        <CardTitle className="text-base">
+          {messages.overview.userRolesTitle}
+        </CardTitle>
         <CardDescription className="text-xs">
-          Admin and regular account split
+          {messages.overview.userRolesDescription}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex min-h-[260px] flex-col justify-center gap-5">
@@ -69,7 +72,9 @@ export function UserRoleCard({ data }: UserRoleCardProps) {
                 />
               </div>
               <p className="text-muted-foreground text-xs tabular-nums">
-                {percentage}% of users
+                {formatMessage(messages.overview.userPercentageDescription, {
+                  percentage,
+                })}
               </p>
             </div>
           );

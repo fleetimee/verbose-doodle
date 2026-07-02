@@ -4,6 +4,7 @@ import { endpointQueryKeys } from "@/features/endpoints/query-keys";
 import { overviewQueryKeys } from "@/features/overview/query-keys";
 import { type ApiError, apiPatch } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
+import { messages } from "@/lib/i18n";
 import { createMutationHook } from "@/lib/query-hooks";
 
 export type UpdateResponseRequest = {
@@ -57,12 +58,12 @@ export function useUpdateResponse() {
       // Invalidate overview to update statistics
       queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
 
-      toast.success("Response updated successfully");
+      toast.success(messages.endpoints.responseUpdateSuccess);
     },
     onError: (error) => {
       // Handle errors with toast notification
-      toast.error("Failed to update response", {
-        description: error.message || "An unexpected error occurred",
+      toast.error(messages.endpoints.responseUpdateError, {
+        description: error.message || messages.common.unexpectedError,
       });
     },
   });

@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import type { EndpointError } from "@/features/endpoints/types";
 import { apiDelete } from "@/lib/api";
 import { getEndpointTrafficLogsClearUrl } from "@/lib/api-endpoints";
+import { messages } from "@/lib/i18n";
 import { createMutationHook } from "@/lib/query-hooks";
 
 type ClearEndpointTrafficLogsRequest = {
@@ -36,9 +37,11 @@ export function useClearEndpointTrafficLogs() {
     EndpointError
   >(clearEndpointTrafficLogs, {
     onSuccess: (response, request) => {
-      toast.success("Traffic logs cleared", {
+      toast.success(messages.endpoints.trafficLogsCleared, {
         description:
-          response.responseDesc || response.message || "Endpoint logs removed",
+          response.responseDesc ||
+          response.message ||
+          messages.endpoints.trafficLogsRemovedDescription,
       });
 
       queryClient.invalidateQueries({
@@ -46,8 +49,8 @@ export function useClearEndpointTrafficLogs() {
       });
     },
     onError: (error) => {
-      toast.error("Failed to clear traffic logs", {
-        description: error.message || "An unexpected error occurred",
+      toast.error(messages.endpoints.trafficLogsClearFailed, {
+        description: error.message || messages.common.unexpectedError,
       });
     },
   });

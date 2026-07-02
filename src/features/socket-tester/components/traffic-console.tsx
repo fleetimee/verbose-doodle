@@ -17,6 +17,7 @@ import type {
   TrafficDirection,
   TrafficLogEntry,
 } from "@/features/socket-tester/types";
+import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type TrafficConsoleProps = {
@@ -128,6 +129,7 @@ export function TrafficConsole({
   const inboundCount = getDirectionCount(logs, "in");
   const outboundCount = getDirectionCount(logs, "out");
   const errorCount = getDirectionCount(logs, "err");
+  const socketMessages = messages.socketTester;
 
   useEffect(() => {
     if (!autoScroll) {
@@ -153,9 +155,11 @@ export function TrafficConsole({
               <Radio aria-hidden="true" className="size-5" />
             </div>
             <div>
-              <h2 className="font-semibold text-lg">Traffic console</h2>
+              <h2 className="font-semibold text-lg">
+                {socketMessages.trafficConsoleTitle}
+              </h2>
               <p className="text-muted-foreground text-sm">
-                Inspect socket frames, payloads, and bridge metadata.
+                {socketMessages.trafficConsoleDescription}
               </p>
             </div>
           </div>
@@ -165,7 +169,7 @@ export function TrafficConsole({
               htmlFor="socket-traffic-auto-scroll"
             >
               <Activity className="size-4 text-muted-foreground" />
-              <span>Auto-scroll</span>
+              <span>{socketMessages.autoScrollLabel}</span>
               <Switch
                 checked={autoScroll}
                 id="socket-traffic-auto-scroll"
@@ -180,7 +184,7 @@ export function TrafficConsole({
               variant="outline"
             >
               <Download className="size-3.5" />
-              Save
+              {socketMessages.saveButton}
             </Button>
             <Button
               className="h-8 gap-2 transition-transform duration-150 ease-out active:scale-[0.97]"
@@ -190,7 +194,7 @@ export function TrafficConsole({
               variant="outline"
             >
               <Eraser className="size-3.5" />
-              Clear
+              {socketMessages.clearButton}
             </Button>
           </div>
         </div>
@@ -198,17 +202,17 @@ export function TrafficConsole({
         <div className="grid gap-2 sm:grid-cols-4">
           <ConsoleMetric
             icon={<CircleDashed className="size-3.5" />}
-            label="Frames"
+            label={socketMessages.framesMetric}
             value={logs.length}
           />
           <ConsoleMetric
             icon={<Download className="size-3.5" />}
-            label="Inbound"
+            label={socketMessages.inboundMetric}
             value={inboundCount}
           />
           <ConsoleMetric
             icon={<Activity className="size-3.5" />}
-            label="Outbound"
+            label={socketMessages.outboundMetric}
             value={outboundCount}
           />
           <ConsoleMetric
@@ -219,7 +223,11 @@ export function TrafficConsole({
                 <TimerReset className="size-3.5" />
               )
             }
-            label={errorCount > 0 ? "Errors" : "Latest"}
+            label={
+              errorCount > 0
+                ? socketMessages.errorsMetric
+                : socketMessages.latestMetric
+            }
             value={errorCount > 0 ? errorCount : getLatestLabel(logs)}
           />
         </div>
@@ -234,10 +242,12 @@ export function TrafficConsole({
             <div className="w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner">
               <div className="mb-3 flex items-center justify-center gap-2 text-[#d4d4d4]">
                 <MousePointerClick className="size-5" />
-                <span className="font-semibold">No frames captured</span>
+                <span className="font-semibold">
+                  {socketMessages.noFramesCapturedTitle}
+                </span>
               </div>
               <p className="text-[#a3a3a3]">
-                Connect the bridge, start a socket, then send traffic.
+                {socketMessages.noFramesCapturedDescription}
               </p>
               <p className="mt-3 text-[#60a5fa]">
                 socket-console --waiting-for-frames

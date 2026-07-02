@@ -5,6 +5,7 @@ import {
   STEP_TRANSITION_DURATION,
   STEPS,
 } from "@/features/endpoints/constants/stepper-steps";
+import { formatMessage, messages } from "@/lib/i18n";
 
 type ResponseStepperHeaderProps = {
   currentStepIndex: number;
@@ -41,6 +42,8 @@ export function ResponseStepperHeader({
   onCancel,
   isFirstStep,
 }: ResponseStepperHeaderProps) {
+  const endpointMessages = messages.endpoints;
+
   return (
     <header className="shrink-0 border-b bg-background/95 backdrop-blur">
       <div className="h-1 bg-muted">
@@ -56,7 +59,11 @@ export function ResponseStepperHeader({
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Button
-              aria-label={isFirstStep ? "Close response builder" : "Go back"}
+              aria-label={
+                isFirstStep
+                  ? endpointMessages.responseBuilderCloseAriaLabel
+                  : endpointMessages.responseBuilderBackAriaLabel
+              }
               onClick={isFirstStep ? onCancel : onBack}
               size="icon"
               variant="ghost"
@@ -65,15 +72,18 @@ export function ResponseStepperHeader({
             </Button>
             <div className="min-w-0">
               <div className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-                Step {currentStepIndex + 1} of {STEPS.length}
+                {formatMessage(endpointMessages.responseBuilderStepLabel, {
+                  current: currentStepIndex + 1,
+                  total: STEPS.length,
+                })}
               </div>
               <h1 className="truncate font-semibold text-lg tracking-tight">
-                Create Response
+                {endpointMessages.responseBuilderTitle}
               </h1>
             </div>
           </div>
           <Button
-            aria-label="Cancel response builder"
+            aria-label={endpointMessages.responseBuilderCancelAriaLabel}
             onClick={onCancel}
             size="icon"
             variant="ghost"

@@ -34,6 +34,7 @@ import { ResponseSimulationAlert } from "@/features/endpoints/components/respons
 import { ServerSettlingLayer } from "@/features/endpoints/components/server-settling-layer";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 import { copyToClipboard } from "@/lib/clipboard";
+import { messages } from "@/lib/i18n";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
 
@@ -120,12 +121,12 @@ export function ResponsePreview({
     try {
       const copied = await copyToClipboard(fullUrl);
       if (!copied) {
-        toast.error("Unable to copy URL");
+        toast.error(messages.endpoints.responseCopyUrlFailed);
         return;
       }
-      toast.success("URL copied to clipboard");
+      toast.success(messages.endpoints.responseCopyUrlSuccess);
     } catch {
-      toast.error("Unable to copy URL");
+      toast.error(messages.endpoints.responseCopyUrlFailed);
     }
   };
 
@@ -152,10 +153,14 @@ export function ResponsePreview({
     }
   }, [response]);
 
+  const endpointMessages = messages.endpoints;
+
   return (
     <div className="flex h-full flex-col">
       <div className="border-b px-4 py-3">
-        <h2 className="font-semibold text-sm">Response Preview</h2>
+        <h2 className="font-semibold text-sm">
+          {endpointMessages.responsePreviewTitle}
+        </h2>
       </div>
       <ScrollArea className="relative flex-1">
         {/* Server Settling Layer */}
@@ -198,7 +203,7 @@ export function ResponsePreview({
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                       </span>
-                      Active Response
+                      {endpointMessages.responseActiveBadge}
                     </Badge>
                   ) : (
                     <Badge
@@ -206,13 +211,13 @@ export function ResponsePreview({
                       variant="outline"
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
-                      Inactive Response
+                      {endpointMessages.responseInactiveBadge}
                     </Badge>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground text-sm">
-                    Status Code:
+                    {endpointMessages.responseStatusCodeLabel}
                   </span>
                   <Badge
                     className="font-mono"
@@ -231,7 +236,7 @@ export function ResponsePreview({
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="shrink-0 text-muted-foreground text-sm">
-                        Endpoint URL:
+                        {endpointMessages.responseEndpointUrlLabel}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
@@ -253,7 +258,9 @@ export function ResponsePreview({
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Generate Code</p>
+                            <p>
+                              {endpointMessages.responseGenerateCodeTooltip}
+                            </p>
                           </TooltipContent>
                         </Tooltip>
 
@@ -268,7 +275,7 @@ export function ResponsePreview({
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Copy URL</p>
+                            <p>{endpointMessages.responseCopyUrlTooltip}</p>
                           </TooltipContent>
                         </Tooltip>
 
@@ -283,7 +290,9 @@ export function ResponsePreview({
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Simulate Request</p>
+                            <p>
+                              {endpointMessages.responseSimulateRequestTooltip}
+                            </p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -348,11 +357,11 @@ export function ResponsePreview({
                 >
                   <CodeBlockHeader>
                     <div className="flex-1 px-3 py-1 text-muted-foreground text-xs">
-                      Response Body
+                      {endpointMessages.responseBodyTitle}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground text-xs">
-                        Theme:
+                        {endpointMessages.responseThemeLabel}
                       </span>
                       <CodeBlockThemeSelector
                         mode={resolvedTheme === "dark" ? "dark" : "light"}
@@ -391,9 +400,9 @@ export function ResponsePreview({
                   <EmptyMedia variant="icon">
                     <Eye />
                   </EmptyMedia>
-                  <EmptyTitle>No response selected</EmptyTitle>
+                  <EmptyTitle>{endpointMessages.responseEmptyTitle}</EmptyTitle>
                   <EmptyDescription>
-                    Select a response from the list to preview its details.
+                    {endpointMessages.responseEmptyDescription}
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>

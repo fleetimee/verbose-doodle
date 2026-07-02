@@ -1,15 +1,16 @@
 import type { ChartConfig } from "@/components/ui/chart";
+import { messages } from "@/lib/i18n";
 
 /**
  * Chart configuration for endpoint usage trend
  */
 export const endpointUsageConfig = {
   requests: {
-    label: "Total Requests",
+    label: messages.overview.chartLabels.totalRequests,
     color: "var(--chart-1)",
   },
   success: {
-    label: "Successful",
+    label: messages.overview.chartLabels.successful,
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
@@ -45,11 +46,11 @@ export const methodDistributionConfig = {
  */
 export const responseTimeConfig = {
   avgResponseTime: {
-    label: "Avg Response Time",
+    label: messages.overview.chartLabels.avgResponseTime,
     color: "var(--chart-1)",
   },
   p95ResponseTime: {
-    label: "P95 Response Time",
+    label: messages.overview.chartLabels.p95ResponseTime,
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
@@ -59,15 +60,15 @@ export const responseTimeConfig = {
  */
 export const endpointStatusConfig = {
   active: {
-    label: "Active",
+    label: messages.overview.chartLabels.active,
     color: "var(--chart-2)",
   },
   inactive: {
-    label: "Inactive",
+    label: messages.overview.chartLabels.inactive,
     color: "var(--chart-3)",
   },
   deprecated: {
-    label: "Deprecated",
+    label: messages.overview.chartLabels.deprecated,
     color: "var(--chart-4)",
   },
 } satisfies ChartConfig;

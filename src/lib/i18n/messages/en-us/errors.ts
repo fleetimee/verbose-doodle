@@ -5,4 +5,5 @@ export const errorsMessages = {
   fallbackTitle: "Something went wrong",
   fallbackDescriptionLine1: "An unexpected error occurred.",
   fallbackDescriptionLine2: "We apologize for the inconvenience.",
+  invalidResponseStructure: "Invalid response structure from server",
 } as const;

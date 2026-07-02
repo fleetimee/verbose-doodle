@@ -19,6 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import type { TrafficLogEntry } from "@/features/socket-tester/types";
 import { copyToClipboard } from "@/lib/clipboard";
+import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type HexInspectorProps = {
@@ -61,17 +62,16 @@ function getRenderedData(value: string) {
   try {
     return {
       content: JSON.stringify(JSON.parse(value), null, 2),
-      description: "Parsed JSON view from the frame payload.",
-      label: "Copy rendered JSON",
-      toastMessage: "Rendered JSON copied",
+      description: messages.socketTester.renderedJsonDescription,
+      label: messages.socketTester.copyRenderedJsonLabel,
+      toastMessage: messages.socketTester.renderedJsonCopied,
     };
   } catch {
     return {
       content: value,
-      description:
-        "Payload is not valid JSON, so this view shows the reply exactly as received.",
-      label: "Copy rendered data",
-      toastMessage: "Rendered data copied",
+      description: messages.socketTester.renderedDataDescription,
+      label: messages.socketTester.copyRenderedDataLabel,
+      toastMessage: messages.socketTester.renderedDataCopied,
     };
   }
 }
@@ -90,7 +90,7 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
     () =>
       entry?.metadata
         ? JSON.stringify(entry.metadata, null, 2)
-        : "No metadata captured for this frame.",
+        : messages.socketTester.metadataEmpty,
     [entry?.metadata]
   );
   const payloadSize = payloadBytes.length;
@@ -112,11 +112,10 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                       <span className="flex size-9 items-center justify-center rounded-md border bg-background text-primary shadow-xs">
                         <Binary data-icon="inline-start" />
                       </span>
-                      Frame inspector
+                      {messages.socketTester.frameInspectorTitle}
                     </DialogTitle>
                     <DialogDescription className="mt-2">
-                      Inspect the selected socket frame as text, bytes, and
-                      bridge metadata.
+                      {messages.socketTester.frameInspectorDescription}
                     </DialogDescription>
                   </div>
                   <Badge
@@ -138,17 +137,26 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                   <InspectorStat
                     icon={<Clock data-icon="inline-start" />}
-                    label="Timestamp"
+                    label={messages.socketTester.timestampLabel}
                     value={entry.timestamp}
                   />
                   <InspectorStat
                     icon={<Hash data-icon="inline-start" />}
-                    label="Protocol"
+                    label={messages.socketTester.protocolLabel}
                     value={entry.protocol}
                   />
-                  <InspectorStat label="Scope" value={entry.scope} />
-                  <InspectorStat label="Format" value={entry.format} />
-                  <InspectorStat label="Bytes" value={String(payloadSize)} />
+                  <InspectorStat
+                    label={messages.socketTester.scopeLabel}
+                    value={entry.scope}
+                  />
+                  <InspectorStat
+                    label={messages.socketTester.formatLabel}
+                    value={entry.format}
+                  />
+                  <InspectorStat
+                    label={messages.socketTester.bytesLabel}
+                    value={String(payloadSize)}
+                  />
                 </div>
 
                 <ResizablePanelGroup
@@ -157,9 +165,11 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                 >
                   <ResizablePanel defaultSize={52} minSize={34}>
                     <FramePane
-                      description="Rendered reply first, raw payload underneath for byte-for-byte comparison."
+                      description={
+                        messages.socketTester.renderedReplyDescription
+                      }
                       icon={<FileJson data-icon="inline-start" />}
-                      title="Data"
+                      title={messages.socketTester.dataTitle}
                     >
                       {renderedData ? (
                         <InspectorBlock
@@ -171,7 +181,7 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                             />
                           }
                           description={renderedData.description}
-                          title="Rendered data"
+                          title={messages.socketTester.renderedDataTitle}
                         >
                           <CodeSurface
                             className="max-h-[300px]"
@@ -185,13 +195,15 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                       <InspectorBlock
                         action={
                           <CopyButton
-                            label="Copy payload"
+                            label={messages.socketTester.copyPayloadLabel}
                             text={entry.data}
-                            toastMessage="Payload copied"
+                            toastMessage={messages.socketTester.payloadCopied}
                           />
                         }
-                        description="Exact text payload captured from the selected frame."
-                        title="Raw payload"
+                        description={
+                          messages.socketTester.rawPayloadDescription
+                        }
+                        title={messages.socketTester.rawPayloadTitle}
                       >
                         <CodeSurface className="max-h-[260px]" tone="payload">
                           {entry.data}
@@ -205,20 +217,22 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                   />
                   <ResizablePanel defaultSize={48} minSize={34}>
                     <FramePane
-                      description="Byte-level inspection and bridge metadata for the selected frame."
+                      description={
+                        messages.socketTester.frameContextDescription
+                      }
                       icon={<Binary data-icon="inline-start" />}
-                      title="Frame context"
+                      title={messages.socketTester.frameContextTitle}
                     >
                       <InspectorBlock
                         action={
                           <CopyButton
-                            label="Copy hex"
+                            label={messages.socketTester.copyHexLabel}
                             text={hexDump}
-                            toastMessage="Hex dump copied"
+                            toastMessage={messages.socketTester.hexDumpCopied}
                           />
                         }
-                        description="Offset, hexadecimal bytes, and ASCII preview."
-                        title="Hex dump"
+                        description={messages.socketTester.hexDumpDescription}
+                        title={messages.socketTester.hexDumpTitle}
                       >
                         <CodeSurface className="max-h-[300px]" tone="hex">
                           {hexDump}
@@ -228,13 +242,13 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                       <InspectorBlock
                         action={
                           <CopyButton
-                            label="Copy metadata"
+                            label={messages.socketTester.copyMetadataLabel}
                             text={metadata}
-                            toastMessage="Metadata copied"
+                            toastMessage={messages.socketTester.metadataCopied}
                           />
                         }
-                        description="Bridge context attached to this log row."
-                        title="Metadata"
+                        description={messages.socketTester.metadataDescription}
+                        title={messages.socketTester.metadataTitle}
                       >
                         <CodeSurface className="max-h-[260px]" tone="metadata">
                           {metadata}
@@ -377,9 +391,9 @@ function CopyButton({
               toast.success(toastMessage);
               return;
             }
-            toast.error("Unable to copy");
+            toast.error(messages.socketTester.unableToCopy);
           })
-          .catch(() => toast.error("Unable to copy"));
+          .catch(() => toast.error(messages.socketTester.unableToCopy));
       }}
       size="sm"
       type="button"

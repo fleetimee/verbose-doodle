@@ -15,14 +15,15 @@ import {
 } from "@/components/ui/chart";
 import { responseTimeConfig } from "@/features/overview/config/chart-configs";
 import { responseTimeData } from "@/features/overview/data/overview-data";
+import { messages } from "@/lib/i18n";
 
 export function ResponseTimeChart() {
   return (
     <Card className="md:col-span-3 lg:col-span-4">
       <CardHeader>
-        <CardTitle>Response Time Trends</CardTitle>
+        <CardTitle>{messages.overview.responseTimeTrendsTitle}</CardTitle>
         <CardDescription>
-          Average and P95 response times (ms) over the last 10 weeks
+          {messages.overview.responseTimeTrendsDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>

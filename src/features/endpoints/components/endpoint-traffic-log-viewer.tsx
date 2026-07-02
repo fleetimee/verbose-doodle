@@ -77,7 +77,7 @@ import type {
 } from "@/features/endpoints/types";
 import { getEndpointTrafficLogsDownloadUrl } from "@/lib/api-endpoints";
 import { copyToClipboard } from "@/lib/clipboard";
-import { messages } from "@/lib/i18n";
+import { formatMessage, formatPluralMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const LOG_LINE_LIMITS = [50, 100, 250, 500, 1000] as const;
@@ -94,16 +94,17 @@ type TerminalTone = "empty" | "error" | "emergency";
 type ExchangeTone = "request" | "response";
 
 const STATUS_LABELS: Record<EndpointTrafficLogStatus, string> = {
-  matched_success: "Success",
-  matched_empty: "Empty",
-  matched_timeout: "Timeout",
-  matched_delayed: "Delayed",
-  unmatched_endpoint: "Unmatched",
-  backend_error: "Error",
+  matched_success: messages.endpoints.trafficLogStatusLabels.matchedSuccess,
+  matched_empty: messages.endpoints.trafficLogStatusLabels.matchedEmpty,
+  matched_timeout: messages.endpoints.trafficLogStatusLabels.matchedTimeout,
+  matched_delayed: messages.endpoints.trafficLogStatusLabels.matchedDelayed,
+  unmatched_endpoint:
+    messages.endpoints.trafficLogStatusLabels.unmatchedEndpoint,
+  backend_error: messages.endpoints.trafficLogStatusLabels.backendError,
 };
 
 const STATUS_FILTER_LABELS: Record<EndpointTrafficLogStatusFilter, string> = {
-  all: "All logs",
+  all: messages.endpoints.trafficLogStatusLabels.all,
   ...STATUS_LABELS,
 };
 
@@ -139,7 +140,7 @@ function getSuccessRate(logs: readonly EndpointTrafficLog[]) {
 }
 
 function getLogCountLabel(count: number) {
-  return `${count} ${count === 1 ? "log" : "logs"}`;
+  return formatPluralMessage(messages.endpoints.trafficLogsCount, count);
 }
 
 function getLatestDurationLabel(log: EndpointTrafficLog | undefined) {
@@ -199,19 +200,19 @@ function formatJson(value: unknown) {
 
 async function copyText(text: string, successMessage: string) {
   if (!text.trim()) {
-    toast.info("No log lines to copy");
+    toast.info(messages.endpoints.trafficLogsNoLinesToCopy);
     return;
   }
 
   try {
     const copied = await copyToClipboard(text);
     if (!copied) {
-      toast.error("Unable to copy logs");
+      toast.error(messages.endpoints.trafficLogsUnableToCopy);
       return;
     }
     toast.success(successMessage);
   } catch {
-    toast.error("Unable to copy logs");
+    toast.error(messages.endpoints.trafficLogsUnableToCopy);
   }
 }
 
@@ -287,7 +288,10 @@ export function EndpointTrafficLogViewer({
     [data?.items]
   );
   const totalLogsLabel = getLogCountLabel(logs.length);
-  const selectedLogsLabel = `${selectedIds.size} selected`;
+  const selectedLogsLabel = formatMessage(
+    messages.endpoints.trafficLogsSelectedCount,
+    { count: selectedIds.size }
+  );
   const successRate = getSuccessRate(logs);
   const latestLog = logs.at(-1);
   const visibleLines = useMemo(
@@ -351,7 +355,7 @@ export function EndpointTrafficLogViewer({
     );
 
     if (!response.ok) {
-      toast.error("Failed to download logs");
+      toast.error(messages.endpoints.trafficLogsDownloadFailed);
       return;
     }
 
@@ -417,7 +421,10 @@ export function EndpointTrafficLogViewer({
               transition={{ duration: 0.15, ease: "easeOut" }}
             >
               <Checkbox
-                aria-label={`Select traffic log ${log.requestId}`}
+                aria-label={formatMessage(
+                  messages.endpoints.trafficLogSelectAriaLabel,
+                  { requestId: log.requestId }
+                )}
                 checked={selectedIds.has(log.id)}
                 className="mt-0.5 border-[#5b5b5b] bg-[#1f1f1f] data-[state=checked]:border-[#60a5fa] data-[state=checked]:bg-[#2563eb]"
                 onCheckedChange={() => handleToggleSelected(log.id)}
@@ -458,26 +465,41 @@ export function EndpointTrafficLogViewer({
     );
   } else if (selectedLogDetail) {
     const requestMeta = [
-      { label: "Method", value: selectedLogDetail.method },
-      { label: "Path", value: selectedLogDetail.path },
       {
-        label: "Source",
+        label: messages.endpoints.trafficLogMeta.method,
+        value: selectedLogDetail.method,
+      },
+      {
+        label: messages.endpoints.trafficLogMeta.path,
+        value: selectedLogDetail.path,
+      },
+      {
+        label: messages.endpoints.trafficLogMeta.source,
         value: formatIp(
           selectedLogDetail.sourceIp,
           selectedLogDetail.sourcePort
         ),
       },
-      { label: "Forwarded", value: selectedLogDetail.forwardedFor ?? "-" },
+      {
+        label: messages.endpoints.trafficLogMeta.forwarded,
+        value: selectedLogDetail.forwardedFor ?? "-",
+      },
     ];
     const responseMeta = [
-      { label: "HTTP", value: selectedLogDetail.httpStatusCode ?? "-" },
       {
-        label: "Duration",
+        label: messages.endpoints.trafficLogMeta.http,
+        value: selectedLogDetail.httpStatusCode ?? "-",
+      },
+      {
+        label: messages.endpoints.trafficLogMeta.duration,
         value: `${selectedLogDetail.durationMs ?? "-"} ms`,
       },
-      { label: "Response", value: selectedLogDetail.responseName ?? "-" },
       {
-        label: "Delay",
+        label: messages.endpoints.trafficLogMeta.response,
+        value: selectedLogDetail.responseName ?? "-",
+      },
+      {
+        label: messages.endpoints.trafficLogMeta.delay,
         value: selectedLogDetail.delayMs
           ? `${selectedLogDetail.delayMs} ms`
           : "-",
@@ -497,7 +519,7 @@ export function EndpointTrafficLogViewer({
               </span>
               {selectedLogDetail.simulateTimeout && (
                 <span className="rounded bg-amber-500/15 px-2 py-1 font-mono text-amber-700 text-xs dark:bg-amber-400/15 dark:text-amber-200">
-                  timeout simulation
+                  {messages.endpoints.trafficLogTimeoutSimulationLabel}
                 </span>
               )}
             </div>
@@ -510,7 +532,7 @@ export function EndpointTrafficLogViewer({
           </div>
           <div className="grid min-w-0 gap-2 pr-12 text-right text-xs">
             <span className="font-mono text-slate-500 dark:text-slate-400">
-              USER AGENT
+              {messages.endpoints.trafficLogUserAgentLabel}
             </span>
             <UserAgentClientBadge
               className="justify-self-end"
@@ -522,7 +544,7 @@ export function EndpointTrafficLogViewer({
           </div>
           <DialogClose asChild>
             <button
-              aria-label="Close traffic log detail"
+              aria-label={messages.endpoints.trafficLogDetailCloseAriaLabel}
               className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md border border-slate-300 bg-white/80 text-slate-600 shadow-xs transition-colors hover:bg-white hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-[#344156] dark:bg-[#0b1020]/80 dark:text-slate-300 dark:hover:bg-[#111827] dark:hover:text-white"
               type="button"
             >
@@ -542,7 +564,7 @@ export function EndpointTrafficLogViewer({
                 headers={selectedLogDetail.requestHeaders}
                 icon={<MonitorUp className="size-4" />}
                 meta={requestMeta}
-                title="Request"
+                title={messages.endpoints.trafficLogRequestTitle}
                 tone="request"
                 wrapLines={wrapLines}
               />
@@ -557,7 +579,7 @@ export function EndpointTrafficLogViewer({
                 headers={selectedLogDetail.responseHeaders}
                 icon={<MonitorDown className="size-4" />}
                 meta={responseMeta}
-                title="Response"
+                title={messages.endpoints.trafficLogResponseTitle}
                 tone="response"
                 wrapLines={wrapLines}
               />
@@ -570,7 +592,7 @@ export function EndpointTrafficLogViewer({
             <ShikiJsonBlock
               defaultWrapLines={wrapLines}
               filename="error.txt"
-              title="Error"
+              title={messages.endpoints.trafficLogErrorTitle}
               value={selectedLogDetail.errorMessage}
             />
           </div>
@@ -589,9 +611,11 @@ export function EndpointTrafficLogViewer({
                 <Activity aria-hidden="true" className="size-5" />
               </div>
               <div>
-                <h2 className="font-semibold text-lg">Traffic logs</h2>
+                <h2 className="font-semibold text-lg">
+                  {messages.endpoints.trafficLogsTitle}
+                </h2>
                 <p className="text-muted-foreground text-sm">
-                  Inspect requests that hit this simulator endpoint.
+                  {messages.endpoints.trafficLogsDescription}
                 </p>
               </div>
             </div>
@@ -605,29 +629,29 @@ export function EndpointTrafficLogViewer({
             variant="outline"
           >
             <RefreshCw data-icon="inline-start" />
-            Refresh
+            {messages.endpoints.trafficLogsRefreshButton}
           </Button>
         </div>
 
         <div className="grid gap-2 sm:grid-cols-4">
           <TrafficMetric
             icon={<CircleDashed className="size-3.5" />}
-            label="Visible"
+            label={messages.endpoints.trafficLogsVisibleMetric}
             value={totalLogsLabel}
           />
           <TrafficMetric
             icon={<CircleCheck className="size-3.5" />}
-            label="Success"
+            label={messages.endpoints.trafficLogsSuccessMetric}
             value={successRate}
           />
           <TrafficMetric
             icon={<Clipboard className="size-3.5" />}
-            label="Selection"
+            label={messages.endpoints.trafficLogsSelectionMetric}
             value={selectedLogsLabel}
           />
           <TrafficMetric
             icon={<TimerReset className="size-3.5" />}
-            label="Latest"
+            label={messages.endpoints.trafficLogsLatestMetric}
             value={getLatestDurationLabel(latestLog)}
           />
         </div>
@@ -639,7 +663,9 @@ export function EndpointTrafficLogViewer({
               htmlFor="traffic-log-auto-refresh"
             >
               <RefreshCw className="size-4 text-muted-foreground" />
-              <span className="font-medium">Auto-refresh logs</span>
+              <span className="font-medium">
+                {messages.endpoints.trafficLogsAutoRefreshLabel}
+              </span>
               <Switch
                 checked={autoRefresh}
                 id="traffic-log-auto-refresh"
@@ -651,7 +677,9 @@ export function EndpointTrafficLogViewer({
               htmlFor="traffic-log-wrap-lines"
             >
               <ListFilter className="size-4 text-muted-foreground" />
-              <span className="font-medium">Wrap lines</span>
+              <span className="font-medium">
+                {messages.endpoints.trafficLogsWrapLinesLabel}
+              </span>
               <Switch
                 checked={wrapLines}
                 id="traffic-log-wrap-lines"
@@ -663,7 +691,9 @@ export function EndpointTrafficLogViewer({
               htmlFor="traffic-log-timestamps"
             >
               <FileClock className="size-4 text-muted-foreground" />
-              <span className="font-medium">Display timestamps</span>
+              <span className="font-medium">
+                {messages.endpoints.trafficLogsDisplayTimestampsLabel}
+              </span>
               <Switch
                 checked={showTimestamps}
                 id="traffic-log-timestamps"
@@ -702,7 +732,7 @@ export function EndpointTrafficLogViewer({
                 <Input
                   className="pl-9"
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search IP, method, URL, request ID, status, body..."
+                  placeholder={messages.endpoints.trafficLogsSearchPlaceholder}
                   value={search}
                 />
               </div>
@@ -724,7 +754,10 @@ export function EndpointTrafficLogViewer({
                   <SelectGroup>
                     {LOG_LINE_LIMITS.map((limit) => (
                       <SelectItem key={limit} value={limit.toString()}>
-                        {limit} lines
+                        {formatMessage(
+                          messages.endpoints.trafficLogsLineCount,
+                          { count: limit }
+                        )}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -735,27 +768,33 @@ export function EndpointTrafficLogViewer({
                 <Button
                   className="transition-transform duration-150 ease-out active:scale-[0.97]"
                   onClick={() =>
-                    copyText(visibleLines.join("\n"), "Visible logs copied")
+                    copyText(
+                      visibleLines.join("\n"),
+                      messages.endpoints.trafficLogsVisibleCopied
+                    )
                   }
                   size="sm"
                   type="button"
                   variant="secondary"
                 >
                   <Copy data-icon="inline-start" />
-                  Copy
+                  {messages.endpoints.trafficLogsCopyButton}
                 </Button>
                 <Button
                   className="transition-transform duration-150 ease-out active:scale-[0.97]"
                   disabled={selectedIds.size === 0}
                   onClick={() =>
-                    copyText(selectedLines.join("\n"), "Selected logs copied")
+                    copyText(
+                      selectedLines.join("\n"),
+                      messages.endpoints.trafficLogsSelectedCopied
+                    )
                   }
                   size="sm"
                   type="button"
                   variant="secondary"
                 >
                   <Clipboard data-icon="inline-start" />
-                  Copy selected
+                  {messages.endpoints.trafficLogsCopySelectedButton}
                 </Button>
                 <Button
                   className="transition-transform duration-150 ease-out active:scale-[0.97]"
@@ -766,7 +805,7 @@ export function EndpointTrafficLogViewer({
                   variant="secondary"
                 >
                   <X data-icon="inline-start" />
-                  Unselect
+                  {messages.endpoints.trafficLogsUnselectButton}
                 </Button>
                 <Button
                   className="transition-transform duration-150 ease-out active:scale-[0.97]"
@@ -776,7 +815,7 @@ export function EndpointTrafficLogViewer({
                   variant="outline"
                 >
                   <Download data-icon="inline-start" />
-                  Download
+                  {messages.endpoints.trafficLogsDownloadButton}
                 </Button>
                 <Button
                   className="transition-transform duration-150 ease-out active:scale-[0.97]"
@@ -785,7 +824,7 @@ export function EndpointTrafficLogViewer({
                   type="button"
                   variant="outline"
                 >
-                  CSV
+                  {messages.endpoints.trafficLogsCsvButton}
                 </Button>
                 <Button
                   className="transition-transform duration-150 ease-out active:scale-[0.97]"
@@ -796,7 +835,7 @@ export function EndpointTrafficLogViewer({
                   variant="destructive"
                 >
                   <Trash2 data-icon="inline-start" />
-                  Clear
+                  {messages.endpoints.trafficLogsClearButton}
                 </Button>
               </div>
             </div>
@@ -821,9 +860,11 @@ export function EndpointTrafficLogViewer({
           showCloseButton={false}
         >
           <DialogHeader className="sr-only">
-            <DialogTitle>Traffic log detail</DialogTitle>
+            <DialogTitle>
+              {messages.endpoints.trafficLogDetailTitle}
+            </DialogTitle>
             <DialogDescription>
-              Request, response, and network metadata for one simulator hit.
+              {messages.endpoints.trafficLogDetailDescription}
             </DialogDescription>
           </DialogHeader>
           {detailContent}
@@ -836,21 +877,22 @@ export function EndpointTrafficLogViewer({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Clear traffic logs?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {messages.endpoints.trafficLogClearTitle}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This removes all stored traffic logs for this endpoint. Download a
-              copy first if you need to keep them.
+              {messages.endpoints.trafficLogClearDescription}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isClearingTrafficLogs}>
-              Cancel
+              {messages.common.cancel}
             </AlertDialogCancel>
             <AlertDialogAction
               disabled={isClearingTrafficLogs}
               onClick={handleClearTrafficLogs}
             >
-              Clear logs
+              {messages.endpoints.trafficLogClearConfirmButton}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -950,7 +992,7 @@ function TerminalState({
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              <span>waiting for incoming requests</span>
+              <span>{messages.endpoints.trafficLogsWaiting}</span>
               <span className="loading-dots inline-flex gap-[1px]">
                 <span>.</span>
                 <span>.</span>
@@ -1004,7 +1046,7 @@ function LogExchangePane({
           <div>
             <h4 className="font-semibold text-sm">{title}</h4>
             <p className="text-slate-600 text-xs dark:text-slate-400">
-              Headers and JSON body
+              {messages.endpoints.trafficLogHeadersAndBody}
             </p>
           </div>
         </div>
@@ -1031,13 +1073,13 @@ function LogExchangePane({
           <ShikiJsonBlock
             defaultWrapLines={wrapLines}
             filename={`${title.toLowerCase()}-headers.json`}
-            title="Headers"
+            title={messages.endpoints.trafficLogHeadersTitle}
             value={headers}
           />
           <ShikiJsonBlock
             defaultWrapLines={wrapLines}
             filename={`${title.toLowerCase()}-body.json`}
-            title="Body"
+            title={messages.endpoints.trafficLogBodyTitle}
             value={body}
           />
         </div>
@@ -1084,7 +1126,7 @@ function ShikiJsonBlock({
           className="ml-1 inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-2 py-1 font-medium text-[11px] text-slate-700 dark:border-[#344156] dark:bg-[#0b1020] dark:text-slate-200"
           htmlFor={`wrap-lines-${filename}`}
         >
-          <span>Wrap</span>
+          <span>{messages.endpoints.trafficLogWrapLabel}</span>
           <Switch
             checked={wrapLines}
             className="scale-75"

@@ -9,17 +9,18 @@ import {
 import type { ChartConfig } from "@/components/ui/chart";
 import { ChartContainer } from "@/components/ui/chart";
 import type { OverviewData } from "@/features/overview/types";
+import { messages } from "@/lib/i18n";
 
 const userStatusConfig = {
   count: {
-    label: "Users",
+    label: messages.overview.chartLabels.users,
   },
   active: {
-    label: "Active Users",
+    label: messages.overview.chartLabels.activeUsers,
     color: "var(--chart-2)",
   },
   inactive: {
-    label: "Inactive Users",
+    label: messages.overview.chartLabels.inactiveUsers,
     color: "var(--muted)",
   },
 } satisfies ChartConfig;
@@ -73,9 +74,11 @@ export function UserStatusChart({ data }: UserStatusChartProps) {
   return (
     <Card className="border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-1">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">Active Users</CardTitle>
+        <CardTitle className="text-base">
+          {messages.overview.activeUsersTitle}
+        </CardTitle>
         <CardDescription className="text-xs">
-          Current active user accounts
+          {messages.overview.currentActiveAccountsDescription}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex min-h-[260px] items-center justify-center pb-0">
@@ -115,7 +118,7 @@ export function UserStatusChart({ data }: UserStatusChartProps) {
                           x={viewBox.cx}
                           y={(viewBox.cy ?? 0) + 24}
                         >
-                          Active
+                          {messages.overview.chartLabels.active}
                         </tspan>
                       </text>
                     );

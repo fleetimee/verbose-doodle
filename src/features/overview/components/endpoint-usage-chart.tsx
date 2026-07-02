@@ -15,14 +15,15 @@ import {
 } from "@/components/ui/chart";
 import { endpointUsageConfig } from "@/features/overview/config/chart-configs";
 import { endpointUsageData } from "@/features/overview/data/overview-data";
+import { messages } from "@/lib/i18n";
 
 export function EndpointUsageChart() {
   return (
     <Card className="md:col-span-2 md:row-span-2">
       <CardHeader>
-        <CardTitle>Endpoint Usage Trend</CardTitle>
+        <CardTitle>{messages.overview.endpointUsageTrendTitle}</CardTitle>
         <CardDescription>
-          Total requests and successful responses over the last 6 months
+          {messages.overview.endpointUsageTrendDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -7,4 +7,5 @@ export const commonMessages = {
   save: "Save",
   delete: "Delete",
   deleting: "Deleting...",
+  unexpectedError: "An unexpected error occurred",
 } as const;
