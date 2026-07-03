@@ -1,6 +1,7 @@
 export const socksRelayMessages = {
   actionsHeader: "Actions",
   allRelaysLabel: "All relays",
+  aboutTab: "About",
   behaviorNotesTitle: "Behavior notes",
   clearButton: "Clear",
   codeHeader: "Code",
@@ -18,7 +19,6 @@ export const socksRelayMessages = {
   holdHostLabel: "Hold host",
   hostAddressLabel: "Host address",
   hostPortLabel: "Host port",
-  legendTab: "Legend",
   listenHeader: "Listen",
   listeningPortLabel: "Listening port",
   meaningHeader: "Meaning",

@@ -40,6 +40,7 @@ export type RelayEventPayload = {
   readonly data?: string;
   readonly hex?: string;
   readonly base64?: string;
+  readonly displayLine?: string;
   readonly message?: string;
   readonly listeningPort?: number;
   readonly hostAddress?: string;

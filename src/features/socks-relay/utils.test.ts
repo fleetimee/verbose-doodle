@@ -71,6 +71,7 @@ describe("socks relay events", () => {
           mode: "REST_API",
           flow: "RC",
           data: "hello",
+          displayLine: "2026-07-03 12:00:00 1200000000 RC hello",
         },
       }),
       "event-1"
@@ -79,6 +80,9 @@ describe("socks relay events", () => {
     expect(event?.id).toBe("event-1");
     expect(event?.type).toBe("relay_message");
     expect(event?.payload.flow).toBe("RC");
+    expect(event?.payload.displayLine).toBe(
+      "2026-07-03 12:00:00 1200000000 RC hello"
+    );
   });
 
   test("returns null for malformed events", () => {
