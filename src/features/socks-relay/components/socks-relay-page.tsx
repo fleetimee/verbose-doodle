@@ -73,6 +73,7 @@ import {
   isRelayMessageEvent,
   type RelayFormErrors,
   summarizeRelayOptions,
+  truncateMiddle,
   validateRelayStartInput,
 } from "@/features/socks-relay/utils";
 import { formatMessage, messages } from "@/lib/i18n";
@@ -118,43 +119,43 @@ const HOLD_DROP_CONTROLS: {
 const RELAY_FLOW_LEGEND = [
   {
     code: "RC",
-    meaning: "Received from Client",
-    note: "Relay received request/message from your caller.",
+    meaning: "Diterima dari Client",
+    note: "Relay menerima request/message dari pemanggil.",
   },
   {
     code: "SH",
-    meaning: "Send to Host",
-    note: "Relay forwarded the client message to the target host.",
+    meaning: "Dikirim ke Host",
+    note: "Relay meneruskan message client ke host tujuan.",
   },
   {
     code: "RH",
-    meaning: "Received from Host",
-    note: "Relay received the response/message from the target host.",
+    meaning: "Diterima dari Host",
+    note: "Relay menerima response/message dari host tujuan.",
   },
   {
     code: "SC",
-    meaning: "Send to Client",
-    note: "Relay returned the host response back to your caller.",
+    meaning: "Dikirim ke Client",
+    note: "Relay mengirim response dari host kembali ke pemanggil.",
   },
   {
     code: "HC",
-    meaning: "Hold on Client",
-    note: "Message is delayed when received by the relay from client side.",
+    meaning: "Hold di Client",
+    note: "Message ditahan saat diterima relay dari sisi client.",
   },
   {
     code: "HH",
-    meaning: "Hold on Host",
-    note: "Message is delayed after the host side response is received.",
+    meaning: "Hold di Host",
+    note: "Message ditahan setelah response dari sisi host diterima.",
   },
   {
     code: "DC",
-    meaning: "Drop on Client",
-    note: "Client-side message is dropped and not forwarded.",
+    meaning: "Drop di Client",
+    note: "Message dari sisi client didrop dan tidak diteruskan.",
   },
   {
     code: "DH",
-    meaning: "Drop on Host",
-    note: "Host-side message is dropped and not sent back.",
+    meaning: "Drop di Host",
+    note: "Message dari sisi host didrop dan tidak dikirim kembali.",
   },
 ] as const;
 
@@ -166,14 +167,14 @@ const RELAY_BEHAVIOR_NOTES = [
 ] as const;
 
 const RELAY_FLOW_TONES: Record<RelayFlow, string> = {
-  RC: "border-sky-400/40 bg-sky-400/15 text-sky-200",
-  SH: "border-indigo-400/40 bg-indigo-400/15 text-indigo-200",
-  RH: "border-emerald-400/40 bg-emerald-400/15 text-emerald-200",
-  SC: "border-teal-400/40 bg-teal-400/15 text-teal-200",
-  HC: "border-amber-400/45 bg-amber-400/15 text-amber-200",
-  HH: "border-orange-400/45 bg-orange-400/15 text-orange-200",
-  DC: "border-rose-400/45 bg-rose-400/15 text-rose-200",
-  DH: "border-red-400/45 bg-red-400/15 text-red-200",
+  RC: "border-sky-600/45 bg-sky-100 text-sky-800 dark:border-sky-400/40 dark:bg-sky-400/15 dark:text-sky-200",
+  SH: "border-indigo-600/45 bg-indigo-100 text-indigo-800 dark:border-indigo-400/40 dark:bg-indigo-400/15 dark:text-indigo-200",
+  RH: "border-emerald-600/45 bg-emerald-100 text-emerald-800 dark:border-emerald-400/40 dark:bg-emerald-400/15 dark:text-emerald-200",
+  SC: "border-teal-600/45 bg-teal-100 text-teal-800 dark:border-teal-400/40 dark:bg-teal-400/15 dark:text-teal-200",
+  HC: "border-amber-600/50 bg-amber-100 text-amber-900 dark:border-amber-400/45 dark:bg-amber-400/15 dark:text-amber-200",
+  HH: "border-orange-600/50 bg-orange-100 text-orange-900 dark:border-orange-400/45 dark:bg-orange-400/15 dark:text-orange-200",
+  DC: "border-rose-600/50 bg-rose-100 text-rose-800 dark:border-rose-400/45 dark:bg-rose-400/15 dark:text-rose-200",
+  DH: "border-red-600/50 bg-red-100 text-red-800 dark:border-red-400/45 dark:bg-red-400/15 dark:text-red-200",
 };
 
 const EMPTY_FORM: Omit<RelayStartInput, "mode"> = {
@@ -450,7 +451,7 @@ function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
   };
 
   return (
-    <Card className="rounded-lg border-border/70 py-5 shadow-sm">
+    <Card className="flex h-full flex-col rounded-lg border-border/70 py-5 shadow-sm">
       <CardHeader className="px-4 md:px-5">
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="grid size-8 place-items-center rounded-md border border-border/70 bg-background text-primary shadow-xs">
@@ -665,22 +666,58 @@ function RelayTable({
   const stopRelay = useStopRelay();
   const [editingRelay, setEditingRelay] = useState<RelayInstance | null>(null);
   let relayTableContent = (
-    <div className="h-56 animate-pulse rounded-lg border border-border/70 bg-muted/20" />
+    <div className="min-h-56 flex-1 animate-pulse rounded-lg border border-border/70 bg-muted/20" />
   );
 
   if (!isLoading && relays.length === 0) {
     relayTableContent = (
-      <div className="grid min-h-56 place-items-center rounded-lg border border-border/70 border-dashed bg-muted/20 p-6 text-center">
-        <div className="flex max-w-sm flex-col items-center gap-2">
-          <span className="grid size-10 place-items-center rounded-md border border-border/70 bg-background text-muted-foreground shadow-xs">
-            <CircleOff className="size-5" />
+      <div className="overflow-hidden rounded-lg border border-border/70 bg-[linear-gradient(135deg,hsl(var(--muted)/0.42),hsl(var(--background))_58%)]">
+        <div className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+          <div className="flex min-w-0 gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-md border border-primary/25 bg-primary/10 text-primary shadow-xs">
+              <CircleOff className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="font-semibold text-foreground">
+                {formatMessage(messages.socksRelay.noRelaysTitle, {
+                  modeLabel,
+                })}
+              </p>
+              <p className="mt-1 max-w-[56ch] text-muted-foreground text-sm">
+                {messages.socksRelay.noRelaysDescription}
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 overflow-hidden rounded-md border border-border/70 bg-background/80 text-center shadow-xs sm:w-[310px]">
+            <div className="grid gap-1 border-border/70 border-r px-3 py-2">
+              <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
+                {messages.socksRelay.noRelayDefaultListenLabel}
+              </span>
+              <span className="font-mono font-semibold text-sm">8090</span>
+            </div>
+            <div className="grid gap-1 border-border/70 border-r px-3 py-2">
+              <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
+                {messages.socksRelay.noRelayDefaultHostLabel}
+              </span>
+              <span className="truncate font-mono font-semibold text-sm">
+                127.0.0.1
+              </span>
+            </div>
+            <div className="grid gap-1 px-3 py-2">
+              <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
+                {messages.socksRelay.noRelayDefaultPortLabel}
+              </span>
+              <span className="font-mono font-semibold text-sm">8085</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 border-border/70 border-t bg-background/50 px-4 py-2.5 text-muted-foreground text-xs">
+          <Play className="size-3.5 text-primary" />
+          <span>
+            {formatMessage(messages.socksRelay.noRelaysReadyHint, {
+              modeLabel,
+            })}
           </span>
-          <p className="font-medium">
-            {formatMessage(messages.socksRelay.noRelaysTitle, { modeLabel })}
-          </p>
-          <p className="text-muted-foreground text-sm">
-            {messages.socksRelay.noRelaysDescription}
-          </p>
         </div>
       </div>
     );
@@ -688,8 +725,16 @@ function RelayTable({
 
   if (!isLoading && relays.length > 0) {
     relayTableContent = (
-      <div className="overflow-hidden rounded-lg border border-border/70">
-        <Table>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border/70">
+        <Table className="w-full table-fixed">
+          <colgroup>
+            <col className="w-[30%]" />
+            <col className="w-[72px]" />
+            <col className="w-[20%]" />
+            <col className="w-[16%]" />
+            <col className="w-[112px]" />
+            <col className="w-[92px]" />
+          </colgroup>
           <TableHeader>
             <TableRow className="bg-muted/30">
               <TableHead>{messages.socksRelay.relayHeader}</TableHead>
@@ -702,70 +747,89 @@ function RelayTable({
               </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {relays.map((relay) => (
-              <TableRow
-                data-state={
-                  relay.relayId === selectedRelayId ? "selected" : undefined
-                }
-                key={relay.relayId}
-              >
-                <TableCell>
-                  <button
-                    className="font-mono text-foreground text-sm underline-offset-4 hover:underline"
-                    onClick={() => onSelect(relay.relayId)}
-                    type="button"
-                  >
-                    {relay.relayId}
-                  </button>
-                </TableCell>
-                <TableCell>{relay.listeningPort}</TableCell>
-                <TableCell className="font-mono text-xs">
-                  {relay.hostAddress}:{relay.hostPort}
-                </TableCell>
-                <TableCell className="max-w-[320px] truncate text-muted-foreground text-xs">
-                  {summarizeRelayOptions(relay.options)}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={relay.running ? "default" : "secondary"}>
-                    {relay.running ? "Running" : "Stopped"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      aria-label={`Edit ${relay.relayId} options`}
-                      className="size-8"
-                      onClick={() => setEditingRelay(relay)}
-                      size="icon"
-                      type="button"
-                      variant="outline"
-                    >
-                      <Pencil className="size-4" />
-                    </Button>
-                    <Button
-                      aria-label={`Stop ${relay.relayId}`}
-                      className="size-8"
-                      disabled={stopRelay.isPending}
-                      onClick={() => stopRelay.mutate(relay.relayId)}
-                      size="icon"
-                      type="button"
-                      variant="destructive"
-                    >
-                      <Square className="size-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
         </Table>
+        <ScrollArea
+          className="min-h-0 flex-1 border-border/70 border-t pr-3"
+        >
+          <Table className="w-full table-fixed">
+            <colgroup>
+              <col className="w-[30%]" />
+              <col className="w-[72px]" />
+              <col className="w-[20%]" />
+              <col className="w-[16%]" />
+              <col className="w-[112px]" />
+              <col className="w-[92px]" />
+            </colgroup>
+            <TableBody>
+              {relays.map((relay) => (
+                <TableRow
+                  data-state={
+                    relay.relayId === selectedRelayId ? "selected" : undefined
+                  }
+                  key={relay.relayId}
+                >
+                  <TableCell className="min-w-0">
+                    <button
+                      aria-label={`Select relay ${relay.relayId}`}
+                      className="block max-w-full whitespace-nowrap font-mono text-foreground text-sm underline-offset-4 hover:underline"
+                      onClick={() => onSelect(relay.relayId)}
+                      title={relay.relayId}
+                      type="button"
+                    >
+                      {truncateMiddle(relay.relayId)}
+                    </button>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {relay.listeningPort}
+                  </TableCell>
+                  <TableCell className="truncate font-mono text-xs">
+                    {relay.hostAddress}:{relay.hostPort}
+                  </TableCell>
+                  <TableCell className="max-w-[320px] truncate text-muted-foreground text-xs">
+                    {summarizeRelayOptions(relay.options)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={relay.running ? "default" : "secondary"}>
+                      {relay.running ? "Running" : "Stopped"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        aria-label={`Edit ${relay.relayId} options`}
+                        className="size-8"
+                        onClick={() => setEditingRelay(relay)}
+                        size="icon"
+                        type="button"
+                        variant="outline"
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                      <Button
+                        aria-label={`Stop ${relay.relayId}`}
+                        className="size-8"
+                        disabled={stopRelay.isPending}
+                        onClick={() => stopRelay.mutate(relay.relayId)}
+                        size="icon"
+                        type="button"
+                        variant="destructive"
+                      >
+                        <Square className="size-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <ScrollBar orientation="vertical" />
+        </ScrollArea>
       </div>
     );
   }
 
   return (
-    <Card className="min-w-0 rounded-lg border-border/70 py-5 shadow-sm">
+    <Card className="flex h-full min-w-0 flex-col rounded-lg border-border/70 py-5 shadow-sm">
       <CardHeader className="px-4 md:px-5">
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="grid size-8 place-items-center rounded-md border border-border/70 bg-background text-primary shadow-xs">
@@ -779,7 +843,9 @@ function RelayTable({
           })}
         </CardDescription>
       </CardHeader>
-      <CardContent className="px-4 md:px-5">{relayTableContent}</CardContent>
+      <CardContent className="flex min-h-0 flex-1 flex-col px-4 md:px-5">
+        {relayTableContent}
+      </CardContent>
       <RelayOptionsDialog
         onOpenChange={(open) => {
           if (!open) {

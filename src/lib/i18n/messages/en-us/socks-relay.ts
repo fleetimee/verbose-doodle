@@ -24,9 +24,13 @@ export const socksRelayMessages = {
   meaningHeader: "Meaning",
   messageTab: "Message",
   noLifecycleEvents: "No lifecycle or error events yet.",
+  noRelayDefaultHostLabel: "Host",
+  noRelayDefaultListenLabel: "Listen",
+  noRelayDefaultPortLabel: "Port",
   noRelayMessages: "No relay messages yet.",
   noRelaysDescription:
     "Start an instance to see it here and focus its live logs.",
+  noRelaysReadyHint: "Ready for the first {modeLabel} relay.",
   noRelaysTitle: "No {modeLabel} relays",
   noteHeader: "Note",
   optionsHeader: "Options",

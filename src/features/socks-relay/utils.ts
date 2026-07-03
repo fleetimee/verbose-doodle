@@ -85,6 +85,14 @@ export function summarizeRelayOptions(options: RelayOptions): string {
   return active.join(" / ");
 }
 
+export function truncateMiddle(value: string, head = 8, tail = 8): string {
+  if (value.length <= head + tail) {
+    return value;
+  }
+
+  return `${value.slice(0, head)}....${value.slice(-tail)}`;
+}
+
 export function isRelayMessageEvent(event: RelayEvent): boolean {
   return event.type === "relay_message";
 }

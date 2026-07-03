@@ -3,6 +3,7 @@ import type { RelayStartInput } from "@/features/socks-relay/types";
 import {
   buildRelayWebSocketUrl,
   parseRelayEvent,
+  truncateMiddle,
   validateRelayStartInput,
 } from "@/features/socks-relay/utils";
 
@@ -90,6 +91,18 @@ describe("socks relay events", () => {
     expect(
       parseRelayEvent(JSON.stringify({ type: "relay_message" }), "event-2")
     ).toBeNull();
+  });
+});
+
+describe("socks relay formatting", () => {
+  test("truncates long relay IDs in the middle", () => {
+    expect(truncateMiddle("rest-mr4fof1d-827ad700")).toBe(
+      "rest-mr4....827ad700"
+    );
+  });
+
+  test("keeps short relay IDs unchanged", () => {
+    expect(truncateMiddle("relay-1")).toBe("relay-1");
   });
 });
 
