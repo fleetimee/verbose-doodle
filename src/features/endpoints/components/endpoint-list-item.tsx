@@ -46,55 +46,55 @@ export function EndpointListItem({
 
   return (
     <Item
-      asChild
       className={cn(
         "relative w-full cursor-pointer overflow-hidden rounded-lg border border-border/40 bg-card/80 p-0 transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:border-primary/25 hover:bg-accent/40 hover:shadow-sm active:scale-[0.995]",
         "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/45"
       )}
+      render={
+        <button
+          className="w-full text-left"
+          id={tourId}
+          onClick={handleClick}
+          onMouseEnter={handleMouseEnter}
+          type="button"
+        />
+      }
       size="default"
       variant="default"
     >
-      <button
-        className="w-full text-left"
-        id={tourId}
-        onClick={handleClick}
-        onMouseEnter={handleMouseEnter}
-        type="button"
-      >
-        <span
-          aria-hidden="true"
-          className={cn(
-            "absolute inset-y-0 left-0 w-1",
-            methodColors.bg,
-            methodColors.border
-          )}
-        />
-        <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-3 pr-4 pl-5">
-          <ItemContent className="min-w-0 gap-2">
-            <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-              <HttpMethodBadge
-                className="min-w-14 justify-center font-mono"
-                method={endpoint.method}
-                variant="badge"
-              />
-              <ItemTitle className="min-w-0">
-                <EndpointPathTitle path={endpoint.url} />
-              </ItemTitle>
-            </div>
-            <ItemDescription className="text-left">
-              <EndpointMetaStrip
-                billerId={endpoint.billerId}
-                responseCount={endpoint.responses.length}
-              />
-            </ItemDescription>
-          </ItemContent>
-          <ItemActions>
-            <span className="flex size-8 items-center justify-center rounded-md border border-transparent text-muted-foreground transition-[border-color,background-color,color,transform] duration-150 ease-out group-hover/item:translate-x-0.5 group-hover/item:border-border group-hover/item:bg-background/80 group-hover/item:text-foreground">
-              <ChevronRight className="size-4" />
-            </span>
-          </ItemActions>
-        </div>
-      </button>
+      <span
+        aria-hidden="true"
+        className={cn(
+          "absolute inset-y-0 left-0 w-1",
+          methodColors.bg,
+          methodColors.border
+        )}
+      />
+      <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-3 pr-4 pl-5">
+        <ItemContent className="min-w-0 gap-2">
+          <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+            <HttpMethodBadge
+              className="min-w-14 justify-center font-mono"
+              method={endpoint.method}
+              variant="badge"
+            />
+            <ItemTitle className="min-w-0">
+              <EndpointPathTitle path={endpoint.url} />
+            </ItemTitle>
+          </div>
+          <ItemDescription className="text-left">
+            <EndpointMetaStrip
+              billerId={endpoint.billerId}
+              responseCount={endpoint.responses.length}
+            />
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
+          <span className="flex size-8 items-center justify-center rounded-md border border-transparent text-muted-foreground transition-[border-color,background-color,color,transform] duration-150 ease-out group-hover/item:translate-x-0.5 group-hover/item:border-border group-hover/item:bg-background/80 group-hover/item:text-foreground">
+            <ChevronRight className="size-4" />
+          </span>
+        </ItemActions>
+      </div>
     </Item>
   );
 }

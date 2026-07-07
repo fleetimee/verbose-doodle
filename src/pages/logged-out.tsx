@@ -111,11 +111,13 @@ export function LoggedOut() {
                 <span>{messages.auth.demoLoginPaused}</span>
               </div>
             </div>
-            <Button asChild className="w-full">
-              <Link onClick={clearManualLogout} to="/login">
-                <LogInIcon data-icon="inline-start" />
-                {messages.auth.loginAgain}
-              </Link>
+            <Button
+              className="w-full"
+              nativeButton={false}
+              render={<Link onClick={clearManualLogout} to="/login" />}
+            >
+              <LogInIcon data-icon="inline-start" />
+              {messages.auth.loginAgain}
             </Button>
           </CardContent>
         </Card>

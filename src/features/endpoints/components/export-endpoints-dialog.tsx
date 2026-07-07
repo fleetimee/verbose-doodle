@@ -380,8 +380,9 @@ export function ExportEndpointsDialog({
               <div className="flex items-center justify-between gap-3 border-b px-3 py-2">
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    checked={checkboxState}
+                    checked={checkboxState === true}
                     id="select-all"
+                    indeterminate={checkboxState === "indeterminate"}
                     onCheckedChange={handleToggleAll}
                   />
                   <Label className="font-medium text-sm" htmlFor="select-all">

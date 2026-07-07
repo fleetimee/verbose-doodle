@@ -25,9 +25,11 @@ export function EndpointsSearchControls({
     onSearchChange?.(event.target.value);
   };
 
-  const handleViewModeChange = (value: string) => {
-    if (value === "grid" || value === "list") {
-      onViewModeChange?.(value);
+  const handleViewModeChange = (value: string[]) => {
+    const nextValue = value[0];
+
+    if (nextValue === "grid" || nextValue === "list") {
+      onViewModeChange?.(nextValue);
     }
   };
 
@@ -46,8 +48,7 @@ export function EndpointsSearchControls({
           aria-label={messages.endpoints.viewAriaLabel}
           id={viewModeId}
           onValueChange={handleViewModeChange}
-          type="single"
-          value={viewMode}
+          value={[viewMode]}
           variant="outline"
         >
           <ToggleGroupItem

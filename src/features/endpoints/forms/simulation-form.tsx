@@ -107,7 +107,7 @@ export const SimulationForm = forwardRef<
                     </FieldDescription>
                     <Choicebox
                       className="gap-4"
-                      onValueChange={(value) => {
+                      onValueChange={(value: unknown) => {
                         field.onChange(value as SimulationFormValues["type"]);
                       }}
                       value={field.value}

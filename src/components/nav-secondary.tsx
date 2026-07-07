@@ -35,15 +35,13 @@ export function NavSecondary({
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
-                  asChild
                   className="rounded-lg text-sidebar-foreground/75"
                   isActive={isActive}
+                  render={<Link onMouseEnter={item.onPrefetch} to={item.url} />}
                   size="sm"
                 >
-                  <Link onMouseEnter={item.onPrefetch} to={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </Link>
+                  <item.icon />
+                  <span>{item.title}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );

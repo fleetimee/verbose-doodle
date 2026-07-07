@@ -28,16 +28,16 @@ export function NotFoundPage() {
             </EmptyHeader>
             <EmptyContent>
               <div className="flex gap-2">
-                <Button asChild>
-                  <Link to="/">
-                    <Home /> {messages.common.goHome}
-                  </Link>
+                <Button nativeButton={false} render={<Link to="/" />}>
+                  <Home /> {messages.common.goHome}
                 </Button>
 
-                <Button asChild variant="outline">
-                  <Link to="/dashboard">
-                    <Compass /> {messages.common.explore}
-                  </Link>
+                <Button
+                  nativeButton={false}
+                  render={<Link to="/dashboard" />}
+                  variant="outline"
+                >
+                  <Compass /> {messages.common.explore}
                 </Button>
               </div>
             </EmptyContent>

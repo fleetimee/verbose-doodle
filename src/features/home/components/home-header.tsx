@@ -8,8 +8,12 @@ export function HomeHeader() {
       <h1 className="font-semibold text-3xl tracking-tight">Fleetime Labs</h1>
       <div className="flex items-center gap-2">
         <ModeToggle />
-        <Button asChild variant="link">
-          <Link to="/about">About</Link>
+        <Button
+          nativeButton={false}
+          render={<Link to="/about" />}
+          variant="link"
+        >
+          About
         </Button>
       </div>
     </header>

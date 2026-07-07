@@ -1,8 +1,8 @@
 "use client";
 
+import { useControlled } from "@base-ui/utils/useControlled";
 import { Moon, Sun } from "lucide-react";
 import { motion } from "motion/react";
-import { useControllableState } from "radix-ui/internal";
 import { useCallback, useEffect, useState } from "react";
 import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -36,12 +36,20 @@ export const ThemeSwitcher = ({
   defaultValue = "light",
   className,
 }: ThemeSwitcherProps) => {
-  const [theme, setTheme] = useControllableState({
-    defaultProp: defaultValue,
-    prop: value,
-    onChange,
+  const [theme, setThemeState] = useControlled({
+    controlled: value,
+    default: defaultValue,
+    name: "ThemeSwitcher",
   });
   const [mounted, setMounted] = useState(false);
+
+  const setTheme = useCallback(
+    (themeKey: "light" | "dark") => {
+      setThemeState(themeKey);
+      onChange?.(themeKey);
+    },
+    [onChange, setThemeState]
+  );
 
   const handleThemeClick = useCallback(
     (themeKey: "light" | "dark") => {

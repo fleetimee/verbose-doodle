@@ -22,8 +22,8 @@ export function AboutPage() {
         initial={{ opacity: 0, y: 30 }}
         transition={{ duration: 0.5, delay: 1.3 }}
       >
-        <Button asChild variant="link">
-          <Link to="/">{messages.about.returnHome}</Link>
+        <Button nativeButton={false} render={<Link to="/" />} variant="link">
+          {messages.about.returnHome}
         </Button>
       </motion.div>
     </motion.main>

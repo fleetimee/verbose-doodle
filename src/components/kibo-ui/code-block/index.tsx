@@ -1,8 +1,8 @@
 "use client";
 
+import { useControlled } from "@base-ui/utils/useControlled";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { motion } from "motion/react";
-import { useControllableState } from "radix-ui/internal";
 import type {
   ComponentProps,
   HTMLAttributes,
@@ -12,6 +12,7 @@ import type {
 import {
   cloneElement,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -347,11 +348,18 @@ export const CodeBlock = ({
   storageKey = "codeblock-themes",
   ...props
 }: CodeBlockProps) => {
-  const [value, onValueChange] = useControllableState({
-    defaultProp: defaultValue ?? "",
-    prop: controlledValue,
-    onChange: controlledOnValueChange,
+  const [value, setValue] = useControlled({
+    controlled: controlledValue,
+    default: defaultValue ?? "",
+    name: "CodeBlock",
   });
+  const onValueChange = useCallback(
+    (nextValue: string) => {
+      setValue(nextValue);
+      controlledOnValueChange?.(nextValue);
+    },
+    [controlledOnValueChange, setValue]
+  );
 
   // Initialize themes from localStorage if available
   const [lightTheme, setLightThemeState] = useState(() => {
@@ -535,6 +543,7 @@ export const CodeBlockSelectItem = ({
 );
 
 export type CodeBlockCopyButtonProps = ComponentProps<typeof Button> & {
+  asChild?: boolean;
   onCopy?: () => void;
   onError?: (error: Error) => void;
   text?: string;

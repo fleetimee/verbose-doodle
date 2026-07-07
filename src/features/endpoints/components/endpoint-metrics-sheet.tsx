@@ -146,9 +146,11 @@ export function EndpointMetricsSheet({
     [data?.items, timeWindow]
   );
 
-  const handleTimeWindowChange = (value: string) => {
-    if (value) {
-      setTimeWindow(value as EndpointMetricsTimeWindow);
+  const handleTimeWindowChange = (value: string[]) => {
+    const nextValue = value[0];
+
+    if (nextValue) {
+      setTimeWindow(nextValue as EndpointMetricsTimeWindow);
     }
   };
 
@@ -208,8 +210,7 @@ export function EndpointMetricsSheet({
                 className="rounded-lg border bg-muted/40 p-1"
                 onValueChange={handleTimeWindowChange}
                 spacing={1}
-                type="single"
-                value={timeWindow}
+                value={[timeWindow]}
               >
                 {Object.entries(TIME_WINDOW_LABELS).map(([value, label]) => (
                   <ToggleGroupItem
@@ -217,7 +218,7 @@ export function EndpointMetricsSheet({
                       messages.endpoints.metrics.timeWindowItemAriaLabel,
                       { label }
                     )}
-                    className="data-[state=on]:bg-background data-[state=on]:shadow-xs"
+                    className="data-pressed:bg-background data-pressed:shadow-xs"
                     key={value}
                     size="sm"
                     value={value}

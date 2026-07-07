@@ -92,10 +92,7 @@ export function StatusCodeCombobox({
           <ChevronsUpDown className="ml-2 h-6 w-6 shrink-0 opacity-50 md:h-8 md:w-8" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className="w-[var(--radix-popover-trigger-width)] p-0"
-      >
+      <PopoverContent align="start" className="w-[var(--anchor-width)] p-0">
         <Command>
           <CommandInput placeholder={messages.endpoints.searchStatusCodes} />
           <CommandList>

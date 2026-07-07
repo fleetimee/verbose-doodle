@@ -169,8 +169,8 @@ function DashboardBreadcrumbContent({
 
   if (item.isNavigable) {
     return (
-      <BreadcrumbLink asChild>
-        <Link to={item.href}>{item.label}</Link>
+      <BreadcrumbLink render={<Link to={item.href} />}>
+        {item.label}
       </BreadcrumbLink>
     );
   }

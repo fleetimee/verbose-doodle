@@ -31,9 +31,10 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
     header: ({ table: tableInstance }) => (
       <Checkbox
         aria-label={messages.users.selectAllAriaLabel}
-        checked={
-          tableInstance.getIsAllPageRowsSelected() ||
-          (tableInstance.getIsSomePageRowsSelected() && "indeterminate")
+        checked={tableInstance.getIsAllPageRowsSelected()}
+        indeterminate={
+          !tableInstance.getIsAllPageRowsSelected() &&
+          tableInstance.getIsSomePageRowsSelected()
         }
         onCheckedChange={(value) =>
           tableInstance.toggleAllPageRowsSelected(!!value)

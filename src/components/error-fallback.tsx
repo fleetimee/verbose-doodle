@@ -46,10 +46,16 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                   <RotateCcw /> {messages.common.tryAgain}
                 </Button>
 
-                <Button asChild variant="outline">
-                  <a href="/">
-                    <Home /> {messages.common.goHome}
-                  </a>
+                <Button
+                  nativeButton={false}
+                  render={
+                    <a href="/">
+                      <span className="sr-only">{messages.common.goHome}</span>
+                    </a>
+                  }
+                  variant="outline"
+                >
+                  <Home /> {messages.common.goHome}
                 </Button>
               </div>
             </EmptyContent>

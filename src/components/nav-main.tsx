@@ -58,15 +58,15 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
               return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
-                    asChild
                     className="h-9 rounded-lg data-[active=true]:shadow-xs"
                     isActive={isActive}
+                    render={
+                      <Link onMouseEnter={item.onPrefetch} to={item.url} />
+                    }
                     tooltip={item.title}
                   >
-                    <Link onMouseEnter={item.onPrefetch} to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
+                    <item.icon />
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                   {item.badge ? (
                     <SidebarMenuBadge className="text-sidebar-foreground/55">
