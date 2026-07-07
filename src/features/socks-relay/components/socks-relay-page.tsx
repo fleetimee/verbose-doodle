@@ -748,9 +748,7 @@ function RelayTable({
             </TableRow>
           </TableHeader>
         </Table>
-        <ScrollArea
-          className="min-h-0 flex-1 border-border/70 border-t pr-3"
-        >
+        <ScrollArea className="min-h-0 flex-1 border-border/70 border-t pr-3">
           <Table className="w-full table-fixed">
             <colgroup>
               <col className="w-[30%]" />

@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  BarChart3,
   Check,
   Circle,
   CircleHelp,
@@ -53,6 +54,7 @@ import { useAuth } from "@/features/auth/context";
 import { usePermissions } from "@/features/auth/hooks/use-permissions";
 import { EndpointDetailLayout } from "@/features/endpoints/components/endpoint-detail-layout";
 import { EndpointDetailSkeleton } from "@/features/endpoints/components/endpoint-detail-skeleton";
+import { EndpointMetricsSheet } from "@/features/endpoints/components/endpoint-metrics-sheet";
 import { EndpointTrafficLogViewer } from "@/features/endpoints/components/endpoint-traffic-log-viewer";
 import { ResponseStepper } from "@/features/endpoints/components/response-stepper";
 import { useActivateResponse } from "@/features/endpoints/hooks/use-activate-response";
@@ -130,6 +132,7 @@ export function EndpointDetailPage() {
     null
   );
   const [isStepperOpen, setIsStepperOpen] = useState(false);
+  const [isMetricsOpen, setIsMetricsOpen] = useState(false);
   const [isEditingUrl, setIsEditingUrl] = useState(false);
   const [editedUrl, setEditedUrl] = useState("");
   const [editedMethod, setEditedMethod] = useState<HttpMethod>("GET");
@@ -834,6 +837,15 @@ export function EndpointDetailPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button
+            onClick={() => setIsMetricsOpen(true)}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            <BarChart3 data-icon="inline-start" />
+            {messages.endpoints.metrics.button}
+          </Button>
+          <Button
             onClick={handleStartTour}
             size="sm"
             type="button"
@@ -909,6 +921,13 @@ export function EndpointDetailPage() {
           />
         )}
       </AnimatePresence>
+
+      <EndpointMetricsSheet
+        endpointId={endpoint.id}
+        endpointLabel={`${endpoint.method} ${endpoint.url}`}
+        onOpenChange={setIsMetricsOpen}
+        open={isMetricsOpen}
+      />
 
       <AlertDialog
         onOpenChange={setShowDeleteEndpointDialog}

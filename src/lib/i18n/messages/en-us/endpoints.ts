@@ -99,6 +99,97 @@ export const endpointsMessages = {
     matchedTimeout: "Timeout",
     unmatchedEndpoint: "Unmatched",
   },
+  metrics: {
+    button: "Metrics",
+    title: "Endpoint metrics",
+    description: "Metrics for {endpointLabel}",
+    timeWindowAriaLabel: "Metrics time window",
+    timeWindowItemAriaLabel: "{label} metrics window",
+    refreshButton: "Refresh",
+    loadErrorTitle: "Unable to load metrics",
+    emptyTitle: "No traffic in this window",
+    emptyDescription:
+      "Recent requests will appear here as soon as this endpoint is hit.",
+    liveWindowLabel: "Live traffic window",
+    requestHealthLabel: "Request health",
+    healthDescription:
+      "{requests} requests sampled from the last {window}, averaging {average} with p95 at {p95}.",
+    timeWindows: {
+      "5m": "5m",
+      "15m": "15m",
+      "1h": "1h",
+    },
+    miniStats: {
+      throughput: "Throughput",
+      slowestRequest: "Slowest request",
+      lastSeen: "Last seen",
+    },
+    statusMix: {
+      title: "Status mix",
+      description: "Non-success traffic by category.",
+      clean: "{count} clean",
+      delayed: "{count} delayed",
+      nonSuccess: "{count} non-success",
+    },
+    statusRows: {
+      delayed: "Delayed",
+      timeouts: "Timeouts",
+      unmatched: "Unmatched",
+      backendErrors: "Backend errors",
+    },
+    cards: {
+      requests: {
+        label: "Requests",
+        description: "Filtered traffic logs",
+      },
+      successRate: {
+        label: "Success rate",
+        description: "{count} successful",
+      },
+      errorRate: {
+        label: "Error rate",
+        description: "{count} non-success",
+      },
+      average: {
+        label: "Average",
+        description: "Mean latency",
+      },
+      p50: {
+        label: "p50 latency",
+        description: "Median latency",
+      },
+      p95: {
+        label: "p95 latency",
+        description: "Slowest 5 percent",
+      },
+      p99: {
+        label: "p99 latency",
+        description: "Slowest 1 percent",
+      },
+      minMax: {
+        label: "Min / max",
+        description: "Range {min} to {max}",
+      },
+    },
+    charts: {
+      latencyTitle: "Latency trend",
+      latencyDescription: "Average and percentile response time by bucket.",
+      volumeTitle: "Request volume",
+      volumeDescription: "Request, success, and error counts by bucket.",
+      avgLabel: "Avg",
+      p50Label: "p50",
+      p95Label: "p95",
+      p99Label: "p99",
+      requestsLabel: "Requests",
+      successesLabel: "Success",
+      errorsLabel: "Errors",
+    },
+    relative: {
+      secondsAgo: "{count}s ago",
+      minutesAgo: "{count}m ago",
+      hoursAgo: "{count}h ago",
+    },
+  },
   addEndpoint: "Add Endpoint",
   addEndpointDescription: "Create a new API endpoint for a specific biller ID.",
   saveEndpointTooltip: "Save endpoint changes",
