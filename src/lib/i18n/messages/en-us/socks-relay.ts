@@ -1,6 +1,7 @@
 export const socksRelayMessages = {
   actionsHeader: "Actions",
   allRelaysLabel: "All relays",
+  appliesToNewTrafficLabel: "Applies to new traffic",
   aboutTab: "About",
   behaviorNotesTitle: "Behavior notes",
   clearButton: "Clear",
@@ -21,6 +22,12 @@ export const socksRelayMessages = {
   hostPortLabel: "Host port",
   listenHeader: "Listen",
   listeningPortLabel: "Listening port",
+  liveControlsDescription:
+    "{relayId} runtime options update immediately for new messages.",
+  liveControlsEmptyDescription:
+    "Start or select a relay to tune hold, drop, headers, and timer behavior.",
+  liveControlsTitle: "Live controls",
+  liveTimerHint: "Blur or press Enter to apply.",
   meaningHeader: "Meaning",
   messageTab: "Message",
   noLifecycleEvents: "No lifecycle or error events yet.",

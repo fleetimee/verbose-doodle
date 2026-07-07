@@ -8,10 +8,10 @@ import {
   FileTerminal,
   ListFilter,
   Network,
-  Pencil,
   Play,
   Radio,
   ShieldAlert,
+  SlidersHorizontal,
   Square,
   TimerReset,
 } from "lucide-react";
@@ -28,17 +28,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -348,6 +348,7 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
           modeLabel={modeLabel}
           onSelect={setSelectedRelayId}
           relays={relays}
+          selectedRelay={selectedRelay}
           selectedRelayId={focusedRelayId}
         />
       </motion.div>
@@ -582,10 +583,12 @@ function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
 }
 
 function RelayOptionsControls({
+  disabled = false,
   onHoldDropChange,
   onRemoveHeadersChange,
   options,
 }: {
+  readonly disabled?: boolean;
   readonly onHoldDropChange: (key: HoldDropKey, checked: boolean) => void;
   readonly onRemoveHeadersChange: (checked: boolean) => void;
   readonly options: RelayOptions;
@@ -596,6 +599,7 @@ function RelayOptionsControls({
         {HOLD_DROP_CONTROLS.map((control) => (
           <SwitchRow
             checked={options[control.key]}
+            disabled={disabled}
             key={control.key}
             label={control.label}
             onCheckedChange={(checked) =>
@@ -607,6 +611,7 @@ function RelayOptionsControls({
       </div>
       <SwitchRow
         checked={options.removeHeaders}
+        disabled={disabled}
         label={messages.socksRelay.removeHeadersLabel}
         onCheckedChange={onRemoveHeadersChange}
         shortLabel="REST"
@@ -617,11 +622,13 @@ function RelayOptionsControls({
 
 function SwitchRow({
   checked,
+  disabled = false,
   label,
   onCheckedChange,
   shortLabel,
 }: {
   readonly checked: boolean;
+  readonly disabled?: boolean;
   readonly label: string;
   readonly onCheckedChange: (checked: boolean) => void;
   readonly shortLabel: string;
@@ -643,6 +650,7 @@ function SwitchRow({
       <Switch
         checked={checked}
         className="shrink-0"
+        disabled={disabled}
         id={switchId}
         onCheckedChange={onCheckedChange}
       />
@@ -655,16 +663,17 @@ function RelayTable({
   modeLabel,
   onSelect,
   relays,
+  selectedRelay,
   selectedRelayId,
 }: {
   readonly isLoading: boolean;
   readonly modeLabel: string;
   readonly onSelect: (relayId: string) => void;
   readonly relays: RelayInstance[];
+  readonly selectedRelay?: RelayInstance;
   readonly selectedRelayId: string | null;
 }) {
   const stopRelay = useStopRelay();
-  const [editingRelay, setEditingRelay] = useState<RelayInstance | null>(null);
   let relayTableContent = (
     <div className="min-h-56 flex-1 animate-pulse rounded-lg border border-border/70 bg-muted/20" />
   );
@@ -794,16 +803,6 @@ function RelayTable({
                   <TableCell>
                     <div className="flex justify-end gap-2">
                       <Button
-                        aria-label={`Edit ${relay.relayId} options`}
-                        className="size-8"
-                        onClick={() => setEditingRelay(relay)}
-                        size="icon"
-                        type="button"
-                        variant="outline"
-                      >
-                        <Pencil className="size-4" />
-                      </Button>
-                      <Button
                         aria-label={`Stop ${relay.relayId}`}
                         className="size-8"
                         disabled={stopRelay.isPending}
@@ -828,41 +827,32 @@ function RelayTable({
 
   return (
     <Card className="flex h-full min-w-0 flex-col rounded-lg border-border/70 py-5 shadow-sm">
-      <CardHeader className="px-4 md:px-5">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <span className="grid size-8 place-items-center rounded-md border border-border/70 bg-background text-primary shadow-xs">
-            <Cable className="size-4" />
-          </span>
-          {messages.socksRelay.relayInstancesTitle}
-        </CardTitle>
-        <CardDescription>
-          {formatMessage(messages.socksRelay.relayInstancesDescription, {
-            modeLabel,
-          })}
-        </CardDescription>
+      <CardHeader className="gap-3 px-4 md:grid-cols-[minmax(0,1fr)_auto] md:px-5">
+        <div>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <span className="grid size-8 place-items-center rounded-md border border-border/70 bg-background text-primary shadow-xs">
+              <Cable className="size-4" />
+            </span>
+            {messages.socksRelay.relayInstancesTitle}
+          </CardTitle>
+          <CardDescription>
+            {formatMessage(messages.socksRelay.relayInstancesDescription, {
+              modeLabel,
+            })}
+          </CardDescription>
+        </div>
+        <div className="flex items-start md:justify-end">
+          <RelayLiveControls relay={selectedRelay} />
+        </div>
       </CardHeader>
       <CardContent className="flex min-h-0 flex-1 flex-col px-4 md:px-5">
         {relayTableContent}
       </CardContent>
-      <RelayOptionsDialog
-        onOpenChange={(open) => {
-          if (!open) {
-            setEditingRelay(null);
-          }
-        }}
-        relay={editingRelay}
-      />
     </Card>
   );
 }
 
-function RelayOptionsDialog({
-  onOpenChange,
-  relay,
-}: {
-  readonly onOpenChange: (open: boolean) => void;
-  readonly relay: RelayInstance | null;
-}) {
+function RelayLiveControls({ relay }: { readonly relay?: RelayInstance }) {
   const updateOptions = useUpdateRelayOptions();
   const [options, setOptions] = useState<RelayOptions>(
     relay?.options ?? DEFAULT_RELAY_OPTIONS
@@ -874,84 +864,135 @@ function RelayOptionsDialog({
     }
   }, [relay]);
 
+  const applyOptions = (nextOptions: RelayOptions) => {
+    if (!relay) {
+      return;
+    }
+
+    const safeNextOptions = {
+      ...nextOptions,
+      timerMs:
+        Number.isInteger(nextOptions.timerMs) && nextOptions.timerMs >= 1000
+          ? nextOptions.timerMs
+          : relay.options.timerMs,
+    };
+    const previousOptions = options;
+    setOptions(safeNextOptions);
+    updateOptions.mutate(
+      { relayId: relay.relayId, options: safeNextOptions },
+      {
+        onError: () => setOptions(previousOptions),
+      }
+    );
+  };
+
   const updateHoldDrop = (key: HoldDropKey, checked: boolean) => {
-    setOptions((current) => ({
-      ...current,
+    applyOptions({
+      ...options,
       holdClient: false,
       holdHost: false,
       dropClient: false,
       dropHost: false,
       [key]: checked,
-    }));
+    });
   };
 
+  const updateTimer = () => {
+    if (
+      !relay ||
+      options.timerMs < 1000 ||
+      options.timerMs === relay.options.timerMs
+    ) {
+      return;
+    }
+
+    applyOptions(options);
+  };
+
+  if (!relay) {
+    return (
+      <Button disabled size="sm" type="button" variant="outline">
+        <SlidersHorizontal data-icon="inline-start" />
+        {messages.socksRelay.liveControlsTitle}
+      </Button>
+    );
+  }
+
+  const isDisabled = !relay.running || updateOptions.isPending;
+
   return (
-    <Dialog
-      onOpenChange={(open) => {
-        onOpenChange(open);
-      }}
-      open={relay !== null}
-    >
-      <DialogContent className="rounded-lg border-border/70 sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>{messages.socksRelay.editRelayOptionsTitle}</DialogTitle>
-          <DialogDescription>
-            {formatMessage(messages.socksRelay.editRelayOptionsDescription, {
-              relayId:
-                relay?.relayId ?? messages.socksRelay.editRelayOptionsFallback,
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button size="sm" type="button" variant="outline">
+          <SlidersHorizontal data-icon="inline-start" />
+          {messages.socksRelay.liveControlsTitle}
+        </Button>
+      </SheetTrigger>
+      <SheetContent className="sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
+            <Activity className="size-4" />
+            {messages.socksRelay.liveControlsTitle}
+          </SheetTitle>
+          <SheetDescription>
+            {formatMessage(messages.socksRelay.liveControlsDescription, {
+              relayId: relay.relayId,
             })}
-          </DialogDescription>
-        </DialogHeader>
-        <RelayOptionsControls
-          onHoldDropChange={updateHoldDrop}
-          onRemoveHeadersChange={(checked) =>
-            setOptions((current) => ({ ...current, removeHeaders: checked }))
-          }
-          options={options}
-        />
-        <div className="grid gap-2">
-          <Label htmlFor="edit-timer-ms">
-            {messages.socksRelay.timerMsLabel}
-          </Label>
-          <Input
-            id="edit-timer-ms"
-            inputMode="numeric"
-            min={1000}
-            onChange={(event) =>
-              setOptions((current) => ({
-                ...current,
-                timerMs: Number.parseInt(event.target.value, 10) || 0,
-              }))
-            }
-            step={100}
-            type="number"
-            value={options.timerMs}
-          />
+          </SheetDescription>
+        </SheetHeader>
+        <div className="flex flex-wrap items-center gap-2 px-4">
+          <Badge variant={relay.running ? "default" : "secondary"}>
+            {relay.running ? "Running" : "Stopped"}
+          </Badge>
+          <Badge variant="outline">
+            {messages.socksRelay.appliesToNewTrafficLabel}
+          </Badge>
         </div>
-        <DialogFooter>
-          <Button
-            className="gap-2"
-            disabled={
-              !relay || updateOptions.isPending || options.timerMs < 1000
+        <div className="grid gap-4 px-4">
+          <RelayOptionsControls
+            disabled={isDisabled}
+            onHoldDropChange={updateHoldDrop}
+            onRemoveHeadersChange={(checked) =>
+              applyOptions({ ...options, removeHeaders: checked })
             }
-            onClick={() => {
-              if (!relay) {
-                return;
+            options={options}
+          />
+          <div className="grid content-start gap-2 rounded-lg border border-border/70 bg-muted/20 p-3 shadow-inner">
+            <Label htmlFor="edit-timer-ms">
+              {messages.socksRelay.timerMsLabel}
+            </Label>
+            <Input
+              aria-invalid={options.timerMs < 1000}
+              disabled={isDisabled}
+              id="edit-timer-ms"
+              inputMode="numeric"
+              min={1000}
+              onBlur={updateTimer}
+              onChange={(event) =>
+                setOptions((current) => ({
+                  ...current,
+                  timerMs: Number.parseInt(event.target.value, 10) || 0,
+                }))
               }
-              updateOptions.mutate(
-                { relayId: relay.relayId, options },
-                {
-                  onSuccess: () => onOpenChange(false),
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.currentTarget.blur();
                 }
-              );
-            }}
-            type="button"
-          >
-            {messages.socksRelay.saveOptionsButton}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+              }}
+              step={100}
+              type="number"
+              value={options.timerMs}
+            />
+            <p className="text-muted-foreground text-xs">
+              {messages.socksRelay.liveTimerHint}
+            </p>
+          </div>
+          <p className="text-muted-foreground text-xs">
+            {messages.socksRelay.liveControlsEmptyDescription}
+          </p>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 
