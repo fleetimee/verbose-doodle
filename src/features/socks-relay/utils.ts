@@ -9,6 +9,8 @@ import type {
 
 const MIN_PORT = 1;
 const MAX_PORT = 65_535;
+export const RELAY_LISTENING_PORT_MIN = 18_090;
+export const RELAY_LISTENING_PORT_MAX = 18_100;
 const MIN_TIMER_MS = 1000;
 const HOLD_DROP_KEYS = [
   "holdClient",
@@ -39,13 +41,21 @@ export function isValidPort(port: number): boolean {
   return Number.isInteger(port) && port >= MIN_PORT && port <= MAX_PORT;
 }
 
+export function isValidRelayListeningPort(port: number): boolean {
+  return (
+    Number.isInteger(port) &&
+    port >= RELAY_LISTENING_PORT_MIN &&
+    port <= RELAY_LISTENING_PORT_MAX
+  );
+}
+
 export function validateRelayStartInput(
   input: RelayStartInput
 ): RelayFormErrors {
   const errors: RelayFormErrors = {};
 
-  if (!isValidPort(input.listeningPort)) {
-    errors.listeningPort = "Listening port must be between 1 and 65535.";
+  if (!isValidRelayListeningPort(input.listeningPort)) {
+    errors.listeningPort = `Listening port must be between ${RELAY_LISTENING_PORT_MIN} and ${RELAY_LISTENING_PORT_MAX}.`;
   }
 
   if (!input.hostAddress.trim()) {

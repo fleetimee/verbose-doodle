@@ -80,6 +80,8 @@ import {
   hasRelayFormErrors,
   isKnownRelayFlow,
   isRelayMessageEvent,
+  RELAY_LISTENING_PORT_MAX,
+  RELAY_LISTENING_PORT_MIN,
   type RelayFormErrors,
   summarizeRelayOptions,
   truncateMiddle,
@@ -221,7 +223,7 @@ const RELAY_FLOW_TONES: Record<RelayFlow, string> = {
 
 const EMPTY_FORM: Omit<RelayStartInput, "mode"> = {
   relayId: "",
-  listeningPort: 8090,
+  listeningPort: RELAY_LISTENING_PORT_MIN,
   hostAddress: "127.0.0.1",
   hostPort: 8085,
   ...DEFAULT_RELAY_OPTIONS,
@@ -712,8 +714,8 @@ function RelayStartForm({
               <Input
                 id="listening-port"
                 inputMode="numeric"
-                max={65_535}
-                min={1}
+                max={RELAY_LISTENING_PORT_MAX}
+                min={RELAY_LISTENING_PORT_MIN}
                 onChange={(event) =>
                   updateNumberField("listeningPort", event.target.value)
                 }
@@ -929,7 +931,9 @@ function RelayTable({
               <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
                 {messages.socksRelay.noRelayDefaultListenLabel}
               </span>
-              <span className="font-mono font-semibold text-sm">8090</span>
+              <span className="font-mono font-semibold text-sm">
+                {RELAY_LISTENING_PORT_MIN}
+              </span>
             </div>
             <div className="grid gap-1 border-border/70 border-r px-3 py-2">
               <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-[0.14em]">

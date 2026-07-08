@@ -10,7 +10,7 @@ import {
 const VALID_INPUT: RelayStartInput = {
   relayId: "relay-1",
   mode: "REST_API",
-  listeningPort: 8080,
+  listeningPort: 18_090,
   hostAddress: "127.0.0.1",
   hostPort: 8081,
   holdClient: false,
@@ -46,6 +46,7 @@ describe("socks relay validation", () => {
     });
 
     expect(errors.listeningPort).toBeDefined();
+    expect(errors.listeningPort).toContain("18090 and 18100");
     expect(errors.hostAddress).toBeDefined();
     expect(errors.hostPort).toBeDefined();
     expect(errors.timerMs).toBeDefined();
