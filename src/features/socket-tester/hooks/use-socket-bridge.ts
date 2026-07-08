@@ -16,6 +16,7 @@ import type {
 } from "@/features/socket-tester/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { formatMessage, messages } from "@/lib/i18n";
+import { generateUUID } from "@/lib/utils";
 
 const DEFAULT_TCP_CLIENT_PORT = 8080;
 const DEFAULT_TCP_SERVER_PORT = 9000;
@@ -23,7 +24,7 @@ const DEFAULT_UDP_SERVER_PORT = 9002;
 const MAX_LOG_ENTRIES = 600;
 
 function createId(prefix: string) {
-  return `${prefix}-${crypto.randomUUID()}`;
+  return `${prefix}-${generateUUID()}`;
 }
 
 function getBridgeUrl() {
@@ -93,7 +94,7 @@ function toLogEntry(
   metadata?: Record<string, unknown>
 ): TrafficLogEntry {
   return {
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     timestamp: nowTimestamp(),
     direction,
     protocol,

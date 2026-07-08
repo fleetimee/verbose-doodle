@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { cn } from "@/lib/utils";
+import { cn, generateUUID } from "@/lib/utils";
+
+const UUID_V4_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 describe("cn utility function", () => {
   test("merges class names", () => {
@@ -49,5 +52,29 @@ describe("cn utility function", () => {
     // cn doesn't deduplicate simple duplicates - it merges and leaves resolution to tailwind-merge
     expect(cn("foo", "foo")).toContain("foo");
     expect(cn("foo bar", "bar baz")).toContain("bar");
+  });
+});
+
+describe("generateUUID", () => {
+  test("falls back when crypto.randomUUID is unavailable", () => {
+    const originalCrypto = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "crypto"
+    );
+
+    Object.defineProperty(globalThis, "crypto", {
+      configurable: true,
+      value: {},
+    });
+
+    try {
+      expect(generateUUID()).toMatch(UUID_V4_PATTERN);
+    } finally {
+      if (originalCrypto) {
+        Object.defineProperty(globalThis, "crypto", originalCrypto);
+      } else {
+        Reflect.deleteProperty(globalThis, "crypto");
+      }
+    }
   });
 });
