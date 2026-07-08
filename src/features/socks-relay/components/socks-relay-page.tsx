@@ -3,6 +3,7 @@ import {
   Cable,
   CircleAlert,
   CircleDashed,
+  CircleHelp,
   CircleOff,
   Eraser,
   FileTerminal,
@@ -18,7 +19,15 @@ import {
 import type { Transition } from "motion/react";
 import { motion, useReducedMotion } from "motion/react";
 import type { FormEvent } from "react";
-import { useEffect, useId, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { type TourStep, useTour } from "@/components/tour";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -76,6 +85,7 @@ import {
   truncateMiddle,
   validateRelayStartInput,
 } from "@/features/socks-relay/utils";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -88,6 +98,38 @@ type HoldDropKey = "holdClient" | "holdHost" | "dropClient" | "dropHost";
 const pageStyle = { willChange: "opacity, transform" };
 const sectionStyle = { willChange: "opacity, transform" };
 const traceStyle = { originX: 0, willChange: "opacity, transform" };
+const SOCKS_RELAY_TOUR_DELAY_MS = 350;
+
+const SOCKS_RELAY_TOUR_CONFIG = {
+  ISO_8583: {
+    storageKey: "socks-relay-iso-8583-tour-seen",
+    targets: {
+      connection: "socks-relay-iso-8583-tour-connection",
+      header: "socks-relay-iso-8583-tour-header",
+      liveControls: "socks-relay-iso-8583-tour-live-controls",
+      logs: "socks-relay-iso-8583-tour-logs",
+      metrics: "socks-relay-iso-8583-tour-metrics",
+      options: "socks-relay-iso-8583-tour-options",
+      relays: "socks-relay-iso-8583-tour-relays",
+      startForm: "socks-relay-iso-8583-tour-start-form",
+    },
+    tourId: "socks-relay-iso-8583-intro",
+  },
+  REST_API: {
+    storageKey: "socks-relay-rest-api-tour-seen",
+    targets: {
+      connection: "socks-relay-rest-api-tour-connection",
+      header: "socks-relay-rest-api-tour-header",
+      liveControls: "socks-relay-rest-api-tour-live-controls",
+      logs: "socks-relay-rest-api-tour-logs",
+      metrics: "socks-relay-rest-api-tour-metrics",
+      options: "socks-relay-rest-api-tour-options",
+      relays: "socks-relay-rest-api-tour-relays",
+      startForm: "socks-relay-rest-api-tour-start-form",
+    },
+    tourId: "socks-relay-rest-api-intro",
+  },
+} as const;
 
 const HOLD_DROP_CONTROLS: {
   readonly key: HoldDropKey;
@@ -185,6 +227,23 @@ const EMPTY_FORM: Omit<RelayStartInput, "mode"> = {
   ...DEFAULT_RELAY_OPTIONS,
 };
 
+function TourStepContent({
+  description,
+  title,
+}: {
+  readonly description: string;
+  readonly title: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2 pr-10">
+      <h2 className="font-semibold text-base">{title}</h2>
+      <p className="text-muted-foreground text-sm leading-relaxed">
+        {description}
+      </p>
+    </div>
+  );
+}
+
 export function SocksRelayPage({ mode }: SocksRelayPageProps) {
   const modeLabel = getModeLabel(mode);
   const relaysQuery = useGetRelays();
@@ -192,6 +251,15 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
   const shouldReduceMotion = useReducedMotion();
   const [selectedRelayId, setSelectedRelayId] = useState<string | null>(null);
   const [showAllLogs, setShowAllLogs] = useState(false);
+  const tourConfig = SOCKS_RELAY_TOUR_CONFIG[mode];
+  const tourCopy = messages.socksRelay.tour;
+  const [hasSeenTour, setHasSeenTour] = useLocalStorage(
+    tourConfig.storageKey,
+    false
+  );
+  const hasAutoStartedTour = useRef(false);
+  const shouldMarkTourSeenOnEnd = useRef(false);
+  const { activeTourId, isActive, setSteps, startTour } = useTour();
 
   const relays = useMemo(
     () => (relaysQuery.data ?? []).filter((relay) => relay.mode === mode),
@@ -237,6 +305,122 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
   const metricAnimate = shouldReduceMotion
     ? { opacity: 1 }
     : { opacity: 1, scale: 1, y: 0 };
+  const tourSteps = useMemo<TourStep[]>(
+    () => [
+      {
+        selectorId: tourConfig.targets.header,
+        position: "bottom",
+        content: (
+          <TourStepContent
+            description={tourCopy.headerDescription}
+            title={tourCopy.headerTitle}
+          />
+        ),
+      },
+      {
+        selectorId: tourConfig.targets.connection,
+        position: "bottom",
+        content: (
+          <TourStepContent
+            description={tourCopy.connectionDescription}
+            title={tourCopy.connectionTitle}
+          />
+        ),
+      },
+      {
+        selectorId: tourConfig.targets.metrics,
+        position: "bottom",
+        content: (
+          <TourStepContent
+            description={tourCopy.metricsDescription}
+            title={tourCopy.metricsTitle}
+          />
+        ),
+      },
+      {
+        selectorId: tourConfig.targets.startForm,
+        position: "right",
+        content: (
+          <TourStepContent
+            description={tourCopy.startFormDescription}
+            title={tourCopy.startFormTitle}
+          />
+        ),
+      },
+      {
+        selectorId: tourConfig.targets.options,
+        position: "right",
+        content: (
+          <TourStepContent
+            description={tourCopy.optionsDescription}
+            title={tourCopy.optionsTitle}
+          />
+        ),
+      },
+      {
+        selectorId: tourConfig.targets.relays,
+        position: "left",
+        content: (
+          <TourStepContent
+            description={tourCopy.relaysDescription}
+            title={tourCopy.relaysTitle}
+          />
+        ),
+      },
+      {
+        selectorId: tourConfig.targets.liveControls,
+        position: "left",
+        content: (
+          <TourStepContent
+            description={tourCopy.liveControlsDescription}
+            title={tourCopy.liveControlsTitle}
+          />
+        ),
+      },
+      {
+        selectorId: tourConfig.targets.logs,
+        position: "top",
+        content: (
+          <TourStepContent
+            description={tourCopy.logsDescription}
+            title={tourCopy.logsTitle}
+          />
+        ),
+      },
+    ],
+    [tourConfig.targets, tourCopy]
+  );
+
+  const handleStartTour = useCallback(() => {
+    setSteps(tourSteps);
+    startTour(tourConfig.tourId);
+  }, [setSteps, startTour, tourConfig.tourId, tourSteps]);
+
+  useEffect(() => {
+    if (hasSeenTour || hasAutoStartedTour.current || tourSteps.length === 0) {
+      return;
+    }
+
+    hasAutoStartedTour.current = true;
+
+    const timeoutId = window.setTimeout(() => {
+      shouldMarkTourSeenOnEnd.current = true;
+      handleStartTour();
+    }, SOCKS_RELAY_TOUR_DELAY_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [handleStartTour, hasSeenTour, tourSteps.length]);
+
+  useEffect(() => {
+    if (
+      shouldMarkTourSeenOnEnd.current &&
+      activeTourId === tourConfig.tourId &&
+      !isActive
+    ) {
+      shouldMarkTourSeenOnEnd.current = false;
+      setHasSeenTour(true);
+    }
+  }, [activeTourId, isActive, setHasSeenTour, tourConfig.tourId]);
 
   return (
     <motion.div
@@ -250,6 +434,7 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
       <motion.header
         animate={sectionAnimate}
         className="relative grid gap-4 border-border/70 border-b pb-5"
+        id={tourConfig.targets.header}
         initial={sectionInitial}
         style={sectionStyle}
         transition={{
@@ -280,9 +465,23 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
               message flow without leaving the dashboard.
             </p>
           </div>
-          <RelayConnectionBadge />
+          <div className="flex flex-wrap items-end gap-2 lg:justify-end">
+            <Button
+              className="gap-2"
+              onClick={handleStartTour}
+              type="button"
+              variant="outline"
+            >
+              <CircleHelp data-icon="inline-start" />
+              {tourCopy.startButton}
+            </Button>
+            <RelayConnectionBadge tourId={tourConfig.targets.connection} />
+          </div>
         </div>
-        <section className="flex flex-wrap gap-2">
+        <section
+          className="flex flex-wrap gap-2"
+          id={tourConfig.targets.metrics}
+        >
           {[
             {
               icon: Network,
@@ -342,14 +541,20 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
           delay: shouldReduceMotion ? 0 : 0.12,
         }}
       >
-        <RelayStartForm mode={mode} />
+        <RelayStartForm
+          mode={mode}
+          optionsTourId={tourConfig.targets.options}
+          tourId={tourConfig.targets.startForm}
+        />
         <RelayTable
           isLoading={relaysQuery.isLoading}
+          liveControlsTourId={tourConfig.targets.liveControls}
           modeLabel={modeLabel}
           onSelect={setSelectedRelayId}
           relays={relays}
           selectedRelay={selectedRelay}
           selectedRelayId={focusedRelayId}
+          tourId={tourConfig.targets.relays}
         />
       </motion.div>
 
@@ -367,18 +572,19 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
           mode={mode}
           onShowAllLogsChange={setShowAllLogs}
           showAllLogs={showAllLogs}
+          tourId={tourConfig.targets.logs}
         />
       </motion.div>
     </motion.div>
   );
 }
 
-function RelayConnectionBadge() {
+function RelayConnectionBadge({ tourId }: { readonly tourId?: string }) {
   const { connectionStatus, malformedEventCount } = useSocksRelayContext();
   const isConnected = connectionStatus === "connected";
 
   return (
-    <div className="flex items-end lg:justify-end">
+    <div className="flex items-end lg:justify-end" id={tourId}>
       <div className="inline-flex h-9 items-center gap-2 rounded-md border border-border/70 bg-background/70 px-3 font-medium text-muted-foreground text-sm shadow-xs">
         <span
           className={cn(
@@ -402,7 +608,15 @@ function RelayConnectionBadge() {
   );
 }
 
-function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
+function RelayStartForm({
+  mode,
+  optionsTourId,
+  tourId,
+}: {
+  readonly mode: RelayMode;
+  readonly optionsTourId?: string;
+  readonly tourId?: string;
+}) {
   const startRelay = useStartRelay();
   const [form, setForm] = useState<Omit<RelayStartInput, "mode">>(EMPTY_FORM);
   const [errors, setErrors] = useState<RelayFormErrors>({});
@@ -452,7 +666,10 @@ function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
   };
 
   return (
-    <Card className="flex h-full flex-col rounded-lg border-border/70 py-5 shadow-sm">
+    <Card
+      className="flex h-full flex-col rounded-lg border-border/70 py-5 shadow-sm"
+      id={tourId}
+    >
       <CardHeader className="px-4 md:px-5">
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="grid size-8 place-items-center rounded-md border border-border/70 bg-background text-primary shadow-xs">
@@ -565,6 +782,7 @@ function RelayStartForm({ mode }: { readonly mode: RelayMode }) {
               setForm((current) => ({ ...current, removeHeaders: checked }))
             }
             options={form}
+            tourId={optionsTourId}
           />
           <Button
             className="h-9 w-full gap-2 transition-transform duration-150 ease-out active:scale-[0.99]"
@@ -587,14 +805,19 @@ function RelayOptionsControls({
   onHoldDropChange,
   onRemoveHeadersChange,
   options,
+  tourId,
 }: {
   readonly disabled?: boolean;
   readonly onHoldDropChange: (key: HoldDropKey, checked: boolean) => void;
   readonly onRemoveHeadersChange: (checked: boolean) => void;
   readonly options: RelayOptions;
+  readonly tourId?: string;
 }) {
   return (
-    <div className="grid gap-3 rounded-lg border border-border/70 bg-muted/20 p-3 shadow-inner">
+    <div
+      className="grid gap-3 rounded-lg border border-border/70 bg-muted/20 p-3 shadow-inner"
+      id={tourId}
+    >
       <div className="grid gap-2 sm:grid-cols-2">
         {HOLD_DROP_CONTROLS.map((control) => (
           <SwitchRow
@@ -660,18 +883,22 @@ function SwitchRow({
 
 function RelayTable({
   isLoading,
+  liveControlsTourId,
   modeLabel,
   onSelect,
   relays,
   selectedRelay,
   selectedRelayId,
+  tourId,
 }: {
   readonly isLoading: boolean;
+  readonly liveControlsTourId?: string;
   readonly modeLabel: string;
   readonly onSelect: (relayId: string) => void;
   readonly relays: RelayInstance[];
   readonly selectedRelay?: RelayInstance;
   readonly selectedRelayId: string | null;
+  readonly tourId?: string;
 }) {
   const stopRelay = useStopRelay();
   let relayTableContent = (
@@ -826,7 +1053,10 @@ function RelayTable({
   }
 
   return (
-    <Card className="flex h-full min-w-0 flex-col rounded-lg border-border/70 py-5 shadow-sm">
+    <Card
+      className="flex h-full min-w-0 flex-col rounded-lg border-border/70 py-5 shadow-sm"
+      id={tourId}
+    >
       <CardHeader className="gap-3 px-4 md:grid-cols-[minmax(0,1fr)_auto] md:px-5">
         <div>
           <CardTitle className="flex items-center gap-2 text-base">
@@ -841,7 +1071,10 @@ function RelayTable({
             })}
           </CardDescription>
         </div>
-        <div className="flex items-start md:justify-end">
+        <div
+          className="flex items-start md:justify-end"
+          id={liveControlsTourId}
+        >
           <RelayLiveControls relay={selectedRelay} />
         </div>
       </CardHeader>
@@ -1001,11 +1234,13 @@ function RelayLogConsole({
   mode,
   onShowAllLogsChange,
   showAllLogs,
+  tourId,
 }: {
   readonly focusedRelayId: string | null;
   readonly mode: RelayMode;
   readonly onShowAllLogsChange: (showAll: boolean) => void;
   readonly showAllLogs: boolean;
+  readonly tourId?: string;
 }) {
   const showAllLogsSwitchId = useId();
   const { clearLogs, events } = useSocksRelayContext();
@@ -1041,7 +1276,10 @@ function RelayLogConsole({
   }
 
   return (
-    <Card className="min-w-0 rounded-lg border-border/70 py-5 shadow-sm">
+    <Card
+      className="min-w-0 rounded-lg border-border/70 py-5 shadow-sm"
+      id={tourId}
+    >
       <CardHeader className="gap-4 px-4 md:grid-cols-[minmax(0,1fr)_auto] md:px-5">
         <div>
           <CardTitle className="flex items-center gap-2 text-base">

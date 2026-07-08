@@ -66,4 +66,31 @@ export const socksRelayMessages = {
   statusHeader: "Status",
   targetHeader: "Target",
   timerMsLabel: "Timer ms",
+  tour: {
+    startButton: "Start tour",
+    headerTitle: "Socks Relay workspace",
+    headerDescription:
+      "Use this workspace to watch relay event connectivity, confirm the active mode, and start the relay workflow.",
+    connectionTitle: "Relay event status",
+    connectionDescription:
+      "This badge shows whether live relay events are connected and calls out malformed relay events when they appear.",
+    metricsTitle: "Relay metrics",
+    metricsDescription:
+      "Track active relays, running listeners, message traffic, lifecycle events, and malformed event counts while traffic flows.",
+    startFormTitle: "Start a relay",
+    startFormDescription:
+      "Set a relay ID, listening port, target host, target port, and timer before starting a new relay instance.",
+    optionsTitle: "Simulation options",
+    optionsDescription:
+      "Choose one hold or drop behavior, remove REST headers when needed, and tune how traffic is simulated before the relay starts.",
+    relaysTitle: "Relay instances",
+    relaysDescription:
+      "Running listeners appear here. Select a relay row to focus its logs, stop it, or open live controls for new traffic.",
+    liveControlsTitle: "Live controls",
+    liveControlsDescription:
+      "Open live controls from here to adjust hold, drop, header, and timer behavior for new messages on the selected relay.",
+    logsTitle: "Relay logs",
+    logsDescription:
+      "Inspect message and lifecycle tabs, clear the console, switch between focused and all-relay logs, and use the About tab to decode flow codes.",
+  },
 } as const;
