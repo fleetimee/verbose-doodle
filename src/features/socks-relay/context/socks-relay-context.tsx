@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import {
   createContext,
@@ -8,6 +9,7 @@ import {
   useState,
 } from "react";
 import { getAuthToken } from "@/features/auth/utils";
+import { socksRelayQueryKeys } from "@/features/socks-relay/query-keys";
 import type {
   RelayConnectionStatus,
   RelayEvent,
@@ -21,6 +23,7 @@ const MAX_RELAY_EVENTS = 1000;
 const RECONNECT_BASE_DELAY_MS = 1000;
 const RECONNECT_MAX_DELAY_MS = 15_000;
 const RECONNECT_MULTIPLIER = 2;
+const RELAY_LIST_EVENTS = new Set(["relay_started", "relay_stopped"]);
 
 type SocksRelayContextValue = {
   readonly clearLogs: () => void;
@@ -42,6 +45,7 @@ export function SocksRelayProvider({
   const [connectionStatus, setConnectionStatus] =
     useState<RelayConnectionStatus>("idle");
   const [malformedEventCount, setMalformedEventCount] = useState(0);
+  const queryClient = useQueryClient();
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reconnectAttemptRef = useRef(0);
@@ -112,6 +116,10 @@ export function SocksRelayProvider({
         setEvents((currentEvents) =>
           [...currentEvents, relayEvent].slice(-MAX_RELAY_EVENTS)
         );
+
+        if (RELAY_LIST_EVENTS.has(relayEvent.type)) {
+          queryClient.invalidateQueries({ queryKey: socksRelayQueryKeys.all });
+        }
       };
 
       socket.onclose = () => {
@@ -135,7 +143,7 @@ export function SocksRelayProvider({
       socketRef.current = null;
       setConnectionStatus("disconnected");
     };
-  }, []);
+  }, [queryClient]);
 
   return (
     <SocksRelayContext.Provider
