@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type {
   RelayEvent,
   RelayEventPayload,
@@ -37,6 +38,52 @@ export type RelayFormErrors = RelayInputErrors & {
   options?: string;
 };
 
+export const relayStartFormSchema = z
+  .object({
+    relayId: z.string(),
+    listeningPort: z
+      .number({ message: "Listening port is required." })
+      .int("Listening port must be an integer.")
+      .min(
+        RELAY_LISTENING_PORT_MIN,
+        `Listening port must be between ${RELAY_LISTENING_PORT_MIN} and ${RELAY_LISTENING_PORT_MAX}.`
+      )
+      .max(
+        RELAY_LISTENING_PORT_MAX,
+        `Listening port must be between ${RELAY_LISTENING_PORT_MIN} and ${RELAY_LISTENING_PORT_MAX}.`
+      ),
+    hostAddress: z.string().trim().min(1, "Host address is required."),
+    hostPort: z
+      .number({ message: "Host port is required." })
+      .int("Host port must be an integer.")
+      .min(MIN_PORT, "Host port must be between 1 and 65535.")
+      .max(MAX_PORT, "Host port must be between 1 and 65535."),
+    holdClient: z.boolean(),
+    holdHost: z.boolean(),
+    dropClient: z.boolean(),
+    dropHost: z.boolean(),
+    removeHeaders: z.boolean(),
+    timerMs: z
+      .number({ message: "Timer is required." })
+      .int("Timer must be an integer.")
+      .min(MIN_TIMER_MS, "Timer must be at least 1000 ms."),
+  })
+  .superRefine((input, context) => {
+    const activeHoldDropCount = HOLD_DROP_KEYS.filter(
+      (key) => input[key]
+    ).length;
+
+    if (activeHoldDropCount > 1) {
+      context.addIssue({
+        code: "custom",
+        message: "Only one hold or drop option can be active.",
+        path: ["holdClient"],
+      });
+    }
+  });
+
+export type RelayStartFormValues = z.infer<typeof relayStartFormSchema>;
+
 export function isValidPort(port: number): boolean {
   return Number.isInteger(port) && port >= MIN_PORT && port <= MAX_PORT;
 }
@@ -53,26 +100,23 @@ export function validateRelayStartInput(
   input: RelayStartInput
 ): RelayFormErrors {
   const errors: RelayFormErrors = {};
+  const result = relayStartFormSchema.safeParse(input);
 
-  if (!isValidRelayListeningPort(input.listeningPort)) {
-    errors.listeningPort = `Listening port must be between ${RELAY_LISTENING_PORT_MIN} and ${RELAY_LISTENING_PORT_MAX}.`;
+  if (result.success) {
+    return errors;
   }
 
-  if (!input.hostAddress.trim()) {
-    errors.hostAddress = "Host address is required.";
-  }
+  for (const issue of result.error.issues) {
+    const key = issue.path[0];
 
-  if (!isValidPort(input.hostPort)) {
-    errors.hostPort = "Host port must be between 1 and 65535.";
-  }
+    if (key === "holdClient") {
+      errors.options = issue.message;
+      continue;
+    }
 
-  if (!Number.isInteger(input.timerMs) || input.timerMs < MIN_TIMER_MS) {
-    errors.timerMs = "Timer must be at least 1000 ms.";
-  }
-
-  const activeHoldDropCount = HOLD_DROP_KEYS.filter((key) => input[key]).length;
-  if (activeHoldDropCount > 1) {
-    errors.options = "Only one hold or drop option can be active.";
+    if (typeof key === "string" && key in input) {
+      errors[key as keyof RelayStartInput] = issue.message;
+    }
   }
 
   return errors;

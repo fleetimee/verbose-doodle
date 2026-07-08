@@ -19,9 +19,14 @@ export const socksRelayMessages = {
   holdClientLabel: "Hold client",
   holdHostLabel: "Hold host",
   hostAddressLabel: "Host address",
+  hostAddressDescription:
+    "Use a reachable hostname or IP from the backend container.",
   hostPortLabel: "Host port",
+  hostPortDescription: "Destination service port that the relay forwards to.",
   listenHeader: "Listen",
   listeningPortLabel: "Listening port",
+  listeningPortDescription:
+    "Use a published Portainer relay port from 18090 to 18100.",
   liveControlsDescription:
     "{relayId} runtime options update immediately for new messages.",
   liveControlsEmptyDescription:
@@ -56,6 +61,8 @@ export const socksRelayMessages = {
   relayUpdated: "Relay options updated",
   relayHeader: "Relay",
   removeHeadersLabel: "Remove headers",
+  relayOptionsDescription:
+    "Pick one hold/drop behavior. Remove headers is mainly for REST relay traffic.",
   saveOptionsButton: "Save options",
   selectedLogScope: "Select a relay row to focus its logs",
   showingAllLogScope: "Showing all {modeLabel} relays",
