@@ -38,6 +38,10 @@ export const API_ENDPOINTS = {
         download: (id: string | number) =>
           `/api/endpoint/${id}/traffic-logs/download`,
       },
+      metrics: {
+        summary: (id: string | number) => `/api/endpoint/${id}/metrics`,
+        hourly: (id: string | number) => `/api/endpoint/${id}/metrics/hourly`,
+      },
     },
     responses: {
       list: "/api/response",
@@ -163,6 +167,14 @@ export function getEndpointTrafficLogsClearUrl(id: string | number): string {
  */
 export function getEndpointTrafficLogsDownloadUrl(id: string | number): string {
   return API_ENDPOINTS.admin.endpoints.trafficLogs.download(id);
+}
+
+export function getEndpointMetricsSummaryUrl(id: string | number): string {
+  return API_ENDPOINTS.admin.endpoints.metrics.summary(id);
+}
+
+export function getEndpointMetricsHourlyUrl(id: string | number): string {
+  return API_ENDPOINTS.admin.endpoints.metrics.hourly(id);
 }
 
 /**

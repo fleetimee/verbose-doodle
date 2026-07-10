@@ -2,8 +2,10 @@ import type {
   EndpointTrafficLog,
   EndpointTrafficLogStatus,
 } from "@/features/endpoints/types";
+import type { EndpointHourlyMetric, EndpointMetric } from "@/features/endpoints/hooks/use-get-endpoint-metrics";
 
 export type EndpointMetricsTimeWindow = "5m" | "15m" | "1h";
+export type PersistedMetricsTimeWindow = "24h" | "7d" | "30d";
 
 export type EndpointMetricsBucket = {
   readonly bucketStart: number;
@@ -50,11 +52,84 @@ export const ENDPOINT_METRICS_TIME_WINDOWS = {
   "1h": 60 * 60 * 1000,
 } as const satisfies Record<EndpointMetricsTimeWindow, number>;
 
+export const PERSISTED_METRICS_TIME_WINDOWS = {
+  "24h": 24 * 60 * 60 * 1000,
+  "7d": 7 * 24 * 60 * 60 * 1000,
+  "30d": 30 * 24 * 60 * 60 * 1000,
+} as const satisfies Record<PersistedMetricsTimeWindow, number>;
+
 const BUCKET_COUNT = 12;
 const SUCCESS_STATUSES = new Set<EndpointTrafficLogStatus>([
   "matched_success",
   "matched_delayed",
 ]);
+
+export function getPersistedEndpointMetrics(
+  _lifetime: EndpointMetric,
+  hourly: readonly EndpointHourlyMetric[],
+  timeWindow: PersistedMetricsTimeWindow
+): EndpointMetrics {
+  const requests = hourly.reduce((total, bucket) => total + bucket.requestCount, 0);
+  const totalDurationMs = hourly.reduce(
+    (total, bucket) => total + bucket.totalDurationMs,
+    0
+  );
+  const statusCount = (status: string) =>
+    hourly.reduce(
+      (total, bucket) => total + (bucket.hitStatusCounts[status] ?? 0),
+      0
+    );
+  const successes = statusCount("matched_success") + statusCount("matched_delayed");
+  const delayed = statusCount("matched_delayed");
+  const timeouts = statusCount("matched_timeout");
+  const unmatched = statusCount("unmatched_endpoint");
+  const backendErrors = statusCount("backend_error");
+  const minMs = minimum(hourly.map((bucket) => bucket.minDurationMs));
+  const maxMs = maximum(hourly.map((bucket) => bucket.maxDurationMs));
+  const lastSeenAt = hourly
+    .filter((bucket) => bucket.requestCount > 0)
+    .at(-1)?.bucketStart ?? null;
+
+  return {
+    logs: [],
+    summary: {
+      requests,
+      successes,
+      errors: requests - successes,
+      delayed,
+      timeouts,
+      unmatched,
+      backendErrors,
+      successRate: requests === 0 ? 0 : Math.round((successes / requests) * 100),
+      errorRate: requests === 0 ? 0 : Math.round(((requests - successes) / requests) * 100),
+      requestsPerMinute: Number((requests / (PERSISTED_METRICS_TIME_WINDOWS[timeWindow] / 60_000)).toFixed(1)),
+      avgMs: requests === 0 ? null : Math.round(totalDurationMs / requests),
+      minMs,
+      maxMs,
+      p50Ms: null,
+      p95Ms: null,
+      p99Ms: null,
+      slowestRequestMs: maxMs,
+      lastSeenAt,
+    },
+    buckets: hourly.map((bucket) => {
+      const bucketSuccesses =
+        (bucket.hitStatusCounts.matched_success ?? 0) +
+        (bucket.hitStatusCounts.matched_delayed ?? 0);
+      return {
+        bucketStart: Date.parse(bucket.bucketStart),
+        label: formatBucketLabel(Date.parse(bucket.bucketStart)),
+        requests: bucket.requestCount,
+        successes: bucketSuccesses,
+        errors: bucket.requestCount - bucketSuccesses,
+        avgMs: bucket.requestCount === 0 ? null : Math.round(bucket.averageDurationMs),
+        p50Ms: null,
+        p95Ms: null,
+        p99Ms: null,
+      };
+    }),
+  };
+}
 
 export function getEndpointMetrics(
   logs: readonly EndpointTrafficLog[],
@@ -252,4 +327,14 @@ function formatBucketLabel(timestamp: number) {
     minute: "2-digit",
     second: "2-digit",
   }).format(new Date(timestamp));
+}
+
+function minimum(values: readonly (number | null)[]) {
+  const populated = values.filter((value): value is number => value !== null);
+  return populated.length === 0 ? null : Math.min(...populated);
+}
+
+function maximum(values: readonly (number | null)[]) {
+  const populated = values.filter((value): value is number => value !== null);
+  return populated.length === 0 ? null : Math.max(...populated);
 }
