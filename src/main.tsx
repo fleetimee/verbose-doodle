@@ -78,6 +78,11 @@ const JsonSchemaValidatorPage = lazy(() =>
     ({ JsonSchemaValidatorPage }) => ({ default: JsonSchemaValidatorPage })
   )
 );
+const DeveloperToolsPage = lazy(() =>
+  import("@/pages/dashboard/developer-tools").then(
+    ({ DeveloperToolsPage }) => ({ default: DeveloperToolsPage })
+  )
+);
 const JsonYamlConverterPage = lazy(() =>
   import("@/pages/dashboard/json-yaml-converter").then(
     ({ JsonYamlConverterPage }) => ({ default: JsonYamlConverterPage })
@@ -145,6 +150,7 @@ function AppContent() {
             <Route element={<TcpClientPage />} path="socket-test/tcp-client" />
             <Route element={<TcpServerPage />} path="socket-test/tcp-server" />
             <Route element={<UdpPage />} path="socket-test/udp" />
+            <Route element={<DeveloperToolsPage />} path="developer-tools" />
             <Route
               element={<JsonSchemaValidatorPage />}
               path="developer-tools/json-schema-validator"

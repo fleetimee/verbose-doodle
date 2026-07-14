@@ -15,6 +15,7 @@ type NavMainItem = {
   icon: LucideIcon;
   groupLabel: string;
   badge?: string;
+  exact?: boolean;
   isActive?: boolean;
   onPrefetch?: () => void;
 };
@@ -53,7 +54,7 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
             {group.items.map((item) => {
               const isActive =
                 location.pathname === item.url ||
-                location.pathname.startsWith(`${item.url}/`);
+                (!item.exact && location.pathname.startsWith(`${item.url}/`));
 
               return (
                 <SidebarMenuItem key={item.title}>

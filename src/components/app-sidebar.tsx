@@ -1,8 +1,7 @@
 import {
-  Braces,
-  FileJson,
   Info,
   LayoutDashboard,
+  LayoutGrid,
   Network,
   Plug,
   RadioTower,
@@ -29,6 +28,10 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/features/auth/context";
+import {
+  DEVELOPER_TOOL_CATEGORIES,
+  DEVELOPER_TOOL_COUNT,
+} from "@/features/developer-tools/catalog";
 import { usePrefetchEndpoints } from "@/features/endpoints/hooks/use-prefetch-endpoints";
 import { usePrefetchOverview } from "@/features/overview/hooks/use-prefetch-overview";
 import { messages } from "@/lib/i18n";
@@ -66,17 +69,21 @@ const data = {
       groupLabel: "Socket Test",
     },
     {
-      title: messages.jsonSchemaValidator.title,
-      url: "/dashboard/developer-tools/json-schema-validator",
-      icon: Braces,
-      groupLabel: messages.jsonSchemaValidator.navigationGroup,
+      title: messages.developerTools.catalogNavigation,
+      url: "/dashboard/developer-tools",
+      icon: LayoutGrid,
+      groupLabel: messages.developerTools.navigationGroup,
+      badge: String(DEVELOPER_TOOL_COUNT),
+      exact: true,
     },
-    {
-      title: messages.jsonYamlConverter.title,
-      url: "/dashboard/developer-tools/json-yaml-converter",
-      icon: FileJson,
-      groupLabel: messages.jsonYamlConverter.navigationGroup,
-    },
+    ...DEVELOPER_TOOL_CATEGORIES.flatMap((category) =>
+      category.tools.map((tool) => ({
+        title: tool.name,
+        url: tool.href,
+        icon: tool.icon,
+        groupLabel: messages.developerTools.navigationGroup,
+      }))
+    ),
     {
       title: "REST API",
       url: "/dashboard/socks-relay/rest-api",

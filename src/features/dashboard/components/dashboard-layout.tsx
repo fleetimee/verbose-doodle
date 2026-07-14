@@ -39,7 +39,7 @@ const routeLabels: Record<string, string> = {
   udp: "UDP",
   users: "Users",
   settings: "Settings",
-  "developer-tools": messages.jsonSchemaValidator.navigationGroup,
+  "developer-tools": messages.developerTools.navigationGroup,
   "json-schema-validator": messages.jsonSchemaValidator.title,
 };
 

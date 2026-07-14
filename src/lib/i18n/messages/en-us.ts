@@ -1,6 +1,7 @@
 import { aboutMessages } from "@/lib/i18n/messages/en-us/about";
 import { authMessages } from "@/lib/i18n/messages/en-us/auth";
 import { commonMessages } from "@/lib/i18n/messages/en-us/common";
+import { developerToolsMessages } from "@/lib/i18n/messages/en-us/developer-tools";
 import { endpointsMessages } from "@/lib/i18n/messages/en-us/endpoints";
 import { errorsMessages } from "@/lib/i18n/messages/en-us/errors";
 import { jsonSchemaValidatorMessages } from "@/lib/i18n/messages/en-us/json-schema-validator";
@@ -13,6 +14,7 @@ import { usersMessages } from "@/lib/i18n/messages/en-us/users";
 
 export const enUsMessages = {
   common: commonMessages,
+  developerTools: developerToolsMessages,
   about: aboutMessages,
   errors: errorsMessages,
   auth: authMessages,
