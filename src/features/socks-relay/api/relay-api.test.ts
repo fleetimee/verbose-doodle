@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import {
+  listRelayLogs,
   listRelays,
   startRelay,
   stopRelay,
@@ -45,6 +46,26 @@ afterEach(() => {
 });
 
 describe("relay api", () => {
+  test("lists saved relay logs", async () => {
+    const logs = [
+      {
+        id: 1,
+        type: "relay_started",
+        occurredAt: "2026-01-01T00:00:00Z",
+        payload: {},
+      },
+    ];
+    globalThis.fetch = mock(() =>
+      Promise.resolve(jsonResponse({ data: { logs } }))
+    ) as unknown as typeof fetch;
+
+    await expect(listRelayLogs()).resolves.toEqual(logs);
+    expect(getFetchMock()).toHaveBeenCalledWith(
+      "/api/relay/logs",
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
   test("lists relays from /api/relay", async () => {
     globalThis.fetch = mock(() =>
       Promise.resolve(jsonResponse({ data: { relays: [relay] } }))

@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
+  listRelayLogs,
   listRelays,
   startRelay,
   stopRelay,
@@ -8,6 +9,7 @@ import {
 } from "@/features/socks-relay/api/relay-api";
 import { socksRelayQueryKeys } from "@/features/socks-relay/query-keys";
 import type {
+  RelayEventLog,
   RelayInstance,
   RelayStartInput,
   RelayUpdateOptionsInput,
@@ -18,12 +20,27 @@ import { TIME_DURATIONS } from "@/lib/constants";
 import { formatMessage, messages } from "@/lib/i18n";
 import { createMutationHook, createQueryHook } from "@/lib/query-hooks";
 
+const RELAY_LOG_REFRESH_INTERVAL_MS = 10_000;
+
 export function useGetRelays() {
   const useQuery = createQueryHook<RelayInstance[]>({
     queryKey: socksRelayQueryKeys.all,
     queryFn: listRelays,
     options: {
       staleTime: TIME_DURATIONS.ONE_MINUTE,
+    },
+  });
+
+  return useQuery();
+}
+
+export function useGetRelayLogs() {
+  const useQuery = createQueryHook<RelayEventLog[]>({
+    queryKey: socksRelayQueryKeys.logs(),
+    queryFn: listRelayLogs,
+    options: {
+      refetchInterval: RELAY_LOG_REFRESH_INTERVAL_MS,
+      staleTime: RELAY_LOG_REFRESH_INTERVAL_MS,
     },
   });
 

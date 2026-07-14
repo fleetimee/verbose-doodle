@@ -6,12 +6,14 @@ import {
   CircleDashed,
   CircleHelp,
   CircleOff,
+  Database,
   Eraser,
   FileTerminal,
   ListFilter,
   Network,
   Play,
   Radio,
+  RefreshCw,
   Route,
   ShieldAlert,
   SlidersHorizontal,
@@ -64,6 +66,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SocketStatusCard } from "@/features/socket-tester/components/socket-status-card";
 import { useSocksRelayContext } from "@/features/socks-relay/context/socks-relay-context";
 import {
+  useGetRelayLogs,
   useGetRelays,
   useStartRelay,
   useStopRelay,
@@ -71,6 +74,7 @@ import {
 } from "@/features/socks-relay/hooks/use-relays";
 import type {
   RelayEvent,
+  RelayEventLog,
   RelayFlow,
   RelayInstance,
   RelayMode,
@@ -1335,9 +1339,18 @@ function RelayLogConsole({
 }) {
   const showAllLogsSwitchId = useId();
   const { clearLogs, events } = useSocksRelayContext();
+  const savedLogsQuery = useGetRelayLogs();
+  const savedEvents = useMemo(
+    () => (savedLogsQuery.data ?? []).map(toRelayEvent),
+    [savedLogsQuery.data]
+  );
+  const allEvents = useMemo(
+    () => mergeRelayEvents(savedEvents, events),
+    [events, savedEvents]
+  );
   const scopedEvents = useMemo(
     () =>
-      events.filter((event) => {
+      allEvents.filter((event) => {
         if (event.payload.mode !== mode) {
           return false;
         }
@@ -1346,7 +1359,7 @@ function RelayLogConsole({
         }
         return event.payload.relayId === focusedRelayId;
       }),
-    [events, focusedRelayId, mode, showAllLogs]
+    [allEvents, focusedRelayId, mode, showAllLogs]
   );
   const messageEvents = scopedEvents.filter(isRelayMessageEvent);
   const lifecycleEvents = scopedEvents.filter(
@@ -1368,10 +1381,10 @@ function RelayLogConsole({
 
   return (
     <Card
-      className="min-w-0 rounded-lg border-border/70 py-5 shadow-sm"
+      className="min-w-0 overflow-hidden rounded-lg border-border/70 bg-[linear-gradient(180deg,hsl(var(--card)),hsl(var(--muted)/0.12))] py-0 shadow-sm"
       id={tourId}
     >
-      <CardHeader className="gap-4 px-4 md:grid-cols-[minmax(0,1fr)_auto] md:px-5">
+      <CardHeader className="gap-4 border-border/70 border-b bg-background/45 px-4 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:px-5">
         <div>
           <CardTitle className="flex items-center gap-2 text-base">
             <span className="grid size-8 place-items-center rounded-md border border-border/70 bg-background text-primary shadow-xs">
@@ -1380,6 +1393,14 @@ function RelayLogConsole({
             {messages.socksRelay.relayLogsTitle}
           </CardTitle>
           <CardDescription>{logScopeDescription}</CardDescription>
+          <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-sky-500/25 bg-sky-500/10 px-2.5 py-1 font-medium text-[11px] text-sky-700 uppercase tracking-[0.12em] dark:text-sky-300">
+            <Database className="size-3.5" />
+            {messages.socksRelay.savedHistoryLabel}
+            <span className="h-3 border-sky-500/25 border-l" />
+            <span className="normal-case tracking-normal">
+              {savedEvents.length} events
+            </span>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="inline-flex h-8 items-center gap-2 rounded-md border border-border/70 bg-background px-3 font-medium text-sm shadow-xs">
@@ -1395,17 +1416,33 @@ function RelayLogConsole({
           </div>
           <Button
             className="h-8 gap-2 transition-transform duration-150 ease-out active:scale-[0.97]"
+            disabled={savedLogsQuery.isFetching}
+            onClick={() => savedLogsQuery.refetch()}
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            <RefreshCw
+              className={cn(
+                "size-4",
+                savedLogsQuery.isFetching && "animate-spin"
+              )}
+            />
+            {messages.socksRelay.refreshLogsButton}
+          </Button>
+          <Button
+            className="h-8 gap-2 transition-transform duration-150 ease-out active:scale-[0.97]"
             onClick={clearLogs}
             size="sm"
             type="button"
             variant="outline"
           >
             <Eraser className="size-4" />
-            {messages.socksRelay.clearButton}
+            {messages.socksRelay.clearLiveButton}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="px-4 md:px-5">
+      <CardContent className="px-4 py-4 md:px-5">
         <Tabs defaultValue="message">
           <TabsList className="mb-3">
             <TabsTrigger value="message">
@@ -1437,6 +1474,38 @@ function RelayLogConsole({
       </CardContent>
     </Card>
   );
+}
+
+function toRelayEvent(log: RelayEventLog): RelayEvent {
+  return {
+    id: `saved-${log.id}`,
+    receivedAt: Date.parse(log.occurredAt),
+    payload: log.payload,
+    type: log.type,
+  };
+}
+
+function mergeRelayEvents(
+  savedEvents: RelayEvent[],
+  liveEvents: RelayEvent[]
+): RelayEvent[] {
+  const byIdentity = new Map<string, RelayEvent>();
+
+  for (const event of savedEvents) {
+    byIdentity.set(relayEventIdentity(event), event);
+  }
+  for (const event of liveEvents) {
+    byIdentity.set(relayEventIdentity(event), event);
+  }
+
+  return [...byIdentity.values()].sort(
+    (first, second) => first.receivedAt - second.receivedAt
+  );
+}
+
+function relayEventIdentity(event: RelayEvent): string {
+  const { data, flow, jobId, relayId, timestamp } = event.payload;
+  return [event.type, relayId, timestamp, flow, jobId, data].join("|");
 }
 
 function RelayLegend() {
