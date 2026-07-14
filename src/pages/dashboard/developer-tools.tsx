@@ -11,6 +11,8 @@ export function DeveloperToolsPage() {
       "json",
       "yaml",
       "cron",
+      "binary",
+      "hexadecimal",
       "validation",
       "conversion",
       "scheduling",

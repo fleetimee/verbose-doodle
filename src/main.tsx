@@ -93,6 +93,11 @@ const CronParserPage = lazy(() =>
     default: CronParserPage,
   }))
 );
+const NumberBaseConverterPage = lazy(() =>
+  import("@/pages/dashboard/number-base-converter").then(
+    ({ NumberBaseConverterPage }) => ({ default: NumberBaseConverterPage })
+  )
+);
 const SocksRelayRestApiPage = lazy(() =>
   import("@/pages/dashboard/socks-relay-rest-api").then(
     ({ SocksRelayRestApiPage }) => ({
@@ -167,6 +172,10 @@ function AppContent() {
             <Route
               element={<CronParserPage />}
               path="developer-tools/cron-parser"
+            />
+            <Route
+              element={<NumberBaseConverterPage />}
+              path="developer-tools/number-base-converter"
             />
             <Route element={<SocksRelayRouteGroup />} path="socks-relay">
               <Route

@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Binary,
   Braces,
   CalendarClock,
   FileJson,
@@ -56,6 +57,15 @@ export const DEVELOPER_TOOL_CATEGORIES: readonly DeveloperToolCategory[] = [
         runtime: messages.developerTools.converterRuntime,
         limit: messages.developerTools.converterLimit,
         tags: messages.developerTools.converterTags,
+      },
+      {
+        name: messages.numberBaseConverter.title,
+        description: messages.developerTools.numberBaseConverterDescription,
+        href: "/dashboard/developer-tools/number-base-converter",
+        icon: Binary,
+        runtime: messages.developerTools.numberBaseConverterRuntime,
+        limit: messages.developerTools.numberBaseConverterLimit,
+        tags: messages.developerTools.numberBaseConverterTags,
       },
     ],
   },

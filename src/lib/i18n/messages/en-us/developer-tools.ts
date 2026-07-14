@@ -36,6 +36,11 @@ export const developerToolsMessages = {
   converterRuntime: "Browser only",
   converterLimit: "1 MiB source",
   converterTags: ["JSON", "YAML 1.2", "Local conversion"],
+  numberBaseConverterDescription:
+    "Convert exact 8-, 16-, 32-, and 64-bit values across binary, octal, decimal, and hexadecimal.",
+  numberBaseConverterRuntime: "Browser only",
+  numberBaseConverterLimit: "64-bit exact",
+  numberBaseConverterTags: ["Binary", "Hex", "Two's complement"],
   cronParserDescription:
     "Explain five- or six-field Unix cron expressions and preview the next five runs in any IANA timezone.",
   cronParserRuntime: "Browser only",
