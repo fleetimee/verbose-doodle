@@ -88,6 +88,11 @@ const JsonYamlConverterPage = lazy(() =>
     ({ JsonYamlConverterPage }) => ({ default: JsonYamlConverterPage })
   )
 );
+const CronParserPage = lazy(() =>
+  import("@/pages/dashboard/cron-parser").then(({ CronParserPage }) => ({
+    default: CronParserPage,
+  }))
+);
 const SocksRelayRestApiPage = lazy(() =>
   import("@/pages/dashboard/socks-relay-rest-api").then(
     ({ SocksRelayRestApiPage }) => ({
@@ -158,6 +163,10 @@ function AppContent() {
             <Route
               element={<JsonYamlConverterPage />}
               path="developer-tools/json-yaml-converter"
+            />
+            <Route
+              element={<CronParserPage />}
+              path="developer-tools/cron-parser"
             />
             <Route element={<SocksRelayRouteGroup />} path="socks-relay">
               <Route

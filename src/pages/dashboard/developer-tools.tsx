@@ -6,7 +6,15 @@ export function DeveloperToolsPage() {
   useDocumentMeta({
     title: messages.developerTools.documentTitle,
     description: messages.developerTools.documentDescription,
-    keywords: ["developer tools", "json", "yaml", "validation", "conversion"],
+    keywords: [
+      "developer tools",
+      "json",
+      "yaml",
+      "cron",
+      "validation",
+      "conversion",
+      "scheduling",
+    ],
   });
 
   return <DeveloperToolsCatalog />;

@@ -19,6 +19,7 @@ describe("DeveloperToolsCatalog", () => {
     ).toBeDefined();
     expect(screen.getByRole("button", { name: "Validation" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Conversion" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Scheduling" })).toBeDefined();
 
     expect(
       screen
@@ -30,6 +31,11 @@ describe("DeveloperToolsCatalog", () => {
         .getByRole("link", { name: "Open JSON/YAML Converter" })
         .getAttribute("href")
     ).toBe("/dashboard/developer-tools/json-yaml-converter");
+    expect(
+      screen
+        .getByRole("link", { name: "Open Cron Parser" })
+        .getAttribute("href")
+    ).toBe("/dashboard/developer-tools/cron-parser");
   });
 
   test("filters categories and switches between grid and list views", async () => {

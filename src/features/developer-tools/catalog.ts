@@ -1,5 +1,12 @@
 import type { LucideIcon } from "lucide-react";
-import { Braces, FileJson, RefreshCw, ShieldCheck } from "lucide-react";
+import {
+  Braces,
+  CalendarClock,
+  FileJson,
+  RefreshCw,
+  ShieldCheck,
+  Timer,
+} from "lucide-react";
 import { messages } from "@/lib/i18n";
 
 export type DeveloperToolDefinition = {
@@ -13,7 +20,7 @@ export type DeveloperToolDefinition = {
 };
 
 export type DeveloperToolCategory = {
-  readonly id: "conversion" | "validation";
+  readonly id: "conversion" | "scheduling" | "validation";
   readonly icon: LucideIcon;
   readonly name: string;
   readonly tools: readonly DeveloperToolDefinition[];
@@ -49,6 +56,22 @@ export const DEVELOPER_TOOL_CATEGORIES: readonly DeveloperToolCategory[] = [
         runtime: messages.developerTools.converterRuntime,
         limit: messages.developerTools.converterLimit,
         tags: messages.developerTools.converterTags,
+      },
+    ],
+  },
+  {
+    id: "scheduling",
+    name: messages.developerTools.schedulingCategory,
+    icon: CalendarClock,
+    tools: [
+      {
+        name: messages.cronParser.title,
+        description: messages.developerTools.cronParserDescription,
+        href: "/dashboard/developer-tools/cron-parser",
+        icon: Timer,
+        runtime: messages.developerTools.cronParserRuntime,
+        limit: messages.developerTools.cronParserLimit,
+        tags: messages.developerTools.cronParserTags,
       },
     ],
   },
