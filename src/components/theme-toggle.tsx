@@ -1,4 +1,5 @@
 import { Moon, Sun } from "lucide-react";
+import { useReducedMotion } from "motion/react";
 import { useTheme } from "@/components/theme-provider";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -11,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const shouldReduceMotion = useReducedMotion();
 
   const isDark =
     theme === "dark" ||
@@ -20,7 +22,7 @@ export function ThemeToggle() {
   const handleToggle = (checked: boolean) => {
     const newTheme = checked ? "dark" : "light";
 
-    if (!document.startViewTransition) {
+    if (shouldReduceMotion || !document.startViewTransition) {
       setTheme(newTheme);
       return;
     }
@@ -36,7 +38,7 @@ export function ThemeToggle() {
         <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 shadow-sm transition-shadow hover:shadow-md">
           <Sun
             className={cn(
-              "h-4 w-4 transition-all duration-300",
+              "h-4 w-4 transition-[color,transform] duration-200 ease-[var(--ease-out)] motion-reduce:transition-none",
               isDark
                 ? "scale-90 text-muted-foreground"
                 : "scale-100 text-amber-500"
@@ -50,7 +52,7 @@ export function ThemeToggle() {
           />
           <Moon
             className={cn(
-              "h-4 w-4 transition-all duration-300",
+              "h-4 w-4 transition-[color,transform] duration-200 ease-[var(--ease-out)] motion-reduce:transition-none",
               isDark
                 ? "scale-100 text-blue-400"
                 : "scale-90 text-muted-foreground"

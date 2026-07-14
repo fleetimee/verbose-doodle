@@ -73,6 +73,11 @@ const UdpPage = lazy(() =>
     default: UdpPage,
   }))
 );
+const JsonSchemaValidatorPage = lazy(() =>
+  import("@/pages/dashboard/json-schema-validator").then(
+    ({ JsonSchemaValidatorPage }) => ({ default: JsonSchemaValidatorPage })
+  )
+);
 const SocksRelayRestApiPage = lazy(() =>
   import("@/pages/dashboard/socks-relay-rest-api").then(
     ({ SocksRelayRestApiPage }) => ({
@@ -135,6 +140,10 @@ function AppContent() {
             <Route element={<TcpClientPage />} path="socket-test/tcp-client" />
             <Route element={<TcpServerPage />} path="socket-test/tcp-server" />
             <Route element={<UdpPage />} path="socket-test/udp" />
+            <Route
+              element={<JsonSchemaValidatorPage />}
+              path="developer-tools/json-schema-validator"
+            />
             <Route element={<SocksRelayRouteGroup />} path="socks-relay">
               <Route
                 element={

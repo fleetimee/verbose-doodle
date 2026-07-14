@@ -1,7 +1,7 @@
 "use client";
 
 import { Torus, X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type React from "react";
 import {
   createContext,
@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 export interface TourStep {
@@ -152,6 +153,7 @@ export function TourProvider({
     height: number;
   } | null>(null);
   const [isCompleted, setIsCompleted] = useState(isTourCompleted);
+  const shouldReduceMotion = useReducedMotion();
 
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentSize, setContentSize] = useState({ width: 300, height: 200 });
@@ -421,8 +423,14 @@ export function TourProvider({
                 "z-[100] border-2 border-muted-foreground",
                 className
               )}
-              exit={{ opacity: 0, scale: 0.95 }}
-              initial={{ opacity: 0, scale: 0.95 }}
+              exit={{
+                opacity: 0,
+                scale: shouldReduceMotion ? 1 : 0.95,
+              }}
+              initial={{
+                opacity: 0,
+                scale: shouldReduceMotion ? 1 : 0.95,
+              }}
               style={{
                 position: "fixed",
                 top: elementPosition.top,
@@ -441,8 +449,8 @@ export function TourProvider({
                 left: contentPosition.left,
               }}
               className="relative z-[100] rounded-lg border bg-background p-4 shadow-lg"
-              exit={{ opacity: 0, y: 10 }}
-              initial={{ opacity: 0, y: 10 }}
+              exit={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
               ref={contentRef}
               style={{
                 position: "fixed",
@@ -450,9 +458,11 @@ export function TourProvider({
                 minWidth: 300,
               }}
               transition={{
-                duration: 0.8,
-                ease: [0.16, 1, 0.3, 1],
-                opacity: { duration: 0.4 },
+                duration: shouldReduceMotion
+                  ? MOTION_DURATION.instant
+                  : MOTION_DURATION.panel,
+                ease: MOTION_EASE.inOut,
+                opacity: { duration: MOTION_DURATION.standard },
               }}
             >
               <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
@@ -478,8 +488,16 @@ export function TourProvider({
                   <motion.div
                     animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                     className="overflow-hidden"
-                    exit={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
-                    initial={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
+                    exit={{
+                      opacity: 0,
+                      scale: shouldReduceMotion ? 1 : 0.97,
+                      filter: shouldReduceMotion ? "blur(0px)" : "blur(2px)",
+                    }}
+                    initial={{
+                      opacity: 0,
+                      scale: shouldReduceMotion ? 1 : 0.97,
+                      filter: shouldReduceMotion ? "blur(0px)" : "blur(2px)",
+                    }}
                     key={`tour-content-${currentStep}`}
                     onAnimationComplete={() => {
                       contentTransitioning.current = false;
@@ -492,10 +510,8 @@ export function TourProvider({
                       }
                     }}
                     transition={{
-                      duration: 0.2,
-                      height: {
-                        duration: 0.4,
-                      },
+                      duration: MOTION_DURATION.standard,
+                      ease: MOTION_EASE.out,
                     }}
                   >
                     {steps[currentStep]?.content}
@@ -555,6 +571,7 @@ export function TourAlertDialog({
   setIsOpen: (isOpen: boolean) => void;
 }) {
   const { startTour, steps, isTourCompleted, currentStep } = useTour();
+  const shouldReduceMotion = useReducedMotion();
 
   if (isTourCompleted || steps.length === 0 || currentStep > -1) {
     return null;
@@ -573,23 +590,30 @@ export function TourAlertDialog({
               animate={{
                 scale: 1,
                 filter: "blur(0px)",
-                y: [0, -8, 0],
-                rotate: [42, 48, 42],
+                y: shouldReduceMotion ? 0 : [0, -8, 0],
+                rotate: shouldReduceMotion ? 42 : [42, 48, 42],
               }}
-              initial={{ scale: 0.7, filter: "blur(10px)" }}
+              initial={{
+                scale: shouldReduceMotion ? 1 : 0.9,
+                filter: shouldReduceMotion ? "blur(0px)" : "blur(10px)",
+              }}
               transition={{
-                duration: 0.4,
-                ease: "easeOut",
-                y: {
-                  duration: 2.5,
-                  repeat: Number.POSITIVE_INFINITY,
-                  ease: "easeInOut",
-                },
-                rotate: {
-                  duration: 3,
-                  repeat: Number.POSITIVE_INFINITY,
-                  ease: "easeInOut",
-                },
+                duration: MOTION_DURATION.standard,
+                ease: MOTION_EASE.out,
+                y: shouldReduceMotion
+                  ? { duration: MOTION_DURATION.instant }
+                  : {
+                      duration: 2.5,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                    },
+                rotate: shouldReduceMotion
+                  ? { duration: MOTION_DURATION.instant }
+                  : {
+                      duration: 3,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                    },
               }}
             >
               <Torus className="size-32 stroke-1 text-primary" />

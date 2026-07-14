@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Check, Code2, FileText, Hash } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,9 @@ import { StatusCodeCombobox } from "@/features/endpoints/components/status-code-
 import {
   ANIMATION_DURATION,
   JSON_PRESETS,
-  STEP_TRANSITION_DURATION,
 } from "@/features/endpoints/constants/stepper-steps";
 import type { EndpointResponse } from "@/features/endpoints/types";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 type EditType = "name" | "statusCode" | "json";
 
@@ -103,6 +103,7 @@ export function EditResponseStepper({
 }: EditResponseStepperProps) {
   const step = stepConfig[editType];
   const schema = editSchemas[editType];
+  const shouldReduceMotion = useReducedMotion();
 
   const getDefaultValue = () => {
     if (editType === "statusCode") {
@@ -173,16 +174,18 @@ export function EditResponseStepper({
             onKeyDown={handleKeyDown}
             onSubmit={handleSubmit}
           >
-            <AnimatePresence mode="wait">
+            <AnimatePresence initial={false}>
               <motion.div
                 animate={{ opacity: 1, x: 0 }}
                 className="flex flex-1 flex-col gap-8 p-5 md:p-8"
-                exit={{ opacity: 0, x: -20 }}
-                initial={{ opacity: 0, x: 20 }}
+                exit={{ opacity: 0, x: shouldReduceMotion ? 0 : -8 }}
+                initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 8 }}
                 key={editType}
                 transition={{
-                  duration: STEP_TRANSITION_DURATION,
-                  ease: "easeInOut",
+                  duration: shouldReduceMotion
+                    ? MOTION_DURATION.fast
+                    : MOTION_DURATION.step,
+                  ease: MOTION_EASE.out,
                 }}
               >
                 <div className="flex items-start gap-3 border-b pb-5">

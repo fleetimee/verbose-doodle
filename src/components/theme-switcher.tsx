@@ -2,9 +2,10 @@
 
 import { useControlled } from "@base-ui/utils/useControlled";
 import { Moon, Sun } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { messages } from "@/lib/i18n";
+import { MOTION_DURATION } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const themes = [
@@ -19,9 +20,6 @@ const themes = [
     label: messages.theme.darkTheme,
   },
 ];
-
-const ACTIVE_ICON_SCALE = 1.1;
-const INACTIVE_ICON_OPACITY = 0.6;
 
 export type ThemeSwitcherProps = {
   value?: "light" | "dark";
@@ -42,6 +40,7 @@ export const ThemeSwitcher = ({
     name: "ThemeSwitcher",
   });
   const [mounted, setMounted] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   const setTheme = useCallback(
     (themeKey: "light" | "dark") => {
@@ -53,7 +52,7 @@ export const ThemeSwitcher = ({
 
   const handleThemeClick = useCallback(
     (themeKey: "light" | "dark") => {
-      if (!document.startViewTransition) {
+      if (shouldReduceMotion || !document.startViewTransition) {
         setTheme(themeKey);
         return;
       }
@@ -62,7 +61,7 @@ export const ThemeSwitcher = ({
         setTheme(themeKey);
       });
     },
-    [setTheme]
+    [setTheme, shouldReduceMotion]
   );
 
   // Prevent hydration mismatch
@@ -91,29 +90,25 @@ export const ThemeSwitcher = ({
             key={key}
             onClick={() => handleThemeClick(key as "light" | "dark")}
             type="button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={shouldReduceMotion ? undefined : { scale: 1.05 }}
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
           >
             {isActive && (
               <motion.div
                 className="absolute inset-0 rounded-full bg-secondary"
-                layoutId="activeTheme"
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30,
-                }}
+                layoutId={shouldReduceMotion ? undefined : "activeTheme"}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: MOTION_DURATION.instant }
+                    : { type: "spring", stiffness: 300, damping: 30 }
+                }
               />
             )}
-            <motion.div
-              animate={{
-                scale: isActive ? ACTIVE_ICON_SCALE : 1,
-                opacity: isActive ? 1 : INACTIVE_ICON_OPACITY,
-              }}
-              transition={{
-                duration: 0.2,
-                ease: "easeInOut",
-              }}
+            <div
+              className={cn(
+                "transition-[opacity,transform] duration-200 ease-[var(--ease-in-out)] motion-reduce:transition-none",
+                isActive ? "scale-110 opacity-100" : "scale-100 opacity-60"
+              )}
             >
               <Icon
                 className={cn(
@@ -121,7 +116,7 @@ export const ThemeSwitcher = ({
                   isActive ? "text-foreground" : "text-muted-foreground"
                 )}
               />
-            </motion.div>
+            </div>
           </motion.button>
         );
       })}

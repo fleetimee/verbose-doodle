@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { lazy, Suspense, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
@@ -19,13 +19,13 @@ import {
   ANIMATION_DURATION,
   JSON_PRESETS,
   PERCENT_MULTIPLIER,
-  STEP_TRANSITION_DURATION,
   STEPS,
 } from "@/features/endpoints/constants/stepper-steps";
 import {
   type ResponseFormData,
   responseSchema,
 } from "@/features/endpoints/schemas/response-schema";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 const ResponseReviewStep = lazy(() =>
   import("@/features/endpoints/components/response-review-step").then(
@@ -83,6 +83,7 @@ export function ResponseStepper({
   isSubmitting = false,
 }: ResponseStepperProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
   const currentStep = STEPS[currentStepIndex];
 
   const form = useForm<ResponseFormData>({
@@ -227,16 +228,24 @@ export function ResponseStepper({
               onKeyDown={handleKeyDown}
               onSubmit={handleSubmit}
             >
-              <AnimatePresence mode="wait">
+              <AnimatePresence initial={false}>
                 <motion.div
                   animate={{ opacity: 1, x: 0 }}
                   className="flex flex-1 flex-col gap-8 p-5 md:p-8"
-                  exit={{ opacity: 0, x: -20 }}
-                  initial={{ opacity: 0, x: 20 }}
+                  exit={{
+                    opacity: 0,
+                    x: shouldReduceMotion ? 0 : -8,
+                  }}
+                  initial={{
+                    opacity: 0,
+                    x: shouldReduceMotion ? 0 : 8,
+                  }}
                   key={currentStepIndex}
                   transition={{
-                    duration: STEP_TRANSITION_DURATION,
-                    ease: "easeInOut",
+                    duration: shouldReduceMotion
+                      ? MOTION_DURATION.fast
+                      : MOTION_DURATION.step,
+                    ease: MOTION_EASE.out,
                   }}
                 >
                   <div className="flex items-start gap-3 border-b pb-5">

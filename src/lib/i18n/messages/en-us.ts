@@ -3,6 +3,7 @@ import { authMessages } from "@/lib/i18n/messages/en-us/auth";
 import { commonMessages } from "@/lib/i18n/messages/en-us/common";
 import { endpointsMessages } from "@/lib/i18n/messages/en-us/endpoints";
 import { errorsMessages } from "@/lib/i18n/messages/en-us/errors";
+import { jsonSchemaValidatorMessages } from "@/lib/i18n/messages/en-us/json-schema-validator";
 import { overviewMessages } from "@/lib/i18n/messages/en-us/overview";
 import { socketTesterMessages } from "@/lib/i18n/messages/en-us/socket-tester";
 import { socksRelayMessages } from "@/lib/i18n/messages/en-us/socks-relay";
@@ -18,6 +19,7 @@ export const enUsMessages = {
   users: usersMessages,
   overview: overviewMessages,
   endpoints: endpointsMessages,
+  jsonSchemaValidator: jsonSchemaValidatorMessages,
   socketTester: socketTesterMessages,
   socksRelay: socksRelayMessages,
 } as const;

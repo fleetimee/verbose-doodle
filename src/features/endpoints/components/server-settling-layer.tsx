@@ -1,7 +1,8 @@
 import { Loader2, Server } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 const SETTLING_DURATION_MS = 10_000;
 const PROGRESS_UPDATE_INTERVAL_MS = 50;
@@ -25,6 +26,7 @@ export function ServerSettlingLayer({
   message = "Waiting for server to settle...",
 }: ServerSettlingLayerProps) {
   const [progress, setProgress] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
   const [secondsRemaining, setSecondsRemaining] = useState(
     SETTLING_DURATION_MS / MS_TO_SECONDS
   );
@@ -63,13 +65,16 @@ export function ServerSettlingLayer({
       className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm"
       exit={{ opacity: 0 }}
       initial={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: MOTION_DURATION.fast, ease: MOTION_EASE.out }}
     >
       <motion.div
         animate={{ scale: 1, opacity: 1 }}
         className="w-full max-w-md space-y-8 px-8"
-        initial={{ scale: 0.9, opacity: 0 }}
-        transition={{ delay: 0.1, duration: 0.4, ease: "easeOut" }}
+        initial={{ scale: shouldReduceMotion ? 1 : 0.95, opacity: 0 }}
+        transition={{
+          duration: MOTION_DURATION.standard,
+          ease: MOTION_EASE.out,
+        }}
       >
         {/* Icon with pulsing animation */}
         <div className="flex justify-center">
@@ -79,12 +84,14 @@ export function ServerSettlingLayer({
             </div>
             <motion.div
               animate={{
-                scale: [PULSE_SCALE_MIN, PULSE_SCALE_MAX, PULSE_SCALE_MIN],
+                scale: shouldReduceMotion
+                  ? PULSE_SCALE_MIN
+                  : [PULSE_SCALE_MIN, PULSE_SCALE_MAX, PULSE_SCALE_MIN],
               }}
               className="absolute inset-0 rounded-full bg-primary/5"
               transition={{
                 duration: PULSE_DURATION_S,
-                repeat: Number.POSITIVE_INFINITY,
+                repeat: shouldReduceMotion ? 0 : Number.POSITIVE_INFINITY,
                 ease: "easeInOut",
               }}
             />
@@ -96,16 +103,16 @@ export function ServerSettlingLayer({
           <motion.h3
             animate={{ opacity: 1, y: 0 }}
             className="font-semibold text-xl"
-            initial={{ opacity: 0, y: 10 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
+            transition={{ duration: MOTION_DURATION.standard }}
           >
             {message}
           </motion.h3>
           <motion.p
             animate={{ opacity: 1, y: 0 }}
             className="text-muted-foreground text-sm"
-            initial={{ opacity: 0, y: 10 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
+            transition={{ duration: MOTION_DURATION.standard }}
           >
             Your changes are being applied to the server. Please wait while the
             configuration settles.
@@ -116,10 +123,10 @@ export function ServerSettlingLayer({
         <motion.div
           animate={{ opacity: 1, scale: 1 }}
           className="flex items-center justify-center gap-2"
-          initial={{ opacity: 0, scale: 0.9 }}
-          transition={{ delay: 0.4, duration: 0.4 }}
+          initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.95 }}
+          transition={{ duration: MOTION_DURATION.standard }}
         >
-          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          <Loader2 className="h-5 w-5 text-primary motion-safe:animate-spin" />
           <span className="font-mono text-2xl tabular-nums">
             {secondsRemaining}s
           </span>
@@ -129,8 +136,8 @@ export function ServerSettlingLayer({
         <motion.div
           animate={{ opacity: 1, y: 0 }}
           className="space-y-2"
-          initial={{ opacity: 0, y: 10 }}
-          transition={{ delay: 0.5, duration: 0.4 }}
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
+          transition={{ duration: MOTION_DURATION.standard }}
         >
           <Progress className="h-2" value={progress} />
           <p className="text-center text-muted-foreground text-xs">
@@ -143,7 +150,7 @@ export function ServerSettlingLayer({
           animate={{ opacity: 1 }}
           className="text-center text-muted-foreground text-xs"
           initial={{ opacity: 0 }}
-          transition={{ delay: 0.8, duration: 0.4 }}
+          transition={{ duration: MOTION_DURATION.standard }}
         >
           This ensures the API is ready to handle requests with the new behavior
         </motion.p>

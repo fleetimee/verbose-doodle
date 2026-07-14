@@ -48,7 +48,7 @@ export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
         <div className="divide-y divide-border/70">
           {data.recentEndpoints.map((endpoint) => (
             <Link
-              className="group relative -mx-3 flex items-center justify-between gap-3 rounded-md border border-transparent px-3 py-4 outline-none transition-all duration-200 first:-mt-2 last:-mb-2 hover:border-border/70 hover:bg-[linear-gradient(90deg,color-mix(in_oklab,var(--primary)_13%,transparent),color-mix(in_oklab,var(--accent)_38%,transparent))] hover:shadow-[0_16px_40px_-28px_var(--primary)] focus-visible:border-border/70 focus-visible:bg-[linear-gradient(90deg,color-mix(in_oklab,var(--primary)_13%,transparent),color-mix(in_oklab,var(--accent)_38%,transparent))] focus-visible:ring-2 focus-visible:ring-primary/25"
+              className="group relative -mx-3 flex items-center justify-between gap-3 rounded-md border border-transparent px-3 py-4 outline-none transition-[color,background-color,border-color,box-shadow] duration-200 ease-[var(--ease-out)] first:-mt-2 last:-mb-2 hover:border-border/70 hover:bg-[linear-gradient(90deg,color-mix(in_oklab,var(--primary)_13%,transparent),color-mix(in_oklab,var(--accent)_38%,transparent))] hover:shadow-[0_16px_40px_-28px_var(--primary)] focus-visible:border-border/70 focus-visible:bg-[linear-gradient(90deg,color-mix(in_oklab,var(--primary)_13%,transparent),color-mix(in_oklab,var(--accent)_38%,transparent))] focus-visible:ring-2 focus-visible:ring-primary/25 motion-reduce:transition-none"
               key={endpoint.endpointId}
               onFocus={() => prefetchEndpoint(endpoint.endpointId)}
               onMouseEnter={() => prefetchEndpoint(endpoint.endpointId)}
@@ -73,11 +73,11 @@ export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
                 </div>
               </div>
               <div
-                className={`shrink-0 rounded-full border px-2.5 py-0.5 font-semibold text-xs shadow-[inset_0_1px_0_color-mix(in_oklab,var(--background)_45%,transparent)] transition-all duration-200 group-hover:scale-105 group-focus-visible:scale-105 ${methodColors[endpoint.method]}`}
+                className={`shrink-0 rounded-full border px-2.5 py-0.5 font-semibold text-xs shadow-[inset_0_1px_0_color-mix(in_oklab,var(--background)_45%,transparent)] transition-[color,background-color,border-color,transform] duration-[160ms] ease-[var(--ease-out)] group-hover:scale-105 group-focus-visible:scale-105 motion-reduce:transform-none motion-reduce:transition-none ${methodColors[endpoint.method]}`}
               >
                 {endpoint.method}
               </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary group-focus-visible:translate-x-1 group-focus-visible:text-primary" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-[color,transform] duration-[160ms] ease-[var(--ease-out)] group-hover:translate-x-1 group-hover:text-primary group-focus-visible:translate-x-1 group-focus-visible:text-primary motion-reduce:transform-none motion-reduce:transition-none" />
             </Link>
           ))}
         </div>

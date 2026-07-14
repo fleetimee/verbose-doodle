@@ -25,7 +25,7 @@ export function SocketBridgeFloatingStatus() {
         >
           <span className="relative flex size-1.5">
             {bridge.bridgeStatus === "connected" && (
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+              <span className="absolute inline-flex size-full rounded-full bg-emerald-400 opacity-40 motion-safe:animate-ping" />
             )}
             <span
               className={cn(

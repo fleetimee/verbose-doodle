@@ -1,4 +1,5 @@
 import {
+  Braces,
   Info,
   LayoutDashboard,
   Network,
@@ -29,6 +30,7 @@ import {
 import { useAuth } from "@/features/auth/context";
 import { usePrefetchEndpoints } from "@/features/endpoints/hooks/use-prefetch-endpoints";
 import { usePrefetchOverview } from "@/features/overview/hooks/use-prefetch-overview";
+import { messages } from "@/lib/i18n";
 
 const data = {
   navMain: [
@@ -61,6 +63,12 @@ const data = {
       url: "/dashboard/socket-test/udp",
       icon: Waves,
       groupLabel: "Socket Test",
+    },
+    {
+      title: messages.jsonSchemaValidator.title,
+      url: "/dashboard/developer-tools/json-schema-validator",
+      icon: Braces,
+      groupLabel: messages.jsonSchemaValidator.navigationGroup,
     },
     {
       title: "REST API",

@@ -68,7 +68,7 @@ export function SessionTimer() {
             )}
             size="sm"
           >
-            <Clock className={cn(isWarning && "animate-pulse")} />
+            <Clock className={cn(isWarning && "motion-safe:animate-pulse")} />
             <span>
               {formatMessage(messages.auth.sessionLabel, { time: timeDisplay })}
             </span>
