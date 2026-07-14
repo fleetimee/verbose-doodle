@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { TimezoneCombobox } from "@/features/cron-parser/components/timezone-combobox";
 import {
   CronParseError,
   type CronParseResult,
@@ -14,6 +13,12 @@ import {
   DeveloperToolTourButton,
   type DeveloperToolTourStep,
 } from "@/features/developer-tools/components/developer-tool-tour-button";
+import { TimezoneCombobox } from "@/features/developer-tools/components/timezone-combobox";
+import {
+  getBrowserTimeZone,
+  getTimeZoneOptions,
+  resolveTimeZone,
+} from "@/features/developer-tools/timezones";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { formatMessage, messages } from "@/lib/i18n";
 
@@ -60,28 +65,6 @@ const CRON_PARSER_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
   },
 ];
 
-function getBrowserTimeZone() {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-  } catch {
-    return "UTC";
-  }
-}
-
-function getTimeZoneOptions(browserTimeZone: string) {
-  const supported =
-    "supportedValuesOf" in Intl ? Intl.supportedValuesOf("timeZone") : [];
-  return [...new Set(["UTC", browserTimeZone, ...supported])].sort((a, b) => {
-    if (a === "UTC") {
-      return -1;
-    }
-    if (b === "UTC") {
-      return 1;
-    }
-    return a.localeCompare(b);
-  });
-}
-
 function formatExecution(date: Date, timeZone: string) {
   const dateTime = new Intl.DateTimeFormat("en-US", {
     dateStyle: "full",
@@ -104,25 +87,6 @@ function getTimeZoneName(
     timeZoneName,
   }).formatToParts(date);
   return parts.find((part) => part.type === "timeZoneName")?.value ?? timeZone;
-}
-
-function resolveTimeZone(savedTimeZone: string, browserTimeZone: string) {
-  if (isValidTimeZone(savedTimeZone)) {
-    return savedTimeZone;
-  }
-  if (isValidTimeZone(browserTimeZone)) {
-    return browserTimeZone;
-  }
-  return "UTC";
-}
-
-function isValidTimeZone(timeZone: string) {
-  try {
-    new Intl.DateTimeFormat("en-US", { timeZone }).format();
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 export function CronParser() {
@@ -293,8 +257,14 @@ export function CronParser() {
                 {messages.cronParser.timezoneLabel}
               </Label>
               <TimezoneCombobox
+                emptyMessage={messages.cronParser.timezoneEmpty}
+                id="cron-timezone"
                 onChange={changeTimeZone}
                 options={timeZoneOptions}
+                searchPlaceholder={messages.cronParser.timezoneSearch}
+                useQueryLabel={(timezone) =>
+                  formatMessage(messages.cronParser.timezoneUse, { timezone })
+                }
                 value={timeZone}
               />
             </div>

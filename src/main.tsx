@@ -93,6 +93,11 @@ const CronParserPage = lazy(() =>
     default: CronParserPage,
   }))
 );
+const DateConverterPage = lazy(() =>
+  import("@/pages/dashboard/date-converter").then(({ DateConverterPage }) => ({
+    default: DateConverterPage,
+  }))
+);
 const NumberBaseConverterPage = lazy(() =>
   import("@/pages/dashboard/number-base-converter").then(
     ({ NumberBaseConverterPage }) => ({ default: NumberBaseConverterPage })
@@ -176,6 +181,10 @@ function AppContent() {
             <Route
               element={<NumberBaseConverterPage />}
               path="developer-tools/number-base-converter"
+            />
+            <Route
+              element={<DateConverterPage />}
+              path="developer-tools/date-converter"
             />
             <Route element={<SocksRelayRouteGroup />} path="socks-relay">
               <Route

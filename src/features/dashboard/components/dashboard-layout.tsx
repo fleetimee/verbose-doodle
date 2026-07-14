@@ -43,6 +43,7 @@ const routeLabels: Record<string, string> = {
   "json-schema-validator": messages.jsonSchemaValidator.title,
   "cron-parser": messages.cronParser.title,
   "number-base-converter": messages.numberBaseConverter.title,
+  "date-converter": messages.dateConverter.title,
 };
 
 // Updated regex to match encoded IDs (base64 URL-safe characters)

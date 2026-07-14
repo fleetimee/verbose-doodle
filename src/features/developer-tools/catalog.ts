@@ -3,6 +3,7 @@ import {
   Binary,
   Braces,
   CalendarClock,
+  CalendarDays,
   FileJson,
   RefreshCw,
   ShieldCheck,
@@ -49,6 +50,15 @@ export const DEVELOPER_TOOL_CATEGORIES: readonly DeveloperToolCategory[] = [
     name: messages.developerTools.conversionCategory,
     icon: RefreshCw,
     tools: [
+      {
+        name: messages.dateConverter.title,
+        description: messages.developerTools.dateConverterDescription,
+        href: "/dashboard/developer-tools/date-converter",
+        icon: CalendarDays,
+        runtime: messages.developerTools.dateConverterRuntime,
+        limit: messages.developerTools.dateConverterLimit,
+        tags: messages.developerTools.dateConverterTags,
+      },
       {
         name: messages.jsonYamlConverter.title,
         description: messages.developerTools.converterDescription,

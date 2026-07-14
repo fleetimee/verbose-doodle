@@ -14,18 +14,26 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { formatMessage, messages } from "@/lib/i18n";
+import { isValidTimeZone } from "@/features/developer-tools/timezones";
 import { cn } from "@/lib/utils";
 
 type TimezoneComboboxProps = {
+  readonly emptyMessage: string;
+  readonly id: string;
   readonly onChange: (timeZone: string) => void;
   readonly options: readonly string[];
+  readonly searchPlaceholder: string;
+  readonly useQueryLabel: (timeZone: string) => string;
   readonly value: string;
 };
 
 export function TimezoneCombobox({
+  emptyMessage,
+  id,
   onChange,
   options,
+  searchPlaceholder,
+  useQueryLabel,
   value,
 }: TimezoneComboboxProps) {
   const [open, setOpen] = useState(false);
@@ -37,17 +45,9 @@ export function TimezoneCombobox({
     setOpen(false);
   };
 
-  const canUseQuery = (() => {
-    if (!query.trim()) {
-      return false;
-    }
-    try {
-      new Intl.DateTimeFormat("en-US", { timeZone: query.trim() }).format();
-      return true;
-    } catch {
-      return false;
-    }
-  })();
+  const normalizedQuery = query.trim();
+  const canUseQuery =
+    Boolean(normalizedQuery) && isValidTimeZone(normalizedQuery);
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -55,7 +55,7 @@ export function TimezoneCombobox({
         <Button
           aria-expanded={open}
           className="w-full justify-between rounded-md bg-background font-mono font-normal shadow-none"
-          id="cron-timezone"
+          id={id}
           role="combobox"
           type="button"
           variant="outline"
@@ -68,7 +68,7 @@ export function TimezoneCombobox({
         <Command>
           <CommandInput
             onValueChange={setQuery}
-            placeholder={messages.cronParser.timezoneSearch}
+            placeholder={searchPlaceholder}
             value={query}
           />
           <CommandList>
@@ -76,15 +76,13 @@ export function TimezoneCombobox({
               {canUseQuery ? (
                 <button
                   className="w-full px-3 py-2 text-left font-mono text-xs hover:bg-accent"
-                  onClick={() => selectTimeZone(query.trim())}
+                  onClick={() => selectTimeZone(normalizedQuery)}
                   type="button"
                 >
-                  {formatMessage(messages.cronParser.timezoneUse, {
-                    timezone: query.trim(),
-                  })}
+                  {useQueryLabel(normalizedQuery)}
                 </button>
               ) : (
-                messages.cronParser.timezoneEmpty
+                emptyMessage
               )}
             </CommandEmpty>
             <CommandGroup>

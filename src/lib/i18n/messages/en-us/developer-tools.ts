@@ -26,6 +26,11 @@ export const developerToolsMessages = {
   validationCategory: "Validation",
   conversionCategory: "Conversion",
   schedulingCategory: "Scheduling",
+  dateConverterDescription:
+    "Convert Unix seconds, milliseconds, and ISO 8601 dates across UTC and IANA timezones.",
+  dateConverterRuntime: "Browser only",
+  dateConverterLimit: "ECMAScript date range",
+  dateConverterTags: ["Unix time", "ISO 8601", "Timezones"],
   schemaValidatorDescription:
     "Validate a JSON document against Draft 7, 2019-09, or 2020-12 schemas with path-based diagnostics.",
   schemaValidatorRuntime: "Validation service",

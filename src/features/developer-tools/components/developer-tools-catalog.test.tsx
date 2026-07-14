@@ -41,6 +41,11 @@ describe("DeveloperToolsCatalog", () => {
         .getByRole("link", { name: "Open Number Base Converter" })
         .getAttribute("href")
     ).toBe("/dashboard/developer-tools/number-base-converter");
+    expect(
+      screen
+        .getByRole("link", { name: "Open Date Converter" })
+        .getAttribute("href")
+    ).toBe("/dashboard/developer-tools/date-converter");
   });
 
   test("filters categories and switches between grid and list views", async () => {
