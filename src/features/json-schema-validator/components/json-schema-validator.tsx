@@ -10,6 +10,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import {
+  DeveloperToolTourButton,
+  type DeveloperToolTourStep,
+} from "@/features/developer-tools/components/developer-tool-tour-button";
 import { DocumentEditor } from "@/features/developer-tools/components/document-editor";
 import { ValidationResult } from "@/features/json-schema-validator/components/validation-result";
 import {
@@ -46,6 +50,26 @@ const childVariants = {
     transition: { type: "spring" as const, stiffness: 100, damping: 20 },
   },
 };
+
+const JSON_SCHEMA_TOUR_ID = "json-schema-validator-intro";
+const JSON_SCHEMA_TOUR_TARGETS = {
+  controls: "json-schema-validator-tour-controls",
+  editors: "json-schema-validator-tour-editors",
+} as const;
+const JSON_SCHEMA_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
+  {
+    selectorId: JSON_SCHEMA_TOUR_TARGETS.controls,
+    position: "bottom",
+    title: messages.jsonSchemaValidator.tour.controlsTitle,
+    description: messages.jsonSchemaValidator.tour.controlsDescription,
+  },
+  {
+    selectorId: JSON_SCHEMA_TOUR_TARGETS.editors,
+    position: "top",
+    title: messages.jsonSchemaValidator.tour.editorsTitle,
+    description: messages.jsonSchemaValidator.tour.editorsDescription,
+  },
+];
 
 function serviceError(error: ApiError | null) {
   if (!error) {
@@ -164,6 +188,12 @@ export function JsonSchemaValidator() {
         </dl>
 
         <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 md:flex-col md:items-start">
+          <DeveloperToolTourButton
+            label={messages.jsonSchemaValidator.tour.startButton}
+            steps={JSON_SCHEMA_TOUR_STEPS}
+            storageKey="json-schema-validator-tour-seen"
+            tourId={JSON_SCHEMA_TOUR_ID}
+          />
           <button
             className="text-muted-foreground text-xs underline decoration-border underline-offset-4 transition-colors hover:text-foreground active:translate-y-px"
             onClick={resetExample}
@@ -184,6 +214,7 @@ export function JsonSchemaValidator() {
       <main className="min-w-0">
         <motion.section
           className="grid border-y md:grid-cols-[minmax(0,1fr)_auto]"
+          id={JSON_SCHEMA_TOUR_TARGETS.controls}
           variants={childVariants}
         >
           <div className="grid gap-4 py-4 sm:grid-cols-2 sm:items-end sm:gap-6 md:pr-6">
@@ -252,6 +283,7 @@ export function JsonSchemaValidator() {
 
         <motion.div
           className="mt-8 grid min-w-0 grid-cols-1 border-x border-b lg:grid-cols-2 lg:divide-x"
+          id={JSON_SCHEMA_TOUR_TARGETS.editors}
           variants={childVariants}
         >
           <DocumentEditor

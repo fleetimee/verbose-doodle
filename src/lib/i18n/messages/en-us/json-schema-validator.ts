@@ -69,4 +69,13 @@ export const jsonSchemaValidatorMessages = {
   diagnosticCopied: "Copied",
   diagnosticCopyError: "Could not copy the diagnostic",
   diagnosticsTruncated: "Showing 100 of {count} diagnostics.",
+  tour: {
+    startButton: "Start tour",
+    controlsTitle: "Choose validation rules",
+    controlsDescription:
+      "Pick a schema draft or let the validator detect it. Format assertions check values such as email addresses, dates, and URIs.",
+    editorsTitle: "Edit both documents",
+    editorsDescription:
+      "Put the JSON Schema on the left and the document under test on the right. Run validation with the button or Ctrl/Cmd+Enter.",
+  },
 } as const;

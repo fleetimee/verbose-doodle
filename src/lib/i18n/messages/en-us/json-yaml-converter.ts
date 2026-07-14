@@ -51,4 +51,16 @@ export const jsonYamlConverterMessages = {
   copyError: "Could not copy output.",
   preservationNote:
     "Converted output does not preserve YAML comments, anchors, aliases, or the original formatting.",
+  tour: {
+    startButton: "Start tour",
+    controlsTitle: "Set the conversion direction",
+    controlsDescription:
+      "Choose JSON or YAML as the source, then convert with the button or Ctrl/Cmd+Enter. Swap becomes available after a successful conversion.",
+    editorsTitle: "Work across two panes",
+    editorsDescription:
+      "Edit the source on the left. The read-only pane on the right shows formatted output in the other document type.",
+    outputTitle: "Use the converted output",
+    outputDescription:
+      "Copy a successful result here. Failed conversions keep the last valid output visible while you fix the source.",
+  },
 } as const;

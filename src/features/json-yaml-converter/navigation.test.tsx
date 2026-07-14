@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
+import { TourProvider } from "@/components/tour";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/features/auth/context";
 import { JsonYamlConverterPage } from "@/pages/dashboard/json-yaml-converter";
@@ -37,7 +38,11 @@ describe("JSON/YAML Converter navigation", () => {
       >
         <Routes>
           <Route
-            element={<JsonYamlConverterPage />}
+            element={
+              <TourProvider>
+                <JsonYamlConverterPage />
+              </TourProvider>
+            }
             path="/dashboard/developer-tools/json-yaml-converter"
           />
         </Routes>

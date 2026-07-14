@@ -7,6 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { TourProvider } from "@/components/tour";
 import { JsonYamlConverter } from "@/features/json-yaml-converter/components/json-yaml-converter";
 
 type CodeMirrorProps = {
@@ -48,7 +49,12 @@ afterEach(() => {
 });
 
 function renderConverter() {
-  return render(<JsonYamlConverter />);
+  localStorage.setItem("json-yaml-converter-tour-seen", "true");
+  return render(
+    <TourProvider closeable>
+      <JsonYamlConverter />
+    </TourProvider>
+  );
 }
 
 describe("JsonYamlConverter", () => {
@@ -88,6 +94,19 @@ describe("JsonYamlConverter", () => {
     fireEvent.click(screen.getByRole("button", { name: "Convert" }));
     expect(fetchMock).not.toHaveBeenCalled();
     globalThis.fetch = originalFetch;
+  });
+
+  test("walks through conversion controls and document panes", async () => {
+    const user = userEvent.setup();
+    renderConverter();
+
+    await user.click(screen.getByRole("button", { name: "Start tour" }));
+    expect(
+      await screen.findByText("Set the conversion direction")
+    ).toBeDefined();
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(await screen.findByText("Work across two panes")).toBeDefined();
   });
 
   test("switches direction and swaps a successful output into the source", async () => {

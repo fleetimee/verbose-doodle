@@ -2,6 +2,7 @@ import { afterEach, describe, expect, mock, test } from "bun:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { TourProvider } from "@/components/tour";
 import { JsonSchemaValidator } from "@/features/json-schema-validator/components/json-schema-validator";
 
 const originalFetch = globalThis.fetch;
@@ -11,12 +12,15 @@ afterEach(() => {
 });
 
 function renderValidator() {
+  localStorage.setItem("json-schema-validator-tour-seen", "true");
   const queryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false } },
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <JsonSchemaValidator />
+      <TourProvider closeable>
+        <JsonSchemaValidator />
+      </TourProvider>
     </QueryClientProvider>
   );
 }
@@ -57,6 +61,17 @@ describe("JsonSchemaValidator", () => {
       );
     });
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  test("walks through the validator controls and editors", async () => {
+    const user = userEvent.setup();
+    renderValidator();
+
+    await user.click(screen.getByRole("button", { name: "Start tour" }));
+    expect(await screen.findByText("Choose validation rules")).toBeDefined();
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(await screen.findByText("Edit both documents")).toBeDefined();
   });
 
   test("sends the selected draft and format assertion setting", async () => {

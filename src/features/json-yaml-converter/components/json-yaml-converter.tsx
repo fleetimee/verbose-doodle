@@ -10,6 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DeveloperToolTourButton,
+  type DeveloperToolTourStep,
+} from "@/features/developer-tools/components/developer-tool-tour-button";
 import { DocumentEditor } from "@/features/developer-tools/components/document-editor";
 import type { DocumentFormat } from "@/features/developer-tools/types";
 import {
@@ -33,6 +37,33 @@ const childVariants = {
     transition: { type: "spring" as const, stiffness: 100, damping: 20 },
   },
 };
+
+const JSON_YAML_TOUR_ID = "json-yaml-converter-intro";
+const JSON_YAML_TOUR_TARGETS = {
+  controls: "json-yaml-converter-tour-controls",
+  editors: "json-yaml-converter-tour-editors",
+  output: "json-yaml-converter-tour-output",
+} as const;
+const JSON_YAML_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
+  {
+    selectorId: JSON_YAML_TOUR_TARGETS.controls,
+    position: "bottom",
+    title: messages.jsonYamlConverter.tour.controlsTitle,
+    description: messages.jsonYamlConverter.tour.controlsDescription,
+  },
+  {
+    selectorId: JSON_YAML_TOUR_TARGETS.editors,
+    position: "top",
+    title: messages.jsonYamlConverter.tour.editorsTitle,
+    description: messages.jsonYamlConverter.tour.editorsDescription,
+  },
+  {
+    selectorId: JSON_YAML_TOUR_TARGETS.output,
+    position: "top",
+    title: messages.jsonYamlConverter.tour.outputTitle,
+    description: messages.jsonYamlConverter.tour.outputDescription,
+  },
+];
 
 function oppositeFormat(format: DocumentFormat): DocumentFormat {
   return format === "json" ? "yaml" : "json";
@@ -177,6 +208,12 @@ export function JsonYamlConverter() {
         </dl>
 
         <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 md:flex-col md:items-start">
+          <DeveloperToolTourButton
+            label={messages.jsonYamlConverter.tour.startButton}
+            steps={JSON_YAML_TOUR_STEPS}
+            storageKey="json-yaml-converter-tour-seen"
+            tourId={JSON_YAML_TOUR_ID}
+          />
           <button
             className="text-muted-foreground text-xs underline decoration-border underline-offset-4 transition-colors hover:text-foreground active:translate-y-px"
             onClick={resetExample}
@@ -197,6 +234,7 @@ export function JsonYamlConverter() {
       <main className="min-w-0">
         <motion.section
           className="grid border-y lg:grid-cols-[minmax(0,1fr)_auto]"
+          id={JSON_YAML_TOUR_TARGETS.controls}
           variants={childVariants}
         >
           <div className="grid gap-4 py-4 sm:grid-cols-[minmax(0,220px)_1fr] sm:items-end sm:gap-6 lg:pr-6">
@@ -255,6 +293,7 @@ export function JsonYamlConverter() {
 
         <motion.div
           className="mt-8 grid min-w-0 grid-cols-1 border-x border-b lg:grid-cols-2 lg:divide-x"
+          id={JSON_YAML_TOUR_TARGETS.editors}
           variants={childVariants}
         >
           <DocumentEditor
@@ -291,6 +330,7 @@ export function JsonYamlConverter() {
 
         <motion.section
           className="mt-5 flex min-h-10 flex-wrap items-center justify-between gap-3 border-y py-3"
+          id={JSON_YAML_TOUR_TARGETS.output}
           variants={childVariants}
         >
           <p className="text-[11px] text-muted-foreground">
