@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { getAuthToken } from "@/features/auth/utils";
+import { createRealtimeTicket } from "@/features/realtime/ticket-client";
 import { socksRelayQueryKeys } from "@/features/socks-relay/query-keys";
 import type {
   RelayConnectionStatus,
@@ -51,6 +52,7 @@ export function SocksRelayProvider({
   const reconnectAttemptRef = useRef(0);
   const eventCounterRef = useRef(0);
   const shouldReconnectRef = useRef(true);
+  const connectionGenerationRef = useRef(0);
 
   const clearLogs = useCallback(() => {
     setEvents([]);
@@ -58,13 +60,9 @@ export function SocksRelayProvider({
   }, []);
 
   useEffect(() => {
-    const token = getAuthToken();
+    const generation = connectionGenerationRef.current + 1;
+    connectionGenerationRef.current = generation;
     shouldReconnectRef.current = true;
-
-    if (!token) {
-      setConnectionStatus("disconnected");
-      return;
-    }
 
     const clearReconnectTimer = () => {
       if (reconnectTimerRef.current) {
@@ -74,7 +72,10 @@ export function SocksRelayProvider({
     };
 
     const scheduleReconnect = () => {
-      if (!shouldReconnectRef.current) {
+      if (
+        !shouldReconnectRef.current ||
+        connectionGenerationRef.current !== generation
+      ) {
         return;
       }
       setConnectionStatus("reconnecting");
@@ -84,16 +85,39 @@ export function SocksRelayProvider({
         RECONNECT_MAX_DELAY_MS
       );
       reconnectAttemptRef.current += 1;
-      reconnectTimerRef.current = setTimeout(connect, delay);
+      reconnectTimerRef.current = setTimeout(async () => {
+        await connect();
+      }, delay);
     };
 
-    const connect = () => {
+    const connect = async () => {
       clearReconnectTimer();
+      if (connectionGenerationRef.current !== generation) {
+        return;
+      }
+      if (!getAuthToken()) {
+        setConnectionStatus("disconnected");
+        return;
+      }
       setConnectionStatus(
         reconnectAttemptRef.current === 0 ? "connecting" : "reconnecting"
       );
 
-      const socket = new WebSocket(buildRelayWebSocketUrl(token));
+      let ticket: string;
+      try {
+        ticket = (await createRealtimeTicket("relay-events")).ticket;
+      } catch {
+        scheduleReconnect();
+        return;
+      }
+      if (
+        !shouldReconnectRef.current ||
+        connectionGenerationRef.current !== generation
+      ) {
+        return;
+      }
+
+      const socket = new WebSocket(buildRelayWebSocketUrl(ticket));
       socketRef.current = socket;
 
       socket.onopen = () => {
@@ -123,6 +147,9 @@ export function SocksRelayProvider({
       };
 
       socket.onclose = () => {
+        if (connectionGenerationRef.current !== generation) {
+          return;
+        }
         if (socketRef.current === socket) {
           socketRef.current = null;
         }
@@ -134,10 +161,14 @@ export function SocksRelayProvider({
       };
     };
 
-    connect();
+    const initialConnection = connect();
+    initialConnection.catch(scheduleReconnect);
 
     return () => {
       shouldReconnectRef.current = false;
+      if (connectionGenerationRef.current === generation) {
+        connectionGenerationRef.current += 1;
+      }
       clearReconnectTimer();
       socketRef.current?.close();
       socketRef.current = null;

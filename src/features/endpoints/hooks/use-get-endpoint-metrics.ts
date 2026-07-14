@@ -1,6 +1,9 @@
 import { endpointQueryKeys } from "@/features/endpoints/query-keys";
-import { getEndpointMetricsHourlyUrl, getEndpointMetricsSummaryUrl } from "@/lib/api-endpoints";
-import { apiGet, type ApiError } from "@/lib/api";
+import { type ApiError, apiGet } from "@/lib/api";
+import {
+  getEndpointMetricsHourlyUrl,
+  getEndpointMetricsSummaryUrl,
+} from "@/lib/api-endpoints";
 import { createQueryHook } from "@/lib/query-hooks";
 
 export type EndpointMetric = {
@@ -36,7 +39,10 @@ async function fetchHourly(endpointId: string, from: string, to: string) {
   return response.data ?? [];
 }
 
-export function useGetEndpointMetricsSummary(endpointId: string, enabled: boolean) {
+export function useGetEndpointMetricsSummary(
+  endpointId: string,
+  enabled: boolean
+) {
   const useQuery = createQueryHook<EndpointMetric, ApiError>({
     queryKey: endpointQueryKeys.metricsSummary(endpointId),
     queryFn: () => fetchSummary(endpointId),

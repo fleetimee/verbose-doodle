@@ -3,6 +3,7 @@
  * These utilities provide a consistent interface for making HTTP requests
  */
 
+import { handleRefreshFailureOnce } from "@/features/auth/refresh-coordinator";
 import {
   clearAuthToken,
   emitUnauthorizedEvent,
@@ -103,10 +104,12 @@ async function handleUnauthorized<T>({
         data: await refreshAndRetry<T>(endpoint, config),
         retried: true,
       };
-    } catch {
+    } catch (error) {
       if (emitUnauthorized) {
-        clearAuthToken();
-        emitUnauthorizedEvent();
+        handleRefreshFailureOnce(error, () => {
+          clearAuthToken();
+          emitUnauthorizedEvent();
+        });
       }
       return { retried: false };
     }

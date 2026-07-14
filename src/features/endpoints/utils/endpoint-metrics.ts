@@ -1,8 +1,11 @@
 import type {
+  EndpointHourlyMetric,
+  EndpointMetric,
+} from "@/features/endpoints/hooks/use-get-endpoint-metrics";
+import type {
   EndpointTrafficLog,
   EndpointTrafficLogStatus,
 } from "@/features/endpoints/types";
-import type { EndpointHourlyMetric, EndpointMetric } from "@/features/endpoints/hooks/use-get-endpoint-metrics";
 
 export type EndpointMetricsTimeWindow = "5m" | "15m" | "1h";
 export type PersistedMetricsTimeWindow = "24h" | "7d" | "30d";
@@ -69,7 +72,10 @@ export function getPersistedEndpointMetrics(
   hourly: readonly EndpointHourlyMetric[],
   timeWindow: PersistedMetricsTimeWindow
 ): EndpointMetrics {
-  const requests = hourly.reduce((total, bucket) => total + bucket.requestCount, 0);
+  const requests = hourly.reduce(
+    (total, bucket) => total + bucket.requestCount,
+    0
+  );
   const totalDurationMs = hourly.reduce(
     (total, bucket) => total + bucket.totalDurationMs,
     0
@@ -79,16 +85,17 @@ export function getPersistedEndpointMetrics(
       (total, bucket) => total + (bucket.hitStatusCounts[status] ?? 0),
       0
     );
-  const successes = statusCount("matched_success") + statusCount("matched_delayed");
+  const successes =
+    statusCount("matched_success") + statusCount("matched_delayed");
   const delayed = statusCount("matched_delayed");
   const timeouts = statusCount("matched_timeout");
   const unmatched = statusCount("unmatched_endpoint");
   const backendErrors = statusCount("backend_error");
   const minMs = minimum(hourly.map((bucket) => bucket.minDurationMs));
   const maxMs = maximum(hourly.map((bucket) => bucket.maxDurationMs));
-  const lastSeenAt = hourly
-    .filter((bucket) => bucket.requestCount > 0)
-    .at(-1)?.bucketStart ?? null;
+  const lastSeenAt =
+    hourly.filter((bucket) => bucket.requestCount > 0).at(-1)?.bucketStart ??
+    null;
 
   return {
     logs: [],
@@ -100,9 +107,18 @@ export function getPersistedEndpointMetrics(
       timeouts,
       unmatched,
       backendErrors,
-      successRate: requests === 0 ? 0 : Math.round((successes / requests) * 100),
-      errorRate: requests === 0 ? 0 : Math.round(((requests - successes) / requests) * 100),
-      requestsPerMinute: Number((requests / (PERSISTED_METRICS_TIME_WINDOWS[timeWindow] / 60_000)).toFixed(1)),
+      successRate:
+        requests === 0 ? 0 : Math.round((successes / requests) * 100),
+      errorRate:
+        requests === 0
+          ? 0
+          : Math.round(((requests - successes) / requests) * 100),
+      requestsPerMinute: Number(
+        (
+          requests /
+          (PERSISTED_METRICS_TIME_WINDOWS[timeWindow] / 60_000)
+        ).toFixed(1)
+      ),
       avgMs: requests === 0 ? null : Math.round(totalDurationMs / requests),
       minMs,
       maxMs,
@@ -122,7 +138,10 @@ export function getPersistedEndpointMetrics(
         requests: bucket.requestCount,
         successes: bucketSuccesses,
         errors: bucket.requestCount - bucketSuccesses,
-        avgMs: bucket.requestCount === 0 ? null : Math.round(bucket.averageDurationMs),
+        avgMs:
+          bucket.requestCount === 0
+            ? null
+            : Math.round(bucket.averageDurationMs),
         p50Ms: null,
         p95Ms: null,
         p99Ms: null,

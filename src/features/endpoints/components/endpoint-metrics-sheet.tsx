@@ -62,9 +62,9 @@ import {
 } from "@/features/endpoints/hooks/use-get-endpoint-metrics";
 import {
   type EndpointMetrics,
-  type PersistedMetricsTimeWindow,
-  PERSISTED_METRICS_TIME_WINDOWS,
   getPersistedEndpointMetrics,
+  PERSISTED_METRICS_TIME_WINDOWS,
+  type PersistedMetricsTimeWindow,
 } from "@/features/endpoints/utils/endpoint-metrics";
 import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -165,7 +165,9 @@ export function EndpointMetricsSheet({
       <Alert variant="destructive">
         <AlertCircle aria-hidden="true" />
         <AlertTitle>{messages.endpoints.metrics.loadErrorTitle}</AlertTitle>
-          <AlertDescription>{(summaryQuery.error ?? hourlyQuery.error)?.message}</AlertDescription>
+        <AlertDescription>
+          {(summaryQuery.error ?? hourlyQuery.error)?.message}
+        </AlertDescription>
       </Alert>
     );
   } else if (metrics.summary.requests === 0) {
@@ -233,9 +235,11 @@ export function EndpointMetricsSheet({
               <Button
                 className="transition-transform active:scale-[0.98]"
                 disabled={summaryQuery.isFetching || hourlyQuery.isFetching}
-                onClick={() => {
-                  void summaryQuery.refetch();
-                  void hourlyQuery.refetch();
+                onClick={async () => {
+                  await Promise.all([
+                    summaryQuery.refetch(),
+                    hourlyQuery.refetch(),
+                  ]);
                 }}
                 size="sm"
                 type="button"
@@ -301,7 +305,7 @@ function MetricsContent({
                     {formatMessage(
                       messages.endpoints.metrics.healthDescription,
                       {
-                      average: formatDuration(summary.avgMs),
+                        average: formatDuration(summary.avgMs),
                         maximum: formatDuration(summary.maxMs),
                         requests: formatInteger(summary.requests),
                         window: TIME_WINDOW_LABELS[timeWindow],
@@ -734,6 +738,8 @@ function getPercentage(value: number, total: number) {
 
 function getMetricRange(timeWindow: PersistedMetricsTimeWindow) {
   const to = new Date();
-  const from = new Date(to.getTime() - PERSISTED_METRICS_TIME_WINDOWS[timeWindow]);
+  const from = new Date(
+    to.getTime() - PERSISTED_METRICS_TIME_WINDOWS[timeWindow]
+  );
   return { from: from.toISOString(), to: to.toISOString() };
 }

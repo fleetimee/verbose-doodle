@@ -1,4 +1,5 @@
 import { useAuth } from "@/features/auth/context";
+import { coordinateRefresh } from "@/features/auth/refresh-coordinator";
 import { getRefreshToken } from "@/features/auth/utils";
 import { apiFetch } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
@@ -32,7 +33,7 @@ export type RefreshTokenError = {
  * Makes API call to refresh the access token
  * This is exported for use in non-React contexts (e.g., AuthContext)
  */
-export async function refreshToken(): Promise<RefreshTokenResult> {
+async function requestRefreshToken(): Promise<RefreshTokenResult> {
   const refreshTokenValue = getRefreshToken();
 
   if (!refreshTokenValue) {
@@ -62,6 +63,10 @@ export async function refreshToken(): Promise<RefreshTokenResult> {
     tokenType: response.data.tokenType,
     expiresIn: response.data.expiresIn,
   };
+}
+
+export function refreshToken(): Promise<RefreshTokenResult> {
+  return coordinateRefresh(requestRefreshToken);
 }
 
 /**

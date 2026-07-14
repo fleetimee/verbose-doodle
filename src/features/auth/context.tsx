@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { useNavigate } from "react-router";
+import { handleRefreshFailureOnce } from "@/features/auth/refresh-coordinator";
 import {
   AUTH_UNAUTHORIZED_EVENT,
   clearAuthToken,
@@ -116,9 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await refreshTokenFn();
       login(response.accessToken, response.refreshToken);
       return true;
-    } catch {
-      // If refresh fails, logout user
-      logout();
+    } catch (error) {
+      handleRefreshFailureOnce(error, logout);
       return false;
     }
   }, [login, logout]);
