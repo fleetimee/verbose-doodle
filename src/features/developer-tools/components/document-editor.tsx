@@ -1,15 +1,21 @@
 import { json } from "@codemirror/lang-json";
+import { yaml } from "@codemirror/lang-yaml";
 import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import { useEffect, useState } from "react";
-import { formatMessage, messages } from "@/lib/i18n";
+import type { DocumentFormat } from "@/features/developer-tools/types";
+import { formatMessage } from "@/lib/i18n";
 
-type JsonDocumentEditorProps = {
+type DocumentEditorProps = {
   readonly label: string;
   readonly index: string;
   readonly description: string;
   readonly value: string;
-  readonly onChange: (value: string) => void;
+  readonly format: DocumentFormat;
+  readonly lineCountMessage: string;
+  readonly byteCountMessage: string;
+  readonly onChange?: (value: string) => void;
+  readonly readOnly?: boolean;
 };
 
 const editorTheme = EditorView.theme({
@@ -26,13 +32,17 @@ const editorTheme = EditorView.theme({
   ".cm-scroller": { minHeight: "400px" },
 });
 
-export function JsonDocumentEditor({
+export function DocumentEditor({
+  byteCountMessage,
   description,
+  format,
   index,
   label,
+  lineCountMessage,
   onChange,
+  readOnly = false,
   value,
-}: JsonDocumentEditorProps) {
+}: DocumentEditorProps) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
@@ -52,6 +62,10 @@ export function JsonDocumentEditor({
 
   const byteCount = new TextEncoder().encode(value).length;
   const lineCount = value.length === 0 ? 0 : value.split("\n").length;
+  const language = format === "json" ? json() : yaml();
+  const extensions = readOnly
+    ? [language, editorTheme, EditorView.editable.of(false)]
+    : [language, editorTheme];
 
   return (
     <section className="min-w-0 border-t bg-background transition-colors focus-within:bg-muted/10">
@@ -64,14 +78,10 @@ export function JsonDocumentEditor({
           <p className="text-[11px] text-muted-foreground">{description}</p>
         </div>
         <div className="flex items-center gap-2 font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
-          <span>
-            {formatMessage(messages.jsonSchemaValidator.editorLineCount, {
-              count: lineCount,
-            })}
-          </span>
+          <span>{formatMessage(lineCountMessage, { count: lineCount })}</span>
           <span aria-hidden="true">/</span>
           <span>
-            {formatMessage(messages.jsonSchemaValidator.editorByteCount, {
+            {formatMessage(byteCountMessage, {
               count: byteCount.toLocaleString(),
             })}
           </span>
@@ -80,16 +90,17 @@ export function JsonDocumentEditor({
       <CodeMirror
         aria-label={label}
         basicSetup={{
-          autocompletion: true,
+          autocompletion: !readOnly,
           bracketMatching: true,
-          closeBrackets: true,
+          closeBrackets: !readOnly,
           foldGutter: true,
           highlightActiveLine: true,
           lineNumbers: true,
         }}
-        extensions={[json(), editorTheme]}
+        editable={!readOnly}
+        extensions={extensions}
         height="440px"
-        onChange={onChange}
+        onChange={readOnly ? undefined : onChange}
         theme={theme}
         value={value}
       />

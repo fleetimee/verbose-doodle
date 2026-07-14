@@ -1,5 +1,6 @@
 import {
   Braces,
+  FileJson,
   Info,
   LayoutDashboard,
   Network,
@@ -69,6 +70,12 @@ const data = {
       url: "/dashboard/developer-tools/json-schema-validator",
       icon: Braces,
       groupLabel: messages.jsonSchemaValidator.navigationGroup,
+    },
+    {
+      title: messages.jsonYamlConverter.title,
+      url: "/dashboard/developer-tools/json-yaml-converter",
+      icon: FileJson,
+      groupLabel: messages.jsonYamlConverter.navigationGroup,
     },
     {
       title: "REST API",

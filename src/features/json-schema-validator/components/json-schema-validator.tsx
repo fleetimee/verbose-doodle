@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { JsonDocumentEditor } from "@/features/json-schema-validator/components/json-document-editor";
+import { DocumentEditor } from "@/features/developer-tools/components/document-editor";
 import { ValidationResult } from "@/features/json-schema-validator/components/validation-result";
 import {
   EXAMPLE_INSTANCE,
@@ -254,17 +254,23 @@ export function JsonSchemaValidator() {
           className="mt-8 grid min-w-0 grid-cols-1 border-x border-b lg:grid-cols-2 lg:divide-x"
           variants={childVariants}
         >
-          <JsonDocumentEditor
+          <DocumentEditor
+            byteCountMessage={messages.jsonSchemaValidator.editorByteCount}
             description={messages.jsonSchemaValidator.schemaEditorDescription}
+            format="json"
             index="01"
             label={messages.jsonSchemaValidator.schemaEditorLabel}
+            lineCountMessage={messages.jsonSchemaValidator.editorLineCount}
             onChange={setSchema}
             value={schema}
           />
-          <JsonDocumentEditor
+          <DocumentEditor
+            byteCountMessage={messages.jsonSchemaValidator.editorByteCount}
             description={messages.jsonSchemaValidator.instanceEditorDescription}
+            format="json"
             index="02"
             label={messages.jsonSchemaValidator.instanceEditorLabel}
+            lineCountMessage={messages.jsonSchemaValidator.editorLineCount}
             onChange={setInstance}
             value={instance}
           />

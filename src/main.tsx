@@ -78,6 +78,11 @@ const JsonSchemaValidatorPage = lazy(() =>
     ({ JsonSchemaValidatorPage }) => ({ default: JsonSchemaValidatorPage })
   )
 );
+const JsonYamlConverterPage = lazy(() =>
+  import("@/pages/dashboard/json-yaml-converter").then(
+    ({ JsonYamlConverterPage }) => ({ default: JsonYamlConverterPage })
+  )
+);
 const SocksRelayRestApiPage = lazy(() =>
   import("@/pages/dashboard/socks-relay-rest-api").then(
     ({ SocksRelayRestApiPage }) => ({
@@ -143,6 +148,10 @@ function AppContent() {
             <Route
               element={<JsonSchemaValidatorPage />}
               path="developer-tools/json-schema-validator"
+            />
+            <Route
+              element={<JsonYamlConverterPage />}
+              path="developer-tools/json-yaml-converter"
             />
             <Route element={<SocksRelayRouteGroup />} path="socks-relay">
               <Route
