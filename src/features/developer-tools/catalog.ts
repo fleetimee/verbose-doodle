@@ -13,18 +13,16 @@ export type DeveloperToolDefinition = {
 };
 
 export type DeveloperToolCategory = {
-  readonly description: string;
+  readonly id: "conversion" | "validation";
   readonly icon: LucideIcon;
-  readonly index: string;
   readonly name: string;
   readonly tools: readonly DeveloperToolDefinition[];
 };
 
 export const DEVELOPER_TOOL_CATEGORIES: readonly DeveloperToolCategory[] = [
   {
-    index: "01",
+    id: "validation",
     name: messages.developerTools.validationCategory,
-    description: messages.developerTools.validationDescription,
     icon: ShieldCheck,
     tools: [
       {
@@ -39,9 +37,8 @@ export const DEVELOPER_TOOL_CATEGORIES: readonly DeveloperToolCategory[] = [
     ],
   },
   {
-    index: "02",
+    id: "conversion",
     name: messages.developerTools.conversionCategory,
-    description: messages.developerTools.conversionDescription,
     icon: RefreshCw,
     tools: [
       {

@@ -15,16 +15,16 @@ export const developerToolsMessages = {
   accessValue: "USER + ADMIN",
   filesLabel: "Files",
   filesValue: "No uploads",
-  categoryCount: {
-    one: "{count} tool",
-    other: "{count} tools",
+  catalogControls: "Catalog controls",
+  allTools: "All tools",
+  gridView: "Grid view",
+  listView: "List view",
+  showingCount: {
+    one: "Showing {count} tool",
+    other: "Showing {count} tools",
   },
   validationCategory: "Validation",
-  validationDescription:
-    "Check a document against explicit rules before it reaches another system.",
   conversionCategory: "Conversion",
-  conversionDescription:
-    "Translate between data formats while keeping the source under your control.",
   schemaValidatorDescription:
     "Validate a JSON document against Draft 7, 2019-09, or 2020-12 schemas with path-based diagnostics.",
   schemaValidatorRuntime: "Validation service",
