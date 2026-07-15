@@ -76,9 +76,10 @@ export function ValidationResult({ result }: ValidationResultProps) {
       animate={{ opacity: 1, y: 0 }}
       aria-live="polite"
       className={cn("mt-8 border-t-2 border-b py-6", details.rule)}
+      exit={{ opacity: 0, y: -8 }}
       initial={{ opacity: 0, y: 8 }}
       layout
-      transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      transition={{ type: "spring", duration: 0.32, bounce: 0.08 }}
     >
       <div className="grid gap-4 sm:grid-cols-[90px_minmax(0,1fr)_auto] sm:items-start">
         <span

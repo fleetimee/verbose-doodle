@@ -1,5 +1,5 @@
 import { ArrowLeftRight, Copy } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -34,7 +34,7 @@ const childVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring" as const, stiffness: 100, damping: 20 },
+    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -350,35 +350,38 @@ export function JsonYamlConverter() {
           </Button>
         </motion.section>
 
-        {error || copyState === "error" ? (
-          <motion.section
-            animate={{ opacity: 1, y: 0 }}
-            aria-live="polite"
-            className="mt-6 grid gap-2 border-destructive/30 border-y py-5 sm:grid-cols-[180px_1fr]"
-            initial={{ opacity: 0, y: 6 }}
-            role="alert"
-            transition={{ type: "spring", stiffness: 100, damping: 20 }}
-          >
-            <h2 className="font-semibold text-destructive text-sm">
-              {messages.jsonYamlConverter.errorTitle}
-            </h2>
-            <div className="text-muted-foreground text-sm">
-              <p>
-                {copyState === "error"
-                  ? messages.jsonYamlConverter.copyError
-                  : error?.message}
-              </p>
-              {error?.line && error.column ? (
-                <p className="mt-1 font-mono text-[11px]">
-                  {formatMessage(messages.jsonYamlConverter.errorLocation, {
-                    line: error.line,
-                    column: error.column,
-                  })}
+        <AnimatePresence>
+          {error || copyState === "error" ? (
+            <motion.section
+              animate={{ opacity: 1, y: 0 }}
+              aria-live="polite"
+              className="mt-6 grid gap-2 border-destructive/30 border-y py-5 sm:grid-cols-[180px_1fr]"
+              exit={{ opacity: 0, y: -6 }}
+              initial={{ opacity: 0, y: 6 }}
+              role="alert"
+              transition={{ type: "spring", duration: 0.32, bounce: 0.08 }}
+            >
+              <h2 className="font-semibold text-destructive text-sm">
+                {messages.jsonYamlConverter.errorTitle}
+              </h2>
+              <div className="text-muted-foreground text-sm">
+                <p>
+                  {copyState === "error"
+                    ? messages.jsonYamlConverter.copyError
+                    : error?.message}
                 </p>
-              ) : null}
-            </div>
-          </motion.section>
-        ) : null}
+                {error?.line && error.column ? (
+                  <p className="mt-1 font-mono text-[11px]">
+                    {formatMessage(messages.jsonYamlConverter.errorLocation, {
+                      line: error.line,
+                      column: error.column,
+                    })}
+                  </p>
+                ) : null}
+              </div>
+            </motion.section>
+          ) : null}
+        </AnimatePresence>
       </main>
     </motion.div>
   );

@@ -51,6 +51,11 @@ export const developerToolsMessages = {
   cronParserRuntime: "Browser only",
   cronParserLimit: "5 or 6 fields",
   cronParserTags: ["Cron", "Timezones", "Run preview"],
+  jwtInspectorDescription:
+    "Decode, inspect, edit, and verify JSON Web Tokens (JWT) using secure, client-side Web Crypto.",
+  jwtInspectorRuntime: "Browser only",
+  jwtInspectorLimit: "Standard JWT structure",
+  jwtInspectorTags: ["JWT", "Base64Url", "HMAC-SHA256", "Web Crypto"],
   openTool: "Open {tool}",
   openAction: "Open tool",
 } as const;

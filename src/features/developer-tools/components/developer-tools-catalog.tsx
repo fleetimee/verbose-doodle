@@ -36,7 +36,25 @@ const childVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring" as const, stiffness: 100, damping: 20 },
+    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
+  },
+};
+
+const gridContainerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.04,
+    },
+  },
+};
+
+const cardEntranceVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -48,15 +66,20 @@ function ToolCard({
   const Icon = tool.icon;
   const CategoryIcon = category.icon;
   const isGrid = view === "grid";
+  const shouldReduceMotion = useReducedMotion();
 
   return (
-    <article
+    <motion.article
       className={cn(
         "group min-w-0 gap-5 bg-background transition-colors hover:bg-muted/20",
         isGrid
           ? "flex h-full flex-col border p-5"
           : "grid border-y px-4 py-5 sm:px-5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-7"
       )}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      variants={cardEntranceVariants}
+      whileHover={shouldReduceMotion ? {} : { y: -2, scale: 1.012 }}
+      whileTap={shouldReduceMotion ? {} : { scale: 0.985 }}
     >
       <div
         className={cn(
@@ -114,7 +137,7 @@ function ToolCard({
           <ArrowUpRight data-icon="inline-end" />
         </Link>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
@@ -266,7 +289,7 @@ export function DeveloperToolsCatalog() {
       <motion.div
         className={cn("grid gap-4", activeView === "grid" && "md:grid-cols-2")}
         key={`${activeCategory}-${activeView}`}
-        variants={childVariants}
+        variants={gridContainerVariants}
       >
         {visibleEntries.map((entry) => (
           <ToolCard

@@ -78,6 +78,11 @@ const JsonSchemaValidatorPage = lazy(() =>
     ({ JsonSchemaValidatorPage }) => ({ default: JsonSchemaValidatorPage })
   )
 );
+const JwtInspectorPage = lazy(() =>
+  import("@/pages/dashboard/jwt-inspector").then(({ JwtInspectorPage }) => ({
+    default: JwtInspectorPage,
+  }))
+);
 const DeveloperToolsPage = lazy(() =>
   import("@/pages/dashboard/developer-tools").then(
     ({ DeveloperToolsPage }) => ({ default: DeveloperToolsPage })
@@ -169,6 +174,10 @@ function AppContent() {
             <Route
               element={<JsonSchemaValidatorPage />}
               path="developer-tools/json-schema-validator"
+            />
+            <Route
+              element={<JwtInspectorPage />}
+              path="developer-tools/jwt-inspector"
             />
             <Route
               element={<JsonYamlConverterPage />}

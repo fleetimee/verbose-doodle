@@ -1,5 +1,5 @@
 import { Binary, Check, ClipboardCopy, Cpu, Hash } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,7 +79,7 @@ const childVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring" as const, stiffness: 100, damping: 20 },
+    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -457,153 +457,184 @@ export function NumberBaseConverter() {
           </p>
         </motion.section>
 
-        {error ? (
-          <motion.div
-            className="mt-6 border border-destructive/40 bg-destructive/5 px-5 py-4"
-            role="alert"
-            variants={childVariants}
-          >
-            <p className="font-medium text-destructive text-sm">
-              {messages.numberBaseConverter.conversionFailed}
-            </p>
-            <p className="mt-1 text-muted-foreground text-xs leading-5">
-              {error}
-            </p>
-          </motion.div>
-        ) : null}
+        <AnimatePresence>
+          {error ? (
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 border border-destructive/40 bg-destructive/5 px-5 py-4"
+              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 10 }}
+              role="alert"
+              transition={{ duration: 0.2 }}
+            >
+              <p className="font-medium text-destructive text-sm">
+                {messages.numberBaseConverter.conversionFailed}
+              </p>
+              <p className="mt-1 text-muted-foreground text-xs leading-5">
+                {error}
+              </p>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
 
-        {result ? (
-          <div className="mt-8 grid gap-8">
-            <motion.section id={TOUR_TARGETS.results} variants={childVariants}>
-              <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
-                <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
-                    {messages.numberBaseConverter.resultTitle}
-                  </h2>
-                  <p className="mt-1 text-muted-foreground text-xs">
-                    {messages.numberBaseConverter.resultDescription}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-                  <span className="border px-2 py-1">
-                    {formatMessage(messages.numberBaseConverter.signedValue, {
-                      value: result.signedDecimal,
-                    })}
-                  </span>
-                  <span className="border px-2 py-1">
-                    {formatMessage(messages.numberBaseConverter.unsignedValue, {
-                      value: result.unsignedDecimal,
-                    })}
-                  </span>
-                </div>
-              </div>
-              <div className="grid border-x sm:grid-cols-2">
-                {OUTPUTS.map((definition) => (
-                  <OutputCard
-                    copied={copiedOutput === definition.key}
-                    definition={definition}
-                    key={definition.key}
-                    onCopy={() => copyOutput(definition.key)}
-                    value={result[definition.key]}
-                  />
-                ))}
-              </div>
-            </motion.section>
-
-            <motion.section variants={childVariants}>
-              <div className="flex items-start gap-3 border-b pb-4">
-                <Binary className="mt-0.5 size-4 text-muted-foreground" />
-                <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
-                    {messages.numberBaseConverter.patternTitle}
-                  </h2>
-                  <p className="mt-1 text-muted-foreground text-xs">
-                    {messages.numberBaseConverter.patternDescription}
-                  </p>
-                </div>
-              </div>
-              <div className="overflow-x-auto border-x border-b p-4">
-                <div className="flex min-w-max gap-2">
-                  {bitGroups.map((group, groupIndex) => (
-                    <div
-                      className={cn(
-                        "flex border font-mono text-sm",
-                        groupIndex % 2 === 0 ? "bg-muted/40" : "bg-background"
+        <AnimatePresence mode="wait">
+          {result ? (
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-8 grid gap-8"
+              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 10 }}
+              key="results"
+              transition={{ duration: 0.2 }}
+            >
+              <motion.section
+                id={TOUR_TARGETS.results}
+                variants={childVariants}
+              >
+                <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
+                  <div>
+                    <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                      {messages.numberBaseConverter.resultTitle}
+                    </h2>
+                    <p className="mt-1 text-muted-foreground text-xs">
+                      {messages.numberBaseConverter.resultDescription}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                    <span className="border px-2 py-1">
+                      {formatMessage(messages.numberBaseConverter.signedValue, {
+                        value: result.signedDecimal,
+                      })}
+                    </span>
+                    <span className="border px-2 py-1">
+                      {formatMessage(
+                        messages.numberBaseConverter.unsignedValue,
+                        {
+                          value: result.unsignedDecimal,
+                        }
                       )}
-                      key={`${group}-${groupIndex}`}
-                    >
-                      {[...group].map((bit, bitIndex) => (
-                        <span
-                          className="flex size-8 items-center justify-center border-r last:border-r-0"
-                          key={`${groupIndex}-${bitIndex}`}
-                        >
-                          {bit}
-                        </span>
-                      ))}
-                    </div>
+                    </span>
+                  </div>
+                </div>
+                <div className="grid border-x sm:grid-cols-2">
+                  {OUTPUTS.map((definition) => (
+                    <OutputCard
+                      copied={copiedOutput === definition.key}
+                      definition={definition}
+                      key={definition.key}
+                      onCopy={() => copyOutput(definition.key)}
+                      value={result[definition.key]}
+                    />
                   ))}
                 </div>
-              </div>
-            </motion.section>
+              </motion.section>
 
-            <motion.section id={TOUR_TARGETS.bytes} variants={childVariants}>
-              <div className="flex items-start gap-3 border-b pb-4">
-                <Cpu className="mt-0.5 size-4 text-muted-foreground" />
-                <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
-                    {messages.numberBaseConverter.bytesTitle}
-                  </h2>
-                  <p className="mt-1 text-muted-foreground text-xs">
-                    {messages.numberBaseConverter.bytesDescription}
-                  </p>
+              <motion.section variants={childVariants}>
+                <div className="flex items-start gap-3 border-b pb-4">
+                  <Binary className="mt-0.5 size-4 text-muted-foreground" />
+                  <div>
+                    <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                      {messages.numberBaseConverter.patternTitle}
+                    </h2>
+                    <p className="mt-1 text-muted-foreground text-xs">
+                      {messages.numberBaseConverter.patternDescription}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="grid border-x border-b lg:grid-cols-[minmax(0,1fr)_220px]">
-                <div className="flex flex-wrap gap-2 p-5">
-                  {result.bytes.map((byte, index) => (
-                    <div className="border bg-muted/25 px-3 py-2" key={index}>
-                      <span className="block font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
-                        {formatMessage(messages.numberBaseConverter.byteIndex, {
-                          index: String(index).padStart(2, "0"),
-                        })}
-                      </span>
-                      <code className="mt-1 block font-mono text-base">
-                        {byte}
-                      </code>
-                    </div>
-                  ))}
+                <div className="overflow-x-auto border-x border-b p-4">
+                  <div className="flex min-w-max gap-2">
+                    {bitGroups.map((group, groupIndex) => (
+                      <div
+                        className={cn(
+                          "flex border font-mono text-sm",
+                          groupIndex % 2 === 0 ? "bg-muted/40" : "bg-background"
+                        )}
+                        key={`${group}-${groupIndex}`}
+                      >
+                        {[...group].map((bit, bitIndex) => (
+                          <span
+                            className="flex size-8 items-center justify-center border-r last:border-r-0"
+                            key={`${groupIndex}-${bitIndex}`}
+                          >
+                            {bit}
+                          </span>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="border-t p-5 lg:border-t-0 lg:border-l">
-                  <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
-                    {messages.numberBaseConverter.asciiLabel}
-                  </span>
-                  <code className="mt-3 block overflow-x-auto font-mono text-xl tracking-[0.16em]">
-                    {result.ascii}
-                  </code>
+              </motion.section>
+
+              <motion.section id={TOUR_TARGETS.bytes} variants={childVariants}>
+                <div className="flex items-start gap-3 border-b pb-4">
+                  <Cpu className="mt-0.5 size-4 text-muted-foreground" />
+                  <div>
+                    <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                      {messages.numberBaseConverter.bytesTitle}
+                    </h2>
+                    <p className="mt-1 text-muted-foreground text-xs">
+                      {messages.numberBaseConverter.bytesDescription}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </motion.section>
-          </div>
-        ) : (
-          <div aria-hidden="true" className="mt-8 grid gap-8">
-            <section
-              className="grid min-h-40 place-items-center border border-dashed px-6 text-center"
-              id={TOUR_TARGETS.results}
+                <div className="grid border-x border-b lg:grid-cols-[minmax(0,1fr)_220px]">
+                  <div className="flex flex-wrap gap-2 p-5">
+                    {result.bytes.map((byte, index) => (
+                      <div className="border bg-muted/25 px-3 py-2" key={index}>
+                        <span className="block font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+                          {formatMessage(
+                            messages.numberBaseConverter.byteIndex,
+                            {
+                              index: String(index).padStart(2, "0"),
+                            }
+                          )}
+                        </span>
+                        <code className="mt-1 block font-mono text-base">
+                          {byte}
+                        </code>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="border-t p-5 lg:border-t-0 lg:border-l">
+                    <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+                      {messages.numberBaseConverter.asciiLabel}
+                    </span>
+                    <code className="mt-3 block overflow-x-auto font-mono text-xl tracking-[0.16em]">
+                      {result.ascii}
+                    </code>
+                  </div>
+                </div>
+              </motion.section>
+            </motion.div>
+          ) : (
+            <motion.div
+              animate={{ opacity: 1 }}
+              aria-hidden="true"
+              className="mt-8 grid gap-8"
+              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }}
+              key="empty"
+              transition={{ duration: 0.15 }}
             >
-              <p className="max-w-sm text-muted-foreground text-xs leading-5">
-                {messages.numberBaseConverter.emptyResults}
-              </p>
-            </section>
-            <section
-              className="grid min-h-28 place-items-center border border-dashed px-6 text-center"
-              id={TOUR_TARGETS.bytes}
-            >
-              <p className="max-w-sm text-muted-foreground text-xs leading-5">
-                {messages.numberBaseConverter.emptyBytes}
-              </p>
-            </section>
-          </div>
-        )}
+              <section
+                className="grid min-h-40 place-items-center border border-dashed px-6 text-center"
+                id={TOUR_TARGETS.results}
+              >
+                <p className="max-w-sm text-muted-foreground text-xs leading-5">
+                  {messages.numberBaseConverter.emptyResults}
+                </p>
+              </section>
+              <section
+                className="grid min-h-28 place-items-center border border-dashed px-6 text-center"
+                id={TOUR_TARGETS.bytes}
+              >
+                <p className="max-w-sm text-muted-foreground text-xs leading-5">
+                  {messages.numberBaseConverter.emptyBytes}
+                </p>
+              </section>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </motion.div>
   );

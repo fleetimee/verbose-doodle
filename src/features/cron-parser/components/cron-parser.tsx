@@ -1,5 +1,5 @@
 import { CheckCircle2, Clock3, TerminalSquare } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,7 @@ const childVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring" as const, stiffness: 100, damping: 20 },
+    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -289,125 +289,139 @@ export function CronParser() {
             </span>
           </div>
         </motion.section>
-
-        {error ? (
-          <motion.div
-            className="mt-6 border border-destructive/40 bg-destructive/5 px-5 py-4"
-            role="alert"
-            variants={childVariants}
-          >
-            <p className="font-medium text-destructive text-sm">
-              {messages.cronParser.invalidExpression}
-            </p>
-            <p className="mt-1 text-muted-foreground text-xs leading-5">
-              {error}
-            </p>
-          </motion.div>
-        ) : null}
-
-        {result ? (
-          <div className="mt-8 grid gap-8">
-            <motion.section
-              className="grid gap-5 border-y py-6 md:grid-cols-[auto_minmax(0,1fr)] md:items-start md:gap-7"
-              variants={childVariants}
+        <AnimatePresence>
+          {error ? (
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 border border-destructive/40 bg-destructive/5 px-5 py-4"
+              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 10 }}
+              role="alert"
+              transition={{ duration: 0.2 }}
             >
-              <div className="flex size-12 items-center justify-center rounded-full border border-emerald-600/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-                <CheckCircle2 className="size-5" />
-              </div>
-              <div>
-                <p className="font-mono text-[10px] text-emerald-700 uppercase tracking-[0.2em] dark:text-emerald-300">
-                  {messages.cronParser.validExpression}
-                </p>
-                <h2 className="mt-3 max-w-[28ch] font-semibold text-2xl leading-tight tracking-[-0.035em] md:text-3xl">
-                  {result.description}
-                </h2>
-                <code className="mt-4 block w-fit border bg-muted/30 px-2.5 py-1.5 font-mono text-xs">
-                  {result.normalizedExpression}
-                </code>
-              </div>
-            </motion.section>
-
-            <motion.section
-              id={CRON_PARSER_TOUR_TARGETS.fields}
-              variants={childVariants}
+              <p className="font-medium text-destructive text-sm">
+                {messages.cronParser.invalidExpression}
+              </p>
+              <p className="mt-1 text-muted-foreground text-xs leading-5">
+                {error}
+              </p>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>{" "}
+        <AnimatePresence>
+          {result ? (
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-8 grid gap-8"
+              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 10 }}
+              key="cron-results"
+              transition={{ duration: 0.2 }}
             >
-              <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
-                <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
-                    {messages.cronParser.fieldBreakdown}
-                  </h2>
-                  <p className="mt-1 text-muted-foreground text-xs">
-                    {messages.cronParser.fieldBreakdownDescription}
-                  </p>
+              <motion.section
+                className="grid gap-5 border-y py-6 md:grid-cols-[auto_minmax(0,1fr)] md:items-start md:gap-7"
+                variants={childVariants}
+              >
+                <div className="flex size-12 items-center justify-center rounded-full border border-emerald-600/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                  <CheckCircle2 className="size-5" />
                 </div>
-                <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-                  {result.mode === "five-field" ? "5 fields" : "6 fields"}
-                </span>
-              </div>
-              <div className="grid border-x sm:grid-cols-2 xl:grid-cols-3">
-                {result.fields.map((field, index) => (
-                  <article
-                    className="min-w-0 border-b p-4 sm:border-r"
-                    key={field.key}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+                <div>
+                  <p className="font-mono text-[10px] text-emerald-700 uppercase tracking-[0.2em] dark:text-emerald-300">
+                    {messages.cronParser.validExpression}
+                  </p>
+                  <h2 className="mt-3 max-w-[28ch] font-semibold text-2xl leading-tight tracking-[-0.035em] md:text-3xl">
+                    {result.description}
+                  </h2>
+                  <code className="mt-4 block w-fit border bg-muted/30 px-2.5 py-1.5 font-mono text-xs">
+                    {result.normalizedExpression}
+                  </code>
+                </div>
+              </motion.section>
+
+              <motion.section
+                id={CRON_PARSER_TOUR_TARGETS.fields}
+                variants={childVariants}
+              >
+                <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
+                  <div>
+                    <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                      {messages.cronParser.fieldBreakdown}
+                    </h2>
+                    <p className="mt-1 text-muted-foreground text-xs">
+                      {messages.cronParser.fieldBreakdownDescription}
+                    </p>
+                  </div>
+                  <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                    {result.mode === "five-field" ? "5 fields" : "6 fields"}
+                  </span>
+                </div>
+                <div className="grid border-x sm:grid-cols-2 xl:grid-cols-3">
+                  {result.fields.map((field, index) => (
+                    <article
+                      className="min-w-0 border-b p-4 sm:border-r"
+                      key={field.key}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <code className="max-w-full truncate bg-muted px-2 py-1 font-mono text-sm">
+                          {field.token}
+                        </code>
+                      </div>
+                      <h3 className="mt-5 font-medium text-sm">
+                        {field.label}
+                      </h3>
+                      <p className="mt-1 text-[10px] text-muted-foreground">
+                        {formatMessage(messages.cronParser.allowedRange, {
+                          range: field.range,
+                        })}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </motion.section>
+
+              <motion.section
+                id={CRON_PARSER_TOUR_TARGETS.runs}
+                variants={childVariants}
+              >
+                <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
+                  <div>
+                    <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                      {messages.cronParser.upcomingRuns}
+                    </h2>
+                    <p className="mt-1 text-muted-foreground text-xs">
+                      {messages.cronParser.upcomingRunsDescription}
+                    </p>
+                  </div>
+                  <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                    {timeZone}
+                  </span>
+                </div>
+                <ol className="divide-y border-x border-b">
+                  {result.nextRuns.map((date, index) => (
+                    <li
+                      className="grid gap-3 px-4 py-4 sm:grid-cols-[48px_minmax(0,1fr)_auto] sm:items-center"
+                      key={date.toISOString()}
+                    >
+                      <span className="font-mono text-[10px] text-muted-foreground">
                         {String(index + 1).padStart(2, "0")}
                       </span>
-                      <code className="max-w-full truncate bg-muted px-2 py-1 font-mono text-sm">
-                        {field.token}
-                      </code>
-                    </div>
-                    <h3 className="mt-5 font-medium text-sm">{field.label}</h3>
-                    <p className="mt-1 text-[10px] text-muted-foreground">
-                      {formatMessage(messages.cronParser.allowedRange, {
-                        range: field.range,
-                      })}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            </motion.section>
-
-            <motion.section
-              id={CRON_PARSER_TOUR_TARGETS.runs}
-              variants={childVariants}
-            >
-              <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
-                <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
-                    {messages.cronParser.upcomingRuns}
-                  </h2>
-                  <p className="mt-1 text-muted-foreground text-xs">
-                    {messages.cronParser.upcomingRunsDescription}
-                  </p>
-                </div>
-                <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-                  {timeZone}
-                </span>
-              </div>
-              <ol className="divide-y border-x border-b">
-                {result.nextRuns.map((date, index) => (
-                  <li
-                    className="grid gap-3 px-4 py-4 sm:grid-cols-[48px_minmax(0,1fr)_auto] sm:items-center"
-                    key={date.toISOString()}
-                  >
-                    <span className="font-mono text-[10px] text-muted-foreground">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <time
-                      className="font-mono text-xs sm:text-sm"
-                      dateTime={date.toISOString()}
-                    >
-                      {formatExecution(date, timeZone)}
-                    </time>
-                    <Clock3 className="hidden size-4 text-muted-foreground sm:block" />
-                  </li>
-                ))}
-              </ol>
-            </motion.section>
-          </div>
-        ) : null}
+                      <time
+                        className="font-mono text-xs sm:text-sm"
+                        dateTime={date.toISOString()}
+                      >
+                        {formatExecution(date, timeZone)}
+                      </time>
+                      <Clock3 className="hidden size-4 text-muted-foreground sm:block" />
+                    </li>
+                  ))}
+                </ol>
+              </motion.section>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </main>
     </motion.div>
   );

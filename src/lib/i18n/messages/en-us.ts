@@ -8,6 +8,7 @@ import { endpointsMessages } from "@/lib/i18n/messages/en-us/endpoints";
 import { errorsMessages } from "@/lib/i18n/messages/en-us/errors";
 import { jsonSchemaValidatorMessages } from "@/lib/i18n/messages/en-us/json-schema-validator";
 import { jsonYamlConverterMessages } from "@/lib/i18n/messages/en-us/json-yaml-converter";
+import { jwtInspectorMessages } from "@/lib/i18n/messages/en-us/jwt-inspector";
 import { numberBaseConverterMessages } from "@/lib/i18n/messages/en-us/number-base-converter";
 import { overviewMessages } from "@/lib/i18n/messages/en-us/overview";
 import { socketTesterMessages } from "@/lib/i18n/messages/en-us/socket-tester";
@@ -29,6 +30,7 @@ export const enUsMessages = {
   endpoints: endpointsMessages,
   jsonSchemaValidator: jsonSchemaValidatorMessages,
   jsonYamlConverter: jsonYamlConverterMessages,
+  jwtInspector: jwtInspectorMessages,
   numberBaseConverter: numberBaseConverterMessages,
   socketTester: socketTesterMessages,
   socksRelay: socksRelayMessages,

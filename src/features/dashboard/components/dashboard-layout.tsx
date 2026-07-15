@@ -44,6 +44,7 @@ const routeLabels: Record<string, string> = {
   "cron-parser": messages.cronParser.title,
   "number-base-converter": messages.numberBaseConverter.title,
   "date-converter": messages.dateConverter.title,
+  "jwt-inspector": messages.jwtInspector.title,
 };
 
 // Updated regex to match encoded IDs (base64 URL-safe characters)

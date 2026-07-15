@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -47,7 +47,7 @@ const childVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring" as const, stiffness: 100, damping: 20 },
+    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -308,41 +308,58 @@ export function JsonSchemaValidator() {
           />
         </motion.div>
 
-        {isValidating ? (
-          <div aria-live="polite" className="mt-8 border-y py-5" role="status">
-            <div className="mb-3 flex items-center justify-between font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-              <span>{messages.jsonSchemaValidator.validationInProgress}</span>
-              <span>{messages.jsonSchemaValidator.deadlineLabel}</span>
-            </div>
-            <div className="h-1 overflow-hidden bg-muted">
-              <motion.div
-                animate={{ x: ["-100%", "260%"] }}
-                className="h-full w-1/3 bg-foreground/60"
-                transition={{
-                  duration: 1.1,
-                  ease: [0.16, 1, 0.3, 1],
-                  repeat: Number.POSITIVE_INFINITY,
-                }}
-              />
-            </div>
-          </div>
-        ) : null}
+        <AnimatePresence>
+          {isValidating ? (
+            <motion.div
+              animate={{ opacity: 1, height: "auto" }}
+              aria-live="polite"
+              className="mt-8 overflow-hidden border-y py-5"
+              exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0, height: 0 }}
+              role="status"
+              transition={{ type: "spring", duration: 0.32, bounce: 0.08 }}
+            >
+              <div className="mb-3 flex items-center justify-between font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                <span>{messages.jsonSchemaValidator.validationInProgress}</span>
+                <span>{messages.jsonSchemaValidator.deadlineLabel}</span>
+              </div>
+              <div className="h-1 overflow-hidden bg-muted">
+                <motion.div
+                  animate={{ x: ["-100%", "260%"] }}
+                  className="h-full w-1/3 bg-foreground/60"
+                  transition={{
+                    duration: 1.1,
+                    ease: [0.16, 1, 0.3, 1],
+                    repeat: Number.POSITIVE_INFINITY,
+                  }}
+                />
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
 
-        {error ? (
-          <motion.section
-            animate={{ opacity: 1, y: 0 }}
-            aria-live="polite"
-            className="mt-8 grid gap-2 border-destructive/30 border-y py-5 sm:grid-cols-[180px_1fr]"
-            initial={{ opacity: 0, y: 6 }}
-            transition={{ type: "spring", stiffness: 100, damping: 20 }}
-          >
-            <h2 className="font-semibold text-destructive text-sm">
-              {error.title}
-            </h2>
-            <p className="text-muted-foreground text-sm">{error.description}</p>
-          </motion.section>
-        ) : null}
-        {lastResult ? <ValidationResult result={lastResult} /> : null}
+        <AnimatePresence>
+          {error ? (
+            <motion.section
+              animate={{ opacity: 1, y: 0 }}
+              aria-live="polite"
+              className="mt-8 grid gap-2 border-destructive/30 border-y py-5 sm:grid-cols-[180px_1fr]"
+              exit={{ opacity: 0, y: -6 }}
+              initial={{ opacity: 0, y: 6 }}
+              transition={{ type: "spring", duration: 0.32, bounce: 0.08 }}
+            >
+              <h2 className="font-semibold text-destructive text-sm">
+                {error.title}
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                {error.description}
+              </p>
+            </motion.section>
+          ) : null}
+        </AnimatePresence>
+        <AnimatePresence>
+          {lastResult ? <ValidationResult result={lastResult} /> : null}
+        </AnimatePresence>
       </main>
     </motion.div>
   );
