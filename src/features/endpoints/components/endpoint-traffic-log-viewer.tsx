@@ -16,7 +16,6 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { motion } from "motion/react";
 import { type ReactNode, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -412,13 +411,9 @@ export function EndpointTrafficLogViewer({
           )}
         >
           {logs.map((log) => (
-            <motion.div
-              animate={{ opacity: 1, x: 0 }}
+            <div
               className="group grid min-w-0 grid-cols-[24px_116px_minmax(0,1fr)] items-start gap-2 rounded px-2 py-1 transition-[background-color,transform] duration-150 ease-out hover:bg-white/7 active:scale-[0.997]"
-              initial={{ opacity: 0, x: -8 }}
               key={log.id}
-              layout="position"
-              transition={{ duration: 0.15, ease: "easeOut" }}
             >
               <Checkbox
                 aria-label={formatMessage(
@@ -446,7 +441,7 @@ export function EndpointTrafficLogViewer({
               >
                 {formatLogLine(log, showTimestamps)}
               </button>
-            </motion.div>
+            </div>
           ))}
         </div>
         {!wrapLines && <ScrollBar orientation="horizontal" />}
@@ -989,7 +984,7 @@ function TerminalState({
           {tone === "empty" && (
             <p className="flex items-center gap-1.5 text-[#737373]">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60 opacity-75" />
+                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/60 opacity-75 motion-safe:animate-ping" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
               <span>{messages.endpoints.trafficLogsWaiting}</span>

@@ -2,8 +2,9 @@
 
 import * as React from 'react';
 import { createContext, useContext } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { MOTION_DURATION, MOTION_EASE } from '@/lib/motion';
 
 // Types
 type StepperOrientation = 'horizontal' | 'vertical';
@@ -375,20 +376,24 @@ interface StepperContentProps extends React.ComponentProps<'div'> {
 function StepperContent({ value, forceMount, children, className }: StepperContentProps) {
   const { activeStep } = useStepper();
   const isActive = value === activeStep;
+  const shouldReduceMotion = useReducedMotion();
 
   if (!forceMount && !isActive) {
     return null;
   }
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence initial={false}>
       {isActive && (
         <motion.div
           key={value}
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 8 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          exit={{ opacity: 0, x: shouldReduceMotion ? 0 : -8 }}
+          transition={{
+            duration: shouldReduceMotion ? MOTION_DURATION.fast : MOTION_DURATION.step,
+            ease: MOTION_EASE.out,
+          }}
           data-slot="stepper-content"
           data-state={activeStep}
           className={cn('w-full', className)}

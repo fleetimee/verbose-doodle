@@ -113,11 +113,11 @@ export const endpointsMessages = {
     liveWindowLabel: "Live traffic window",
     requestHealthLabel: "Request health",
     healthDescription:
-      "{requests} requests sampled from the last {window}, averaging {average} with p95 at {p95}.",
+      "{requests} requests in the last {window}, averaging {average} with a maximum of {maximum}.",
     timeWindows: {
-      "5m": "5m",
-      "15m": "15m",
-      "1h": "1h",
+      "24h": "24h",
+      "7d": "7d",
+      "30d": "30d",
     },
     miniStats: {
       throughput: "Throughput",
@@ -173,7 +173,7 @@ export const endpointsMessages = {
     },
     charts: {
       latencyTitle: "Latency trend",
-      latencyDescription: "Average and percentile response time by bucket.",
+      latencyDescription: "Average response time by hour.",
       volumeTitle: "Request volume",
       volumeDescription: "Request, success, and error counts by bucket.",
       avgLabel: "Avg",

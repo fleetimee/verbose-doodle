@@ -1,6 +1,7 @@
 import {
   Info,
   LayoutDashboard,
+  LayoutGrid,
   Network,
   Plug,
   RadioTower,
@@ -27,8 +28,13 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/features/auth/context";
+import {
+  DEVELOPER_TOOL_CATEGORIES,
+  DEVELOPER_TOOL_COUNT,
+} from "@/features/developer-tools/catalog";
 import { usePrefetchEndpoints } from "@/features/endpoints/hooks/use-prefetch-endpoints";
 import { usePrefetchOverview } from "@/features/overview/hooks/use-prefetch-overview";
+import { messages } from "@/lib/i18n";
 
 const data = {
   navMain: [
@@ -45,36 +51,62 @@ const data = {
       groupLabel: "Biller Simulator",
     },
     {
-      title: "TCP Client",
-      url: "/dashboard/socket-test/tcp-client",
+      title: "Socket Test",
       icon: RadioTower,
       groupLabel: "Socket Test",
+      items: [
+        {
+          title: "TCP Client",
+          url: "/dashboard/socket-test/tcp-client",
+          icon: RadioTower,
+        },
+        {
+          title: "TCP Server",
+          url: "/dashboard/socket-test/tcp-server",
+          icon: Server,
+        },
+        {
+          title: "UDP",
+          url: "/dashboard/socket-test/udp",
+          icon: Waves,
+        },
+      ],
     },
     {
-      title: "TCP Server",
-      url: "/dashboard/socket-test/tcp-server",
-      icon: Server,
-      groupLabel: "Socket Test",
+      title: messages.developerTools.catalogNavigation,
+      url: "/dashboard/developer-tools",
+      icon: LayoutGrid,
+      groupLabel: messages.developerTools.navigationGroup,
+      badge: String(DEVELOPER_TOOL_COUNT),
+      exact: true,
     },
+    ...DEVELOPER_TOOL_CATEGORIES.map((category) => ({
+      title: category.name,
+      icon: category.icon,
+      groupLabel: messages.developerTools.navigationGroup,
+      items: category.tools.map((tool) => ({
+        title: tool.name,
+        url: tool.href,
+        icon: tool.icon,
+      })),
+    })),
     {
-      title: "UDP",
-      url: "/dashboard/socket-test/udp",
-      icon: Waves,
-      groupLabel: "Socket Test",
-    },
-    {
-      title: "REST API",
-      url: "/dashboard/socks-relay/rest-api",
-      icon: Route,
-      groupLabel: "Socks Relay",
-      adminOnly: true,
-    },
-    {
-      title: "ISO 8583",
-      url: "/dashboard/socks-relay/iso-8583",
+      title: "Socks Relay",
       icon: Network,
       groupLabel: "Socks Relay",
       adminOnly: true,
+      items: [
+        {
+          title: "REST API",
+          url: "/dashboard/socks-relay/rest-api",
+          icon: Route,
+        },
+        {
+          title: "ISO 8583",
+          url: "/dashboard/socks-relay/iso-8583",
+          icon: Network,
+        },
+      ],
     },
   ],
   navSecondary: [

@@ -38,7 +38,7 @@ describe("ResponseForm", () => {
     expect(statusInput.value).toBe("200");
 
     const activatedSwitch = screen.getByRole("switch", { name: "Activate" });
-    expect(activatedSwitch.getAttribute("data-state")).toBe("unchecked");
+    expect(activatedSwitch.getAttribute("aria-checked")).toBe("false");
   });
 
   test("coerces numeric values and forwards submission data", async () => {
@@ -67,7 +67,7 @@ describe("ResponseForm", () => {
     await user.click(jsonTextarea);
     await user.paste('{"error":"not_found"}');
 
-    await user.click(screen.getByLabelText("Activate"));
+    await user.click(screen.getByRole("switch", { name: "Activate" }));
 
     await user.click(screen.getByRole("button", { name: SUBMIT_BUTTON_LABEL }));
 

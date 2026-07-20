@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Clock, Timer, Zap } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { forwardRef, useImperativeHandle } from "react";
 import { Controller, type UseFormReturn, useForm } from "react-hook-form";
 import {
@@ -27,15 +27,10 @@ import {
   type SimulationFormValues,
   simulationFormSchema,
 } from "@/features/endpoints/schemas/simulation-schema";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 const MS_PER_SECOND = 1000;
 const DELAY_DISPLAY_DECIMAL_PLACES = 2;
-
-// Animation constants
-const SECTION_ANIMATION_DURATION = 0.4;
-const BUTTON_ANIMATION_DURATION = 0.2;
-const BUTTON_STAGGER_DELAY = 0.05;
-const PREVIEW_ANIMATION_DURATION = 0.3;
 
 type SimulationFormProps = {
   defaultValues?: SimulationFormValues;
@@ -70,6 +65,7 @@ export const SimulationForm = forwardRef<
 
   const simulationType = form.watch("type");
   const delayMs = form.watch("delayMs");
+  const shouldReduceMotion = useReducedMotion();
 
   const handleSubmit = (data: SimulationFormValues) => {
     // Validate delay if DELAY type is selected
@@ -195,16 +191,16 @@ export const SimulationForm = forwardRef<
             />
 
             {/* Step 2: Delay Configuration (Conditional) */}
-            <AnimatePresence mode="wait">
+            <AnimatePresence initial={false}>
               {simulationType === SIMULATION_TYPE.DELAY && (
                 <motion.div
-                  animate={{ opacity: 1, height: "auto", y: 0 }}
-                  exit={{ opacity: 0, height: 0, y: -20 }}
-                  initial={{ opacity: 0, height: 0, y: -20 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  initial={{ opacity: 0 }}
                   key="delay-config"
                   transition={{
-                    duration: SECTION_ANIMATION_DURATION,
-                    ease: "easeOut",
+                    duration: MOTION_DURATION.fast,
+                    ease: MOTION_EASE.out,
                   }}
                 >
                   <Controller
@@ -220,19 +216,10 @@ export const SimulationForm = forwardRef<
 
                           {/* Preset Buttons */}
                           <div className="mb-4 grid grid-cols-3 gap-2">
-                            {DELAY_PRESETS.map((preset, index) => (
-                              <motion.div
-                                animate={{ opacity: 1, scale: 1 }}
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                key={preset.value}
-                                transition={{
-                                  duration: BUTTON_ANIMATION_DURATION,
-                                  delay: index * BUTTON_STAGGER_DELAY,
-                                  ease: "easeOut",
-                                }}
-                              >
+                            {DELAY_PRESETS.map((preset) => (
+                              <div key={preset.value}>
                                 <Button
-                                  className="w-full transition-all duration-200"
+                                  className="w-full"
                                   onClick={() => field.onChange(preset.value)}
                                   size="sm"
                                   type="button"
@@ -244,7 +231,7 @@ export const SimulationForm = forwardRef<
                                 >
                                   {preset.label}
                                 </Button>
-                              </motion.div>
+                              </div>
                             ))}
                           </div>
 
@@ -278,38 +265,31 @@ export const SimulationForm = forwardRef<
                           </div>
 
                           {/* Preview */}
-                          <AnimatePresence mode="wait">
+                          <AnimatePresence initial={false}>
                             {delayMs && delayMs > 0 && (
                               <motion.div
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                animate={{ opacity: 1 }}
                                 className="mt-4 rounded-lg border bg-muted/50 p-4"
-                                exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                                initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                                key={`preview-${delayMs}`}
+                                exit={{ opacity: 0 }}
+                                initial={{ opacity: 0 }}
+                                key="delay-preview"
                                 transition={{
-                                  duration: PREVIEW_ANIMATION_DURATION,
-                                  ease: "easeOut",
+                                  duration: shouldReduceMotion
+                                    ? MOTION_DURATION.instant
+                                    : MOTION_DURATION.fast,
+                                  ease: MOTION_EASE.out,
                                 }}
                               >
                                 <p className="font-medium text-sm">Preview</p>
                                 <p className="mt-1 text-muted-foreground text-sm">
                                   Response will be delayed by{" "}
-                                  <motion.span
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className="font-semibold"
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    key={delayMs}
-                                    transition={{
-                                      duration: 0.2,
-                                      ease: "easeOut",
-                                    }}
-                                  >
+                                  <span className="font-semibold">
                                     {delayMs >= MS_PER_SECOND
                                       ? `${(delayMs / MS_PER_SECOND).toFixed(
                                           DELAY_DISPLAY_DECIMAL_PLACES
                                         )}s`
                                       : `${delayMs}ms`}
-                                  </motion.span>
+                                  </span>
                                 </p>
                               </motion.div>
                             )}

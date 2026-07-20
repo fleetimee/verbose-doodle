@@ -108,14 +108,14 @@ describe("socks relay formatting", () => {
 });
 
 describe("socks relay websocket url", () => {
-  test("builds a tokenized websocket url on the current host", () => {
+  test("builds a ticketed websocket url without a bearer token", () => {
     Object.defineProperty(window, "location", {
       configurable: true,
       value: new URL("http://localhost:5173/dashboard"),
     });
 
-    expect(buildRelayWebSocketUrl("token value")).toBe(
-      "ws://localhost:5173/api/relay/events?token=token+value"
+    expect(buildRelayWebSocketUrl("one-time ticket")).toBe(
+      "ws://localhost:5173/api/relay/events?ticket=one-time+ticket"
     );
   });
 });

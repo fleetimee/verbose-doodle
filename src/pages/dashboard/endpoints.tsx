@@ -1,5 +1,5 @@
 import { CircleHelp, Layers3, Plug, Plus } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type TourStep, useTour } from "@/components/tour";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ import { ExportEndpointsDialog } from "@/features/endpoints/components/export-en
 import { useCreateEndpoint } from "@/features/endpoints/hooks/use-create-endpoint";
 import { useGetEndpoints } from "@/features/endpoints/hooks/use-get-endpoints";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
-import type { Endpoint, GroupedEndpoints } from "@/features/endpoints/types";
+import type { GroupedEndpoints } from "@/features/endpoints/types";
 import {
   filterEndpoints,
   groupEndpointsByBiller,
@@ -34,6 +34,7 @@ import {
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { messages } from "@/lib/i18n";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 // Skeleton loading constants
 const SKELETON_TOTAL_COUNT = 18;
@@ -49,11 +50,6 @@ const SKELETON_KEYS = Array.from(
   (_, i) => `skeleton-${i}`
 );
 
-// Animation constants
-const STAGGER_BASE_DELAY = 0.4;
-const STAGGER_INCREMENT = 0.1;
-const VIEW_ITEM_STAGGER = 0.035;
-const VIEW_ITEM_STAGGER_LIMIT = 9;
 const ENDPOINTS_TOUR_ID = "endpoints-intro";
 const ENDPOINTS_TOUR_TARGETS = {
   header: "endpoints-tour-header",
@@ -84,37 +80,11 @@ function TourStepContent({
   );
 }
 
-function ViewModeSweep({ viewMode }: { viewMode: EndpointViewMode }) {
-  return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 overflow-hidden">
-      <motion.div
-        animate={{
-          opacity: [0, 1, 0],
-          scaleX: [0.15, 1, 0.75],
-          y: [-8, 42, 96],
-        }}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent shadow-[0_0_28px_hsl(var(--primary)/0.45)]"
-        exit={{ opacity: 0 }}
-        initial={{ opacity: 0, scaleX: 0.15, y: -8 }}
-        key={`sweep-${viewMode}`}
-        transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
-      />
-    </div>
-  );
-}
-
 type AnimatedEndpointGroupProps = {
   readonly group: GroupedEndpoints;
   readonly groupIndex: number;
   readonly prefersReducedMotion: boolean;
   readonly viewMode: EndpointViewMode;
-};
-
-type AnimatedEndpointItemsProps = {
-  readonly endpoints: Endpoint[];
-  readonly groupIndex: number;
-  readonly prefersReducedMotion: boolean;
 };
 
 function getEndpointTourId(groupIndex: number, endpointIndex: number) {
@@ -123,126 +93,39 @@ function getEndpointTourId(groupIndex: number, endpointIndex: number) {
     : undefined;
 }
 
-function getViewItemDelay(
-  endpointIndex: number,
-  prefersReducedMotion: boolean
-) {
-  if (prefersReducedMotion) {
-    return 0;
-  }
-
-  return Math.min(endpointIndex, VIEW_ITEM_STAGGER_LIMIT) * VIEW_ITEM_STAGGER;
-}
-
-function AnimatedGridEndpoints({
-  endpoints,
+function GridEndpoints({
+  group,
   groupIndex,
-  prefersReducedMotion,
-}: AnimatedEndpointItemsProps) {
+}: Omit<AnimatedEndpointGroupProps, "prefersReducedMotion" | "viewMode">) {
   return (
-    <motion.div
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-      exit={{
-        opacity: 0,
-        scale: prefersReducedMotion ? 1 : 0.98,
-        y: prefersReducedMotion ? 0 : -10,
-      }}
-      initial={{
-        opacity: 0,
-        scale: prefersReducedMotion ? 1 : 0.96,
-        y: prefersReducedMotion ? 0 : 14,
-      }}
-      key="grid"
-      layout
-      transition={{
-        duration: prefersReducedMotion ? 0.12 : 0.34,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-    >
-      {endpoints.map((endpoint, endpointIndex) => (
-        <motion.div
-          animate={{ opacity: 1, rotateX: 0, y: 0 }}
-          exit={{
-            opacity: 0,
-            rotateX: prefersReducedMotion ? 0 : 8,
-            y: prefersReducedMotion ? 0 : -10,
-          }}
-          initial={{
-            opacity: 0,
-            rotateX: prefersReducedMotion ? 0 : -10,
-            y: prefersReducedMotion ? 0 : 18,
-          }}
-          key={endpoint.id}
-          layout
-          transition={{
-            delay: getViewItemDelay(endpointIndex, prefersReducedMotion),
-            duration: prefersReducedMotion ? 0.1 : 0.32,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        >
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {group.endpoints.map((endpoint, endpointIndex) => (
+        <div key={endpoint.id}>
           <EndpointCard
             endpoint={endpoint}
             tourId={getEndpointTourId(groupIndex, endpointIndex)}
           />
-        </motion.div>
+        </div>
       ))}
-    </motion.div>
+    </div>
   );
 }
 
-function AnimatedListEndpoints({
-  endpoints,
+function ListEndpoints({
+  group,
   groupIndex,
-  prefersReducedMotion,
-}: AnimatedEndpointItemsProps) {
+}: Omit<AnimatedEndpointGroupProps, "prefersReducedMotion" | "viewMode">) {
   return (
-    <motion.div
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      className="space-y-3"
-      exit={{
-        opacity: 0,
-        scale: prefersReducedMotion ? 1 : 1.01,
-        y: prefersReducedMotion ? 0 : 10,
-      }}
-      initial={{
-        opacity: 0,
-        scale: prefersReducedMotion ? 1 : 1.02,
-        y: prefersReducedMotion ? 0 : -14,
-      }}
-      key="list"
-      layout
-      transition={{
-        duration: prefersReducedMotion ? 0.12 : 0.34,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-    >
-      {endpoints.map((endpoint, endpointIndex) => (
-        <motion.div
-          animate={{ opacity: 1, x: 0 }}
-          exit={{
-            opacity: 0,
-            x: prefersReducedMotion ? 0 : 18,
-          }}
-          initial={{
-            opacity: 0,
-            x: prefersReducedMotion ? 0 : -18,
-          }}
-          key={endpoint.id}
-          layout
-          transition={{
-            delay: getViewItemDelay(endpointIndex, prefersReducedMotion),
-            duration: prefersReducedMotion ? 0.1 : 0.28,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        >
+    <div className="space-y-3">
+      {group.endpoints.map((endpoint, endpointIndex) => (
+        <div key={endpoint.id}>
           <EndpointListItem
             endpoint={endpoint}
             tourId={getEndpointTourId(groupIndex, endpointIndex)}
           />
-        </motion.div>
+        </div>
       ))}
-    </motion.div>
+    </div>
   );
 }
 
@@ -253,26 +136,24 @@ function AnimatedEndpointGroup({
   viewMode,
 }: AnimatedEndpointGroupProps) {
   return (
-    <div className="relative rounded-lg">
-      {!prefersReducedMotion && <ViewModeSweep viewMode={viewMode} />}
-      <AnimatePresence initial={false} mode="popLayout">
-        {viewMode === "grid" ? (
-          <AnimatedGridEndpoints
-            endpoints={group.endpoints}
-            groupIndex={groupIndex}
-            key="grid"
-            prefersReducedMotion={prefersReducedMotion}
-          />
-        ) : (
-          <AnimatedListEndpoints
-            endpoints={group.endpoints}
-            groupIndex={groupIndex}
-            key="list"
-            prefersReducedMotion={prefersReducedMotion}
-          />
-        )}
-      </AnimatePresence>
-    </div>
+    <motion.div
+      animate={{ opacity: 1 }}
+      className="rounded-lg"
+      initial={{ opacity: prefersReducedMotion ? 1 : 0 }}
+      key={viewMode}
+      transition={{
+        duration: prefersReducedMotion
+          ? MOTION_DURATION.instant
+          : MOTION_DURATION.fast,
+        ease: MOTION_EASE.out,
+      }}
+    >
+      {viewMode === "grid" ? (
+        <GridEndpoints group={group} groupIndex={groupIndex} />
+      ) : (
+        <ListEndpoints group={group} groupIndex={groupIndex} />
+      )}
+    </motion.div>
   );
 }
 
@@ -474,17 +355,17 @@ export function EndpointsPage() {
 
   return (
     <motion.div
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1 }}
       className="space-y-6"
-      initial={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
+      initial={{ opacity: 0 }}
+      transition={{ duration: MOTION_DURATION.fast, ease: MOTION_EASE.out }}
     >
       <motion.div
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ opacity: 1 }}
         className="flex items-center justify-between"
         id={ENDPOINTS_TOUR_TARGETS.header}
-        initial={{ opacity: 0, y: 20 }}
-        transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+        initial={{ opacity: 0 }}
+        transition={{ duration: MOTION_DURATION.fast, ease: MOTION_EASE.out }}
       >
         <div>
           <h1 className="font-bold text-3xl tracking-tight">Endpoint</h1>
@@ -624,10 +505,13 @@ export function EndpointsPage() {
       {!isLoadingEndpoints && hasEndpoints && (
         <>
           <motion.div
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1 }}
             className="flex flex-col gap-4 sm:flex-row sm:items-center"
-            initial={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            transition={{
+              duration: MOTION_DURATION.fast,
+              ease: MOTION_EASE.out,
+            }}
           >
             <div className="flex-1">
               <EndpointsSearchControls
@@ -657,23 +541,16 @@ export function EndpointsPage() {
 
           {hasFilteredEndpoints ? (
             <motion.div
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1 }}
               className="space-y-8"
-              initial={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
+              initial={{ opacity: 0 }}
+              transition={{
+                duration: MOTION_DURATION.fast,
+                ease: MOTION_EASE.out,
+              }}
             >
               {groupedEndpoints.map((group, index) => (
-                <motion.section
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  key={group.billerId}
-                  transition={{
-                    duration: 0.3,
-                    delay: STAGGER_BASE_DELAY + index * STAGGER_INCREMENT,
-                    ease: "easeOut",
-                  }}
-                >
+                <section className="space-y-4" key={group.billerId}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <h2 className="font-semibold text-lg">
                       {group.billerName}
@@ -690,14 +567,17 @@ export function EndpointsPage() {
                     prefersReducedMotion={shouldReduceMotion}
                     viewMode={viewMode}
                   />
-                </motion.section>
+                </section>
               ))}
             </motion.div>
           ) : (
             <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              initial={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
+              animate={{ opacity: 1 }}
+              initial={{ opacity: 0 }}
+              transition={{
+                duration: MOTION_DURATION.fast,
+                ease: MOTION_EASE.out,
+              }}
             >
               <Empty className="border">
                 <EmptyHeader>
@@ -719,9 +599,9 @@ export function EndpointsPage() {
 
       {!(isLoadingEndpoints || hasEndpoints) && (
         <motion.div
-          animate={{ opacity: 1, y: 0 }}
-          initial={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+          animate={{ opacity: 1 }}
+          initial={{ opacity: 0 }}
+          transition={{ duration: MOTION_DURATION.fast, ease: MOTION_EASE.out }}
         >
           <Empty className="min-h-[60vh] border">
             <EmptyHeader>

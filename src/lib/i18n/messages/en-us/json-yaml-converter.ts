@@ -1,0 +1,66 @@
+export const jsonYamlConverterMessages = {
+  navigationGroup: "Developer Tools",
+  title: "JSON/YAML Converter",
+  pageTitle: "JSON/YAML Converter | BPDDIY DevTools",
+  pageDescription: "Convert JSON documents to YAML and YAML documents to JSON.",
+  pageKeywords: ["json", "yaml", "converter", "developer tools"],
+  eyebrow: "Developer tools / 02",
+  description:
+    "Convert JSON and YAML in your browser. Your input never leaves this page.",
+  formatsLabel: "Formats",
+  formatsValue: "JSON / YAML 1.2",
+  limitLabel: "Limit",
+  limitValue: "1 MiB / source",
+  storageLabel: "Storage",
+  storageValue: "Memory only",
+  resetExample: "Reset example",
+  clear: "Clear",
+  sourceFormatLabel: "Source format",
+  jsonFormat: "JSON",
+  yamlFormat: "YAML",
+  shortcutLabel: "Ctrl / Cmd + Enter",
+  convert: "Convert",
+  swap: "Swap",
+  copyOutput: "Copy output",
+  copied: "Copied",
+  sourceLabel: "Source {format}",
+  sourceDescription: "Editable {format} input",
+  outputLabel: "Output {format}",
+  outputDescription: "Read-only converted {format}",
+  editorLineCount: "{count} ln",
+  editorByteCount: "{count} b",
+  errorTitle: "Conversion failed",
+  errorLocation: "Line {line}, column {column}",
+  jsonParseError: "JSON could not be parsed. {detail}",
+  yamlParseError: "YAML could not be parsed. {detail}",
+  duplicateYamlKeyError: "YAML contains a duplicate mapping key.",
+  nonStringYamlKeyError: "YAML mapping keys must be strings.",
+  circularAliasError: "Circular YAML aliases are not supported.",
+  nonFiniteNumberError: "Non-finite numbers are not supported.",
+  yamlNegativeZeroError:
+    "This YAML value cannot round-trip through JSON. Negative zero would become zero.",
+  jsonNegativeZeroError:
+    "This JSON value cannot round-trip through YAML. Negative zero would become zero.",
+  yamlUnsafeIntegerError:
+    "This YAML value cannot round-trip through JSON. The integer is outside JSON's safe range.",
+  jsonUnsafeIntegerError:
+    "This JSON value cannot round-trip through YAML. The integer is outside JavaScript's safe range.",
+  unsupportedYamlValueError: "This YAML value cannot round-trip through JSON.",
+  yamlConversionError: "YAML could not be converted. {detail}",
+  sourceTooLargeError: "Source input cannot exceed 1 MiB.",
+  copyError: "Could not copy output.",
+  preservationNote:
+    "Converted output does not preserve YAML comments, anchors, aliases, or the original formatting.",
+  tour: {
+    startButton: "Start tour",
+    controlsTitle: "Set the conversion direction",
+    controlsDescription:
+      "Choose JSON or YAML as the source, then convert with the button or Ctrl/Cmd+Enter. Swap becomes available after a successful conversion.",
+    editorsTitle: "Work across two panes",
+    editorsDescription:
+      "Edit the source on the left. The read-only pane on the right shows formatted output in the other document type.",
+    outputTitle: "Use the converted output",
+    outputDescription:
+      "Copy a successful result here. Failed conversions keep the last valid output visible while you fix the source.",
+  },
+} as const;

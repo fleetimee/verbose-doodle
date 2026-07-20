@@ -8,7 +8,7 @@ import {
   Timer,
   Trash2,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence } from "motion/react";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -46,17 +46,6 @@ import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
-const SELECTED_ITEM_SCALE = 1.01;
-
-// Animation constants for smooth transitions
-const ANIMATION_DURATION = 0.3;
-const HOVER_SCALE = 1.01;
-const SCALE_SPRING = {
-  type: "spring",
-  stiffness: 400,
-  damping: 30,
-} as const;
-
 type ResponseListItemProps = {
   response: EndpointResponse;
   isSelected: boolean;
@@ -202,74 +191,38 @@ export function ResponseListItem({
 
   return (
     <>
-      <motion.div
-        animate={{
-          scale: isSelected ? SELECTED_ITEM_SCALE : 1,
-          opacity: 1,
-        }}
+      {/* biome-ignore lint/a11y/useSemanticElements: Nested action controls prevent using a button element. */}
+      <div
         className={getItemContainerClasses(isSelected)}
-        initial={false}
-        key={response.id}
-        layout
         onClick={() => {
           onSelect(response.id);
         }}
         onKeyDown={handleKeyDown}
         role="button"
-        style={{
-          transition: `background-color ${ANIMATION_DURATION}s cubic-bezier(0.4, 0, 0.2, 1), box-shadow ${ANIMATION_DURATION}s cubic-bezier(0.4, 0, 0.2, 1)`,
-        }}
         tabIndex={0}
-        transition={{
-          layout: { type: "spring", stiffness: 400, damping: 30 },
-          scale: SCALE_SPRING,
-          opacity: { duration: ANIMATION_DURATION, ease: "easeOut" },
-        }}
-        whileHover={{ scale: isSelected ? SELECTED_ITEM_SCALE : HOVER_SCALE }}
-        whileTap={{ scale: 0.99 }}
       >
         <div className="relative flex items-start justify-between gap-3">
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-1 flex-col gap-2.5"
-            initial={false}
-            transition={{
-              duration: ANIMATION_DURATION,
-              ease: "easeOut",
-            }}
-          >
+          <div className="flex flex-1 flex-col gap-2.5">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-base leading-none">
                 {response.name}
               </span>
               {isActive && (
-                <motion.div
-                  animate={{ opacity: 1, scale: 1 }}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                >
+                <div>
                   <Badge
                     className="flex items-center gap-1.5 bg-background/70 text-xs shadow-xs"
                     variant="secondary"
                   >
                     <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" />
                       <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     </span>
                     Active
                   </Badge>
-                </motion.div>
+                </div>
               )}
             </div>
-            <motion.div
-              animate={{ opacity: 1 }}
-              className="flex flex-wrap items-center gap-1.5"
-              initial={false}
-              transition={{
-                duration: ANIMATION_DURATION,
-                ease: "easeOut",
-              }}
-            >
+            <div className="flex flex-wrap items-center gap-1.5">
               <Badge
                 className="font-mono text-xs shadow-xs"
                 variant={getStatusCodeVariant(response.statusCode)}
@@ -277,8 +230,8 @@ export function ResponseListItem({
                 {response.statusCode}
               </Badge>
               <ResponseSimulationBadge response={response} />
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
           {canActivateResponse && (
             <div className="flex items-center gap-1">
               <DropdownMenu>
@@ -394,7 +347,7 @@ export function ResponseListItem({
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
 
       <SimulateTimeoutDialog
         onOpenChange={setShowSimulateDialog}

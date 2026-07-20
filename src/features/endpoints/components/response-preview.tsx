@@ -35,13 +35,9 @@ import { ServerSettlingLayer } from "@/features/endpoints/components/server-sett
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 import { copyToClipboard } from "@/lib/clipboard";
 import { messages } from "@/lib/i18n";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
-
-// Animation constants
-const RESPONSE_ANIMATION_DURATION = 0.3;
-const STAGGER_DELAY = 0.05;
-const ALERT_STAGGER_MULTIPLIER = 3;
 
 type ResponsePreviewProps = {
   response: EndpointResponse | null;
@@ -169,246 +165,206 @@ export function ResponsePreview({
             <ServerSettlingLayer onComplete={handleSettlingComplete} />
           )}
         </AnimatePresence>
-        <AnimatePresence mode="wait">
-          {response ? (
-            <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              className="p-4"
-              exit={{ opacity: 0, y: -10 }}
-              initial={{ opacity: 0, y: 10 }}
-              key={response.id}
-              transition={{
-                duration: RESPONSE_ANIMATION_DURATION,
-                ease: "easeOut",
-              }}
-            >
-              <motion.div
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-4 space-y-3"
-                initial={{ opacity: 0, y: 10 }}
-                transition={{
-                  duration: RESPONSE_ANIMATION_DURATION,
-                  delay: STAGGER_DELAY,
-                  ease: "easeOut",
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-lg">{response.name}</h3>
-                  {response.activated ? (
-                    <Badge
-                      className="flex items-center gap-1.5"
-                      variant="secondary"
-                    >
-                      <span className="relative flex h-1.5 w-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      </span>
-                      {endpointMessages.responseActiveBadge}
-                    </Badge>
-                  ) : (
-                    <Badge
-                      className="flex items-center gap-1.5 text-muted-foreground"
-                      variant="outline"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
-                      {endpointMessages.responseInactiveBadge}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-sm">
-                    {endpointMessages.responseStatusCodeLabel}
-                  </span>
+        {response ? (
+          <motion.div
+            animate={{ opacity: 1 }}
+            className="p-4"
+            initial={{ opacity: 0 }}
+            key={response.id}
+            transition={{
+              duration: MOTION_DURATION.fast,
+              ease: MOTION_EASE.out,
+            }}
+          >
+            <div className="mb-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-lg">{response.name}</h3>
+                {response.activated ? (
                   <Badge
-                    className="font-mono"
-                    variant={
-                      response.statusCode < SUCCESS_STATUS_CODE_THRESHOLD
-                        ? "default"
-                        : "destructive"
-                    }
+                    className="flex items-center gap-1.5"
+                    variant="secondary"
                   >
-                    {response.statusCode}
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    </span>
+                    {endpointMessages.responseActiveBadge}
                   </Badge>
-                </div>
+                ) : (
+                  <Badge
+                    className="flex items-center gap-1.5 text-muted-foreground"
+                    variant="outline"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                    {endpointMessages.responseInactiveBadge}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground text-sm">
+                  {endpointMessages.responseStatusCodeLabel}
+                </span>
+                <Badge
+                  className="font-mono"
+                  variant={
+                    response.statusCode < SUCCESS_STATUS_CODE_THRESHOLD
+                      ? "default"
+                      : "destructive"
+                  }
+                >
+                  {response.statusCode}
+                </Badge>
+              </div>
 
-                {/* URL Preview and Actions */}
-                {endpointUrl && endpointMethod && baseUrl && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="shrink-0 text-muted-foreground text-sm">
-                        {endpointMessages.responseEndpointUrlLabel}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <input
-                        className="flex-1 rounded-md border border-input bg-background px-3 py-2 font-mono text-xs ring-offset-background file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        readOnly
-                        type="text"
-                        value={fullUrl}
-                      />
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              onClick={() => setIsCodeDialogOpen(true)}
-                              size="icon"
-                              variant="outline"
-                            >
-                              <Code2 className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              {endpointMessages.responseGenerateCodeTooltip}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              onClick={handleCopyUrl}
-                              size="icon"
-                              variant="outline"
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{endpointMessages.responseCopyUrlTooltip}</p>
-                          </TooltipContent>
-                        </Tooltip>
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              onClick={() => setIsSimulatorOpen(true)}
-                              size="icon"
-                              variant="outline"
-                            >
-                              <Play className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              {endpointMessages.responseSimulateRequestTooltip}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-
-                    <CodeGeneratorDialog
-                      baseUrl={baseUrl}
-                      method={endpointMethod}
-                      onOpenChange={setIsCodeDialogOpen}
-                      open={isCodeDialogOpen}
-                      path={endpointUrl}
-                      response={response}
-                      token={token}
+              {/* URL Preview and Actions */}
+              {endpointUrl && endpointMethod && baseUrl && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="shrink-0 text-muted-foreground text-sm">
+                      {endpointMessages.responseEndpointUrlLabel}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <input
+                      className="flex-1 rounded-md border border-input bg-background px-3 py-2 font-mono text-xs ring-offset-background file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      readOnly
+                      type="text"
+                      value={fullUrl}
                     />
-                    <RequestSimulatorSheet
-                      baseUrl={baseUrl}
-                      endpointUrl={endpointUrl}
-                      method={endpointMethod}
-                      onOpenChange={setIsSimulatorOpen}
-                      open={isSimulatorOpen}
-                      response={response}
-                      token={token}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => setIsCodeDialogOpen(true)}
+                            size="icon"
+                            variant="outline"
+                          >
+                            <Code2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{endpointMessages.responseGenerateCodeTooltip}</p>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={handleCopyUrl}
+                            size="icon"
+                            variant="outline"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{endpointMessages.responseCopyUrlTooltip}</p>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => setIsSimulatorOpen(true)}
+                            size="icon"
+                            variant="outline"
+                          >
+                            <Play className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            {endpointMessages.responseSimulateRequestTooltip}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+
+                  <CodeGeneratorDialog
+                    baseUrl={baseUrl}
+                    method={endpointMethod}
+                    onOpenChange={setIsCodeDialogOpen}
+                    open={isCodeDialogOpen}
+                    path={endpointUrl}
+                    response={response}
+                    token={token}
+                  />
+                  <RequestSimulatorSheet
+                    baseUrl={baseUrl}
+                    endpointUrl={endpointUrl}
+                    method={endpointMethod}
+                    onOpenChange={setIsSimulatorOpen}
+                    open={isSimulatorOpen}
+                    response={response}
+                    token={token}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Simulation Explanation Alert */}
+            <div className="mb-4">
+              <ResponseSimulationAlert response={response} />
+            </div>
+
+            <div>
+              <CodeBlock
+                className="max-w-full"
+                data={[
+                  {
+                    language: "json",
+                    filename: "response.json",
+                    code: formattedResponseJson,
+                  },
+                ]}
+                defaultValue="json"
+                storageKey="response-preview-themes"
+              >
+                <CodeBlockHeader>
+                  <div className="flex-1 px-3 py-1 text-muted-foreground text-xs">
+                    {endpointMessages.responseBodyTitle}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground text-xs">
+                      {endpointMessages.responseThemeLabel}
+                    </span>
+                    <CodeBlockThemeSelector
+                      mode={resolvedTheme === "dark" ? "dark" : "light"}
                     />
                   </div>
-                )}
-              </motion.div>
-
-              {/* Simulation Explanation Alert */}
-              <motion.div
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-4"
-                initial={{ opacity: 0, y: 10 }}
-                transition={{
-                  duration: RESPONSE_ANIMATION_DURATION,
-                  delay: STAGGER_DELAY * 2,
-                  ease: "easeOut",
-                }}
-              >
-                <ResponseSimulationAlert response={response} />
-              </motion.div>
-
-              <motion.div
-                animate={{ opacity: 1, y: 0 }}
-                initial={{ opacity: 0, y: 10 }}
-                transition={{
-                  duration: RESPONSE_ANIMATION_DURATION,
-                  delay: STAGGER_DELAY * ALERT_STAGGER_MULTIPLIER,
-                  ease: "easeOut",
-                }}
-              >
-                <CodeBlock
-                  className="max-w-full"
-                  data={[
-                    {
-                      language: "json",
-                      filename: "response.json",
-                      code: formattedResponseJson,
-                    },
-                  ]}
-                  defaultValue="json"
-                  storageKey="response-preview-themes"
-                >
-                  <CodeBlockHeader>
-                    <div className="flex-1 px-3 py-1 text-muted-foreground text-xs">
-                      {endpointMessages.responseBodyTitle}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground text-xs">
-                        {endpointMessages.responseThemeLabel}
-                      </span>
-                      <CodeBlockThemeSelector
-                        mode={resolvedTheme === "dark" ? "dark" : "light"}
-                      />
-                    </div>
-                    <CodeBlockCopyButton />
-                  </CodeBlockHeader>
-                  <CodeBlockBody>
-                    {(item) => (
-                      <CodeBlockItem key={item.language} value="json">
-                        <CodeBlockContent
-                          className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
-                          language="json"
-                        >
-                          {item.code}
-                        </CodeBlockContent>
-                      </CodeBlockItem>
-                    )}
-                  </CodeBlockBody>
-                </CodeBlock>
-              </motion.div>
-            </motion.div>
-          ) : (
-            <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              initial={{ opacity: 0, y: 10 }}
-              key="empty"
-              transition={{
-                duration: RESPONSE_ANIMATION_DURATION,
-                ease: "easeOut",
-              }}
-            >
-              <Empty className="min-h-[300px] border-0">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <Eye />
-                  </EmptyMedia>
-                  <EmptyTitle>{endpointMessages.responseEmptyTitle}</EmptyTitle>
-                  <EmptyDescription>
-                    {endpointMessages.responseEmptyDescription}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  <CodeBlockCopyButton />
+                </CodeBlockHeader>
+                <CodeBlockBody>
+                  {(item) => (
+                    <CodeBlockItem key={item.language} value="json">
+                      <CodeBlockContent
+                        className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
+                        language="json"
+                      >
+                        {item.code}
+                      </CodeBlockContent>
+                    </CodeBlockItem>
+                  )}
+                </CodeBlockBody>
+              </CodeBlock>
+            </div>
+          </motion.div>
+        ) : (
+          <div>
+            <Empty className="min-h-[300px] border-0">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Eye />
+                </EmptyMedia>
+                <EmptyTitle>{endpointMessages.responseEmptyTitle}</EmptyTitle>
+                <EmptyDescription>
+                  {endpointMessages.responseEmptyDescription}
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </div>
+        )}
       </ScrollArea>
     </div>
   );

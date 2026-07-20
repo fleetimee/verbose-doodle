@@ -26,6 +26,12 @@ export const endpointQueryKeys = {
   trafficLogDetail: (id: string | number, logId: string | number) =>
     ["endpoints", id, "traffic-logs", logId] as const,
 
+  metricsSummary: (id: string | number) =>
+    ["endpoints", id, "metrics"] as const,
+
+  metricsHourly: (id: string | number, from: string, to: string) =>
+    ["endpoints", id, "metrics", "hourly", from, to] as const,
+
   /**
    * Query key for endpoints filtered by biller
    */

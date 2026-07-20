@@ -246,6 +246,95 @@ describe("API utilities", () => {
       emitSpy.mockRestore();
     });
 
+    test("shares one refresh across concurrent unauthorized requests", async () => {
+      localStorage.setItem("auth_token", "old-access-token");
+      localStorage.setItem("refresh_token", "refresh-token");
+
+      let refreshRequests = 0;
+      fetchSpy.mockImplementation(
+        async (input: string | URL | Request, init?: RequestInit) => {
+          const url = String(input);
+          const authorization = (
+            init?.headers as Record<string, string> | undefined
+          )?.Authorization;
+
+          if (url === "/api/refresh") {
+            refreshRequests += 1;
+            await Promise.resolve();
+            return {
+              ok: true,
+              status: 200,
+              headers: new Headers({ "content-type": "application/json" }),
+              json: async () => ({
+                responseCode: "00",
+                responseDesc: "Success",
+                data: {
+                  accessToken: "new-access-token",
+                  refreshToken: "new-refresh-token",
+                  tokenType: "Bearer",
+                  expiresIn: 900,
+                },
+              }),
+            } as Response;
+          }
+
+          if (authorization === "Bearer old-access-token") {
+            return {
+              ok: false,
+              status: 401,
+              statusText: "Unauthorized",
+              headers: new Headers(),
+              json: async () => ({ message: "Unauthorized" }),
+            } as Response;
+          }
+
+          return {
+            ok: true,
+            status: 200,
+            headers: new Headers({ "content-type": "application/json" }),
+            json: async () => ({ url }),
+          } as Response;
+        }
+      );
+
+      const [first, second] = await Promise.all([
+        apiFetch<{ url: string }>("/first"),
+        apiFetch<{ url: string }>("/second"),
+      ]);
+
+      expect(first).toEqual({ url: "/first" });
+      expect(second).toEqual({ url: "/second" });
+      expect(refreshRequests).toBe(1);
+      expect(fetchSpy).toHaveBeenCalledTimes(5);
+    });
+
+    test("emits one logout transition when a shared refresh fails", async () => {
+      const authUtils = await import("@/features/auth/utils");
+      const emitSpy = spyOn(authUtils, "emitUnauthorizedEvent");
+
+      localStorage.setItem("auth_token", "old-access-token");
+      localStorage.setItem("refresh_token", "refresh-token");
+
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        statusText: "Unauthorized",
+        headers: new Headers(),
+        json: async () => ({ message: "Unauthorized" }),
+      } as Response);
+
+      const results = await Promise.allSettled([
+        apiFetch("/first"),
+        apiFetch("/second"),
+      ]);
+
+      expect(
+        results.every((result) => result.status === "rejected")
+      ).toBeTrue();
+      expect(emitSpy).toHaveBeenCalledTimes(1);
+      emitSpy.mockRestore();
+    });
+
     test("does not emit unauthorized event when disabled", async () => {
       const authUtils = await import("@/features/auth/utils");
       const clearSpy = spyOn(authUtils, "clearAuthToken");

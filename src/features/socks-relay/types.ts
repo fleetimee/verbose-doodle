@@ -55,6 +55,13 @@ export type RelayEvent = {
   readonly payload: RelayEventPayload;
 };
 
+export type RelayEventLog = {
+  readonly id: number;
+  readonly type: string;
+  readonly occurredAt: string;
+  readonly payload: RelayEventPayload;
+};
+
 export type RelayConnectionStatus =
   | "idle"
   | "connecting"

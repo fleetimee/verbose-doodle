@@ -1,4 +1,5 @@
 import type {
+  RelayEventLog,
   RelayInstance,
   RelayStartInput,
   RelayUpdateOptionsInput,
@@ -19,6 +20,10 @@ type RelayDetailData = {
   readonly relay: RelayInstance;
 };
 
+type RelayLogsData = {
+  readonly logs: RelayEventLog[];
+};
+
 export async function listRelays(): Promise<RelayInstance[]> {
   const response = await apiGet<ApiEnvelope<RelayListData>>("/api/relay");
   return response.data.relays;
@@ -29,6 +34,11 @@ export async function getRelay(relayId: string): Promise<RelayInstance> {
     `/api/relay/${encodeURIComponent(relayId)}`
   );
   return response.data.relay;
+}
+
+export async function listRelayLogs(): Promise<RelayEventLog[]> {
+  const response = await apiGet<ApiEnvelope<RelayLogsData>>("/api/relay/logs");
+  return response.data.logs;
 }
 
 export async function startRelay(

@@ -1,0 +1,15 @@
+export const EXAMPLE_SCHEMA = `{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["name", "email"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "email": { "type": "string", "format": "email" }
+  },
+  "additionalProperties": false
+}`;
+
+export const EXAMPLE_INSTANCE = `{
+  "name": "Ayu",
+  "email": "ayu@example.com"
+}`;

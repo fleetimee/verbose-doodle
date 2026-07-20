@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import {
+  buildTicketWebSocketUrl,
+  createRealtimeTicket,
+} from "@/features/realtime/ticket-client";
 import type {
   BridgeEvent,
   BridgeStatus,
@@ -27,17 +31,11 @@ function createId(prefix: string) {
   return `${prefix}-${generateUUID()}`;
 }
 
-function getBridgeUrl() {
+function getBridgeUrl(ticket: string) {
   const configuredUrl = import.meta.env.VITE_SOCKET_TEST_WS_URL as
     | string
     | undefined;
-
-  if (configuredUrl) {
-    return configuredUrl;
-  }
-
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${window.location.host}/api/socket-test`;
+  return buildTicketWebSocketUrl("/api/socket-test", ticket, configuredUrl);
 }
 
 function readString(
@@ -140,6 +138,7 @@ export function useSocketBridge() {
     null
   );
   const manualDisconnectRef = useRef(false);
+  const connectionAttemptRef = useRef(0);
   const autoConnectRef = useRef(true);
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
   const [bridgeAutoConnect, setBridgeAutoConnect] = useLocalStorage(
@@ -438,7 +437,7 @@ export function useSocketBridge() {
     [appendLog]
   );
 
-  const connectBridge = useCallback(() => {
+  const connectBridge = useCallback(async () => {
     manualDisconnectRef.current = false;
     setBridgeAutoConnect(true);
 
@@ -451,12 +450,44 @@ export function useSocketBridge() {
     }
 
     setBridgeStatus("connecting");
-    const socket = new WebSocket(getBridgeUrl());
+    const attempt = connectionAttemptRef.current + 1;
+    connectionAttemptRef.current = attempt;
+    let ticket: string;
+    try {
+      ticket = (await createRealtimeTicket("socket-test")).ticket;
+    } catch (error) {
+      if (connectionAttemptRef.current === attempt) {
+        setBridgeStatus("disconnected");
+        appendLog(
+          toLogEntry(
+            "err",
+            "tcp-client",
+            "bridge",
+            "Could not authorize WebSocket bridge",
+            "text",
+            { error: String(error) }
+          )
+        );
+        if (autoConnectRef.current && !manualDisconnectRef.current) {
+          setReconnectAttempt((current) => current + 1);
+        }
+      }
+      return;
+    }
+    if (
+      connectionAttemptRef.current !== attempt ||
+      manualDisconnectRef.current
+    ) {
+      return;
+    }
+
+    const url = getBridgeUrl(ticket);
+    const socket = new WebSocket(url);
     socketRef.current = socket;
 
     socket.addEventListener("open", () => {
       setBridgeStatus("connected");
-      appendSystemLog("Bridge connected", { url: getBridgeUrl() });
+      appendSystemLog("Bridge connected", { url });
     });
 
     socket.addEventListener("message", (message) => {
@@ -496,6 +527,7 @@ export function useSocketBridge() {
 
   const disconnectBridge = useCallback(() => {
     manualDisconnectRef.current = true;
+    connectionAttemptRef.current += 1;
     setBridgeAutoConnect(false);
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
@@ -731,6 +763,7 @@ export function useSocketBridge() {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
+      connectionAttemptRef.current += 1;
       socketRef.current?.close();
     },
     []
@@ -743,8 +776,8 @@ export function useSocketBridge() {
   useEffect(() => {
     if (bridgeAutoConnect && bridgeStatus === "disconnected") {
       reconnectTimeoutRef.current = setTimeout(
-        () => {
-          connectBridge();
+        async () => {
+          await connectBridge();
         },
         reconnectAttempt === 0 ? 0 : 2000
       );

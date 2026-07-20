@@ -2,10 +2,11 @@ import { ArrowLeft, X } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import {
-  STEP_TRANSITION_DURATION,
+  PERCENT_MULTIPLIER,
   STEPS,
 } from "@/features/endpoints/constants/stepper-steps";
 import { formatMessage, messages } from "@/lib/i18n";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 type ResponseStepperHeaderProps = {
   currentStepIndex: number;
@@ -48,10 +49,14 @@ export function ResponseStepperHeader({
     <header className="shrink-0 border-b bg-background/95 backdrop-blur">
       <div className="h-1 bg-muted">
         <motion.div
-          animate={{ width: `${progress}%` }}
+          animate={{ transform: `scaleX(${progress / PERCENT_MULTIPLIER})` }}
           className="h-full bg-primary"
-          initial={{ width: "0%" }}
-          transition={{ duration: STEP_TRANSITION_DURATION, ease: "easeInOut" }}
+          initial={{ transform: "scaleX(0)" }}
+          style={{ transformOrigin: "left" }}
+          transition={{
+            duration: MOTION_DURATION.standard,
+            ease: MOTION_EASE.inOut,
+          }}
         />
       </div>
 

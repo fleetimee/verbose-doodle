@@ -42,7 +42,6 @@ export const INACTIVE_INDICATOR_SCALE = 1;
 export const ACTIVE_INDICATOR_OPACITY = 1;
 export const INACTIVE_INDICATOR_OPACITY = 0.6;
 export const ANIMATION_DURATION = 0.2;
-export const STEP_TRANSITION_DURATION = 0.3;
 export const AUTO_ADVANCE_DELAY = 100;
 
 export const JSON_PRESETS = [

@@ -23,6 +23,7 @@ import { useGetEndpoint } from "@/features/endpoints/hooks/use-get-endpoint";
 import type { HttpMethod } from "@/features/endpoints/types";
 import { SocketBridgeFloatingStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
 import { SocketBridgeProvider } from "@/features/socket-tester/context/socket-bridge-context";
+import { messages } from "@/lib/i18n";
 import { decodeId } from "@/lib/id-encoder";
 
 const routeLabels: Record<string, string> = {
@@ -38,6 +39,12 @@ const routeLabels: Record<string, string> = {
   udp: "UDP",
   users: "Users",
   settings: "Settings",
+  "developer-tools": messages.developerTools.navigationGroup,
+  "json-schema-validator": messages.jsonSchemaValidator.title,
+  "cron-parser": messages.cronParser.title,
+  "number-base-converter": messages.numberBaseConverter.title,
+  "date-converter": messages.dateConverter.title,
+  "jwt-inspector": messages.jwtInspector.title,
 };
 
 // Updated regex to match encoded IDs (base64 URL-safe characters)

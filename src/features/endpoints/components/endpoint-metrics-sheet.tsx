@@ -8,9 +8,7 @@ import {
   ServerCrash,
   ShieldCheck,
   Signal,
-  Timer,
   TrendingUp,
-  Zap,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
@@ -58,45 +56,29 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useGetEndpointTrafficLogs } from "@/features/endpoints/hooks/use-get-endpoint-traffic-logs";
-import type { EndpointTrafficLogsFilters } from "@/features/endpoints/types";
+import {
+  useGetEndpointHourlyMetrics,
+  useGetEndpointMetricsSummary,
+} from "@/features/endpoints/hooks/use-get-endpoint-metrics";
 import {
   type EndpointMetrics,
-  type EndpointMetricsTimeWindow,
-  getEndpointMetrics,
+  getPersistedEndpointMetrics,
+  PERSISTED_METRICS_TIME_WINDOWS,
+  type PersistedMetricsTimeWindow,
 } from "@/features/endpoints/utils/endpoint-metrics";
 import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-const METRICS_FILTERS = {
-  limit: 1000,
-  status: "all",
-  search: "",
-  includeBody: false,
-} as const satisfies EndpointTrafficLogsFilters;
-
-const TIME_WINDOW_LABELS: Record<EndpointMetricsTimeWindow, string> = {
-  "5m": messages.endpoints.metrics.timeWindows["5m"],
-  "15m": messages.endpoints.metrics.timeWindows["15m"],
-  "1h": messages.endpoints.metrics.timeWindows["1h"],
+const TIME_WINDOW_LABELS: Record<PersistedMetricsTimeWindow, string> = {
+  "24h": messages.endpoints.metrics.timeWindows["24h"],
+  "7d": messages.endpoints.metrics.timeWindows["7d"],
+  "30d": messages.endpoints.metrics.timeWindows["30d"],
 };
 
 const latencyChartConfig = {
   avgMs: {
     label: messages.endpoints.metrics.charts.avgLabel,
     color: "var(--chart-1)",
-  },
-  p50Ms: {
-    label: messages.endpoints.metrics.charts.p50Label,
-    color: "var(--chart-2)",
-  },
-  p95Ms: {
-    label: messages.endpoints.metrics.charts.p95Label,
-    color: "var(--chart-3)",
-  },
-  p99Ms: {
-    label: messages.endpoints.metrics.charts.p99Label,
-    color: "var(--chart-4)",
   },
 } satisfies ChartConfig;
 
@@ -114,6 +96,16 @@ const volumeChartConfig = {
     color: "var(--chart-5)",
   },
 } satisfies ChartConfig;
+
+const emptyMetric = {
+  requestCount: 0,
+  hitStatusCounts: {},
+  httpStatusCounts: {},
+  totalDurationMs: 0,
+  minDurationMs: null,
+  maxDurationMs: null,
+  averageDurationMs: 0,
+};
 
 type EndpointMetricsSheetProps = {
   readonly endpointId: string;
@@ -137,35 +129,48 @@ export function EndpointMetricsSheet({
   open,
 }: EndpointMetricsSheetProps) {
   const [timeWindow, setTimeWindow] =
-    useState<EndpointMetricsTimeWindow>("15m");
-  const { data, error, isFetching, isPending, refetch } =
-    useGetEndpointTrafficLogs(endpointId, METRICS_FILTERS, open);
+    useState<PersistedMetricsTimeWindow>("24h");
+  const range = useMemo(() => getMetricRange(timeWindow), [timeWindow]);
+  const summaryQuery = useGetEndpointMetricsSummary(endpointId, open);
+  const hourlyQuery = useGetEndpointHourlyMetrics(
+    endpointId,
+    range.from,
+    range.to,
+    open
+  );
 
   const metrics = useMemo(
-    () => getEndpointMetrics(data?.items ?? [], timeWindow),
-    [data?.items, timeWindow]
+    () =>
+      getPersistedEndpointMetrics(
+        summaryQuery.data ?? emptyMetric,
+        hourlyQuery.data ?? [],
+        timeWindow
+      ),
+    [hourlyQuery.data, summaryQuery.data, timeWindow]
   );
 
   const handleTimeWindowChange = (value: string[]) => {
     const nextValue = value[0];
 
     if (nextValue) {
-      setTimeWindow(nextValue as EndpointMetricsTimeWindow);
+      setTimeWindow(nextValue as PersistedMetricsTimeWindow);
     }
   };
 
   let metricsContent: ReactNode;
-  if (isPending) {
+  if (summaryQuery.isPending || hourlyQuery.isPending) {
     metricsContent = <MetricsLoadingState />;
-  } else if (error) {
+  } else if (summaryQuery.error || hourlyQuery.error) {
     metricsContent = (
       <Alert variant="destructive">
         <AlertCircle aria-hidden="true" />
         <AlertTitle>{messages.endpoints.metrics.loadErrorTitle}</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
+        <AlertDescription>
+          {(summaryQuery.error ?? hourlyQuery.error)?.message}
+        </AlertDescription>
       </Alert>
     );
-  } else if (metrics.logs.length === 0) {
+  } else if (metrics.summary.requests === 0) {
     metricsContent = (
       <Empty className="min-h-[460px] border">
         <EmptyHeader>
@@ -229,13 +234,18 @@ export function EndpointMetricsSheet({
               </ToggleGroup>
               <Button
                 className="transition-transform active:scale-[0.98]"
-                disabled={isFetching}
-                onClick={() => refetch()}
+                disabled={summaryQuery.isFetching || hourlyQuery.isFetching}
+                onClick={async () => {
+                  await Promise.all([
+                    summaryQuery.refetch(),
+                    hourlyQuery.refetch(),
+                  ]);
+                }}
                 size="sm"
                 type="button"
                 variant="outline"
               >
-                {isFetching ? (
+                {summaryQuery.isFetching || hourlyQuery.isFetching ? (
                   <Spinner data-icon="inline-start" />
                 ) : (
                   <RefreshCw data-icon="inline-start" />
@@ -261,7 +271,7 @@ function MetricsContent({
   timeWindow,
 }: {
   readonly metrics: EndpointMetrics;
-  readonly timeWindow: EndpointMetricsTimeWindow;
+  readonly timeWindow: PersistedMetricsTimeWindow;
 }) {
   const summary = metrics.summary;
 
@@ -296,7 +306,7 @@ function MetricsContent({
                       messages.endpoints.metrics.healthDescription,
                       {
                         average: formatDuration(summary.avgMs),
-                        p95: formatDuration(summary.p95Ms),
+                        maximum: formatDuration(summary.maxMs),
                         requests: formatInteger(summary.requests),
                         window: TIME_WINDOW_LABELS[timeWindow],
                       }
@@ -393,26 +403,6 @@ function MetricsContent({
           value={formatDuration(summary.avgMs)}
         />
         <MetricCard
-          description={messages.endpoints.metrics.cards.p50.description}
-          icon={Timer}
-          label={messages.endpoints.metrics.cards.p50.label}
-          value={formatDuration(summary.p50Ms)}
-        />
-        <MetricCard
-          description={messages.endpoints.metrics.cards.p95.description}
-          icon={Clock}
-          label={messages.endpoints.metrics.cards.p95.label}
-          tone="warning"
-          value={formatDuration(summary.p95Ms)}
-        />
-        <MetricCard
-          description={messages.endpoints.metrics.cards.p99.description}
-          icon={Zap}
-          label={messages.endpoints.metrics.cards.p99.label}
-          tone="warning"
-          value={formatDuration(summary.p99Ms)}
-        />
-        <MetricCard
           description={formatMessage(
             messages.endpoints.metrics.cards.minMax.description,
             {
@@ -466,30 +456,6 @@ function MetricsContent({
                   fill="var(--color-avgMs)"
                   fillOpacity={0.12}
                   stroke="var(--color-avgMs)"
-                  strokeWidth={2}
-                  type="monotone"
-                />
-                <Area
-                  dataKey="p50Ms"
-                  fill="var(--color-p50Ms)"
-                  fillOpacity={0.08}
-                  stroke="var(--color-p50Ms)"
-                  strokeWidth={2}
-                  type="monotone"
-                />
-                <Area
-                  dataKey="p95Ms"
-                  fill="var(--color-p95Ms)"
-                  fillOpacity={0.08}
-                  stroke="var(--color-p95Ms)"
-                  strokeWidth={2}
-                  type="monotone"
-                />
-                <Area
-                  dataKey="p99Ms"
-                  fill="var(--color-p99Ms)"
-                  fillOpacity={0.08}
-                  stroke="var(--color-p99Ms)"
                   strokeWidth={2}
                   type="monotone"
                 />
@@ -768,4 +734,12 @@ function getPercentage(value: number, total: number) {
   }
 
   return Math.min(Math.max((value / total) * 100, 0), 100);
+}
+
+function getMetricRange(timeWindow: PersistedMetricsTimeWindow) {
+  const to = new Date();
+  const from = new Date(
+    to.getTime() - PERSISTED_METRICS_TIME_WINDOWS[timeWindow]
+  );
+  return { from: from.toISOString(), to: to.toISOString() };
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { buildTicketWebSocketUrl } from "@/features/realtime/ticket-client";
 import type {
   RelayEvent,
   RelayEventPayload,
@@ -159,14 +160,12 @@ export function getModeLabel(mode: RelayMode): string {
   return mode === "REST_API" ? "REST API" : "ISO 8583";
 }
 
-export function buildRelayWebSocketUrl(token: string): string {
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  const url = new URL(
+export function buildRelayWebSocketUrl(ticket: string): string {
+  return buildTicketWebSocketUrl(
     "/api/relay/events",
-    `${protocol}//${window.location.host}`
+    ticket,
+    import.meta.env.VITE_RELAY_EVENTS_WS_URL
   );
-  url.searchParams.set("token", token);
-  return url.toString();
 }
 
 export function parseRelayEvent(raw: string, id: string): RelayEvent | null {

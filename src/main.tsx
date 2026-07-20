@@ -73,6 +73,41 @@ const UdpPage = lazy(() =>
     default: UdpPage,
   }))
 );
+const JsonSchemaValidatorPage = lazy(() =>
+  import("@/pages/dashboard/json-schema-validator").then(
+    ({ JsonSchemaValidatorPage }) => ({ default: JsonSchemaValidatorPage })
+  )
+);
+const JwtInspectorPage = lazy(() =>
+  import("@/pages/dashboard/jwt-inspector").then(({ JwtInspectorPage }) => ({
+    default: JwtInspectorPage,
+  }))
+);
+const DeveloperToolsPage = lazy(() =>
+  import("@/pages/dashboard/developer-tools").then(
+    ({ DeveloperToolsPage }) => ({ default: DeveloperToolsPage })
+  )
+);
+const JsonYamlConverterPage = lazy(() =>
+  import("@/pages/dashboard/json-yaml-converter").then(
+    ({ JsonYamlConverterPage }) => ({ default: JsonYamlConverterPage })
+  )
+);
+const CronParserPage = lazy(() =>
+  import("@/pages/dashboard/cron-parser").then(({ CronParserPage }) => ({
+    default: CronParserPage,
+  }))
+);
+const DateConverterPage = lazy(() =>
+  import("@/pages/dashboard/date-converter").then(({ DateConverterPage }) => ({
+    default: DateConverterPage,
+  }))
+);
+const NumberBaseConverterPage = lazy(() =>
+  import("@/pages/dashboard/number-base-converter").then(
+    ({ NumberBaseConverterPage }) => ({ default: NumberBaseConverterPage })
+  )
+);
 const SocksRelayRestApiPage = lazy(() =>
   import("@/pages/dashboard/socks-relay-rest-api").then(
     ({ SocksRelayRestApiPage }) => ({
@@ -135,6 +170,31 @@ function AppContent() {
             <Route element={<TcpClientPage />} path="socket-test/tcp-client" />
             <Route element={<TcpServerPage />} path="socket-test/tcp-server" />
             <Route element={<UdpPage />} path="socket-test/udp" />
+            <Route element={<DeveloperToolsPage />} path="developer-tools" />
+            <Route
+              element={<JsonSchemaValidatorPage />}
+              path="developer-tools/json-schema-validator"
+            />
+            <Route
+              element={<JwtInspectorPage />}
+              path="developer-tools/jwt-inspector"
+            />
+            <Route
+              element={<JsonYamlConverterPage />}
+              path="developer-tools/json-yaml-converter"
+            />
+            <Route
+              element={<CronParserPage />}
+              path="developer-tools/cron-parser"
+            />
+            <Route
+              element={<NumberBaseConverterPage />}
+              path="developer-tools/number-base-converter"
+            />
+            <Route
+              element={<DateConverterPage />}
+              path="developer-tools/date-converter"
+            />
             <Route element={<SocksRelayRouteGroup />} path="socks-relay">
               <Route
                 element={
