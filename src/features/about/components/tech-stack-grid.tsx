@@ -54,7 +54,6 @@ type Category = "All" | "Core" | "UI & Styling" | "Tooling & State";
 
 interface TechItem {
   category: Exclude<Category, "All">;
-  color: string;
   description: string;
   docsUrl: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
@@ -73,7 +72,6 @@ const TECH_STACK: TechItem[] = [
       "UI library with the new compiler for automatic memoization and concurrent rendering.",
     docsUrl: "https://react.dev",
     icon: React,
-    color: "from-cyan-500/20 to-blue-500/20 border-cyan-500/30",
   },
   {
     name: "TypeScript",
@@ -82,7 +80,6 @@ const TECH_STACK: TechItem[] = [
       "Typed superset of JavaScript that compiles to plain JS; catches bugs at compile time.",
     docsUrl: "https://www.typescriptlang.org",
     icon: TypeScript,
-    color: "from-blue-500/20 to-indigo-500/20 border-blue-500/30",
   },
   {
     name: "Vite",
@@ -91,7 +88,6 @@ const TECH_STACK: TechItem[] = [
       "Lightning-fast build tool powered by native ES modules with instant HMR.",
     docsUrl: "https://vitejs.dev",
     icon: ViteJS,
-    color: "from-purple-500/20 to-pink-500/20 border-purple-500/30",
   },
   {
     name: "Bun",
@@ -100,7 +96,6 @@ const TECH_STACK: TechItem[] = [
       "All-in-one JavaScript runtime & toolkit: fast package manager, bundler, and test runner.",
     docsUrl: "https://bun.sh",
     icon: BunJs,
-    color: "from-amber-500/20 to-orange-500/20 border-amber-500/30",
   },
   {
     name: "Tailwind CSS v4",
@@ -109,7 +104,6 @@ const TECH_STACK: TechItem[] = [
       "Utility-first CSS framework with CSS-native configuration and zero-runtime overhead.",
     docsUrl: "https://tailwindcss.com",
     icon: TailwindCSS,
-    color: "from-teal-500/20 to-cyan-500/20 border-teal-500/30",
   },
   {
     name: "Radix UI",
@@ -118,7 +112,6 @@ const TECH_STACK: TechItem[] = [
       "Unstyled, accessible UI primitives for building high-quality design systems.",
     docsUrl: "https://www.radix-ui.com",
     icon: RadixUI,
-    color: "from-violet-500/20 to-purple-500/20 border-violet-500/30",
   },
   {
     name: "Motion",
@@ -127,7 +120,6 @@ const TECH_STACK: TechItem[] = [
       "Production-ready animation library for React with declarative, physics-based animations.",
     docsUrl: "https://motion.dev",
     icon: FramerDark,
-    color: "from-rose-500/20 to-pink-500/20 border-rose-500/30",
   },
   {
     name: "TanStack Query",
@@ -136,7 +128,6 @@ const TECH_STACK: TechItem[] = [
       "Powerful async state management with automatic caching, background refetching, and stale-while-revalidate.",
     docsUrl: "https://tanstack.com/query",
     icon: ReactQuery,
-    color: "from-orange-500/20 to-red-500/20 border-orange-500/30",
   },
   {
     name: "React Hook Form",
@@ -145,7 +136,6 @@ const TECH_STACK: TechItem[] = [
       "Performant, flexible form management with minimal re-renders and built-in validation.",
     docsUrl: "https://react-hook-form.com",
     icon: ReactHookFormIcon,
-    color: "from-pink-500/20 to-rose-500/20 border-pink-500/30",
   },
   {
     name: "React Router v7",
@@ -154,7 +144,6 @@ const TECH_STACK: TechItem[] = [
       "Declarative client-side routing for React with nested routes and loader patterns.",
     docsUrl: "https://reactrouter.com",
     icon: ReactRouter,
-    color: "from-red-500/20 to-orange-500/20 border-red-500/30",
   },
 ];
 
@@ -202,7 +191,7 @@ function TechCard({ item, index }: TechCardProps) {
   return (
     <motion.a
       animate="visible"
-      className={`relative flex cursor-pointer flex-col gap-3 rounded-xl border bg-gradient-to-br p-4 transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${item.color} hover:shadow-black/10 hover:shadow-lg dark:hover:shadow-black/30`}
+      className="relative flex cursor-pointer flex-col gap-3 rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-border hover:bg-card hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-card/40 dark:hover:bg-card/80"
       custom={index}
       exit="exit"
       href={item.docsUrl}
@@ -215,7 +204,7 @@ function TechCard({ item, index }: TechCardProps) {
     >
       {/* Icon */}
       <motion.div
-        animate={{ rotate: hovered ? 10 : 0, scale: hovered ? 1.1 : 1 }}
+        animate={{ rotate: hovered ? 8 : 0, scale: hovered ? 1.08 : 1 }}
         className="flex size-8 shrink-0 items-center justify-center"
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
