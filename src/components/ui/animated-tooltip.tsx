@@ -99,6 +99,7 @@ export const AnimatedTooltip = ({
             role="button"
             tabIndex={0}
             aria-label={`View profile for ${item.name}`}
+            aria-haspopup="dialog"
           >
             <AnimatePresence>
               {hoveredIndex === item.id && (
