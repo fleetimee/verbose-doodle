@@ -1,41 +1,25 @@
 import { useAuth } from "@/features/auth/context";
-import { usePermissions } from "./use-permissions";
 
 /**
- * Combined hook that provides both auth state and permission checks
- * This is the recommended hook to use in most components
- *
- * @example
- * function MyComponent() {
- *   const { user, isAuthenticated, can, isAdmin } = useAuthPermissions();
- *
- *   if (!isAuthenticated) return <LoginPrompt />;
- *
- *   return (
- *     <div>
- *       <h1>Welcome, {user?.username}</h1>
- *       {can("canAddEndpoint") && <AddEndpointButton />}
- *       {isAdmin && <AdminPanel />}
- *     </div>
- *   );
- * }
+ * Legacy combined hook that delegates directly to useAuth.
+ * Note: Components should prefer calling useAuth() directly.
  */
 export function useAuthPermissions() {
-  const { authState, login, logout } = useAuth();
-  const permissions = usePermissions({ role: authState.user?.role });
+  const auth = useAuth();
 
   return {
     // Auth state
-    user: authState.user,
-    isAuthenticated: authState.isAuthenticated,
-    login,
-    logout,
+    user: auth.user,
+    isAuthenticated: auth.isAuthenticated,
+    login: auth.login,
+    logout: auth.logout,
 
     // Permission checks
-    can: permissions.can,
-    hasRole: permissions.hasRole,
-    isAdmin: permissions.isAdmin,
-    isUser: permissions.isUser,
-    role: permissions.role,
+    can: auth.can,
+    hasRole: auth.hasRole,
+    isAdmin: auth.isAdmin,
+    isUser: auth.isUser,
+    role: auth.role,
   };
 }
+

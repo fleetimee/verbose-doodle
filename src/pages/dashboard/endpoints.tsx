@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Postman } from "@/components/ui/svgs/postman";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useAuth } from "@/features/auth/context";
-import { usePermissions } from "@/features/auth/hooks/use-permissions";
+
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
 import { EndpointCard } from "@/features/endpoints/components/endpoint-card";
 import { EndpointCardSkeleton } from "@/features/endpoints/components/endpoint-card-skeleton";
@@ -166,8 +166,7 @@ export function EndpointsPage() {
 
   const { data: endpoints = [], isPending: isLoadingEndpoints } =
     useGetEndpoints();
-  const { authState } = useAuth();
-  const { can } = usePermissions({ role: authState.user?.role });
+  const { can } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");

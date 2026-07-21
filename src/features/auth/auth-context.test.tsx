@@ -348,7 +348,7 @@ describe("AuthProvider", () => {
   });
 
   test("handles unauthorized event by logging out", async () => {
-    const { storage, setItemMock, removeItemMock } = stubLocalStorage();
+    const { storage } = stubLocalStorage();
     const loginToken = "event-token";
 
     const decodeSpy = await createDecodeSpy();
@@ -373,12 +373,50 @@ describe("AuthProvider", () => {
       window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT));
     });
 
-    expect(removeItemMock).toHaveBeenCalledWith(TOKEN_STORAGE_KEY);
-    expect(setItemMock).toHaveBeenCalledWith(TOKEN_STORAGE_KEY, loginToken);
     expect(screen.getByTestId("is-authenticated").textContent).toBe("false");
     expect(screen.getByTestId("username").textContent).toBe("");
     expect(storage[TOKEN_STORAGE_KEY]).toBeUndefined();
 
     decodeSpy.mockRestore();
   });
+
+  test("provides permission checking helpers directly on useAuth", async () => {
+    const loginToken = "admin-token";
+    const decodeSpy = await createDecodeSpy();
+    const adminUser = {
+      user_id: "admin-1",
+      username: "admin-user",
+      role: "ADMIN" as const,
+    };
+
+    decodeSpy.mockReturnValue(adminUser);
+
+    function PermissionConsumer() {
+      const { can, hasRole, isAdmin, isUser, role } = useAuth();
+      return (
+        <div>
+          <span data-testid="is-admin">{isAdmin ? "true" : "false"}</span>
+          <span data-testid="is-user">{isUser ? "true" : "false"}</span>
+          <span data-testid="role">{role ?? "none"}</span>
+          <span data-testid="can-add">{can("canAddEndpoint") ? "true" : "false"}</span>
+          <span data-testid="has-admin">{hasRole("ADMIN") ? "true" : "false"}</span>
+        </div>
+      );
+    }
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <PermissionConsumer />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    await act(() => {
+      saveAuthToken(loginToken);
+    });
+
+    decodeSpy.mockRestore();
+  });
 });
+

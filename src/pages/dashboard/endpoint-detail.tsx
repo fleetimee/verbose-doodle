@@ -51,7 +51,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useAuth } from "@/features/auth/context";
-import { usePermissions } from "@/features/auth/hooks/use-permissions";
+
 import { EndpointDetailLayout } from "@/features/endpoints/components/endpoint-detail-layout";
 import { EndpointDetailSkeleton } from "@/features/endpoints/components/endpoint-detail-skeleton";
 import { EndpointMetricsSheet } from "@/features/endpoints/components/endpoint-metrics-sheet";
@@ -116,8 +116,7 @@ function TourStepContent({
 export function EndpointDetailPage() {
   const { id: encodedId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { authState } = useAuth();
-  const { can } = usePermissions({ role: authState.user?.role });
+  const { can } = useAuth();
   const canAddResponse = can("canAddResponse");
 
   // Decode the ID from the URL
