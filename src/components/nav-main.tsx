@@ -116,6 +116,7 @@ function NavMenuItem({
                         to={subItem.url}
                       />
                     }
+                    size="sm"
                   >
                     <subItem.icon />
                     <span>{subItem.title}</span>
