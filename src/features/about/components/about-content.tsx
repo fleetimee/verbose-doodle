@@ -1,13 +1,9 @@
-import { motion } from "motion/react";
+import { type Variants, motion, useReducedMotion } from "motion/react";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 import { AboutVersionFooter } from "@/features/about/components/about-version-footer";
 import { SimulatorDemoPreview } from "@/features/about/components/simulator-demo-preview";
 import { TechStackGrid } from "@/features/about/components/tech-stack-grid";
 import { type AppLocale, getActiveLocale, getMessages } from "@/lib/i18n";
-
-// Animation timing constants
-const FEATURE_LIST_BASE_DELAY = 0.7;
-const FEATURE_LIST_STAGGER_DELAY = 0.08;
 
 const teamMembers = [
   {
@@ -72,59 +68,91 @@ const teamMembers = [
   },
 ];
 
-const sectionVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0 },
-};
-
-const listItemVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { opacity: 1, x: 0 },
-};
-
 export type AboutContentProps = {
   locale?: AppLocale;
 };
 
 export function AboutContent({ locale }: AboutContentProps) {
   const activeMessages = getMessages(locale || getActiveLocale());
+  const shouldReduceMotion = useReducedMotion();
+
+  const contentContainerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: shouldReduceMotion
+        ? { duration: 0 }
+        : {
+            staggerChildren: 0.1,
+            delayChildren: 0.1,
+          },
+    },
+  };
+
+  const sectionVariants: Variants = {
+    hidden: shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 25 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: shouldReduceMotion
+        ? { duration: 0 }
+        : { duration: 0.45, ease: "easeOut" },
+    },
+  };
+
+  const listContainerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: shouldReduceMotion
+        ? { duration: 0 }
+        : {
+            staggerChildren: 0.06,
+          },
+    },
+  };
+
+  const listItemVariants: Variants = {
+    hidden: shouldReduceMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -16 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: shouldReduceMotion
+        ? { duration: 0 }
+        : { duration: 0.35, ease: "easeOut" },
+    },
+  };
 
   return (
-    <section className="flex flex-col gap-8 text-pretty leading-relaxed">
-      <motion.div
-        animate="visible"
-        className="flex flex-col gap-4"
-        initial="hidden"
-        transition={{ duration: 0.5, delay: 0.5 }}
-        variants={sectionVariants}
-      >
-        <h2 className="font-semibold text-2xl">
+    <motion.section
+      animate="visible"
+      className="flex flex-col gap-8 text-pretty leading-relaxed transition-colors duration-300 ease-in-out"
+      initial="hidden"
+      variants={contentContainerVariants}
+    >
+      <motion.div className="flex flex-col gap-4" variants={sectionVariants}>
+        <h2 className="font-semibold text-2xl text-foreground transition-colors duration-300">
           {activeMessages.about.whatIsThisTitle}
         </h2>
-        <p>{activeMessages.about.whatIsThisDescription}</p>
+        <p className="text-muted-foreground transition-colors duration-300">
+          {activeMessages.about.whatIsThisDescription}
+        </p>
       </motion.div>
 
-      <motion.div
-        animate="visible"
-        className="flex flex-col gap-4"
-        initial="hidden"
-        transition={{ duration: 0.5, delay: 0.6 }}
-        variants={sectionVariants}
-      >
+      <motion.div className="flex flex-col gap-4" variants={sectionVariants}>
         <SimulatorDemoPreview locale={locale} />
       </motion.div>
 
-      <motion.div
-        animate="visible"
-        className="flex flex-col gap-4"
-        initial="hidden"
-        transition={{ duration: 0.5, delay: 0.7 }}
-        variants={sectionVariants}
-      >
-        <h2 className="font-semibold text-2xl">
+      <motion.div className="flex flex-col gap-4" variants={sectionVariants}>
+        <h2 className="font-semibold text-2xl text-foreground transition-colors duration-300">
           {activeMessages.about.keyFeaturesTitle}
         </h2>
-        <ul className="ml-6 flex list-disc flex-col gap-2">
+        <motion.ul
+          animate="visible"
+          className="ml-6 flex list-disc flex-col gap-2"
+          initial="hidden"
+          variants={listContainerVariants}
+        >
           {[
             {
               title: activeMessages.about.endpointManagementTitle,
@@ -154,32 +182,21 @@ export function AboutContent({ locale }: AboutContentProps) {
               title: activeMessages.about.modernStackTitle,
               desc: activeMessages.about.modernStackDescription,
             },
-          ].map((feature, index) => (
+          ].map((feature) => (
             <motion.li
-              animate="visible"
-              initial="hidden"
               key={feature.title}
-              transition={{
-                duration: 0.4,
-                delay:
-                  FEATURE_LIST_BASE_DELAY + index * FEATURE_LIST_STAGGER_DELAY,
-              }}
               variants={listItemVariants}
+              className="transition-colors duration-300"
             >
-              <strong>{feature.title}</strong> {feature.desc}
+              <strong className="text-foreground">{feature.title}</strong>{" "}
+              <span className="text-muted-foreground">{feature.desc}</span>
             </motion.li>
           ))}
-        </ul>
+        </motion.ul>
       </motion.div>
 
-      <motion.div
-        animate="visible"
-        className="flex flex-col gap-4"
-        initial="hidden"
-        transition={{ duration: 0.5, delay: 1.1 }}
-        variants={sectionVariants}
-      >
-        <h2 className="font-semibold text-2xl">
+      <motion.div className="flex flex-col gap-4" variants={sectionVariants}>
+        <h2 className="font-semibold text-2xl text-foreground transition-colors duration-300">
           {activeMessages.about.ourTeamTitle}
         </h2>
         <div className="flex flex-row items-center justify-center">
@@ -187,20 +204,16 @@ export function AboutContent({ locale }: AboutContentProps) {
         </div>
       </motion.div>
 
-      <motion.div
-        animate="visible"
-        className="flex flex-col gap-4"
-        initial="hidden"
-        transition={{ duration: 0.5, delay: 1.2 }}
-        variants={sectionVariants}
-      >
-        <h2 className="font-semibold text-2xl">
+      <motion.div className="flex flex-col gap-4" variants={sectionVariants}>
+        <h2 className="font-semibold text-2xl text-foreground transition-colors duration-300">
           {activeMessages.about.technologyTitle}
         </h2>
         <TechStackGrid />
       </motion.div>
 
-      <AboutVersionFooter />
-    </section>
+      <motion.div variants={sectionVariants}>
+        <AboutVersionFooter />
+      </motion.div>
+    </motion.section>
   );
 }
