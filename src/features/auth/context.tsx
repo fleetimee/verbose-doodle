@@ -8,12 +8,15 @@ import {
 } from "react";
 import { useNavigate } from "react-router";
 import { handleRefreshFailureOnce } from "@/features/auth/refresh-coordinator";
+import type { Ability, Role } from "@/features/auth/types";
+import { ROLE_ABILITIES } from "@/features/auth/types";
 import {
   AUTH_UNAUTHORIZED_EVENT,
   clearAuthToken,
   clearRefreshToken,
   decodeJWT,
   getAuthToken,
+  getTokenExpiration,
   hasManualLogout,
   markManualLogout,
   saveAuthToken,
@@ -22,6 +25,10 @@ import {
 import type { AuthUser } from "@/features/login/types";
 import { queryClient } from "@/lib/query-client";
 
+const REFRESH_BEFORE_EXPIRY_MS = 180_000;
+const AUTO_REFRESH_CHECK_INTERVAL_MS = 10_000;
+const EXPIRATION_CHECK_INTERVAL_MS = 5_000;
+
 type AuthState = {
   user: AuthUser | null;
   isAuthenticated: boolean;
@@ -29,6 +36,13 @@ type AuthState = {
 
 type AuthContextValue = {
   authState: AuthState;
+  user: AuthUser | null;
+  isAuthenticated: boolean;
+  role: Role | undefined;
+  isAdmin: boolean;
+  isUser: boolean;
+  can: (ability: Ability) => boolean;
+  hasRole: (requiredRole: Role) => boolean;
   login: (accessToken: string, refreshToken?: string) => void;
   logout: () => void;
   refreshAuth: () => Promise<boolean>;
@@ -123,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [login, logout]);
 
+  // Handle global unauthorized events (e.g. 401 response from API)
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -141,8 +156,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [logout, navigate]);
 
+  // Encapsulated token expiration check loop
+  useEffect(() => {
+    if (!authState.isAuthenticated) {
+      return;
+    }
+
+    const checkExpiration = () => {
+      const token = getAuthToken();
+      if (!token) {
+        return;
+      }
+      const expiration = getTokenExpiration();
+      if (expiration && Date.now() >= expiration) {
+        logout();
+      }
+    };
+
+    checkExpiration();
+    const interval = setInterval(checkExpiration, EXPIRATION_CHECK_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [authState.isAuthenticated, logout]);
+
+  // Encapsulated token auto-refresh loop
+  useEffect(() => {
+    if (!authState.isAuthenticated) {
+      return;
+    }
+
+    const checkAndRefresh = async () => {
+      const expiration = getTokenExpiration();
+      if (!expiration) {
+        return;
+      }
+
+      const timeUntilExpiry = expiration - Date.now();
+
+      if (timeUntilExpiry > 0 && timeUntilExpiry < REFRESH_BEFORE_EXPIRY_MS) {
+        await refreshAuth();
+      }
+    };
+
+    checkAndRefresh();
+    const interval = setInterval(checkAndRefresh, AUTO_REFRESH_CHECK_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [authState.isAuthenticated, refreshAuth]);
+
+  // Derived authorization helpers
+  const role = authState.user?.role;
+  const isAdmin = role === "ADMIN";
+  const isUser = role === "USER";
+
+  const can = useCallback(
+    (ability: Ability): boolean => {
+      if (!role) {
+        return false;
+      }
+      return ROLE_ABILITIES[role][ability];
+    },
+    [role]
+  );
+
+  const hasRole = useCallback(
+    (requiredRole: Role): boolean => role === requiredRole,
+    [role]
+  );
+
   return (
-    <AuthContext.Provider value={{ authState, login, logout, refreshAuth }}>
+    <AuthContext.Provider
+      value={{
+        authState,
+        user: authState.user,
+        isAuthenticated: authState.isAuthenticated,
+        role,
+        isAdmin,
+        isUser,
+        can,
+        hasRole,
+        login,
+        logout,
+        refreshAuth,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -155,3 +252,4 @@ export function useAuth() {
   }
   return context;
 }
+

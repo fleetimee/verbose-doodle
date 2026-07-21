@@ -35,7 +35,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/features/auth/context";
-import { usePermissions } from "@/features/auth/hooks/use-permissions";
+
 import { EditResponseStepper } from "@/features/endpoints/components/edit-response-stepper";
 import { ResponseSimulationBadge } from "@/features/endpoints/components/response-simulation-badge";
 import { SimulateTimeoutDialog } from "@/features/endpoints/components/simulate-timeout-dialog";
@@ -92,8 +92,7 @@ export function ResponseListItem({
   onActivate,
   onDeactivate,
 }: ResponseListItemProps) {
-  const { authState } = useAuth();
-  const { can } = usePermissions({ role: authState.user?.role });
+  const { can } = useAuth();
   const canActivateResponse = can("canActivateResponse");
 
   const isActive = response.activated;

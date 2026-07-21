@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { useAuth } from "@/features/auth/context";
-import type { Ability } from "../hooks/use-permissions";
-import { usePermissions } from "../hooks/use-permissions";
+import type { Ability } from "@/features/auth/types";
 
 type ProtectedActionProps = {
   ability: Ability;
@@ -24,8 +23,7 @@ export function ProtectedAction({
   fallback = null,
   children,
 }: ProtectedActionProps) {
-  const { authState } = useAuth();
-  const { can } = usePermissions({ role: authState.user?.role });
+  const { can } = useAuth();
 
   if (!can(ability)) {
     return <>{fallback}</>;
@@ -33,3 +31,4 @@ export function ProtectedAction({
 
   return <>{children}</>;
 }
+

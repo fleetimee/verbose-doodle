@@ -1,44 +1,8 @@
-import type { Role } from "../types";
+import type { Ability, Role } from "@/features/auth/types";
+import { ROLE_ABILITIES } from "@/features/auth/types";
 
-// Define what each role can do based on Option 1 RBAC plan
-export const ROLE_ABILITIES = {
-  ADMIN: {
-    // Dynamic Endpoints
-    canAccessEndpoints: true,
-
-    // Configuration
-    canViewEndpoints: true,
-    canAddEndpoint: true,
-    canEditEndpoint: true,
-    canAddResponse: true,
-    canActivateResponse: true,
-
-    // User Management
-    canViewUsers: true,
-    canCreateUser: true,
-    canUpdateUser: true,
-    canDeleteUser: true,
-  },
-  USER: {
-    // Dynamic Endpoints
-    canAccessEndpoints: true,
-
-    // Configuration
-    canViewEndpoints: true, // Read-only
-    canAddEndpoint: false,
-    canEditEndpoint: false,
-    canAddResponse: false,
-    canActivateResponse: false,
-
-    // User Management
-    canViewUsers: false,
-    canCreateUser: false,
-    canUpdateUser: false,
-    canDeleteUser: false,
-  },
-} as const;
-
-export type Ability = keyof (typeof ROLE_ABILITIES)["ADMIN"];
+export { ROLE_ABILITIES };
+export type { Ability };
 
 type UsePermissionsProps = {
   role?: Role;
@@ -65,3 +29,4 @@ export function usePermissions({ role }: UsePermissionsProps = {}) {
     role,
   };
 }
+
