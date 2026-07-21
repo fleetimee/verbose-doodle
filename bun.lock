@@ -23,6 +23,7 @@
         "cron-parser": "^5.6.2",
         "cronstrue": "^3.24.0",
         "date-fns": "^4.4.0",
+        "developer-icons": "^7.0.1",
         "embla-carousel-react": "^8.6.0",
         "input-otp": "^1.4.2",
         "jwt-decode": "^4.0.0",
@@ -764,6 +765,8 @@
     "detect-libc": ["detect-libc@2.1.2", "", {}, "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="],
 
     "detect-node-es": ["detect-node-es@1.1.0", "", {}, "sha512-ypdmJU/TbBby2Dxibuv7ZLW3Bs1QEmM7nHjEANfohJLvE0XVujisn1qPJcZxg+qDucsr+bP6fLD1rPS3AhJ7EQ=="],
+
+    "developer-icons": ["developer-icons@7.0.1", "", { "peerDependencies": { "react": "^18.2.0 || ^19.0.0", "react-dom": "^18.2.0 || ^19.0.0" } }, "sha512-QnC49krMtj41j4xeYTmYxRpjLPMgND+ew7UEIi45qTNJ6AT/d6eJtgO3RcMszQj4GSDlgJg90730QRGhhHXxTQ=="],
 
     "devlop": ["devlop@1.1.0", "", { "dependencies": { "dequal": "^2.0.0" } }, "sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA=="],
 
