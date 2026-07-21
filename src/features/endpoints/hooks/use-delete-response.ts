@@ -1,1 +1,1 @@
-export { useDeleteResponse } from "@/features/endpoints/queries";
+export { useDeleteResponse } from "@/features/endpoints/queries/use-endpoint-queries";

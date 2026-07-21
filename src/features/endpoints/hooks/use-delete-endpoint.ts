@@ -1,1 +1,1 @@
-export { useDeleteEndpoint } from "@/features/endpoints/queries";
+export { useDeleteEndpoint } from "@/features/endpoints/queries/use-endpoint-queries";

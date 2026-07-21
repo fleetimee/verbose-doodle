@@ -1,1 +1,1 @@
-export { useGetEndpointTrafficLogs } from "@/features/endpoints/queries";
+export { useGetEndpointTrafficLogs } from "@/features/endpoints/queries/use-endpoint-queries";

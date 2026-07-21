@@ -1,1 +1,1 @@
-export { useGetEndpoint } from "@/features/endpoints/queries";
+export { useGetEndpoint } from "@/features/endpoints/queries/use-endpoint-queries";

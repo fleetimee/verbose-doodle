@@ -1,1 +1,1 @@
-export { usePrefetchEndpoint } from "@/features/endpoints/queries";
+export { usePrefetchEndpoint } from "@/features/endpoints/queries/use-endpoint-queries";

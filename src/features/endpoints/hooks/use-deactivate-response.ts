@@ -1,1 +1,1 @@
-export { useDeactivateResponse } from "@/features/endpoints/queries";
+export { useDeactivateResponse } from "@/features/endpoints/queries/use-endpoint-queries";
