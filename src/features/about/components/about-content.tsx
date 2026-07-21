@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
+import { TechStackGrid } from "@/features/about/components/tech-stack-grid";
 import { messages } from "@/lib/i18n";
 
 // Animation timing constants
@@ -142,7 +143,7 @@ export function AboutContent() {
         <h2 className="font-semibold text-2xl">
           {messages.about.technologyTitle}
         </h2>
-        <p>{messages.about.technologyDescription}</p>
+        <TechStackGrid />
       </motion.div>
     </section>
   );
