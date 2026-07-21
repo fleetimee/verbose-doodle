@@ -28,7 +28,7 @@ export const aboutMessages = {
   jsonDrivenTitle: "Berbasis JSON:",
   jsonDrivenDescription:
     "Konfigurasi fleksibel berbasis skenario JSON untuk prototipe cepat",
-  modernStackTitle: "Stack Modern:",
+  modernStackTitle: "Modern Stack:",
   modernStackDescription:
     "Dibuat menggunakan React 19, TypeScript, dan Vite untuk performa maksimal",
   interactiveDemoTitle: "Pratinjau Simulator Interaktif",
@@ -37,6 +37,6 @@ export const aboutMessages = {
   ourTeamTitle: "Tim Kami",
   technologyTitle: "Teknologi",
   technologyDescription:
-    "Aplikasi ini mengadopsi teknologi modern termasuk React 19 dengan compiler baru, TypeScript untuk keamanan tipe, TanStack Query untuk data fetching, dan Tailwind CSS untuk desain visual. Perpustakaan komponen dibangun di atas shadcn/ui dan Radix UI primitives.",
+    "Aplikasi ini mengadopsi teknologi modern termasuk React 19 dengan compiler baru, TypeScript untuk keamanan tipe, TanStack Query untuk data fetching, dan Tailwind CSS untuk desain visual. Perpustakaan komponen dibangun di atas shadcn/ui dan Base UI primitives.",
   returnHome: "Kembali ke Beranda",
 } as const;
