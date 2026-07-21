@@ -25,11 +25,21 @@ export function buildTicketWebSocketUrl(
   ticket: string,
   configuredUrl?: string
 ): string {
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  const url = new URL(
-    configuredUrl?.trim() || path,
-    `${protocol}//${window.location.host}`
-  );
+  const host =
+    typeof window !== "undefined" && window.location.host
+      ? window.location.host
+      : "localhost:8080";
+  const protocol =
+    typeof window !== "undefined" && window.location.protocol === "https:"
+      ? "wss:"
+      : "ws:";
+  const base = `${protocol}//${host}`;
+  const rawUrl = configuredUrl?.trim();
+  const url = rawUrl
+    ? rawUrl.startsWith("ws://") || rawUrl.startsWith("wss://") || rawUrl.startsWith("http")
+      ? new URL(rawUrl)
+      : new URL(rawUrl, base)
+    : new URL(path, base);
   url.searchParams.set("ticket", ticket);
   return url.toString();
 }
