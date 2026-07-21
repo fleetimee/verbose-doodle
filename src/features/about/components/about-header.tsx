@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { motion } from "motion/react";
 import { useTheme } from "@/components/theme-provider";
-import { messages } from "@/lib/i18n";
+import { LanguageToggle } from "@/features/about/components/language-toggle";
+import { type AppLocale, getActiveLocale, getMessages } from "@/lib/i18n";
 
 // Animation easing curve for bounce effect (cubic-bezier control points)
 const EASE_P1 = 0.34;
@@ -9,12 +11,24 @@ const EASE_P3 = 0.64;
 const EASE_P4 = 1;
 const BOUNCE_EASE_CURVE = [EASE_P1, EASE_P2, EASE_P3, EASE_P4] as const;
 
-export function AboutHeader() {
-  const { theme } = useTheme();
+export type AboutHeaderProps = {
+  onLocaleChange?: (locale: AppLocale) => void;
+};
 
-  // Determine the actual theme (resolve 'system' to 'light' or 'dark')
+export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
+  const { theme } = useTheme();
+  const [currentLocale, setCurrentLocale] = useState<AppLocale>(() => getActiveLocale());
+  const activeMessages = getMessages(currentLocale);
+
+  const handleLocaleChange = (locale: AppLocale) => {
+    setCurrentLocale(locale);
+    if (onLocaleChange) {
+      onLocaleChange(locale);
+    }
+  };
+
   let resolvedTheme = theme;
-  if (theme === "system") {
+  if (theme === "system" && typeof window !== "undefined") {
     const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     resolvedTheme = isDark ? "dark" : "light";
   }
@@ -24,8 +38,11 @@ export function AboutHeader() {
 
   return (
     <header className="flex w-full flex-col items-center gap-8 text-center">
+      <div className="flex w-full items-center justify-end">
+        <LanguageToggle onLocaleChange={handleLocaleChange} />
+      </div>
       <motion.img
-        alt={messages.about.logoAlt}
+        alt={activeMessages.about.logoAlt}
         animate={{ opacity: 1, scale: 1, rotate: 0 }}
         className="h-32 w-32 md:h-40 md:w-40"
         height="200"
@@ -45,7 +62,7 @@ export function AboutHeader() {
           initial={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
         >
-          {messages.about.headerTitle}
+          {activeMessages.about.headerTitle}
         </motion.h1>
         <motion.p
           animate={{ opacity: 1, y: 0 }}
@@ -53,7 +70,7 @@ export function AboutHeader() {
           initial={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
         >
-          {messages.about.headerDescription}
+          {activeMessages.about.headerDescription}
         </motion.p>
       </div>
     </header>
