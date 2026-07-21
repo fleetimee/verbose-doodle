@@ -38,5 +38,8 @@ export const aboutMessages = {
   technologyTitle: "Technology",
   technologyDescription:
     "This application leverages cutting-edge technologies including React 19 with the new compiler, TypeScript for type safety, TanStack Query for data fetching, and Tailwind CSS for styling. The component library is built on shadcn/ui with Base UI primitives.",
+  systemArchitectureTitle: "System Architecture",
+  systemArchitectureDescription:
+    "An interactive overview of how the React frontend communicates with the Spring Boot backend, its dynamic catch-all controller, JWT security layer, and PostgreSQL data store.",
   returnHome: "Return home",
 } as const;

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { type Variants, motion, useReducedMotion } from "motion/react";
 import { AnimatedTooltip, type AnimatedTooltipItem } from "@/components/ui/animated-tooltip";
 import { AboutVersionFooter } from "@/features/about/components/about-version-footer";
+import { ArchitectureDiagram } from "@/features/about/components/architecture-diagram";
 import { SimulatorDemoPreview } from "@/features/about/components/simulator-demo-preview";
 import { TeamMemberModal, type TeamMemberProfile } from "@/features/about/components/team-member-modal";
 import { TechStackGrid } from "@/features/about/components/tech-stack-grid";
@@ -218,6 +219,16 @@ export function AboutContent({ locale }: AboutContentProps) {
 
         <motion.div className="flex flex-col gap-4" variants={sectionVariants}>
           <SimulatorDemoPreview locale={locale} />
+        </motion.div>
+
+        <motion.div className="flex flex-col gap-4" variants={sectionVariants} role="region" aria-labelledby="section-system-architecture">
+          <h2 id="section-system-architecture" className="font-semibold text-2xl text-foreground transition-colors duration-300">
+            {activeMessages.about.systemArchitectureTitle}
+          </h2>
+          <p className="text-muted-foreground transition-colors duration-300">
+            {activeMessages.about.systemArchitectureDescription}
+          </p>
+          <ArchitectureDiagram />
         </motion.div>
 
         <motion.div className="flex flex-col gap-4" variants={sectionVariants} role="region" aria-labelledby="section-key-features">
