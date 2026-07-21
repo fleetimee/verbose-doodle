@@ -38,5 +38,9 @@ export const aboutMessages = {
   technologyTitle: "Teknologi",
   technologyDescription:
     "Aplikasi ini mengadopsi teknologi modern termasuk React 19 dengan compiler baru, TypeScript untuk keamanan tipe, TanStack Query untuk data fetching, dan Tailwind CSS untuk desain visual. Perpustakaan komponen dibangun di atas shadcn/ui dan Base UI primitives.",
+  systemArchitectureTitle: "Arsitektur Sistem",
+  systemArchitectureDescription:
+    "Gambaran interaktif tentang bagaimana frontend React berkomunikasi dengan backend Spring Boot, controller catch-all dinamis, lapisan keamanan JWT, dan penyimpanan data PostgreSQL.",
   returnHome: "Kembali ke Beranda",
 } as const;
+
