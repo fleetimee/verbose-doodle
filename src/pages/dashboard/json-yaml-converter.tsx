@@ -1,4 +1,4 @@
-import { JsonYamlConverter } from "@/features/json-yaml-converter/components/json-yaml-converter";
+import { JsonYamlConverter } from "@/features/developer-tools/tools/json-yaml-converter/components/json-yaml-converter";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { messages } from "@/lib/i18n";
 

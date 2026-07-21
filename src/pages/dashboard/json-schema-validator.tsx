@@ -1,4 +1,4 @@
-import { JsonSchemaValidator } from "@/features/json-schema-validator/components/json-schema-validator";
+import { JsonSchemaValidator } from "@/features/developer-tools/tools/json-schema-validator/components/json-schema-validator";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { messages } from "@/lib/i18n";
 
