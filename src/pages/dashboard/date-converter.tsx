@@ -1,4 +1,4 @@
-import { DateConverter } from "@/features/date-converter/components/date-converter";
+import { DateConverter } from "@/features/developer-tools/tools/date-converter/components/date-converter";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { messages } from "@/lib/i18n";
 

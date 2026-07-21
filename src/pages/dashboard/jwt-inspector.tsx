@@ -1,4 +1,4 @@
-import { JwtInspector } from "@/features/jwt-inspector/components/jwt-inspector";
+import { JwtInspector } from "@/features/developer-tools/tools/jwt-inspector/components/jwt-inspector";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { messages } from "@/lib/i18n";
 
