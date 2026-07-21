@@ -202,12 +202,13 @@ export function AboutContent({ locale }: AboutContentProps) {
     <>
       <motion.section
         animate="visible"
+        aria-label="About page content"
         className="flex flex-col gap-8 text-pretty leading-relaxed transition-colors duration-300 ease-in-out"
         initial="hidden"
         variants={contentContainerVariants}
       >
-        <motion.div className="flex flex-col gap-4" variants={sectionVariants}>
-          <h2 className="font-semibold text-2xl text-foreground transition-colors duration-300">
+        <motion.div className="flex flex-col gap-4" variants={sectionVariants} role="region" aria-labelledby="section-what-is-this">
+          <h2 id="section-what-is-this" className="font-semibold text-2xl text-foreground transition-colors duration-300">
             {activeMessages.about.whatIsThisTitle}
           </h2>
           <p className="text-muted-foreground transition-colors duration-300">
@@ -219,8 +220,8 @@ export function AboutContent({ locale }: AboutContentProps) {
           <SimulatorDemoPreview locale={locale} />
         </motion.div>
 
-        <motion.div className="flex flex-col gap-4" variants={sectionVariants}>
-          <h2 className="font-semibold text-2xl text-foreground transition-colors duration-300">
+        <motion.div className="flex flex-col gap-4" variants={sectionVariants} role="region" aria-labelledby="section-key-features">
+          <h2 id="section-key-features" className="font-semibold text-2xl text-foreground transition-colors duration-300">
             {activeMessages.about.keyFeaturesTitle}
           </h2>
           <motion.ul
@@ -271,17 +272,21 @@ export function AboutContent({ locale }: AboutContentProps) {
           </motion.ul>
         </motion.div>
 
-        <motion.div className="flex flex-col gap-4" variants={sectionVariants}>
-          <h2 className="font-semibold text-2xl text-foreground transition-colors duration-300">
+        <motion.div className="flex flex-col gap-4" variants={sectionVariants} role="region" aria-labelledby="section-our-team">
+          <h2 id="section-our-team" className="font-semibold text-2xl text-foreground transition-colors duration-300">
             {activeMessages.about.ourTeamTitle}
           </h2>
-          <div className="flex flex-row items-center justify-center">
+          <div
+            aria-label={`${activeMessages.about.ourTeamTitle} — click an avatar to view profile`}
+            className="flex flex-row items-center justify-center"
+            role="group"
+          >
             <AnimatedTooltip items={teamMembers} onSelect={handleSelectMember} />
           </div>
         </motion.div>
 
-        <motion.div className="flex flex-col gap-4" variants={sectionVariants}>
-          <h2 className="font-semibold text-2xl text-foreground transition-colors duration-300">
+        <motion.div className="flex flex-col gap-4" variants={sectionVariants} role="region" aria-labelledby="section-technology">
+          <h2 id="section-technology" className="font-semibold text-2xl text-foreground transition-colors duration-300">
             {activeMessages.about.technologyTitle}
           </h2>
           <TechStackGrid />

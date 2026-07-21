@@ -78,6 +78,7 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
   return (
     <motion.header
       animate="visible"
+      aria-labelledby="about-page-title"
       className="flex w-full flex-col items-center gap-8 text-center transition-colors duration-300 ease-in-out"
       initial="hidden"
       variants={headerContainerVariants}
@@ -95,6 +96,7 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
       />
       <motion.div className="flex flex-col gap-3" variants={itemVariants}>
         <motion.h1
+          id="about-page-title"
           className="font-semibold text-4xl tracking-tight text-foreground md:text-5xl transition-colors duration-300"
           variants={itemVariants}
         >

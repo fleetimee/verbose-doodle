@@ -37,13 +37,29 @@ export function AboutPage() {
   };
 
   return (
-    <motion.main
-      animate="visible"
-      className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-12 px-4 py-12 md:py-16 transition-colors duration-300 ease-in-out"
-      exit="exit"
-      initial="hidden"
-      variants={pageContainerVariants}
-    >
+    <>
+      {/* Skip navigation link for keyboard / screen-reader users */}
+      <a
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-md focus:ring-2 focus:ring-ring focus:outline-none"
+        href="#about-main-content"
+      >
+        Skip to main content
+      </a>
+
+      {/* Screen-reader live region for locale change announcements */}
+      <span aria-live="polite" aria-atomic="true" className="sr-only">
+        {activeMessages.about.documentTitle}
+      </span>
+
+      <motion.main
+        animate="visible"
+        aria-label={activeMessages.about.documentDescription}
+        className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-12 px-4 py-12 md:py-16 transition-colors duration-300 ease-in-out"
+        exit="exit"
+        id="about-main-content"
+        initial="hidden"
+        variants={pageContainerVariants}
+      >
       <AboutHeader onLocaleChange={setLocale} />
       <AboutContent locale={locale} />
       <motion.div
@@ -54,6 +70,7 @@ export function AboutPage() {
           {activeMessages.about.returnHome}
         </Button>
       </motion.div>
-    </motion.main>
+      </motion.main>
+    </>
   );
 }
