@@ -3,7 +3,6 @@
 import {
   BunJs,
   FramerDark,
-  RadixUI,
   React,
   ReactQuery,
   ReactRouter,
@@ -15,7 +14,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
 // ---------------------------------------------------------------------------
-// Custom Fallback Icon for React Hook Form
+// Custom Fallback Icons for React Hook Form and Base UI
 // ---------------------------------------------------------------------------
 
 function ReactHookFormIcon({
@@ -41,6 +40,30 @@ function ReactHookFormIcon({
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function BaseUiIcon({
+  size = 32,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      height={size}
+      viewBox="0 0 24 24"
+      width={size}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.8L18.5 8 12 11.2 5.5 8 12 4.8zM4 9.6l7 3.5v6.9l-7-3.5V9.6zm9 10.4v-6.9l7-3.5v6.9l-7 3.5z"
+        fill="#0066FF"
       />
     </svg>
   );
@@ -106,12 +129,12 @@ const TECH_STACK: TechItem[] = [
     icon: TailwindCSS,
   },
   {
-    name: "Radix UI",
+    name: "Base UI",
     category: "UI & Styling",
     description:
-      "Unstyled, accessible UI primitives for building high-quality design systems.",
-    docsUrl: "https://www.radix-ui.com",
-    icon: RadixUI,
+      "Unstyled, accessible UI primitives by MUI for building modern React design systems.",
+    docsUrl: "https://base-ui.com",
+    icon: BaseUiIcon,
   },
   {
     name: "Motion",

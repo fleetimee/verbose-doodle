@@ -37,6 +37,6 @@ export const aboutMessages = {
   ourTeamTitle: "Our Team",
   technologyTitle: "Technology",
   technologyDescription:
-    "This application leverages cutting-edge technologies including React 19 with the new compiler, TypeScript for type safety, TanStack Query for data fetching, and Tailwind CSS for styling. The component library is built on shadcn/ui with Radix UI primitives.",
+    "This application leverages cutting-edge technologies including React 19 with the new compiler, TypeScript for type safety, TanStack Query for data fetching, and Tailwind CSS for styling. The component library is built on shadcn/ui with Base UI primitives.",
   returnHome: "Return home",
 } as const;
