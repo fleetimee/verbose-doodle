@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
+import { AboutVersionFooter } from "@/features/about/components/about-version-footer";
 import { TechStackGrid } from "@/features/about/components/tech-stack-grid";
 import { messages } from "@/lib/i18n";
 
@@ -169,6 +170,8 @@ export function AboutContent() {
         </h2>
         <TechStackGrid />
       </motion.div>
+
+      <AboutVersionFooter />
     </section>
   );
 }
