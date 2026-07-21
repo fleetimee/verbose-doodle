@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "motion/react";
+import { type Variants, motion, useReducedMotion } from "motion/react";
 import { useTheme } from "@/components/theme-provider";
 import { LanguageToggle } from "@/features/about/components/language-toggle";
 import { type AppLocale, getActiveLocale, getMessages } from "@/lib/i18n";
@@ -17,6 +17,7 @@ export type AboutHeaderProps = {
 
 export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
   const { theme } = useTheme();
+  const shouldReduceMotion = useReducedMotion();
   const [currentLocale, setCurrentLocale] = useState<AppLocale>(() => getActiveLocale());
   const activeMessages = getMessages(currentLocale);
 
@@ -36,43 +37,76 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
   const logoSrc =
     resolvedTheme === "dark" ? "/logo-dark.svg" : "/logo-icon.svg";
 
+  const headerContainerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: shouldReduceMotion
+        ? { duration: 0 }
+        : {
+            staggerChildren: 0.12,
+            delayChildren: 0.05,
+          },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: shouldReduceMotion
+        ? { duration: 0 }
+        : { duration: 0.5, ease: "easeOut" },
+    },
+  };
+
+  const logoVariants: Variants = {
+    hidden: shouldReduceMotion
+      ? { opacity: 1, scale: 1, rotate: 0 }
+      : { opacity: 0, scale: 0.8, rotate: -8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      rotate: 0,
+      transition: shouldReduceMotion
+        ? { duration: 0 }
+        : { duration: 0.6, ease: BOUNCE_EASE_CURVE },
+    },
+  };
+
   return (
-    <header className="flex w-full flex-col items-center gap-8 text-center">
+    <motion.header
+      animate="visible"
+      className="flex w-full flex-col items-center gap-8 text-center transition-colors duration-300 ease-in-out"
+      initial="hidden"
+      variants={headerContainerVariants}
+    >
       <div className="flex w-full items-center justify-end">
         <LanguageToggle onLocaleChange={handleLocaleChange} />
       </div>
       <motion.img
         alt={activeMessages.about.logoAlt}
-        animate={{ opacity: 1, scale: 1, rotate: 0 }}
-        className="h-32 w-32 md:h-40 md:w-40"
+        className="h-32 w-32 md:h-40 md:w-40 transition-transform duration-300"
         height="200"
-        initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
         src={logoSrc}
-        transition={{
-          duration: 0.6,
-          ease: BOUNCE_EASE_CURVE,
-          delay: 0.1,
-        }}
+        variants={logoVariants}
         width="200"
       />
-      <div className="flex flex-col gap-3">
+      <motion.div className="flex flex-col gap-3" variants={itemVariants}>
         <motion.h1
-          animate={{ opacity: 1, y: 0 }}
-          className="font-semibold text-4xl tracking-tight md:text-5xl"
-          initial={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+          className="font-semibold text-4xl tracking-tight text-foreground md:text-5xl transition-colors duration-300"
+          variants={itemVariants}
         >
           {activeMessages.about.headerTitle}
         </motion.h1>
         <motion.p
-          animate={{ opacity: 1, y: 0 }}
-          className="text-pretty text-lg text-muted-foreground"
-          initial={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+          className="text-pretty text-lg text-muted-foreground transition-colors duration-300"
+          variants={itemVariants}
         >
           {activeMessages.about.headerDescription}
         </motion.p>
-      </div>
-    </header>
+      </motion.div>
+    </motion.header>
   );
 }
