@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 import { AboutVersionFooter } from "@/features/about/components/about-version-footer";
 import { TechStackGrid } from "@/features/about/components/tech-stack-grid";
-import { messages } from "@/lib/i18n";
+import { type AppLocale, getActiveLocale, getMessages } from "@/lib/i18n";
 
 // Animation timing constants
 const FEATURE_LIST_BASE_DELAY = 0.7;
@@ -81,7 +81,13 @@ const listItemVariants = {
   visible: { opacity: 1, x: 0 },
 };
 
-export function AboutContent() {
+export type AboutContentProps = {
+  locale?: AppLocale;
+};
+
+export function AboutContent({ locale }: AboutContentProps) {
+  const activeMessages = getMessages(locale || getActiveLocale());
+
   return (
     <section className="flex flex-col gap-6 text-pretty leading-relaxed">
       <motion.div
@@ -92,9 +98,9 @@ export function AboutContent() {
         variants={sectionVariants}
       >
         <h2 className="font-semibold text-2xl">
-          {messages.about.whatIsThisTitle}
+          {activeMessages.about.whatIsThisTitle}
         </h2>
-        <p>{messages.about.whatIsThisDescription}</p>
+        <p>{activeMessages.about.whatIsThisDescription}</p>
       </motion.div>
 
       <motion.div
@@ -105,25 +111,25 @@ export function AboutContent() {
         variants={sectionVariants}
       >
         <h2 className="font-semibold text-2xl">
-          {messages.about.keyFeaturesTitle}
+          {activeMessages.about.keyFeaturesTitle}
         </h2>
         <ul className="ml-6 flex list-disc flex-col gap-2">
           {[
             {
-              title: messages.about.endpointManagementTitle,
-              desc: messages.about.endpointManagementDescription,
+              title: activeMessages.about.endpointManagementTitle,
+              desc: activeMessages.about.endpointManagementDescription,
             },
             {
-              title: messages.about.userAdministrationTitle,
-              desc: messages.about.userAdministrationDescription,
+              title: activeMessages.about.userAdministrationTitle,
+              desc: activeMessages.about.userAdministrationDescription,
             },
             {
-              title: messages.about.jsonDrivenTitle,
-              desc: messages.about.jsonDrivenDescription,
+              title: activeMessages.about.jsonDrivenTitle,
+              desc: activeMessages.about.jsonDrivenDescription,
             },
             {
-              title: messages.about.modernStackTitle,
-              desc: messages.about.modernStackDescription,
+              title: activeMessages.about.modernStackTitle,
+              desc: activeMessages.about.modernStackDescription,
             },
           ].map((feature, index) => (
             <motion.li
@@ -151,7 +157,7 @@ export function AboutContent() {
         variants={sectionVariants}
       >
         <h2 className="font-semibold text-2xl">
-          {messages.about.ourTeamTitle}
+          {activeMessages.about.ourTeamTitle}
         </h2>
         <div className="flex flex-row items-center justify-center">
           <AnimatedTooltip items={teamMembers} />
@@ -166,7 +172,7 @@ export function AboutContent() {
         variants={sectionVariants}
       >
         <h2 className="font-semibold text-2xl">
-          {messages.about.technologyTitle}
+          {activeMessages.about.technologyTitle}
         </h2>
         <TechStackGrid />
       </motion.div>
