@@ -1,12 +1,13 @@
 import { motion } from "motion/react";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 import { AboutVersionFooter } from "@/features/about/components/about-version-footer";
+import { SimulatorDemoPreview } from "@/features/about/components/simulator-demo-preview";
 import { TechStackGrid } from "@/features/about/components/tech-stack-grid";
 import { type AppLocale, getActiveLocale, getMessages } from "@/lib/i18n";
 
 // Animation timing constants
 const FEATURE_LIST_BASE_DELAY = 0.7;
-const FEATURE_LIST_STAGGER_DELAY = 0.1;
+const FEATURE_LIST_STAGGER_DELAY = 0.08;
 
 const teamMembers = [
   {
@@ -89,7 +90,7 @@ export function AboutContent({ locale }: AboutContentProps) {
   const activeMessages = getMessages(locale || getActiveLocale());
 
   return (
-    <section className="flex flex-col gap-6 text-pretty leading-relaxed">
+    <section className="flex flex-col gap-8 text-pretty leading-relaxed">
       <motion.div
         animate="visible"
         className="flex flex-col gap-4"
@@ -110,6 +111,16 @@ export function AboutContent({ locale }: AboutContentProps) {
         transition={{ duration: 0.5, delay: 0.6 }}
         variants={sectionVariants}
       >
+        <SimulatorDemoPreview locale={locale} />
+      </motion.div>
+
+      <motion.div
+        animate="visible"
+        className="flex flex-col gap-4"
+        initial="hidden"
+        transition={{ duration: 0.5, delay: 0.7 }}
+        variants={sectionVariants}
+      >
         <h2 className="font-semibold text-2xl">
           {activeMessages.about.keyFeaturesTitle}
         </h2>
@@ -118,6 +129,18 @@ export function AboutContent({ locale }: AboutContentProps) {
             {
               title: activeMessages.about.endpointManagementTitle,
               desc: activeMessages.about.endpointManagementDescription,
+            },
+            {
+              title: activeMessages.about.developerToolsTitle,
+              desc: activeMessages.about.developerToolsDescription,
+            },
+            {
+              title: activeMessages.about.socketTestingTitle,
+              desc: activeMessages.about.socketTestingDescription,
+            },
+            {
+              title: activeMessages.about.socksRelayTitle,
+              desc: activeMessages.about.socksRelayDescription,
             },
             {
               title: activeMessages.about.userAdministrationTitle,
