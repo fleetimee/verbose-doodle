@@ -19,12 +19,22 @@ export type AnimatedTooltipItem = {
   imageWebp2x?: string;
   width?: number;
   height?: number;
+  bio?: string;
+  githubUsername?: string;
+  roles?: readonly string[];
+  contributions?: readonly string[];
+  socials?: {
+    github?: string;
+    linkedin?: string;
+  };
 };
 
 export const AnimatedTooltip = ({
   items,
+  onSelect,
 }: {
   items: AnimatedTooltipItem[];
+  onSelect?: (item: AnimatedTooltipItem) => void;
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [loadedMap, setLoadedMap] = useState<Record<number, boolean>>({});
@@ -56,6 +66,19 @@ export const AnimatedTooltip = ({
     setLoadedMap((prev) => ({ ...prev, [id]: true }));
   };
 
+  const handleClick = (item: AnimatedTooltipItem) => {
+    if (onSelect) {
+      onSelect(item);
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent, item: AnimatedTooltipItem) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleClick(item);
+    }
+  };
+
   return (
     <>
       {items.map((item) => {
@@ -67,10 +90,15 @@ export const AnimatedTooltip = ({
 
         return (
           <div
-            className="group relative -mr-4"
+            className="group relative -mr-4 cursor-pointer focus-visible:outline-none"
             key={item.name}
+            onClick={() => handleClick(item)}
+            onKeyDown={(e) => handleKeyDown(e, item)}
             onMouseEnter={() => setHoveredIndex(item.id)}
             onMouseLeave={() => setHoveredIndex(null)}
+            role="button"
+            tabIndex={0}
+            aria-label={`View profile for ${item.name}`}
           >
             <AnimatePresence>
               {hoveredIndex === item.id && (
@@ -116,7 +144,7 @@ export const AnimatedTooltip = ({
               loading="lazy"
               decoding="async"
               alt={item.name}
-              className={`relative !m-0 h-14 w-14 rounded-full border-2 border-white object-cover object-top !p-0 transition duration-500 group-hover:z-30 group-hover:scale-105 ${
+              className={`relative !m-0 h-14 w-14 rounded-full border-2 border-white object-cover object-top !p-0 transition duration-500 group-hover:z-30 group-hover:scale-105 group-focus-visible:ring-2 group-focus-visible:ring-primary ${
                 isLoaded ? "opacity-100" : "opacity-0"
               }`}
             />
