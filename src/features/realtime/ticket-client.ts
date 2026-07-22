@@ -35,11 +35,21 @@ export function buildTicketWebSocketUrl(
       : "ws:";
   const base = `${protocol}//${host}`;
   const rawUrl = configuredUrl?.trim();
-  const url = rawUrl
-    ? rawUrl.startsWith("ws://") || rawUrl.startsWith("wss://") || rawUrl.startsWith("http")
-      ? new URL(rawUrl)
-      : new URL(rawUrl, base)
-    : new URL(path, base);
+  let url: URL;
+  if (!rawUrl) {
+    url = new URL(path, base);
+  } else if (
+    rawUrl.startsWith("ws://") ||
+    rawUrl.startsWith("wss://") ||
+    rawUrl.startsWith("http")
+  ) {
+    url = new URL(rawUrl);
+  } else {
+    url = new URL(rawUrl, base);
+  }
+  if (url.protocol !== "ws:" && url.protocol !== "wss:") {
+    throw new TypeError("WebSocket URL must use ws: or wss:");
+  }
   url.searchParams.set("ticket", ticket);
   return url.toString();
 }
