@@ -1,8 +1,41 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createElement, forwardRef, type ReactNode } from "react";
 import { TourProvider } from "@/components/tour";
 import { NumberBaseConverter } from "@/features/developer-tools/tools/number-base-converter/components/number-base-converter";
+
+type MotionTestProps = {
+  readonly children?: ReactNode;
+  readonly [key: string]: unknown;
+};
+
+const createMotionElement = (tag: "aside" | "div" | "section" | "svg") =>
+  forwardRef<HTMLElement, MotionTestProps>((props, ref) => {
+    const {
+      animate: _animate,
+      exit: _exit,
+      initial: _initial,
+      layout: _layout,
+      onAnimationComplete: _onAnimationComplete,
+      transition: _transition,
+      variants: _variants,
+      ...elementProps
+    } = props;
+    return createElement(tag, { ...elementProps, ref });
+  });
+
+mock.module("motion/react", () => ({
+  AnimatePresence: ({ children }: { readonly children?: ReactNode }) =>
+    children,
+  motion: {
+    aside: createMotionElement("aside"),
+    div: createMotionElement("div"),
+    section: createMotionElement("section"),
+    svg: createMotionElement("svg"),
+  },
+  useReducedMotion: () => true,
+}));
 
 const originalFetch = globalThis.fetch;
 const originalClipboard = Object.getOwnPropertyDescriptor(
@@ -72,18 +105,16 @@ describe("NumberBaseConverter", () => {
     expect(screen.getByText("Unsigned 255")).toBeDefined();
   });
 
-  test("clears stale output when conversion fails", async () => {
-    const user = userEvent.setup();
+  test("clears stale output when conversion fails", () => {
     renderConverter();
     const input = screen.getByRole("textbox", { name: "Value" });
 
-    await user.click(screen.getByRole("button", { name: "Convert" }));
+    fireEvent.click(screen.getByRole("button", { name: "Convert" }));
     expect(screen.getByRole("region", { name: "Binary output" })).toBeDefined();
-    await user.clear(input);
-    await user.type(input, "256");
-    await user.click(screen.getByRole("button", { name: "Convert" }));
+    fireEvent.change(input, { target: { value: "256" } });
+    fireEvent.click(screen.getByRole("button", { name: "Convert" }));
 
-    expect(await screen.findByRole("alert")).toBeDefined();
+    expect(screen.getByRole("alert")).toBeDefined();
     expect(screen.queryByRole("region", { name: "Binary output" })).toBeNull();
   });
 
@@ -120,11 +151,10 @@ describe("NumberBaseConverter", () => {
     expect((input as HTMLInputElement).value).toBe("255");
   });
 
-  test("keeps every guided-tour target available after clearing", async () => {
-    const user = userEvent.setup();
+  test("keeps every guided-tour target available after clearing", () => {
     renderConverter();
 
-    await user.click(screen.getByRole("button", { name: "Clear" }));
+    fireEvent.click(screen.getByRole("button", { name: "Clear" }));
     expect(screen.queryByRole("region", { name: "Binary output" })).toBeNull();
     expect(
       document.getElementById("number-base-converter-tour-results")
@@ -132,15 +162,11 @@ describe("NumberBaseConverter", () => {
     expect(
       document.getElementById("number-base-converter-tour-bytes")
     ).not.toBeNull();
-    await user.click(screen.getByRole("button", { name: "Start tour" }));
-    expect(
-      await screen.findByText("Choose how to read the input")
-    ).toBeDefined();
-    await user.click(screen.getByRole("button", { name: "Next" }));
-    expect(
-      await screen.findByText("Compare every representation")
-    ).toBeDefined();
-    await user.click(screen.getByRole("button", { name: "Next" }));
-    expect(await screen.findByText("Read the underlying bytes")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "Start tour" }));
+    expect(screen.getByText("Choose how to read the input")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText("Compare every representation")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText("Read the underlying bytes")).toBeDefined();
   });
 });
