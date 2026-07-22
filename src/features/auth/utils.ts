@@ -150,9 +150,9 @@ export function clearRefreshToken(): void {
  * Get token expiration time in milliseconds
  * Returns null if token is invalid or doesn't have expiration
  */
-export function getTokenExpiration(): number | null {
+export function getTokenExpiration(tokenOverride?: string): number | null {
   try {
-    const token = getAuthToken();
+    const token = tokenOverride ?? getAuthToken();
     if (!token) {
       return null;
     }
