@@ -15,12 +15,12 @@ import {
   type DeveloperToolTourStep,
 } from "@/features/developer-tools/components/developer-tool-tour-button";
 import { DocumentEditor } from "@/features/developer-tools/components/document-editor";
-import type { DocumentFormat } from "@/features/developer-tools/types";
 import {
   ConversionError,
   convertDocument,
 } from "@/features/developer-tools/tools/json-yaml-converter/conversion";
 import { EXAMPLE_JSON } from "@/features/developer-tools/tools/json-yaml-converter/example";
+import type { DocumentFormat } from "@/features/developer-tools/types";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
 

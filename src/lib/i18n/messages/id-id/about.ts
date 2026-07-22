@@ -43,4 +43,3 @@ export const aboutMessages = {
     "Gambaran interaktif tentang bagaimana frontend React berkomunikasi dengan backend Spring Boot, controller catch-all dinamis, lapisan keamanan JWT, dan penyimpanan data PostgreSQL.",
   returnHome: "Kembali ke Beranda",
 } as const;
-

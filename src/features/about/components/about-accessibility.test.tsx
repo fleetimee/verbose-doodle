@@ -11,7 +11,9 @@ function renderWithRouter(ui: React.ReactElement) {
 describe("AboutPage accessibility", () => {
   test("renders a skip navigation link", () => {
     renderWithRouter(<AboutPage />);
-    const skipLink = screen.getByRole("link", { name: /skip to main content/i });
+    const skipLink = screen.getByRole("link", {
+      name: /skip to main content/i,
+    });
     expect(skipLink).toBeDefined();
     expect(skipLink.getAttribute("href")).toBe("#about-main-content");
   });

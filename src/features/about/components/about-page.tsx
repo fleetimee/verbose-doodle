@@ -1,5 +1,5 @@
+import { motion, useReducedMotion, type Variants } from "motion/react";
 import { useState } from "react";
-import { type Variants, motion, useReducedMotion } from "motion/react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { AboutContent } from "@/features/about/components/about-content";
@@ -40,36 +40,36 @@ export function AboutPage() {
     <>
       {/* Skip navigation link for keyboard / screen-reader users */}
       <a
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-md focus:ring-2 focus:ring-ring focus:outline-none"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:font-medium focus:text-foreground focus:text-sm focus:shadow-md focus:outline-none focus:ring-2 focus:ring-ring"
         href="#about-main-content"
       >
         Skip to main content
       </a>
 
       {/* Screen-reader live region for locale change announcements */}
-      <span aria-live="polite" aria-atomic="true" className="sr-only">
+      <span aria-atomic="true" aria-live="polite" className="sr-only">
         {activeMessages.about.documentTitle}
       </span>
 
       <motion.main
         animate="visible"
         aria-label={activeMessages.about.documentDescription}
-        className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-12 px-4 py-12 md:py-16 transition-colors duration-300 ease-in-out"
+        className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-12 px-4 py-12 transition-colors duration-300 ease-in-out md:py-16"
         exit="exit"
         id="about-main-content"
         initial="hidden"
         variants={pageContainerVariants}
       >
-      <AboutHeader onLocaleChange={setLocale} />
-      <AboutContent locale={locale} />
-      <motion.div
-        className="flex justify-center"
-        variants={footerItemVariants}
-      >
-        <Button nativeButton={false} render={<Link to="/" />} variant="link">
-          {activeMessages.about.returnHome}
-        </Button>
-      </motion.div>
+        <AboutHeader onLocaleChange={setLocale} />
+        <AboutContent locale={locale} />
+        <motion.div
+          className="flex justify-center"
+          variants={footerItemVariants}
+        >
+          <Button nativeButton={false} render={<Link to="/" />} variant="link">
+            {activeMessages.about.returnHome}
+          </Button>
+        </motion.div>
       </motion.main>
     </>
   );

@@ -1,4 +1,3 @@
-import { motion } from "motion/react";
 import {
   CalendarIcon,
   ExternalLinkIcon,
@@ -7,6 +6,7 @@ import {
   ShieldCheckIcon,
   TagIcon,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 
 export type AboutVersionFooterProps = {
@@ -24,8 +24,11 @@ const DEFAULT_GITEA_BASE =
 export function AboutVersionFooter({
   version = import.meta.env.VITE_APP_VERSION || "1.2.0",
   commitSha = import.meta.env.VITE_GIT_COMMIT_SHA || "8bd0927",
-  buildTimestamp = import.meta.env.VITE_BUILD_TIMESTAMP || "2026-07-21 13:56 WIB",
-  environment = import.meta.env.MODE === "production" ? "Production" : "Development",
+  buildTimestamp = import.meta.env.VITE_BUILD_TIMESTAMP ||
+    "2026-07-21 13:56 WIB",
+  environment = import.meta.env.MODE === "production"
+    ? "Production"
+    : "Development",
   giteaCommitUrl,
   giteaReleasesUrl,
 }: AboutVersionFooterProps) {
@@ -114,7 +117,7 @@ export function AboutVersionFooter({
             <span className="font-medium text-muted-foreground text-xs">
               Build Timestamp
             </span>
-            <span className="font-semibold text-foreground text-sm truncate">
+            <span className="truncate font-semibold text-foreground text-sm">
               {buildTimestamp}
             </span>
           </div>
