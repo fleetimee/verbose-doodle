@@ -20,176 +20,10 @@ interface ArchNode {
   darkColor: string;
   description: string;
   glowColor: string;
-  icon: React.ReactNode;
   id: Exclude<NodeId, null>;
   label: string;
   layer: number;
   sublabel: string;
-}
-
-// ---------------------------------------------------------------------------
-// SVG Icons (inline, no external dependency)
-// ---------------------------------------------------------------------------
-
-function BrowserIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      height={22}
-      viewBox="0 0 24 24"
-      width={22}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect
-        height="16"
-        rx="2"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        width="20"
-        x="2"
-        y="4"
-      />
-      <path
-        d="M2 8h20"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.5"
-      />
-      <circle cx="6" cy="6" fill="currentColor" r="0.75" />
-      <circle cx="9" cy="6" fill="currentColor" r="0.75" />
-    </svg>
-  );
-}
-
-function ServerIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      height={22}
-      viewBox="0 0 24 24"
-      width={22}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect
-        height="6"
-        rx="1.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        width="20"
-        x="2"
-        y="3"
-      />
-      <rect
-        height="6"
-        rx="1.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        width="20"
-        x="2"
-        y="15"
-      />
-      <circle cx="6" cy="6" fill="currentColor" r="0.75" />
-      <circle cx="6" cy="18" fill="currentColor" r="0.75" />
-    </svg>
-  );
-}
-
-function RouteIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      height={22}
-      viewBox="0 0 24 24"
-      width={22}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M3 6h3a4 4 0 0 1 4 4v4a4 4 0 0 0 4 4h7"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M18 15l3-3-3-3"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M3 12h5"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.5"
-      />
-    </svg>
-  );
-}
-
-function LockIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      height={22}
-      viewBox="0 0 24 24"
-      width={22}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect
-        height="11"
-        rx="2"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        width="16"
-        x="4"
-        y="11"
-      />
-      <path
-        d="M8 11V7a4 4 0 0 1 8 0v4"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.5"
-      />
-      <circle cx="12" cy="16" fill="currentColor" r="1.5" />
-    </svg>
-  );
-}
-
-function DatabaseIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      height={22}
-      viewBox="0 0 24 24"
-      width={22}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <ellipse
-        cx="12"
-        cy="5"
-        rx="9"
-        ry="3"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M3 5v6c0 1.657 4.03 3 9 3s9-1.343 9-3V5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M3 11v6c0 1.657 4.03 3 9 3s9-1.343 9-3v-6"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-    </svg>
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -206,7 +40,6 @@ const NODES: ArchNode[] = [
     color: "#3b82f6",
     darkColor: "#60a5fa",
     glowColor: "rgba(59,130,246,0.25)",
-    icon: <BrowserIcon />,
     layer: 0,
   },
   {
@@ -218,7 +51,6 @@ const NODES: ArchNode[] = [
     color: "#10b981",
     darkColor: "#34d399",
     glowColor: "rgba(16,185,129,0.25)",
-    icon: <ServerIcon />,
     layer: 1,
   },
   {
@@ -230,7 +62,6 @@ const NODES: ArchNode[] = [
     color: "#f59e0b",
     darkColor: "#fbbf24",
     glowColor: "rgba(245,158,11,0.25)",
-    icon: <RouteIcon />,
     layer: 2,
   },
   {
@@ -242,7 +73,6 @@ const NODES: ArchNode[] = [
     color: "#8b5cf6",
     darkColor: "#a78bfa",
     glowColor: "rgba(139,92,246,0.25)",
-    icon: <LockIcon />,
     layer: 2,
   },
   {
@@ -254,7 +84,6 @@ const NODES: ArchNode[] = [
     color: "#06b6d4",
     darkColor: "#22d3ee",
     glowColor: "rgba(6,182,212,0.25)",
-    icon: <DatabaseIcon />,
     layer: 3,
   },
 ];

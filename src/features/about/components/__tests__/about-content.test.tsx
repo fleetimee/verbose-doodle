@@ -42,4 +42,22 @@ describe("AboutContent", () => {
       screen.getByText("Technical Writer & Frontend Developer")
     ).toBeDefined();
   });
+
+  test("opens the selected team member profile", async () => {
+    const user = userEvent.setup();
+    render(<AboutContent locale="en-US" />);
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "View profile for Novian Andika",
+      })
+    );
+
+    expect(await screen.findByRole("dialog")).toBeDefined();
+    expect(
+      screen.getByText(
+        "Lead Frontend Developer & System Architect driving React 19 architecture, Base UI design systems, and token-optimized developer tools."
+      )
+    ).toBeDefined();
+  });
 });

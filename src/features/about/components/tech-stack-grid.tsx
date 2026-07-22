@@ -319,11 +319,9 @@ export function TechStackGrid() {
 
       {/* Badge grid */}
       <motion.div className="grid grid-cols-2 gap-3 sm:grid-cols-3" layout>
-        <AnimatePresence mode="popLayout">
-          {filtered.map((item, i) => (
-            <TechCard index={i} item={item} key={item.name} />
-          ))}
-        </AnimatePresence>
+        {filtered.map((item, i) => (
+          <TechCard index={i} item={item} key={item.name} />
+        ))}
       </motion.div>
 
       <p className="text-center text-muted-foreground text-xs">
