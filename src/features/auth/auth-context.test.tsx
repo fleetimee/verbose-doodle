@@ -398,8 +398,12 @@ describe("AuthProvider", () => {
           <span data-testid="is-admin">{isAdmin ? "true" : "false"}</span>
           <span data-testid="is-user">{isUser ? "true" : "false"}</span>
           <span data-testid="role">{role ?? "none"}</span>
-          <span data-testid="can-add">{can("canAddEndpoint") ? "true" : "false"}</span>
-          <span data-testid="has-admin">{hasRole("ADMIN") ? "true" : "false"}</span>
+          <span data-testid="can-add">
+            {can("canAddEndpoint") ? "true" : "false"}
+          </span>
+          <span data-testid="has-admin">
+            {hasRole("ADMIN") ? "true" : "false"}
+          </span>
         </div>
       );
     }
@@ -419,4 +423,3 @@ describe("AuthProvider", () => {
     decodeSpy.mockRestore();
   });
 });
-

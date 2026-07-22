@@ -22,4 +22,3 @@ export function useAuthPermissions() {
     role: auth.role,
   };
 }
-

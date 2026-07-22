@@ -157,8 +157,8 @@ export class SocketBridgeEngine {
     readonly port: number;
   } | null = null;
 
-  private stateChangeListeners: Set<() => void> = new Set();
-  private toastListeners: Set<(event: ToastEvent) => void> = new Set();
+  private readonly stateChangeListeners: Set<() => void> = new Set();
+  private readonly toastListeners: Set<(event: ToastEvent) => void> = new Set();
 
   public subscribe(listener: () => void): () => void {
     this.stateChangeListeners.add(listener);
@@ -222,16 +222,25 @@ export class SocketBridgeEngine {
     this.notifyStateChange();
   }
 
-  public appendSystemLog(data: string, metadata?: Record<string, unknown>): void {
+  public appendSystemLog(
+    data: string,
+    metadata?: Record<string, unknown>
+  ): void {
     this.appendLog(
       toLogEntry("sys", "tcp-client", "bridge", data, "text", metadata)
     );
   }
 
   public getMetrics(): SocketMetrics {
-    const packetsIn = this.logs.filter((entry) => entry.direction === "in").length;
-    const packetsOut = this.logs.filter((entry) => entry.direction === "out").length;
-    const errors = this.logs.filter((entry) => entry.direction === "err").length;
+    const packetsIn = this.logs.filter(
+      (entry) => entry.direction === "in"
+    ).length;
+    const packetsOut = this.logs.filter(
+      (entry) => entry.direction === "out"
+    ).length;
+    const errors = this.logs.filter(
+      (entry) => entry.direction === "err"
+    ).length;
     const activeConnections =
       (this.tcpClient.connected ? 1 : 0) +
       (this.tcpServer.listening ? this.tcpServer.clients.length : 0) +
@@ -407,14 +416,7 @@ export class SocketBridgeEngine {
           : [...this.tcpServer.clients, client],
       };
       this.appendLog(
-        toLogEntry(
-          "sys",
-          "tcp-server",
-          id,
-          "Client connected",
-          "text",
-          payload
-        )
+        toLogEntry("sys", "tcp-server", id, "Client connected", "text", payload)
       );
       return;
     }
@@ -495,7 +497,9 @@ export class SocketBridgeEngine {
       ["clientId", "connectionId", "serverId", "remoteAddress", "scope"],
       protocol
     );
-    this.appendLog(toLogEntry(direction, protocol, scope, data, "text", payload));
+    this.appendLog(
+      toLogEntry(direction, protocol, scope, data, "text", payload)
+    );
   }
 
   // Socket Command Creators & State Updaters
@@ -556,13 +560,7 @@ export class SocketBridgeEngine {
     const serverId = createId("tcp-server");
     this.tcpServer = { serverId, listening: false, port, clients: [] };
     this.appendLog(
-      toLogEntry(
-        "sys",
-        "tcp-server",
-        `:${port}`,
-        "Starting TCP server",
-        "text"
-      )
+      toLogEntry("sys", "tcp-server", `:${port}`, "Starting TCP server", "text")
     );
     return {
       type: "tcp_server_start",
