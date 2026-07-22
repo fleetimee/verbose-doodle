@@ -60,47 +60,49 @@ export function SocketBridgeFloatingStatus() {
             </motion.span>
           </AnimatePresence>
         </span>
-        <AnimatePresence initial={false} mode="sync">
-          {bridge.bridgeAutoConnect ? (
-            <motion.div
-              animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex"
-              exit={{ opacity: 0, scale: contentScale }}
-              initial={{ opacity: 0, scale: contentScale }}
-              key="bridge-action-off"
-              transition={contentTransition}
-            >
-              <Button
-                className="h-6 gap-1 px-1.5 text-[11px]"
-                onClick={bridge.disconnectBridge}
-                type="button"
-                variant="ghost"
+        <span className="relative inline-flex h-6 w-11 shrink-0">
+          <AnimatePresence initial={false} mode="sync">
+            {bridge.bridgeAutoConnect ? (
+              <motion.div
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute inset-0 flex items-center justify-center"
+                exit={{ opacity: 0, scale: contentScale }}
+                initial={{ opacity: 0, scale: contentScale }}
+                key="bridge-action-off"
+                transition={contentTransition}
               >
-                <Unplug className="size-3" />
-                Off
-              </Button>
-            </motion.div>
-          ) : (
-            <motion.div
-              animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex"
-              exit={{ opacity: 0, scale: contentScale }}
-              initial={{ opacity: 0, scale: contentScale }}
-              key="bridge-action-on"
-              transition={contentTransition}
-            >
-              <Button
-                className="h-6 gap-1 px-1.5 text-[11px]"
-                onClick={bridge.connectBridge}
-                type="button"
-                variant="ghost"
+                <Button
+                  className="h-6 w-full gap-1 px-1.5 text-[11px]"
+                  onClick={bridge.disconnectBridge}
+                  type="button"
+                  variant="ghost"
+                >
+                  <Unplug className="size-3" />
+                  Off
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute inset-0 flex items-center justify-center"
+                exit={{ opacity: 0, scale: contentScale }}
+                initial={{ opacity: 0, scale: contentScale }}
+                key="bridge-action-on"
+                transition={contentTransition}
               >
-                <Cable className="size-3" />
-                On
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <Button
+                  className="h-6 w-full gap-1 px-1.5 text-[11px]"
+                  onClick={bridge.connectBridge}
+                  type="button"
+                  variant="ghost"
+                >
+                  <Cable className="size-3" />
+                  On
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </span>
       </div>
     </div>
   );

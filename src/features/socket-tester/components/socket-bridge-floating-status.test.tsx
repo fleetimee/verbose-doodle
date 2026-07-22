@@ -48,6 +48,10 @@ describe("SocketBridgeFloatingStatus", () => {
 
     screen.getByRole("button", { name: "On" }).click();
     expect(bridge.connectBridge).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByRole("button", { name: "On" }).parentElement?.parentElement
+        ?.className
+    ).toContain("w-11");
 
     bridge.bridgeAutoConnect = true;
     rerender(<SocketBridgeFloatingStatus />);
