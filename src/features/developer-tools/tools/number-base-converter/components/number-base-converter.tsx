@@ -26,6 +26,7 @@ import {
 } from "@/features/developer-tools/tools/number-base-converter/convert-number-base";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type OutputKey = "binary" | "octal" | "decimal" | "hexadecimal";
@@ -134,13 +135,16 @@ function OutputCard({
   copied,
   definition,
   onCopy,
+  shouldReduceMotion,
   value,
 }: {
   readonly copied: boolean;
   readonly definition: OutputDefinition;
   readonly onCopy: () => void;
+  readonly shouldReduceMotion: boolean;
   readonly value: string;
 }) {
+  const CopyIcon = copied ? Check : ClipboardCopy;
   const outputLabel = formatMessage(messages.numberBaseConverter.outputLabel, {
     base: definition.label,
   });
@@ -167,7 +171,32 @@ function OutputCard({
           type="button"
           variant="ghost"
         >
-          {copied ? <Check /> : <ClipboardCopy />}
+          <span className="relative size-4">
+            <AnimatePresence initial={false} mode="sync">
+              <motion.span
+                animate={{
+                  opacity: 1,
+                  ...(shouldReduceMotion ? {} : { scale: 1 }),
+                }}
+                className="absolute inset-0"
+                exit={{
+                  opacity: 0,
+                  ...(shouldReduceMotion ? {} : { scale: 0.95 }),
+                }}
+                initial={{
+                  opacity: 0,
+                  ...(shouldReduceMotion ? {} : { scale: 0.95 }),
+                }}
+                key={copied ? "copied" : "idle"}
+                transition={{
+                  duration: MOTION_DURATION.fast,
+                  ease: MOTION_EASE.out,
+                }}
+              >
+                <CopyIcon />
+              </motion.span>
+            </AnimatePresence>
+          </span>
         </Button>
       </div>
       <code className="mt-6 block overflow-x-auto pb-1 font-mono text-lg leading-7 tracking-[0.04em]">
@@ -523,6 +552,7 @@ export function NumberBaseConverter() {
                       definition={definition}
                       key={definition.key}
                       onCopy={() => copyOutput(definition.key)}
+                      shouldReduceMotion={shouldReduceMotion ?? false}
                       value={result[definition.key]}
                     />
                   ))}
