@@ -7,7 +7,17 @@ import { GlobalRegistrator } from "@happy-dom/global-registrator";
 
 GlobalRegistrator.register();
 
-afterEach(() => {
+if (!Element.prototype.getAnimations) {
+  Element.prototype.getAnimations = () => [];
+}
+
+if (!document.getAnimations) {
+  document.getAnimations = () => [];
+}
+
+afterEach(async () => {
+  const { cleanup } = await import("@testing-library/react");
+  cleanup();
   if (document.body) {
     document.body.innerHTML = "";
   }

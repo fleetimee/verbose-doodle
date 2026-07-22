@@ -114,7 +114,7 @@ describe("socks relay websocket url", () => {
       value: new URL("http://localhost:5173/dashboard"),
     });
 
-    expect(buildRelayWebSocketUrl("one-time ticket")).toBe(
+    expect(buildRelayWebSocketUrl("one-time ticket", "")).toBe(
       "ws://localhost:5173/api/relay/events?ticket=one-time+ticket"
     );
   });

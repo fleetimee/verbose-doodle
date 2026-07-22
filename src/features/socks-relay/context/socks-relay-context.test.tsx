@@ -8,9 +8,12 @@ import {
   vi,
 } from "bun:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, waitFor } from "@testing-library/react";
-import { StrictMode } from "react";
-import { SocksRelayProvider } from "@/features/socks-relay/context/socks-relay-context";
+import { act, render, renderHook, waitFor } from "@testing-library/react";
+import { type ReactNode, StrictMode } from "react";
+import {
+  SocksRelayProvider,
+  useSocksRelayContext,
+} from "@/features/socks-relay/context/socks-relay-context";
 import { socksRelayQueryKeys } from "@/features/socks-relay/query-keys";
 
 class FakeWebSocket {
@@ -25,6 +28,21 @@ class FakeWebSocket {
   constructor(url: string) {
     this.url = url;
     FakeWebSocket.instances.push(this);
+  }
+
+  addEventListener(
+    type: string,
+    listener: (event?: { readonly data: string }) => void
+  ) {
+    if (type === "close") {
+      this.onclose = listener as () => void;
+    } else if (type === "error") {
+      this.onerror = listener as () => void;
+    } else if (type === "message") {
+      this.onmessage = listener as (message: { readonly data: string }) => void;
+    } else if (type === "open") {
+      this.onopen = listener as () => void;
+    }
   }
 
   close() {
@@ -136,6 +154,35 @@ describe("SocksRelayProvider", () => {
     expect(FakeWebSocket.instances).toHaveLength(2);
     expect(FakeWebSocket.instances[1]?.url).toContain("ticket=ticket-2");
     expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  test("retains parsed events and counts malformed frames", async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const wrapper = ({ children }: { readonly children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>
+        <SocksRelayProvider>{children}</SocksRelayProvider>
+      </QueryClientProvider>
+    );
+    const { result } = renderHook(() => useSocksRelayContext(), { wrapper });
+
+    await waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+    act(() => {
+      FakeWebSocket.instances[0]?.onmessage?.({ data: "{" });
+      for (let index = 0; index <= 1000; index += 1) {
+        FakeWebSocket.instances[0]?.onmessage?.({
+          data: JSON.stringify({
+            type: "relay_message",
+            payload: { relayId: `relay-${index}`, mode: "REST_API" },
+          }),
+        });
+      }
+    });
+
+    expect(result.current.malformedEventCount).toBe(1);
+    expect(result.current.events).toHaveLength(1000);
+    expect(result.current.events[0]?.payload.relayId).toBe("relay-1");
   });
 
   test("discards a ticket minted by a superseded StrictMode effect", async () => {

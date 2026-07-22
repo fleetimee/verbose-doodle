@@ -160,12 +160,11 @@ export function getModeLabel(mode: RelayMode): string {
   return mode === "REST_API" ? "REST API" : "ISO 8583";
 }
 
-export function buildRelayWebSocketUrl(ticket: string): string {
-  return buildTicketWebSocketUrl(
-    "/api/relay/events",
-    ticket,
-    import.meta.env.VITE_RELAY_EVENTS_WS_URL
-  );
+export function buildRelayWebSocketUrl(
+  ticket: string,
+  configuredUrl = import.meta.env.VITE_RELAY_EVENTS_WS_URL
+): string {
+  return buildTicketWebSocketUrl("/api/relay/events", ticket, configuredUrl);
 }
 
 export function parseRelayEvent(raw: string, id: string): RelayEvent | null {
