@@ -4,30 +4,38 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useState,
+  useMemo,
+  useSyncExternalStore,
 } from "react";
 import { useNavigate } from "react-router";
 import { handleRefreshFailureOnce } from "@/features/auth/refresh-coordinator";
+import {
+  type AuthenticatedSession,
+  createAuthenticatedSession,
+} from "@/features/auth/session";
 import type { Ability, Role } from "@/features/auth/types";
-import { ROLE_ABILITIES } from "@/features/auth/types";
 import {
   AUTH_UNAUTHORIZED_EVENT,
-  clearAuthToken,
-  clearRefreshToken,
   decodeJWT,
   getAuthToken,
+  getRefreshToken,
   getTokenExpiration,
   hasManualLogout,
   markManualLogout,
-  saveAuthToken,
-  saveRefreshToken,
 } from "@/features/auth/utils";
 import type { AuthUser } from "@/features/login/types";
+import { apiFetch } from "@/lib/api";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import { queryClient } from "@/lib/query-client";
 
-const REFRESH_BEFORE_EXPIRY_MS = 180_000;
-const AUTO_REFRESH_CHECK_INTERVAL_MS = 10_000;
-const EXPIRATION_CHECK_INTERVAL_MS = 5_000;
+type RefreshTokenResponse = {
+  responseCode: string;
+  responseDesc: string;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+  };
+};
 
 type AuthState = {
   user: AuthUser | null;
@@ -50,67 +58,82 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+function createBrowserSession(): AuthenticatedSession {
+  return createAuthenticatedSession({
+    storage: {
+      read: () => ({
+        accessToken: getAuthToken() ?? undefined,
+        refreshToken: getRefreshToken() ?? undefined,
+      }),
+      write: ({ accessToken, refreshToken }) => {
+        localStorage.setItem("auth_token", accessToken);
+        if (refreshToken) {
+          localStorage.setItem("refresh_token", refreshToken);
+        } else {
+          localStorage.removeItem("refresh_token");
+        }
+      },
+      clear: () => {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("refresh_token");
+      },
+    },
+    clock: () => Date.now(),
+    decodeToken: (token) => {
+      const user = decodeJWT(token);
+      return user ? { user, expiresAt: getTokenExpiration(token) } : null;
+    },
+    scheduler: {
+      schedule: (callback, delayMs) => globalThis.setTimeout(callback, delayMs),
+      cancel: (handle) => globalThis.clearTimeout(handle as number),
+    },
+    refresh: async (refreshToken) => {
+      const response = await apiFetch<RefreshTokenResponse>(
+        API_ENDPOINTS.auth.refresh,
+        {
+          auth: false,
+          emitUnauthorized: false,
+          method: "POST",
+          retryOnUnauthorized: false,
+          body: JSON.stringify({ refreshToken }),
+        }
+      );
+
+      if (response.responseCode !== "00") {
+        throw new Error(response.responseDesc || "Failed to refresh token");
+      }
+
+      return response.data;
+    },
+    clearPrivateCache: () => queryClient.clear(),
+  });
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const [authState, setAuthState] = useState<AuthState>(() => {
-    // Initialize from JWT token in localStorage
-    const token = getAuthToken();
-    if (!token) {
-      return {
-        user: null,
-        isAuthenticated: false,
-      };
-    }
+  const session = useMemo(createBrowserSession, []);
+  const snapshot = useSyncExternalStore(
+    session.subscribe,
+    session.getSnapshot,
+    session.getSnapshot
+  );
 
-    const user = decodeJWT(token);
-
-    if (!user) {
-      clearAuthToken();
-      return {
-        user: null,
-        isAuthenticated: false,
-      };
-    }
-
-    return {
-      user,
-      isAuthenticated: true,
-    };
-  });
-
-  const login = useCallback((accessToken: string, refreshToken?: string) => {
-    saveAuthToken(accessToken);
-    if (refreshToken) {
-      saveRefreshToken(refreshToken);
-    }
-    const user = decodeJWT(accessToken);
-    if (!user) {
-      clearAuthToken();
-      clearRefreshToken();
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
+  const login = useCallback(
+    (accessToken: string, refreshToken?: string) => {
+      const didSignIn = session.signIn({
+        accessToken,
+        refreshToken: refreshToken ?? null,
       });
-      return;
-    }
-
-    setAuthState({
-      user,
-      isAuthenticated: true,
-    });
-  }, []);
+      if (!didSignIn) {
+        session.signOut();
+      }
+    },
+    [session]
+  );
 
   const logout = useCallback(() => {
     const shouldKeepManualLogout = hasManualLogout();
-    clearAuthToken();
-    clearRefreshToken();
-    setAuthState({
-      user: null,
-      isAuthenticated: false,
-    });
-    // Clear all TanStack Query cache to prevent data leakage between sessions
-    queryClient.clear();
-    // Clear all sessionStorage (including expiration reasons)
+    session.signOut();
     try {
       sessionStorage.clear();
       if (shouldKeepManualLogout) {
@@ -119,117 +142,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // Silently fail if sessionStorage is unavailable
     }
-  }, []);
+  }, [session]);
 
   const refreshAuth = useCallback(async (): Promise<boolean> => {
-    // Import dynamically to avoid circular dependency
-    const { refreshToken: refreshTokenFn } = await import(
-      "@/features/auth/hooks/use-refresh-token"
-    );
-
     try {
-      const response = await refreshTokenFn();
-      login(response.accessToken, response.refreshToken);
+      await session.refresh();
       return true;
     } catch (error) {
       handleRefreshFailureOnce(error, logout);
       return false;
     }
-  }, [login, logout]);
+  }, [logout, session]);
 
-  // Handle global unauthorized events (e.g. 401 response from API)
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
     const handleUnauthorized = () => {
       logout();
-      // Use React Router navigate instead of window.location.href
       navigate("/login?reason=expired-during-request");
     };
 
     window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
-
     return () => {
       window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
     };
   }, [logout, navigate]);
 
-  // Encapsulated token expiration check loop
-  useEffect(() => {
-    if (!authState.isAuthenticated) {
-      return;
-    }
-
-    const checkExpiration = () => {
-      const token = getAuthToken();
-      if (!token) {
-        return;
-      }
-      const expiration = getTokenExpiration();
-      if (expiration && Date.now() >= expiration) {
-        logout();
-      }
-    };
-
-    checkExpiration();
-    const interval = setInterval(checkExpiration, EXPIRATION_CHECK_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [authState.isAuthenticated, logout]);
-
-  // Encapsulated token auto-refresh loop
-  useEffect(() => {
-    if (!authState.isAuthenticated) {
-      return;
-    }
-
-    const checkAndRefresh = async () => {
-      const expiration = getTokenExpiration();
-      if (!expiration) {
-        return;
-      }
-
-      const timeUntilExpiry = expiration - Date.now();
-
-      if (timeUntilExpiry > 0 && timeUntilExpiry < REFRESH_BEFORE_EXPIRY_MS) {
-        await refreshAuth();
-      }
-    };
-
-    checkAndRefresh();
-    const interval = setInterval(checkAndRefresh, AUTO_REFRESH_CHECK_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [authState.isAuthenticated, refreshAuth]);
-
-  // Derived authorization helpers
-  const role = authState.user?.role;
+  const role = snapshot.user?.role;
   const isAdmin = role === "ADMIN";
   const isUser = role === "USER";
-
   const can = useCallback(
-    (ability: Ability): boolean => {
-      if (!role) {
-        return false;
-      }
-      return ROLE_ABILITIES[role][ability];
-    },
-    [role]
+    (ability: Ability) => session.can(ability),
+    [session]
   );
-
   const hasRole = useCallback(
-    (requiredRole: Role): boolean => role === requiredRole,
+    (requiredRole: Role) => role === requiredRole,
     [role]
   );
+  const authState = {
+    user: snapshot.user,
+    isAuthenticated: snapshot.isAuthenticated,
+  };
 
   return (
     <AuthContext.Provider
       value={{
         authState,
-        user: authState.user,
-        isAuthenticated: authState.isAuthenticated,
+        user: snapshot.user,
+        isAuthenticated: snapshot.isAuthenticated,
         role,
         isAdmin,
         isUser,
@@ -252,4 +210,3 @@ export function useAuth() {
   }
   return context;
 }
-
