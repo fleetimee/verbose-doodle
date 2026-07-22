@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   TriangleAlert,
 } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -48,6 +49,7 @@ import {
 import { JsonEditor } from "@/features/endpoints/components/json-editor";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 import { formatMessage, formatPluralMessage, messages } from "@/lib/i18n";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type RequestSimulatorSheetProps = {
@@ -237,6 +239,19 @@ const showRequestResultToast = ({
   toast.error(SIMULATOR_MESSAGES.requestReturnedErrorToast, { description });
 };
 
+const getResultPanelMotion = (shouldReduceMotion: boolean) =>
+  shouldReduceMotion
+    ? {
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        initial: { opacity: 0 },
+      }
+    : {
+        animate: { opacity: 1, scale: 1 },
+        exit: { opacity: 0, scale: 0.97 },
+        initial: { opacity: 0, scale: 0.97 },
+      };
+
 export function RequestSimulatorSheet({
   baseUrl,
   endpointUrl,
@@ -246,6 +261,8 @@ export function RequestSimulatorSheet({
   token,
   onOpenChange,
 }: RequestSimulatorSheetProps) {
+  const shouldReduceMotion = useReducedMotion() ?? false;
+  const resultPanelMotion = getResultPanelMotion(shouldReduceMotion);
   const [headersJson, setHeadersJson] = useState(DEFAULT_HEADERS);
   const [bodyJson, setBodyJson] = useState(formatJson(response.json));
   const [headerError, setHeaderError] = useState<string | null>(null);
@@ -515,132 +532,152 @@ export function RequestSimulatorSheet({
               </div>
             </div>
 
-            {result ? (
-              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
-                <div className="flex flex-wrap gap-2 rounded-md border bg-muted/25 p-2">
-                  <Badge
-                    className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
-                    variant={
-                      result.status < SUCCESS_STATUS_THRESHOLD
-                        ? "default"
-                        : "destructive"
-                    }
+            <div className="relative min-h-72 min-w-0 flex-1 overflow-hidden">
+              <AnimatePresence initial={false} mode="sync">
+                {result ? (
+                  <motion.div
+                    className="absolute inset-0 flex min-h-0 flex-col gap-3 overflow-hidden"
+                    key="result"
+                    transition={{
+                      duration: MOTION_DURATION.fast,
+                      ease: MOTION_EASE.out,
+                    }}
+                    {...resultPanelMotion}
                   >
-                    {getStatusIcon(result)}
-                    <span className="text-[10px] uppercase opacity-75">
-                      {getStatusTone(result)}
-                    </span>
-                    <span className="truncate">
-                      {result.status} {result.statusText}
-                    </span>
-                  </Badge>
-                  <Badge
-                    className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
-                    variant="secondary"
-                  >
-                    <Clock3 data-icon="inline-start" />
-                    {result.durationMs} ms
-                  </Badge>
-                  <Badge
-                    className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
-                    variant="outline"
-                  >
-                    <FileJson data-icon="inline-start" />
-                    {responseSize}
-                  </Badge>
-                  <Badge
-                    className="h-9 min-w-0 max-w-full justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono sm:max-w-52"
-                    variant="outline"
-                  >
-                    <Server data-icon="inline-start" />
-                    <span className="min-w-0 truncate">
-                      {responseContentType}
-                    </span>
-                  </Badge>
-                  <HoverCard>
-                    <HoverCardTrigger asChild>
+                    <div className="flex flex-wrap gap-2 rounded-md border bg-muted/25 p-2">
                       <Badge
-                        className="h-9 min-w-0 cursor-default justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
+                        className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
+                        variant={
+                          result.status < SUCCESS_STATUS_THRESHOLD
+                            ? "default"
+                            : "destructive"
+                        }
+                      >
+                        {getStatusIcon(result)}
+                        <span className="text-[10px] uppercase opacity-75">
+                          {getStatusTone(result)}
+                        </span>
+                        <span className="truncate">
+                          {result.status} {result.statusText}
+                        </span>
+                      </Badge>
+                      <Badge
+                        className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
+                        variant="secondary"
+                      >
+                        <Clock3 data-icon="inline-start" />
+                        {result.durationMs} ms
+                      </Badge>
+                      <Badge
+                        className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
                         variant="outline"
                       >
-                        <ShieldCheck data-icon="inline-start" />
-                        {responseHeaderCountLabel}
+                        <FileJson data-icon="inline-start" />
+                        {responseSize}
                       </Badge>
-                    </HoverCardTrigger>
-                    <HoverCardContent align="end" className="w-96 p-0">
-                      <div className="border-b px-3 py-2">
-                        <p className="font-medium text-sm">
-                          {SIMULATOR_MESSAGES.responseHeadersTitle}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          {responseHeadersReturnedLabel}
-                        </p>
-                      </div>
-                      <ScrollArea className="max-h-72">
-                        <pre className="p-3 font-mono text-xs leading-relaxed">
-                          {responseHeadersJson}
-                        </pre>
-                      </ScrollArea>
-                    </HoverCardContent>
-                  </HoverCard>
-                </div>
-
-                <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border bg-muted/30 shadow-xs">
-                  <CodeBlock
-                    className="flex min-h-0 flex-1 flex-col"
-                    data={[
-                      {
-                        code: responseBody,
-                        filename: SIMULATOR_MESSAGES.responseBodyFilename,
-                        language: "json",
-                      },
-                    ]}
-                    defaultValue="json"
-                  >
-                    <CodeBlockHeader>
-                      <span className="flex items-center gap-2 px-3 py-1 text-muted-foreground text-xs">
-                        <FileJson aria-hidden="true" className="size-3.5" />
-                        {SIMULATOR_MESSAGES.responseBodyFilename}
-                      </span>
-                    </CodeBlockHeader>
-                    <CodeBlockBody className="min-h-0 flex-1">
-                      {(item) => (
-                        <ScrollArea
-                          className="h-full min-h-0"
-                          key={item.filename}
-                        >
-                          <CodeBlockItem
-                            className="min-h-full"
-                            value={item.language}
+                      <Badge
+                        className="h-9 min-w-0 max-w-full justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono sm:max-w-52"
+                        variant="outline"
+                      >
+                        <Server data-icon="inline-start" />
+                        <span className="min-w-0 truncate">
+                          {responseContentType}
+                        </span>
+                      </Badge>
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <Badge
+                            className="h-9 min-w-0 cursor-default justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
+                            variant="outline"
                           >
-                            <CodeBlockContent
-                              className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
-                              language="json"
+                            <ShieldCheck data-icon="inline-start" />
+                            {responseHeaderCountLabel}
+                          </Badge>
+                        </HoverCardTrigger>
+                        <HoverCardContent align="end" className="w-96 p-0">
+                          <div className="border-b px-3 py-2">
+                            <p className="font-medium text-sm">
+                              {SIMULATOR_MESSAGES.responseHeadersTitle}
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                              {responseHeadersReturnedLabel}
+                            </p>
+                          </div>
+                          <ScrollArea className="max-h-72">
+                            <pre className="p-3 font-mono text-xs leading-relaxed">
+                              {responseHeadersJson}
+                            </pre>
+                          </ScrollArea>
+                        </HoverCardContent>
+                      </HoverCard>
+                    </div>
+
+                    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border bg-muted/30 shadow-xs">
+                      <CodeBlock
+                        className="flex min-h-0 flex-1 flex-col"
+                        data={[
+                          {
+                            code: responseBody,
+                            filename: SIMULATOR_MESSAGES.responseBodyFilename,
+                            language: "json",
+                          },
+                        ]}
+                        defaultValue="json"
+                      >
+                        <CodeBlockHeader>
+                          <span className="flex items-center gap-2 px-3 py-1 text-muted-foreground text-xs">
+                            <FileJson aria-hidden="true" className="size-3.5" />
+                            {SIMULATOR_MESSAGES.responseBodyFilename}
+                          </span>
+                        </CodeBlockHeader>
+                        <CodeBlockBody className="min-h-0 flex-1">
+                          {(item) => (
+                            <ScrollArea
+                              className="h-full min-h-0"
+                              key={item.filename}
                             >
-                              {item.code}
-                            </CodeBlockContent>
-                          </CodeBlockItem>
-                        </ScrollArea>
-                      )}
-                    </CodeBlockBody>
-                  </CodeBlock>
-                </div>
-              </div>
-            ) : (
-              <div className="flex min-h-72 flex-1 flex-col items-center justify-center gap-3 rounded-md border border-dashed bg-muted/20 p-6 text-center shadow-inner">
-                <div className="rounded-md border bg-background p-3 text-muted-foreground shadow-xs">
-                  <Inbox data-icon="inline-start" />
-                </div>
-                <div className="flex max-w-sm flex-col gap-1">
-                  <p className="font-medium text-sm">
-                    {SIMULATOR_MESSAGES.emptyResponseTitle}
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {SIMULATOR_MESSAGES.emptyResponseDescription}
-                  </p>
-                </div>
-              </div>
-            )}
+                              <CodeBlockItem
+                                className="min-h-full"
+                                value={item.language}
+                              >
+                                <CodeBlockContent
+                                  className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
+                                  language="json"
+                                >
+                                  {item.code}
+                                </CodeBlockContent>
+                              </CodeBlockItem>
+                            </ScrollArea>
+                          )}
+                        </CodeBlockBody>
+                      </CodeBlock>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-md border border-dashed bg-muted/20 p-6 text-center shadow-inner"
+                    key="empty"
+                    transition={{
+                      duration: MOTION_DURATION.fast,
+                      ease: MOTION_EASE.out,
+                    }}
+                    {...resultPanelMotion}
+                  >
+                    <div className="rounded-md border bg-background p-3 text-muted-foreground shadow-xs">
+                      <Inbox data-icon="inline-start" />
+                    </div>
+                    <div className="flex max-w-sm flex-col gap-1">
+                      <p className="font-medium text-sm">
+                        {SIMULATOR_MESSAGES.emptyResponseTitle}
+                      </p>
+                      <p className="text-muted-foreground text-sm">
+                        {SIMULATOR_MESSAGES.emptyResponseDescription}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 

@@ -10,7 +10,9 @@ type MotionTestProps = {
   readonly [key: string]: unknown;
 };
 
-const createMotionElement = (tag: "aside" | "div" | "section" | "svg") =>
+const createMotionElement = (
+  tag: "aside" | "div" | "section" | "span" | "svg"
+) =>
   forwardRef<HTMLElement, MotionTestProps>((props, ref) => {
     const {
       animate: _animate,
@@ -32,6 +34,7 @@ mock.module("motion/react", () => ({
     aside: createMotionElement("aside"),
     div: createMotionElement("div"),
     section: createMotionElement("section"),
+    span: createMotionElement("span"),
     svg: createMotionElement("svg"),
   },
   useReducedMotion: () => true,
@@ -136,8 +139,13 @@ describe("NumberBaseConverter", () => {
     ).toBeDefined();
     expect(fetchMock).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole("button", { name: "Copy hexadecimal" }));
+    const copyButton = screen.getByRole("button", { name: "Copy hexadecimal" });
+    expect(copyButton.querySelector(".lucide-clipboard-copy")).not.toBeNull();
+
+    await user.click(copyButton);
+
     expect(writeText).toHaveBeenCalledWith("FF");
+    expect(copyButton.querySelector(".lucide-check")).not.toBeNull();
   });
 
   test("clears the workspace and restores the example", async () => {
