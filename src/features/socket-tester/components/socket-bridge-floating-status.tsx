@@ -27,14 +27,14 @@ export function SocketBridgeFloatingStatus() {
       <div className="pointer-events-auto inline-flex max-w-[calc(100vw-2rem)] items-center gap-1 rounded-md border border-border/70 bg-background/95 px-1.5 py-1 shadow-lg backdrop-blur">
         <span
           className={cn(
-            "inline-flex min-w-0 items-center gap-1.5 rounded-sm border px-1.5 py-1 font-medium text-[11px]",
+            "relative inline-flex h-7 w-[calc(12ch+1.5rem)] shrink-0 items-center rounded-sm border font-medium text-[11px]",
             floatingBridgeTone[bridge.bridgeStatus]
           )}
         >
           <AnimatePresence initial={false} mode="sync">
             <motion.span
               animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex w-[12ch] shrink-0 items-center gap-1.5"
+              className="absolute inset-0 inline-flex items-center gap-1.5 px-1.5 py-1"
               exit={{ opacity: 0, scale: contentScale }}
               initial={{ opacity: 0, scale: contentScale }}
               key={bridge.bridgeStatus}
