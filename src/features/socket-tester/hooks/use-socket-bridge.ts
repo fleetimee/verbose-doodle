@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { createRealtimeTicket } from "@/features/realtime/ticket-client";
 import {
-  buildTicketWebSocketUrl,
-  createRealtimeTicket,
-} from "@/features/realtime/ticket-client";
+  createTicketedRealtimeConnection,
+  type TicketedRealtimeConnection,
+  type TicketedRealtimeConnectionSnapshot,
+} from "@/features/realtime/ticketed-realtime-connection";
 import {
-  SocketBridgeEngine,
   parseBridgeEvent,
+  SocketBridgeEngine,
 } from "@/features/socket-tester/engine/socket-bridge-engine";
 import type {
+  BridgeStatus,
   PayloadFormat,
   SocketCommand,
   TrafficLogEntry,
@@ -16,19 +19,33 @@ import type {
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { messages } from "@/lib/i18n";
 
-function getBridgeUrl(ticket: string) {
-  const host =
-    typeof window !== "undefined" && window.location.host
-      ? window.location.host
-      : "localhost:8080";
-  const protocol =
-    typeof window !== "undefined" && window.location.protocol === "https:"
-      ? "wss:"
-      : "ws:";
-  const configuredUrl =
-    (import.meta.env.VITE_SOCKET_TEST_WS_URL as string | undefined) ||
-    `${protocol}//${host}/api/socket-test`;
-  return buildTicketWebSocketUrl("/api/socket-test", ticket, configuredUrl);
+function appendBridgeError(
+  engine: SocketBridgeEngine,
+  message: string,
+  error?: unknown
+) {
+  engine.appendLog({
+    id: crypto.randomUUID(),
+    timestamp: new Date().toLocaleTimeString(),
+    direction: "err",
+    protocol: "tcp-client",
+    scope: "bridge",
+    data: message,
+    format: "text",
+    ...(error === undefined ? {} : { metadata: { error: String(error) } }),
+  });
+}
+
+function mapConnectionStatus(
+  snapshot: TicketedRealtimeConnectionSnapshot
+): BridgeStatus {
+  if (snapshot.status === "connected") {
+    return "connected";
+  }
+  if (snapshot.status === "connecting" || snapshot.status === "reconnecting") {
+    return "connecting";
+  }
+  return "disconnected";
 }
 
 export function useSocketBridge() {
@@ -38,15 +55,33 @@ export function useSocketBridge() {
   }
   const engine = engineRef.current;
 
-  const socketRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
-  const manualDisconnectRef = useRef(false);
-  const connectionAttemptRef = useRef(0);
   const autoConnectRef = useRef(true);
+  const connectionRef = useRef<TicketedRealtimeConnection | null>(null);
+  if (!connectionRef.current) {
+    connectionRef.current = createTicketedRealtimeConnection({
+      acquireTicket: () => createRealtimeTicket("socket-test"),
+      configuredUrl: import.meta.env.VITE_SOCKET_TEST_WS_URL,
+      onError: (error) => {
+        appendBridgeError(engine, "WebSocket bridge error", error);
+        if (!autoConnectRef.current) {
+          toast.error(messages.socketTester.bridgeConnectionFailed);
+        }
+      },
+      onMessage: (data) => {
+        engine.handleBridgeEvent(parseBridgeEvent(String(data)));
+      },
+      onTicketError: (error) => {
+        appendBridgeError(
+          engine,
+          "Could not authorize WebSocket bridge",
+          error
+        );
+      },
+      path: "/api/socket-test",
+    });
+  }
+  const connection = connectionRef.current;
 
-  const [reconnectAttempt, setReconnectAttempt] = useState(0);
   const [bridgeAutoConnect, setBridgeAutoConnect] = useLocalStorage(
     "socket-tester-bridge-auto-connect",
     true
@@ -74,9 +109,30 @@ export function useSocketBridge() {
     };
   }, [engine]);
 
+  useEffect(() => {
+    let previousStatus = connection.getSnapshot().status;
+    const unsubscribe = connection.subscribe((snapshot) => {
+      const connectionLost =
+        previousStatus === "connected" && snapshot.status !== "connected";
+      if (connectionLost || snapshot.status === "disconnected") {
+        engine.resetOnClose();
+      }
+      engine.setBridgeStatus(mapConnectionStatus(snapshot));
+      if (snapshot.status === "connected") {
+        engine.appendSystemLog("Bridge connected", { url: snapshot.url });
+      }
+      previousStatus = snapshot.status;
+    });
+
+    return () => {
+      unsubscribe();
+      connection.disconnect();
+    };
+  }, [connection, engine]);
+
   const sendCommand = useCallback(
     (command: SocketCommand) => {
-      if (socketRef.current?.readyState !== WebSocket.OPEN) {
+      if (!connection.send(JSON.stringify(command))) {
         toast.error(messages.socketTester.bridgeConnectFirstError);
         engine.appendLog({
           id: crypto.randomUUID(),
@@ -91,106 +147,22 @@ export function useSocketBridge() {
         return false;
       }
 
-      socketRef.current.send(JSON.stringify(command));
       return true;
     },
-    [engine]
+    [connection, engine]
   );
 
   const connectBridge = useCallback(async () => {
-    manualDisconnectRef.current = false;
+    autoConnectRef.current = true;
     setBridgeAutoConnect(true);
-
-    if (
-      socketRef.current &&
-      (socketRef.current.readyState === WebSocket.OPEN ||
-        socketRef.current.readyState === WebSocket.CONNECTING)
-    ) {
-      return;
-    }
-
-    engine.setBridgeStatus("connecting");
-    const attempt = connectionAttemptRef.current + 1;
-    connectionAttemptRef.current = attempt;
-    let ticket: string;
-
-    try {
-      ticket = (await createRealtimeTicket("socket-test")).ticket;
-    } catch (error) {
-      if (connectionAttemptRef.current === attempt) {
-        engine.setBridgeStatus("disconnected");
-        engine.appendLog({
-          id: crypto.randomUUID(),
-          timestamp: new Date().toLocaleTimeString(),
-          direction: "err",
-          protocol: "tcp-client",
-          scope: "bridge",
-          data: "Could not authorize WebSocket bridge",
-          format: "text",
-          metadata: { error: String(error) },
-        });
-        if (autoConnectRef.current && !manualDisconnectRef.current) {
-          setReconnectAttempt((current) => current + 1);
-        }
-      }
-      return;
-    }
-
-    if (
-      connectionAttemptRef.current !== attempt ||
-      manualDisconnectRef.current
-    ) {
-      return;
-    }
-
-    const url = getBridgeUrl(ticket);
-    const socket = new WebSocket(url);
-    socketRef.current = socket;
-
-    socket.addEventListener("open", () => {
-      engine.setBridgeStatus("connected");
-      engine.appendSystemLog("Bridge connected", { url });
-    });
-
-    socket.addEventListener("message", (message) => {
-      const event = parseBridgeEvent(String(message.data));
-      engine.handleBridgeEvent(event);
-    });
-
-    socket.addEventListener("error", () => {
-      engine.appendLog({
-        id: crypto.randomUUID(),
-        timestamp: new Date().toLocaleTimeString(),
-        direction: "err",
-        protocol: "tcp-client",
-        scope: "bridge",
-        data: "WebSocket bridge error",
-        format: "text",
-      });
-      if (!autoConnectRef.current) {
-        toast.error(messages.socketTester.bridgeConnectionFailed);
-      }
-    });
-
-    socket.addEventListener("close", () => {
-      engine.resetOnClose();
-      if (autoConnectRef.current && !manualDisconnectRef.current) {
-        setReconnectAttempt((current) => current + 1);
-      }
-    });
-  }, [engine, setBridgeAutoConnect]);
+    await connection.connect();
+  }, [connection, setBridgeAutoConnect]);
 
   const disconnectBridge = useCallback(() => {
-    manualDisconnectRef.current = true;
-    connectionAttemptRef.current += 1;
+    autoConnectRef.current = false;
     setBridgeAutoConnect(false);
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-    socketRef.current?.close();
-    socketRef.current = null;
-  }, [setBridgeAutoConnect]);
+    connection.disconnect();
+  }, [connection, setBridgeAutoConnect]);
 
   const connectTcpClient = useCallback(
     (host: string, port: number) => {
@@ -272,38 +244,22 @@ export function useSocketBridge() {
     engine.clearLogs();
   }, [engine]);
 
-  useEffect(
-    () => () => {
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      connectionAttemptRef.current += 1;
-      socketRef.current?.close();
-    },
-    []
-  );
-
   useEffect(() => {
     autoConnectRef.current = bridgeAutoConnect;
   }, [bridgeAutoConnect]);
 
   useEffect(() => {
-    if (bridgeAutoConnect && engineState.bridgeStatus === "disconnected") {
-      reconnectTimeoutRef.current = setTimeout(
-        async () => {
-          await connectBridge();
-        },
-        reconnectAttempt === 0 ? 0 : 2000
-      );
+    const connectionStatus = connection.getSnapshot().status;
+    if (
+      bridgeAutoConnect &&
+      autoConnectRef.current &&
+      (connectionStatus === "idle" || connectionStatus === "disconnected")
+    ) {
+      connection.connect().catch((error: unknown) => {
+        appendBridgeError(engine, "WebSocket bridge error", error);
+      });
     }
-
-    return () => {
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-        reconnectTimeoutRef.current = null;
-      }
-    };
-  }, [bridgeAutoConnect, engineState.bridgeStatus, connectBridge, reconnectAttempt]);
+  }, [bridgeAutoConnect, connection, engine]);
 
   return {
     bridgeAutoConnect,

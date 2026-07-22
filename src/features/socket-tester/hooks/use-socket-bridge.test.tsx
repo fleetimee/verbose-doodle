@@ -8,6 +8,7 @@ import {
   vi,
 } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
+import { type ReactNode, StrictMode } from "react";
 import { useSocketBridge } from "@/features/socket-tester/hooks/use-socket-bridge";
 
 type SocketListener = (event: { readonly data?: string }) => void;
@@ -52,6 +53,10 @@ class FakeWebSocket {
   send(message: string) {
     this.sent.push(message);
   }
+}
+
+function StrictModeWrapper({ children }: { readonly children: ReactNode }) {
+  return <StrictMode>{children}</StrictMode>;
 }
 
 describe("useSocketBridge", () => {
@@ -179,5 +184,63 @@ describe("useSocketBridge", () => {
       await Promise.resolve();
     });
     expect(FakeWebSocket.instances).toHaveLength(1);
+  });
+
+  test("reconnects through the shared module with a fresh ticket", async () => {
+    const { result } = renderHook(() => useSocketBridge());
+    await act(async () => {
+      vi.advanceTimersByTime(0);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    const firstSocket = FakeWebSocket.instances[0];
+
+    act(() => firstSocket?.open());
+    act(() => firstSocket?.emit("close"));
+
+    await act(async () => {
+      vi.advanceTimersByTime(999);
+      await Promise.resolve();
+    });
+    expect(FakeWebSocket.instances).toHaveLength(1);
+
+    await act(async () => {
+      vi.advanceTimersByTime(1);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(FakeWebSocket.instances).toHaveLength(2);
+    expect(FakeWebSocket.instances[1]?.url).toContain("ticket=socket-ticket-2");
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+
+    act(() => result.current.disconnectBridge());
+  });
+
+  test("preserves auto-connect through StrictMode effect replay", async () => {
+    renderHook(() => useSocketBridge(), { wrapper: StrictModeWrapper });
+    await act(async () => {
+      vi.advanceTimersByTime(0);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(FakeWebSocket.instances).toHaveLength(1);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test("preserves the authorization failure log", async () => {
+    fetchSpy.mockRejectedValueOnce(new Error("ticket unavailable"));
+    const { result } = renderHook(() => useSocketBridge());
+
+    await act(async () => {
+      vi.advanceTimersByTime(0);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(result.current.logs.at(-1)?.data).toBe(
+      "Could not authorize WebSocket bridge"
+    );
+    act(() => result.current.disconnectBridge());
   });
 });
