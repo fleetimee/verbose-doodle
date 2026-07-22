@@ -27,7 +27,9 @@ describe("SocketBridgeFloatingStatus", () => {
   test("shows each bridge status and only pings while connected", () => {
     const { container, rerender } = render(<SocketBridgeFloatingStatus />);
 
-    expect(screen.getByText("disconnected")).toBeDefined();
+    expect(screen.getByText("disconnected").parentElement?.className).toContain(
+      "w-[12ch]"
+    );
     expect(container.querySelector('[class*="animate-ping"]')).toBeNull();
 
     bridge.bridgeStatus = "connecting";

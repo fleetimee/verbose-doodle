@@ -34,7 +34,7 @@ export function SocketBridgeFloatingStatus() {
           <AnimatePresence initial={false} mode="sync">
             <motion.span
               animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex items-center gap-1.5"
+              className="inline-flex w-[12ch] shrink-0 items-center gap-1.5"
               exit={{ opacity: 0, scale: contentScale }}
               initial={{ opacity: 0, scale: contentScale }}
               key={bridge.bridgeStatus}
