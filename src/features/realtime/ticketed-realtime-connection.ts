@@ -48,6 +48,7 @@ export type TicketedRealtimeConnectionOptions = {
   readonly configuredUrl?: string;
   readonly onError?: (error: unknown) => void;
   readonly onMessage?: (data: unknown) => void;
+  readonly onTicketError?: (error: unknown) => void;
   readonly path: string;
   readonly socketAdapter?: RealtimeSocketAdapter;
 };
@@ -142,6 +143,7 @@ export function createTicketedRealtimeConnection({
   configuredUrl,
   onError,
   onMessage,
+  onTicketError,
   path,
   socketAdapter = createBrowserRealtimeSocketAdapter(),
 }: TicketedRealtimeConnectionOptions): TicketedRealtimeConnection {
@@ -240,7 +242,7 @@ export function createTicketedRealtimeConnection({
         ticket = await acquireTicket();
       } catch (error) {
         if (isCurrentAttempt(currentGeneration, currentAttempt)) {
-          onError?.(error);
+          (onTicketError ?? onError)?.(error);
           scheduleReconnect(currentGeneration);
         }
         return;
