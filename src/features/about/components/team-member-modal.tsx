@@ -67,12 +67,18 @@ export function TeamMemberModal({
   open,
   onOpenChange,
 }: TeamMemberModalProps) {
-  if (!member) return null;
+  if (!member) {
+    return null;
+  }
 
-  const githubUrl = member.socials?.github || (member.githubUsername ? `https://github.com/${member.githubUsername}` : undefined);
+  const githubUrl =
+    member.socials?.github ||
+    (member.githubUsername
+      ? `https://github.com/${member.githubUsername}`
+      : undefined);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="max-w-lg overflow-hidden border-border/80 bg-background/95 p-6 backdrop-blur-md sm:max-w-xl">
         <DialogHeader className="flex flex-col gap-4 text-left">
           <div className="flex items-center gap-4">
@@ -84,10 +90,10 @@ export function TeamMemberModal({
               />
             </div>
             <div className="flex flex-col gap-1">
-              <DialogTitle className="font-semibold text-xl text-foreground">
+              <DialogTitle className="font-semibold text-foreground text-xl">
                 {member.name}
               </DialogTitle>
-              <DialogDescription className="font-medium text-sm text-primary">
+              <DialogDescription className="font-medium text-primary text-sm">
                 {member.designation}
               </DialogDescription>
             </div>
@@ -95,20 +101,16 @@ export function TeamMemberModal({
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-2 text-sm leading-relaxed">
-          {member.bio && (
-            <p className="text-muted-foreground">
-              {member.bio}
-            </p>
-          )}
+          {member.bio && <p className="text-muted-foreground">{member.bio}</p>}
 
           {member.roles && member.roles.length > 0 && (
             <div className="flex flex-col gap-2">
-              <span className="font-semibold text-xs text-foreground uppercase tracking-wider">
+              <span className="font-semibold text-foreground text-xs uppercase tracking-wider">
                 Key Specializations
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {member.roles.map((role) => (
-                  <Badge key={role} variant="secondary" className="text-xs">
+                  <Badge className="text-xs" key={role} variant="secondary">
                     {role}
                   </Badge>
                 ))}
@@ -118,10 +120,10 @@ export function TeamMemberModal({
 
           {member.contributions && member.contributions.length > 0 && (
             <div className="flex flex-col gap-2">
-              <span className="font-semibold text-xs text-foreground uppercase tracking-wider">
+              <span className="font-semibold text-foreground text-xs uppercase tracking-wider">
                 Core Contributions
               </span>
-              <ul className="ml-4 flex list-disc flex-col gap-1 text-xs text-muted-foreground">
+              <ul className="ml-4 flex list-disc flex-col gap-1 text-muted-foreground text-xs">
                 {member.contributions.map((contribution) => (
                   <li key={contribution}>{contribution}</li>
                 ))}
@@ -130,16 +132,17 @@ export function TeamMemberModal({
           )}
         </div>
 
-        <DialogFooter className="flex items-center justify-between border-t border-border/40 pt-4 sm:justify-between">
+        <DialogFooter className="flex items-center justify-between border-border/40 border-t pt-4 sm:justify-between">
           <div className="flex items-center gap-2">
             {githubUrl && (
               <Button
+                className="gap-1.5 text-xs"
                 nativeButton={false}
                 render={
                   <a
                     href={githubUrl}
-                    target="_blank"
                     rel="noreferrer"
+                    target="_blank"
                     title={`View ${member.name}'s GitHub Profile`}
                   >
                     <GithubIcon className="h-3.5 w-3.5 text-foreground" />
@@ -148,17 +151,17 @@ export function TeamMemberModal({
                 }
                 size="sm"
                 variant="outline"
-                className="gap-1.5 text-xs"
               />
             )}
             {member.socials?.linkedin && (
               <Button
+                className="gap-1.5 text-xs"
                 nativeButton={false}
                 render={
                   <a
                     href={member.socials.linkedin}
-                    target="_blank"
                     rel="noreferrer"
+                    target="_blank"
                     title={`View ${member.name}'s LinkedIn Profile`}
                   >
                     <LinkedinIcon className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
@@ -167,15 +170,10 @@ export function TeamMemberModal({
                 }
                 size="sm"
                 variant="outline"
-                className="gap-1.5 text-xs"
               />
             )}
           </div>
-          <Button
-            size="sm"
-            onClick={() => onOpenChange(false)}
-            variant="ghost"
-          >
+          <Button onClick={() => onOpenChange(false)} size="sm" variant="ghost">
             Close
           </Button>
         </DialogFooter>

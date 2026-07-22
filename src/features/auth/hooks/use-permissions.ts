@@ -1,8 +1,8 @@
 import type { Ability, Role } from "@/features/auth/types";
 import { ROLE_ABILITIES } from "@/features/auth/types";
 
-export { ROLE_ABILITIES };
 export type { Ability };
+export { ROLE_ABILITIES };
 
 type UsePermissionsProps = {
   role?: Role;
@@ -29,4 +29,3 @@ export function usePermissions({ role }: UsePermissionsProps = {}) {
     role,
   };
 }
-

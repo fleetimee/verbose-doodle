@@ -62,4 +62,3 @@ export type LoginResponse = {
   response_desc: string;
   token: string;
 };
-

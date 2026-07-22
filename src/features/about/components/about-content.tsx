@@ -1,10 +1,16 @@
+import { motion, useReducedMotion, type Variants } from "motion/react";
 import { useState } from "react";
-import { type Variants, motion, useReducedMotion } from "motion/react";
-import { AnimatedTooltip, type AnimatedTooltipItem } from "@/components/ui/animated-tooltip";
+import {
+  AnimatedTooltip,
+  type AnimatedTooltipItem,
+} from "@/components/ui/animated-tooltip";
 import { AboutVersionFooter } from "@/features/about/components/about-version-footer";
 import { ArchitectureDiagram } from "@/features/about/components/architecture-diagram";
 import { SimulatorDemoPreview } from "@/features/about/components/simulator-demo-preview";
-import { TeamMemberModal, type TeamMemberProfile } from "@/features/about/components/team-member-modal";
+import {
+  TeamMemberModal,
+  type TeamMemberProfile,
+} from "@/features/about/components/team-member-modal";
 import { TechStackGrid } from "@/features/about/components/tech-stack-grid";
 import { type AppLocale, getActiveLocale, getMessages } from "@/lib/i18n";
 
@@ -20,7 +26,11 @@ const teamMembers: AnimatedTooltipItem[] = [
     height: 56,
     bio: "Technical Writer & Frontend Developer specializing in developer documentation, UI component guidelines, and user experience for billing workflow simulators.",
     githubUsername: "nashira-oksani",
-    roles: ["Technical Documentation", "Frontend Architecture", "UI Guidelines"],
+    roles: [
+      "Technical Documentation",
+      "Frontend Architecture",
+      "UI Guidelines",
+    ],
     contributions: [
       "Auth Flow & Session Guidelines",
       "Component Accessibility Specs",
@@ -41,7 +51,11 @@ const teamMembers: AnimatedTooltipItem[] = [
     height: 56,
     bio: "Senior Backend Engineer focusing on high-concurrency billing microservices, protocol state machine engines, and socket relay infrastructure.",
     githubUsername: "novianto-eb",
-    roles: ["Backend Engineering", "Socket Bridge Architecture", "API Endpoints"],
+    roles: [
+      "Backend Engineering",
+      "Socket Bridge Architecture",
+      "API Endpoints",
+    ],
     contributions: [
       "SocketBridgeEngine State Machine",
       "TCP/UDP Protocol Parser",
@@ -144,7 +158,8 @@ export type AboutContentProps = {
 export function AboutContent({ locale }: AboutContentProps) {
   const activeMessages = getMessages(locale || getActiveLocale());
   const shouldReduceMotion = useReducedMotion();
-  const [selectedMember, setSelectedMember] = useState<TeamMemberProfile | null>(null);
+  const [selectedMember, setSelectedMember] =
+    useState<TeamMemberProfile | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleSelectMember = (item: AnimatedTooltipItem) => {
@@ -208,8 +223,16 @@ export function AboutContent({ locale }: AboutContentProps) {
         initial="hidden"
         variants={contentContainerVariants}
       >
-        <motion.div className="flex flex-col gap-4" variants={sectionVariants} role="region" aria-labelledby="section-what-is-this">
-          <h2 id="section-what-is-this" className="font-semibold text-2xl text-foreground transition-colors duration-300">
+        <motion.div
+          aria-labelledby="section-what-is-this"
+          className="flex flex-col gap-4"
+          role="region"
+          variants={sectionVariants}
+        >
+          <h2
+            className="font-semibold text-2xl text-foreground transition-colors duration-300"
+            id="section-what-is-this"
+          >
             {activeMessages.about.whatIsThisTitle}
           </h2>
           <p className="text-muted-foreground transition-colors duration-300">
@@ -221,8 +244,16 @@ export function AboutContent({ locale }: AboutContentProps) {
           <SimulatorDemoPreview locale={locale} />
         </motion.div>
 
-        <motion.div className="flex flex-col gap-4" variants={sectionVariants} role="region" aria-labelledby="section-system-architecture">
-          <h2 id="section-system-architecture" className="font-semibold text-2xl text-foreground transition-colors duration-300">
+        <motion.div
+          aria-labelledby="section-system-architecture"
+          className="flex flex-col gap-4"
+          role="region"
+          variants={sectionVariants}
+        >
+          <h2
+            className="font-semibold text-2xl text-foreground transition-colors duration-300"
+            id="section-system-architecture"
+          >
             {activeMessages.about.systemArchitectureTitle}
           </h2>
           <p className="text-muted-foreground transition-colors duration-300">
@@ -231,8 +262,16 @@ export function AboutContent({ locale }: AboutContentProps) {
           <ArchitectureDiagram />
         </motion.div>
 
-        <motion.div className="flex flex-col gap-4" variants={sectionVariants} role="region" aria-labelledby="section-key-features">
-          <h2 id="section-key-features" className="font-semibold text-2xl text-foreground transition-colors duration-300">
+        <motion.div
+          aria-labelledby="section-key-features"
+          className="flex flex-col gap-4"
+          role="region"
+          variants={sectionVariants}
+        >
+          <h2
+            className="font-semibold text-2xl text-foreground transition-colors duration-300"
+            id="section-key-features"
+          >
             {activeMessages.about.keyFeaturesTitle}
           </h2>
           <motion.ul
@@ -272,9 +311,9 @@ export function AboutContent({ locale }: AboutContentProps) {
               },
             ].map((feature) => (
               <motion.li
+                className="transition-colors duration-300"
                 key={feature.title}
                 variants={listItemVariants}
-                className="transition-colors duration-300"
               >
                 <strong className="text-foreground">{feature.title}</strong>{" "}
                 <span className="text-muted-foreground">{feature.desc}</span>
@@ -283,8 +322,16 @@ export function AboutContent({ locale }: AboutContentProps) {
           </motion.ul>
         </motion.div>
 
-        <motion.div className="flex flex-col gap-4" variants={sectionVariants} role="region" aria-labelledby="section-our-team">
-          <h2 id="section-our-team" className="font-semibold text-2xl text-foreground transition-colors duration-300">
+        <motion.div
+          aria-labelledby="section-our-team"
+          className="flex flex-col gap-4"
+          role="region"
+          variants={sectionVariants}
+        >
+          <h2
+            className="font-semibold text-2xl text-foreground transition-colors duration-300"
+            id="section-our-team"
+          >
             {activeMessages.about.ourTeamTitle}
           </h2>
           <div
@@ -292,12 +339,23 @@ export function AboutContent({ locale }: AboutContentProps) {
             className="flex flex-row items-center justify-center"
             role="group"
           >
-            <AnimatedTooltip items={teamMembers} onSelect={handleSelectMember} />
+            <AnimatedTooltip
+              items={teamMembers}
+              onSelect={handleSelectMember}
+            />
           </div>
         </motion.div>
 
-        <motion.div className="flex flex-col gap-4" variants={sectionVariants} role="region" aria-labelledby="section-technology">
-          <h2 id="section-technology" className="font-semibold text-2xl text-foreground transition-colors duration-300">
+        <motion.div
+          aria-labelledby="section-technology"
+          className="flex flex-col gap-4"
+          role="region"
+          variants={sectionVariants}
+        >
+          <h2
+            className="font-semibold text-2xl text-foreground transition-colors duration-300"
+            id="section-technology"
+          >
             {activeMessages.about.technologyTitle}
           </h2>
           <TechStackGrid />
@@ -310,8 +368,8 @@ export function AboutContent({ locale }: AboutContentProps) {
 
       <TeamMemberModal
         member={selectedMember}
-        open={modalOpen}
         onOpenChange={setModalOpen}
+        open={modalOpen}
       />
     </>
   );

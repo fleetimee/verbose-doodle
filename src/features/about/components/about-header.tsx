@@ -1,5 +1,5 @@
+import { motion, useReducedMotion, type Variants } from "motion/react";
 import { useState } from "react";
-import { type Variants, motion, useReducedMotion } from "motion/react";
 import { useTheme } from "@/components/theme-provider";
 import { LanguageToggle } from "@/features/about/components/language-toggle";
 import { type AppLocale, getActiveLocale, getMessages } from "@/lib/i18n";
@@ -18,7 +18,9 @@ export type AboutHeaderProps = {
 export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
   const { theme } = useTheme();
   const shouldReduceMotion = useReducedMotion();
-  const [currentLocale, setCurrentLocale] = useState<AppLocale>(() => getActiveLocale());
+  const [currentLocale, setCurrentLocale] = useState<AppLocale>(() =>
+    getActiveLocale()
+  );
   const activeMessages = getMessages(currentLocale);
 
   const handleLocaleChange = (locale: AppLocale) => {
@@ -88,7 +90,7 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
       </div>
       <motion.img
         alt={activeMessages.about.logoAlt}
-        className="h-32 w-32 md:h-40 md:w-40 transition-transform duration-300"
+        className="h-32 w-32 transition-transform duration-300 md:h-40 md:w-40"
         height="200"
         src={logoSrc}
         variants={logoVariants}
@@ -96,8 +98,8 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
       />
       <motion.div className="flex flex-col gap-3" variants={itemVariants}>
         <motion.h1
+          className="font-semibold text-4xl text-foreground tracking-tight transition-colors duration-300 md:text-5xl"
           id="about-page-title"
-          className="font-semibold text-4xl tracking-tight text-foreground md:text-5xl transition-colors duration-300"
           variants={itemVariants}
         >
           {activeMessages.about.headerTitle}

@@ -27,14 +27,14 @@ export function SocketBridgeFloatingStatus() {
       <div className="pointer-events-auto inline-flex max-w-[calc(100vw-2rem)] items-center gap-1 rounded-md border border-border/70 bg-background/95 px-1.5 py-1 shadow-lg backdrop-blur">
         <span
           className={cn(
-            "inline-flex min-w-0 items-center gap-1.5 rounded-sm border px-1.5 py-1 font-medium text-[11px]",
+            "relative inline-flex h-7 w-[calc(12ch+1.5rem)] shrink-0 items-center rounded-sm border font-medium text-[11px]",
             floatingBridgeTone[bridge.bridgeStatus]
           )}
         >
           <AnimatePresence initial={false} mode="sync">
             <motion.span
               animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex items-center gap-1.5"
+              className="absolute inset-0 inline-flex items-center gap-1.5 px-1.5 py-1"
               exit={{ opacity: 0, scale: contentScale }}
               initial={{ opacity: 0, scale: contentScale }}
               key={bridge.bridgeStatus}
@@ -60,47 +60,49 @@ export function SocketBridgeFloatingStatus() {
             </motion.span>
           </AnimatePresence>
         </span>
-        <AnimatePresence initial={false} mode="sync">
-          {bridge.bridgeAutoConnect ? (
-            <motion.div
-              animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex"
-              exit={{ opacity: 0, scale: contentScale }}
-              initial={{ opacity: 0, scale: contentScale }}
-              key="bridge-action-off"
-              transition={contentTransition}
-            >
-              <Button
-                className="h-6 gap-1 px-1.5 text-[11px]"
-                onClick={bridge.disconnectBridge}
-                type="button"
-                variant="ghost"
+        <span className="relative inline-flex h-6 w-11 shrink-0">
+          <AnimatePresence initial={false} mode="sync">
+            {bridge.bridgeAutoConnect ? (
+              <motion.div
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute inset-0 flex items-center justify-center"
+                exit={{ opacity: 0, scale: contentScale }}
+                initial={{ opacity: 0, scale: contentScale }}
+                key="bridge-action-off"
+                transition={contentTransition}
               >
-                <Unplug className="size-3" />
-                Off
-              </Button>
-            </motion.div>
-          ) : (
-            <motion.div
-              animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex"
-              exit={{ opacity: 0, scale: contentScale }}
-              initial={{ opacity: 0, scale: contentScale }}
-              key="bridge-action-on"
-              transition={contentTransition}
-            >
-              <Button
-                className="h-6 gap-1 px-1.5 text-[11px]"
-                onClick={bridge.connectBridge}
-                type="button"
-                variant="ghost"
+                <Button
+                  className="h-6 w-full gap-1 px-1.5 text-[11px]"
+                  onClick={bridge.disconnectBridge}
+                  type="button"
+                  variant="ghost"
+                >
+                  <Unplug className="size-3" />
+                  Off
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute inset-0 flex items-center justify-center"
+                exit={{ opacity: 0, scale: contentScale }}
+                initial={{ opacity: 0, scale: contentScale }}
+                key="bridge-action-on"
+                transition={contentTransition}
               >
-                <Cable className="size-3" />
-                On
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <Button
+                  className="h-6 w-full gap-1 px-1.5 text-[11px]"
+                  onClick={bridge.connectBridge}
+                  type="button"
+                  variant="ghost"
+                >
+                  <Cable className="size-3" />
+                  On
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </span>
       </div>
     </div>
   );
