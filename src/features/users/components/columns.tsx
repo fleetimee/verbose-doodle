@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
@@ -123,20 +124,23 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{messages.users.actions}</DropdownMenuLabel>
-            <DropdownMenuItem
-              className="flex items-center hover:cursor-pointer"
-              onClick={() => actions.onEdit(user)}
-            >
-              <Pencil className="w-2" />
-              {messages.users.editUser}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-red-600 hover:cursor-pointer hover:text-red-600!"
-              onClick={() => actions.onDelete(user)}
-            >
-              <Trash className="w-2 text-red-600" /> {messages.users.deleteUser}
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>{messages.users.actions}</DropdownMenuLabel>
+              <DropdownMenuItem
+                className="flex items-center hover:cursor-pointer"
+                onClick={() => actions.onEdit(user)}
+              >
+                <Pencil className="w-2" />
+                {messages.users.editUser}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-red-600 hover:cursor-pointer hover:text-red-600!"
+                onClick={() => actions.onDelete(user)}
+              >
+                <Trash className="w-2 text-red-600" />{" "}
+                {messages.users.deleteUser}
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       );
