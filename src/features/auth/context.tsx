@@ -24,7 +24,7 @@ import {
   markManualLogout,
 } from "@/features/auth/utils";
 import type { AuthUser } from "@/features/login/types";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, setDefaultApiSession } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import { queryClient } from "@/lib/query-client";
 
@@ -111,7 +111,11 @@ function createBrowserSession(): AuthenticatedSession {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const session = useMemo(createBrowserSession, []);
+  const session = useMemo(() => {
+    const nextSession = createBrowserSession();
+    setDefaultApiSession(nextSession);
+    return nextSession;
+  }, []);
   const snapshot = useSyncExternalStore(
     session.subscribe,
     session.getSnapshot,
