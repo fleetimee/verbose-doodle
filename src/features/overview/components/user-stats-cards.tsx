@@ -1,5 +1,5 @@
-import type { LucideIcon } from "lucide-react";
-import { ShieldCheck, UserCheck, Users } from "lucide-react";
+import type { HugeIcon } from "@/components/hugeicons";
+import { ShieldCheck, UserCheck, Users } from "@/components/hugeicons";
 import { Card, CardContent } from "@/components/ui/card";
 import type { OverviewData } from "@/features/overview/types";
 import { formatMessage, messages } from "@/lib/i18n";
@@ -8,7 +8,7 @@ type UserMetricProps = {
   readonly title: string;
   readonly value: number;
   readonly detail: string;
-  readonly icon: LucideIcon;
+  readonly icon: HugeIcon;
 };
 
 function UserMetric({ title, value, detail, icon: Icon }: UserMetricProps) {

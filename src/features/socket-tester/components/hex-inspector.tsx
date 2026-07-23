@@ -1,6 +1,12 @@
-import { Activity, Binary, Clock, Copy, FileJson, Hash } from "lucide-react";
+import {
+  ActivityIcon,
+  Clock01Icon,
+  Copy01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { Binary, FileJson, Hash } from "@/components/hugeicons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -125,7 +131,11 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                     )}
                     variant="outline"
                   >
-                    <Activity data-icon="inline-start" />
+                    <HugeiconsIcon
+                      data-icon="inline-start"
+                      icon={ActivityIcon}
+                      strokeWidth={2}
+                    />
                     {entry.direction}
                   </Badge>
                 </div>
@@ -136,7 +146,13 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
               <div className="grid gap-5 p-6">
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                   <InspectorStat
-                    icon={<Clock data-icon="inline-start" />}
+                    icon={
+                      <HugeiconsIcon
+                        data-icon="inline-start"
+                        icon={Clock01Icon}
+                        strokeWidth={2}
+                      />
+                    }
                     label={messages.socketTester.timestampLabel}
                     value={entry.timestamp}
                   />
@@ -399,7 +415,11 @@ function CopyButton({
       type="button"
       variant="outline"
     >
-      <Copy data-icon="inline-start" />
+      <HugeiconsIcon
+        data-icon="inline-start"
+        icon={Copy01Icon}
+        strokeWidth={2}
+      />
       {label}
     </Button>
   );

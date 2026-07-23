@@ -1,4 +1,5 @@
-import { Plus } from "lucide-react";
+import { Add01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
 
 type UserFormDialogTriggerProps = {
@@ -9,7 +10,7 @@ export const UserFormDialogTrigger = ({
   onClick,
 }: UserFormDialogTriggerProps) => (
   <Button onClick={onClick} variant="outline">
-    <Plus className="mr-2 h-4 w-4" />
+    <HugeiconsIcon className="mr-2 h-4 w-4" icon={Add01Icon} strokeWidth={2} />
     Add User
   </Button>
 );

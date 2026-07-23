@@ -1,9 +1,11 @@
 import * as React from "react"
 import { Menu as MenuPrimitive } from "@base-ui/react/menu"
 import { Menubar as MenubarPrimitive } from "@base-ui/react/menubar"
-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
+import { CircleIcon } from "@/components/hugeicons"
 
 import { cn } from "@/lib/utils"
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Tick02Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 function Menubar({
   className,
@@ -127,7 +129,7 @@ function MenubarCheckboxItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <MenuPrimitive.CheckboxItemIndicator>
-          <CheckIcon className="size-4" />
+          <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-4" />
         </MenuPrimitive.CheckboxItemIndicator>
       </span>
       {children}
@@ -225,7 +227,7 @@ function MenubarSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto h-4 w-4" />
+      <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="ml-auto h-4 w-4" />
     </MenuPrimitive.SubmenuTrigger>
   )
 }

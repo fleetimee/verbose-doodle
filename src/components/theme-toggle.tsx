@@ -1,4 +1,5 @@
-import { Moon, Sun } from "lucide-react";
+import { MoonIcon, Sun03Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useReducedMotion } from "motion/react";
 import { useTheme } from "@/components/theme-provider";
 import { Switch } from "@/components/ui/switch";
@@ -36,13 +37,15 @@ export function ThemeToggle() {
     <Tooltip>
       <TooltipTrigger asChild>
         <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 shadow-sm transition-shadow hover:shadow-md">
-          <Sun
+          <HugeiconsIcon
             className={cn(
               "h-4 w-4 transition-[color,transform] duration-200 ease-[var(--ease-out)] motion-reduce:transition-none",
               isDark
                 ? "scale-90 text-muted-foreground"
                 : "scale-100 text-amber-500"
             )}
+            icon={Sun03Icon}
+            strokeWidth={2}
           />
           <Switch
             aria-label={messages.theme.toggleAriaLabel}
@@ -50,13 +53,15 @@ export function ThemeToggle() {
             className="data-[state=checked]:bg-slate-950 data-[state=unchecked]:bg-amber-500"
             onCheckedChange={handleToggle}
           />
-          <Moon
+          <HugeiconsIcon
             className={cn(
               "h-4 w-4 transition-[color,transform] duration-200 ease-[var(--ease-out)] motion-reduce:transition-none",
               isDark
                 ? "scale-100 text-blue-400"
                 : "scale-90 text-muted-foreground"
             )}
+            icon={MoonIcon}
+            strokeWidth={2}
           />
         </div>
       </TooltipTrigger>

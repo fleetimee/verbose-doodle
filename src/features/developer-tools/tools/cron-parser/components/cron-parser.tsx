@@ -1,6 +1,11 @@
-import { CheckCircle2, Clock3, TerminalSquare } from "lucide-react";
+import {
+  CheckmarkCircle02Icon,
+  ComputerTerminalIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Clock3 } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -273,7 +278,11 @@ export function CronParser() {
               onClick={() => parse()}
               type="button"
             >
-              <TerminalSquare data-icon="inline-start" />
+              <HugeiconsIcon
+                data-icon="inline-start"
+                icon={ComputerTerminalIcon}
+                strokeWidth={2}
+              />
               {messages.cronParser.parse}
             </Button>
           </div>
@@ -323,7 +332,11 @@ export function CronParser() {
                 variants={childVariants}
               >
                 <div className="flex size-12 items-center justify-center rounded-full border border-emerald-600/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-                  <CheckCircle2 className="size-5" />
+                  <HugeiconsIcon
+                    className="size-5"
+                    icon={CheckmarkCircle02Icon}
+                    strokeWidth={2}
+                  />
                 </div>
                 <div>
                   <p className="font-mono text-[10px] text-emerald-700 uppercase tracking-[0.2em] dark:text-emerald-300">

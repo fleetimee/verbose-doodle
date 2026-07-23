@@ -1,15 +1,16 @@
+import { HelpCircleIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import type { Transition } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   Cable,
   CircleAlert,
-  CircleHelp,
   Network,
   SendHorizontal,
   Unplug,
-} from "lucide-react";
-import type { Transition } from "motion/react";
-import { motion, useReducedMotion } from "motion/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+} from "@/components/hugeicons";
 import { type TourStep, useTour } from "@/components/tour";
 import { Button } from "@/components/ui/button";
 import { HexInspector } from "@/features/socket-tester/components/hex-inspector";
@@ -414,7 +415,11 @@ export function SocketTesterLayout({
               type="button"
               variant="outline"
             >
-              <CircleHelp data-icon="inline-start" />
+              <HugeiconsIcon
+                data-icon="inline-start"
+                icon={HelpCircleIcon}
+                strokeWidth={2}
+              />
               {tourCopy.startButton}
             </Button>
             {bridgeConnected ? (

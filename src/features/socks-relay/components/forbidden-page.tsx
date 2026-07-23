@@ -1,4 +1,4 @@
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert } from "@/components/hugeicons";
 import { Card, CardContent } from "@/components/ui/card";
 
 export function ForbiddenPage() {

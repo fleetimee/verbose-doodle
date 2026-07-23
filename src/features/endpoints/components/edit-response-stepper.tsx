@@ -1,8 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Check, Code2, FileText, Hash } from "lucide-react";
+import { ArrowLeft02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import { Code2, FileText, Hash } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -151,7 +153,11 @@ export function EditResponseStepper({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button onClick={onCancel} size="icon" variant="ghost">
-              <ArrowLeft className="h-5 w-5" />
+              <HugeiconsIcon
+                className="h-5 w-5"
+                icon={ArrowLeft02Icon}
+                strokeWidth={2}
+              />
             </Button>
             <div>
               <div className="font-medium text-muted-foreground text-sm">
@@ -375,7 +381,11 @@ export function EditResponseStepper({
               </>
             ) : (
               <>
-                <Check className="mr-2 h-4 w-4" />
+                <HugeiconsIcon
+                  className="mr-2 h-4 w-4"
+                  icon={Tick02Icon}
+                  strokeWidth={2}
+                />
                 Save Changes
               </>
             )}

@@ -12,7 +12,6 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +29,8 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 type DataTableProps<TData, TValue> = {
 	columns: ColumnDef<TData, TValue>[];
@@ -89,7 +90,7 @@ export function DataTable<TData, TValue>({
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button className="ml-auto" variant="outline">
-							Columns <ChevronDown />
+							Columns <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">

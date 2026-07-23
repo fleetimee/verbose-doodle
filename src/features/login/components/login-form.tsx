@@ -1,5 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { EyeIcon, EyeOffIcon, OctagonXIcon } from "lucide-react";
+import {
+  EyeIcon,
+  MultiplicationSignCircleIcon,
+  ViewOffIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -92,7 +97,10 @@ export const LoginForm = ({
         >
           {error && (
             <Alert variant="destructive">
-              <OctagonXIcon />
+              <HugeiconsIcon
+                icon={MultiplicationSignCircleIcon}
+                strokeWidth={2}
+              />
               <AlertTitle>{error.message}</AlertTitle>
               {error.description && (
                 <AlertDescription>{error.description}</AlertDescription>
@@ -155,7 +163,11 @@ export const LoginForm = ({
                           type="button"
                           variant="ghost"
                         >
-                          {passwordVisible ? <EyeOffIcon /> : <EyeIcon />}
+                          {passwordVisible ? (
+                            <HugeiconsIcon icon={ViewOffIcon} strokeWidth={2} />
+                          ) : (
+                            <HugeiconsIcon icon={EyeIcon} strokeWidth={2} />
+                          )}
                         </InputGroupButton>
                       </InputGroupAddon>
                     </InputGroup>

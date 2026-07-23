@@ -1,5 +1,7 @@
-import { RadioReceiver, Send, Square } from "lucide-react";
+import { SentIcon, StopCircleIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
+import { RadioReceiver } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SendPanel } from "@/features/socket-tester/components/send-panel";
@@ -93,7 +95,11 @@ export function UdpPanel({
                   type="button"
                   variant="destructive"
                 >
-                  <Square className="size-4" />
+                  <HugeiconsIcon
+                    className="size-4"
+                    icon={StopCircleIcon}
+                    strokeWidth={2}
+                  />
                   <span className="sr-only">
                     {socketMessages.stopUdpListenerSrLabel}
                   </span>
@@ -137,7 +143,11 @@ export function UdpPanel({
       <div className="grid gap-4">
         <div className="rounded-md border border-border/70 bg-muted/35 p-3 text-muted-foreground text-sm">
           <div className="flex items-start gap-3">
-            <Send className="mt-0.5 size-4 shrink-0" />
+            <HugeiconsIcon
+              className="mt-0.5 size-4 shrink-0"
+              icon={SentIcon}
+              strokeWidth={2}
+            />
             <p>
               UDP sends are stateless. Start the listener only when you also
               need inbound datagrams captured in the console.

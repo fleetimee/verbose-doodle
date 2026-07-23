@@ -1,4 +1,5 @@
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -89,7 +90,11 @@ export function ResponseStepperFooter({
                 </>
               ) : (
                 <>
-                  <Check data-icon="inline-start" />
+                  <HugeiconsIcon
+                    data-icon="inline-start"
+                    icon={Tick02Icon}
+                    strokeWidth={2}
+                  />
                   Create Response
                 </>
               )}
@@ -102,7 +107,11 @@ export function ResponseStepperFooter({
               type="button"
             >
               Next
-              <ArrowRight data-icon="inline-end" />
+              <HugeiconsIcon
+                data-icon="inline-end"
+                icon={ArrowRight01Icon}
+                strokeWidth={2}
+              />
             </Button>
           )}
         </div>

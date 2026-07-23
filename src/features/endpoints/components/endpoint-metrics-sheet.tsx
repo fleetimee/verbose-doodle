@@ -1,15 +1,9 @@
 import {
-  Activity,
-  AlertCircle,
-  BarChart3,
-  Clock,
-  Gauge,
-  RefreshCw,
-  ServerCrash,
-  ShieldCheck,
-  Signal,
-  TrendingUp,
-} from "lucide-react";
+  AlertCircleIcon,
+  Clock01Icon,
+  RepeatIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import {
@@ -21,6 +15,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import {
+  Activity,
+  BarChart3,
+  Gauge,
+  ServerCrash,
+  ShieldCheck,
+  Signal,
+  TrendingUp,
+} from "@/components/hugeicons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -163,7 +166,11 @@ export function EndpointMetricsSheet({
   } else if (summaryQuery.error || hourlyQuery.error) {
     metricsContent = (
       <Alert variant="destructive">
-        <AlertCircle aria-hidden="true" />
+        <HugeiconsIcon
+          aria-hidden="true"
+          icon={AlertCircleIcon}
+          strokeWidth={2}
+        />
         <AlertTitle>{messages.endpoints.metrics.loadErrorTitle}</AlertTitle>
         <AlertDescription>
           {(summaryQuery.error ?? hourlyQuery.error)?.message}
@@ -248,7 +255,11 @@ export function EndpointMetricsSheet({
                 {summaryQuery.isFetching || hourlyQuery.isFetching ? (
                   <Spinner data-icon="inline-start" />
                 ) : (
-                  <RefreshCw data-icon="inline-start" />
+                  <HugeiconsIcon
+                    data-icon="inline-start"
+                    icon={RepeatIcon}
+                    strokeWidth={2}
+                  />
                 )}
                 {messages.endpoints.metrics.refreshButton}
               </Button>
@@ -420,7 +431,11 @@ function MetricsContent({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Clock aria-hidden="true" />
+              <HugeiconsIcon
+                aria-hidden="true"
+                icon={Clock01Icon}
+                strokeWidth={2}
+              />
               {messages.endpoints.metrics.charts.latencyTitle}
             </CardTitle>
             <CardDescription>

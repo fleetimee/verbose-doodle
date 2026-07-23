@@ -1,4 +1,4 @@
-import { Hash, MessageSquareText } from "lucide-react";
+import { Hash, MessageSquareText } from "@/components/hugeicons";
 import { cn } from "@/lib/utils";
 
 type EndpointMetaStripProps = {

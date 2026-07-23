@@ -1,23 +1,26 @@
 import {
-  Activity,
+  ActivityIcon,
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  Copy01Icon,
+  DashedLineCircleIcon,
+  Delete02Icon,
+  DownloadIcon,
+  RepeatIcon,
+  SearchIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { type ReactNode, useMemo, useState } from "react";
+import { toast } from "sonner";
+import {
   CircleAlert,
-  CircleCheck,
-  CircleDashed,
   Clipboard,
-  Copy,
-  Download,
   FileClock,
   ListFilter,
   MonitorDown,
   MonitorUp,
-  RefreshCw,
-  Search,
   TimerReset,
-  Trash2,
-  X,
-} from "lucide-react";
-import { type ReactNode, useMemo, useState } from "react";
-import { toast } from "sonner";
+} from "@/components/hugeicons";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -543,7 +546,11 @@ export function EndpointTrafficLogViewer({
               className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md border border-slate-300 bg-white/80 text-slate-600 shadow-xs transition-colors hover:bg-white hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-[#344156] dark:bg-[#0b1020]/80 dark:text-slate-300 dark:hover:bg-[#111827] dark:hover:text-white"
               type="button"
             >
-              <X className="size-4" />
+              <HugeiconsIcon
+                className="size-4"
+                icon={Cancel01Icon}
+                strokeWidth={2}
+              />
             </button>
           </DialogClose>
         </div>
@@ -603,7 +610,12 @@ export function EndpointTrafficLogViewer({
           <div>
             <div className="flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-md border bg-background text-primary shadow-xs">
-                <Activity aria-hidden="true" className="size-5" />
+                <HugeiconsIcon
+                  aria-hidden="true"
+                  className="size-5"
+                  icon={ActivityIcon}
+                  strokeWidth={2}
+                />
               </div>
               <div>
                 <h2 className="font-semibold text-lg">
@@ -623,19 +635,35 @@ export function EndpointTrafficLogViewer({
             type="button"
             variant="outline"
           >
-            <RefreshCw data-icon="inline-start" />
+            <HugeiconsIcon
+              data-icon="inline-start"
+              icon={RepeatIcon}
+              strokeWidth={2}
+            />
             {messages.endpoints.trafficLogsRefreshButton}
           </Button>
         </div>
 
         <div className="grid gap-2 sm:grid-cols-4">
           <TrafficMetric
-            icon={<CircleDashed className="size-3.5" />}
+            icon={
+              <HugeiconsIcon
+                className="size-3.5"
+                icon={DashedLineCircleIcon}
+                strokeWidth={2}
+              />
+            }
             label={messages.endpoints.trafficLogsVisibleMetric}
             value={totalLogsLabel}
           />
           <TrafficMetric
-            icon={<CircleCheck className="size-3.5" />}
+            icon={
+              <HugeiconsIcon
+                className="size-3.5"
+                icon={CheckmarkCircle01Icon}
+                strokeWidth={2}
+              />
+            }
             label={messages.endpoints.trafficLogsSuccessMetric}
             value={successRate}
           />
@@ -657,7 +685,11 @@ export function EndpointTrafficLogViewer({
               className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm"
               htmlFor="traffic-log-auto-refresh"
             >
-              <RefreshCw className="size-4 text-muted-foreground" />
+              <HugeiconsIcon
+                className="size-4 text-muted-foreground"
+                icon={RepeatIcon}
+                strokeWidth={2}
+              />
               <span className="font-medium">
                 {messages.endpoints.trafficLogsAutoRefreshLabel}
               </span>
@@ -723,7 +755,11 @@ export function EndpointTrafficLogViewer({
               </Select>
 
               <div className="relative">
-                <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <HugeiconsIcon
+                  className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  icon={SearchIcon}
+                  strokeWidth={2}
+                />
                 <Input
                   className="pl-9"
                   onChange={(event) => setSearch(event.target.value)}
@@ -772,7 +808,11 @@ export function EndpointTrafficLogViewer({
                   type="button"
                   variant="secondary"
                 >
-                  <Copy data-icon="inline-start" />
+                  <HugeiconsIcon
+                    data-icon="inline-start"
+                    icon={Copy01Icon}
+                    strokeWidth={2}
+                  />
                   {messages.endpoints.trafficLogsCopyButton}
                 </Button>
                 <Button
@@ -799,7 +839,11 @@ export function EndpointTrafficLogViewer({
                   type="button"
                   variant="secondary"
                 >
-                  <X data-icon="inline-start" />
+                  <HugeiconsIcon
+                    data-icon="inline-start"
+                    icon={Cancel01Icon}
+                    strokeWidth={2}
+                  />
                   {messages.endpoints.trafficLogsUnselectButton}
                 </Button>
                 <Button
@@ -809,7 +853,11 @@ export function EndpointTrafficLogViewer({
                   type="button"
                   variant="outline"
                 >
-                  <Download data-icon="inline-start" />
+                  <HugeiconsIcon
+                    data-icon="inline-start"
+                    icon={DownloadIcon}
+                    strokeWidth={2}
+                  />
                   {messages.endpoints.trafficLogsDownloadButton}
                 </Button>
                 <Button
@@ -829,7 +877,11 @@ export function EndpointTrafficLogViewer({
                   type="button"
                   variant="destructive"
                 >
-                  <Trash2 data-icon="inline-start" />
+                  <HugeiconsIcon
+                    data-icon="inline-start"
+                    icon={Delete02Icon}
+                    strokeWidth={2}
+                  />
                   {messages.endpoints.trafficLogsClearButton}
                 </Button>
               </div>

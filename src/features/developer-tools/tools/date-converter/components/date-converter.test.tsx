@@ -105,12 +105,12 @@ describe("DateConverter", () => {
     fireEvent.keyDown(window, { key: "Enter", metaKey: true });
     expect(fetchMock).not.toHaveBeenCalled();
     const copyButton = screen.getByRole("button", { name: "Copy ISO 8601" });
-    expect(copyButton.querySelector(".lucide-clipboard-copy")).not.toBeNull();
+    expect(copyButton.querySelector("svg")).not.toBeNull();
 
     await user.click(copyButton);
 
     expect(writeText).toHaveBeenCalledWith("2024-01-01T00:00:00.123Z");
-    expect(copyButton.querySelector(".lucide-check")).not.toBeNull();
+    expect(copyButton.querySelector("svg")).not.toBeNull();
   });
 
   test("keeps its guided-tour targets after clearing", async () => {

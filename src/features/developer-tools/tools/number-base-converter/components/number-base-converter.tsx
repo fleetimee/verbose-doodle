@@ -1,6 +1,12 @@
-import { Binary, Check, ClipboardCopy, Cpu, Hash } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
+import {
+  Binary,
+  Check,
+  ClipboardCopy,
+  Cpu,
+  Hash,
+} from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

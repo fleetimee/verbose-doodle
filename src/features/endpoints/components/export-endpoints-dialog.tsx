@@ -1,13 +1,13 @@
+import { DownloadIcon, SearchIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { motion } from "motion/react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Braces,
   CheckCircle2,
-  Download,
   FileJson,
   Layers3,
-  Search,
-} from "lucide-react";
-import { motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+} from "@/components/hugeicons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -351,7 +351,11 @@ export function ExportEndpointsDialog({
             <div className="rounded-lg border bg-card">
               <div className="flex flex-col gap-3 border-b p-3 sm:flex-row sm:items-center">
                 <div className="relative flex-1">
-                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <HugeiconsIcon
+                    className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    icon={SearchIcon}
+                    strokeWidth={2}
+                  />
                   <Input
                     className="pl-9"
                     onChange={(event) => setSearchTerm(event.target.value)}
@@ -507,7 +511,11 @@ export function ExportEndpointsDialog({
             {POSTMAN_EXPORT_MESSAGES.cancelButton}
           </Button>
           <Button disabled={!canExport} onClick={handleExport}>
-            <Download className="mr-2 h-4 w-4" />
+            <HugeiconsIcon
+              className="mr-2 h-4 w-4"
+              icon={DownloadIcon}
+              strokeWidth={2}
+            />
             {POSTMAN_EXPORT_MESSAGES.exportButton}
           </Button>
         </DialogFooter>

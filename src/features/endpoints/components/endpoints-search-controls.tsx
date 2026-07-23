@@ -1,4 +1,5 @@
-import { LayoutGrid, List, Search } from "lucide-react";
+import { GridIcon, Menu01Icon, SearchIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -36,7 +37,11 @@ export function EndpointsSearchControls({
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div className="relative min-w-[220px] flex-1" id={searchId}>
-        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <HugeiconsIcon
+          className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+          icon={SearchIcon}
+          strokeWidth={2}
+        />
         <Input
           className="pl-9"
           onChange={handleSearchChange}
@@ -55,14 +60,22 @@ export function EndpointsSearchControls({
             aria-label={messages.endpoints.gridViewAriaLabel}
             value="grid"
           >
-            <LayoutGrid className="mr-2 h-4 w-4" />
+            <HugeiconsIcon
+              className="mr-2 h-4 w-4"
+              icon={GridIcon}
+              strokeWidth={2}
+            />
             Grid
           </ToggleGroupItem>
           <ToggleGroupItem
             aria-label={messages.endpoints.listViewAriaLabel}
             value="list"
           >
-            <List className="mr-2 h-4 w-4" />
+            <HugeiconsIcon
+              className="mr-2 h-4 w-4"
+              icon={Menu01Icon}
+              strokeWidth={2}
+            />
             List
           </ToggleGroupItem>
         </ToggleGroup>

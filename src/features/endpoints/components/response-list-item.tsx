@@ -1,15 +1,18 @@
 import {
-  CheckCircle2,
+  CheckmarkCircle02Icon,
+  Clock03Icon,
+  Delete02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { AnimatePresence } from "motion/react";
+import { useState } from "react";
+import {
   Circle,
   FileJson,
   Hash,
   Pen,
   TextCursor,
-  Timer,
-  Trash2,
-} from "lucide-react";
-import { AnimatePresence } from "motion/react";
-import { useState } from "react";
+} from "@/components/hugeicons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +38,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/features/auth/context";
-
 import { EditResponseStepper } from "@/features/endpoints/components/edit-response-stepper";
 import { ResponseSimulationBadge } from "@/features/endpoints/components/response-simulation-badge";
 import { SimulateTimeoutDialog } from "@/features/endpoints/components/simulate-timeout-dialog";
@@ -293,7 +295,11 @@ export function ResponseListItem({
                       handleDeleteClick();
                     }}
                   >
-                    <Trash2 className="h-4 w-4 text-red-600" />
+                    <HugeiconsIcon
+                      className="h-4 w-4 text-red-600"
+                      icon={Delete02Icon}
+                      strokeWidth={2}
+                    />
                     Delete Response
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -312,7 +318,7 @@ export function ResponseListItem({
                     type="button"
                     variant="outline"
                   >
-                    <Timer />
+                    <HugeiconsIcon icon={Clock03Icon} strokeWidth={2} />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="top">
@@ -336,7 +342,14 @@ export function ResponseListItem({
                     type="button"
                     variant="outline"
                   >
-                    {isActive ? <CheckCircle2 /> : <Circle />}
+                    {isActive ? (
+                      <HugeiconsIcon
+                        icon={CheckmarkCircle02Icon}
+                        strokeWidth={2}
+                      />
+                    ) : (
+                      <Circle />
+                    )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="top">

@@ -1,5 +1,5 @@
-import type { LucideIcon } from "lucide-react";
-import { Activity, Building2, FileJson, Globe } from "lucide-react";
+import type { HugeIcon } from "@/components/hugeicons";
+import { Activity, Building2, FileJson, Globe } from "@/components/hugeicons";
 import { Card, CardContent } from "@/components/ui/card";
 import type { OverviewData } from "@/features/overview/types";
 import { messages } from "@/lib/i18n";
@@ -9,7 +9,7 @@ type MetricCardProps = {
   readonly title: string;
   readonly value: number | string;
   readonly description: string;
-  readonly icon: LucideIcon;
+  readonly icon: HugeIcon;
   readonly className?: string;
   readonly meta?: string;
 };

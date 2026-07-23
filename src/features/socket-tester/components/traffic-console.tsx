@@ -1,15 +1,14 @@
 import {
-  Activity,
-  CircleAlert,
-  CircleDashed,
-  Download,
-  Eraser,
-  MousePointerClick,
-  Radio,
-  TimerReset,
-} from "lucide-react";
+  ActivityIcon,
+  AlertCircleIcon,
+  DashedLineCircleIcon,
+  DownloadIcon,
+  RecordIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import { Eraser, MousePointerClick, TimerReset } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
@@ -152,7 +151,12 @@ export function TrafficConsole({
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-md border bg-background text-primary shadow-xs">
-              <Radio aria-hidden="true" className="size-5" />
+              <HugeiconsIcon
+                aria-hidden="true"
+                className="size-5"
+                icon={RecordIcon}
+                strokeWidth={2}
+              />
             </div>
             <div>
               <h2 className="font-semibold text-lg">
@@ -168,7 +172,11 @@ export function TrafficConsole({
               className="inline-flex h-8 items-center gap-2 rounded-md border bg-muted/20 px-3 font-medium text-sm"
               htmlFor="socket-traffic-auto-scroll"
             >
-              <Activity className="size-4 text-muted-foreground" />
+              <HugeiconsIcon
+                className="size-4 text-muted-foreground"
+                icon={ActivityIcon}
+                strokeWidth={2}
+              />
               <span>{socketMessages.autoScrollLabel}</span>
               <Switch
                 checked={autoScroll}
@@ -183,7 +191,11 @@ export function TrafficConsole({
               type="button"
               variant="outline"
             >
-              <Download className="size-3.5" />
+              <HugeiconsIcon
+                className="size-3.5"
+                icon={DownloadIcon}
+                strokeWidth={2}
+              />
               {socketMessages.saveButton}
             </Button>
             <Button
@@ -201,24 +213,46 @@ export function TrafficConsole({
 
         <div className="grid gap-2 sm:grid-cols-4">
           <ConsoleMetric
-            icon={<CircleDashed className="size-3.5" />}
+            icon={
+              <HugeiconsIcon
+                className="size-3.5"
+                icon={DashedLineCircleIcon}
+                strokeWidth={2}
+              />
+            }
             label={socketMessages.framesMetric}
             value={logs.length}
           />
           <ConsoleMetric
-            icon={<Download className="size-3.5" />}
+            icon={
+              <HugeiconsIcon
+                className="size-3.5"
+                icon={DownloadIcon}
+                strokeWidth={2}
+              />
+            }
             label={socketMessages.inboundMetric}
             value={inboundCount}
           />
           <ConsoleMetric
-            icon={<Activity className="size-3.5" />}
+            icon={
+              <HugeiconsIcon
+                className="size-3.5"
+                icon={ActivityIcon}
+                strokeWidth={2}
+              />
+            }
             label={socketMessages.outboundMetric}
             value={outboundCount}
           />
           <ConsoleMetric
             icon={
               errorCount > 0 ? (
-                <CircleAlert className="size-3.5" />
+                <HugeiconsIcon
+                  className="size-3.5"
+                  icon={AlertCircleIcon}
+                  strokeWidth={2}
+                />
               ) : (
                 <TimerReset className="size-3.5" />
               )

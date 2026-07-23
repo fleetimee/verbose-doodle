@@ -1,5 +1,7 @@
-import { CircleHelp, Eraser, SendHorizontal } from "lucide-react";
+import { HelpCircleIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
+import { Eraser, SendHorizontal } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -110,7 +112,11 @@ export function SendPanel({
                       className="text-muted-foreground transition-colors hover:text-foreground"
                       type="button"
                     >
-                      <CircleHelp data-icon="inline-start" />
+                      <HugeiconsIcon
+                        data-icon="inline-start"
+                        icon={HelpCircleIcon}
+                        strokeWidth={2}
+                      />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-64" side="top">

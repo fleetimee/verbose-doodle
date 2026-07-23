@@ -1,4 +1,5 @@
-import { Clock, Timer, Zap } from "lucide-react";
+import { Clock01Icon, Clock03Icon, ZapIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { EndpointResponse } from "@/features/endpoints/types";
 import {
@@ -24,7 +25,11 @@ export function ResponseSimulationAlert({
     case SIMULATION_MODE.TIMEOUT:
       return (
         <Alert variant="destructive">
-          <Timer className="h-4 w-4" />
+          <HugeiconsIcon
+            className="h-4 w-4"
+            icon={Clock03Icon}
+            strokeWidth={2}
+          />
           <AlertTitle>Timeout Simulation Active</AlertTitle>
           <AlertDescription>
             When this endpoint is called, the server will hold the connection
@@ -38,7 +43,11 @@ export function ResponseSimulationAlert({
     case SIMULATION_MODE.DELAY:
       return (
         <Alert>
-          <Clock className="h-4 w-4" />
+          <HugeiconsIcon
+            className="h-4 w-4"
+            icon={Clock01Icon}
+            strokeWidth={2}
+          />
           <AlertTitle>Latency Simulation Active</AlertTitle>
           <AlertDescription>
             When this endpoint is called, the server will wait for{" "}
@@ -55,7 +64,7 @@ export function ResponseSimulationAlert({
     default:
       return (
         <Alert>
-          <Zap className="h-4 w-4" />
+          <HugeiconsIcon className="h-4 w-4" icon={ZapIcon} strokeWidth={2} />
           <AlertTitle>Normal Response Mode</AlertTitle>
           <AlertDescription>
             When this endpoint is called, the server will respond immediately

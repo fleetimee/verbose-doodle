@@ -1,20 +1,18 @@
 import {
-  ArrowLeft,
-  BarChart3,
-  Check,
-  Circle,
-  CircleHelp,
-  Hash,
-  List,
-  Pen,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
+  Add01Icon,
+  ArrowLeft02Icon,
+  Cancel01Icon,
+  Delete02Icon,
+  HelpCircleIcon,
+  Menu01Icon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
+import { BarChart3, Circle, Hash, Pen } from "@/components/hugeicons";
 import { type TourStep, useTour } from "@/components/tour";
 import {
   AlertDialog,
@@ -51,7 +49,6 @@ import {
 } from "@/components/ui/tooltip";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useAuth } from "@/features/auth/context";
-
 import { EndpointDetailLayout } from "@/features/endpoints/components/endpoint-detail-layout";
 import { EndpointDetailSkeleton } from "@/features/endpoints/components/endpoint-detail-skeleton";
 import { EndpointMetricsSheet } from "@/features/endpoints/components/endpoint-metrics-sheet";
@@ -473,7 +470,11 @@ export function EndpointDetailPage() {
           }}
         >
           <Button onClick={handleBack} size="sm" variant="ghost">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <HugeiconsIcon
+              className="mr-2 h-4 w-4"
+              icon={ArrowLeft02Icon}
+              strokeWidth={2}
+            />
             Back to Endpoints
           </Button>
         </motion.div>
@@ -571,7 +572,11 @@ export function EndpointDetailPage() {
           }}
         >
           <Button onClick={handleBack} size="sm" variant="ghost">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <HugeiconsIcon
+              className="mr-2 h-4 w-4"
+              icon={ArrowLeft02Icon}
+              strokeWidth={2}
+            />
             Back to Endpoints
           </Button>
         </motion.div>
@@ -631,7 +636,11 @@ export function EndpointDetailPage() {
             type="button"
             variant="outline"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <HugeiconsIcon
+              className="h-5 w-5"
+              icon={ArrowLeft02Icon}
+              strokeWidth={2}
+            />
           </Button>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 md:gap-3">
@@ -713,7 +722,7 @@ export function EndpointDetailPage() {
                             type="button"
                             variant="outline"
                           >
-                            <Check />
+                            <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent side="top">
@@ -733,7 +742,10 @@ export function EndpointDetailPage() {
                             type="button"
                             variant="outline"
                           >
-                            <X />
+                            <HugeiconsIcon
+                              icon={Cancel01Icon}
+                              strokeWidth={2}
+                            />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent side="top">
@@ -801,7 +813,10 @@ export function EndpointDetailPage() {
                               type="button"
                               variant="outline"
                             >
-                              <Trash2 />
+                              <HugeiconsIcon
+                                icon={Delete02Icon}
+                                strokeWidth={2}
+                              />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent side="top">
@@ -823,7 +838,11 @@ export function EndpointDetailPage() {
                 </span>
               </span>
               <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 bg-background/70 px-2.5 font-medium text-muted-foreground text-xs shadow-xs">
-                <List className="h-3.5 w-3.5 text-primary" />
+                <HugeiconsIcon
+                  className="h-3.5 w-3.5 text-primary"
+                  icon={Menu01Icon}
+                  strokeWidth={2}
+                />
                 <span className="font-mono text-foreground">
                   {endpoint.responses.length}
                 </span>
@@ -850,7 +869,11 @@ export function EndpointDetailPage() {
             type="button"
             variant="outline"
           >
-            <CircleHelp data-icon="inline-start" />
+            <HugeiconsIcon
+              data-icon="inline-start"
+              icon={HelpCircleIcon}
+              strokeWidth={2}
+            />
             {messages.endpoints.tour.startButton}
           </Button>
           <ProtectedAction ability="canAddResponse">
@@ -860,7 +883,11 @@ export function EndpointDetailPage() {
               size="sm"
               type="button"
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <HugeiconsIcon
+                className="mr-2 h-4 w-4"
+                icon={Add01Icon}
+                strokeWidth={2}
+              />
               Add Response
             </Button>
           </ProtectedAction>

@@ -1,25 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Activity,
-  Cable,
-  CircleAlert,
-  CircleDashed,
-  CircleHelp,
-  CircleOff,
-  Database,
-  Eraser,
-  FileTerminal,
-  ListFilter,
-  Network,
-  Play,
-  Radio,
-  RefreshCw,
-  Route,
-  ShieldAlert,
-  SlidersHorizontal,
-  Square,
-  TimerReset,
-} from "lucide-react";
+  Database01Icon,
+  HelpCircleIcon,
+  RepeatIcon,
+  StopCircleIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { Transition } from "motion/react";
 import { motion, useReducedMotion } from "motion/react";
 import {
@@ -32,6 +18,23 @@ import {
 } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  Activity,
+  Cable,
+  CircleAlert,
+  CircleDashed,
+  CircleOff,
+  Eraser,
+  FileTerminal,
+  ListFilter,
+  Network,
+  Play,
+  Radio,
+  Route,
+  ShieldAlert,
+  SlidersHorizontal,
+  TimerReset,
+} from "@/components/hugeicons";
 import { type TourStep, useTour } from "@/components/tour";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -480,7 +483,11 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
               type="button"
               variant="outline"
             >
-              <CircleHelp data-icon="inline-start" />
+              <HugeiconsIcon
+                data-icon="inline-start"
+                icon={HelpCircleIcon}
+                strokeWidth={2}
+              />
               {tourCopy.startButton}
             </Button>
             <RelayConnectionBadge tourId={tourConfig.targets.connection} />
@@ -1133,7 +1140,11 @@ function RelayTable({
                         type="button"
                         variant="destructive"
                       >
-                        <Square className="size-4" />
+                        <HugeiconsIcon
+                          className="size-4"
+                          icon={StopCircleIcon}
+                          strokeWidth={2}
+                        />
                       </Button>
                     </div>
                   </TableCell>
@@ -1394,7 +1405,11 @@ function RelayLogConsole({
           </CardTitle>
           <CardDescription>{logScopeDescription}</CardDescription>
           <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-sky-500/25 bg-sky-500/10 px-2.5 py-1 font-medium text-[11px] text-sky-700 uppercase tracking-[0.12em] dark:text-sky-300">
-            <Database className="size-3.5" />
+            <HugeiconsIcon
+              className="size-3.5"
+              icon={Database01Icon}
+              strokeWidth={2}
+            />
             {messages.socksRelay.savedHistoryLabel}
             <span className="h-3 border-sky-500/25 border-l" />
             <span className="normal-case tracking-normal">
@@ -1422,11 +1437,13 @@ function RelayLogConsole({
             type="button"
             variant="ghost"
           >
-            <RefreshCw
+            <HugeiconsIcon
               className={cn(
                 "size-4",
                 savedLogsQuery.isFetching && "animate-spin"
               )}
+              icon={RepeatIcon}
+              strokeWidth={2}
             />
             {messages.socksRelay.refreshLogsButton}
           </Button>

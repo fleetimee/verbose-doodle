@@ -1,6 +1,8 @@
-import { ArrowUpRight, Grid2X2, List } from "lucide-react";
+import { ArrowUpRightIcon, Menu01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { Link } from "react-router";
+import { Grid2X2 } from "@/components/hugeicons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DEVELOPER_TOOL_CATEGORIES,
@@ -134,7 +136,11 @@ function ToolCard({
           to={tool.href}
         >
           {messages.developerTools.openAction}
-          <ArrowUpRight data-icon="inline-end" />
+          <HugeiconsIcon
+            data-icon="inline-end"
+            icon={ArrowUpRightIcon}
+            strokeWidth={2}
+          />
         </Link>
       </div>
     </motion.article>
@@ -280,7 +286,7 @@ export function DeveloperToolsCatalog() {
               type="button"
               variant={activeView === "list" ? "secondary" : "ghost"}
             >
-              <List />
+              <HugeiconsIcon icon={Menu01Icon} strokeWidth={2} />
             </Button>
           </div>
         </div>

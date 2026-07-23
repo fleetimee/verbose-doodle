@@ -1,4 +1,5 @@
-import { ChevronRight } from "lucide-react";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Link } from "react-router";
 import {
   Card,
@@ -77,7 +78,11 @@ export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
               >
                 {endpoint.method}
               </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-[color,transform] duration-[160ms] ease-[var(--ease-out)] group-hover:translate-x-1 group-hover:text-primary group-focus-visible:translate-x-1 group-focus-visible:text-primary motion-reduce:transform-none motion-reduce:transition-none" />
+              <HugeiconsIcon
+                className="h-4 w-4 shrink-0 text-muted-foreground transition-[color,transform] duration-[160ms] ease-[var(--ease-out)] group-hover:translate-x-1 group-hover:text-primary group-focus-visible:translate-x-1 group-focus-visible:text-primary motion-reduce:transform-none motion-reduce:transition-none"
+                icon={ArrowRight01Icon}
+                strokeWidth={2}
+              />
             </Link>
           ))}
         </div>

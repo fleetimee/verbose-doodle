@@ -1,8 +1,8 @@
 import * as React from "react"
 import { Select as SelectPrimitive } from "@base-ui/react/select"
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
-
 import { cn } from "@/lib/utils"
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Tick02Icon, ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons";
 
 type SelectProps = Omit<
   React.ComponentProps<typeof SelectPrimitive.Root>,
@@ -62,7 +62,7 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon
-        render={<ChevronDownIcon className="size-4 opacity-50" />}
+        render={<HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} className="size-4 opacity-50" />}
       />
     </SelectPrimitive.Trigger>
   )
@@ -140,7 +140,7 @@ function SelectItem({
     >
       <span className="absolute right-2 flex size-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <CheckIcon className="size-4" />
+          <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-4" />
         </SelectPrimitive.ItemIndicator>
       </span>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
@@ -174,7 +174,7 @@ function SelectScrollUpButton({
       )}
       {...props}
     >
-      <ChevronUpIcon className="size-4" />
+      <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} className="size-4" />
     </SelectPrimitive.ScrollUpArrow>
   )
 }
@@ -192,7 +192,7 @@ function SelectScrollDownButton({
       )}
       {...props}
     >
-      <ChevronDownIcon className="size-4" />
+      <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} className="size-4" />
     </SelectPrimitive.ScrollDownArrow>
   )
 }

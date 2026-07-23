@@ -1,10 +1,11 @@
+import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Link, Navigate } from "react-router";
 import {
-  CheckCircle2Icon,
   DoorClosedIcon,
   LogInIcon,
   ShieldCheckIcon,
-} from "lucide-react";
-import { Link, Navigate } from "react-router";
+} from "@/components/hugeicons";
 import SlicedText from "@/components/kokonutui/sliced-text";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -89,7 +90,11 @@ export function LoggedOut() {
                 <DoorClosedIcon />
                 {messages.auth.signedOutBadge}
               </Badge>
-              <CheckCircle2Icon className="text-primary" />
+              <HugeiconsIcon
+                className="text-primary"
+                icon={CheckmarkCircle02Icon}
+                strokeWidth={2}
+              />
             </div>
             <div className="flex flex-col gap-1">
               <CardTitle className="font-bold text-2xl tracking-tight">

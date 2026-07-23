@@ -1,3 +1,5 @@
+import type React from "react";
+import { Link } from "react-router";
 import {
   Info,
   LayoutDashboard,
@@ -8,9 +10,7 @@ import {
   Route,
   Server,
   Waves,
-} from "lucide-react";
-import type React from "react";
-import { Link } from "react-router";
+} from "@/components/hugeicons";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";

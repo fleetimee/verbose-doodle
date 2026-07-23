@@ -1,6 +1,11 @@
-import { Activity, Braces, Cpu, Network, Play, Terminal } from "lucide-react";
+import {
+  ActivityIcon,
+  ComputerTerminal01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { Braces, Cpu, Network, Play } from "@/components/hugeicons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,7 +62,11 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
               size="sm"
               variant={activeTab === "sockets" ? "default" : "ghost"}
             >
-              <Activity className="h-3.5 w-3.5" />
+              <HugeiconsIcon
+                className="h-3.5 w-3.5"
+                icon={ActivityIcon}
+                strokeWidth={2}
+              />
               Socket Bridge
             </Button>
             <Button
@@ -136,7 +145,11 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
               <div className="flex flex-col gap-2 rounded-lg border border-border/50 bg-slate-950 p-4 font-mono text-slate-100 text-xs">
                 <div className="flex items-center justify-between border-slate-800 border-b pb-2">
                   <div className="flex items-center gap-2">
-                    <Terminal className="h-4 w-4 text-cyan-400" />
+                    <HugeiconsIcon
+                      className="h-4 w-4 text-cyan-400"
+                      icon={ComputerTerminal01Icon}
+                      strokeWidth={2}
+                    />
                     <span className="text-slate-300">
                       SocketBridgeEngine [TCP: 8080]
                     </span>

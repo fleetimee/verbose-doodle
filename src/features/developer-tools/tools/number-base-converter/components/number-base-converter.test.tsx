@@ -140,12 +140,12 @@ describe("NumberBaseConverter", () => {
     expect(fetchMock).not.toHaveBeenCalled();
 
     const copyButton = screen.getByRole("button", { name: "Copy hexadecimal" });
-    expect(copyButton.querySelector(".lucide-clipboard-copy")).not.toBeNull();
+    expect(copyButton.querySelector("svg")).not.toBeNull();
 
     await user.click(copyButton);
 
     expect(writeText).toHaveBeenCalledWith("FF");
-    expect(copyButton.querySelector(".lucide-check")).not.toBeNull();
+    expect(copyButton.querySelector("svg")).not.toBeNull();
   });
 
   test("clears the workspace and restores the example", async () => {

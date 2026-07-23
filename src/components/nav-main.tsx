@@ -1,7 +1,8 @@
-import type { LucideIcon } from "lucide-react";
-import { ChevronRight } from "lucide-react";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
+import type { HugeIcon } from "@/components/hugeicons";
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,14 +23,14 @@ import {
 type NavMainSubItem = {
   title: string;
   url: string;
-  icon: LucideIcon;
+  icon: HugeIcon;
   onPrefetch?: () => void;
 };
 
 type NavMainItem = {
   title: string;
   url?: string;
-  icon: LucideIcon;
+  icon: HugeIcon;
   groupLabel: string;
   badge?: string;
   exact?: boolean;
@@ -96,7 +97,11 @@ function NavMenuItem({
             <SidebarMenuButton tooltip={item.title}>
               <item.icon />
               <span>{item.title}</span>
-              <ChevronRight className="ml-auto size-4 transition-transform duration-200 group-data-[open]/collapsible-trigger:rotate-90" />
+              <HugeiconsIcon
+                className="ml-auto size-4 transition-transform duration-200 group-data-[open]/collapsible-trigger:rotate-90"
+                icon={ArrowRight01Icon}
+                strokeWidth={2}
+              />
             </SidebarMenuButton>
           }
         />

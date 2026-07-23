@@ -1,5 +1,7 @@
-import { Cable, CheckCircle2, CircleOff, Unplug } from "lucide-react";
+import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
+import { Cable, CircleOff, Unplug } from "@/components/hugeicons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,7 +75,11 @@ export function TcpClientPanel({
             variant={state.connected ? "default" : "secondary"}
           >
             {state.connected ? (
-              <CheckCircle2 data-icon="inline-start" />
+              <HugeiconsIcon
+                data-icon="inline-start"
+                icon={CheckmarkCircle02Icon}
+                strokeWidth={2}
+              />
             ) : (
               <CircleOff data-icon="inline-start" />
             )}

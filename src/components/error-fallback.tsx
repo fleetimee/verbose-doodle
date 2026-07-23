@@ -1,4 +1,6 @@
-import { AlertTriangle, Home, RotateCcw } from "lucide-react";
+import { AlertCircleIcon, HomeIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { RotateCcw } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -23,7 +25,11 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
           <Empty>
             <EmptyHeader>
               <div className="mb-4 flex justify-center">
-                <AlertTriangle className="h-16 w-16 text-destructive" />
+                <HugeiconsIcon
+                  className="h-16 w-16 text-destructive"
+                  icon={AlertCircleIcon}
+                  strokeWidth={2}
+                />
               </div>
               <EmptyTitle className="font-black text-4xl">
                 {messages.errors.fallbackTitle}
@@ -55,7 +61,8 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                   }
                   variant="outline"
                 >
-                  <Home /> {messages.common.goHome}
+                  <HugeiconsIcon icon={HomeIcon} strokeWidth={2} />{" "}
+                  {messages.common.goHome}
                 </Button>
               </div>
             </EmptyContent>
