@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import type {
   EndpointDataAdapter,
   EndpointHourlyMetricsInput,
@@ -17,9 +18,12 @@ import type {
   EndpointTrafficLogsResult,
 } from "@/features/endpoints/types";
 import type { ApiError } from "@/lib/api";
+import { messages } from "@/lib/i18n";
 
 export type EndpointTelemetryOptions = {
   readonly enabled?: boolean;
+  readonly includeMetrics?: boolean;
+  readonly includeTrafficLogs?: boolean;
   readonly selectedLogId?: string | null;
   readonly from?: string;
   readonly to?: string;
@@ -37,11 +41,13 @@ export function useEndpointTelemetry(
 ) {
   const queryClient = useQueryClient();
   const enabled = (options.enabled ?? true) && Boolean(endpointId);
+  const includeMetrics = options.includeMetrics ?? true;
+  const includeTrafficLogs = options.includeTrafficLogs ?? true;
   const telemetryInput: EndpointTelemetryInput = { endpointId, filters };
   const trafficLogs = useQuery<EndpointTrafficLogsResult, ApiError>({
     queryKey: endpointDataQueryKeys.telemetry(endpointId, filters),
     queryFn: () => adapter.listTrafficLogs(telemetryInput),
-    enabled,
+    enabled: enabled && includeTrafficLogs,
     staleTime: 10 * 1000,
   });
   const trafficLogDetail = useQuery<EndpointTrafficLogDetail, ApiError>({
@@ -51,12 +57,12 @@ export function useEndpointTelemetry(
     ),
     queryFn: () =>
       adapter.getTrafficLogDetail(endpointId, options.selectedLogId ?? ""),
-    enabled: enabled && Boolean(options.selectedLogId),
+    enabled: enabled && includeTrafficLogs && Boolean(options.selectedLogId),
   });
   const metricsSummary = useQuery<EndpointMetric, ApiError>({
     queryKey: endpointDataQueryKeys.metrics(endpointId),
     queryFn: () => adapter.getMetricsSummary(endpointId),
-    enabled,
+    enabled: enabled && includeMetrics,
     staleTime: 15 * 1000,
   });
   const hourlyInput: EndpointHourlyMetricsInput = {
@@ -71,14 +77,23 @@ export function useEndpointTelemetry(
       hourlyInput.to
     ),
     queryFn: () => adapter.getHourlyMetrics(hourlyInput),
-    enabled: enabled && Boolean(options.from) && Boolean(options.to),
+    enabled:
+      enabled && includeMetrics && Boolean(options.from) && Boolean(options.to),
     staleTime: 15 * 1000,
   });
   const clearTrafficLogs = useMutation<void, ApiError, string>({
     mutationFn: adapter.clearTrafficLogs,
     onSuccess: async (_, clearedEndpointId) => {
+      toast.success(messages.endpoints.trafficLogsCleared, {
+        description: "All traffic logs for this endpoint were removed.",
+      });
       await queryClient.invalidateQueries({
         queryKey: endpointDataTelemetryPrefix(clearedEndpointId),
+      });
+    },
+    onError: (error) => {
+      toast.error(messages.endpoints.trafficLogsClearFailed, {
+        description: error.message,
       });
     },
   });

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import type {
   CreateResponseInput,
   EndpointDataAdapter,
@@ -11,6 +12,7 @@ import { httpEndpointAdapter } from "@/features/endpoints/data/http-endpoint-ada
 import type { Endpoint, EndpointResponse } from "@/features/endpoints/types";
 import { overviewQueryKeys } from "@/features/overview/query-keys";
 import type { ApiError } from "@/lib/api";
+import { formatMessage, messages } from "@/lib/i18n";
 
 /**
  * Endpoint workspace: load one endpoint and manage its response configurations.
@@ -42,7 +44,22 @@ export function useEndpointWorkspace(
     CreateResponseInput
   >({
     mutationFn: adapter.createResponse,
-    onSuccess: invalidateWorkspace,
+    onSuccess: async (response) => {
+      toast.success(messages.endpoints.responseCreateSuccess, {
+        description: formatMessage(
+          messages.endpoints.responseCreateDescription,
+          {
+            name: response.name,
+          }
+        ),
+      });
+      await invalidateWorkspace();
+    },
+    onError: (error) => {
+      toast.error(messages.endpoints.responseCreateError, {
+        description: error.message,
+      });
+    },
   });
   const updateResponse = useMutation<
     EndpointResponse,
@@ -50,11 +67,29 @@ export function useEndpointWorkspace(
     UpdateResponseInput
   >({
     mutationFn: adapter.updateResponse,
-    onSuccess: invalidateWorkspace,
+    onSuccess: async () => {
+      toast.success(messages.endpoints.responseUpdateSuccess);
+      await invalidateWorkspace();
+    },
+    onError: (error) => {
+      toast.error(messages.endpoints.responseUpdateError, {
+        description: error.message,
+      });
+    },
   });
   const deleteResponse = useMutation<void, ApiError, ResponseActivationInput>({
     mutationFn: adapter.deleteResponse,
-    onSuccess: invalidateWorkspace,
+    onSuccess: async () => {
+      toast.success(messages.endpoints.responseDeleteSuccessTitle, {
+        description: messages.endpoints.responseDeleteSuccessDescription,
+      });
+      await invalidateWorkspace();
+    },
+    onError: (error) => {
+      toast.error(messages.endpoints.responseDeleteError, {
+        description: error.message,
+      });
+    },
   });
   const activateResponse = useMutation<
     EndpointResponse,
@@ -63,6 +98,11 @@ export function useEndpointWorkspace(
   >({
     mutationFn: adapter.activateResponse,
     onSuccess: invalidateWorkspace,
+    onError: (error) => {
+      toast.error("Failed to activate response", {
+        description: error.message,
+      });
+    },
   });
   const deactivateResponse = useMutation<
     EndpointResponse,
@@ -71,6 +111,11 @@ export function useEndpointWorkspace(
   >({
     mutationFn: adapter.deactivateResponse,
     onSuccess: invalidateWorkspace,
+    onError: (error) => {
+      toast.error("Failed to deactivate response", {
+        description: error.message,
+      });
+    },
   });
   const updateResponseSimulation = useMutation<
     EndpointResponse,
@@ -78,7 +123,15 @@ export function useEndpointWorkspace(
     ResponseSimulationInput
   >({
     mutationFn: adapter.updateResponseSimulation,
-    onSuccess: invalidateWorkspace,
+    onSuccess: async () => {
+      toast.success("Simulation settings updated successfully");
+      await invalidateWorkspace();
+    },
+    onError: (error) => {
+      toast.error("Failed to update simulation settings", {
+        description: error.message,
+      });
+    },
   });
 
   return {

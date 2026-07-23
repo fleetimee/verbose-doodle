@@ -8,13 +8,14 @@ import {
 import { EditResponseJsonForm } from "@/features/endpoints/forms/edit-response-json-form";
 import { EditResponseNameForm } from "@/features/endpoints/forms/edit-response-name-form";
 import { EditResponseStatusCodeForm } from "@/features/endpoints/forms/edit-response-status-code-form";
-import { useUpdateResponse } from "@/features/endpoints/hooks/use-update-response";
+import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
 import type { EndpointResponse } from "@/features/endpoints/types";
 import { messages } from "@/lib/i18n";
 
 type EditType = "name" | "statusCode" | "json";
 
 type EditResponseDialogProps = {
+  endpointId: string;
   response: EndpointResponse;
   editType: EditType;
   open: boolean;
@@ -22,22 +23,25 @@ type EditResponseDialogProps = {
 };
 
 export function EditResponseDialog({
+  endpointId,
   response,
   editType,
   open,
   onOpenChange,
 }: EditResponseDialogProps) {
-  const { mutate: updateResponse, isPending } = useUpdateResponse();
+  const { updateResponse } = useEndpointWorkspace(endpointId);
+  const { mutate: updateResponseMutation, isPending } = updateResponse;
 
   const handleSubmit = (data: {
     name?: string;
     statusCode?: number;
     json?: string;
   }) => {
-    updateResponse(
+    updateResponseMutation(
       {
+        endpointId,
         responseId: response.id,
-        ...data,
+        changes: data,
       },
       {
         onSuccess: () => {

@@ -24,8 +24,7 @@ import { EndpointListItem } from "@/features/endpoints/components/endpoint-list-
 import { EndpointListSkeleton } from "@/features/endpoints/components/endpoint-list-skeleton";
 import { EndpointsSearchControls } from "@/features/endpoints/components/endpoints-search-controls";
 import { ExportEndpointsDialog } from "@/features/endpoints/components/export-endpoints-dialog";
-import { useCreateEndpoint } from "@/features/endpoints/hooks/use-create-endpoint";
-import { useGetEndpoints } from "@/features/endpoints/hooks/use-get-endpoints";
+import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import type { GroupedEndpoints } from "@/features/endpoints/types";
 import {
@@ -165,8 +164,10 @@ export function EndpointsPage() {
     keywords: ["api endpoints", "integrations", "api management", "endpoints"],
   });
 
+  const { endpoints: endpointsQuery, createEndpoint: createEndpointMutation } =
+    useEndpointCatalog();
   const { data: endpoints = [], isPending: isLoadingEndpoints } =
-    useGetEndpoints();
+    endpointsQuery;
   const { session } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
@@ -186,7 +187,7 @@ export function EndpointsPage() {
   const shouldReduceMotion = prefersReducedMotion ?? false;
 
   const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
-    useCreateEndpoint();
+    createEndpointMutation;
 
   const filteredEndpoints = useMemo(
     () => filterEndpoints(endpoints, searchTerm),

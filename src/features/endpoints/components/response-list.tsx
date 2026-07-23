@@ -21,6 +21,7 @@ import { messages } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 type ResponseListProps = {
+  endpointId: string;
   responses: EndpointResponse[];
   selectedResponseId: string | null;
   isActivating: boolean;
@@ -73,6 +74,7 @@ function AnimatedResponseListItem({
 }
 
 export function ResponseList({
+  endpointId,
   responses,
   selectedResponseId,
   isActivating,
@@ -116,6 +118,7 @@ export function ResponseList({
                   <AnimatePresence initial={false} mode="popLayout">
                     {activeResponses.map((response) => (
                       <AnimatedResponseListItem
+                        endpointId={endpointId}
                         isActivating={isActivating}
                         isDeactivating={isDeactivating}
                         isSelected={selectedResponseId === response.id}
@@ -178,6 +181,7 @@ export function ResponseList({
                   <AnimatePresence initial={false} mode="popLayout">
                     {inactiveResponses.map((response) => (
                       <AnimatedResponseListItem
+                        endpointId={endpointId}
                         isActivating={isActivating}
                         isDeactivating={isDeactivating}
                         isSelected={selectedResponseId === response.id}

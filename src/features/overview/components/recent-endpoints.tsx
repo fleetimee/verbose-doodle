@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { usePrefetchEndpoint } from "@/features/endpoints/hooks/use-prefetch-endpoint";
+import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import type { HttpMethod } from "@/features/endpoints/types";
 import type { OverviewData } from "@/features/overview/types";
 import { encodeId } from "@/lib/id-encoder";
@@ -30,7 +30,7 @@ type RecentEndpointsProps = {
 };
 
 export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
-  const { prefetchEndpoint } = usePrefetchEndpoint();
+  const { prefetchEndpoint } = useEndpointCatalog();
 
   return (
     <Card
@@ -51,8 +51,8 @@ export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
             <Link
               className="group relative -mx-3 flex items-center justify-between gap-3 rounded-md border border-transparent px-3 py-4 outline-none transition-[color,background-color,border-color,box-shadow] duration-200 ease-[var(--ease-out)] first:-mt-2 last:-mb-2 hover:border-border/70 hover:bg-[linear-gradient(90deg,color-mix(in_oklab,var(--primary)_13%,transparent),color-mix(in_oklab,var(--accent)_38%,transparent))] hover:shadow-[0_16px_40px_-28px_var(--primary)] focus-visible:border-border/70 focus-visible:bg-[linear-gradient(90deg,color-mix(in_oklab,var(--primary)_13%,transparent),color-mix(in_oklab,var(--accent)_38%,transparent))] focus-visible:ring-2 focus-visible:ring-primary/25 motion-reduce:transition-none"
               key={endpoint.endpointId}
-              onFocus={() => prefetchEndpoint(endpoint.endpointId)}
-              onMouseEnter={() => prefetchEndpoint(endpoint.endpointId)}
+              onFocus={() => prefetchEndpoint(String(endpoint.endpointId))}
+              onMouseEnter={() => prefetchEndpoint(String(endpoint.endpointId))}
               to={`/dashboard/endpoints/${encodeId(endpoint.endpointId)}`}
             >
               <span className="absolute inset-y-3 left-0 w-0.5 rounded-full bg-primary opacity-0 transition-opacity duration-200 group-hover:opacity-80 group-focus-visible:opacity-80" />

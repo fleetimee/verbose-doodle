@@ -97,13 +97,6 @@ export const API_ENDPOINTS = {
 } as const;
 
 /**
- * Helper function to get admin endpoint list URL
- */
-export function getAdminEndpointList(): string {
-  return API_ENDPOINTS.admin.endpoints.list;
-}
-
-/**
  * Helper function to get public endpoint view URL
  */
 export function getPublicEndpointView(): string {
@@ -118,66 +111,6 @@ export function getAdminBillerList(): string {
 }
 
 /**
- * Helper function to get endpoint detail URL
- */
-export function getEndpointDetailUrl(id: string | number): string {
-  return API_ENDPOINTS.admin.endpoints.detail(id);
-}
-
-/**
- * Helper function to get endpoint update URL
- */
-export function getEndpointUpdateUrl(id: string | number): string {
-  return API_ENDPOINTS.admin.endpoints.update(id);
-}
-
-/**
- * Helper function to get endpoint delete URL
- */
-export function getEndpointDeleteUrl(id: string | number): string {
-  return API_ENDPOINTS.admin.endpoints.delete(id);
-}
-
-/**
- * Helper function to get endpoint traffic logs URL
- */
-export function getEndpointTrafficLogsUrl(id: string | number): string {
-  return API_ENDPOINTS.admin.endpoints.trafficLogs.list(id);
-}
-
-/**
- * Helper function to get endpoint traffic log detail URL
- */
-export function getEndpointTrafficLogDetailUrl(
-  id: string | number,
-  logId: string | number
-): string {
-  return API_ENDPOINTS.admin.endpoints.trafficLogs.detail(id, logId);
-}
-
-/**
- * Helper function to get endpoint traffic logs clear URL
- */
-export function getEndpointTrafficLogsClearUrl(id: string | number): string {
-  return API_ENDPOINTS.admin.endpoints.trafficLogs.clear(id);
-}
-
-/**
- * Helper function to get endpoint traffic logs download URL
- */
-export function getEndpointTrafficLogsDownloadUrl(id: string | number): string {
-  return API_ENDPOINTS.admin.endpoints.trafficLogs.download(id);
-}
-
-export function getEndpointMetricsSummaryUrl(id: string | number): string {
-  return API_ENDPOINTS.admin.endpoints.metrics.summary(id);
-}
-
-export function getEndpointMetricsHourlyUrl(id: string | number): string {
-  return API_ENDPOINTS.admin.endpoints.metrics.hourly(id);
-}
-
-/**
  * Helper function to get login URL
  */
 export function getLoginUrl(): string {
@@ -189,33 +122,6 @@ export function getLoginUrl(): string {
  */
 export function getOverviewUrl(): string {
   return API_ENDPOINTS.admin.overview;
-}
-
-/**
- * Helper function to get response create URL
- */
-export function getResponseCreateUrl(): string {
-  return API_ENDPOINTS.admin.responses.create;
-}
-
-/**
- * Helper function to get response activate URL
- */
-export function getResponseActivateUrl(
-  endpointId: string | number,
-  responseId: string | number
-): string {
-  return API_ENDPOINTS.admin.responses.activate(endpointId, responseId);
-}
-
-/**
- * Helper function to get response deactivate URL
- */
-export function getResponseDeactivateUrl(
-  endpointId: string | number,
-  responseId: string | number
-): string {
-  return API_ENDPOINTS.admin.responses.deactivate(endpointId, responseId);
 }
 
 /**
@@ -251,11 +157,4 @@ export function getUserUpdateUrl(id: string | number): string {
  */
 export function getUserDeleteUrl(id: string | number): string {
   return API_ENDPOINTS.admin.users.delete(id);
-}
-
-/**
- * Helper function to get response simulation update URL
- */
-export function getResponseSimulationUrl(id: string | number): string {
-  return API_ENDPOINTS.admin.responses.updateSimulation(id);
 }

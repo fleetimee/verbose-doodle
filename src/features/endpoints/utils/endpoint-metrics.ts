@@ -1,8 +1,6 @@
 import type {
   EndpointHourlyMetric,
   EndpointMetric,
-} from "@/features/endpoints/hooks/use-get-endpoint-metrics";
-import type {
   EndpointTrafficLog,
   EndpointTrafficLogStatus,
 } from "@/features/endpoints/types";

@@ -59,10 +59,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  useGetEndpointHourlyMetrics,
-  useGetEndpointMetricsSummary,
-} from "@/features/endpoints/hooks/use-get-endpoint-metrics";
+import { useEndpointTelemetry } from "@/features/endpoints/hooks/use-endpoint-telemetry";
+import type { EndpointTrafficLogsFilters } from "@/features/endpoints/types";
 import {
   type EndpointMetrics,
   getPersistedEndpointMetrics,
@@ -134,13 +132,19 @@ export function EndpointMetricsSheet({
   const [timeWindow, setTimeWindow] =
     useState<PersistedMetricsTimeWindow>("24h");
   const range = useMemo(() => getMetricRange(timeWindow), [timeWindow]);
-  const summaryQuery = useGetEndpointMetricsSummary(endpointId, open);
-  const hourlyQuery = useGetEndpointHourlyMetrics(
-    endpointId,
-    range.from,
-    range.to,
-    open
-  );
+  const telemetryFilters: EndpointTrafficLogsFilters = {
+    limit: 1,
+    status: "all",
+    search: "",
+    includeBody: false,
+  };
+  const { metricsSummary: summaryQuery, hourlyMetrics: hourlyQuery } =
+    useEndpointTelemetry(endpointId, telemetryFilters, {
+      enabled: open,
+      from: range.from,
+      includeTrafficLogs: false,
+      to: range.to,
+    });
 
   const metrics = useMemo(
     () =>

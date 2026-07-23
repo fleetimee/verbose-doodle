@@ -54,12 +54,8 @@ import { EndpointDetailSkeleton } from "@/features/endpoints/components/endpoint
 import { EndpointMetricsSheet } from "@/features/endpoints/components/endpoint-metrics-sheet";
 import { EndpointTrafficLogViewer } from "@/features/endpoints/components/endpoint-traffic-log-viewer";
 import { ResponseStepper } from "@/features/endpoints/components/response-stepper";
-import { useActivateResponse } from "@/features/endpoints/hooks/use-activate-response";
-import { useCreateResponse } from "@/features/endpoints/hooks/use-create-response";
-import { useDeactivateResponse } from "@/features/endpoints/hooks/use-deactivate-response";
-import { useDeleteEndpoint } from "@/features/endpoints/hooks/use-delete-endpoint";
-import { useGetEndpoint } from "@/features/endpoints/hooks/use-get-endpoint";
-import { useUpdateEndpoint } from "@/features/endpoints/hooks/use-update-endpoint";
+import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
+import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
 import type { ResponseFormData } from "@/features/endpoints/schemas/response-schema";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
 import {
@@ -142,19 +138,27 @@ export function EndpointDetailPage() {
   const shouldMarkTourSeenOnEnd = useRef(false);
   const { activeTourId, isActive, setSteps, startTour } = useTour();
 
-  const { data: endpoint, isPending: isLoadingEndpoint } = useGetEndpoint(
-    decodedId ?? ""
-  );
+  const {
+    endpoint: endpointQuery,
+    createResponse: createResponseMutation,
+    activateResponse: activateResponseMutation,
+    deactivateResponse: deactivateResponseMutation,
+  } = useEndpointWorkspace(decodedId ?? "");
+  const { data: endpoint, isPending: isLoadingEndpoint } = endpointQuery;
   const { mutate: createResponse, isPending: isCreatingResponse } =
-    useCreateResponse();
+    createResponseMutation;
   const { mutate: activateResponse, isPending: isActivatingResponse } =
-    useActivateResponse();
+    activateResponseMutation;
   const { mutate: deactivateResponse, isPending: isDeactivatingResponse } =
-    useDeactivateResponse();
+    deactivateResponseMutation;
+  const {
+    updateEndpoint: updateEndpointMutation,
+    deleteEndpoint: deleteEndpointMutation,
+  } = useEndpointCatalog();
   const { mutate: updateEndpoint, isPending: isUpdatingEndpoint } =
-    useUpdateEndpoint();
+    updateEndpointMutation;
   const { mutate: deleteEndpoint, isPending: isDeletingEndpoint } =
-    useDeleteEndpoint();
+    deleteEndpointMutation;
 
   useDocumentMeta({
     title: endpoint ? `${endpoint.method} ${endpoint.url}` : "Endpoint Detail",
@@ -395,7 +399,7 @@ export function EndpointDetailPage() {
     const updatePayload: {
       endpointId: string;
       url?: string;
-      method?: string;
+      method?: HttpMethod;
     } = {
       endpointId: endpoint.id,
     };
@@ -408,17 +412,26 @@ export function EndpointDetailPage() {
       updatePayload.method = editedMethod;
     }
 
-    updateEndpoint(updatePayload, {
-      onSuccess: () => {
-        setIsEditingUrl(false);
-        setEditedUrl("");
-        setEditedMethod("GET");
+    updateEndpoint(
+      {
+        endpointId: updatePayload.endpointId,
+        changes: {
+          ...(updatePayload.url ? { url: updatePayload.url } : {}),
+          ...(updatePayload.method ? { method: updatePayload.method } : {}),
+        },
       },
-      onError: () => {
-        // Error toast is handled by the hook
-        // Keep editing mode open so user can correct the error
-      },
-    });
+      {
+        onSuccess: () => {
+          setIsEditingUrl(false);
+          setEditedUrl("");
+          setEditedMethod("GET");
+        },
+        onError: () => {
+          // Error toast is handled by the hook
+          // Keep editing mode open so user can correct the error
+        },
+      }
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -438,18 +451,13 @@ export function EndpointDetailPage() {
       return;
     }
 
-    deleteEndpoint(
-      {
-        endpointId: endpoint.id,
+    deleteEndpoint(endpoint.id, {
+      onSuccess: () => {
+        setShowDeleteEndpointDialog(false);
+        // Redirect to endpoints page after deletion
+        navigate("/dashboard/endpoints");
       },
-      {
-        onSuccess: () => {
-          setShowDeleteEndpointDialog(false);
-          // Redirect to endpoints page after deletion
-          navigate("/dashboard/endpoints");
-        },
-      }
-    );
+    });
   };
 
   // Show error if the ID cannot be decoded
@@ -905,6 +913,7 @@ export function EndpointDetailPage() {
         }}
       >
         <EndpointDetailLayout
+          endpointId={endpoint.id}
           endpointMethod={endpoint.method}
           endpointUrl={endpoint.url}
           isActivating={isActivatingResponse}

@@ -41,14 +41,14 @@ import { useAuth } from "@/features/auth/context";
 import { EditResponseStepper } from "@/features/endpoints/components/edit-response-stepper";
 import { ResponseSimulationBadge } from "@/features/endpoints/components/response-simulation-badge";
 import { SimulateTimeoutDialog } from "@/features/endpoints/components/simulate-timeout-dialog";
-import { useDeleteResponse } from "@/features/endpoints/hooks/use-delete-response";
-import { useUpdateResponse } from "@/features/endpoints/hooks/use-update-response";
+import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
 import type { EndpointResponse } from "@/features/endpoints/types";
 import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
 type ResponseListItemProps = {
+  endpointId: string;
   response: EndpointResponse;
   isSelected: boolean;
   isActivating: boolean;
@@ -86,6 +86,7 @@ function getActivationButtonClasses(isActive: boolean, isLoading: boolean) {
 }
 
 export function ResponseListItem({
+  endpointId,
   response,
   isSelected,
   isActivating,
@@ -107,8 +108,12 @@ export function ResponseListItem({
     "name"
   );
 
-  const { mutate: updateResponse, isPending: isUpdating } = useUpdateResponse();
-  const { mutate: deleteResponse, isPending: isDeleting } = useDeleteResponse();
+  const { updateResponse: updateResponseMutation, deleteResponse } =
+    useEndpointWorkspace(endpointId);
+  const { mutate: updateResponse, isPending: isUpdating } =
+    updateResponseMutation;
+  const { mutate: deleteResponseMutation, isPending: isDeleting } =
+    deleteResponse;
 
   const handleConfirm = () => {
     if (isActive) {
@@ -131,8 +136,9 @@ export function ResponseListItem({
   }) => {
     updateResponse(
       {
+        endpointId,
         responseId: response.id,
-        ...data,
+        changes: data,
       },
       {
         onSuccess: () => {
@@ -147,10 +153,8 @@ export function ResponseListItem({
   };
 
   const handleConfirmDelete = () => {
-    deleteResponse(
-      {
-        responseId: response.id,
-      },
+    deleteResponseMutation(
+      { endpointId, responseId: response.id },
       {
         onSuccess: () => {
           setShowDeleteDialog(false);
@@ -362,6 +366,7 @@ export function ResponseListItem({
       </div>
 
       <SimulateTimeoutDialog
+        endpointId={endpointId}
         onOpenChange={setShowSimulateDialog}
         open={showSimulateDialog}
         response={response}

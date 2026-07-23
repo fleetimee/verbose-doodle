@@ -16,6 +16,7 @@ const ResponsePreview = lazy(() =>
 );
 
 type EndpointDetailLayoutProps = {
+  endpointId: string;
   responses: EndpointResponse[];
   selectedResponse: EndpointResponse | null;
   selectedResponseId: string | null;
@@ -31,6 +32,7 @@ type EndpointDetailLayoutProps = {
 };
 
 export function EndpointDetailLayout({
+  endpointId,
   responses,
   selectedResponse,
   selectedResponseId,
@@ -59,6 +61,7 @@ export function EndpointDetailLayout({
           </div>
           <TabsContent className="mt-0" value="responses">
             <ResponseList
+              endpointId={endpointId}
               isActivating={isActivating}
               isDeactivating={isDeactivating}
               onActivateResponse={onActivateResponse}
@@ -85,6 +88,7 @@ export function EndpointDetailLayout({
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={35} id={responsesTourId} minSize={25}>
             <ResponseList
+              endpointId={endpointId}
               isActivating={isActivating}
               isDeactivating={isDeactivating}
               onActivateResponse={onActivateResponse}
