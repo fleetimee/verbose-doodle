@@ -170,6 +170,7 @@ export function EndpointsPage() {
     endpointsQuery;
   const { session } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [initialBillerId, setInitialBillerId] = useState<number | undefined>();
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useLocalStorage<"grid" | "list">(
@@ -203,7 +204,8 @@ export function EndpointsPage() {
   const hasFilteredEndpoints = groupedEndpoints.length > 0;
   const canAddEndpoint = session.can("canAddEndpoint");
 
-  const handleCreateEndpoint = () => {
+  const handleCreateEndpoint = (billerId?: number) => {
+    setInitialBillerId(billerId);
     setIsDialogOpen(true);
   };
 
@@ -393,9 +395,11 @@ export function EndpointsPage() {
               id={hasEndpoints ? ENDPOINTS_TOUR_TARGETS.addEndpoint : undefined}
             >
               <AddEndpointSheet
+                initialBillerId={initialBillerId}
                 isSubmitting={isCreatingEndpoint}
                 onOpenChange={setIsDialogOpen}
                 onSubmit={handleAddEndpoint}
+                onTriggerClick={() => handleCreateEndpoint()}
                 open={isDialogOpen}
                 showTrigger={hasEndpoints}
               />
@@ -557,9 +561,27 @@ export function EndpointsPage() {
               {groupedEndpoints.map((group, index) => (
                 <section className="space-y-4" key={group.billerId}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <h2 className="font-semibold text-lg">
-                      {group.billerName}
-                    </h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="font-semibold text-lg">
+                        {group.billerName}
+                      </h2>
+                      <ProtectedAction ability="canAddEndpoint">
+                        <Button
+                          aria-label={`Add endpoint for ${group.billerName}`}
+                          onClick={() => handleCreateEndpoint(group.billerId)}
+                          size="sm"
+                          type="button"
+                          variant="outline"
+                        >
+                          <HugeiconsIcon
+                            className="size-3.5"
+                            icon={Add01Icon}
+                            strokeWidth={2}
+                          />
+                          {messages.endpoints.addEndpoint}
+                        </Button>
+                      </ProtectedAction>
+                    </div>
                     <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-muted/35 px-2.5 py-1 font-medium text-muted-foreground text-xs">
                       <Layers3 className="h-3.5 w-3.5" />
                       {group.endpoints.length} endpoint
@@ -622,7 +644,8 @@ export function EndpointsPage() {
               <ProtectedAction ability="canAddEndpoint">
                 <Button
                   id={ENDPOINTS_TOUR_TARGETS.createFirstEndpoint}
-                  onClick={handleCreateEndpoint}
+                  onClick={() => handleCreateEndpoint()}
+                  type="button"
                 >
                   <HugeiconsIcon
                     className="mr-2 h-4 w-4"
