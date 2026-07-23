@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { Controller, type UseFormReturn, useForm } from "react-hook-form";
 import {
   Field,
@@ -31,8 +31,17 @@ type EndpointFormProps = {
   onSubmit: (data: EndpointFormData) => void;
   billers?: Biller[];
   isLoadingBillers?: boolean;
+  initialBillerId?: number;
   children?: React.ReactNode;
 };
+
+function getDefaultValues(initialBillerId?: number) {
+  return {
+    method: "GET" as const,
+    url: "/rest",
+    billerId: initialBillerId,
+  };
+}
 
 export type EndpointFormHandle = {
   reset: () => void;
@@ -41,15 +50,24 @@ export type EndpointFormHandle = {
 };
 
 export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
-  ({ onSubmit, billers = [], isLoadingBillers = false, children }, ref) => {
+  (
+    {
+      onSubmit,
+      billers = [],
+      initialBillerId,
+      isLoadingBillers = false,
+      children,
+    },
+    ref
+  ) => {
     const form = useForm<EndpointFormData>({
       resolver: zodResolver(endpointSchema),
-      defaultValues: {
-        method: "GET",
-        url: "/rest",
-        billerId: billers[0]?.id ?? 1,
-      },
+      defaultValues: getDefaultValues(initialBillerId),
     });
+
+    useEffect(() => {
+      form.reset(getDefaultValues(initialBillerId));
+    }, [form, initialBillerId]);
 
     useImperativeHandle(ref, () => ({
       reset: () => form.reset(),

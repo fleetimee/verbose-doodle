@@ -42,7 +42,7 @@ describe("EndpointForm", () => {
     const handleSubmit = mock((_data: EndpointFormData) => {});
 
     render(
-      <EndpointForm onSubmit={handleSubmit}>
+      <EndpointForm initialBillerId={1} onSubmit={handleSubmit}>
         <button type="submit">{SUBMIT_BUTTON_LABEL}</button>
       </EndpointForm>
     );
@@ -89,7 +89,7 @@ describe("EndpointForm", () => {
     const formRef = createRef<EndpointFormHandle>();
 
     render(
-      <EndpointForm onSubmit={handleSubmit} ref={formRef}>
+      <EndpointForm initialBillerId={1} onSubmit={handleSubmit} ref={formRef}>
         <button type="submit">{SUBMIT_BUTTON_LABEL}</button>
       </EndpointForm>
     );

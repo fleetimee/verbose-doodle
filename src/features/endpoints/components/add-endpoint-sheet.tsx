@@ -26,6 +26,8 @@ type AddEndpointSheetProps = {
   onOpenChange?: (open: boolean) => void;
   isSubmitting?: boolean;
   showTrigger?: boolean;
+  initialBillerId?: number;
+  onTriggerClick?: () => void;
 };
 
 export function AddEndpointSheet({
@@ -34,6 +36,8 @@ export function AddEndpointSheet({
   onOpenChange,
   isSubmitting = false,
   showTrigger = true,
+  initialBillerId,
+  onTriggerClick,
 }: AddEndpointSheetProps) {
   const formRef = useRef<EndpointFormHandle>(null);
   const { data: billers = [], isLoading: isLoadingBillers } = useGetBillers();
@@ -54,7 +58,7 @@ export function AddEndpointSheet({
     <Sheet onOpenChange={handleOpenChange} open={open}>
       {showTrigger && (
         <SheetTrigger asChild>
-          <Button>
+          <Button onClick={onTriggerClick} type="button">
             <HugeiconsIcon
               className="mr-2 h-4 w-4"
               icon={Add01Icon}
@@ -74,6 +78,7 @@ export function AddEndpointSheet({
         <div className="flex flex-1 flex-col overflow-hidden">
           <EndpointForm
             billers={billers}
+            initialBillerId={initialBillerId}
             isLoadingBillers={isLoadingBillers}
             onSubmit={handleFormSubmit}
             ref={formRef}
