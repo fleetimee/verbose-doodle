@@ -199,7 +199,7 @@ function OutputCard({
                   ease: MOTION_EASE.out,
                 }}
               >
-                <CopyIcon />
+                <CopyIcon data-icon={copied ? "check" : "clipboard-copy"} />
               </motion.span>
             </AnimatePresence>
           </span>

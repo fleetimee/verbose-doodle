@@ -140,12 +140,14 @@ describe("NumberBaseConverter", () => {
     expect(fetchMock).not.toHaveBeenCalled();
 
     const copyButton = screen.getByRole("button", { name: "Copy hexadecimal" });
-    expect(copyButton.querySelector("svg")).not.toBeNull();
+    expect(
+      copyButton.querySelector('[data-icon="clipboard-copy"]')
+    ).not.toBeNull();
 
     await user.click(copyButton);
 
     expect(writeText).toHaveBeenCalledWith("FF");
-    expect(copyButton.querySelector("svg")).not.toBeNull();
+    expect(copyButton.querySelector('[data-icon="check"]')).not.toBeNull();
   });
 
   test("clears the workspace and restores the example", async () => {

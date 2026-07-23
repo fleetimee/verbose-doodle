@@ -105,12 +105,14 @@ describe("DateConverter", () => {
     fireEvent.keyDown(window, { key: "Enter", metaKey: true });
     expect(fetchMock).not.toHaveBeenCalled();
     const copyButton = screen.getByRole("button", { name: "Copy ISO 8601" });
-    expect(copyButton.querySelector("svg")).not.toBeNull();
+    expect(
+      copyButton.querySelector('[data-icon="clipboard-copy"]')
+    ).not.toBeNull();
 
     await user.click(copyButton);
 
     expect(writeText).toHaveBeenCalledWith("2024-01-01T00:00:00.123Z");
-    expect(copyButton.querySelector("svg")).not.toBeNull();
+    expect(copyButton.querySelector('[data-icon="check"]')).not.toBeNull();
   });
 
   test("keeps its guided-tour targets after clearing", async () => {

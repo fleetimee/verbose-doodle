@@ -39,6 +39,7 @@ import {
   GlobeIcon,
   Grid2X2Icon,
   HashIcon,
+  HistoryIcon,
   InformationCircleIcon,
   Key01Icon,
   LayerIcon,
@@ -59,10 +60,10 @@ import {
   Radio02Icon,
   RadioIcon,
   Refresh01Icon,
-  ResetPasswordIcon,
   Route01Icon,
   SecurityCheckIcon,
   ServerStack01Icon,
+  ServerStack02Icon,
   ShieldBanIcon,
   SignalIcon,
   SlidersHorizontalIcon,
@@ -154,7 +155,7 @@ export const RotateCcw = createHugeIcon(Refresh01Icon);
 export const Route = createHugeIcon(Route01Icon);
 export const SendHorizontal = createHugeIcon(MailSend01Icon);
 export const Server = createHugeIcon(ServerStack01Icon);
-export const ServerCrash = createHugeIcon(ServerStack01Icon);
+export const ServerCrash = createHugeIcon(ServerStack02Icon);
 export const ShieldAlert = createHugeIcon(ShieldBanIcon);
 export const ShieldCheck = createHugeIcon(SecurityCheckIcon);
 export const ShieldCheckIcon = createHugeIcon(SecurityCheckIcon);
@@ -164,7 +165,7 @@ export const Sun = createHugeIcon(Sun03Icon);
 export const TagIcon = createHugeIcon(Tag01Icon);
 export const TextCursor = createHugeIcon(CursorTextIcon);
 export const Timer = createHugeIcon(Timer01Icon);
-export const TimerReset = createHugeIcon(ResetPasswordIcon);
+export const TimerReset = createHugeIcon(HistoryIcon);
 export const Torus = createHugeIcon(TorusIcon);
 export const TrendingUp = createHugeIcon(TrendingUpDownIcon);
 export const Unplug = createHugeIcon(PlugSocketIcon);
