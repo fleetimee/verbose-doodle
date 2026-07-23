@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import type {
   CreateEndpointInput,
   EndpointDataAdapter,
@@ -28,26 +29,46 @@ export function useEndpointCatalog(
   const createEndpoint = useMutation<Endpoint, ApiError, CreateEndpointInput>({
     mutationFn: adapter.createEndpoint,
     onSuccess: async () => {
+      toast.success("Success", {
+        description: "Endpoint created successfully",
+      });
       await queryClient.invalidateQueries({
         queryKey: endpointDataQueryKeys.catalog,
       });
       await queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
     },
+    onError: (error) => {
+      toast.error("Failed to create endpoint", {
+        description: error.message,
+      });
+    },
   });
   const updateEndpoint = useMutation<Endpoint, ApiError, UpdateEndpointInput>({
     mutationFn: adapter.updateEndpoint,
     onSuccess: async (_, input) => {
+      toast.success("Success", {
+        description: "Endpoint updated successfully",
+      });
       await queryClient.invalidateQueries({
         queryKey: endpointDataQueryKeys.catalog,
       });
       await queryClient.invalidateQueries({
         queryKey: endpointDataQueryKeys.workspace(input.endpointId),
       });
+      await queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
+    },
+    onError: (error) => {
+      toast.error("Failed to update endpoint", {
+        description: error.message,
+      });
     },
   });
   const deleteEndpoint = useMutation<void, ApiError, string>({
     mutationFn: adapter.deleteEndpoint,
     onSuccess: async (_, endpointId) => {
+      toast.success("Success", {
+        description: "Endpoint deleted successfully",
+      });
       await queryClient.invalidateQueries({
         queryKey: endpointDataQueryKeys.catalog,
       });
@@ -55,6 +76,11 @@ export function useEndpointCatalog(
         queryKey: endpointDataQueryKeys.workspace(endpointId),
       });
       await queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
+    },
+    onError: (error) => {
+      toast.error("Failed to delete endpoint", {
+        description: error.message,
+      });
     },
   });
 

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import type { SimulationFormHandle } from "@/features/endpoints/forms/simulation-form";
 import { SimulationForm } from "@/features/endpoints/forms/simulation-form";
-import { useUpdateResponseSimulation } from "@/features/endpoints/hooks/use-update-response-simulation";
+import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
 import {
   SIMULATION_TYPE,
   type SimulationFormValues,
@@ -16,18 +16,21 @@ import {
 import type { EndpointResponse } from "@/features/endpoints/types";
 
 type SimulateTimeoutDialogProps = {
+  endpointId: string;
   response: EndpointResponse;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
 export function SimulateTimeoutDialog({
+  endpointId,
   response,
   open,
   onOpenChange,
 }: SimulateTimeoutDialogProps) {
   const formRef = useRef<SimulationFormHandle>(null);
-  const { mutate: updateSimulation, isPending } = useUpdateResponseSimulation();
+  const { updateResponseSimulation } = useEndpointWorkspace(endpointId);
+  const { mutate: updateSimulation, isPending } = updateResponseSimulation;
 
   // Determine initial values based on current response settings
   const getInitialValues = (): SimulationFormValues => {
@@ -64,6 +67,7 @@ export function SimulateTimeoutDialog({
     // Convert form values to API request
     const simulationSettings = {
       responseId: response.id,
+      endpointId,
       delayMs:
         values.type === SIMULATION_TYPE.DELAY && values.delayMs
           ? values.delayMs

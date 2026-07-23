@@ -19,7 +19,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { HttpMethodBadge } from "@/features/endpoints/components/http-method-badge";
-import { useGetEndpoint } from "@/features/endpoints/hooks/use-get-endpoint";
+import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
 import type { HttpMethod } from "@/features/endpoints/types";
 import { SocketBridgeFloatingStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
 import { SocketBridgeProvider } from "@/features/socket-tester/context/socket-bridge-context";
@@ -73,7 +73,8 @@ export function DashboardLayout() {
   // Decode the ID if we're on an endpoint detail page
   const decodedId = encodedId ? decodeId(encodedId) : undefined;
 
-  const { data: endpoint } = useGetEndpoint(decodedId || "");
+  const { endpoint: endpointQuery } = useEndpointWorkspace(decodedId || "");
+  const { data: endpoint } = endpointQuery;
 
   const pathSegments = location.pathname
     .split("/")

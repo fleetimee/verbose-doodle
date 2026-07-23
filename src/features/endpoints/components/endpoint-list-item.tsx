@@ -11,7 +11,7 @@ import {
 import { EndpointMetaStrip } from "@/features/endpoints/components/endpoint-meta-strip";
 import { EndpointPathTitle } from "@/features/endpoints/components/endpoint-path-title";
 import { HttpMethodBadge } from "@/features/endpoints/components/http-method-badge";
-import { usePrefetchEndpoint } from "@/features/endpoints/hooks/use-prefetch-endpoint";
+import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import type { Endpoint } from "@/features/endpoints/types";
 import { getMethodColor } from "@/features/endpoints/utils/http-method-colors";
 import { encodeId } from "@/lib/id-encoder";
@@ -29,7 +29,7 @@ export function EndpointListItem({
   tourId,
 }: EndpointListItemProps) {
   const navigate = useNavigate();
-  const { prefetchEndpoint } = usePrefetchEndpoint();
+  const { prefetchEndpoint } = useEndpointCatalog();
   const methodColors = getMethodColor(endpoint.method);
 
   const handleClick = () => {

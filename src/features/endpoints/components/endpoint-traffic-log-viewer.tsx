@@ -68,16 +68,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/features/auth/context";
 import { UserAgentClientBadge } from "@/features/endpoints/components/user-agent-client-badge";
-import { useClearEndpointTrafficLogs } from "@/features/endpoints/hooks/use-clear-endpoint-traffic-logs";
-import { useGetEndpointTrafficLogDetail } from "@/features/endpoints/hooks/use-get-endpoint-traffic-log-detail";
-import { useGetEndpointTrafficLogs } from "@/features/endpoints/hooks/use-get-endpoint-traffic-logs";
+import { useEndpointTelemetry } from "@/features/endpoints/hooks/use-endpoint-telemetry";
 import type {
   EndpointTrafficLog,
   EndpointTrafficLogStatus,
   EndpointTrafficLogStatusFilter,
   EndpointTrafficLogsFilters,
 } from "@/features/endpoints/types";
-import { getEndpointTrafficLogsDownloadUrl } from "@/lib/api-endpoints";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, formatPluralMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -274,16 +272,25 @@ export function EndpointTrafficLogViewer({
   );
 
   const {
+    trafficLogs,
+    trafficLogDetail,
+    clearTrafficLogs: clearTrafficLogsMutation,
+  } = useEndpointTelemetry(endpointId, filters, {
+    enabled: autoRefresh,
+    includeMetrics: false,
+    selectedLogId,
+  });
+  const {
     data,
     error,
     isFetching,
     isPending,
     refetch: refetchLogs,
-  } = useGetEndpointTrafficLogs(endpointId, filters, autoRefresh);
+  } = trafficLogs;
   const { data: selectedLogDetail, isPending: isLoadingDetail } =
-    useGetEndpointTrafficLogDetail(endpointId, selectedLogId);
+    trafficLogDetail;
   const { mutate: clearTrafficLogs, isPending: isClearingTrafficLogs } =
-    useClearEndpointTrafficLogs();
+    clearTrafficLogsMutation;
 
   const logs = useMemo(
     () =>
@@ -326,16 +333,13 @@ export function EndpointTrafficLogViewer({
   };
 
   const handleClearTrafficLogs = () => {
-    clearTrafficLogs(
-      { endpointId },
-      {
-        onSuccess: () => {
-          setSelectedIds(new Set());
-          setSelectedLogId(null);
-          setShowClearLogsDialog(false);
-        },
-      }
-    );
+    clearTrafficLogs(endpointId, {
+      onSuccess: () => {
+        setSelectedIds(new Set());
+        setSelectedLogId(null);
+        setShowClearLogsDialog(false);
+      },
+    });
   };
 
   const handleDownload = async (format: LogDownloadFormat) => {
@@ -351,7 +355,7 @@ export function EndpointTrafficLogViewer({
 
     const token = snapshot.accessToken;
     const response = await fetch(
-      `${getEndpointTrafficLogsDownloadUrl(endpointId)}?${params.toString()}`,
+      `${API_ENDPOINTS.admin.endpoints.trafficLogs.download(endpointId)}?${params.toString()}`,
       {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       }
