@@ -575,12 +575,13 @@ export function EndpointsPage() {
                           <TooltipTrigger asChild>
                             <Button
                               aria-label={`Add endpoint for ${group.billerName}`}
+                              className="border-border/70 bg-background/70 text-muted-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
                               onClick={() =>
                                 handleCreateEndpoint(group.billerId)
                               }
-                              size="icon-sm"
+                              size="icon-xs"
                               type="button"
-                              variant="ghost"
+                              variant="outline"
                             >
                               <HugeiconsIcon
                                 className="size-3.5"
