@@ -111,18 +111,18 @@ const ACTIVE_MAP: Record<Exclude<NodeId, null>, Set<Exclude<NodeId, null>>> = {
 // ---------------------------------------------------------------------------
 
 const VB_W = 500;
-const VB_H = 320;
+const VB_H = 355;
 
 // x/y center of each node in viewBox coordinates
 const NODE_POSITIONS: Record<
   Exclude<NodeId, null>,
   { x: number; y: number }
 > = {
-  frontend: { x: 250, y: 50 },
-  "api-gateway": { x: 250, y: 140 },
-  controller: { x: 145, y: 230 },
-  jwt: { x: 355, y: 230 },
-  database: { x: 250, y: 290 },
+  frontend: { x: 250, y: 52 },
+  "api-gateway": { x: 250, y: 138 },
+  controller: { x: 145, y: 224 },
+  jwt: { x: 355, y: 224 },
+  database: { x: 250, y: 285 },
 };
 
 // Map of node ID to its icon glyph
@@ -192,7 +192,7 @@ function DiagramNode({
       style={{
         cursor: "pointer",
         transformOrigin: `${pos.x}px ${pos.y}px`,
-        opacity: reducedMotion ? nodeOpacity : undefined,
+        opacity: nodeOpacity,
       }}
       tabIndex={0}
       transition={{ type: "spring", stiffness: 350, damping: 25 }}
