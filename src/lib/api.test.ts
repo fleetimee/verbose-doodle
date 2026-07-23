@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import {
   apiDelete,
   apiFetch,
@@ -6,21 +6,49 @@ import {
   apiPatch,
   apiPost,
   apiPut,
+  createApiClient,
 } from "@/lib/api";
 
 describe("API utilities", () => {
-  let fetchSpy: ReturnType<typeof spyOn>;
+  const originalFetch = globalThis.fetch;
+  let fetchSpy: ReturnType<typeof mock>;
 
   beforeEach(() => {
-    // Create spy on global fetch
-    fetchSpy = spyOn(global, "fetch");
+    fetchSpy = mock();
+    globalThis.fetch = fetchSpy as unknown as typeof fetch;
     localStorage.clear();
   });
 
   afterEach(() => {
-    // Restore original fetch after each test
-    fetchSpy.mockRestore();
+    globalThis.fetch = originalFetch;
     localStorage.clear();
+  });
+
+  test("creates a client from injected session and fetch dependencies", async () => {
+    const fetchCalls: RequestInit[] = [];
+    const session = {
+      getSnapshot: () => ({ accessToken: "session-token" }),
+      refresh: () => Promise.resolve(),
+      signOut: () => undefined,
+    };
+    const injectedFetch = (_input: RequestInfo | URL, init?: RequestInit) => {
+      fetchCalls.push(init ?? {});
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+        json: async () => ({ ok: true }),
+      } as Response);
+    };
+
+    const client = createApiClient({ session, fetch: injectedFetch });
+
+    await expect(client.apiGet<{ ok: boolean }>("/injected")).resolves.toEqual({
+      ok: true,
+    });
+    expect(fetchCalls[0]?.headers).toEqual(
+      expect.objectContaining({ Authorization: "Bearer session-token" })
+    );
   });
 
   describe("apiFetch", () => {
@@ -147,10 +175,18 @@ describe("API utilities", () => {
       });
     });
 
-    test("clears auth token and emits unauthorized event on 401", async () => {
-      const authUtils = await import("@/features/auth/utils");
-      const clearSpy = spyOn(authUtils, "clearAuthToken");
-      const emitSpy = spyOn(authUtils, "emitUnauthorizedEvent");
+    test("signs out through the session on an authenticated 401", async () => {
+      let signOutCalls = 0;
+      const client = createApiClient({
+        session: {
+          getSnapshot: () => ({ accessToken: "access-token" }),
+          refresh: () => Promise.resolve(),
+          signOut: () => {
+            signOutCalls += 1;
+          },
+        },
+        fetch: fetchSpy as unknown as typeof fetch,
+      });
 
       fetchSpy.mockResolvedValue({
         ok: false,
@@ -160,27 +196,36 @@ describe("API utilities", () => {
         json: async () => ({ message: "Unauthorized" }),
       } as Response);
 
-      await expect(apiFetch("/test")).rejects.toEqual({
+      await expect(
+        client.apiFetch("/test", { retryOnUnauthorized: false })
+      ).rejects.toEqual({
         message: "Unauthorized",
         status: 401,
         code: "401",
       });
 
-      expect(clearSpy).toHaveBeenCalledTimes(1);
-      expect(emitSpy).toHaveBeenCalledTimes(1);
-
-      clearSpy.mockRestore();
-      emitSpy.mockRestore();
+      expect(signOutCalls).toBe(1);
     });
 
     test("refreshes token and retries once on 401", async () => {
-      const authUtils = await import("@/features/auth/utils");
-      const clearSpy = spyOn(authUtils, "clearAuthToken");
-      const emitSpy = spyOn(authUtils, "emitUnauthorizedEvent");
+      let accessToken = "old-access-token";
+      let refreshCalls = 0;
+      let signOutCalls = 0;
+      const client = createApiClient({
+        session: {
+          getSnapshot: () => ({ accessToken }),
+          refresh: () => {
+            refreshCalls += 1;
+            accessToken = "new-access-token";
+            return Promise.resolve();
+          },
+          signOut: () => {
+            signOutCalls += 1;
+          },
+        },
+        fetch: fetchSpy as unknown as typeof fetch,
+      });
       const mockData = { ok: true };
-
-      localStorage.setItem("auth_token", "old-access-token");
-      localStorage.setItem("refresh_token", "refresh-token");
 
       fetchSpy
         .mockResolvedValueOnce({
@@ -194,28 +239,14 @@ describe("API utilities", () => {
           ok: true,
           status: 200,
           headers: new Headers({ "content-type": "application/json" }),
-          json: async () => ({
-            responseCode: "00",
-            responseDesc: "Success",
-            data: {
-              accessToken: "new-access-token",
-              refreshToken: "new-refresh-token",
-              tokenType: "Bearer",
-              expiresIn: 900,
-            },
-          }),
-        } as Response)
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          headers: new Headers({ "content-type": "application/json" }),
           json: async () => mockData,
         } as Response);
 
-      const result = await apiFetch("/test");
+      const result = await client.apiFetch("/test");
 
       expect(result).toEqual(mockData);
-      expect(fetchSpy).toHaveBeenCalledTimes(3);
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(refreshCalls).toBe(1);
       expect(fetchSpy.mock.calls[0]?.[1]).toEqual(
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -225,95 +256,84 @@ describe("API utilities", () => {
       );
       expect(fetchSpy.mock.calls[1]?.[1]).toEqual(
         expect.objectContaining({
-          headers: expect.not.objectContaining({
-            Authorization: expect.any(String),
-          }),
-        })
-      );
-      expect(fetchSpy.mock.calls[2]?.[1]).toEqual(
-        expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: "Bearer new-access-token",
           }),
         })
       );
-      expect(localStorage.getItem("auth_token")).toBe("new-access-token");
-      expect(localStorage.getItem("refresh_token")).toBe("new-refresh-token");
-      expect(clearSpy).not.toHaveBeenCalled();
-      expect(emitSpy).not.toHaveBeenCalled();
-
-      clearSpy.mockRestore();
-      emitSpy.mockRestore();
+      expect(signOutCalls).toBe(0);
     });
 
     test("shares one refresh across concurrent unauthorized requests", async () => {
-      localStorage.setItem("auth_token", "old-access-token");
-      localStorage.setItem("refresh_token", "refresh-token");
+      let accessToken = "old-access-token";
+      let refreshCalls = 0;
+      let resolveRefresh: (() => void) | undefined;
+      const refreshPromise = new Promise<void>((resolve) => {
+        resolveRefresh = resolve;
+      });
+      const client = createApiClient({
+        session: {
+          getSnapshot: () => ({ accessToken }),
+          refresh: () => {
+            refreshCalls += 1;
+            return refreshPromise.then(() => {
+              accessToken = "new-access-token";
+            });
+          },
+          signOut: () => undefined,
+        },
+        fetch: fetchSpy as unknown as typeof fetch,
+      });
 
-      let refreshRequests = 0;
       fetchSpy.mockImplementation(
-        async (input: string | URL | Request, init?: RequestInit) => {
+        (input: string | URL | Request, init?: RequestInit) => {
           const url = String(input);
           const authorization = (
             init?.headers as Record<string, string> | undefined
           )?.Authorization;
 
-          if (url === "/api/refresh") {
-            refreshRequests += 1;
-            await Promise.resolve();
-            return {
-              ok: true,
-              status: 200,
-              headers: new Headers({ "content-type": "application/json" }),
-              json: async () => ({
-                responseCode: "00",
-                responseDesc: "Success",
-                data: {
-                  accessToken: "new-access-token",
-                  refreshToken: "new-refresh-token",
-                  tokenType: "Bearer",
-                  expiresIn: 900,
-                },
-              }),
-            } as Response;
-          }
-
           if (authorization === "Bearer old-access-token") {
-            return {
+            return Promise.resolve({
               ok: false,
               status: 401,
               statusText: "Unauthorized",
               headers: new Headers(),
               json: async () => ({ message: "Unauthorized" }),
-            } as Response;
+            } as Response);
           }
 
-          return {
+          return Promise.resolve({
             ok: true,
             status: 200,
             headers: new Headers({ "content-type": "application/json" }),
             json: async () => ({ url }),
-          } as Response;
+          } as Response);
         }
       );
 
-      const [first, second] = await Promise.all([
-        apiFetch<{ url: string }>("/first"),
-        apiFetch<{ url: string }>("/second"),
-      ]);
+      const firstRequest = client.apiFetch<{ url: string }>("/first");
+      const secondRequest = client.apiFetch<{ url: string }>("/second");
+      resolveRefresh?.();
+      const [first, second] = await Promise.all([firstRequest, secondRequest]);
 
       expect(first).toEqual({ url: "/first" });
       expect(second).toEqual({ url: "/second" });
-      expect(refreshRequests).toBe(1);
-      expect(fetchSpy).toHaveBeenCalledTimes(5);
+      expect(refreshCalls).toBe(1);
+      expect(fetchSpy).toHaveBeenCalledTimes(4);
     });
 
     test("emits one logout transition when a shared refresh fails", async () => {
-      const authUtils = await import("@/features/auth/utils");
-      const emitSpy = spyOn(authUtils, "emitUnauthorizedEvent");
-
-      localStorage.setItem("auth_token", "old-access-token");
-      localStorage.setItem("refresh_token", "refresh-token");
+      let signOutCalls = 0;
+      const client = createApiClient({
+        session: {
+          getSnapshot: () => ({ accessToken: "old-access-token" }),
+          refresh: () => Promise.reject(new Error("refresh failed")),
+          signOut: () => {
+            signOutCalls += 1;
+          },
+        },
+        fetch: fetchSpy as unknown as typeof fetch,
+      });
 
       fetchSpy.mockResolvedValue({
         ok: false,
@@ -324,21 +344,28 @@ describe("API utilities", () => {
       } as Response);
 
       const results = await Promise.allSettled([
-        apiFetch("/first"),
-        apiFetch("/second"),
+        client.apiFetch("/first"),
+        client.apiFetch("/second"),
       ]);
 
       expect(
         results.every((result) => result.status === "rejected")
       ).toBeTrue();
-      expect(emitSpy).toHaveBeenCalledTimes(1);
-      emitSpy.mockRestore();
+      expect(signOutCalls).toBe(1);
     });
 
-    test("does not emit unauthorized event when disabled", async () => {
-      const authUtils = await import("@/features/auth/utils");
-      const clearSpy = spyOn(authUtils, "clearAuthToken");
-      const emitSpy = spyOn(authUtils, "emitUnauthorizedEvent");
+    test("does not sign out when unauthorized handling is disabled", async () => {
+      let signOutCalls = 0;
+      const client = createApiClient({
+        session: {
+          getSnapshot: () => ({ accessToken: null }),
+          refresh: () => Promise.resolve(),
+          signOut: () => {
+            signOutCalls += 1;
+          },
+        },
+        fetch: fetchSpy as unknown as typeof fetch,
+      });
 
       fetchSpy.mockResolvedValue({
         ok: false,
@@ -349,7 +376,7 @@ describe("API utilities", () => {
       } as Response);
 
       await expect(
-        apiFetch("/api/refresh", {
+        client.apiFetch("/api/refresh", {
           auth: false,
           emitUnauthorized: false,
           retryOnUnauthorized: false,
@@ -360,11 +387,7 @@ describe("API utilities", () => {
         code: "401",
       });
 
-      expect(clearSpy).not.toHaveBeenCalled();
-      expect(emitSpy).not.toHaveBeenCalled();
-
-      clearSpy.mockRestore();
-      emitSpy.mockRestore();
+      expect(signOutCalls).toBe(0);
     });
 
     test("handles timeout", async () => {

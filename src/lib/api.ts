@@ -3,20 +3,115 @@
  * These utilities provide a consistent interface for making HTTP requests
  */
 
-import { handleRefreshFailureOnce } from "@/features/auth/refresh-coordinator";
-import {
-  clearAuthToken,
-  emitUnauthorizedEvent,
-  getAuthToken,
-  saveAuthToken,
-  saveRefreshToken,
-} from "@/features/auth/utils";
-
 export type ApiError = {
   message: string;
   status?: number;
   code?: string;
 };
+
+export type ApiSession = {
+  getSnapshot: () => { readonly accessToken: string | null };
+  refresh: () => Promise<unknown>;
+  signOut: () => void;
+};
+
+/**
+ * Configuration options for API requests
+ */
+export type FetchConfig = RequestInit & {
+  auth?: boolean;
+  baseUrl?: string;
+  emitUnauthorized?: boolean;
+  retryOnUnauthorized?: boolean;
+  timeout?: number;
+};
+
+export type ApiClientOptions = {
+  session: ApiSession;
+  fetch: ApiFetchImplementation;
+};
+
+export type ApiClient = {
+  apiFetch: <T>(endpoint: string, config?: FetchConfig) => Promise<T>;
+  apiGet: <T>(
+    endpoint: string,
+    config?: Omit<FetchConfig, "method" | "body">
+  ) => Promise<T>;
+  apiPost: <T, D = unknown>(
+    endpoint: string,
+    data?: D,
+    config?: Omit<FetchConfig, "method" | "body">
+  ) => Promise<T>;
+  apiPut: <T, D = unknown>(
+    endpoint: string,
+    data?: D,
+    config?: Omit<FetchConfig, "method" | "body">
+  ) => Promise<T>;
+  apiPatch: <T, D = unknown>(
+    endpoint: string,
+    data?: D,
+    config?: Omit<FetchConfig, "method" | "body">
+  ) => Promise<T>;
+  apiDelete: <T>(
+    endpoint: string,
+    config?: Omit<FetchConfig, "method" | "body">
+  ) => Promise<T>;
+};
+
+const DEFAULT_TIMEOUT = 30_000;
+const DEFAULT_BASE_URL = "";
+const HTTP_STATUS_UNAUTHORIZED = 401;
+
+type ApiFetchImplementation = (
+  input: RequestInfo | URL,
+  init?: RequestInit
+) => Promise<Response>;
+
+type UnauthorizedResult<T> =
+  | {
+      readonly data: T;
+      readonly retried: true;
+    }
+  | {
+      readonly retried: false;
+    };
+
+async function fetchWithTimeout(
+  fetchImplementation: ApiFetchImplementation,
+  url: string,
+  options: RequestInit,
+  timeout: number
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    return await fetchImplementation(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw {
+        message: "Request timeout",
+        code: "TIMEOUT",
+      } as ApiError;
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function parseResponse<T>(response: Response): Promise<T> {
+  const contentType = response.headers.get("content-type");
+  if (!contentType?.includes("application/json")) {
+    return Promise.resolve(undefined as T);
+  }
+
+  return response.json();
+}
 
 /**
  * Creates an ApiError from a Response object
@@ -44,220 +139,230 @@ async function createApiError(response: Response): Promise<ApiError> {
   };
 }
 
-/**
- * Configuration options for API requests
- */
-export type FetchConfig = RequestInit & {
-  auth?: boolean;
-  baseUrl?: string;
-  emitUnauthorized?: boolean;
-  retryOnUnauthorized?: boolean;
-  timeout?: number;
-};
+export function createApiClient({
+  session,
+  fetch,
+}: ApiClientOptions): ApiClient {
+  let refreshFailureHandled = false;
+  let refreshOperation: Promise<unknown> | null = null;
 
-const DEFAULT_TIMEOUT = 30_000;
-const DEFAULT_BASE_URL = "";
-const HTTP_STATUS_UNAUTHORIZED = 401;
-
-type UnauthorizedResult<T> =
-  | {
-      readonly data: T;
-      readonly retried: true;
+  const signOutAfterRefreshFailure = () => {
+    if (refreshFailureHandled) {
+      return;
     }
-  | {
-      readonly retried: false;
-    };
+    refreshFailureHandled = true;
+    session.signOut();
+  };
 
-async function refreshAndRetry<T>(
-  endpoint: string,
-  config: FetchConfig
-): Promise<T> {
-  const { refreshToken } = await import(
-    "@/features/auth/hooks/use-refresh-token"
-  );
-  const refreshResult = await refreshToken();
-  saveAuthToken(refreshResult.accessToken);
-  saveRefreshToken(refreshResult.refreshToken);
+  const refreshSession = () => {
+    if (refreshOperation) {
+      return refreshOperation;
+    }
 
-  return await apiFetch<T>(endpoint, {
-    ...config,
-    retryOnUnauthorized: false,
-  });
-}
+    const operation = session.refresh().finally(() => {
+      if (refreshOperation === operation) {
+        refreshOperation = null;
+      }
+    });
+    refreshOperation = operation;
+    return operation;
+  };
 
-async function handleUnauthorized<T>({
-  auth,
-  config,
-  emitUnauthorized,
-  endpoint,
-  retryOnUnauthorized,
-}: {
-  readonly auth: boolean;
-  readonly config: FetchConfig;
-  readonly emitUnauthorized: boolean;
-  readonly endpoint: string;
-  readonly retryOnUnauthorized: boolean;
-}): Promise<UnauthorizedResult<T>> {
-  if (retryOnUnauthorized && auth) {
+  const retryUnauthorized = async <T>(
+    request: () => Promise<T>,
+    emitUnauthorized: boolean
+  ): Promise<UnauthorizedResult<T>> => {
     try {
-      return {
-        data: await refreshAndRetry<T>(endpoint, config),
-        retried: true,
-      };
-    } catch (error) {
+      await refreshSession();
+      const data = await request();
+      refreshFailureHandled = false;
+      return { data, retried: true };
+    } catch {
       if (emitUnauthorized) {
-        handleRefreshFailureOnce(error, () => {
-          clearAuthToken();
-          emitUnauthorizedEvent();
-        });
+        signOutAfterRefreshFailure();
       }
       return { retried: false };
     }
-  }
-
-  if (emitUnauthorized) {
-    clearAuthToken();
-    emitUnauthorizedEvent();
-  }
-
-  return { retried: false };
-}
-
-/**
- * Generic fetch wrapper with error handling and timeout
- */
-export async function apiFetch<T>(
-  endpoint: string,
-  config: FetchConfig = {}
-): Promise<T> {
-  const {
-    auth = true,
-    baseUrl = DEFAULT_BASE_URL,
-    emitUnauthorized = true,
-    retryOnUnauthorized = true,
-    timeout = DEFAULT_TIMEOUT,
-    headers = {},
-    ...rest
-  } = config;
-
-  const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  const token = auth ? getAuthToken() : null;
-  const requestHeaders: HeadersInit = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-    ...headers,
   };
 
-  try {
-    const response = await fetch(url, {
-      ...rest,
-      headers: requestHeaders,
-      signal: controller.signal,
-    });
+  const apiFetch = async <T>(
+    endpoint: string,
+    config: FetchConfig = {}
+  ): Promise<T> => {
+    const {
+      auth = true,
+      baseUrl = DEFAULT_BASE_URL,
+      emitUnauthorized = true,
+      retryOnUnauthorized = true,
+      timeout = DEFAULT_TIMEOUT,
+      headers = {},
+      ...rest
+    } = config;
 
-    clearTimeout(timeoutId);
+    const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint;
+
+    const accessToken = auth ? session.getSnapshot().accessToken : null;
+    const requestHeaders: HeadersInit = {
+      "Content-Type": "application/json",
+      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+      ...headers,
+    };
+    const response = await fetchWithTimeout(
+      fetch,
+      url,
+      { ...rest, headers: requestHeaders },
+      timeout
+    );
+
+    if (
+      !response.ok &&
+      response.status === HTTP_STATUS_UNAUTHORIZED &&
+      retryOnUnauthorized &&
+      auth
+    ) {
+      const retryResult = await retryUnauthorized(
+        () =>
+          apiFetch<T>(endpoint, {
+            ...config,
+            emitUnauthorized: false,
+            retryOnUnauthorized: false,
+          }),
+        emitUnauthorized
+      );
+      if (retryResult.retried) {
+        return retryResult.data;
+      }
+    }
+
+    if (
+      !response.ok &&
+      response.status === HTTP_STATUS_UNAUTHORIZED &&
+      auth &&
+      emitUnauthorized &&
+      !retryOnUnauthorized
+    ) {
+      session.signOut();
+    }
 
     if (!response.ok) {
-      if (response.status === HTTP_STATUS_UNAUTHORIZED) {
-        const retryResult = await handleUnauthorized<T>({
-          auth,
-          config,
-          emitUnauthorized,
-          endpoint,
-          retryOnUnauthorized,
-        });
-        if (retryResult.retried) {
-          return retryResult.data;
-        }
-      }
       throw await createApiError(response);
     }
 
-    const contentType = response.headers.get("content-type");
-    if (!contentType?.includes("application/json")) {
-      return undefined as T;
-    }
+    return parseResponse<T>(response);
+  };
 
-    return await response.json();
-  } catch (error) {
-    clearTimeout(timeoutId);
+  const apiGet = <T>(
+    endpoint: string,
+    config?: Omit<FetchConfig, "method" | "body">
+  ): Promise<T> => apiFetch<T>(endpoint, { ...config, method: "GET" });
 
-    if (error instanceof DOMException && error.name === "AbortError") {
-      throw {
-        message: "Request timeout",
-        code: "TIMEOUT",
-      } as ApiError;
-    }
+  const apiPost = <T, D = unknown>(
+    endpoint: string,
+    data?: D,
+    config?: Omit<FetchConfig, "method" | "body">
+  ): Promise<T> =>
+    apiFetch<T>(endpoint, {
+      ...config,
+      method: "POST",
+      body: JSON.stringify(data),
+    });
 
-    throw error;
-  }
+  const apiPut = <T, D = unknown>(
+    endpoint: string,
+    data?: D,
+    config?: Omit<FetchConfig, "method" | "body">
+  ): Promise<T> =>
+    apiFetch<T>(endpoint, {
+      ...config,
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+
+  const apiPatch = <T, D = unknown>(
+    endpoint: string,
+    data?: D,
+    config?: Omit<FetchConfig, "method" | "body">
+  ): Promise<T> =>
+    apiFetch<T>(endpoint, {
+      ...config,
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+
+  const apiDelete = <T>(
+    endpoint: string,
+    config?: Omit<FetchConfig, "method" | "body">
+  ): Promise<T> => apiFetch<T>(endpoint, { ...config, method: "DELETE" });
+
+  return {
+    apiFetch,
+    apiGet,
+    apiPost,
+    apiPut,
+    apiPatch,
+    apiDelete,
+  };
 }
 
-/**
- * GET request helper
- */
+const defaultSession: ApiSession = {
+  getSnapshot: () => ({ accessToken: null }),
+  refresh: () => Promise.reject(new Error("No default session configured")),
+  signOut: () => undefined,
+};
+
+const defaultFetch: ApiFetchImplementation = (input, init) =>
+  globalThis.fetch(input, init);
+
+let defaultClient = createApiClient({
+  session: defaultSession,
+  fetch: defaultFetch,
+});
+
+export function setDefaultApiSession(session: ApiSession): void {
+  defaultClient = createApiClient({ session, fetch: defaultFetch });
+}
+
+export function apiFetch<T>(
+  endpoint: string,
+  config: FetchConfig = {}
+): Promise<T> {
+  return defaultClient.apiFetch<T>(endpoint, config);
+}
+
 export function apiGet<T>(
   endpoint: string,
   config?: Omit<FetchConfig, "method" | "body">
 ): Promise<T> {
-  return apiFetch<T>(endpoint, { ...config, method: "GET" });
+  return defaultClient.apiGet<T>(endpoint, config);
 }
 
-/**
- * POST request helper
- */
 export function apiPost<T, D = unknown>(
   endpoint: string,
   data?: D,
   config?: Omit<FetchConfig, "method" | "body">
 ): Promise<T> {
-  return apiFetch<T>(endpoint, {
-    ...config,
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+  return defaultClient.apiPost<T, D>(endpoint, data, config);
 }
 
-/**
- * PUT request helper
- */
 export function apiPut<T, D = unknown>(
   endpoint: string,
   data?: D,
   config?: Omit<FetchConfig, "method" | "body">
 ): Promise<T> {
-  return apiFetch<T>(endpoint, {
-    ...config,
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
+  return defaultClient.apiPut<T, D>(endpoint, data, config);
 }
 
-/**
- * PATCH request helper
- */
 export function apiPatch<T, D = unknown>(
   endpoint: string,
   data?: D,
   config?: Omit<FetchConfig, "method" | "body">
 ): Promise<T> {
-  return apiFetch<T>(endpoint, {
-    ...config,
-    method: "PATCH",
-    body: JSON.stringify(data),
-  });
+  return defaultClient.apiPatch<T, D>(endpoint, data, config);
 }
 
-/**
- * DELETE request helper
- */
 export function apiDelete<T>(
   endpoint: string,
   config?: Omit<FetchConfig, "method" | "body">
 ): Promise<T> {
-  return apiFetch<T>(endpoint, { ...config, method: "DELETE" });
+  return defaultClient.apiDelete<T>(endpoint, config);
 }
