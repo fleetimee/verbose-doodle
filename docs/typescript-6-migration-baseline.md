@@ -58,7 +58,7 @@ Bun is the package-manager authority. The manifest declares `typescript: ^6.0.3`
 - `package.json` `build`: `tsc -b && vite build`
 - `Dockerfile`, `Dockerfile.production`, and `Dockerfile.kantor.deploy`: `bun run build`
 
-The checked-in `package-lock.json` is not coherent with the current Bun-managed project: its root dependency set is from an older project shape and its root TypeScript entry is `~5.9.3`. It is not used by the package scripts or Docker build files. Do not silently reconcile it in this baseline ticket; issue #74 should either remove/replace it deliberately or record a maintainer decision.
+The obsolete npm `package-lock.json` was not coherent with the Bun-managed project and has been removed. Dependency resolution is governed by `bun.lock`, the package scripts, and the Docker build files.
 
 No repository CI configuration directory was found. Deployment documentation contains file-copy instructions and Docker workflows, but no separate TypeScript invocation.
 

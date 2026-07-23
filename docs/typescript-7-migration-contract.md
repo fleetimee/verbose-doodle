@@ -25,7 +25,7 @@ No configuration contains `baseUrl`, legacy module resolution, legacy module kin
 - Docker continues to call `bun run build`.
 - No `checkers`, `builders`, or other compiler parallelism flags were added.
 - `bun.lock` is authoritative and resolves TypeScript 7.0.2 and its platform packages.
-- The stale npm `package-lock.json` remains unchanged and is explicitly outside the Bun-managed migration contract.
+- The stale npm `package-lock.json` was removed; dependency resolution is governed by the Bun-managed `bun.lock`.
 
 ## Verification
 
