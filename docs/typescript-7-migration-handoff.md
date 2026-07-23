@@ -38,5 +38,5 @@ The migration verification ran `bun run lint`. It reports 44 existing diagnostic
 ## Remaining uncertainties
 
 - The requested exact `typescript@7.0.0` package is unavailable in the configured registry; the repository uses the first available stable release, exact `7.0.2`.
-- The checked-in npm `package-lock.json` still contains an older TypeScript 5.9.3 resolution. Bun is the repository's package-manager authority, and its lockfile is coherent and frozen; the npm lockfile remains unchanged and outside this migration.
+- The obsolete npm `package-lock.json` was removed. Bun is the repository's package-manager authority, and `bun.lock` is coherent and frozen.
 - Parent issue #72 was not modified by this verification work.
