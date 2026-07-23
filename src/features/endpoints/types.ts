@@ -137,3 +137,17 @@ export type EndpointTrafficLogsResult = {
   readonly nextCursor: string | null;
   readonly hasMore: boolean;
 };
+
+export type EndpointMetric = {
+  readonly requestCount: number;
+  readonly hitStatusCounts: Record<string, number>;
+  readonly httpStatusCounts: Record<string, number>;
+  readonly totalDurationMs: number;
+  readonly minDurationMs: number | null;
+  readonly maxDurationMs: number | null;
+  readonly averageDurationMs: number;
+};
+
+export type EndpointHourlyMetric = EndpointMetric & {
+  readonly bucketStart: string;
+};
