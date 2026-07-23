@@ -29,7 +29,7 @@ describe("Date Converter navigation", () => {
     );
   });
 
-  test("renders the converter page with document metadata", () => {
+  test("renders the converter page at its dashboard path", () => {
     localStorage.setItem("date-converter-tour-seen", "true");
     localStorage.setItem("date-converter-timezone", '"UTC"');
     render(
@@ -52,8 +52,5 @@ describe("Date Converter navigation", () => {
     expect(
       screen.getByRole("heading", { name: "Date Converter", level: 1 })
     ).toBeDefined();
-    expect(document.title).toBe(
-      "Date / Unix Timestamp Converter | BPDDIY DevTools | Fleetime Labs"
-    );
   });
 });

@@ -9,6 +9,7 @@ import {
   DEVELOPER_TOOL_COUNT,
   type DeveloperToolCategory,
   type DeveloperToolDefinition,
+  getDeveloperToolHref,
 } from "@/features/developer-tools/catalog";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { formatMessage, formatPluralMessage, messages } from "@/lib/i18n";
@@ -133,7 +134,7 @@ function ToolCard({
             tool: tool.name,
           })}
           className={buttonVariants({ size: "sm", variant: "outline" })}
-          to={tool.href}
+          to={getDeveloperToolHref(tool)}
         >
           {messages.developerTools.openAction}
           <HugeiconsIcon
@@ -300,7 +301,7 @@ export function DeveloperToolsCatalog() {
         {visibleEntries.map((entry) => (
           <ToolCard
             category={entry.category}
-            key={entry.tool.href}
+            key={entry.tool.id}
             tool={entry.tool}
             view={activeView}
           />

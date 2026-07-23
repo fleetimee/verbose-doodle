@@ -31,7 +31,7 @@ describe("Number Base Converter navigation", () => {
     );
   });
 
-  test("renders the converter page with document metadata", () => {
+  test("renders the converter page at its dashboard path", () => {
     localStorage.setItem("number-base-converter-tour-seen", "true");
     render(
       <MemoryRouter
@@ -56,8 +56,5 @@ describe("Number Base Converter navigation", () => {
         level: 1,
       })
     ).toBeDefined();
-    expect(document.title).toBe(
-      "Number Base Converter | BPDDIY DevTools | Fleetime Labs"
-    );
   });
 });

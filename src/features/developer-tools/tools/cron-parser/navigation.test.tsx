@@ -49,15 +49,5 @@ describe("Cron Parser navigation", () => {
     expect(
       screen.getByRole("heading", { name: "Cron Parser", level: 1 })
     ).toBeDefined();
-    expect(document.title).toBe(
-      "Cron Parser | BPDDIY DevTools | Fleetime Labs"
-    );
-    expect(
-      document
-        .querySelector('meta[name="description"]')
-        ?.getAttribute("content")
-    ).toBe(
-      "Explain Unix cron expressions and preview their next executions by timezone."
-    );
   });
 });

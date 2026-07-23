@@ -31,6 +31,7 @@ import { useAuth } from "@/features/auth/context";
 import {
   DEVELOPER_TOOL_CATEGORIES,
   DEVELOPER_TOOL_COUNT,
+  getDeveloperToolHref,
 } from "@/features/developer-tools/catalog";
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import { usePrefetchOverview } from "@/features/overview/hooks/use-prefetch-overview";
@@ -86,7 +87,7 @@ const data = {
       groupLabel: messages.developerTools.navigationGroup,
       items: category.tools.map((tool) => ({
         title: tool.name,
-        url: tool.href,
+        url: getDeveloperToolHref(tool),
         icon: tool.icon,
       })),
     })),
