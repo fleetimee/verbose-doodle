@@ -1,6 +1,6 @@
-import type { LucideIcon } from "lucide-react";
 import type React from "react";
 import { Link, useLocation } from "react-router";
+import type { HugeIcon } from "@/components/hugeicons";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -17,7 +17,7 @@ export function NavSecondary({
   items: {
     title: string;
     url: string;
-    icon: LucideIcon;
+    icon: HugeIcon;
     onPrefetch?: () => void;
   }[];
   children?: React.ReactNode;

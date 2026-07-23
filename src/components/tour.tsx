@@ -1,6 +1,7 @@
 "use client";
 
-import { Torus, X } from "lucide-react";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type React from "react";
 import {
@@ -12,6 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Torus } from "@/components/hugeicons";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -478,7 +480,7 @@ export function TourProvider({
                     }}
                     type="button"
                   >
-                    <X />
+                    <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
                     <span className="sr-only">Close</span>
                   </button>
                 )}

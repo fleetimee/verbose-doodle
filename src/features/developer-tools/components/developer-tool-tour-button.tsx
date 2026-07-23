@@ -1,4 +1,5 @@
-import { CircleHelp } from "lucide-react";
+import { HelpCircleIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { type TourStep, useTour } from "@/components/tour";
 import { Button } from "@/components/ui/button";
@@ -97,7 +98,11 @@ export function DeveloperToolTourButton({
       type="button"
       variant="outline"
     >
-      <CircleHelp data-icon="inline-start" />
+      <HugeiconsIcon
+        data-icon="inline-start"
+        icon={HelpCircleIcon}
+        strokeWidth={2}
+      />
       {label}
     </Button>
   );

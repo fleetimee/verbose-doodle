@@ -1,17 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  CheckCircle,
-  Eye,
-  EyeOff,
-  KeyRound,
-  Shield,
-  ShieldCheck,
-  User,
-  UserCog,
-} from "lucide-react";
+  EyeIcon,
+  ShieldIcon,
+  UserIcon,
+  ViewOffIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { Controller, type UseFormReturn, useForm } from "react-hook-form";
+import {
+  CheckCircle,
+  KeyRound,
+  ShieldCheck,
+  UserCog,
+} from "@/components/hugeicons";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
@@ -119,7 +122,11 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                       className="flex items-center gap-2"
                       htmlFor="user-username"
                     >
-                      <User className="h-4 w-4" />
+                      <HugeiconsIcon
+                        className="h-4 w-4"
+                        icon={UserIcon}
+                        strokeWidth={2}
+                      />
                       {messages.users.usernameLabel}
                     </FieldLabel>
                     <FieldContent>
@@ -183,9 +190,17 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                               type="button"
                             >
                               {showPassword ? (
-                                <EyeOff className="h-4 w-4" />
+                                <HugeiconsIcon
+                                  className="h-4 w-4"
+                                  icon={ViewOffIcon}
+                                  strokeWidth={2}
+                                />
                               ) : (
-                                <Eye className="h-4 w-4" />
+                                <HugeiconsIcon
+                                  className="h-4 w-4"
+                                  icon={EyeIcon}
+                                  strokeWidth={2}
+                                />
                               )}
                             </InputGroupButton>
                           </InputGroupAddon>
@@ -261,7 +276,11 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                               <TooltipTrigger asChild>
                                 <SelectItem value="USER">
                                   <div className="flex items-center gap-2">
-                                    <Shield className="h-4 w-4" />
+                                    <HugeiconsIcon
+                                      className="h-4 w-4"
+                                      icon={ShieldIcon}
+                                      strokeWidth={2}
+                                    />
                                     {messages.users.userRole}
                                   </div>
                                 </SelectItem>

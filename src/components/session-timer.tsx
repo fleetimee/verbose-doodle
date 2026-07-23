@@ -1,4 +1,5 @@
-import { Clock, Info } from "lucide-react";
+import { AlertCircleIcon, Clock01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Popover,
   PopoverContent,
@@ -68,11 +69,19 @@ export function SessionTimer() {
             )}
             size="sm"
           >
-            <Clock className={cn(isWarning && "motion-safe:animate-pulse")} />
+            <HugeiconsIcon
+              className={cn(isWarning && "motion-safe:animate-pulse")}
+              icon={Clock01Icon}
+              strokeWidth={2}
+            />
             <span>
               {formatMessage(messages.auth.sessionLabel, { time: timeDisplay })}
             </span>
-            <Info className="ml-auto opacity-60" />
+            <HugeiconsIcon
+              className="ml-auto opacity-60"
+              icon={AlertCircleIcon}
+              strokeWidth={2}
+            />
           </SidebarMenuButton>
         </PopoverTrigger>
         <PopoverContent align="start" className="w-80" side="right">

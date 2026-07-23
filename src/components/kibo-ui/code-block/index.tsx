@@ -1,7 +1,6 @@
 "use client";
 
 import { useControlled } from "@base-ui/utils/useControlled";
-import { CheckIcon, CopyIcon } from "lucide-react";
 import { motion } from "motion/react";
 import type {
   ComponentProps,
@@ -90,6 +89,7 @@ import {
 } from "react-icons/si";
 import type { BundledLanguage, CodeOptionsMultipleThemes } from "shiki";
 import { toast } from "sonner";
+import { CheckIcon, CopyIcon } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import {
   Select,

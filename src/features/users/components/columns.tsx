@@ -1,5 +1,11 @@
+import {
+  DeleteIcon,
+  EditIcon,
+  MoreHorizontalCircle01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { ArrowUpDown } from "@/components/hugeicons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -120,7 +126,10 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
           <DropdownMenuTrigger asChild>
             <Button className="h-8 w-8 p-0" variant="ghost">
               <span className="sr-only">{messages.users.openMenu}</span>
-              <MoreHorizontal />
+              <HugeiconsIcon
+                icon={MoreHorizontalCircle01Icon}
+                strokeWidth={2}
+              />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -130,14 +139,22 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
                 className="flex items-center hover:cursor-pointer"
                 onClick={() => actions.onEdit(user)}
               >
-                <Pencil className="w-2" />
+                <HugeiconsIcon
+                  className="w-2"
+                  icon={EditIcon}
+                  strokeWidth={2}
+                />
                 {messages.users.editUser}
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600 hover:cursor-pointer hover:text-red-600!"
                 onClick={() => actions.onDelete(user)}
               >
-                <Trash className="w-2 text-red-600" />{" "}
+                <HugeiconsIcon
+                  className="w-2 text-red-600"
+                  icon={DeleteIcon}
+                  strokeWidth={2}
+                />{" "}
                 {messages.users.deleteUser}
               </DropdownMenuItem>
             </DropdownMenuGroup>

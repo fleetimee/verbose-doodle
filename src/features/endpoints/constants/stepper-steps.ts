@@ -1,4 +1,4 @@
-import { Code2, Eye, FileText, Hash } from "lucide-react";
+import { Code2, Eye, FileText, Hash } from "@/components/hugeicons";
 
 export const STEPS = [
   {

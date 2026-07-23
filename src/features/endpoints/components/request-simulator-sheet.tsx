@@ -1,21 +1,24 @@
 import {
+  Alert02Icon,
+  CheckmarkCircle02Icon,
+  InboxIcon,
+  ServerStackIcon,
+  Settings01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import {
   Braces,
-  CheckCircle2,
   Clock3,
   FileJson,
-  Gauge,
-  Inbox,
   LoaderCircle,
   Play,
   RotateCcw,
   Route,
-  Server,
   ShieldCheck,
-  TriangleAlert,
-} from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+} from "@/components/hugeicons";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -136,9 +139,17 @@ const getStatusTone = (result: SimulatorResult): string =>
 
 const getStatusIcon = (result: SimulatorResult) =>
   result.ok ? (
-    <CheckCircle2 data-icon="inline-start" />
+    <HugeiconsIcon
+      data-icon="inline-start"
+      icon={CheckmarkCircle02Icon}
+      strokeWidth={2}
+    />
   ) : (
-    <TriangleAlert data-icon="inline-start" />
+    <HugeiconsIcon
+      data-icon="inline-start"
+      icon={Alert02Icon}
+      strokeWidth={2}
+    />
   );
 
 const formatHeaders = (headers: Headers): Record<string, string> => {
@@ -415,7 +426,12 @@ export function RequestSimulatorSheet({
         <SheetHeader className="border-b bg-muted/20 px-5 py-4">
           <div className="flex flex-wrap items-start gap-3 pr-8">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-background text-primary shadow-xs">
-              <Gauge aria-hidden="true" className="size-5" />
+              <HugeiconsIcon
+                aria-hidden="true"
+                className="size-5"
+                icon={Settings01Icon}
+                strokeWidth={2}
+              />
             </div>
             <div className="min-w-0 flex-1 space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
@@ -519,7 +535,12 @@ export function RequestSimulatorSheet({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">
-                  <Server aria-hidden="true" className="size-4" />
+                  <HugeiconsIcon
+                    aria-hidden="true"
+                    className="size-4"
+                    icon={ServerStackIcon}
+                    strokeWidth={2}
+                  />
                 </div>
                 <div className="flex flex-col gap-1">
                   <h3 className="font-medium text-sm">
@@ -579,7 +600,11 @@ export function RequestSimulatorSheet({
                         className="h-9 min-w-0 max-w-full justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono sm:max-w-52"
                         variant="outline"
                       >
-                        <Server data-icon="inline-start" />
+                        <HugeiconsIcon
+                          data-icon="inline-start"
+                          icon={ServerStackIcon}
+                          strokeWidth={2}
+                        />
                         <span className="min-w-0 truncate">
                           {responseContentType}
                         </span>
@@ -664,7 +689,11 @@ export function RequestSimulatorSheet({
                     {...resultPanelMotion}
                   >
                     <div className="rounded-md border bg-background p-3 text-muted-foreground shadow-xs">
-                      <Inbox data-icon="inline-start" />
+                      <HugeiconsIcon
+                        data-icon="inline-start"
+                        icon={InboxIcon}
+                        strokeWidth={2}
+                      />
                     </div>
                     <div className="flex max-w-sm flex-col gap-1">
                       <p className="font-medium text-sm">

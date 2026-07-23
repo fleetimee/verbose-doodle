@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+import type { HugeIcon } from "@/components/hugeicons";
 import {
   Binary,
   Braces,
@@ -9,13 +9,13 @@ import {
   RefreshCw,
   ShieldCheck,
   Timer,
-} from "lucide-react";
+} from "@/components/hugeicons";
 import { messages } from "@/lib/i18n";
 
 export type DeveloperToolDefinition = {
   readonly description: string;
   readonly href: string;
-  readonly icon: LucideIcon;
+  readonly icon: HugeIcon;
   readonly limit: string;
   readonly name: string;
   readonly runtime: string;
@@ -24,7 +24,7 @@ export type DeveloperToolDefinition = {
 
 export type DeveloperToolCategory = {
   readonly id: "conversion" | "scheduling" | "validation";
-  readonly icon: LucideIcon;
+  readonly icon: HugeIcon;
   readonly name: string;
   readonly tools: readonly DeveloperToolDefinition[];
 };

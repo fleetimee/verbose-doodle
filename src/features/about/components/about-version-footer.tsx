@@ -1,12 +1,12 @@
+import { Calendar03Icon, LinkSquare02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { motion } from "motion/react";
 import {
-  CalendarIcon,
-  ExternalLinkIcon,
   GitCommitIcon,
   LayersIcon,
   ShieldCheckIcon,
   TagIcon,
-} from "lucide-react";
-import { motion } from "motion/react";
+} from "@/components/hugeicons";
 import { Badge } from "@/components/ui/badge";
 
 export type AboutVersionFooterProps = {
@@ -65,7 +65,11 @@ export function AboutVersionFooter({
             target="_blank"
           >
             Releases
-            <ExternalLinkIcon className="h-3 w-3" />
+            <HugeiconsIcon
+              className="h-3 w-3"
+              icon={LinkSquare02Icon}
+              strokeWidth={2}
+            />
           </a>
         </div>
       </div>
@@ -102,8 +106,12 @@ export function AboutVersionFooter({
               target="_blank"
               title={`View commit ${commitSha} on Gitea`}
             >
-              {commitSha.substring(0, 7)}
-              <ExternalLinkIcon className="h-3 w-3 opacity-75" />
+              {commitSha.slice(0, 7)}
+              <HugeiconsIcon
+                className="h-3 w-3 opacity-75"
+                icon={LinkSquare02Icon}
+                strokeWidth={2}
+              />
             </a>
           </div>
         </div>
@@ -111,7 +119,11 @@ export function AboutVersionFooter({
         {/* Build Date */}
         <div className="flex items-center gap-3 rounded-lg border border-border/40 bg-background/60 p-3">
           <div className="rounded-md bg-primary/10 p-2 text-primary">
-            <CalendarIcon className="h-4 w-4" />
+            <HugeiconsIcon
+              className="h-4 w-4"
+              icon={Calendar03Icon}
+              strokeWidth={2}
+            />
           </div>
           <div className="flex flex-col gap-0.5">
             <span className="font-medium text-muted-foreground text-xs">

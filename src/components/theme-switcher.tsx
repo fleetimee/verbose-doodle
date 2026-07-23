@@ -1,9 +1,9 @@
 "use client";
 
 import { useControlled } from "@base-ui/utils/useControlled";
-import { Moon, Sun } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
+import { Moon, Sun } from "@/components/hugeicons";
 import { messages } from "@/lib/i18n";
 import { MOTION_DURATION } from "@/lib/motion";
 import { cn } from "@/lib/utils";

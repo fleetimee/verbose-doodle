@@ -1,4 +1,5 @@
-import { ChevronRight } from "lucide-react";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate } from "react-router";
 import {
   Item,
@@ -86,7 +87,11 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
       </ItemContent>
       <ItemActions className="self-center pr-4">
         <span className="flex size-8 items-center justify-center rounded-md border border-transparent text-muted-foreground transition-[border-color,background-color,color,transform] duration-150 ease-out group-hover/item:translate-x-0.5 group-hover/item:border-border group-hover/item:bg-muted/70 group-hover/item:text-foreground">
-          <ChevronRight className="size-4" />
+          <HugeiconsIcon
+            className="size-4"
+            icon={ArrowRight01Icon}
+            strokeWidth={2}
+          />
         </span>
       </ItemActions>
     </Item>

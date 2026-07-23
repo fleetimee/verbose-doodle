@@ -1,4 +1,5 @@
-import { Users as UsersIcon } from "lucide-react";
+import { UserGroupIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
@@ -78,7 +79,7 @@ export function UsersPage() {
         <Empty className="min-h-[60vh] border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <UsersIcon />
+              <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} />
             </EmptyMedia>
             <EmptyTitle>{messages.users.emptyTitle}</EmptyTitle>
             <EmptyDescription>

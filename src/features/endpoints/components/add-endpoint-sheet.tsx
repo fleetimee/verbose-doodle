@@ -1,4 +1,5 @@
-import { Plus } from "lucide-react";
+import { Add01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,7 +55,11 @@ export function AddEndpointSheet({
       {showTrigger && (
         <SheetTrigger asChild>
           <Button>
-            <Plus className="mr-2 h-4 w-4" />
+            <HugeiconsIcon
+              className="mr-2 h-4 w-4"
+              icon={Add01Icon}
+              strokeWidth={2}
+            />
             {messages.endpoints.addEndpoint}
           </Button>
         </SheetTrigger>

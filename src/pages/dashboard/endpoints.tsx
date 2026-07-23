@@ -1,6 +1,8 @@
-import { CircleHelp, Layers3, Plug, Plus } from "lucide-react";
+import { Add01Icon, HelpCircleIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Layers3, Plug } from "@/components/hugeicons";
 import { type TourStep, useTour } from "@/components/tour";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +17,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Postman } from "@/components/ui/svgs/postman";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useAuth } from "@/features/auth/context";
-
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
 import { EndpointCard } from "@/features/endpoints/components/endpoint-card";
 import { EndpointCardSkeleton } from "@/features/endpoints/components/endpoint-card-skeleton";
@@ -379,7 +380,11 @@ export function EndpointsPage() {
             type="button"
             variant="outline"
           >
-            <CircleHelp data-icon="inline-start" />
+            <HugeiconsIcon
+              data-icon="inline-start"
+              icon={HelpCircleIcon}
+              strokeWidth={2}
+            />
             {messages.endpoints.tour.startButton}
           </Button>
           <ProtectedAction ability="canAddEndpoint">
@@ -618,7 +623,11 @@ export function EndpointsPage() {
                   id={ENDPOINTS_TOUR_TARGETS.createFirstEndpoint}
                   onClick={handleCreateEndpoint}
                 >
-                  <Plus className="mr-2 h-4 w-4" />
+                  <HugeiconsIcon
+                    className="mr-2 h-4 w-4"
+                    icon={Add01Icon}
+                    strokeWidth={2}
+                  />
                   {messages.endpoints.createFirstButton}
                 </Button>
               </ProtectedAction>

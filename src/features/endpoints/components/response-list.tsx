@@ -1,4 +1,3 @@
-import { ListX } from "lucide-react";
 import {
   AnimatePresence,
   LayoutGroup,
@@ -6,6 +5,7 @@ import {
   useReducedMotion,
 } from "motion/react";
 import { useId, useMemo } from "react";
+import { ListX } from "@/components/hugeicons";
 import {
   Empty,
   EmptyDescription,

@@ -1,4 +1,4 @@
-import { ShieldCheck, User } from "lucide-react";
+import { ShieldCheck, User } from "@/components/hugeicons";
 import {
   Card,
   CardContent,

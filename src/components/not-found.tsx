@@ -1,5 +1,7 @@
-import { Compass, Home } from "lucide-react";
+import { HomeIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Link } from "react-router";
+import { Compass } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -29,7 +31,8 @@ export function NotFoundPage() {
             <EmptyContent>
               <div className="flex gap-2">
                 <Button nativeButton={false} render={<Link to="/" />}>
-                  <Home /> {messages.common.goHome}
+                  <HugeiconsIcon icon={HomeIcon} strokeWidth={2} />{" "}
+                  {messages.common.goHome}
                 </Button>
 
                 <Button

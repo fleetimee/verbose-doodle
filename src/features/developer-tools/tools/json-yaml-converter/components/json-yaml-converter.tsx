@@ -1,4 +1,8 @@
-import { ArrowLeftRight, Copy } from "lucide-react";
+import {
+  ArrowDataTransferHorizontalIcon,
+  Copy01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -278,7 +282,10 @@ export function JsonYamlConverter() {
                 type="button"
                 variant="outline"
               >
-                <ArrowLeftRight />
+                <HugeiconsIcon
+                  icon={ArrowDataTransferHorizontalIcon}
+                  strokeWidth={2}
+                />
               </Button>
               <Button
                 className="min-w-28 rounded-md active:translate-y-px"
@@ -343,7 +350,7 @@ export function JsonYamlConverter() {
             type="button"
             variant="outline"
           >
-            <Copy />
+            <HugeiconsIcon icon={Copy01Icon} strokeWidth={2} />
             {copyState === "copied"
               ? messages.jsonYamlConverter.copied
               : messages.jsonYamlConverter.copyOutput}

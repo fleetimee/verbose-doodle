@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Clock, Timer, Zap } from "lucide-react";
+import { Clock01Icon, Clock03Icon, ZapIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { forwardRef, useImperativeHandle } from "react";
 import { Controller, type UseFormReturn, useForm } from "react-hook-form";
@@ -115,7 +116,11 @@ export const SimulationForm = forwardRef<
                       >
                         <ChoiceboxIndicator className="sr-only" />
                         <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
-                          <Zap className="size-5 text-muted-foreground" />
+                          <HugeiconsIcon
+                            className="size-5 text-muted-foreground"
+                            icon={ZapIcon}
+                            strokeWidth={2}
+                          />
                         </div>
                         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                           <div className="flex items-center gap-2">
@@ -139,7 +144,11 @@ export const SimulationForm = forwardRef<
                       >
                         <ChoiceboxIndicator className="sr-only" />
                         <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
-                          <Clock className="size-5 text-muted-foreground" />
+                          <HugeiconsIcon
+                            className="size-5 text-muted-foreground"
+                            icon={Clock01Icon}
+                            strokeWidth={2}
+                          />
                         </div>
                         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                           <div className="flex items-center gap-2">
@@ -165,7 +174,11 @@ export const SimulationForm = forwardRef<
                       >
                         <ChoiceboxIndicator className="sr-only" />
                         <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
-                          <Timer className="size-5 text-muted-foreground" />
+                          <HugeiconsIcon
+                            className="size-5 text-muted-foreground"
+                            icon={Clock03Icon}
+                            strokeWidth={2}
+                          />
                         </div>
                         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                           <div className="flex items-center gap-2">

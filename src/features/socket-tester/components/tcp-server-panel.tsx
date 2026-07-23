@@ -1,5 +1,7 @@
-import { RadioTower, Square, UsersRound } from "lucide-react";
+import { StopCircleIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo, useState } from "react";
+import { RadioTower, UsersRound } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -69,7 +71,11 @@ export function TcpServerPanel({
               type="button"
               variant="destructive"
             >
-              <Square className="size-4" />
+              <HugeiconsIcon
+                className="size-4"
+                icon={StopCircleIcon}
+                strokeWidth={2}
+              />
               Stop server
             </Button>
           ) : (

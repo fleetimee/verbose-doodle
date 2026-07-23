@@ -2,9 +2,9 @@
 
 import * as React from "react"
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox"
-import { CheckIcon } from "lucide-react"
-
 import { cn } from "@/lib/utils"
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Tick02Icon } from "@hugeicons/core-free-icons";
 
 function Checkbox({
   className,
@@ -23,7 +23,7 @@ function Checkbox({
         data-slot="checkbox-indicator"
         className="grid place-content-center text-current transition-none"
       >
-        <CheckIcon className="size-3.5" />
+        <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-3.5" />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   )

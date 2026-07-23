@@ -1,7 +1,9 @@
-import { CheckCircle2Icon, RefreshCwIcon, ShieldCheckIcon } from "lucide-react";
+import { ShieldCheckIcon } from "@/components/hugeicons";
 import * as React from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { CheckmarkCircle02Icon, RepeatIcon } from "@hugeicons/core-free-icons";
 
 type SliderCaptchaProps = {
   onVerify: (verified: boolean) => void;
@@ -352,7 +354,7 @@ export const SliderCaptcha = ({
           </div>
           <div className="flex items-center gap-1.5">
             {isVerified && (
-              <CheckCircle2Icon className="size-4 animate-in zoom-in-50 text-green-600 duration-300" />
+              <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} className="size-4 animate-in zoom-in-50 text-green-600 duration-300" />
             )}
             <button
               aria-label="Generate new puzzle"
@@ -360,7 +362,7 @@ export const SliderCaptcha = ({
               onClick={handleRefresh}
               type="button"
             >
-              <RefreshCwIcon className="size-3.5 text-muted-foreground" />
+              <HugeiconsIcon icon={RepeatIcon} strokeWidth={2} className="size-3.5 text-muted-foreground" />
             </button>
           </div>
         </div>

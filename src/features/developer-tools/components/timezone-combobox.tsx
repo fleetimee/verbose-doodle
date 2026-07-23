@@ -1,4 +1,5 @@
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,7 +62,11 @@ export function TimezoneCombobox({
           variant="outline"
         >
           <span className="truncate">{value}</span>
-          <ChevronsUpDown className="size-4 shrink-0 opacity-45" />
+          <HugeiconsIcon
+            className="size-4 shrink-0 opacity-45"
+            icon={UnfoldMoreIcon}
+            strokeWidth={2}
+          />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-[var(--anchor-width)] p-0">
@@ -93,11 +98,13 @@ export function TimezoneCombobox({
                   value={timeZone}
                 >
                   <span className="font-mono text-xs">{timeZone}</span>
-                  <Check
+                  <HugeiconsIcon
                     className={cn(
                       "ml-auto size-4",
                       value === timeZone ? "opacity-100" : "opacity-0"
                     )}
+                    icon={Tick02Icon}
+                    strokeWidth={2}
                   />
                 </CommandItem>
               ))}

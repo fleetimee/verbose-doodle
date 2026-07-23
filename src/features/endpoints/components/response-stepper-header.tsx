@@ -1,4 +1,5 @@
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft02Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,7 +74,7 @@ export function ResponseStepperHeader({
               size="icon"
               variant="ghost"
             >
-              <ArrowLeft />
+              <HugeiconsIcon icon={ArrowLeft02Icon} strokeWidth={2} />
             </Button>
             <div className="min-w-0">
               <div className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
@@ -93,7 +94,7 @@ export function ResponseStepperHeader({
             size="icon"
             variant="ghost"
           >
-            <X />
+            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
           </Button>
         </div>
 

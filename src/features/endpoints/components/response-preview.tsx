@@ -1,7 +1,9 @@
-import { Code2, Copy, Eye, Play } from "lucide-react";
+import { Copy01Icon, EyeIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Code2, Play } from "@/components/hugeicons";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -254,7 +256,11 @@ export function ResponsePreview({
                             size="icon"
                             variant="outline"
                           >
-                            <Copy className="h-4 w-4" />
+                            <HugeiconsIcon
+                              className="h-4 w-4"
+                              icon={Copy01Icon}
+                              strokeWidth={2}
+                            />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -355,7 +361,7 @@ export function ResponsePreview({
             <Empty className="min-h-[300px] border-0">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <Eye />
+                  <HugeiconsIcon icon={EyeIcon} strokeWidth={2} />
                 </EmptyMedia>
                 <EmptyTitle>{endpointMessages.responseEmptyTitle}</EmptyTitle>
                 <EmptyDescription>

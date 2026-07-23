@@ -1,8 +1,10 @@
 import * as React from "react"
 import { Menu as DropdownMenuPrimitive } from "@base-ui/react/menu"
-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
+import { CircleIcon } from "@/components/hugeicons"
 
 import { cn } from "@/lib/utils"
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Tick02Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 function DropdownMenu({
   ...props
@@ -123,7 +125,7 @@ function DropdownMenuCheckboxItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.CheckboxItemIndicator>
-          <CheckIcon className="size-4" />
+          <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-4" />
         </DropdownMenuPrimitive.CheckboxItemIndicator>
       </span>
       {children}
@@ -239,7 +241,7 @@ function DropdownMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto size-4" />
+      <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="ml-auto size-4" />
     </DropdownMenuPrimitive.SubmenuTrigger>
   )
 }

@@ -1,4 +1,5 @@
-import { Loader2, Server } from "lucide-react";
+import { Loading03Icon, ServerStackIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
@@ -80,7 +81,11 @@ export function ServerSettlingLayer({
         <div className="flex justify-center">
           <div className="relative">
             <div className="rounded-full bg-primary/10 p-6">
-              <Server className="h-12 w-12 text-primary" />
+              <HugeiconsIcon
+                className="h-12 w-12 text-primary"
+                icon={ServerStackIcon}
+                strokeWidth={2}
+              />
             </div>
             <motion.div
               animate={{
@@ -126,7 +131,11 @@ export function ServerSettlingLayer({
           initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.95 }}
           transition={{ duration: MOTION_DURATION.standard }}
         >
-          <Loader2 className="h-5 w-5 text-primary motion-safe:animate-spin" />
+          <HugeiconsIcon
+            className="h-5 w-5 text-primary motion-safe:animate-spin"
+            icon={Loading03Icon}
+            strokeWidth={2}
+          />
           <span className="font-mono text-2xl tabular-nums">
             {secondsRemaining}s
           </span>

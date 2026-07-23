@@ -1,6 +1,8 @@
-import { CheckCircle2Icon, KeyRoundIcon, ShieldCheckIcon } from "lucide-react";
+import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useRef, useState } from "react";
 import { Navigate, useSearchParams } from "react-router";
+import { KeyRoundIcon, ShieldCheckIcon } from "@/components/hugeicons";
 import SlicedText from "@/components/kokonutui/sliced-text";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -211,7 +213,11 @@ export const Login = () => {
                   {messages.auth.demoAccess}
                 </Badge>
                 {isAutoLoginComplete ? (
-                  <CheckCircle2Icon className="text-primary" />
+                  <HugeiconsIcon
+                    className="text-primary"
+                    icon={CheckmarkCircle02Icon}
+                    strokeWidth={2}
+                  />
                 ) : (
                   <Spinner />
                 )}

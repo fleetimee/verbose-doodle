@@ -1,4 +1,10 @@
-import { AlertCircle, CheckCircle2, Copy, HelpCircle } from "lucide-react";
+import {
+  AlertCircleIcon,
+  CheckmarkCircle02Icon,
+  Copy01Icon,
+  HelpCircleIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -399,7 +405,11 @@ export function JwtInspector() {
     if (isSignatureVerified === true) {
       return (
         <Badge className="flex items-center gap-1.5 border-emerald-500/30 bg-emerald-500/15 px-2.5 py-1 font-medium text-emerald-500">
-          <CheckCircle2 className="h-3.5 w-3.5" />
+          <HugeiconsIcon
+            className="h-3.5 w-3.5"
+            icon={CheckmarkCircle02Icon}
+            strokeWidth={2}
+          />
           {messages.jwtInspector.signatureValid}
         </Badge>
       );
@@ -407,14 +417,22 @@ export function JwtInspector() {
     if (isSignatureVerified === false) {
       return (
         <Badge className="flex items-center gap-1.5 border-destructive/30 bg-destructive/15 px-2.5 py-1 font-medium text-destructive">
-          <AlertCircle className="h-3.5 w-3.5" />
+          <HugeiconsIcon
+            className="h-3.5 w-3.5"
+            icon={AlertCircleIcon}
+            strokeWidth={2}
+          />
           {messages.jwtInspector.signatureInvalid}
         </Badge>
       );
     }
     return (
       <Badge className="flex items-center gap-1.5 border-yellow-500/30 bg-yellow-500/15 px-2.5 py-1 font-medium text-yellow-500">
-        <HelpCircle className="h-3.5 w-3.5" />
+        <HugeiconsIcon
+          className="h-3.5 w-3.5"
+          icon={HelpCircleIcon}
+          strokeWidth={2}
+        />
         {messages.jwtInspector.signatureUnsupported}
       </Badge>
     );
@@ -602,7 +620,11 @@ export function JwtInspector() {
                     size="sm"
                     variant="outline"
                   >
-                    <Copy className="mr-2 h-3.5 w-3.5" />
+                    <HugeiconsIcon
+                      className="mr-2 h-3.5 w-3.5"
+                      icon={Copy01Icon}
+                      strokeWidth={2}
+                    />
                     {messages.jwtInspector.copyToken}
                   </Button>
                 </div>
@@ -622,7 +644,11 @@ export function JwtInspector() {
                   />
                   {structureError && (
                     <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 rounded-b-md border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
-                      <AlertCircle className="h-4.5 w-4.5 shrink-0" />
+                      <HugeiconsIcon
+                        className="h-4.5 w-4.5 shrink-0"
+                        icon={AlertCircleIcon}
+                        strokeWidth={2}
+                      />
                       <span>{structureError}</span>
                     </div>
                   )}
@@ -647,7 +673,11 @@ export function JwtInspector() {
               />
               {headerError && (
                 <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <HugeiconsIcon
+                    className="h-4 w-4 shrink-0"
+                    icon={AlertCircleIcon}
+                    strokeWidth={2}
+                  />
                   <span className="font-mono">{headerError}</span>
                 </div>
               )}
@@ -667,7 +697,11 @@ export function JwtInspector() {
               />
               {payloadError && (
                 <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <HugeiconsIcon
+                    className="h-4 w-4 shrink-0"
+                    icon={AlertCircleIcon}
+                    strokeWidth={2}
+                  />
                   <span className="font-mono">{payloadError}</span>
                 </div>
               )}

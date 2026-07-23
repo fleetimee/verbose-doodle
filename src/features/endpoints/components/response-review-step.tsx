@@ -1,4 +1,6 @@
-import { CheckCircle2, Code2, FileText, Hash } from "lucide-react";
+import { CheckmarkCircle02Icon, File01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Code2, Hash } from "@/components/hugeicons";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -25,7 +27,11 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
       <div className="rounded-lg border bg-primary/5 p-5">
         <div className="flex items-start gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <CheckCircle2 className="size-5" />
+            <HugeiconsIcon
+              className="size-5"
+              icon={CheckmarkCircle02Icon}
+              strokeWidth={2}
+            />
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-lg">Ready to create</div>
@@ -39,7 +45,11 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
       <div className="grid gap-3 md:grid-cols-2">
         <div className="rounded-lg border bg-background p-4 shadow-xs">
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <FileText className="size-4" />
+            <HugeiconsIcon
+              className="size-4"
+              icon={File01Icon}
+              strokeWidth={2}
+            />
             Response Name
           </div>
           <div className="mt-3 truncate font-mono font-semibold text-xl">

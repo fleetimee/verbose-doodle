@@ -1,9 +1,9 @@
 import * as React from "react"
 import { NavigationMenu as NavigationMenuPrimitive } from "@base-ui/react/navigation-menu"
 import { cva } from "class-variance-authority"
-import { ChevronDownIcon } from "lucide-react"
-
 import { cn } from "@/lib/utils"
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 function NavigationMenu({
   className,
@@ -76,10 +76,7 @@ function NavigationMenuTrigger({
       {children}{" "}
       <NavigationMenuPrimitive.Icon
         render={
-          <ChevronDownIcon
-            aria-hidden="true"
-            className="relative top-[1px] ml-1 size-3 transition duration-300 data-popup-open:rotate-180"
-          />
+          <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} aria-hidden="true" className="relative top-[1px] ml-1 size-3 transition duration-300 data-popup-open:rotate-180" />
         }
       />
     </NavigationMenuPrimitive.Trigger>

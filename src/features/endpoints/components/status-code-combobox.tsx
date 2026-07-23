@@ -1,4 +1,5 @@
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import type { FieldError } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -89,7 +90,11 @@ export function StatusCodeCombobox({
           {selectedCode
             ? selectedCode.label
             : messages.endpoints.selectStatusCode}
-          <ChevronsUpDown className="ml-2 h-6 w-6 shrink-0 opacity-50 md:h-8 md:w-8" />
+          <HugeiconsIcon
+            className="ml-2 h-6 w-6 shrink-0 opacity-50 md:h-8 md:w-8"
+            icon={UnfoldMoreIcon}
+            strokeWidth={2}
+          />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-[var(--anchor-width)] p-0">
@@ -109,11 +114,13 @@ export function StatusCodeCombobox({
                   value={code.label}
                 >
                   {code.label}
-                  <Check
+                  <HugeiconsIcon
                     className={cn(
                       "ml-auto h-4 w-4",
                       field.value === code.value ? "opacity-100" : "opacity-0"
                     )}
+                    icon={Tick02Icon}
+                    strokeWidth={2}
                   />
                 </CommandItem>
               ))}
@@ -130,11 +137,13 @@ export function StatusCodeCombobox({
                   value={code.label}
                 >
                   {code.label}
-                  <Check
+                  <HugeiconsIcon
                     className={cn(
                       "ml-auto h-4 w-4",
                       field.value === code.value ? "opacity-100" : "opacity-0"
                     )}
+                    icon={Tick02Icon}
+                    strokeWidth={2}
                   />
                 </CommandItem>
               ))}
@@ -151,11 +160,13 @@ export function StatusCodeCombobox({
                   value={code.label}
                 >
                   {code.label}
-                  <Check
+                  <HugeiconsIcon
                     className={cn(
                       "ml-auto h-4 w-4",
                       field.value === code.value ? "opacity-100" : "opacity-0"
                     )}
+                    icon={Tick02Icon}
+                    strokeWidth={2}
                   />
                 </CommandItem>
               ))}
@@ -170,11 +181,13 @@ export function StatusCodeCombobox({
                   value={code.label}
                 >
                   {code.label}
-                  <Check
+                  <HugeiconsIcon
                     className={cn(
                       "ml-auto h-4 w-4",
                       field.value === code.value ? "opacity-100" : "opacity-0"
                     )}
+                    icon={Tick02Icon}
+                    strokeWidth={2}
                   />
                 </CommandItem>
               ))}

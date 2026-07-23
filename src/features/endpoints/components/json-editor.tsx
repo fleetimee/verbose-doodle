@@ -5,8 +5,8 @@ import {
   placeholder as placeholderExtension,
 } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
-import { Wand2 } from "lucide-react";
 import { forwardRef, useEffect, useMemo, useState } from "react";
+import { Wand2 } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

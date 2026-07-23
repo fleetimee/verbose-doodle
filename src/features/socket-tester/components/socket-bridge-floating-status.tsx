@@ -1,5 +1,5 @@
-import { Cable, Unplug } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Cable, Unplug } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { useSocketBridgeContext } from "@/features/socket-tester/context/socket-bridge-context";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Radio as RadioPrimitive } from "@base-ui/react/radio"
 import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group"
-import { CircleIcon } from "lucide-react"
+import { CircleIcon } from "@/components/hugeicons"
 
 import { cn } from "@/lib/utils"
 

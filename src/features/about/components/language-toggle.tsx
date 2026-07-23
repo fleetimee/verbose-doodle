@@ -1,4 +1,5 @@
-import { GlobeIcon } from "lucide-react";
+import { Globe02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { type AppLocale, getActiveLocale, setActiveLocale } from "@/lib/i18n";
@@ -28,7 +29,11 @@ export function LanguageToggle({ onLocaleChange }: LanguageToggleProps) {
       size="sm"
       variant="outline"
     >
-      <GlobeIcon className="h-3.5 w-3.5 text-primary" />
+      <HugeiconsIcon
+        className="h-3.5 w-3.5 text-primary"
+        icon={Globe02Icon}
+        strokeWidth={2}
+      />
       <span>
         {activeLocale === "en-US"
           ? "English (en-US)"

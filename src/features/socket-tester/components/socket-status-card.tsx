@@ -1,7 +1,7 @@
-import type { LucideIcon } from "lucide-react";
+import type { HugeIcon } from "@/components/hugeicons";
 
 type SocketStatusCardProps = {
-  readonly icon: LucideIcon;
+  readonly icon: HugeIcon;
   readonly label: string;
   readonly value: string | number;
 };
