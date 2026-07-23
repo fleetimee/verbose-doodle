@@ -6,9 +6,9 @@ import { useAuth } from "@/features/auth/context";
  * Redirects to /login if not authenticated, otherwise to /dashboard
  */
 export function AuthRedirect() {
-  const { authState } = useAuth();
+  const { snapshot } = useAuth();
 
-  if (!authState.isAuthenticated) {
+  if (!snapshot.isAuthenticated) {
     return <Navigate replace to="/login" />;
   }
 

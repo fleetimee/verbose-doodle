@@ -167,7 +167,7 @@ export function EndpointsPage() {
 
   const { data: endpoints = [], isPending: isLoadingEndpoints } =
     useGetEndpoints();
-  const { can } = useAuth();
+  const { session } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -200,7 +200,7 @@ export function EndpointsPage() {
 
   const hasEndpoints = endpoints.length > 0;
   const hasFilteredEndpoints = groupedEndpoints.length > 0;
-  const canAddEndpoint = can("canAddEndpoint");
+  const canAddEndpoint = session.can("canAddEndpoint");
 
   const handleCreateEndpoint = () => {
     setIsDialogOpen(true);

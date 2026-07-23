@@ -119,17 +119,17 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { authState } = useAuth();
+  const { snapshot } = useAuth();
 
   // Prefetch hooks for hover behavior
   const { prefetchOverview } = usePrefetchOverview();
   const { prefetchEndpoints } = usePrefetchEndpoints();
 
   // Construct user object for NavUser component
-  const user = authState.user
+  const user = snapshot.user
     ? {
-        name: authState.user.username,
-        email: `${authState.user.role.toLowerCase()}@fleetime-labs.local`,
+        name: snapshot.user.username,
+        email: `${snapshot.user.role.toLowerCase()}@fleetime-labs.local`,
         avatar: "", // No avatar for now, will show initials
       }
     : {
@@ -138,7 +138,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         avatar: "",
       };
 
-  const isAdmin = authState.user?.role === "ADMIN";
+  const isAdmin = snapshot.user?.role === "ADMIN";
   const navMain = data.navMain
     .filter((item) => !item.adminOnly || isAdmin)
     .map((item) => {

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/features/auth/context";
-import { markManualLogout } from "@/features/auth/utils";
+import { markManualLogout } from "@/features/auth/manual-logout";
 import { messages } from "@/lib/i18n";
 
 /**

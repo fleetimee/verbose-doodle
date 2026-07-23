@@ -113,8 +113,9 @@ function TourStepContent({
 export function EndpointDetailPage() {
   const { id: encodedId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { can } = useAuth();
-  const canAddResponse = can("canAddResponse");
+  const { session } = useAuth();
+  const canAddResponse = session.can("canAddResponse");
+  const canEditEndpoint = session.can("canEditEndpoint");
 
   // Decode the ID from the URL
   const decodedId = useMemo(() => {
@@ -183,7 +184,7 @@ export function EndpointDetailPage() {
           />
         ),
       },
-      ...(can("canEditEndpoint")
+      ...(canEditEndpoint
         ? [
             {
               selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.editActions,
@@ -246,7 +247,7 @@ export function EndpointDetailPage() {
         ),
       },
     ];
-  }, [can, canAddResponse, endpoint]);
+  }, [canAddResponse, canEditEndpoint, endpoint]);
 
   const handleStartTour = useCallback(() => {
     setSteps(tourSteps);

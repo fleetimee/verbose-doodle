@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { getAuthToken } from "@/features/auth/utils";
+import { useAuth } from "@/features/auth/context";
 import { createRealtimeTicket } from "@/features/realtime/ticket-client";
 import {
   createTicketedRealtimeConnection,
@@ -40,6 +40,7 @@ export function SocksRelayProvider({
 }: {
   readonly children: ReactNode;
 }) {
+  const { snapshot } = useAuth();
   const [events, setEvents] = useState<RelayEvent[]>([]);
   const [connectionStatus, setConnectionStatus] =
     useState<RelayConnectionStatus>("idle");
@@ -86,7 +87,7 @@ export function SocksRelayProvider({
       setConnectionStatus(snapshot.status);
     });
 
-    if (getAuthToken()) {
+    if (snapshot.isAuthenticated) {
       connection.connect().catch(() => undefined);
     } else {
       setConnectionStatus("disconnected");
@@ -96,7 +97,7 @@ export function SocksRelayProvider({
       unsubscribe();
       connection.disconnect();
     };
-  }, [connection]);
+  }, [connection, snapshot.isAuthenticated]);
 
   return (
     <SocksRelayContext.Provider

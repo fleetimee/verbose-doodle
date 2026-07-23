@@ -109,8 +109,8 @@ function OverviewContentGrid({
 }
 
 export function OverviewPage() {
-  const { authState } = useAuth();
-  const isAdmin = authState.user?.role === "ADMIN";
+  const { snapshot } = useAuth();
+  const isAdmin = snapshot.user?.role === "ADMIN";
   const { data, isLoading, error } = useGetOverview();
 
   useDocumentMeta({

@@ -20,7 +20,7 @@ import { Logo } from "@/components/ui/logo";
 import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/features/auth/context";
-import { hasManualLogout } from "@/features/auth/utils";
+import { hasManualLogout } from "@/features/auth/manual-logout";
 import { LoginForm } from "@/features/login/components/login-form";
 import { useLogin } from "@/features/login/hooks/use-login";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
@@ -48,14 +48,14 @@ const AUTO_LOGIN_PROGRESS_STEP = 7;
 const AUTO_LOGIN_MAX_PENDING_PROGRESS = 86;
 
 export const Login = () => {
-  const { authState } = useAuth();
+  const { snapshot } = useAuth();
   const isManualLogout = hasManualLogout();
   const { theme, setTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const [expirationMessage, setExpirationMessage] = useState<string | null>(
     null
   );
-  const [redirectReady, setRedirectReady] = useState(authState.isAuthenticated);
+  const [redirectReady, setRedirectReady] = useState(snapshot.isAuthenticated);
   const [autoLoginProgress, setAutoLoginProgress] = useState(14);
   const [isAutoLoginComplete, setIsAutoLoginComplete] = useState(false);
   const hasAttemptedLogin = useRef(false);
@@ -130,7 +130,7 @@ export const Login = () => {
   };
 
   // Redirect to dashboard if already authenticated
-  if (authState.isAuthenticated && redirectReady) {
+  if (snapshot.isAuthenticated && redirectReady) {
     return <Navigate replace to="/dashboard" />;
   }
 

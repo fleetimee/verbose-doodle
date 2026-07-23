@@ -10,6 +10,8 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, renderHook, waitFor } from "@testing-library/react";
 import { type ReactNode, StrictMode } from "react";
+import { MemoryRouter } from "react-router";
+import { AuthProvider } from "@/features/auth/context";
 import {
   SocksRelayProvider,
   useSocksRelayContext,
@@ -50,6 +52,47 @@ class FakeWebSocket {
   }
 }
 
+const TRAILING_PADDING_REGEX = /=+$/u;
+
+function createRelayToken(): string {
+  const encode = (value: string) =>
+    Buffer.from(value, "utf8")
+      .toString("base64")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(TRAILING_PADDING_REGEX, "");
+  return [
+    encode(JSON.stringify({ alg: "HS256", typ: "JWT" })),
+    encode(
+      JSON.stringify({
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        role: "ADMIN",
+        user_id: "relay-user",
+        username: "relay-user",
+      })
+    ),
+    encode("signature"),
+  ].join(".");
+}
+
+function RelayProviders({
+  children,
+  queryClient,
+}: {
+  readonly children: ReactNode;
+  readonly queryClient: QueryClient;
+}) {
+  return (
+    <MemoryRouter>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <SocksRelayProvider>{children}</SocksRelayProvider>
+        </QueryClientProvider>
+      </AuthProvider>
+    </MemoryRouter>
+  );
+}
+
 describe("SocksRelayProvider", () => {
   const originalWebSocket = globalThis.WebSocket;
   let fetchSpy: ReturnType<typeof spyOn>;
@@ -58,7 +101,7 @@ describe("SocksRelayProvider", () => {
   beforeEach(() => {
     FakeWebSocket.instances = [];
     ticketNumber = 0;
-    localStorage.setItem("auth_token", "relay-token");
+    localStorage.setItem("auth_token", createRelayToken());
     window.location.href = "http://localhost/dashboard";
     globalThis.WebSocket =
       FakeWebSocket as unknown as typeof globalThis.WebSocket;
@@ -93,11 +136,9 @@ describe("SocksRelayProvider", () => {
     const invalidateSpy = spyOn(queryClient, "invalidateQueries");
 
     render(
-      <QueryClientProvider client={queryClient}>
-        <SocksRelayProvider>
-          <div />
-        </SocksRelayProvider>
-      </QueryClientProvider>
+      <RelayProviders queryClient={queryClient}>
+        <div />
+      </RelayProviders>
     );
 
     await waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
@@ -129,11 +170,9 @@ describe("SocksRelayProvider", () => {
     });
 
     render(
-      <QueryClientProvider client={queryClient}>
-        <SocksRelayProvider>
-          <div />
-        </SocksRelayProvider>
-      </QueryClientProvider>
+      <RelayProviders queryClient={queryClient}>
+        <div />
+      </RelayProviders>
     );
 
     await act(async () => {
@@ -161,9 +200,7 @@ describe("SocksRelayProvider", () => {
       defaultOptions: { queries: { retry: false } },
     });
     const wrapper = ({ children }: { readonly children: ReactNode }) => (
-      <QueryClientProvider client={queryClient}>
-        <SocksRelayProvider>{children}</SocksRelayProvider>
-      </QueryClientProvider>
+      <RelayProviders queryClient={queryClient}>{children}</RelayProviders>
     );
     const { result } = renderHook(() => useSocksRelayContext(), { wrapper });
 
@@ -211,11 +248,9 @@ describe("SocksRelayProvider", () => {
 
     render(
       <StrictMode>
-        <QueryClientProvider client={queryClient}>
-          <SocksRelayProvider>
-            <div />
-          </SocksRelayProvider>
-        </QueryClientProvider>
+        <RelayProviders queryClient={queryClient}>
+          <div />
+        </RelayProviders>
       </StrictMode>
     );
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTokenExpiration } from "@/features/auth/utils";
+import { useAuth } from "@/features/auth/context";
 
 const UPDATE_INTERVAL = 1000;
 const MINUTES_PER_HOUR = 60;
@@ -16,44 +16,24 @@ export type TokenExpirationInfo = {
  * Updates every second and provides formatted remaining time
  */
 export function useTokenExpiration(): TokenExpirationInfo | null {
-  const [info, setInfo] = useState<TokenExpirationInfo | null>(() => {
-    const expiration = getTokenExpiration();
-    if (!expiration) {
-      return null;
-    }
-
-    const remainingMs = expiration - Date.now();
-    return {
-      remainingMs,
-      isExpired: remainingMs <= 0,
-      formattedTime: formatRemainingTime(remainingMs),
-    };
-  });
+  const { snapshot } = useAuth();
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const updateExpiration = () => {
-      const expiration = getTokenExpiration();
-      if (!expiration) {
-        setInfo(null);
-        return;
-      }
-
-      const remainingMs = expiration - Date.now();
-      setInfo({
-        remainingMs,
-        isExpired: remainingMs <= 0,
-        formattedTime: formatRemainingTime(remainingMs),
-      });
-    };
-
-    updateExpiration();
-
-    const interval = setInterval(updateExpiration, UPDATE_INTERVAL);
-
+    const interval = setInterval(() => setNow(Date.now()), UPDATE_INTERVAL);
     return () => clearInterval(interval);
   }, []);
 
-  return info;
+  if (snapshot.expiresAt === null) {
+    return null;
+  }
+
+  const remainingMs = snapshot.expiresAt - now;
+  return {
+    remainingMs,
+    isExpired: remainingMs <= 0,
+    formattedTime: formatRemainingTime(remainingMs),
+  };
 }
 
 /**

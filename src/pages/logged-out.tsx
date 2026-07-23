@@ -22,7 +22,7 @@ import { Highlighter } from "@/components/ui/highlighter";
 import { InteractiveGridPattern } from "@/components/ui/interactive-grid-pattern";
 import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/features/auth/context";
-import { clearManualLogout } from "@/features/auth/utils";
+import { clearManualLogout } from "@/features/auth/manual-logout";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { messages } from "@/lib/i18n";
 
@@ -30,7 +30,7 @@ const GRID_SQUARES_HORIZONTAL = 50;
 const GRID_SQUARES_VERTICAL = 50;
 
 export function LoggedOut() {
-  const { authState } = useAuth();
+  const { snapshot } = useAuth();
   const { theme, setTheme } = useTheme();
 
   useDocumentMeta({
@@ -39,7 +39,7 @@ export function LoggedOut() {
     keywords: ["logout", "sign out", "authentication"],
   });
 
-  if (authState.isAuthenticated) {
+  if (snapshot.isAuthenticated) {
     return <Navigate replace to="/dashboard/overview" />;
   }
 

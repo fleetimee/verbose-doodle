@@ -94,8 +94,8 @@ export function ResponseListItem({
   onActivate,
   onDeactivate,
 }: ResponseListItemProps) {
-  const { can } = useAuth();
-  const canActivateResponse = can("canActivateResponse");
+  const { session } = useAuth();
+  const canActivateResponse = session.can("canActivateResponse");
 
   const isActive = response.activated;
   const isLoading = isActivating || isDeactivating;
