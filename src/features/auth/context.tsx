@@ -8,22 +8,16 @@ import {
   useSyncExternalStore,
 } from "react";
 import { useNavigate } from "react-router";
-import { handleRefreshFailureOnce } from "@/features/auth/refresh-coordinator";
 import {
-  type AuthenticatedSession,
-  createAuthenticatedSession,
-} from "@/features/auth/session";
-import type { Ability, Role } from "@/features/auth/types";
-import {
-  AUTH_UNAUTHORIZED_EVENT,
-  decodeJWT,
-  getAuthToken,
-  getRefreshToken,
-  getTokenExpiration,
   hasManualLogout,
   markManualLogout,
-} from "@/features/auth/utils";
-import type { AuthUser } from "@/features/login/types";
+} from "@/features/auth/manual-logout";
+import {
+  type AuthenticatedSession,
+  type AuthenticatedSessionSnapshot,
+  createAuthenticatedSession,
+  type SessionTokens,
+} from "@/features/auth/session";
 import { apiFetch, setDefaultApiSession } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import { queryClient } from "@/lib/query-client";
@@ -31,27 +25,13 @@ import { queryClient } from "@/lib/query-client";
 type RefreshTokenResponse = {
   responseCode: string;
   responseDesc: string;
-  data: {
-    accessToken: string;
-    refreshToken: string;
-  };
-};
-
-type AuthState = {
-  user: AuthUser | null;
-  isAuthenticated: boolean;
+  data: SessionTokens;
 };
 
 type AuthContextValue = {
-  authState: AuthState;
-  user: AuthUser | null;
-  isAuthenticated: boolean;
-  role: Role | undefined;
-  isAdmin: boolean;
-  isUser: boolean;
-  can: (ability: Ability) => boolean;
-  hasRole: (requiredRole: Role) => boolean;
-  login: (accessToken: string, refreshToken?: string) => void;
+  session: AuthenticatedSession;
+  snapshot: AuthenticatedSessionSnapshot;
+  login: (tokens: SessionTokens) => boolean;
   logout: () => void;
   refreshAuth: () => Promise<boolean>;
 };
@@ -62,8 +42,8 @@ function createBrowserSession(): AuthenticatedSession {
   return createAuthenticatedSession({
     storage: {
       read: () => ({
-        accessToken: getAuthToken() ?? undefined,
-        refreshToken: getRefreshToken() ?? undefined,
+        accessToken: localStorage.getItem("auth_token") ?? undefined,
+        refreshToken: localStorage.getItem("refresh_token") ?? undefined,
       }),
       write: ({ accessToken, refreshToken }) => {
         localStorage.setItem("auth_token", accessToken);
@@ -79,10 +59,6 @@ function createBrowserSession(): AuthenticatedSession {
       },
     },
     clock: () => Date.now(),
-    decodeToken: (token) => {
-      const user = decodeJWT(token);
-      return user ? { user, expiresAt: getTokenExpiration(token) } : null;
-    },
     scheduler: {
       schedule: (callback, delayMs) => globalThis.setTimeout(callback, delayMs),
       cancel: (handle) => globalThis.clearTimeout(handle as number),
@@ -113,24 +89,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const session = useMemo(() => {
     const nextSession = createBrowserSession();
-    setDefaultApiSession(nextSession);
+    setDefaultApiSession({
+      getSnapshot: nextSession.getSnapshot,
+      refresh: nextSession.refresh,
+      signOut: () => {
+        nextSession.signOut();
+        navigate("/login?reason=expired-during-request");
+      },
+    });
     return nextSession;
-  }, []);
+  }, [navigate]);
   const snapshot = useSyncExternalStore(
     session.subscribe,
     session.getSnapshot,
     session.getSnapshot
   );
 
+  useEffect(() => () => session.dispose(), [session]);
+
   const login = useCallback(
-    (accessToken: string, refreshToken?: string) => {
-      const didSignIn = session.signIn({
-        accessToken,
-        refreshToken: refreshToken ?? null,
-      });
+    (tokens: SessionTokens) => {
+      const didSignIn = session.signIn(tokens);
       if (!didSignIn) {
         session.signOut();
       }
+      return didSignIn;
     },
     [session]
   );
@@ -152,51 +135,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await session.refresh();
       return true;
-    } catch (error) {
-      handleRefreshFailureOnce(error, logout);
+    } catch {
+      session.signOut();
       return false;
     }
-  }, [logout, session]);
-
-  useEffect(() => {
-    const handleUnauthorized = () => {
-      logout();
-      navigate("/login?reason=expired-during-request");
-    };
-
-    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
-    return () => {
-      window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
-    };
-  }, [logout, navigate]);
-
-  const role = snapshot.user?.role;
-  const isAdmin = role === "ADMIN";
-  const isUser = role === "USER";
-  const can = useCallback(
-    (ability: Ability) => session.can(ability),
-    [session]
-  );
-  const hasRole = useCallback(
-    (requiredRole: Role) => role === requiredRole,
-    [role]
-  );
-  const authState = {
-    user: snapshot.user,
-    isAuthenticated: snapshot.isAuthenticated,
-  };
+  }, [session]);
 
   return (
     <AuthContext.Provider
       value={{
-        authState,
-        user: snapshot.user,
-        isAuthenticated: snapshot.isAuthenticated,
-        role,
-        isAdmin,
-        isUser,
-        can,
-        hasRole,
+        session,
+        snapshot,
         login,
         logout,
         refreshAuth,

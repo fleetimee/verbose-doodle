@@ -66,7 +66,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
-import { getAuthToken } from "@/features/auth/utils";
+import { useAuth } from "@/features/auth/context";
 import { UserAgentClientBadge } from "@/features/endpoints/components/user-agent-client-badge";
 import { useClearEndpointTrafficLogs } from "@/features/endpoints/hooks/use-clear-endpoint-traffic-logs";
 import { useGetEndpointTrafficLogDetail } from "@/features/endpoints/hooks/use-get-endpoint-traffic-log-detail";
@@ -251,6 +251,7 @@ export function EndpointTrafficLogViewer({
   responseCount,
   tourId,
 }: EndpointTrafficLogViewerProps) {
+  const { snapshot } = useAuth();
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [wrapLines, setWrapLines] = useState(false);
   const [showTimestamps, setShowTimestamps] = useState(true);
@@ -348,7 +349,7 @@ export function EndpointTrafficLogViewer({
       params.set("search", search.trim());
     }
 
-    const token = getAuthToken();
+    const token = snapshot.accessToken;
     const response = await fetch(
       `${getEndpointTrafficLogsDownloadUrl(endpointId)}?${params.toString()}`,
       {

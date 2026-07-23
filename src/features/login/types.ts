@@ -21,14 +21,13 @@ type ApiLoginResponse = {
 
 /**
  * Login response after processing
- * Includes tokens and role extracted from JWT
+ * Includes the tokens accepted by Authenticated Session
  */
 export type LoginResponse = {
   responseCode: string;
   responseDesc: string;
   accessToken: string;
   refreshToken: string;
-  role: UserRole;
 };
 
 /**

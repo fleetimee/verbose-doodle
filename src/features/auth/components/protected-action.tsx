@@ -23,9 +23,9 @@ export function ProtectedAction({
   fallback = null,
   children,
 }: ProtectedActionProps) {
-  const { can } = useAuth();
+  const { session } = useAuth();
 
-  if (!can(ability)) {
+  if (!session.can(ability)) {
     return <>{fallback}</>;
   }
 

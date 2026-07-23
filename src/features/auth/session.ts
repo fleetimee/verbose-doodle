@@ -193,7 +193,7 @@ export function createAuthenticatedSession(
     },
 
     signOut: () => {
-      if (disposed) {
+      if (disposed || !snapshot.isAuthenticated) {
         return;
       }
       cancelExpiry();
