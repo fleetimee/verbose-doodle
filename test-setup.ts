@@ -7,6 +7,8 @@ import { GlobalRegistrator } from "@happy-dom/global-registrator";
 
 GlobalRegistrator.register();
 
+const { cleanup } = await import("@testing-library/react");
+
 if (!Element.prototype.getAnimations) {
   Element.prototype.getAnimations = () => [];
 }
@@ -15,8 +17,7 @@ if (!document.getAnimations) {
   document.getAnimations = () => [];
 }
 
-afterEach(async () => {
-  const { cleanup } = await import("@testing-library/react");
+afterEach(() => {
   cleanup();
   if (document.body) {
     document.body.innerHTML = "";
