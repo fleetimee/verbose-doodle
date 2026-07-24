@@ -13,7 +13,7 @@
   },
   "overrides": [
     {
-      "includes": ["tools/**/*.ts"],
+      "includes": ["tools/**/*.ts", "tools/**/*.cjs"],
       "linter": {
         "rules": {
           "suspicious": {

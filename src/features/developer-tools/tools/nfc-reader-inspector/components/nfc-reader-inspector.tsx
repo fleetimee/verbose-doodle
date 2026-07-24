@@ -130,6 +130,24 @@ export function NfcReaderInspector() {
       <Card className="border-border/70 shadow-xs">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
+            <RadioReceiver data-icon="inline-start" />
+            {copy.nfcScanTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {bridge.latestScan ? (
+            <ScanDetails scan={bridge.latestScan} />
+          ) : (
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {copy.nfcScanEmpty}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/70 shadow-xs">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
             <CircleDashed data-icon="inline-start" />
             {copy.nfcReaderNextStepTitle}
           </CardTitle>
@@ -138,6 +156,65 @@ export function NfcReaderInspector() {
           {copy.nfcReaderNextStepDescription}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function ScanDetails({
+  scan,
+}: {
+  readonly scan: NonNullable<ReturnType<typeof useNfcBridge>["latestScan"]>;
+}) {
+  const copy = messages.developerTools;
+  return (
+    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="space-y-5">
+        <ScanField label={copy.nfcScanDecodedLabel}>
+          <p className="font-medium text-lg leading-relaxed">
+            {scan.decodedText ?? copy.nfcScanNoDecodedText}
+          </p>
+        </ScanField>
+        <ScanField label={copy.nfcScanUidLabel}>
+          <p className="font-mono text-sm">
+            {scan.uid ?? copy.nfcScanUidUnavailable}
+          </p>
+        </ScanField>
+        <ScanField label={copy.nfcScanTimestampLabel}>
+          <time
+            className="font-mono text-muted-foreground text-xs"
+            dateTime={scan.timestamp}
+          >
+            {scan.timestamp}
+          </time>
+        </ScanField>
+        {scan.warning && (
+          <ScanField label={copy.nfcScanWarningLabel}>
+            <p className="text-destructive text-sm">{scan.warning}</p>
+          </ScanField>
+        )}
+      </div>
+      <ScanField label={copy.nfcScanRawLabel}>
+        <pre className="max-h-56 overflow-auto whitespace-pre-wrap rounded-md border border-border/70 bg-muted/40 p-3 font-mono text-xs leading-relaxed">
+          <code>{scan.rawNdef}</code>
+        </pre>
+      </ScanField>
+    </div>
+  );
+}
+
+function ScanField({
+  children,
+  label,
+}: {
+  readonly children: React.ReactNode;
+  readonly label: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
+        {label}
+      </p>
+      {children}
     </div>
   );
 }

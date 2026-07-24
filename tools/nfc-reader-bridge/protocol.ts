@@ -1,3 +1,5 @@
+import type { NdefScanResult } from "./ndef";
+
 export const NFC_BRIDGE_PROTOCOL_VERSION = "1" as const;
 
 export type BridgeReaderState =
@@ -14,7 +16,8 @@ export type BridgeErrorCode =
   | "unauthorized"
   | "protocol-mismatch"
   | "invalid-message"
-  | "bridge-error";
+  | "bridge-error"
+  | "scan-error";
 
 export type BridgeEvent =
   | {
@@ -34,6 +37,10 @@ export type BridgeEvent =
       readonly reason?: string;
       readonly action?: string;
     }
+  | (NdefScanResult & {
+      readonly protocolVersion: typeof NFC_BRIDGE_PROTOCOL_VERSION;
+      readonly type: "scan";
+    })
   | {
       readonly protocolVersion: typeof NFC_BRIDGE_PROTOCOL_VERSION;
       readonly type: "error";
@@ -70,6 +77,7 @@ export type BridgeSnapshot = {
     readonly reason?: string;
     readonly action?: string;
   };
+  readonly latestScan?: NdefScanResult;
 };
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
@@ -153,5 +161,14 @@ export function snapshotToEvents(
       type: "reader-status",
       ...snapshot.reader,
     },
+    ...(snapshot.latestScan
+      ? [
+          {
+            protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+            type: "scan" as const,
+            ...snapshot.latestScan,
+          },
+        ]
+      : []),
   ];
 }

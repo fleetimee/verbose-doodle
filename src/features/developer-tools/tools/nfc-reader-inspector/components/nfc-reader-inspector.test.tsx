@@ -11,6 +11,7 @@ let bridge = {
   connectionStatus: "disconnected" as NfcBridgeState["connectionStatus"],
   disconnect: mock(() => undefined),
   error: null as string | null,
+  latestScan: null as NfcBridgeState["latestScan"],
   readerName: null as string | null,
   readerState: "unavailable" as NfcBridgeState["readerState"],
   reason: null as string | null,
@@ -33,6 +34,7 @@ afterEach(() => {
     connectionStatus: "disconnected",
     disconnect: mock(() => undefined),
     error: null,
+    latestScan: null,
     readerName: null,
     readerState: "unavailable",
     reason: null,
@@ -68,5 +70,30 @@ describe("NFC Reader Inspector", () => {
     expect(screen.getByText("ACS ACR1252U 00 00")).toBeDefined();
     screen.getByRole("button", { name: "Disconnect" }).click();
     expect(bridge.disconnect).toHaveBeenCalledTimes(1);
+  });
+
+  test("renders decoded text, raw NDEF, and UID independently", () => {
+    bridge = {
+      ...bridge,
+      bridgeVersion: "0.1.0",
+      connectionStatus: "connected",
+      latestScan: {
+        decodingStatus: "decoded",
+        decodedText: "Hello",
+        rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
+        records: [],
+        timestamp: "2026-07-24T12:00:00.000Z",
+        uid: "04 AA BB CC",
+      },
+      readerName: "ACS ACR1252U 00 00",
+      readerState: "tag-detected",
+    };
+    render(<NfcReaderInspector />);
+
+    expect(screen.getByText("Hello")).toBeDefined();
+    expect(
+      screen.getByText("D1 01 08 54 02 65 6E 48 65 6C 6C 6F")
+    ).toBeDefined();
+    expect(screen.getByText("04 AA BB CC")).toBeDefined();
   });
 });

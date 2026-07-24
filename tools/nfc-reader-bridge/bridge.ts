@@ -1,3 +1,4 @@
+import type { NdefScanResult } from "./ndef";
 import {
   type BridgeEvent,
   type BridgeSnapshot,
@@ -54,17 +55,19 @@ export function assertLoopbackHost(host: string): void {
 
 export function createBridgeSnapshot(
   config: Required<NfcBridgeConfig>,
-  reader: ReaderStatus
+  reader: ReaderStatus,
+  latestScan?: NdefScanResult
 ): BridgeSnapshot {
   return {
     bridge: {
       bridgeVersion: config.bridgeVersion,
-      capabilities: ["health", "reader-status"],
+      capabilities: ["health", "reader-status", "scan"],
       host: config.host,
       port: config.port,
       tokenRequired: true,
     },
     reader,
+    ...(latestScan ? { latestScan } : {}),
   };
 }
 
@@ -93,6 +96,7 @@ export class NfcBridge {
   private readonly adapter: ReaderAdapter;
   private readonly clients = new Set<BridgeSocket>();
   private readerStatus: ReaderStatus;
+  private latestScan: NdefScanResult | undefined;
   private server: ReturnType<typeof Bun.serve> | null = null;
 
   constructor(config: NfcBridgeConfig, adapter?: ReaderAdapter) {
@@ -118,7 +122,11 @@ export class NfcBridge {
   }
 
   getSnapshot(): BridgeSnapshot {
-    return createBridgeSnapshot(this.config, this.readerStatus);
+    return createBridgeSnapshot(
+      this.config,
+      this.readerStatus,
+      this.latestScan
+    );
   }
 
   getHealthResponse(): Response {
@@ -149,14 +157,33 @@ export class NfcBridge {
         },
       },
     });
-    await this.adapter.start((status) => {
-      this.readerStatus = status;
-      this.broadcast({
-        protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
-        type: "reader-status",
-        ...status,
-      });
-    });
+    await this.adapter.start(
+      (status) => {
+        this.readerStatus = status;
+        this.broadcast({
+          protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+          type: "reader-status",
+          ...status,
+        });
+      },
+      (scan) => {
+        this.latestScan = scan;
+        this.readerStatus = {
+          ...this.readerStatus,
+          readerState: "tag-detected",
+        };
+        this.broadcast({
+          protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+          type: "reader-status",
+          ...this.readerStatus,
+        });
+        this.broadcast({
+          protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+          type: "scan",
+          ...scan,
+        });
+      }
+    );
   }
 
   async stop(): Promise<void> {
