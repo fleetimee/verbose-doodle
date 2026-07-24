@@ -22,7 +22,11 @@ export const pcscUnavailableStatus: ReaderStatus = {
     "Install or start the operating system PC/SC service, then restart the bridge.",
 };
 
-const ACR122U_NAME = /acr122u/i;
+const ACS_READER_NAME = /\bacs\b/i;
+
+export function isSupportedReaderName(readerName: string): boolean {
+  return ACS_READER_NAME.test(readerName);
+}
 
 export class FakeReaderAdapter implements ReaderAdapter {
   readonly initialStatus: ReaderStatus;
@@ -80,8 +84,9 @@ function getFactory(module: PcscModule): PcscFactory {
 export class PcscReaderAdapter implements ReaderAdapter {
   readonly initialStatus: ReaderStatus = {
     readerState: "unavailable",
-    reason: "No ACS ACR122U reader has been detected.",
-    action: "Connect an ACR122U and check that the PC/SC service is running.",
+    reason: "No ACS reader has been detected.",
+    action:
+      "Connect an ACS reader and check that the PC/SC service is running.",
   };
   private client: PcscClient | null = null;
   private listener: ReaderStatusListener | null = null;
@@ -124,12 +129,12 @@ export class PcscReaderAdapter implements ReaderAdapter {
 
   private addReader(reader: PcscReader): void {
     this.readers.add(reader);
-    if (!ACR122U_NAME.test(reader.name)) {
+    if (!isSupportedReaderName(reader.name)) {
       this.listener?.({
         readerState: "unavailable",
         readerName: reader.name,
         reason: `Unsupported reader detected: ${reader.name}.`,
-        action: "Connect an ACS ACR122U reader.",
+        action: "Connect an ACS PC/SC reader.",
       });
       return;
     }
@@ -147,7 +152,7 @@ export class PcscReaderAdapter implements ReaderAdapter {
         readerName: reader.name,
         ...(present
           ? {}
-          : { reason: "The ACR122U is ready and waiting for a tag." }),
+          : { reason: "The ACS reader is ready and waiting for a tag." }),
       });
     });
     reader.on("error", (...args: never[]) => {
@@ -158,7 +163,7 @@ export class PcscReaderAdapter implements ReaderAdapter {
         reason:
           error instanceof Error
             ? error.message
-            : "The ACR122U reported an error.",
+            : "The ACS reader reported an error.",
         action: "Reconnect the reader and restart the PC/SC service if needed.",
       });
     });
@@ -167,7 +172,7 @@ export class PcscReaderAdapter implements ReaderAdapter {
       this.listener?.({
         readerState: "unavailable",
         readerName: reader.name,
-        reason: "The ACR122U reader was removed.",
+        reason: "The ACS reader was removed.",
         action: "Reconnect the reader, then retry.",
       });
     });

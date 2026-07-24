@@ -1,6 +1,6 @@
 # NFC reader bridge
 
-The bridge is a local Bun CLI for the NFC Reader Inspector. It binds to loopback, exposes a versioned WebSocket health contract, and reports PC/SC/ACR122U reader state without sending scan data through the remote backend.
+The bridge is a local Bun CLI for the NFC Reader Inspector. It binds to loopback, exposes a versioned WebSocket health contract, and reports PC/SC/ACS reader state without sending scan data through the remote backend.
 
 ## Run
 

@@ -1,7 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { FakeReaderAdapter, pcscUnavailableStatus } from "./reader-adapter";
+import {
+  FakeReaderAdapter,
+  isSupportedReaderName,
+  pcscUnavailableStatus,
+} from "./reader-adapter";
 
 describe("NFC reader adapter seam", () => {
+  test("accepts ACS readers across model names", () => {
+    expect(isSupportedReaderName("ACS ACR122U 00 00")).toBe(true);
+    expect(isSupportedReaderName("ACS ACR1252U 00 00")).toBe(true);
+    expect(isSupportedReaderName("ACS ACR1552U 00 00")).toBe(true);
+    expect(isSupportedReaderName("Generic PC/SC Reader 00 00")).toBe(false);
+  });
+
   test("emits deterministic waiting and reader-unavailable states", async () => {
     const waiting = new FakeReaderAdapter();
     const states: string[] = [];
@@ -24,7 +35,7 @@ describe("NFC reader adapter seam", () => {
     adapter.setStatus({
       readerState: "waiting",
       readerName: "ACS ACR122U 00 00",
-      reason: "The ACR122U is ready and waiting for a tag.",
+      reason: "The ACS reader is ready and waiting for a tag.",
     });
     expect(states).toEqual(["waiting", "detected", "waiting"]);
   });

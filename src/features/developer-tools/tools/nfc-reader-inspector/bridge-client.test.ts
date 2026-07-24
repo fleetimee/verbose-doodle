@@ -96,13 +96,13 @@ describe("NFC bridge browser client", () => {
       JSON.stringify({
         action: "Start the bridge and retry.",
         code: "reader-unavailable",
-        message: "No ACR122U reader detected.",
+        message: "No ACS reader detected.",
         protocolVersion: "1",
         type: "error",
       })
     );
     expect(client.getState().connectionStatus).toBe("error");
-    expect(client.getState().error).toBe("No ACR122U reader detected.");
+    expect(client.getState().error).toBe("No ACS reader detected.");
     expect(client.getState().action).toBe("Start the bridge and retry.");
     client.disconnect();
     expect(client.getState().connectionStatus).toBe("disconnected");

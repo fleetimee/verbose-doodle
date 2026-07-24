@@ -59,16 +59,16 @@ export const developerToolsMessages = {
   jwtInspectorTags: ["JWT", "Base64Url", "HMAC-SHA256", "Web Crypto"],
   nfcReaderName: "NFC Reader Inspector",
   nfcReaderCatalogDescription:
-    "Connect to a loopback bridge and verify PC/SC health for an ACS ACR122U reader.",
+    "Connect to a loopback bridge and verify PC/SC health for an ACS reader.",
   nfcReaderRuntime: "Local Bun bridge",
   nfcReaderLimit: "Loopback WebSocket",
-  nfcReaderTags: ["NFC", "PC/SC", "ACR122U", "WebSocket"],
+  nfcReaderTags: ["NFC", "PC/SC", "ACS", "WebSocket"],
   nfcReaderDocumentTitle: "NFC Reader Inspector | BPDDIY DevTools",
   nfcReaderDocumentDescription:
-    "Check the local Bun bridge and ACS ACR122U PC/SC reader health.",
+    "Check the local Bun bridge and ACS PC/SC reader health.",
   nfcReaderDocumentKeywords: [
     "NFC reader",
-    "ACR122U",
+    "ACS reader",
     "PC/SC",
     "WebSocket bridge",
   ],
@@ -76,7 +76,7 @@ export const developerToolsMessages = {
   nfcReaderTitle: "NFC Reader Inspector",
   nfcReaderTransport: "LOOPBACK / WS",
   nfcReaderDescription:
-    "Verify that the local bridge can reach your ACS ACR122U before a scan session begins.",
+    "Verify that the local bridge can reach your ACS reader before a scan session begins.",
   nfcBridgeStatusLabel: "Bridge status",
   nfcReaderStatusLabel: "Reader status",
   nfcBridgeVersionLabel: "Protocol bridge",
@@ -89,7 +89,7 @@ export const developerToolsMessages = {
   nfcRetryBridge: "Retry connection",
   nfcReaderNextStepTitle: "Ready for the next NFC slice",
   nfcReaderNextStepDescription:
-    "This first slice confirms loopback transport, bridge authentication, PC/SC availability, and ACR122U reader health. Tag scanning and NDEF inspection will build on this status contract.",
+    "This first slice confirms loopback transport, bridge authentication, PC/SC availability, and ACS reader health. Tag scanning and NDEF inspection will build on this status contract.",
   nfcBridgeConnectionStates: {
     connected: "Connected",
     connecting: "Connecting",
