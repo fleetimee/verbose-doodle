@@ -1,6 +1,9 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["ultracite/biome/core"],
+  "javascript": {
+    "globals": ["Bun"]
+  },
   "linter": {
     "rules": {
       "style": {
@@ -9,6 +12,16 @@
     }
   },
   "overrides": [
+    {
+      "includes": ["tools/**/*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noBitwiseOperators": "off"
+          }
+        }
+      }
+    },
     {
       "includes": ["public/**/*.html"],
       "linter": {

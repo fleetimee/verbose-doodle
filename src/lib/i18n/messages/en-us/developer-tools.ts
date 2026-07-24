@@ -26,6 +26,7 @@ export const developerToolsMessages = {
   validationCategory: "Validation",
   conversionCategory: "Conversion",
   schedulingCategory: "Scheduling",
+  inspectionCategory: "Inspection",
   dateConverterDescription:
     "Convert Unix seconds, milliseconds, and ISO 8601 dates across UTC and IANA timezones.",
   dateConverterRuntime: "Browser only",
@@ -56,6 +57,51 @@ export const developerToolsMessages = {
   jwtInspectorRuntime: "Browser only",
   jwtInspectorLimit: "Standard JWT structure",
   jwtInspectorTags: ["JWT", "Base64Url", "HMAC-SHA256", "Web Crypto"],
+  nfcReaderName: "NFC Reader Inspector",
+  nfcReaderCatalogDescription:
+    "Connect to a loopback bridge and verify PC/SC health for an ACS reader.",
+  nfcReaderRuntime: "Local Bun bridge",
+  nfcReaderLimit: "Loopback WebSocket",
+  nfcReaderTags: ["NFC", "PC/SC", "ACS", "WebSocket"],
+  nfcReaderDocumentTitle: "NFC Reader Inspector | BPDDIY DevTools",
+  nfcReaderDocumentDescription:
+    "Check the local Bun bridge and ACS PC/SC reader health.",
+  nfcReaderDocumentKeywords: [
+    "NFC reader",
+    "ACS reader",
+    "PC/SC",
+    "WebSocket bridge",
+  ],
+  nfcReaderEyebrow: "Hardware inspection / local bridge",
+  nfcReaderTitle: "NFC Reader Inspector",
+  nfcReaderTransport: "LOOPBACK / WS",
+  nfcReaderDescription:
+    "Verify that the local bridge can reach your ACS reader before a scan session begins.",
+  nfcBridgeStatusLabel: "Bridge status",
+  nfcReaderStatusLabel: "Reader status",
+  nfcBridgeVersionLabel: "Protocol bridge",
+  nfcBridgeNotConnected:
+    "Connect to the local bridge to read its version and capabilities.",
+  nfcReaderNotDetected:
+    "No compatible reader has reported itself to the bridge.",
+  nfcConnectBridge: "Connect bridge",
+  nfcDisconnectBridge: "Disconnect",
+  nfcRetryBridge: "Retry connection",
+  nfcReaderNextStepTitle: "Ready for the next NFC slice",
+  nfcReaderNextStepDescription:
+    "This first slice confirms loopback transport, bridge authentication, PC/SC availability, and ACS reader health. Tag scanning and NDEF inspection will build on this status contract.",
+  nfcBridgeConnectionStates: {
+    connected: "Connected",
+    connecting: "Connecting",
+    disconnected: "Disconnected",
+    error: "Connection error",
+  },
+  nfcReaderStates: {
+    detected: "Reader detected",
+    "tag-detected": "Tag detected",
+    unavailable: "Reader unavailable",
+    waiting: "Waiting for tag",
+  },
   openTool: "Open {tool}",
   openAction: "Open tool",
 } as const;

@@ -6,6 +6,7 @@ import {
   CalendarDays,
   FileJson,
   Fingerprint,
+  RadioReceiver,
   RefreshCw,
   ShieldCheck,
   Timer,
@@ -14,6 +15,7 @@ import { messages } from "@/lib/i18n";
 
 export type DeveloperToolCategoryId =
   | "conversion"
+  | "inspection"
   | "scheduling"
   | "validation";
 
@@ -90,6 +92,11 @@ const CATEGORY_METADATA: readonly Omit<DeveloperToolCategory, "tools">[] = [
     name: messages.developerTools.schedulingCategory,
     icon: CalendarClock,
   },
+  {
+    id: "inspection",
+    name: messages.developerTools.inspectionCategory,
+    icon: RadioReceiver,
+  },
 ];
 
 const loadJsonSchemaValidator: DeveloperToolLoader = () =>
@@ -121,6 +128,11 @@ const loadCronParser: DeveloperToolLoader = () =>
   import("@/pages/dashboard/cron-parser").then(({ CronParserPage }) => ({
     default: CronParserPage,
   }));
+
+const loadNfcReaderInspector: DeveloperToolLoader = () =>
+  import("@/pages/dashboard/nfc-reader-inspector").then(
+    ({ NfcReaderInspectorPage }) => ({ default: NfcReaderInspectorPage })
+  );
 
 export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
   {
@@ -224,6 +236,23 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     runtime: messages.developerTools.cronParserRuntime,
     limit: messages.developerTools.cronParserLimit,
     tags: messages.developerTools.cronParserTags,
+  },
+  {
+    categoryId: "inspection",
+    name: messages.developerTools.nfcReaderName,
+    description: messages.developerTools.nfcReaderCatalogDescription,
+    document: {
+      title: messages.developerTools.nfcReaderDocumentTitle,
+      description: messages.developerTools.nfcReaderDocumentDescription,
+      keywords: messages.developerTools.nfcReaderDocumentKeywords,
+    },
+    icon: RadioReceiver,
+    id: "nfc-reader-inspector",
+    path: "developer-tools/nfc-reader-inspector",
+    load: loadNfcReaderInspector,
+    runtime: messages.developerTools.nfcReaderRuntime,
+    limit: messages.developerTools.nfcReaderLimit,
+    tags: messages.developerTools.nfcReaderTags,
   },
 ];
 
