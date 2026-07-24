@@ -11,7 +11,9 @@
     "fix": "ultracite fix",
     "preview": "vite preview",
     "test": "bun test",
-    "test:watch": "bun test --watch"
+    "test:watch": "bun test --watch",
+    "nfc-bridge": "bun tools/nfc-reader-bridge/cli.ts",
+    "nfc-bridge:compile": "bun build tools/nfc-reader-bridge/cli.ts --compile --outfile dist/nfc-reader-bridge"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -78,5 +80,8 @@
     "typescript": "7.0.2",
     "ultracite": "7.8.3",
     "vite": "^8.0.16"
+  },
+  "optionalDependencies": {
+    "@pokusew/pcsclite": "^0.6.0"
   }
 }
