@@ -108,6 +108,39 @@ describe("NFC bridge browser client", () => {
     expect(client.getState().connectionStatus).toBe("disconnected");
   });
 
+  test("stores the latest versioned scan with decoded text, raw NDEF, and UID", () => {
+    let socket: FakeWebSocket | undefined;
+    const client = new NfcBridgeClient("ws://127.0.0.1:7788/ws", (url) => {
+      socket = new FakeWebSocket(url);
+      return socket;
+    });
+
+    client.connect();
+    socket?.open();
+    socket?.receive(
+      JSON.stringify({
+        decodingStatus: "decoded",
+        decodedText: "Hello",
+        protocolVersion: "1",
+        rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
+        records: [],
+        timestamp: "2026-07-24T12:00:00.000Z",
+        type: "scan",
+        uid: "04 AA BB CC",
+      })
+    );
+
+    expect(client.getState().readerState).toBe("tag-detected");
+    expect(client.getState().latestScan).toEqual({
+      decodingStatus: "decoded",
+      decodedText: "Hello",
+      rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
+      records: [],
+      timestamp: "2026-07-24T12:00:00.000Z",
+      uid: "04 AA BB CC",
+    });
+  });
+
   test("rejects malformed and unknown bridge events", () => {
     expect(parseNfcBridgeEvent("not-json")).toEqual({
       error: "The bridge sent malformed JSON.",

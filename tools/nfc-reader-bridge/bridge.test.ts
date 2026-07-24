@@ -80,4 +80,32 @@ describe("NFC bridge lifecycle", () => {
       },
     });
   });
+
+  test("retains the latest scan in the bridge snapshot", async () => {
+    const adapter = new FakeReaderAdapter();
+    const bridge = new NfcBridge(
+      {
+        allowedOrigins: ["http://localhost:5173"],
+        port: 0,
+        token: "secret",
+      },
+      adapter
+    );
+    bridges.push(bridge);
+    await bridge.start();
+    adapter.setScan({
+      decodedText: "Hello",
+      decodingStatus: "decoded",
+      rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
+      records: [],
+      timestamp: "2026-07-24T12:00:00.000Z",
+      uid: "04 AA BB CC",
+    });
+
+    expect(bridge.getSnapshot().latestScan).toMatchObject({
+      decodedText: "Hello",
+      rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
+      uid: "04 AA BB CC",
+    });
+  });
 });

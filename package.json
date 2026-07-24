@@ -83,5 +83,8 @@
   },
   "optionalDependencies": {
     "@pokusew/pcsclite": "^0.6.0"
-  }
+  },
+  "trustedDependencies": [
+    "@pokusew/pcsclite"
+  ]
 }

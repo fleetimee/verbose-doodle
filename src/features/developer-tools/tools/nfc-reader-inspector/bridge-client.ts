@@ -41,6 +41,7 @@ export function parseNfcBridgeEvent(
     if (
       value.type !== "bridge-status" &&
       value.type !== "reader-status" &&
+      value.type !== "scan" &&
       value.type !== "error"
     ) {
       return {
@@ -156,6 +157,23 @@ export class NfcBridgeClient {
         readerName: event.readerName ?? null,
         readerState: event.readerState,
         reason: event.reason ?? null,
+      });
+      return;
+    }
+    if (event.type === "scan") {
+      this.updateState({
+        action: null,
+        error: null,
+        latestScan: {
+          decodedText: event.decodedText,
+          decodingStatus: event.decodingStatus,
+          rawNdef: event.rawNdef,
+          records: event.records,
+          timestamp: event.timestamp,
+          uid: event.uid,
+          warning: event.warning,
+        },
+        readerState: "tag-detected",
       });
       return;
     }

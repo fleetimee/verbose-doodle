@@ -90,6 +90,16 @@ export const developerToolsMessages = {
   nfcReaderNextStepTitle: "Ready for the next NFC slice",
   nfcReaderNextStepDescription:
     "This first slice confirms loopback transport, bridge authentication, PC/SC availability, and ACS reader health. Tag scanning and NDEF inspection will build on this status contract.",
+  nfcScanTitle: "Latest scan",
+  nfcScanEmpty:
+    "Place an NDEF tag on the reader to populate the inspection surface.",
+  nfcScanDecodedLabel: "Decoded text",
+  nfcScanNoDecodedText: "No human-readable text was decoded.",
+  nfcScanRawLabel: "Raw NDEF",
+  nfcScanUidLabel: "Tag UID",
+  nfcScanUidUnavailable: "The reader did not expose a UID.",
+  nfcScanTimestampLabel: "Captured",
+  nfcScanWarningLabel: "Decode warning",
   nfcBridgeConnectionStates: {
     connected: "Connected",
     connecting: "Connecting",

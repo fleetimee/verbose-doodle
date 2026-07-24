@@ -32,6 +32,17 @@ export type NfcBridgeEvent =
     }
   | {
       readonly protocolVersion: typeof NFC_BRIDGE_PROTOCOL_VERSION;
+      readonly type: "scan";
+      readonly timestamp: string;
+      readonly decodedText?: string;
+      readonly rawNdef: string;
+      readonly uid?: string;
+      readonly records: readonly NfcNdefRecord[];
+      readonly decodingStatus: NfcNdefDecodingStatus;
+      readonly warning?: string;
+    }
+  | {
+      readonly protocolVersion: typeof NFC_BRIDGE_PROTOCOL_VERSION;
       readonly type: "error";
       readonly code: string;
       readonly message: string;
@@ -47,6 +58,35 @@ export type NfcBridgeState = {
   readonly bridgeVersion: string | null;
   readonly capabilities: readonly string[];
   readonly error: string | null;
+  readonly latestScan: NfcScan | null;
+};
+
+export type NfcNdefDecodingStatus =
+  | "decoded"
+  | "no-text"
+  | "unsupported"
+  | "malformed";
+
+export type NfcNdefRecord = {
+  readonly index: number;
+  readonly tnf: number;
+  readonly type: string;
+  readonly typeHex: string;
+  readonly id: string | null;
+  readonly idHex: string | null;
+  readonly payload: string | null;
+  readonly payloadHex: string;
+  readonly raw: string;
+};
+
+export type NfcScan = {
+  readonly timestamp: string;
+  readonly decodedText?: string;
+  readonly rawNdef: string;
+  readonly uid?: string;
+  readonly records: readonly NfcNdefRecord[];
+  readonly decodingStatus: NfcNdefDecodingStatus;
+  readonly warning?: string;
 };
 
 export type NfcBridgeCommand = {
@@ -63,4 +103,5 @@ export const initialNfcBridgeState: NfcBridgeState = {
   readerName: null,
   readerState: "unavailable",
   reason: null,
+  latestScan: null,
 };
