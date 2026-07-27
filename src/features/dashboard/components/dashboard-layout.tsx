@@ -1,5 +1,11 @@
 import React, { Suspense } from "react";
-import { Link, Outlet, useLocation, useParams } from "react-router";
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -12,12 +18,20 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
 import { HttpMethodBadge } from "@/features/endpoints/components/http-method-badge";
 import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
 import type { HttpMethod } from "@/features/endpoints/types";
@@ -51,9 +65,11 @@ const routeLabels: Record<string, string> = {
 const ENDPOINT_DETAIL_REGEX = /^\/dashboard\/endpoints\/([A-Za-z0-9_-]+)$/;
 
 type DashboardBreadcrumbItem = {
+  readonly billerId?: number;
   readonly href: string;
   readonly isLast: boolean;
   readonly isNavigable: boolean;
+  readonly kind?: "biller";
   readonly label: string;
   readonly method?: HttpMethod;
   readonly url?: string;
@@ -103,6 +119,21 @@ export function DashboardLayout() {
     }
   );
 
+  const endpointBreadcrumbIndex = breadcrumbItems.findIndex(
+    (item) => item.label === "Endpoints"
+  );
+
+  if (isEndpointDetail && endpointBreadcrumbIndex !== -1) {
+    breadcrumbItems.splice(endpointBreadcrumbIndex + 1, 0, {
+      billerId: endpoint?.billerId,
+      href: "/dashboard/endpoints",
+      isLast: false,
+      isNavigable: false,
+      kind: "biller",
+      label: endpoint?.billerName ?? "Biller",
+    });
+  }
+
   const themeSwitcherValue =
     theme === "light" || theme === "dark" ? theme : undefined;
 
@@ -120,8 +151,10 @@ export function DashboardLayout() {
               />
               <Breadcrumb>
                 <BreadcrumbList>
-                  {breadcrumbItems.map((item) => (
-                    <React.Fragment key={item.href}>
+                  {breadcrumbItems.map((item, index) => (
+                    <React.Fragment
+                      key={`${item.href}-${item.kind ?? "route"}-${index}`}
+                    >
                       <BreadcrumbItem
                         className={
                           item.isLast ? "min-w-0 max-w-full" : "hidden md:block"
@@ -158,6 +191,15 @@ function DashboardBreadcrumbContent({
 }: {
   readonly item: DashboardBreadcrumbItem;
 }) {
+  if (item.kind === "biller") {
+    return (
+      <BillerBreadcrumbSelector
+        billerId={item.billerId}
+        fallbackLabel={item.label}
+      />
+    );
+  }
+
   if (item.isLast) {
     return (
       <BreadcrumbPage>
@@ -186,6 +228,49 @@ function DashboardBreadcrumbContent({
   }
 
   return <span className="text-muted-foreground">{item.label}</span>;
+}
+
+function BillerBreadcrumbSelector({
+  billerId,
+  fallbackLabel,
+}: {
+  readonly billerId?: number;
+  readonly fallbackLabel: string;
+}) {
+  const navigate = useNavigate();
+  const { data: billers = [], isPending: isLoadingBillers } = useGetBillers();
+  const currentBiller = billers.find((biller) => biller.id === billerId);
+
+  if (isLoadingBillers || billerId === undefined || !currentBiller) {
+    return <span className="text-muted-foreground">{fallbackLabel}</span>;
+  }
+
+  return (
+    <Select
+      onValueChange={(value) => {
+        const nextBillerId = Number(value);
+
+        if (Number.isSafeInteger(nextBillerId) && nextBillerId !== billerId) {
+          navigate(`/dashboard/endpoints?billerId=${nextBillerId}`);
+        }
+      }}
+      value={String(billerId)}
+    >
+      <SelectTrigger
+        aria-label="Biller"
+        className="h-8 max-w-48 border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+      >
+        <SelectValue>{currentBiller.name}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {billers.map((biller) => (
+          <SelectItem key={biller.id} value={String(biller.id)}>
+            {biller.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
 }
 
 function DashboardPageFallback() {

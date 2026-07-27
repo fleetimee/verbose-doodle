@@ -9,6 +9,12 @@ export const endpointsMessages = {
   noSearchResultsTitle: "No endpoints found",
   noSearchResultsDescription:
     "Change the search keyword or reset filters to view the endpoint list.",
+  scopedEmptyTitle: "No endpoints for this biller",
+  scopedEmptyDescription:
+    "Create an endpoint for this biller to see it in this scoped catalog.",
+  billerNotFoundTitle: "Biller not found",
+  billerNotFoundDescription:
+    "The selected biller is unavailable, so no endpoints can be shown.",
   emptyTitle: "No endpoints yet",
   emptyDescription:
     "Start by creating your first API endpoint for an available biller.",
