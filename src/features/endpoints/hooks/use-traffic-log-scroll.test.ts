@@ -16,13 +16,17 @@ describe("useTrafficLogScroll", () => {
     const viewport = createViewport();
     const viewportRef = { current: viewport };
     const { rerender } = renderHook(
-      ({ logs }) => useTrafficLogScroll(viewportRef, logs),
-      { initialProps: { logs: [{ id: "log-1" }] } }
+      ({ autoRefresh, logs }) =>
+        useTrafficLogScroll(viewportRef, logs, autoRefresh),
+      { initialProps: { autoRefresh: true, logs: [{ id: "log-1" }] } }
     );
 
     expect(viewport.scrollTop).toBe(1560);
 
-    rerender({ logs: [{ id: "log-1" }, { id: "log-2" }] });
+    rerender({
+      autoRefresh: true,
+      logs: [{ id: "log-1" }, { id: "log-2" }],
+    });
 
     expect(viewport.scrollTop).toBe(1560);
   });
@@ -31,8 +35,9 @@ describe("useTrafficLogScroll", () => {
     const viewport = createViewport();
     const viewportRef = { current: viewport };
     const { rerender } = renderHook(
-      ({ logs }) => useTrafficLogScroll(viewportRef, logs),
-      { initialProps: { logs: [{ id: "log-1" }] } }
+      ({ autoRefresh, logs }) =>
+        useTrafficLogScroll(viewportRef, logs, autoRefresh),
+      { initialProps: { autoRefresh: false, logs: [{ id: "log-1" }] } }
     );
 
     act(() => {
@@ -40,8 +45,33 @@ describe("useTrafficLogScroll", () => {
       viewport.dispatchEvent(new Event("scroll"));
     });
 
-    rerender({ logs: [{ id: "log-1" }, { id: "log-2" }] });
+    rerender({
+      autoRefresh: false,
+      logs: [{ id: "log-1" }, { id: "log-2" }],
+    });
 
     expect(viewport.scrollTop).toBe(120);
+  });
+
+  test("returns to the latest log after a manual scroll when auto-refresh is enabled", () => {
+    const viewport = createViewport();
+    const viewportRef = { current: viewport };
+    const { rerender } = renderHook(
+      ({ autoRefresh, logs }) =>
+        useTrafficLogScroll(viewportRef, logs, autoRefresh),
+      { initialProps: { autoRefresh: true, logs: [{ id: "log-1" }] } }
+    );
+
+    act(() => {
+      viewport.scrollTop = 120;
+      viewport.dispatchEvent(new Event("scroll"));
+    });
+
+    rerender({
+      autoRefresh: true,
+      logs: [{ id: "log-1" }, { id: "log-2" }],
+    });
+
+    expect(viewport.scrollTop).toBe(1560);
   });
 });
