@@ -302,7 +302,7 @@ export function EndpointTrafficLogViewer({
       [...(data?.items ?? [])].sort((a, b) => getLogTime(a) - getLogTime(b)),
     [data?.items]
   );
-  useTrafficLogScroll(trafficLogViewportRef, logs);
+  useTrafficLogScroll(trafficLogViewportRef, logs, autoRefresh);
   const totalLogsLabel = getLogCountLabel(logs.length);
   const selectedLogsLabel = formatMessage(
     messages.endpoints.trafficLogsSelectedCount,

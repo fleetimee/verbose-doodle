@@ -15,7 +15,8 @@ function isNearBottom(viewport: HTMLElement) {
 
 export function useTrafficLogScroll(
   viewportRef: RefObject<HTMLDivElement | null>,
-  logs: readonly TrafficLogItem[]
+  logs: readonly TrafficLogItem[],
+  autoRefresh: boolean
 ) {
   const shouldStickToBottomRef = useRef(true);
   const hasRenderedLogsRef = useRef(false);
@@ -43,11 +44,13 @@ export function useTrafficLogScroll(
 
     if (
       viewport &&
-      (!hasRenderedLogsRef.current || shouldStickToBottomRef.current)
+      (!hasRenderedLogsRef.current ||
+        autoRefresh ||
+        shouldStickToBottomRef.current)
     ) {
       viewport.scrollTop = viewport.scrollHeight;
     }
 
     hasRenderedLogsRef.current = true;
-  }, [logs, viewportRef]);
+  }, [autoRefresh, logs, viewportRef]);
 }
