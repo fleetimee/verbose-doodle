@@ -75,6 +75,7 @@ import type {
   EndpointTrafficLogStatusFilter,
   EndpointTrafficLogsFilters,
 } from "@/features/endpoints/types";
+import { formatJakartaTimestamp } from "@/features/endpoints/utils/endpoint-time";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, formatPluralMessage, messages } from "@/lib/i18n";
@@ -154,7 +155,7 @@ function getLatestDurationLabel(log: EndpointTrafficLog | undefined) {
 
 function formatLogLine(log: EndpointTrafficLog, showTimestamp: boolean) {
   const parts = [
-    showTimestamp ? log.occurredAt : null,
+    showTimestamp ? formatJakartaTimestamp(log.occurredAt) : null,
     `request_id:${log.requestId || "-"}`,
     `source_ip:${formatIp(log.sourceIp, log.sourcePort)}`,
     `destination_ip:${formatIp(log.destinationIp, log.destinationPort)}`,
@@ -532,7 +533,8 @@ export function EndpointTrafficLogViewer({
               {selectedLogDetail.path}
             </h3>
             <p className="truncate text-slate-600 text-xs dark:text-slate-400">
-              {selectedLogDetail.requestId} / {selectedLogDetail.occurredAt}
+              {selectedLogDetail.requestId} /{" "}
+              {formatJakartaTimestamp(selectedLogDetail.occurredAt)}
             </p>
           </div>
           <div className="grid min-w-0 gap-2 pr-12 text-right text-xs">
