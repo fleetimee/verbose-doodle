@@ -1,3 +1,4 @@
+import { dirname } from "node:path";
 import {
   extractNdefMessage,
   type NdefScanResult,
@@ -132,6 +133,7 @@ async function resolvePcscHelperPath(): Promise<string> {
   const candidates = [
     ...(configuredPath ? [configuredPath] : []),
     PCSC_HELPER_PATH,
+    `${dirname(process.execPath)}/pcsc-node-helper.cjs`,
     `${process.cwd()}/tools/nfc-reader-bridge/pcsc-node-helper.cjs`,
     `${process.cwd()}/pcsc-node-helper.cjs`,
   ];
