@@ -74,7 +74,7 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
             method={endpoint.method}
             variant="badge"
           />
-          <ItemTitle className="min-w-0 flex-1">
+          <ItemTitle className="w-full min-w-0 flex-1">
             <EndpointPathTitle path={endpoint.url} />
           </ItemTitle>
         </div>
