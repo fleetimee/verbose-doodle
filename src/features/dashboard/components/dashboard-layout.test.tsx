@@ -37,6 +37,14 @@ function installApiMock() {
     responses: [],
     url: "/xapi-pbb/api/user/login",
   };
+  const alternateEndpoint = {
+    biller_id: 1,
+    biller_name: "PLN",
+    endpoint_id: "endpoint-2",
+    method: "GET",
+    responses: [],
+    url: "/xapi-pbb/api/user/status",
+  };
   const mockFetch = (input: Parameters<typeof globalThis.fetch>[0]) => {
     const url = String(input);
 
@@ -50,12 +58,22 @@ function installApiMock() {
       );
     }
 
-    if (url === "/api/endpoint" || url === "/api/endpoint/endpoint-1") {
+    if (url === "/api/endpoint") {
+      return Promise.resolve(
+        jsonResponse({
+          data: { endpoints: [endpoint, alternateEndpoint] },
+        })
+      );
+    }
+
+    if (
+      url === "/api/endpoint/endpoint-1" ||
+      url === "/api/endpoint/endpoint-2"
+    ) {
       return Promise.resolve(
         jsonResponse({
           data: {
-            endpoint: url.endsWith("endpoint-1") ? endpoint : undefined,
-            endpoints: url === "/api/endpoint" ? [endpoint] : undefined,
+            endpoint: url.endsWith("endpoint-1") ? endpoint : alternateEndpoint,
           },
         })
       );
@@ -145,6 +163,24 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
         "/dashboard/endpoints?billerId=2"
+      );
+    });
+  });
+
+  test("navigates directly to another endpoint for the current biller", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.click(await screen.findByRole("combobox", { name: "Endpoint" }));
+    await user.click(
+      await screen.findByRole("option", {
+        name: "GET /xapi-pbb/api/user/status",
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("location").textContent).toBe(
+        `/dashboard/endpoints/${encodeId("endpoint-2")}`
       );
     });
   });

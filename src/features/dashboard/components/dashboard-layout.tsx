@@ -33,12 +33,13 @@ import {
 } from "@/components/ui/sidebar";
 import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
 import { HttpMethodBadge } from "@/features/endpoints/components/http-method-badge";
+import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
 import type { HttpMethod } from "@/features/endpoints/types";
 import { SocketBridgeFloatingStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
 import { SocketBridgeProvider } from "@/features/socket-tester/context/socket-bridge-context";
 import { messages } from "@/lib/i18n";
-import { decodeId } from "@/lib/id-encoder";
+import { decodeId, encodeId } from "@/lib/id-encoder";
 
 const routeLabels: Record<string, string> = {
   overview: "Overview",
@@ -69,9 +70,10 @@ type DashboardBreadcrumbItem = {
   readonly href: string;
   readonly isLast: boolean;
   readonly isNavigable: boolean;
-  readonly kind?: "biller";
+  readonly kind?: "biller" | "endpoint";
   readonly label: string;
   readonly method?: HttpMethod;
+  readonly endpointId?: string;
   readonly url?: string;
 };
 
@@ -103,11 +105,17 @@ export function DashboardLayout() {
         routeLabels[segment] ||
         segment.charAt(0).toUpperCase() + segment.slice(1);
       let method: HttpMethod | undefined;
+      let billerId: number | undefined;
+      let endpointId: string | undefined;
+      let kind: DashboardBreadcrumbItem["kind"];
       let url: string | undefined;
 
       // If this segment is the encoded ID and we have endpoint data, show the endpoint URL
       if (isEndpointDetail && segment === encodedId && endpoint) {
         label = `${endpoint.method} ${endpoint.url}`;
+        billerId = endpoint.billerId;
+        endpointId = endpoint.id;
+        kind = "endpoint";
         method = endpoint.method;
         url = endpoint.url;
       }
@@ -115,7 +123,17 @@ export function DashboardLayout() {
       const isLast = index === pathSegments.length - 1;
       const isNavigable = segment !== "socket-test";
 
-      return { href, isLast, isNavigable, label, method, url };
+      return {
+        billerId,
+        endpointId,
+        href,
+        isLast,
+        isNavigable,
+        kind,
+        label,
+        method,
+        url,
+      };
     }
   );
 
@@ -200,18 +218,22 @@ function DashboardBreadcrumbContent({
     );
   }
 
+  if (item.kind === "endpoint") {
+    return (
+      <EndpointBreadcrumbSelector
+        billerId={item.billerId}
+        endpointId={item.endpointId}
+        fallbackMethod={item.method}
+        fallbackUrl={item.url}
+      />
+    );
+  }
+
   if (item.isLast) {
     return (
       <BreadcrumbPage>
         {item.method && item.url ? (
-          <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
-            <HttpMethodBadge
-              className="shrink-0"
-              method={item.method}
-              variant="text"
-            />
-            <span className="min-w-0 truncate">{item.url}</span>
-          </span>
+          <EndpointBreadcrumbLabel method={item.method} url={item.url} />
         ) : (
           item.label
         )}
@@ -228,6 +250,21 @@ function DashboardBreadcrumbContent({
   }
 
   return <span className="text-muted-foreground">{item.label}</span>;
+}
+
+function EndpointBreadcrumbLabel({
+  method,
+  url,
+}: {
+  readonly method: HttpMethod;
+  readonly url: string;
+}) {
+  return (
+    <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
+      <HttpMethodBadge className="shrink-0" method={method} variant="text" />
+      <span className="min-w-0 truncate">{url}</span>
+    </span>
+  );
 }
 
 function BillerBreadcrumbSelector({
@@ -266,6 +303,75 @@ function BillerBreadcrumbSelector({
         {billers.map((biller) => (
           <SelectItem key={biller.id} value={String(biller.id)}>
             {biller.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function EndpointBreadcrumbSelector({
+  billerId,
+  endpointId,
+  fallbackMethod,
+  fallbackUrl,
+}: {
+  readonly billerId?: number;
+  readonly endpointId?: string;
+  readonly fallbackMethod?: HttpMethod;
+  readonly fallbackUrl?: string;
+}) {
+  const navigate = useNavigate();
+  const { endpoints: endpointQuery } = useEndpointCatalog();
+  const { data: endpoints = [], isPending: isLoadingEndpoints } = endpointQuery;
+  const billerEndpoints = endpoints.filter(
+    (endpoint) => endpoint.billerId === billerId
+  );
+  const currentEndpoint = billerEndpoints.find(
+    (endpoint) => endpoint.id === endpointId
+  );
+
+  if (
+    isLoadingEndpoints ||
+    !currentEndpoint ||
+    !fallbackMethod ||
+    !fallbackUrl
+  ) {
+    return (
+      <BreadcrumbPage>
+        {fallbackMethod && fallbackUrl ? (
+          <EndpointBreadcrumbLabel method={fallbackMethod} url={fallbackUrl} />
+        ) : (
+          "Endpoint"
+        )}
+      </BreadcrumbPage>
+    );
+  }
+
+  return (
+    <Select
+      onValueChange={(value) => {
+        if (value && value !== currentEndpoint.id) {
+          navigate(`/dashboard/endpoints/${encodeId(value)}`);
+        }
+      }}
+      value={currentEndpoint.id}
+    >
+      <SelectTrigger
+        aria-label="Endpoint"
+        className="h-8 max-w-[min(32rem,50vw)] border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+      >
+        <SelectValue>
+          <EndpointBreadcrumbLabel
+            method={currentEndpoint.method}
+            url={currentEndpoint.url}
+          />
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {billerEndpoints.map((endpoint) => (
+          <SelectItem key={endpoint.id} value={endpoint.id}>
+            {endpoint.method} {endpoint.url}
           </SelectItem>
         ))}
       </SelectContent>
