@@ -93,6 +93,7 @@ describe("NFC bridge lifecycle", () => {
     );
     bridges.push(bridge);
     await bridge.start();
+    bridge.startScanning();
     adapter.setScan({
       decodedText: "Hello",
       decodingStatus: "decoded",
@@ -119,5 +120,49 @@ describe("NFC bridge lifecycle", () => {
       rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
       uid: "04 AA BB CC",
     });
+  });
+
+  test("gates scan events behind the explicit scan session", async () => {
+    const adapter = new FakeReaderAdapter();
+    const bridge = new NfcBridge(
+      {
+        allowedOrigins: ["http://localhost:5173"],
+        port: 0,
+        token: "secret",
+      },
+      adapter
+    );
+    bridges.push(bridge);
+    await bridge.start();
+
+    adapter.setScan({
+      decodingStatus: "decoded",
+      rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
+      records: [],
+      timestamp: "2026-07-24T12:00:00.000Z",
+    });
+    expect(bridge.getSnapshot().latestScan).toBeUndefined();
+
+    bridge.startScanning();
+    expect(bridge.getSnapshot().scanStatus).toBe("scanning");
+    adapter.setScan({
+      decodedText: "Hello",
+      decodingStatus: "decoded",
+      rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
+      records: [],
+      timestamp: "2026-07-24T12:00:00.000Z",
+    });
+    expect(bridge.getSnapshot().latestScan?.decodedText).toBe("Hello");
+
+    bridge.stopScanning();
+    expect(bridge.getSnapshot().scanStatus).toBe("stopped");
+    adapter.setScan({
+      decodedText: "Ignored",
+      decodingStatus: "decoded",
+      rawNdef: "D1 01 08 54 02 65 6E 49 67 6E 6F 72 65 64",
+      records: [],
+      timestamp: "2026-07-24T12:01:00.000Z",
+    });
+    expect(bridge.getSnapshot().latestScan?.decodedText).toBe("Hello");
   });
 });

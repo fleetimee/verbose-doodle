@@ -7,6 +7,7 @@ let bridge = {
   action: null as string | null,
   bridgeVersion: null as string | null,
   capabilities: [] as readonly string[],
+  clearScan: mock(() => undefined),
   connect: mock(() => undefined),
   connectionStatus: "disconnected" as NfcBridgeState["connectionStatus"],
   disconnect: mock(() => undefined),
@@ -16,6 +17,9 @@ let bridge = {
   readerState: "unavailable" as NfcBridgeState["readerState"],
   reason: null as string | null,
   refresh: mock(() => undefined),
+  scanStatus: "stopped" as NfcBridgeState["scanStatus"],
+  startScan: mock(() => true),
+  stopScan: mock(() => true),
 };
 
 mock.module(
@@ -30,6 +34,7 @@ afterEach(() => {
     action: null,
     bridgeVersion: null,
     capabilities: [],
+    clearScan: mock(() => undefined),
     connect: mock(() => undefined),
     connectionStatus: "disconnected",
     disconnect: mock(() => undefined),
@@ -39,6 +44,9 @@ afterEach(() => {
     readerState: "unavailable",
     reason: null,
     refresh: mock(() => undefined),
+    scanStatus: "stopped",
+    startScan: mock(() => true),
+    stopScan: mock(() => true),
   };
 });
 
@@ -68,6 +76,8 @@ describe("NFC Reader Inspector", () => {
     expect(screen.getAllByText("Connected")).toHaveLength(2);
     expect(screen.getAllByText("Waiting for tag")).toHaveLength(2);
     expect(screen.getByText("ACS ACR1252U 00 00")).toBeDefined();
+    screen.getByRole("button", { name: "Start scan" }).click();
+    expect(bridge.startScan).toHaveBeenCalledTimes(1);
     screen.getByRole("button", { name: "Disconnect" }).click();
     expect(bridge.disconnect).toHaveBeenCalledTimes(1);
   });
@@ -123,6 +133,11 @@ describe("NFC Reader Inspector", () => {
     expect(screen.getByText("74 65 78 74")).toBeDefined();
     expect(screen.getByText("No decoded payload")).toBeDefined();
     expect(screen.getByText("01 6F 70 65 6E 61 69")).toBeDefined();
+    expect(screen.getAllByRole("button", { name: "Copy record" })).toHaveLength(
+      2
+    );
+    screen.getByRole("button", { name: "Clear scan" }).click();
+    expect(bridge.clearScan).toHaveBeenCalledTimes(1);
   });
 
   test("renders explicit status and raw fallback for non-text scans", () => {

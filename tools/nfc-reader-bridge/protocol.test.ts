@@ -52,6 +52,7 @@ describe("NFC bridge protocol", () => {
         readerState: "waiting",
         readerName: "ACS ACR122U 00 00",
       },
+      scanStatus: "stopped",
     });
 
     expect(JSON.parse(serializeBridgeEvent(events[0]))).toEqual({
@@ -64,6 +65,10 @@ describe("NFC bridge protocol", () => {
       tokenRequired: true,
     });
     expect(events[1].type).toBe("reader-status");
+    expect(events[2]).toMatchObject({
+      scanning: false,
+      type: "scan-status",
+    });
   });
 
   test("serializes a versioned scan event with raw and decoded fields", () => {
@@ -96,7 +101,8 @@ describe("NFC bridge protocol", () => {
         uid: "04 AA BB CC",
       },
       reader: { readerState: "tag-detected" },
-    }).slice(2);
+      scanStatus: "scanning",
+    }).slice(3);
 
     expect(JSON.parse(serializeBridgeEvent(scan))).toEqual({
       decodedText: "Hello",

@@ -8,6 +8,8 @@ export type BridgeReaderState =
   | "waiting"
   | "tag-detected";
 
+export type BridgeScanStatus = "stopped" | "scanning";
+
 export type BridgeErrorCode =
   | "pcsc-unavailable"
   | "reader-unavailable"
@@ -34,6 +36,13 @@ export type BridgeEvent =
       readonly type: "reader-status";
       readonly readerState: BridgeReaderState;
       readonly readerName?: string;
+      readonly reason?: string;
+      readonly action?: string;
+    }
+  | {
+      readonly protocolVersion: typeof NFC_BRIDGE_PROTOCOL_VERSION;
+      readonly type: "scan-status";
+      readonly scanning: boolean;
       readonly reason?: string;
       readonly action?: string;
     }
@@ -77,6 +86,7 @@ export type BridgeSnapshot = {
     readonly reason?: string;
     readonly action?: string;
   };
+  readonly scanStatus: BridgeScanStatus;
   readonly latestScan?: NdefScanResult;
 };
 
@@ -160,6 +170,11 @@ export function snapshotToEvents(
       protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
       type: "reader-status",
       ...snapshot.reader,
+    },
+    {
+      protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+      scanning: snapshot.scanStatus === "scanning",
+      type: "scan-status",
     },
     ...(snapshot.latestScan
       ? [

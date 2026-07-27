@@ -26,10 +26,21 @@ export function useNfcBridge() {
 
   const connect = useCallback(() => client.connect(), [client]);
   const disconnect = useCallback(() => client.disconnect(), [client]);
+  const startScan = useCallback(() => client.startScan(), [client]);
+  const stopScan = useCallback(() => client.stopScan(), [client]);
+  const clearScan = useCallback(() => client.clearScan(), [client]);
   const refresh = useCallback(() => {
     client.disconnect();
     client.connect();
   }, [client]);
 
-  return { ...state, connect, disconnect, refresh };
+  return {
+    ...state,
+    clearScan,
+    connect,
+    disconnect,
+    refresh,
+    startScan,
+    stopScan,
+  };
 }

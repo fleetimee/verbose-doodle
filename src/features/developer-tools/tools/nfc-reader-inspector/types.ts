@@ -9,8 +9,11 @@ export type NfcReaderState =
 export type NfcBridgeConnectionStatus =
   | "disconnected"
   | "connecting"
+  | "reconnecting"
   | "connected"
   | "error";
+
+export type NfcScanSessionStatus = "stopped" | "scanning";
 
 export type NfcBridgeEvent =
   | {
@@ -27,6 +30,13 @@ export type NfcBridgeEvent =
       readonly type: "reader-status";
       readonly readerState: NfcReaderState;
       readonly readerName?: string;
+      readonly reason?: string;
+      readonly action?: string;
+    }
+  | {
+      readonly protocolVersion: typeof NFC_BRIDGE_PROTOCOL_VERSION;
+      readonly type: "scan-status";
+      readonly scanning: boolean;
       readonly reason?: string;
       readonly action?: string;
     }
@@ -51,6 +61,7 @@ export type NfcBridgeEvent =
 
 export type NfcBridgeState = {
   readonly connectionStatus: NfcBridgeConnectionStatus;
+  readonly scanStatus: NfcScanSessionStatus;
   readonly readerState: NfcReaderState;
   readonly readerName: string | null;
   readonly reason: string | null;
@@ -103,5 +114,6 @@ export const initialNfcBridgeState: NfcBridgeState = {
   readerName: null,
   readerState: "unavailable",
   reason: null,
+  scanStatus: "stopped",
   latestScan: null,
 };

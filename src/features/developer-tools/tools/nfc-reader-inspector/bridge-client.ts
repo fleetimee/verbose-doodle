@@ -19,6 +19,9 @@ export type NfcWebSocket = {
 export type NfcWebSocketFactory = (url: string) => NfcWebSocket;
 
 export const NFC_WEBSOCKET_OPEN = 1;
+export const NFC_RECONNECT_DELAYS_MS = [
+  1000, 2000, 4000, 8000, 15_000,
+] as const;
 
 export function parseNfcBridgeEvent(
   raw: string
@@ -41,6 +44,7 @@ export function parseNfcBridgeEvent(
     if (
       value.type !== "bridge-status" &&
       value.type !== "reader-status" &&
+      value.type !== "scan-status" &&
       value.type !== "scan" &&
       value.type !== "error"
     ) {
@@ -72,6 +76,10 @@ export class NfcBridgeClient {
   private socket: NfcWebSocket | null = null;
   private state: NfcBridgeState = initialNfcBridgeState;
   private readonly listeners = new Set<() => void>();
+  private shouldReconnect = false;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private reconnectAttempt = 0;
+  private desiredScanning = false;
 
   constructor(url: string, createSocket?: NfcWebSocketFactory) {
     this.url = url;
@@ -96,15 +104,35 @@ export class NfcBridgeClient {
     ) {
       return;
     }
+    this.shouldReconnect = true;
+    this.clearReconnectTimer();
     this.updateState({ connectionStatus: "connecting", error: null });
-    const socket = this.createSocket(this.url);
+    let socket: NfcWebSocket;
+    try {
+      socket = this.createSocket(this.url);
+    } catch {
+      this.updateState({
+        connectionStatus: "error",
+        error:
+          "The local bridge could not be reached. Start the bridge and retry.",
+      });
+      this.scheduleReconnect();
+      return;
+    }
     this.socket = socket;
     socket.onopen = () => {
+      this.reconnectAttempt = 0;
       this.updateState({ connectionStatus: "connected", error: null });
       this.send({
         protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
         type: "status",
       });
+      if (this.desiredScanning) {
+        this.send({
+          protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+          type: "start-scan",
+        });
+      }
     };
     socket.onmessage = (message) => this.handleMessage(message.data);
     socket.onerror = () => {
@@ -113,25 +141,77 @@ export class NfcBridgeClient {
         error:
           "The local bridge could not be reached. Start the bridge and retry.",
       });
+      socket.close();
     };
     socket.onclose = () => {
+      if (this.socket !== socket) {
+        return;
+      }
       this.socket = null;
-      this.updateState({ connectionStatus: "disconnected" });
+      if (this.shouldReconnect) {
+        this.updateState({
+          connectionStatus: "reconnecting",
+          error: "The local bridge connection was interrupted. Reconnecting…",
+        });
+        this.scheduleReconnect();
+        return;
+      }
+      this.updateState({
+        connectionStatus: "disconnected",
+        scanStatus: "stopped",
+      });
     };
   }
 
   disconnect(): void {
+    this.shouldReconnect = false;
+    this.desiredScanning = false;
+    this.reconnectAttempt = 0;
+    this.clearReconnectTimer();
     this.socket?.close();
     this.socket = null;
-    this.updateState({ connectionStatus: "disconnected" });
+    this.updateState({
+      connectionStatus: "disconnected",
+      scanStatus: "stopped",
+    });
+  }
+
+  startScan(): boolean {
+    this.desiredScanning = true;
+    const sent = this.send({
+      protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+      type: "start-scan",
+    });
+    if (sent) {
+      this.updateState({ scanStatus: "scanning", error: null });
+    }
+    return sent;
+  }
+
+  stopScan(): boolean {
+    this.desiredScanning = false;
+    const sent = this.send({
+      protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+      type: "stop-scan",
+    });
+    this.updateState({ scanStatus: "stopped" });
+    return sent;
+  }
+
+  clearScan(): void {
+    this.updateState({ latestScan: null });
   }
 
   send(command: NfcBridgeCommand): boolean {
     if (!this.socket || this.socket.readyState !== NFC_WEBSOCKET_OPEN) {
       return false;
     }
-    this.socket.send(JSON.stringify(command));
-    return true;
+    try {
+      this.socket.send(JSON.stringify(command));
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private handleMessage(raw: string): void {
@@ -157,6 +237,15 @@ export class NfcBridgeClient {
         readerName: event.readerName ?? null,
         readerState: event.readerState,
         reason: event.reason ?? null,
+      });
+      return;
+    }
+    if (event.type === "scan-status") {
+      this.updateState({
+        action: event.action ?? null,
+        error: null,
+        reason: event.reason ?? null,
+        scanStatus: event.scanning ? "scanning" : "stopped",
       });
       return;
     }
@@ -190,5 +279,36 @@ export class NfcBridgeClient {
     for (const listener of this.listeners) {
       listener();
     }
+  }
+
+  private clearReconnectTimer(): void {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+  }
+
+  private scheduleReconnect(): void {
+    if (
+      !this.shouldReconnect ||
+      this.reconnectTimer ||
+      this.reconnectAttempt >= NFC_RECONNECT_DELAYS_MS.length
+    ) {
+      if (this.reconnectAttempt >= NFC_RECONNECT_DELAYS_MS.length) {
+        this.shouldReconnect = false;
+        this.updateState({
+          connectionStatus: "error",
+          error:
+            "The local bridge did not return. Check the bridge and retry manually.",
+        });
+      }
+      return;
+    }
+    const delay = NFC_RECONNECT_DELAYS_MS[this.reconnectAttempt];
+    this.reconnectAttempt += 1;
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      this.connect();
+    }, delay);
   }
 }
