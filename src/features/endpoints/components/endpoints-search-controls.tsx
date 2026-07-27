@@ -7,6 +7,7 @@ import { messages } from "@/lib/i18n";
 
 type EndpointsSearchControlsProps = {
   onSearchChange?: (search: string) => void;
+  searchValue?: string;
   searchPlaceholder?: string;
   onViewModeChange?: (viewMode: "grid" | "list") => void;
   viewMode?: "grid" | "list";
@@ -16,6 +17,7 @@ type EndpointsSearchControlsProps = {
 
 export function EndpointsSearchControls({
   onSearchChange,
+  searchValue,
   searchPlaceholder = messages.endpoints.searchPlaceholder,
   onViewModeChange,
   viewMode,
@@ -46,6 +48,7 @@ export function EndpointsSearchControls({
           className="pl-9"
           onChange={handleSearchChange}
           placeholder={searchPlaceholder}
+          value={searchValue}
         />
       </div>
       {onViewModeChange && viewMode ? (

@@ -23,6 +23,7 @@ import {
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useAuth } from "@/features/auth/context";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
+import { DeleteEndpointDialog } from "@/features/endpoints/components/delete-endpoint-dialog";
 import { EditEndpointSheet } from "@/features/endpoints/components/edit-endpoint-sheet";
 import { EndpointCard } from "@/features/endpoints/components/endpoint-card";
 import { EndpointCardSkeleton } from "@/features/endpoints/components/endpoint-card-skeleton";
@@ -90,6 +91,7 @@ function TourStepContent({
 type AnimatedEndpointGroupProps = {
   readonly group: GroupedEndpoints;
   readonly groupIndex: number;
+  readonly onDeleteEndpoint: (endpoint: Endpoint) => void;
   readonly onEditEndpoint: (endpoint: Endpoint) => void;
   readonly prefersReducedMotion: boolean;
   readonly viewMode: EndpointViewMode;
@@ -106,6 +108,7 @@ function GridEndpoints({
   canEditEndpoint,
   group,
   groupIndex,
+  onDeleteEndpoint,
   onEditEndpoint,
 }: Omit<AnimatedEndpointGroupProps, "prefersReducedMotion" | "viewMode">) {
   return (
@@ -115,6 +118,7 @@ function GridEndpoints({
           canEdit={canEditEndpoint}
           endpoint={endpoint}
           key={endpoint.id}
+          onDelete={onDeleteEndpoint}
           onEdit={onEditEndpoint}
         >
           <div>
@@ -133,6 +137,7 @@ function ListEndpoints({
   canEditEndpoint,
   group,
   groupIndex,
+  onDeleteEndpoint,
   onEditEndpoint,
 }: Omit<AnimatedEndpointGroupProps, "prefersReducedMotion" | "viewMode">) {
   return (
@@ -142,6 +147,7 @@ function ListEndpoints({
           canEdit={canEditEndpoint}
           endpoint={endpoint}
           key={endpoint.id}
+          onDelete={onDeleteEndpoint}
           onEdit={onEditEndpoint}
         >
           <div>
@@ -160,6 +166,7 @@ function AnimatedEndpointGroup({
   group,
   groupIndex,
   canEditEndpoint,
+  onDeleteEndpoint,
   onEditEndpoint,
   prefersReducedMotion,
   viewMode,
@@ -182,6 +189,7 @@ function AnimatedEndpointGroup({
           canEditEndpoint={canEditEndpoint}
           group={group}
           groupIndex={groupIndex}
+          onDeleteEndpoint={onDeleteEndpoint}
           onEditEndpoint={onEditEndpoint}
         />
       ) : (
@@ -189,6 +197,7 @@ function AnimatedEndpointGroup({
           canEditEndpoint={canEditEndpoint}
           group={group}
           groupIndex={groupIndex}
+          onDeleteEndpoint={onDeleteEndpoint}
           onEditEndpoint={onEditEndpoint}
         />
       )}
@@ -206,6 +215,7 @@ export function EndpointsPage() {
   const {
     endpoints: endpointsQuery,
     createEndpoint: createEndpointMutation,
+    deleteEndpoint: deleteEndpointMutation,
     updateEndpoint: updateEndpointMutation,
   } = useEndpointCatalog();
   const { data: endpoints = [], isPending: isLoadingEndpoints } =
@@ -214,6 +224,9 @@ export function EndpointsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [initialBillerId, setInitialBillerId] = useState<number | undefined>();
   const [endpointToEdit, setEndpointToEdit] = useState<Endpoint | null>(null);
+  const [endpointToDelete, setEndpointToDelete] = useState<Endpoint | null>(
+    null
+  );
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useLocalStorage<"grid" | "list">(
@@ -234,6 +247,8 @@ export function EndpointsPage() {
     createEndpointMutation;
   const { mutate: updateEndpoint, isPending: isUpdatingEndpoint } =
     updateEndpointMutation;
+  const { mutate: deleteEndpoint, isPending: isDeletingEndpoint } =
+    deleteEndpointMutation;
 
   const filteredEndpoints = useMemo(
     () => filterEndpoints(endpoints, searchTerm),
@@ -247,6 +262,8 @@ export function EndpointsPage() {
 
   const hasEndpoints = endpoints.length > 0;
   const hasFilteredEndpoints = groupedEndpoints.length > 0;
+  const hasSearchTerm = searchTerm.trim().length > 0;
+  const shouldShowCatalog = hasEndpoints || hasSearchTerm;
   const canAddEndpoint = session.can("canAddEndpoint");
   const canEditEndpoint = session.can("canEditEndpoint");
 
@@ -282,6 +299,18 @@ export function EndpointsPage() {
         },
       }
     );
+  };
+
+  const handleDeleteEndpoint = () => {
+    if (!endpointToDelete) {
+      return;
+    }
+
+    deleteEndpoint(endpointToDelete.id, {
+      onSuccess: () => {
+        setEndpointToDelete(null);
+      },
+    });
   };
 
   const handleOpenExportDialog = () => {
@@ -484,6 +513,17 @@ export function EndpointsPage() {
               onSubmit={handleEditEndpoint}
               open={endpointToEdit !== null}
             />
+            <DeleteEndpointDialog
+              endpoint={endpointToDelete}
+              isDeleting={isDeletingEndpoint}
+              onConfirm={handleDeleteEndpoint}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setEndpointToDelete(null);
+                }
+              }}
+              open={endpointToDelete !== null}
+            />
           </ProtectedAction>
         </div>
       </motion.div>
@@ -496,6 +536,7 @@ export function EndpointsPage() {
                 onSearchChange={setSearchTerm}
                 onViewModeChange={setViewMode}
                 searchId={ENDPOINTS_TOUR_TARGETS.search}
+                searchValue={searchTerm}
                 viewMode={viewMode}
                 viewModeId={ENDPOINTS_TOUR_TARGETS.viewMode}
               />
@@ -591,7 +632,7 @@ export function EndpointsPage() {
         </>
       )}
 
-      {!isLoadingEndpoints && hasEndpoints && (
+      {!isLoadingEndpoints && shouldShowCatalog && (
         <>
           <motion.div
             animate={{ opacity: 1 }}
@@ -607,6 +648,7 @@ export function EndpointsPage() {
                 onSearchChange={setSearchTerm}
                 onViewModeChange={setViewMode}
                 searchId={ENDPOINTS_TOUR_TARGETS.search}
+                searchValue={searchTerm}
                 viewMode={viewMode}
                 viewModeId={ENDPOINTS_TOUR_TARGETS.viewMode}
               />
@@ -681,6 +723,7 @@ export function EndpointsPage() {
                     canEditEndpoint={canEditEndpoint}
                     group={group}
                     groupIndex={index}
+                    onDeleteEndpoint={setEndpointToDelete}
                     onEditEndpoint={setEndpointToEdit}
                     prefersReducedMotion={shouldReduceMotion}
                     viewMode={viewMode}
@@ -715,7 +758,7 @@ export function EndpointsPage() {
         </>
       )}
 
-      {!(isLoadingEndpoints || hasEndpoints) && (
+      {!(isLoadingEndpoints || shouldShowCatalog) && (
         <motion.div
           animate={{ opacity: 1 }}
           initial={{ opacity: 0 }}

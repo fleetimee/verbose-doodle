@@ -25,7 +25,16 @@ const endpoints = [
     billerName: "PLN",
     id: "endpoint-1",
     method: "GET" as const,
-    responses: [],
+    responses: [
+      {
+        activated: true,
+        delayMs: 0,
+        id: "response-1",
+        json: "{}",
+        name: "Inquiry response",
+        statusCode: 200,
+      },
+    ],
     url: "/inquiry",
   },
 ];
@@ -33,9 +42,14 @@ const endpoints = [
 const originalFetch = globalThis.fetch;
 let lastCreateBody: { billerId?: number } | null = null;
 let lastUpdateBody: Record<string, unknown> | null = null;
-let currentEndpoint = { ...endpoints[0] };
+let lastDeleteId: string | null = null;
+let currentEndpoint: (typeof endpoints)[number] | null = { ...endpoints[0] };
+let deleteRequestResolver: (() => void) | null = null;
+let holdDeleteRequest = false;
+let shouldFailDelete = false;
 let shouldFailUpdate = false;
 const endpointButtonName = /GET.*inquiry/i;
+const configuredResponseName = /1 configured response/;
 
 function createAdminToken() {
   const payload = btoa(
@@ -55,13 +69,15 @@ function installApiMock() {
   const mockFetch = (
     input: Parameters<typeof globalThis.fetch>[0],
     init: Parameters<typeof globalThis.fetch>[1]
-  ) => {
+  ): Promise<Response> => {
     const url = String(input);
     const method = init?.method ?? "GET";
 
     if (url === "/api/endpoint" && method === "GET") {
       return Promise.resolve(
-        jsonResponse({ data: { endpoints: [currentEndpoint] } })
+        jsonResponse({
+          data: { endpoints: currentEndpoint ? [currentEndpoint] : [] },
+        })
       );
     }
 
@@ -106,12 +122,57 @@ function installApiMock() {
           })
         );
       }
-      const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      const body = JSON.parse(String(init?.body)) as Partial<
+        (typeof endpoints)[number]
+      >;
       lastUpdateBody = body;
+      if (!currentEndpoint) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ data: {} }), {
+            headers: { "Content-Type": "application/json" },
+            status: 404,
+          })
+        );
+      }
       currentEndpoint = { ...currentEndpoint, ...body };
       return Promise.resolve(
         jsonResponse({ data: { endpoint: currentEndpoint } })
       );
+    }
+
+    if (url === "/api/endpoint/endpoint-1" && method === "DELETE") {
+      lastDeleteId = "endpoint-1";
+
+      if (holdDeleteRequest) {
+        return new Promise((resolve) => {
+          deleteRequestResolver = () => {
+            if (shouldFailDelete) {
+              resolve(
+                new Response(JSON.stringify({ data: {} }), {
+                  headers: { "Content-Type": "application/json" },
+                  status: 500,
+                })
+              );
+              return;
+            }
+
+            currentEndpoint = null;
+            resolve(jsonResponse({ data: {} }));
+          };
+        });
+      }
+
+      if (shouldFailDelete) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ data: {} }), {
+            headers: { "Content-Type": "application/json" },
+            status: 500,
+          })
+        );
+      }
+
+      currentEndpoint = null;
+      return Promise.resolve(jsonResponse({ data: {} }));
     }
 
     return Promise.resolve(jsonResponse({ data: {} }));
@@ -147,7 +208,11 @@ describe("EndpointsPage catalog actions", () => {
     localStorage.setItem("endpoints-tour-seen", "true");
     lastCreateBody = null;
     lastUpdateBody = null;
+    lastDeleteId = null;
     currentEndpoint = { ...endpoints[0] };
+    deleteRequestResolver = null;
+    holdDeleteRequest = false;
+    shouldFailDelete = false;
     shouldFailUpdate = false;
     installApiMock();
   });
@@ -239,7 +304,7 @@ describe("EndpointsPage catalog actions", () => {
     "list",
   ] as const)("edits an endpoint from the %s view without changing its biller", async (viewMode) => {
     const user = userEvent.setup();
-    localStorage.setItem("endpoints-view-mode", viewMode);
+    localStorage.setItem("endpoints-view-mode", JSON.stringify(viewMode));
     renderEndpointsPage();
 
     const endpointButton = await screen.findByRole("button", {
@@ -335,6 +400,132 @@ describe("EndpointsPage catalog actions", () => {
     });
   });
 
+  test.each([
+    "grid",
+    "list",
+  ] as const)("deletes an endpoint from the %s view after confirmation and preserves catalog state", async (viewMode) => {
+    const user = userEvent.setup();
+    localStorage.setItem("endpoints-view-mode", JSON.stringify(viewMode));
+    renderEndpointsPage();
+
+    const endpointButton = await screen.findByRole("button", {
+      name: endpointButtonName,
+    });
+    const searchInput = await screen.findByPlaceholderText(
+      "Search endpoints..."
+    );
+    await user.type(searchInput, "/inquiry");
+    expect((searchInput as HTMLInputElement).value).toBe("/inquiry");
+
+    act(() => {
+      fireEvent.contextMenu(endpointButton);
+    });
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Delete endpoint" })
+    );
+
+    const dialog = await screen.findByRole("alertdialog");
+    expect(within(dialog).getByText("GET /inquiry")).toBeDefined();
+    expect(within(dialog).getByText(configuredResponseName)).toBeDefined();
+
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    expect(lastDeleteId).toBeNull();
+    expect(
+      screen.getByRole("button", { name: endpointButtonName })
+    ).toBeDefined();
+
+    act(() => {
+      fireEvent.contextMenu(
+        screen.getByRole("button", { name: endpointButtonName })
+      );
+    });
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Delete endpoint" })
+    );
+    await user.click(
+      within(await screen.findByRole("alertdialog")).getByRole("button", {
+        name: "Delete Endpoint",
+      })
+    );
+
+    await waitFor(() => {
+      expect(lastDeleteId).toBe("endpoint-1");
+      expect(
+        screen.queryByRole("button", { name: endpointButtonName })
+      ).toBeNull();
+    });
+    expect(
+      (screen.getByPlaceholderText("Search endpoints...") as HTMLInputElement)
+        .value
+    ).toBe("/inquiry");
+    expect(
+      screen
+        .getByRole("button", {
+          name: `${viewMode === "grid" ? "Grid" : "List"} view`,
+        })
+        .getAttribute("aria-pressed")
+    ).toBe("true");
+  });
+
+  test("disables duplicate deletion while the request is pending", async () => {
+    const user = userEvent.setup();
+    holdDeleteRequest = true;
+    renderEndpointsPage();
+
+    const endpointButton = await screen.findByRole("button", {
+      name: endpointButtonName,
+    });
+    act(() => {
+      fireEvent.contextMenu(endpointButton);
+    });
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Delete endpoint" })
+    );
+    const dialog = await screen.findByRole("alertdialog");
+    const confirmButton = within(dialog).getByRole("button", {
+      name: "Delete Endpoint",
+    });
+
+    await user.click(confirmButton);
+    expect((confirmButton as HTMLButtonElement).disabled).toBe(true);
+    expect(lastDeleteId).toBe("endpoint-1");
+    expect(deleteRequestResolver).not.toBeNull();
+
+    deleteRequestResolver?.();
+  });
+
+  test("keeps a failed deletion visible and the confirmation open", async () => {
+    const user = userEvent.setup();
+    shouldFailDelete = true;
+    renderEndpointsPage();
+
+    const endpointButton = await screen.findByRole("button", {
+      name: endpointButtonName,
+    });
+    act(() => {
+      fireEvent.contextMenu(endpointButton);
+    });
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Delete endpoint" })
+    );
+    await user.click(
+      within(await screen.findByRole("alertdialog")).getByRole("button", {
+        name: "Delete Endpoint",
+      })
+    );
+
+    await waitFor(() => {
+      expect(lastDeleteId).toBe("endpoint-1");
+      expect(screen.getByRole("alertdialog")).toBeDefined();
+      expect(
+        screen.getByRole("button", {
+          hidden: true,
+          name: endpointButtonName,
+        })
+      ).toBeDefined();
+    });
+  });
+
   test("does not expose endpoint edit actions without permission", async () => {
     localStorage.removeItem("auth_token");
     renderEndpointsPage();
@@ -343,5 +534,6 @@ describe("EndpointsPage catalog actions", () => {
       await screen.findByRole("button", { name: endpointButtonName })
     ).toBeDefined();
     expect(screen.queryByText("Edit endpoint")).toBeNull();
+    expect(screen.queryByText("Delete endpoint")).toBeNull();
   });
 });
