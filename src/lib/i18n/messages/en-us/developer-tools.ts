@@ -77,6 +77,22 @@ export const developerToolsMessages = {
   nfcReaderTransport: "LOOPBACK / WS",
   nfcReaderDescription:
     "Inspect each NDEF record from your ACS reader while the scan stays on your local bridge.",
+  nfcDownloadBridge: "Download bridge release",
+  nfcTour: {
+    startButton: "Take the NFC tour",
+    bridgeTitle: "Connect the local bridge",
+    bridgeDescription:
+      "Start here. The browser connects to the local bridge, which reports the ACS reader and keeps card data on this machine.",
+    sessionTitle: "Control the scan session",
+    sessionDescription:
+      "Start a session when the reader is ready, then stop it when you want to keep the current capture unchanged.",
+    scanTitle: "Inspect the latest scan",
+    scanDescription:
+      "The latest NDEF payload, UID, decode status, and individual records appear here with copy actions for integration fixtures.",
+    releaseTitle: "Install the bridge release",
+    releaseDescription:
+      "Need the local connector? Open the v0.1.0 Gitea release to download the bridge for your platform and its helper files.",
+  },
   nfcBridgeStatusLabel: "Bridge status",
   nfcReaderStatusLabel: "Reader status",
   nfcBridgeVersionLabel: "Protocol bridge",

@@ -7,13 +7,18 @@ import {
   CircleOff,
   ClipboardCopy,
   Eraser,
+  MonitorDown,
   RadioReceiver,
   RefreshCw,
   Unplug,
 } from "@/components/hugeicons";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DeveloperToolTourButton,
+  type DeveloperToolTourStep,
+} from "@/features/developer-tools/components/developer-tool-tour-button";
 import { useNfcBridge } from "@/features/developer-tools/tools/nfc-reader-inspector/hooks/use-nfc-bridge";
 import type { NfcNdefRecord } from "@/features/developer-tools/tools/nfc-reader-inspector/types";
 import { copyToClipboard } from "@/lib/clipboard";
@@ -39,6 +44,42 @@ const readerTone = {
   waiting:
     "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
 } as const;
+
+const NFC_BRIDGE_RELEASE_URL =
+  "http://192.168.4.62/BPD_DIY_DEV_WEB_DASHBOARD/BILLER_SIMULATOR_JSON/releases/tag/v0.1.0";
+const NFC_READER_TOUR_ID = "nfc-reader-inspector-intro";
+const NFC_READER_TOUR_TARGETS = {
+  bridge: "nfc-reader-tour-bridge",
+  release: "nfc-reader-tour-release",
+  scan: "nfc-reader-tour-scan",
+  session: "nfc-reader-tour-session",
+} as const;
+const NFC_READER_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
+  {
+    selectorId: NFC_READER_TOUR_TARGETS.bridge,
+    position: "bottom",
+    title: messages.developerTools.nfcTour.bridgeTitle,
+    description: messages.developerTools.nfcTour.bridgeDescription,
+  },
+  {
+    selectorId: NFC_READER_TOUR_TARGETS.session,
+    position: "bottom",
+    title: messages.developerTools.nfcTour.sessionTitle,
+    description: messages.developerTools.nfcTour.sessionDescription,
+  },
+  {
+    selectorId: NFC_READER_TOUR_TARGETS.scan,
+    position: "top",
+    title: messages.developerTools.nfcTour.scanTitle,
+    description: messages.developerTools.nfcTour.scanDescription,
+  },
+  {
+    selectorId: NFC_READER_TOUR_TARGETS.release,
+    position: "bottom",
+    title: messages.developerTools.nfcTour.releaseTitle,
+    description: messages.developerTools.nfcTour.releaseDescription,
+  },
+];
 
 export function NfcReaderInspector() {
   const bridge = useNfcBridge();
@@ -90,16 +131,35 @@ export function NfcReaderInspector() {
             {copy.nfcReaderDescription}
           </p>
         </div>
-        <div className="flex items-end justify-start md:justify-end">
+        <div className="flex flex-col items-start gap-3 md:items-end">
           <Badge className="h-8 rounded-full px-3" variant="outline">
             {copy.nfcReaderTransport}
           </Badge>
+          <div className="flex flex-wrap gap-2 md:justify-end">
+            <DeveloperToolTourButton
+              label={copy.nfcTour.startButton}
+              steps={NFC_READER_TOUR_STEPS}
+              storageKey="nfc-reader-inspector-tour-seen"
+              tourId={NFC_READER_TOUR_ID}
+            />
+            <a
+              className={buttonVariants({ size: "sm", variant: "outline" })}
+              href={NFC_BRIDGE_RELEASE_URL}
+              id={NFC_READER_TOUR_TARGETS.release}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <MonitorDown data-icon="inline-start" />
+              {copy.nfcDownloadBridge}
+            </a>
+          </div>
         </div>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <StatusCard
           icon={<Activity data-icon="inline-start" />}
+          id={NFC_READER_TOUR_TARGETS.bridge}
           label={copy.nfcBridgeStatusLabel}
           tone={connectionTone[bridge.connectionStatus]}
           value={connectionLabel}
@@ -142,13 +202,19 @@ export function NfcReaderInspector() {
         </div>
       )}
 
-      <Card className="border-border/70 shadow-xs">
+      <Card
+        className="border-border/70 shadow-xs"
+        id={NFC_READER_TOUR_TARGETS.scan}
+      >
         <CardHeader className="gap-4 md:flex-row md:items-center md:justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <RadioReceiver data-icon="inline-start" />
             {copy.nfcScanTitle}
           </CardTitle>
-          <div className="flex flex-wrap items-center gap-2">
+          <div
+            className="flex flex-wrap items-center gap-2"
+            id={NFC_READER_TOUR_TARGETS.session}
+          >
             <Badge variant="outline">
               {copy.nfcScanSessionLabel}:{" "}
               {copy.nfcScanSessionStates[bridge.scanStatus]}
@@ -444,19 +510,21 @@ function ScanField({
 
 function StatusCard({
   children,
+  id,
   icon,
   label,
   tone,
   value,
 }: {
   readonly children: React.ReactNode;
+  readonly id?: string;
   readonly icon: React.ReactNode;
   readonly label: string;
   readonly tone: string;
   readonly value: string;
 }) {
   return (
-    <Card className="border-border/70 shadow-xs">
+    <Card className="border-border/70 shadow-xs" id={id}>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
           <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">

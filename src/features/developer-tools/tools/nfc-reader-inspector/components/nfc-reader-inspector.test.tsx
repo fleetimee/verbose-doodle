@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import { render, screen } from "@testing-library/react";
+import { TourProvider } from "@/components/tour";
 import { NfcReaderInspector } from "@/features/developer-tools/tools/nfc-reader-inspector/components/nfc-reader-inspector";
 import type { NfcBridgeState } from "@/features/developer-tools/tools/nfc-reader-inspector/types";
 
@@ -30,6 +31,7 @@ mock.module(
 );
 
 afterEach(() => {
+  localStorage.clear();
   bridge = {
     action: null,
     bridgeVersion: null,
@@ -50,9 +52,18 @@ afterEach(() => {
   };
 });
 
+function renderInspector() {
+  localStorage.setItem("nfc-reader-inspector-tour-seen", "true");
+  return render(
+    <TourProvider closeable>
+      <NfcReaderInspector />
+    </TourProvider>
+  );
+}
+
 describe("NFC Reader Inspector", () => {
   test("shows disconnected and unavailable setup state with a connect action", () => {
-    render(<NfcReaderInspector />);
+    renderInspector();
 
     expect(
       screen.getByRole("heading", { name: "NFC Reader Inspector" })
@@ -71,7 +82,7 @@ describe("NFC Reader Inspector", () => {
       readerName: "ACS ACR1252U 00 00",
       readerState: "waiting",
     };
-    render(<NfcReaderInspector />);
+    renderInspector();
 
     expect(screen.getAllByText("Connected")).toHaveLength(2);
     expect(screen.getAllByText("Waiting for tag")).toHaveLength(2);
@@ -121,7 +132,7 @@ describe("NFC Reader Inspector", () => {
       readerName: "ACS ACR1252U 00 00",
       readerState: "tag-detected",
     };
-    render(<NfcReaderInspector />);
+    renderInspector();
 
     expect(screen.getAllByText("Hello")).toHaveLength(2);
     expect(
@@ -212,11 +223,30 @@ describe("NFC Reader Inspector", () => {
         latestScan: scan,
         readerState: "tag-detected",
       };
-      const view = render(<NfcReaderInspector />);
+      const view = renderInspector();
       expect(screen.getByText(statusLabels[index] ?? "")).toBeDefined();
       expect(screen.getByText("No decoded payload")).toBeDefined();
       expect(screen.getAllByText(scan.rawNdef).length).toBeGreaterThan(1);
       view.unmount();
     }
+  });
+
+  test("offers the guided tour and bridge release download", () => {
+    renderInspector();
+
+    expect(
+      screen.getByRole("button", { name: "Take the NFC tour" })
+    ).toBeDefined();
+    expect(
+      screen
+        .getByRole("link", { name: "Download bridge release" })
+        .getAttribute("href")
+    ).toBe(
+      "http://192.168.4.62/BPD_DIY_DEV_WEB_DASHBOARD/BILLER_SIMULATOR_JSON/releases/tag/v0.1.0"
+    );
+    expect(document.getElementById("nfc-reader-tour-bridge")).toBeDefined();
+    expect(document.getElementById("nfc-reader-tour-session")).toBeDefined();
+    expect(document.getElementById("nfc-reader-tour-scan")).toBeDefined();
+    expect(document.getElementById("nfc-reader-tour-release")).toBeDefined();
   });
 });
