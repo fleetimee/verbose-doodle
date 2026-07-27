@@ -1,6 +1,7 @@
 import type { NdefScanResult } from "./ndef";
 import {
   type BridgeEvent,
+  type BridgeScanStatus,
   type BridgeSnapshot,
   NFC_BRIDGE_PROTOCOL_VERSION,
   parseBridgeCommand,
@@ -56,17 +57,19 @@ export function assertLoopbackHost(host: string): void {
 export function createBridgeSnapshot(
   config: Required<NfcBridgeConfig>,
   reader: ReaderStatus,
+  scanStatus: BridgeScanStatus,
   latestScan?: NdefScanResult
 ): BridgeSnapshot {
   return {
     bridge: {
       bridgeVersion: config.bridgeVersion,
-      capabilities: ["health", "reader-status", "scan"],
+      capabilities: ["health", "reader-status", "scan", "scan-session"],
       host: config.host,
       port: config.port,
       tokenRequired: true,
     },
     reader,
+    scanStatus,
     ...(latestScan ? { latestScan } : {}),
   };
 }
@@ -96,6 +99,7 @@ export class NfcBridge {
   private readonly adapter: ReaderAdapter;
   private readonly clients = new Set<BridgeSocket>();
   private readerStatus: ReaderStatus;
+  private scanStatus: BridgeScanStatus = "stopped";
   private latestScan: NdefScanResult | undefined;
   private server: ReturnType<typeof Bun.serve> | null = null;
 
@@ -125,6 +129,7 @@ export class NfcBridge {
     return createBridgeSnapshot(
       this.config,
       this.readerStatus,
+      this.scanStatus,
       this.latestScan
     );
   }
@@ -139,6 +144,14 @@ export class NfcBridge {
 
   getPort(): number | null {
     return this.server?.port ?? null;
+  }
+
+  startScanning(): void {
+    this.setScanStatus("scanning");
+  }
+
+  stopScanning(): void {
+    this.setScanStatus("stopped");
   }
 
   async start(): Promise<void> {
@@ -167,6 +180,9 @@ export class NfcBridge {
         });
       },
       (scan) => {
+        if (this.scanStatus !== "scanning") {
+          return;
+        }
         this.latestScan = scan;
         this.readerStatus = {
           ...this.readerStatus,
@@ -187,6 +203,7 @@ export class NfcBridge {
   }
 
   async stop(): Promise<void> {
+    this.stopScanning();
     await this.adapter.stop();
     this.server?.stop(true);
     this.server = null;
@@ -238,13 +255,23 @@ export class NfcBridge {
       this.sendSnapshot(socket);
       return;
     }
-    socket.send(
-      serializeBridgeEvent({
-        protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
-        type: "reader-status",
-        ...this.readerStatus,
-      })
-    );
+    if (result.command.type === "start-scan") {
+      this.startScanning();
+      return;
+    }
+    this.stopScanning();
+  }
+
+  private setScanStatus(scanStatus: BridgeScanStatus): void {
+    if (this.scanStatus === scanStatus) {
+      return;
+    }
+    this.scanStatus = scanStatus;
+    this.broadcast({
+      protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+      scanning: scanStatus === "scanning",
+      type: "scan-status",
+    });
   }
 
   private sendSnapshot(socket: BridgeSocket): void {

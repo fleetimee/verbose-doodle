@@ -1,7 +1,12 @@
+import { useState } from "react";
 import {
   Activity,
+  Check,
   CircleAlert,
   CircleDashed,
+  CircleOff,
+  ClipboardCopy,
+  Eraser,
   RadioReceiver,
   RefreshCw,
   Unplug,
@@ -11,12 +16,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNfcBridge } from "@/features/developer-tools/tools/nfc-reader-inspector/hooks/use-nfc-bridge";
 import type { NfcNdefRecord } from "@/features/developer-tools/tools/nfc-reader-inspector/types";
+import { copyToClipboard } from "@/lib/clipboard";
 import { messages } from "@/lib/i18n";
 
 const connectionTone = {
   connected:
     "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   connecting:
+    "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  reconnecting:
     "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
   disconnected: "border-muted-foreground/25 bg-muted text-muted-foreground",
   error: "border-destructive/30 bg-destructive/10 text-destructive",
@@ -36,9 +44,37 @@ export function NfcReaderInspector() {
   const bridge = useNfcBridge();
   const copy = messages.developerTools;
   const isConnected = bridge.connectionStatus === "connected";
+  const isConnectionPending =
+    bridge.connectionStatus === "connecting" ||
+    bridge.connectionStatus === "reconnecting";
+  const isScanning = bridge.scanStatus === "scanning";
+  const canControlScan = isConnected && bridge.readerState !== "unavailable";
   const connectionLabel =
     copy.nfcBridgeConnectionStates[bridge.connectionStatus];
   const readerLabel = copy.nfcReaderStates[bridge.readerState];
+  let connectionButton: React.ReactNode;
+  if (isConnected || isConnectionPending) {
+    connectionButton = (
+      <Button onClick={bridge.disconnect} type="button" variant="outline">
+        <Unplug data-icon="inline-start" />
+        {copy.nfcDisconnectBridge}
+      </Button>
+    );
+  } else if (bridge.connectionStatus === "error") {
+    connectionButton = (
+      <Button onClick={bridge.refresh} type="button">
+        <RefreshCw data-icon="inline-start" />
+        {copy.nfcRetryBridge}
+      </Button>
+    );
+  } else {
+    connectionButton = (
+      <Button onClick={bridge.connect} type="button">
+        <RadioReceiver data-icon="inline-start" />
+        {copy.nfcConnectBridge}
+      </Button>
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-6">
@@ -73,29 +109,7 @@ export function NfcReaderInspector() {
               ? `${copy.nfcBridgeVersionLabel}: ${bridge.bridgeVersion}`
               : copy.nfcBridgeNotConnected}
           </p>
-          <div className="flex flex-wrap gap-2">
-            {isConnected ? (
-              <Button
-                onClick={bridge.disconnect}
-                type="button"
-                variant="outline"
-              >
-                <Unplug data-icon="inline-start" />
-                {copy.nfcDisconnectBridge}
-              </Button>
-            ) : (
-              <Button onClick={bridge.connect} type="button">
-                <RadioReceiver data-icon="inline-start" />
-                {copy.nfcConnectBridge}
-              </Button>
-            )}
-            {bridge.connectionStatus === "error" && (
-              <Button onClick={bridge.refresh} type="button" variant="outline">
-                <RefreshCw data-icon="inline-start" />
-                {copy.nfcRetryBridge}
-              </Button>
-            )}
-          </div>
+          <div className="flex flex-wrap gap-2">{connectionButton}</div>
         </StatusCard>
 
         <StatusCard
@@ -129,11 +143,50 @@ export function NfcReaderInspector() {
       )}
 
       <Card className="border-border/70 shadow-xs">
-        <CardHeader>
+        <CardHeader className="gap-4 md:flex-row md:items-center md:justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <RadioReceiver data-icon="inline-start" />
             {copy.nfcScanTitle}
           </CardTitle>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline">
+              {copy.nfcScanSessionLabel}:{" "}
+              {copy.nfcScanSessionStates[bridge.scanStatus]}
+            </Badge>
+            {isScanning ? (
+              <Button
+                disabled={!canControlScan}
+                onClick={bridge.stopScan}
+                size="sm"
+                type="button"
+                variant="outline"
+              >
+                <CircleOff data-icon="inline-start" />
+                {copy.nfcStopScan}
+              </Button>
+            ) : (
+              <Button
+                disabled={!canControlScan}
+                onClick={bridge.startScan}
+                size="sm"
+                type="button"
+              >
+                <RadioReceiver data-icon="inline-start" />
+                {copy.nfcStartScan}
+              </Button>
+            )}
+            {bridge.latestScan && (
+              <Button
+                onClick={bridge.clearScan}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                <Eraser data-icon="inline-start" />
+                {copy.nfcClearScan}
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {bridge.latestScan ? (
@@ -170,7 +223,14 @@ function ScanDetails({
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <div className="space-y-5">
-        <ScanField label={copy.nfcScanDecodedLabel}>
+        <ScanField
+          action={
+            scan.decodedText ? (
+              <CopyButton label={copy.nfcCopyDecoded} text={scan.decodedText} />
+            ) : undefined
+          }
+          label={copy.nfcScanDecodedLabel}
+        >
           <p className="font-medium text-lg leading-relaxed">
             {scan.decodedText ?? copy.nfcScanNoDecodedText}
           </p>
@@ -180,7 +240,14 @@ function ScanDetails({
             {copy.nfcScanDecodingStatuses[scan.decodingStatus]}
           </Badge>
         </ScanField>
-        <ScanField label={copy.nfcScanUidLabel}>
+        <ScanField
+          action={
+            scan.uid ? (
+              <CopyButton label={copy.nfcCopyUid} text={scan.uid} />
+            ) : undefined
+          }
+          label={copy.nfcScanUidLabel}
+        >
           <p className="font-mono text-sm">
             {scan.uid ?? copy.nfcScanUidUnavailable}
           </p>
@@ -199,7 +266,10 @@ function ScanDetails({
           </ScanField>
         )}
       </div>
-      <ScanField label={copy.nfcScanRawLabel}>
+      <ScanField
+        action={<CopyButton label={copy.nfcCopyRaw} text={scan.rawNdef} />}
+        label={copy.nfcScanRawLabel}
+      >
         <pre className="max-h-56 overflow-auto whitespace-pre-wrap rounded-md border border-border/70 bg-muted/40 p-3 font-mono text-xs leading-relaxed">
           <code>{scan.rawNdef}</code>
         </pre>
@@ -269,6 +339,7 @@ function RecordDetails({ record }: { readonly record: NfcNdefRecord }) {
           value={record.payloadHex || "—"}
         />
         <RecordField
+          action={<CopyButton label={copy.nfcCopyRecord} text={record.raw} />}
           label={copy.nfcScanRecordRawLabel}
           monospace
           value={record.raw}
@@ -279,19 +350,24 @@ function RecordDetails({ record }: { readonly record: NfcNdefRecord }) {
 }
 
 function RecordField({
+  action,
   label,
   monospace = false,
   value,
 }: {
+  readonly action?: React.ReactNode;
   readonly label: string;
   readonly monospace?: boolean;
   readonly value: string;
 }) {
   return (
     <div className="min-w-0 space-y-1.5">
-      <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
-        {label}
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
+          {label}
+        </p>
+        {action}
+      </div>
       <p
         className={`${monospace ? "font-mono" : ""} break-words text-sm leading-relaxed`}
       >
@@ -301,18 +377,66 @@ function RecordField({
   );
 }
 
+function CopyButton({
+  label,
+  text,
+}: {
+  readonly label: string;
+  readonly text: string;
+}) {
+  const copy = messages.developerTools;
+  const [status, setStatus] = useState<"idle" | "copied" | "error">("idle");
+
+  const handleCopy = async () => {
+    try {
+      const copied = await copyToClipboard(text);
+      setStatus(copied ? "copied" : "error");
+    } catch {
+      setStatus("error");
+    }
+    window.setTimeout(() => setStatus("idle"), 1500);
+  };
+
+  const Icon = status === "copied" ? Check : ClipboardCopy;
+  let buttonLabel = label;
+  if (status === "copied") {
+    buttonLabel = copy.nfcCopied;
+  } else if (status === "error") {
+    buttonLabel = copy.nfcCopyFailed;
+  }
+
+  return (
+    <Button
+      aria-label={buttonLabel}
+      onClick={handleCopy}
+      size="icon-xs"
+      title={label}
+      type="button"
+      variant="ghost"
+    >
+      <Icon />
+      <span className="sr-only">{buttonLabel}</span>
+    </Button>
+  );
+}
+
 function ScanField({
+  action,
   children,
   label,
 }: {
+  readonly action?: React.ReactNode;
   readonly children: React.ReactNode;
   readonly label: string;
 }) {
   return (
     <div className="space-y-2">
-      <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
-        {label}
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
+          {label}
+        </p>
+        {action}
+      </div>
       {children}
     </div>
   );

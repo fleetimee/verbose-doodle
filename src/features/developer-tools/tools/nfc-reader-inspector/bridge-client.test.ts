@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test, vi } from "bun:test";
 import {
   createNfcBridgeUrl,
   NFC_WEBSOCKET_OPEN,
@@ -106,6 +106,63 @@ describe("NFC bridge browser client", () => {
     expect(client.getState().action).toBe("Start the bridge and retry.");
     client.disconnect();
     expect(client.getState().connectionStatus).toBe("disconnected");
+  });
+
+  test("controls the scan session and clears the latest scan locally", () => {
+    let socket: FakeWebSocket | undefined;
+    const client = new NfcBridgeClient("ws://127.0.0.1:7788/ws", (url) => {
+      socket = new FakeWebSocket(url);
+      return socket;
+    });
+
+    client.connect();
+    socket?.open();
+    expect(client.startScan()).toBe(true);
+    expect(JSON.parse(socket?.sent.at(-1) ?? "{}")).toEqual({
+      protocolVersion: "1",
+      type: "start-scan",
+    });
+    socket?.receive(
+      JSON.stringify({
+        protocolVersion: "1",
+        scanning: true,
+        type: "scan-status",
+      })
+    );
+    expect(client.getState().scanStatus).toBe("scanning");
+    client.clearScan();
+    expect(client.getState().latestScan).toBeNull();
+    client.stopScan();
+    expect(client.getState().scanStatus).toBe("stopped");
+  });
+
+  test("reconnects after an interruption and resumes the scan intent", () => {
+    vi.useFakeTimers();
+    try {
+      const sockets: FakeWebSocket[] = [];
+      const client = new NfcBridgeClient("ws://127.0.0.1:7788/ws", (url) => {
+        const socket = new FakeWebSocket(url);
+        sockets.push(socket);
+        return socket;
+      });
+
+      client.connect();
+      sockets[0]?.open();
+      client.startScan();
+      sockets[0]?.close();
+      expect(client.getState().connectionStatus).toBe("reconnecting");
+
+      vi.advanceTimersByTime(1000);
+      expect(sockets).toHaveLength(2);
+      sockets[1]?.open();
+      expect(client.getState().connectionStatus).toBe("connected");
+      expect(JSON.parse(sockets[1]?.sent.at(-1) ?? "{}")).toEqual({
+        protocolVersion: "1",
+        type: "start-scan",
+      });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   test("stores the latest versioned scan with decoded text, raw NDEF, and UID", () => {

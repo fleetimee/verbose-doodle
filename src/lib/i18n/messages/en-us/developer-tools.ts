@@ -87,6 +87,25 @@ export const developerToolsMessages = {
   nfcConnectBridge: "Connect bridge",
   nfcDisconnectBridge: "Disconnect",
   nfcRetryBridge: "Retry connection",
+  nfcStartScan: "Start scan",
+  nfcStopScan: "Stop scan",
+  nfcClearScan: "Clear scan",
+  nfcScanSessionLabel: "Scan session",
+  nfcScanSessionStates: {
+    scanning: "Scanning",
+    stopped: "Stopped",
+  },
+  nfcScanConnectionInterrupted:
+    "The local bridge connection was interrupted. Reconnecting…",
+  nfcScanConnectionUnavailable:
+    "The local bridge did not return. Check the bridge and retry manually.",
+  nfcCopyDecoded: "Copy decoded text",
+  nfcCopyRaw: "Copy raw NDEF",
+  nfcCopyUid: "Copy tag UID",
+  nfcCopyRecord: "Copy record",
+  nfcCopy: "Copy",
+  nfcCopied: "Copied",
+  nfcCopyFailed: "Copy failed",
   nfcReaderNextStepTitle: "Structured inspection ready",
   nfcReaderNextStepDescription:
     "Every scan keeps its raw NDEF message, record order, metadata, and decoded payloads visible so you can compare the tag with an integration fixture.",
@@ -123,6 +142,7 @@ export const developerToolsMessages = {
     connected: "Connected",
     connecting: "Connecting",
     disconnected: "Disconnected",
+    reconnecting: "Reconnecting",
     error: "Connection error",
   },
   nfcReaderStates: {
