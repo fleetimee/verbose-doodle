@@ -10,7 +10,7 @@ import {
   SearchIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   CircleAlert,
@@ -69,6 +69,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/features/auth/context";
 import { UserAgentClientBadge } from "@/features/endpoints/components/user-agent-client-badge";
 import { useEndpointTelemetry } from "@/features/endpoints/hooks/use-endpoint-telemetry";
+import { useTrafficLogScroll } from "@/features/endpoints/hooks/use-traffic-log-scroll";
 import type {
   EndpointTrafficLog,
   EndpointTrafficLogStatus,
@@ -262,6 +263,7 @@ export function EndpointTrafficLogViewer({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
   const [showClearLogsDialog, setShowClearLogsDialog] = useState(false);
+  const trafficLogViewportRef = useRef<HTMLDivElement>(null);
 
   const filters = useMemo<EndpointTrafficLogsFilters>(
     () => ({
@@ -300,6 +302,7 @@ export function EndpointTrafficLogViewer({
       [...(data?.items ?? [])].sort((a, b) => getLogTime(a) - getLogTime(b)),
     [data?.items]
   );
+  useTrafficLogScroll(trafficLogViewportRef, logs);
   const totalLogsLabel = getLogCountLabel(logs.length);
   const selectedLogsLabel = formatMessage(
     messages.endpoints.trafficLogsSelectedCount,
@@ -414,7 +417,10 @@ export function EndpointTrafficLogViewer({
     );
   } else {
     logContent = (
-      <ScrollArea className="h-[560px] w-full max-w-full bg-[#151515]">
+      <ScrollArea
+        className="h-[560px] w-full max-w-full bg-[#151515]"
+        viewportRef={trafficLogViewportRef}
+      >
         <div
           className={cn(
             "p-4 font-mono text-[#e7e7e7] text-[13px] leading-5",
