@@ -525,7 +525,7 @@ export function EndpointDetailPage() {
       >
         <motion.div
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+          className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
           initial={{ opacity: 0, y: 20 }}
           transition={{
             duration: PAGE_ANIMATION_DURATION,
@@ -533,7 +533,7 @@ export function EndpointDetailPage() {
             ease: "easeOut",
           }}
         >
-          <div className="flex items-start gap-3 md:items-center md:gap-4">
+          <div className="flex items-start gap-3 xl:items-center xl:gap-4">
             <Skeleton className="h-10 w-10 shrink-0 rounded-md" />
             <div className="min-w-0 flex-1 space-y-2">
               <div className="flex flex-wrap items-center gap-2 md:gap-3">
@@ -627,7 +627,7 @@ export function EndpointDetailPage() {
     >
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+        className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
         id={ENDPOINT_DETAIL_TOUR_TARGETS.header}
         initial={{ opacity: 0, y: 20 }}
         transition={{
@@ -636,7 +636,7 @@ export function EndpointDetailPage() {
           ease: "easeOut",
         }}
       >
-        <div className="flex items-start gap-3 md:items-center md:gap-4">
+        <div className="flex items-start gap-3 xl:items-center xl:gap-4">
           <Button
             aria-label="Back to Endpoints"
             className="mt-1 bg-background/80 shadow-xs md:mt-0"
@@ -712,7 +712,7 @@ export function EndpointDetailPage() {
                       </SelectContent>
                     </Select>
                     <Input
-                      className="h-auto min-w-[260px] flex-1 rounded-none border-0 bg-transparent px-0 py-0 font-bold font-mono text-xl tracking-tight shadow-none focus-visible:ring-0 md:text-2xl"
+                      className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 py-0 font-bold font-mono text-xl tracking-tight shadow-none focus-visible:ring-0 lg:text-2xl"
                       disabled={isUpdatingEndpoint}
                       onChange={(e) => setEditedUrl(e.target.value)}
                       onKeyDown={handleKeyDown}
@@ -783,7 +783,7 @@ export function EndpointDetailPage() {
                     >
                       {abbreviateMethod(endpoint.method)}
                     </span>
-                    <h1 className="break-all font-bold font-mono text-xl tracking-tight md:text-2xl">
+                    <h1 className="break-all font-bold font-mono text-xl tracking-tight lg:text-2xl">
                       {endpoint.url}
                     </h1>
                     <ProtectedAction ability="canEditEndpoint">
@@ -862,7 +862,7 @@ export function EndpointDetailPage() {
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 xl:w-auto">
           <Button
             onClick={() => setIsMetricsOpen(true)}
             size="sm"
