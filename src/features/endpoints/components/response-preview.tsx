@@ -3,7 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Code2, Play } from "@/components/hugeicons";
+import { FileTerminal, Play } from "@/components/hugeicons";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -241,7 +241,7 @@ export function ResponsePreview({
                             size="icon"
                             variant="outline"
                           >
-                            <Code2 className="h-4 w-4" />
+                            <FileTerminal className="size-4" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>

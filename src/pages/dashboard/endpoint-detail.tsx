@@ -1,10 +1,14 @@
 import {
   Add01Icon,
   ArrowLeft02Icon,
+  BarChartIcon,
   Cancel01Icon,
+  CircleIcon as CircleDefinition,
   Delete02Icon,
+  HashIcon,
   HelpCircleIcon,
   Menu01Icon,
+  Pen01Icon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -12,7 +16,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
-import { BarChart3, Circle, Hash, Pen } from "@/components/hugeicons";
 import { type TourStep, useTour } from "@/components/tour";
 import {
   AlertDialog,
@@ -499,7 +502,7 @@ export function EndpointDetailPage() {
           <Empty className="min-h-[60vh] border">
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <Circle />
+                <HugeiconsIcon icon={CircleDefinition} strokeWidth={2} />
               </EmptyMedia>
               <EmptyTitle>Invalid endpoint ID</EmptyTitle>
               <EmptyDescription>
@@ -601,7 +604,7 @@ export function EndpointDetailPage() {
           <Empty className="min-h-[60vh] border">
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <Circle />
+                <HugeiconsIcon icon={CircleDefinition} strokeWidth={2} />
               </EmptyMedia>
               <EmptyTitle>Endpoint not found</EmptyTitle>
               <EmptyDescription>
@@ -646,7 +649,7 @@ export function EndpointDetailPage() {
             variant="outline"
           >
             <HugeiconsIcon
-              className="h-5 w-5"
+              className="size-4"
               icon={ArrowLeft02Icon}
               strokeWidth={2}
             />
@@ -731,7 +734,11 @@ export function EndpointDetailPage() {
                             type="button"
                             variant="outline"
                           >
-                            <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} />
+                            <HugeiconsIcon
+                              className="size-4"
+                              icon={Tick02Icon}
+                              strokeWidth={2}
+                            />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent side="top">
@@ -752,6 +759,7 @@ export function EndpointDetailPage() {
                             variant="outline"
                           >
                             <HugeiconsIcon
+                              className="size-4"
                               icon={Cancel01Icon}
                               strokeWidth={2}
                             />
@@ -803,7 +811,11 @@ export function EndpointDetailPage() {
                               type="button"
                               variant="outline"
                             >
-                              <Pen />
+                              <HugeiconsIcon
+                                className="size-4"
+                                icon={Pen01Icon}
+                                strokeWidth={2}
+                              />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent side="top">
@@ -823,6 +835,7 @@ export function EndpointDetailPage() {
                               variant="outline"
                             >
                               <HugeiconsIcon
+                                className="size-4"
                                 icon={Delete02Icon}
                                 strokeWidth={2}
                               />
@@ -840,7 +853,11 @@ export function EndpointDetailPage() {
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 bg-background/70 px-2.5 font-medium text-muted-foreground text-xs shadow-xs">
-                <Hash className="h-3.5 w-3.5 text-primary" />
+                <HugeiconsIcon
+                  className="size-3.5 text-primary"
+                  icon={HashIcon}
+                  strokeWidth={2}
+                />
                 <span>Biller ID</span>
                 <span className="font-mono text-foreground">
                   {endpoint.billerId}
@@ -848,7 +865,7 @@ export function EndpointDetailPage() {
               </span>
               <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 bg-background/70 px-2.5 font-medium text-muted-foreground text-xs shadow-xs">
                 <HugeiconsIcon
-                  className="h-3.5 w-3.5 text-primary"
+                  className="size-3.5 text-primary"
                   icon={Menu01Icon}
                   strokeWidth={2}
                 />
@@ -869,7 +886,11 @@ export function EndpointDetailPage() {
             type="button"
             variant="outline"
           >
-            <BarChart3 data-icon="inline-start" />
+            <HugeiconsIcon
+              data-icon="inline-start"
+              icon={BarChartIcon}
+              strokeWidth={2}
+            />
             {messages.endpoints.metrics.button}
           </Button>
           <Button
@@ -893,7 +914,7 @@ export function EndpointDetailPage() {
               type="button"
             >
               <HugeiconsIcon
-                className="mr-2 h-4 w-4"
+                data-icon="inline-start"
                 icon={Add01Icon}
                 strokeWidth={2}
               />
