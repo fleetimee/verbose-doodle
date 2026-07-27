@@ -2,6 +2,7 @@ import { Add01Icon, HelpCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
 import { Layers3, Plug } from "@/components/hugeicons";
 import { type TourStep, useTour } from "@/components/tour";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useAuth } from "@/features/auth/context";
+import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
 import { DeleteEndpointDialog } from "@/features/endpoints/components/delete-endpoint-dialog";
 import { EditEndpointSheet } from "@/features/endpoints/components/edit-endpoint-sheet";
@@ -68,8 +70,59 @@ const ENDPOINTS_TOUR_TARGETS = {
   export: "endpoints-tour-export",
   firstEndpoint: "endpoints-tour-first-endpoint",
 } as const;
+const BILLER_ID_PATTERN = /^\d+$/;
 
 type EndpointViewMode = "grid" | "list";
+
+function parseBillerId(value: string | null): number | null {
+  if (!(value && BILLER_ID_PATTERN.test(value))) {
+    return null;
+  }
+
+  const billerId = Number(value);
+  return Number.isSafeInteger(billerId) ? billerId : null;
+}
+
+function filterEndpointsByBiller(
+  endpoints: Endpoint[],
+  billerId: number | null,
+  isBillerScoped: boolean
+): Endpoint[] {
+  if (!isBillerScoped) {
+    return endpoints;
+  }
+
+  if (billerId === null) {
+    return [];
+  }
+
+  return endpoints.filter((endpoint) => endpoint.billerId === billerId);
+}
+
+function getEmptyStateCopy(
+  isUnknownBillerScope: boolean,
+  isBillerScoped: boolean,
+  hasSearchTerm: boolean
+) {
+  if (isUnknownBillerScope) {
+    return {
+      description: messages.endpoints.billerNotFoundDescription,
+      title: messages.endpoints.billerNotFoundTitle,
+    };
+  }
+
+  if (isBillerScoped && !hasSearchTerm) {
+    return {
+      description: messages.endpoints.scopedEmptyDescription,
+      title: messages.endpoints.scopedEmptyTitle,
+    };
+  }
+
+  return {
+    description: messages.endpoints.noSearchResultsDescription,
+    title: messages.endpoints.noSearchResultsTitle,
+  };
+}
 
 function TourStepContent({
   title,
@@ -220,6 +273,8 @@ export function EndpointsPage() {
   } = useEndpointCatalog();
   const { data: endpoints = [], isPending: isLoadingEndpoints } =
     endpointsQuery;
+  const [searchParams] = useSearchParams();
+  const { data: billers = [], isPending: isLoadingBillers } = useGetBillers();
   const { session } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [initialBillerId, setInitialBillerId] = useState<number | undefined>();
@@ -243,6 +298,15 @@ export function EndpointsPage() {
   const prefersReducedMotion = useReducedMotion();
   const shouldReduceMotion = prefersReducedMotion ?? false;
 
+  const billerIdParam = searchParams.get("billerId");
+  const selectedBillerId = parseBillerId(billerIdParam);
+  const isBillerScoped = billerIdParam !== null;
+  const hasKnownBiller =
+    selectedBillerId !== null &&
+    billers.some((biller) => biller.id === selectedBillerId);
+  const isUnknownBillerScope =
+    isBillerScoped && !isLoadingBillers && !hasKnownBiller;
+
   const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
     createEndpointMutation;
   const { mutate: updateEndpoint, isPending: isUpdatingEndpoint } =
@@ -250,9 +314,14 @@ export function EndpointsPage() {
   const { mutate: deleteEndpoint, isPending: isDeletingEndpoint } =
     deleteEndpointMutation;
 
+  const scopedEndpoints = useMemo(
+    () => filterEndpointsByBiller(endpoints, selectedBillerId, isBillerScoped),
+    [endpoints, isBillerScoped, selectedBillerId]
+  );
+
   const filteredEndpoints = useMemo(
-    () => filterEndpoints(endpoints, searchTerm),
-    [endpoints, searchTerm]
+    () => filterEndpoints(scopedEndpoints, searchTerm),
+    [scopedEndpoints, searchTerm]
   );
 
   const groupedEndpoints = useMemo(
@@ -260,14 +329,14 @@ export function EndpointsPage() {
     [filteredEndpoints]
   );
 
-  const hasEndpoints = endpoints.length > 0;
+  const hasEndpoints = scopedEndpoints.length > 0;
   const hasFilteredEndpoints = groupedEndpoints.length > 0;
   const hasSearchTerm = searchTerm.trim().length > 0;
-  const shouldShowCatalog = hasEndpoints || hasSearchTerm;
+  const shouldShowCatalog = isBillerScoped || hasEndpoints || hasSearchTerm;
   const canAddEndpoint = session.can("canAddEndpoint");
   const canEditEndpoint = session.can("canEditEndpoint");
 
-  const handleCreateEndpoint = (billerId?: number) => {
+  const handleCreateEndpoint = (billerId = selectedBillerId ?? undefined) => {
     setInitialBillerId(billerId);
     setIsDialogOpen(true);
   };
@@ -331,7 +400,7 @@ export function EndpointsPage() {
       },
     ];
 
-    if (!hasEndpoints && canAddEndpoint) {
+    if (!(hasEndpoints || isUnknownBillerScope) && canAddEndpoint) {
       return [
         ...baseSteps,
         {
@@ -408,12 +477,23 @@ export function EndpointsPage() {
           ]
         : []),
     ];
-  }, [canAddEndpoint, hasEndpoints, hasFilteredEndpoints]);
+  }, [
+    canAddEndpoint,
+    hasEndpoints,
+    hasFilteredEndpoints,
+    isUnknownBillerScope,
+  ]);
 
   const handleStartTour = useCallback(() => {
     setSteps(tourSteps);
     startTour(ENDPOINTS_TOUR_ID);
   }, [setSteps, startTour, tourSteps]);
+
+  const emptyStateCopy = getEmptyStateCopy(
+    isUnknownBillerScope,
+    isBillerScoped,
+    hasSearchTerm
+  );
 
   useEffect(() => {
     if (
@@ -745,11 +825,9 @@ export function EndpointsPage() {
                   <EmptyMedia variant="icon">
                     <Plug />
                   </EmptyMedia>
-                  <EmptyTitle>
-                    {messages.endpoints.noSearchResultsTitle}
-                  </EmptyTitle>
+                  <EmptyTitle>{emptyStateCopy.title}</EmptyTitle>
                   <EmptyDescription>
-                    {messages.endpoints.noSearchResultsDescription}
+                    {emptyStateCopy.description}
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
@@ -775,20 +853,22 @@ export function EndpointsPage() {
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <ProtectedAction ability="canAddEndpoint">
-                <Button
-                  id={ENDPOINTS_TOUR_TARGETS.createFirstEndpoint}
-                  onClick={() => handleCreateEndpoint()}
-                  type="button"
-                >
-                  <HugeiconsIcon
-                    className="mr-2 h-4 w-4"
-                    icon={Add01Icon}
-                    strokeWidth={2}
-                  />
-                  {messages.endpoints.createFirstButton}
-                </Button>
-              </ProtectedAction>
+              {!isUnknownBillerScope && (
+                <ProtectedAction ability="canAddEndpoint">
+                  <Button
+                    id={ENDPOINTS_TOUR_TARGETS.createFirstEndpoint}
+                    onClick={() => handleCreateEndpoint()}
+                    type="button"
+                  >
+                    <HugeiconsIcon
+                      className="mr-2 h-4 w-4"
+                      icon={Add01Icon}
+                      strokeWidth={2}
+                    />
+                    {messages.endpoints.createFirstButton}
+                  </Button>
+                </ProtectedAction>
+              )}
             </EmptyContent>
           </Empty>
         </motion.div>

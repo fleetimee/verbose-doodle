@@ -39,16 +39,27 @@ const endpoints = [
   },
 ];
 
+const pdamEndpoint = {
+  billerId: 2,
+  billerName: "PDAM",
+  id: "endpoint-2",
+  method: "POST" as const,
+  responses: [],
+  url: "/payment",
+};
+
 const originalFetch = globalThis.fetch;
 let lastCreateBody: { billerId?: number } | null = null;
 let lastUpdateBody: Record<string, unknown> | null = null;
 let lastDeleteId: string | null = null;
 let currentEndpoint: (typeof endpoints)[number] | null = { ...endpoints[0] };
+let extraCatalogEndpoint: typeof pdamEndpoint | null = null;
 let deleteRequestResolver: (() => void) | null = null;
 let holdDeleteRequest = false;
 let shouldFailDelete = false;
 let shouldFailUpdate = false;
 const endpointButtonName = /GET.*inquiry/i;
+const pdamEndpointButtonName = /POST.*payment/i;
 const configuredResponseName = /1 configured response/;
 
 function createAdminToken() {
@@ -76,7 +87,12 @@ function installApiMock() {
     if (url === "/api/endpoint" && method === "GET") {
       return Promise.resolve(
         jsonResponse({
-          data: { endpoints: currentEndpoint ? [currentEndpoint] : [] },
+          data: {
+            endpoints: [currentEndpoint, extraCatalogEndpoint].filter(
+              (endpoint): endpoint is NonNullable<typeof endpoint> =>
+                endpoint !== null
+            ),
+          },
         })
       );
     }
@@ -183,13 +199,13 @@ function installApiMock() {
   });
 }
 
-function renderEndpointsPage() {
+function renderEndpointsPage(initialEntries = ["/dashboard/endpoints"]) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
 
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <TourProvider>
@@ -210,6 +226,7 @@ describe("EndpointsPage catalog actions", () => {
     lastUpdateBody = null;
     lastDeleteId = null;
     currentEndpoint = { ...endpoints[0] };
+    extraCatalogEndpoint = null;
     deleteRequestResolver = null;
     holdDeleteRequest = false;
     shouldFailDelete = false;
@@ -241,6 +258,55 @@ describe("EndpointsPage catalog actions", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).toBeNull();
     });
+  });
+
+  test("filters the catalog to the selected biller and defaults creation to it", async () => {
+    const user = userEvent.setup();
+    extraCatalogEndpoint = pdamEndpoint;
+    renderEndpointsPage(["/dashboard/endpoints?billerId=2"]);
+
+    expect(
+      await screen.findByRole("button", { name: pdamEndpointButtonName })
+    ).toBeDefined();
+    expect(
+      screen.queryByRole("button", { name: endpointButtonName })
+    ).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Add Endpoint" }));
+
+    expect(
+      within(screen.getByLabelText("Biller")).getByText("PDAM")
+    ).toBeDefined();
+  });
+
+  test("keeps an unknown biller URL scoped instead of showing other endpoints", async () => {
+    extraCatalogEndpoint = pdamEndpoint;
+    renderEndpointsPage(["/dashboard/endpoints?billerId=999"]);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("button", { name: endpointButtonName })
+      ).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: pdamEndpointButtonName })
+      ).toBeNull();
+    });
+    expect(await screen.findByText("Biller not found")).toBeDefined();
+  });
+
+  test("keeps a malformed biller URL scoped instead of showing other endpoints", async () => {
+    extraCatalogEndpoint = pdamEndpoint;
+    renderEndpointsPage(["/dashboard/endpoints?billerId=abc"]);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("button", { name: endpointButtonName })
+      ).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: pdamEndpointButtonName })
+      ).toBeNull();
+    });
+    expect(await screen.findByText("Biller not found")).toBeDefined();
   });
 
   test("opens the global form without automatically selecting a biller", async () => {
