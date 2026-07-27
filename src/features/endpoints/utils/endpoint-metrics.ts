@@ -4,6 +4,7 @@ import type {
   EndpointTrafficLog,
   EndpointTrafficLogStatus,
 } from "@/features/endpoints/types";
+import { formatJakartaTime } from "@/features/endpoints/utils/endpoint-time";
 
 export type EndpointMetricsTimeWindow = "5m" | "15m" | "1h";
 export type PersistedMetricsTimeWindow = "24h" | "7d" | "30d";
@@ -339,11 +340,7 @@ function getObservedMinutes(logs: readonly EndpointTrafficLog[]) {
 }
 
 function formatBucketLabel(timestamp: number) {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).format(new Date(timestamp));
+  return formatJakartaTime(timestamp);
 }
 
 function minimum(values: readonly (number | null)[]) {
