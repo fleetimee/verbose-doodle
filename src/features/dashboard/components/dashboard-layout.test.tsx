@@ -16,6 +16,15 @@ let availableBillers = [
 ];
 let endpointBillerName: string | undefined = "PLN";
 
+type MockEndpoint = {
+  biller_id: number;
+  biller_name: string | undefined;
+  endpoint_id: string;
+  method: string;
+  responses: { response_id: string }[];
+  url: string;
+};
+
 function createAdminToken() {
   const payload = btoa(
     JSON.stringify({ role: "ADMIN", user_id: "user-1", username: "admin" })
@@ -31,7 +40,7 @@ function jsonResponse(body: unknown) {
 }
 
 function installApiMock() {
-  const endpoint = {
+  const endpoint: MockEndpoint = {
     biller_id: 1,
     biller_name: endpointBillerName,
     endpoint_id: "endpoint-1",
@@ -39,7 +48,7 @@ function installApiMock() {
     responses: [{ response_id: "response-1" }],
     url: "/xapi-pbb/api/user/login",
   };
-  const alternateEndpoint = {
+  const alternateEndpoint: MockEndpoint = {
     biller_id: 1,
     biller_name: "PLN",
     endpoint_id: "endpoint-2",
@@ -47,7 +56,7 @@ function installApiMock() {
     responses: [{ response_id: "response-2" }],
     url: "/xapi-pbb/api/user/status",
   };
-  const emptyEndpoint = {
+  const emptyEndpoint: MockEndpoint = {
     biller_id: 3,
     biller_name: "Empty Biller",
     endpoint_id: "endpoint-3",
@@ -55,7 +64,7 @@ function installApiMock() {
     responses: [],
     url: "/xapi-pbb/api/empty/status",
   };
-  const pdamEndpoint = {
+  const pdamEndpoint: MockEndpoint = {
     biller_id: 2,
     biller_name: "PDAM",
     endpoint_id: "endpoint-pdam",

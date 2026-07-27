@@ -4,6 +4,8 @@ import { MemoryRouter } from "react-router";
 import { AboutHeader } from "./about-header";
 import { AboutPage } from "./about-page";
 
+const SKIP_NAVIGATION_NAME = /skip to main content/i;
+
 function renderWithRouter(ui: React.ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
 }
@@ -12,7 +14,7 @@ describe("AboutPage accessibility", () => {
   test("renders a skip navigation link", () => {
     renderWithRouter(<AboutPage />);
     const skipLink = screen.getByRole("link", {
-      name: /skip to main content/i,
+      name: SKIP_NAVIGATION_NAME,
     });
     expect(skipLink).toBeDefined();
     expect(skipLink.getAttribute("href")).toBe("#about-main-content");

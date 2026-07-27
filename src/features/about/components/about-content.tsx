@@ -334,16 +334,15 @@ export function AboutContent({ locale }: AboutContentProps) {
           >
             {activeMessages.about.ourTeamTitle}
           </h2>
-          <div
+          <fieldset
             aria-label={`${activeMessages.about.ourTeamTitle} — click an avatar to view profile`}
-            className="flex flex-row items-center justify-center"
-            role="group"
+            className="flex flex-row items-center justify-center border-0 p-0"
           >
             <AnimatedTooltip
               items={teamMembers}
               onSelect={handleSelectMember}
             />
-          </div>
+          </fieldset>
         </motion.div>
 
         <motion.div

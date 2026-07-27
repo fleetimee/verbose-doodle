@@ -1,4 +1,3 @@
-import { Postman } from "developer-icons";
+import { Postman as PostmanIcon } from "developer-icons";
 
-export { Postman };
-
+export const Postman = PostmanIcon;

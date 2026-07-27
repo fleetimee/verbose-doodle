@@ -10,7 +10,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-
 function LinkedinIcon({ className = "h-3.5 w-3.5" }: { className?: string }) {
   return (
     <svg
@@ -71,7 +70,9 @@ export function TeamMemberModal({
               <img
                 alt={member.name}
                 className="h-full w-full object-cover object-top"
+                height={64}
                 src={member.imageWebp1x || member.image}
+                width={64}
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -130,8 +131,14 @@ export function TeamMemberModal({
                     target="_blank"
                     title={`View ${member.name}'s GitHub Profile`}
                   >
-                    <GitHubDark className="block h-3.5 w-3.5 dark:hidden" size={14} />
-                    <GitHubLight className="hidden h-3.5 w-3.5 dark:block" size={14} />
+                    <GitHubDark
+                      className="block h-3.5 w-3.5 dark:hidden"
+                      size={14}
+                    />
+                    <GitHubLight
+                      className="hidden h-3.5 w-3.5 dark:block"
+                      size={14}
+                    />
                     <span>GitHub</span>
                   </a>
                 }

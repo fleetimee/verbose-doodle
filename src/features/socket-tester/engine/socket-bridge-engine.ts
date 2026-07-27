@@ -160,14 +160,14 @@ export class SocketBridgeEngine {
   private readonly stateChangeListeners: Set<() => void> = new Set();
   private readonly toastListeners: Set<(event: ToastEvent) => void> = new Set();
 
-  public subscribe(listener: () => void): () => void {
+  subscribe(listener: () => void): () => void {
     this.stateChangeListeners.add(listener);
     return () => {
       this.stateChangeListeners.delete(listener);
     };
   }
 
-  public onToast(listener: (event: ToastEvent) => void): () => void {
+  onToast(listener: (event: ToastEvent) => void): () => void {
     this.toastListeners.add(listener);
     return () => {
       this.toastListeners.delete(listener);
@@ -186,7 +186,7 @@ export class SocketBridgeEngine {
     }
   }
 
-  public getState(): EngineState {
+  getState(): EngineState {
     return {
       bridgeStatus: this.bridgeStatus,
       logs: this.logs,
@@ -197,41 +197,38 @@ export class SocketBridgeEngine {
     };
   }
 
-  public getBridgeStatus(): BridgeStatus {
+  getBridgeStatus(): BridgeStatus {
     return this.bridgeStatus;
   }
 
-  public setBridgeStatus(status: BridgeStatus): void {
+  setBridgeStatus(status: BridgeStatus): void {
     if (this.bridgeStatus !== status) {
       this.bridgeStatus = status;
       this.notifyStateChange();
     }
   }
 
-  public getLogs(): readonly TrafficLogEntry[] {
+  getLogs(): readonly TrafficLogEntry[] {
     return this.logs;
   }
 
-  public clearLogs(): void {
+  clearLogs(): void {
     this.logs = [];
     this.notifyStateChange();
   }
 
-  public appendLog(entry: TrafficLogEntry): void {
+  appendLog(entry: TrafficLogEntry): void {
     this.logs = [...this.logs, entry].slice(-MAX_LOG_ENTRIES);
     this.notifyStateChange();
   }
 
-  public appendSystemLog(
-    data: string,
-    metadata?: Record<string, unknown>
-  ): void {
+  appendSystemLog(data: string, metadata?: Record<string, unknown>): void {
     this.appendLog(
       toLogEntry("sys", "tcp-client", "bridge", data, "text", metadata)
     );
   }
 
-  public getMetrics(): SocketMetrics {
+  getMetrics(): SocketMetrics {
     const packetsIn = this.logs.filter(
       (entry) => entry.direction === "in"
     ).length;
@@ -249,54 +246,74 @@ export class SocketBridgeEngine {
     return { activeConnections, errors, packetsIn, packetsOut };
   }
 
-  public handleBridgeEvent(event: BridgeEvent): void {
+  handleBridgeEvent(event: BridgeEvent): void {
     const payload = event.payload ?? {};
     const type = typeof event.type === "string" ? event.type : "message";
     const normalizedType = type.replaceAll("-", "_");
 
     if (normalizedType.includes("error")) {
-      const errorScope = readString(
-        payload,
-        ["scope", "connectionId", "serverId"],
-        "bridge"
-      );
-      const errorMessage = readString(
-        payload,
-        ["message", "error", "data"],
-        JSON.stringify(event)
-      );
-
-      if (
-        this.pendingTcpClient &&
-        (errorScope === this.pendingTcpClient.connectionId ||
-          normalizedType.includes("tcp_client"))
-      ) {
-        const { host, port } = this.pendingTcpClient;
-        this.pendingTcpClient = null;
-        this.tcpClient = { ...this.tcpClient, connected: false };
-        this.notifyToast({
-          type: "error",
-          title: messages.socketTester.tcpConnectionFailed,
-          description: formatMessage(
-            messages.socketTester.tcpConnectionRefusedDescription,
-            { host, message: errorMessage, port }
-          ),
-        });
-      }
-
-      this.appendLog(
-        toLogEntry(
-          "err",
-          "tcp-client",
-          errorScope,
-          errorMessage,
-          "text",
-          payload
-        )
-      );
+      this.handleBridgeError(event, payload, normalizedType);
       return;
     }
 
+    if (this.handleTcpClientEvent(normalizedType, payload)) {
+      return;
+    }
+
+    if (this.handleTcpServerEvent(normalizedType, payload)) {
+      return;
+    }
+
+    if (this.handleUdpServerEvent(normalizedType, payload)) {
+      return;
+    }
+
+    this.appendGenericBridgeEvent(event, payload, normalizedType);
+  }
+
+  private handleBridgeError(
+    event: BridgeEvent,
+    payload: Record<string, unknown>,
+    normalizedType: string
+  ): void {
+    const errorScope = readString(
+      payload,
+      ["scope", "connectionId", "serverId"],
+      "bridge"
+    );
+    const errorMessage = readString(
+      payload,
+      ["message", "error", "data"],
+      JSON.stringify(event)
+    );
+
+    if (
+      this.pendingTcpClient &&
+      (errorScope === this.pendingTcpClient.connectionId ||
+        normalizedType.includes("tcp_client"))
+    ) {
+      const { host, port } = this.pendingTcpClient;
+      this.pendingTcpClient = null;
+      this.tcpClient = { ...this.tcpClient, connected: false };
+      this.notifyToast({
+        type: "error",
+        title: messages.socketTester.tcpConnectionFailed,
+        description: formatMessage(
+          messages.socketTester.tcpConnectionRefusedDescription,
+          { host, message: errorMessage, port }
+        ),
+      });
+    }
+
+    this.appendLog(
+      toLogEntry("err", "tcp-client", errorScope, errorMessage, "text", payload)
+    );
+  }
+
+  private handleTcpClientEvent(
+    normalizedType: string,
+    payload: Record<string, unknown>
+  ): boolean {
     if (normalizedType.includes("tcp_client_connected")) {
       const connectedTarget = this.pendingTcpClient;
       if (connectedTarget) {
@@ -324,7 +341,7 @@ export class SocketBridgeEngine {
           payload
         )
       );
-      return;
+      return true;
     }
 
     if (
@@ -358,9 +375,16 @@ export class SocketBridgeEngine {
           payload
         )
       );
-      return;
+      return true;
     }
 
+    return false;
+  }
+
+  private handleTcpServerEvent(
+    normalizedType: string,
+    payload: Record<string, unknown>
+  ): boolean {
     if (normalizedType.includes("tcp_server_started")) {
       this.tcpServer = { ...this.tcpServer, listening: true };
       this.appendLog(
@@ -373,7 +397,7 @@ export class SocketBridgeEngine {
           payload
         )
       );
-      return;
+      return true;
     }
 
     if (
@@ -395,7 +419,7 @@ export class SocketBridgeEngine {
           payload
         )
       );
-      return;
+      return true;
     }
 
     if (normalizedType.includes("tcp_server_client_connected")) {
@@ -418,7 +442,7 @@ export class SocketBridgeEngine {
       this.appendLog(
         toLogEntry("sys", "tcp-server", id, "Client connected", "text", payload)
       );
-      return;
+      return true;
     }
 
     if (normalizedType.includes("tcp_server_client_disconnected")) {
@@ -441,9 +465,16 @@ export class SocketBridgeEngine {
           payload
         )
       );
-      return;
+      return true;
     }
 
+    return false;
+  }
+
+  private handleUdpServerEvent(
+    normalizedType: string,
+    payload: Record<string, unknown>
+  ): boolean {
     if (normalizedType.includes("udp_server_started")) {
       this.udpServer = { ...this.udpServer, listening: true };
       this.appendLog(
@@ -456,7 +487,7 @@ export class SocketBridgeEngine {
           payload
         )
       );
-      return;
+      return true;
     }
 
     if (
@@ -474,9 +505,17 @@ export class SocketBridgeEngine {
           payload
         )
       );
-      return;
+      return true;
     }
 
+    return false;
+  }
+
+  private appendGenericBridgeEvent(
+    event: BridgeEvent,
+    payload: Record<string, unknown>,
+    normalizedType: string
+  ): void {
     let protocol: SocketProtocol = "tcp-client";
     if (normalizedType.includes("udp")) {
       protocol = "udp";
@@ -503,7 +542,7 @@ export class SocketBridgeEngine {
   }
 
   // Socket Command Creators & State Updaters
-  public prepareConnectTcpClient(host: string, port: number): SocketCommand {
+  prepareConnectTcpClient(host: string, port: number): SocketCommand {
     const connectionId = createId("tcp-client");
     this.pendingTcpClient = { connectionId, host, port };
     this.tcpClient = { connectionId, connected: false, host, port };
@@ -522,7 +561,7 @@ export class SocketBridgeEngine {
     };
   }
 
-  public prepareDisconnectTcpClient(): SocketCommand {
+  prepareDisconnectTcpClient(): SocketCommand {
     this.tcpClient = { ...this.tcpClient, connected: false };
     this.notifyStateChange();
     return {
@@ -531,7 +570,7 @@ export class SocketBridgeEngine {
     };
   }
 
-  public prepareSendTcpClient(
+  prepareSendTcpClient(
     data: string,
     format: PayloadFormat,
     delimiter: "\r\n" | "\n" | ""
@@ -556,7 +595,7 @@ export class SocketBridgeEngine {
     };
   }
 
-  public prepareStartTcpServer(port: number): SocketCommand {
+  prepareStartTcpServer(port: number): SocketCommand {
     const serverId = createId("tcp-server");
     this.tcpServer = { serverId, listening: false, port, clients: [] };
     this.appendLog(
@@ -568,7 +607,7 @@ export class SocketBridgeEngine {
     };
   }
 
-  public prepareStopTcpServer(): SocketCommand {
+  prepareStopTcpServer(): SocketCommand {
     this.tcpServer = {
       ...this.tcpServer,
       clients: [],
@@ -581,7 +620,7 @@ export class SocketBridgeEngine {
     };
   }
 
-  public prepareSendTcpServer(
+  prepareSendTcpServer(
     clientId: string,
     data: string,
     format: PayloadFormat,
@@ -600,7 +639,7 @@ export class SocketBridgeEngine {
     };
   }
 
-  public prepareStartUdpServer(port: number): SocketCommand {
+  prepareStartUdpServer(port: number): SocketCommand {
     const serverId = createId("udp-server");
     this.udpServer = { serverId, listening: false, port };
     this.appendLog(
@@ -612,7 +651,7 @@ export class SocketBridgeEngine {
     };
   }
 
-  public prepareStopUdpServer(): SocketCommand {
+  prepareStopUdpServer(): SocketCommand {
     this.udpServer = { ...this.udpServer, listening: false };
     this.notifyStateChange();
     return {
@@ -621,7 +660,7 @@ export class SocketBridgeEngine {
     };
   }
 
-  public prepareSendUdp(
+  prepareSendUdp(
     host: string,
     port: number,
     data: string,
@@ -634,7 +673,7 @@ export class SocketBridgeEngine {
     };
   }
 
-  public resetOnClose(): void {
+  resetOnClose(): void {
     this.bridgeStatus = "disconnected";
     this.tcpClient = { ...this.tcpClient, connected: false };
     this.tcpServer = {
