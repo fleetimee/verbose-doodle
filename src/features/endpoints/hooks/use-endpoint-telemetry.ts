@@ -24,6 +24,7 @@ export type EndpointTelemetryOptions = {
   readonly enabled?: boolean;
   readonly includeMetrics?: boolean;
   readonly includeTrafficLogs?: boolean;
+  readonly refetchInterval?: number | false;
   readonly selectedLogId?: string | null;
   readonly from?: string;
   readonly to?: string;
@@ -48,6 +49,7 @@ export function useEndpointTelemetry(
     queryKey: endpointDataQueryKeys.telemetry(endpointId, filters),
     queryFn: () => adapter.listTrafficLogs(telemetryInput),
     enabled: enabled && includeTrafficLogs,
+    refetchInterval: options.refetchInterval,
     staleTime: 10 * 1000,
   });
   const trafficLogDetail = useQuery<EndpointTrafficLogDetail, ApiError>({
