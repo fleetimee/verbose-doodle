@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNfcBridge } from "@/features/developer-tools/tools/nfc-reader-inspector/hooks/use-nfc-bridge";
+import type { NfcNdefRecord } from "@/features/developer-tools/tools/nfc-reader-inspector/types";
 import { messages } from "@/lib/i18n";
 
 const connectionTone = {
@@ -174,6 +175,11 @@ function ScanDetails({
             {scan.decodedText ?? copy.nfcScanNoDecodedText}
           </p>
         </ScanField>
+        <ScanField label={copy.nfcScanDecodingStatusLabel}>
+          <Badge variant="outline">
+            {copy.nfcScanDecodingStatuses[scan.decodingStatus]}
+          </Badge>
+        </ScanField>
         <ScanField label={copy.nfcScanUidLabel}>
           <p className="font-mono text-sm">
             {scan.uid ?? copy.nfcScanUidUnavailable}
@@ -198,6 +204,99 @@ function ScanDetails({
           <code>{scan.rawNdef}</code>
         </pre>
       </ScanField>
+      <div className="space-y-3 lg:col-span-2">
+        <div className="flex items-center justify-between gap-3">
+          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
+            {copy.nfcScanRecordsLabel}
+          </p>
+          <Badge variant="secondary">{scan.records.length}</Badge>
+        </div>
+        <div className="grid gap-3">
+          {scan.records.map((record) => (
+            <RecordDetails
+              key={`${record.index}:${record.raw}`}
+              record={record}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecordDetails({ record }: { readonly record: NfcNdefRecord }) {
+  const copy = messages.developerTools;
+  return (
+    <Card className="border-border/70 bg-muted/10 shadow-none">
+      <CardHeader className="flex flex-row items-start justify-between gap-4 pb-3">
+        <div>
+          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
+            {copy.nfcScanRecordLabel.replace(
+              "{index}",
+              String(record.index + 1)
+            )}
+          </p>
+          <CardTitle className="mt-1 text-base">{record.type}</CardTitle>
+        </div>
+        <Badge variant="outline">
+          {copy.nfcScanRecordTnfLabel} {record.tnf}
+        </Badge>
+      </CardHeader>
+      <CardContent className="grid gap-4 md:grid-cols-2">
+        <RecordField label={copy.nfcScanRecordTypeLabel} value={record.type} />
+        <RecordField
+          label={copy.nfcScanRecordTypeHexLabel}
+          monospace
+          value={record.typeHex || "—"}
+        />
+        <RecordField
+          label={copy.nfcScanRecordIdLabel}
+          monospace={record.id !== null}
+          value={record.id ?? copy.nfcScanRecordIdUnavailable}
+        />
+        <RecordField
+          label={copy.nfcScanRecordIdHexLabel}
+          monospace
+          value={record.idHex || "—"}
+        />
+        <RecordField
+          label={copy.nfcScanRecordPayloadLabel}
+          value={record.payload ?? copy.nfcScanRecordPayloadUnavailable}
+        />
+        <RecordField
+          label={copy.nfcScanRecordPayloadHexLabel}
+          monospace
+          value={record.payloadHex || "—"}
+        />
+        <RecordField
+          label={copy.nfcScanRecordRawLabel}
+          monospace
+          value={record.raw}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+function RecordField({
+  label,
+  monospace = false,
+  value,
+}: {
+  readonly label: string;
+  readonly monospace?: boolean;
+  readonly value: string;
+}) {
+  return (
+    <div className="min-w-0 space-y-1.5">
+      <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
+        {label}
+      </p>
+      <p
+        className={`${monospace ? "font-mono" : ""} break-words text-sm leading-relaxed`}
+      >
+        {value}
+      </p>
     </div>
   );
 }

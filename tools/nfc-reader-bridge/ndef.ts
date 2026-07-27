@@ -66,6 +66,21 @@ function decodeType(typeBytes: Uint8Array): string {
   return decodeUtf8(typeBytes) ?? toHex(typeBytes);
 }
 
+function createUnparsedRecord(raw: Uint8Array): NdefRecordInspection {
+  const rawHex = toHex(raw);
+  return {
+    id: null,
+    idHex: null,
+    index: 0,
+    payload: null,
+    payloadHex: rawHex,
+    raw: rawHex,
+    tnf: 0,
+    type: "Unparsed record",
+    typeHex: "",
+  };
+}
+
 type NdefRecordHeader = {
   readonly header: number;
   readonly typeLength: number;
@@ -220,6 +235,23 @@ export function parseNdefMessage(
 
   try {
     const records = parseRecords(raw);
+    const hasMalformedTextRecord = records.some(
+      (record) => isNdefTextRecord(record) && record.payload === null
+    );
+    if (hasMalformedTextRecord) {
+      return {
+        ...base,
+        decodingStatus: "malformed",
+        records,
+        warning: "One or more NDEF text records could not be decoded.",
+      };
+    }
+
+    const hasUnsupportedRecord = records.some(
+      (record) =>
+        record.tnf !== NDEF_TNF_WELL_KNOWN ||
+        (record.typeHex !== "54" && record.typeHex !== "55")
+    );
     const text = records
       .filter(
         (record) =>
@@ -229,17 +261,29 @@ export function parseNdefMessage(
       )
       .map((record) => record.payload as string)
       .join("\n");
+    let decodingStatus: NdefDecodingStatus = "no-text";
+    if (hasUnsupportedRecord) {
+      decodingStatus = "unsupported";
+    } else if (text) {
+      decodingStatus = "decoded";
+    }
     return {
       ...base,
       ...(text ? { decodedText: text } : {}),
-      decodingStatus: text ? "decoded" : "no-text",
+      decodingStatus,
       records,
+      ...(hasUnsupportedRecord
+        ? {
+            warning:
+              "One or more NDEF record types are not decoded by this inspector; raw data is preserved.",
+          }
+        : {}),
     };
   } catch (error) {
     return {
       ...base,
       decodingStatus: "malformed",
-      records: [],
+      records: [createUnparsedRecord(raw)],
       warning:
         error instanceof Error
           ? error.message
