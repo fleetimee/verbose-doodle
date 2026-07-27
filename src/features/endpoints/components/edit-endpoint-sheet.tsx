@@ -36,10 +36,6 @@ export function EditEndpointSheet({
   const formRef = useRef<EndpointFormHandle>(null);
   const { data: billers = [], isLoading: isLoadingBillers } = useGetBillers();
 
-  if (!endpoint) {
-    return null;
-  }
-
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       formRef.current?.reset();
@@ -49,34 +45,39 @@ export function EditEndpointSheet({
 
   return (
     <Sheet onOpenChange={handleOpenChange} open={open}>
-      <SheetContent className="flex w-[400px] flex-col sm:w-[640px]">
+      <SheetContent
+        className="flex w-[400px] flex-col sm:w-[640px]"
+        keepMounted
+      >
         <SheetHeader>
           <SheetTitle>{messages.endpoints.editEndpoint}</SheetTitle>
           <SheetDescription>
             {messages.endpoints.editEndpointDescription}
           </SheetDescription>
         </SheetHeader>
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <EndpointForm
-            billers={billers}
-            initialBillerId={endpoint.billerId}
-            initialMethod={endpoint.method}
-            initialUrl={endpoint.url}
-            isBillerReadOnly
-            isLoadingBillers={isLoadingBillers}
-            onSubmit={onSubmit}
-            ref={formRef}
-          >
-            <SheetFooter className="border-t px-6 pt-4 pb-6">
-              <Button disabled={isSubmitting} type="submit">
-                {isSubmitting && <Spinner className="mr-2" />}
-                {isSubmitting
-                  ? messages.endpoints.updating
-                  : messages.endpoints.saveEndpoint}
-              </Button>
-            </SheetFooter>
-          </EndpointForm>
-        </div>
+        {endpoint && (
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <EndpointForm
+              billers={billers}
+              initialBillerId={endpoint.billerId}
+              initialMethod={endpoint.method}
+              initialUrl={endpoint.url}
+              isBillerReadOnly
+              isLoadingBillers={isLoadingBillers}
+              onSubmit={onSubmit}
+              ref={formRef}
+            >
+              <SheetFooter className="border-t px-6 pt-4 pb-6">
+                <Button disabled={isSubmitting} type="submit">
+                  {isSubmitting && <Spinner className="mr-2" />}
+                  {isSubmitting
+                    ? messages.endpoints.updating
+                    : messages.endpoints.saveEndpoint}
+                </Button>
+              </SheetFooter>
+            </EndpointForm>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );
