@@ -148,7 +148,11 @@ export function DashboardLayout() {
       isLast: false,
       isNavigable: false,
       kind: "biller",
-      label: endpoint?.billerName ?? "Biller",
+      label:
+        endpoint?.billerName ??
+        (endpoint?.billerId === undefined
+          ? "Biller"
+          : `Biller ID ${endpoint.billerId}`),
     });
   }
 

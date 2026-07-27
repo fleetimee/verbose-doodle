@@ -14,6 +14,7 @@ let availableBillers = [
   { biller_name: "PDAM", id: 2 },
   { biller_name: "Empty Biller", id: 3 },
 ];
+let endpointBillerName: string | undefined = "PLN";
 
 function createAdminToken() {
   const payload = btoa(
@@ -32,7 +33,7 @@ function jsonResponse(body: unknown) {
 function installApiMock() {
   const endpoint = {
     biller_id: 1,
-    biller_name: "PLN",
+    biller_name: endpointBillerName,
     endpoint_id: "endpoint-1",
     method: "POST",
     responses: [{ response_id: "response-1" }],
@@ -164,6 +165,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
       { biller_name: "PDAM", id: 2 },
       { biller_name: "Empty Biller", id: 3 },
     ];
+    endpointBillerName = "PLN";
     installApiMock();
   });
 
@@ -235,6 +237,16 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     renderDashboard();
 
     expect(await screen.findByText("PLN")).toBeDefined();
+    expect(screen.queryByRole("combobox", { name: "Biller" })).toBeNull();
+  });
+
+  test("falls back to the biller ID when its name is unavailable", async () => {
+    availableBillers = [];
+    endpointBillerName = undefined;
+    installApiMock();
+    renderDashboard();
+
+    expect(await screen.findByText("Biller ID 1")).toBeDefined();
     expect(screen.queryByRole("combobox", { name: "Biller" })).toBeNull();
   });
 });
