@@ -13,7 +13,9 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "nfc-bridge": "bun tools/nfc-reader-bridge/cli.ts",
-    "nfc-bridge:compile": "bun build tools/nfc-reader-bridge/cli.ts --compile --outfile dist/nfc-reader-bridge"
+    "nfc-bridge:build": "bun tools/nfc-reader-bridge/release.ts build",
+    "nfc-bridge:compile": "bun run nfc-bridge:build",
+    "nfc-bridge:smoke": "bun tools/nfc-reader-bridge/release.ts smoke"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
