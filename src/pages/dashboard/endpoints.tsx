@@ -23,15 +23,17 @@ import {
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useAuth } from "@/features/auth/context";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
+import { EditEndpointSheet } from "@/features/endpoints/components/edit-endpoint-sheet";
 import { EndpointCard } from "@/features/endpoints/components/endpoint-card";
 import { EndpointCardSkeleton } from "@/features/endpoints/components/endpoint-card-skeleton";
+import { EndpointContextMenu } from "@/features/endpoints/components/endpoint-context-menu";
 import { EndpointListItem } from "@/features/endpoints/components/endpoint-list-item";
 import { EndpointListSkeleton } from "@/features/endpoints/components/endpoint-list-skeleton";
 import { EndpointsSearchControls } from "@/features/endpoints/components/endpoints-search-controls";
 import { ExportEndpointsDialog } from "@/features/endpoints/components/export-endpoints-dialog";
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
-import type { GroupedEndpoints } from "@/features/endpoints/types";
+import type { Endpoint, GroupedEndpoints } from "@/features/endpoints/types";
 import {
   filterEndpoints,
   groupEndpointsByBiller,
@@ -88,8 +90,10 @@ function TourStepContent({
 type AnimatedEndpointGroupProps = {
   readonly group: GroupedEndpoints;
   readonly groupIndex: number;
+  readonly onEditEndpoint: (endpoint: Endpoint) => void;
   readonly prefersReducedMotion: boolean;
   readonly viewMode: EndpointViewMode;
+  readonly canEditEndpoint: boolean;
 };
 
 function getEndpointTourId(groupIndex: number, endpointIndex: number) {
@@ -99,36 +103,54 @@ function getEndpointTourId(groupIndex: number, endpointIndex: number) {
 }
 
 function GridEndpoints({
+  canEditEndpoint,
   group,
   groupIndex,
+  onEditEndpoint,
 }: Omit<AnimatedEndpointGroupProps, "prefersReducedMotion" | "viewMode">) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {group.endpoints.map((endpoint, endpointIndex) => (
-        <div key={endpoint.id}>
-          <EndpointCard
-            endpoint={endpoint}
-            tourId={getEndpointTourId(groupIndex, endpointIndex)}
-          />
-        </div>
+        <EndpointContextMenu
+          canEdit={canEditEndpoint}
+          endpoint={endpoint}
+          key={endpoint.id}
+          onEdit={onEditEndpoint}
+        >
+          <div>
+            <EndpointCard
+              endpoint={endpoint}
+              tourId={getEndpointTourId(groupIndex, endpointIndex)}
+            />
+          </div>
+        </EndpointContextMenu>
       ))}
     </div>
   );
 }
 
 function ListEndpoints({
+  canEditEndpoint,
   group,
   groupIndex,
+  onEditEndpoint,
 }: Omit<AnimatedEndpointGroupProps, "prefersReducedMotion" | "viewMode">) {
   return (
     <div className="space-y-3">
       {group.endpoints.map((endpoint, endpointIndex) => (
-        <div key={endpoint.id}>
-          <EndpointListItem
-            endpoint={endpoint}
-            tourId={getEndpointTourId(groupIndex, endpointIndex)}
-          />
-        </div>
+        <EndpointContextMenu
+          canEdit={canEditEndpoint}
+          endpoint={endpoint}
+          key={endpoint.id}
+          onEdit={onEditEndpoint}
+        >
+          <div>
+            <EndpointListItem
+              endpoint={endpoint}
+              tourId={getEndpointTourId(groupIndex, endpointIndex)}
+            />
+          </div>
+        </EndpointContextMenu>
       ))}
     </div>
   );
@@ -137,6 +159,8 @@ function ListEndpoints({
 function AnimatedEndpointGroup({
   group,
   groupIndex,
+  canEditEndpoint,
+  onEditEndpoint,
   prefersReducedMotion,
   viewMode,
 }: AnimatedEndpointGroupProps) {
@@ -154,9 +178,19 @@ function AnimatedEndpointGroup({
       }}
     >
       {viewMode === "grid" ? (
-        <GridEndpoints group={group} groupIndex={groupIndex} />
+        <GridEndpoints
+          canEditEndpoint={canEditEndpoint}
+          group={group}
+          groupIndex={groupIndex}
+          onEditEndpoint={onEditEndpoint}
+        />
       ) : (
-        <ListEndpoints group={group} groupIndex={groupIndex} />
+        <ListEndpoints
+          canEditEndpoint={canEditEndpoint}
+          group={group}
+          groupIndex={groupIndex}
+          onEditEndpoint={onEditEndpoint}
+        />
       )}
     </motion.div>
   );
@@ -169,13 +203,17 @@ export function EndpointsPage() {
     keywords: ["api endpoints", "integrations", "api management", "endpoints"],
   });
 
-  const { endpoints: endpointsQuery, createEndpoint: createEndpointMutation } =
-    useEndpointCatalog();
+  const {
+    endpoints: endpointsQuery,
+    createEndpoint: createEndpointMutation,
+    updateEndpoint: updateEndpointMutation,
+  } = useEndpointCatalog();
   const { data: endpoints = [], isPending: isLoadingEndpoints } =
     endpointsQuery;
   const { session } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [initialBillerId, setInitialBillerId] = useState<number | undefined>();
+  const [endpointToEdit, setEndpointToEdit] = useState<Endpoint | null>(null);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useLocalStorage<"grid" | "list">(
@@ -194,6 +232,8 @@ export function EndpointsPage() {
 
   const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
     createEndpointMutation;
+  const { mutate: updateEndpoint, isPending: isUpdatingEndpoint } =
+    updateEndpointMutation;
 
   const filteredEndpoints = useMemo(
     () => filterEndpoints(endpoints, searchTerm),
@@ -208,6 +248,7 @@ export function EndpointsPage() {
   const hasEndpoints = endpoints.length > 0;
   const hasFilteredEndpoints = groupedEndpoints.length > 0;
   const canAddEndpoint = session.can("canAddEndpoint");
+  const canEditEndpoint = session.can("canEditEndpoint");
 
   const handleCreateEndpoint = (billerId?: number) => {
     setInitialBillerId(billerId);
@@ -220,6 +261,27 @@ export function EndpointsPage() {
         setIsDialogOpen(false);
       },
     });
+  };
+
+  const handleEditEndpoint = (data: EndpointFormData) => {
+    if (!endpointToEdit) {
+      return;
+    }
+
+    updateEndpoint(
+      {
+        endpointId: endpointToEdit.id,
+        changes: {
+          method: data.method,
+          url: data.url,
+        },
+      },
+      {
+        onSuccess: () => {
+          setEndpointToEdit(null);
+        },
+      }
+    );
   };
 
   const handleOpenExportDialog = () => {
@@ -409,6 +471,19 @@ export function EndpointsPage() {
                 showTrigger={hasEndpoints}
               />
             </div>
+          </ProtectedAction>
+          <ProtectedAction ability="canEditEndpoint">
+            <EditEndpointSheet
+              endpoint={endpointToEdit}
+              isSubmitting={isUpdatingEndpoint}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setEndpointToEdit(null);
+                }
+              }}
+              onSubmit={handleEditEndpoint}
+              open={endpointToEdit !== null}
+            />
           </ProtectedAction>
         </div>
       </motion.div>
@@ -603,8 +678,10 @@ export function EndpointsPage() {
                     </span>
                   </div>
                   <AnimatedEndpointGroup
+                    canEditEndpoint={canEditEndpoint}
                     group={group}
                     groupIndex={index}
+                    onEditEndpoint={setEndpointToEdit}
                     prefersReducedMotion={shouldReduceMotion}
                     viewMode={viewMode}
                   />

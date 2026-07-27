@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { TourProvider } from "@/components/tour";
@@ -25,6 +32,10 @@ const endpoints = [
 
 const originalFetch = globalThis.fetch;
 let lastCreateBody: { billerId?: number } | null = null;
+let lastUpdateBody: Record<string, unknown> | null = null;
+let currentEndpoint = { ...endpoints[0] };
+let shouldFailUpdate = false;
+const endpointButtonName = /GET.*inquiry/i;
 
 function createAdminToken() {
   const payload = btoa(
@@ -49,7 +60,9 @@ function installApiMock() {
     const method = init?.method ?? "GET";
 
     if (url === "/api/endpoint" && method === "GET") {
-      return Promise.resolve(jsonResponse({ data: { endpoints } }));
+      return Promise.resolve(
+        jsonResponse({ data: { endpoints: [currentEndpoint] } })
+      );
     }
 
     if (url === "/api/biller" && method === "GET") {
@@ -84,6 +97,23 @@ function installApiMock() {
       );
     }
 
+    if (url === "/api/endpoint/endpoint-1" && method === "PATCH") {
+      if (shouldFailUpdate) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ data: {} }), {
+            headers: { "Content-Type": "application/json" },
+            status: 500,
+          })
+        );
+      }
+      const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      lastUpdateBody = body;
+      currentEndpoint = { ...currentEndpoint, ...body };
+      return Promise.resolve(
+        jsonResponse({ data: { endpoint: currentEndpoint } })
+      );
+    }
+
     return Promise.resolve(jsonResponse({ data: {} }));
   };
 
@@ -110,12 +140,15 @@ function renderEndpointsPage() {
   );
 }
 
-describe("EndpointsPage endpoint creation", () => {
+describe("EndpointsPage catalog actions", () => {
   beforeEach(() => {
     localStorage.clear();
     localStorage.setItem("auth_token", createAdminToken());
     localStorage.setItem("endpoints-tour-seen", "true");
     lastCreateBody = null;
+    lastUpdateBody = null;
+    currentEndpoint = { ...endpoints[0] };
+    shouldFailUpdate = false;
     installApiMock();
   });
 
@@ -199,5 +232,116 @@ describe("EndpointsPage endpoint creation", () => {
     expect(
       screen.queryByRole("button", { name: "Add endpoint for PLN" })
     ).toBeNull();
+  });
+
+  test.each([
+    "grid",
+    "list",
+  ] as const)("edits an endpoint from the %s view without changing its biller", async (viewMode) => {
+    const user = userEvent.setup();
+    localStorage.setItem("endpoints-view-mode", viewMode);
+    renderEndpointsPage();
+
+    const endpointButton = await screen.findByRole("button", {
+      name: endpointButtonName,
+    });
+    act(() => {
+      fireEvent.contextMenu(endpointButton);
+    });
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Edit endpoint" })
+    );
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByDisplayValue("/inquiry")).toBeDefined();
+    expect(within(dialog).getByText("PLN")).toBeDefined();
+
+    await user.click(within(dialog).getByLabelText("Method"));
+    await user.click(await screen.findByRole("option", { name: "POST" }));
+    await user.clear(within(dialog).getByLabelText("URL"));
+    await user.type(within(dialog).getByLabelText("URL"), "/payment");
+    await user.click(
+      within(dialog).getByRole("button", { name: "Save Changes" })
+    );
+
+    await waitFor(() => {
+      expect(lastUpdateBody).toEqual({ method: "POST", url: "/payment" });
+    });
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(screen.getByText("/payment")).toBeDefined();
+    });
+  });
+
+  test("keeps the edit sheet open when the update fails", async () => {
+    const user = userEvent.setup();
+    shouldFailUpdate = true;
+    renderEndpointsPage();
+
+    const endpointButton = await screen.findByRole("button", {
+      name: endpointButtonName,
+    });
+    act(() => {
+      fireEvent.contextMenu(endpointButton);
+    });
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Edit endpoint" })
+    );
+
+    const dialog = await screen.findByRole("dialog");
+    await user.clear(within(dialog).getByLabelText("URL"));
+    await user.type(within(dialog).getByLabelText("URL"), "/payment");
+    await user.click(
+      within(dialog).getByRole("button", { name: "Save Changes" })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeDefined();
+      expect(
+        within(screen.getByRole("dialog")).getByDisplayValue("/payment")
+      ).toBeDefined();
+    });
+  });
+
+  test("removes an edited endpoint that no longer matches the search", async () => {
+    const user = userEvent.setup();
+    renderEndpointsPage();
+
+    await user.type(
+      await screen.findByPlaceholderText("Search endpoints..."),
+      "/inquiry"
+    );
+    const endpointButton = await screen.findByRole("button", {
+      name: endpointButtonName,
+    });
+    act(() => {
+      fireEvent.contextMenu(endpointButton);
+    });
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Edit endpoint" })
+    );
+
+    const dialog = await screen.findByRole("dialog");
+    await user.clear(within(dialog).getByLabelText("URL"));
+    await user.type(within(dialog).getByLabelText("URL"), "/payment");
+    await user.click(
+      within(dialog).getByRole("button", { name: "Save Changes" })
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("button", { name: endpointButtonName })
+      ).toBeNull();
+    });
+  });
+
+  test("does not expose endpoint edit actions without permission", async () => {
+    localStorage.removeItem("auth_token");
+    renderEndpointsPage();
+
+    expect(
+      await screen.findByRole("button", { name: endpointButtonName })
+    ).toBeDefined();
+    expect(screen.queryByText("Edit endpoint")).toBeNull();
   });
 });

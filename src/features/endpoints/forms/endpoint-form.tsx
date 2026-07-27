@@ -32,15 +32,37 @@ type EndpointFormProps = {
   billers?: Biller[];
   isLoadingBillers?: boolean;
   initialBillerId?: number;
+  initialMethod?: EndpointFormData["method"];
+  initialUrl?: string;
+  isBillerReadOnly?: boolean;
   children?: React.ReactNode;
 };
 
-function getDefaultValues(initialBillerId?: number) {
+function getDefaultValues(
+  initialBillerId?: number,
+  initialMethod: EndpointFormData["method"] = "GET",
+  initialUrl = "/rest"
+) {
   return {
-    method: "GET" as const,
-    url: "/rest",
+    method: initialMethod,
+    url: initialUrl,
     billerId: initialBillerId,
   };
+}
+
+function getBillerDescription(
+  isLoadingBillers: boolean,
+  isBillerReadOnly: boolean
+) {
+  if (isLoadingBillers) {
+    return messages.endpoints.billersLoading;
+  }
+
+  if (isBillerReadOnly) {
+    return messages.endpoints.billerReadOnlyDescription;
+  }
+
+  return messages.endpoints.billerDescription;
 }
 
 export type EndpointFormHandle = {
@@ -55,6 +77,9 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
       onSubmit,
       billers = [],
       initialBillerId,
+      initialMethod,
+      initialUrl,
+      isBillerReadOnly = false,
       isLoadingBillers = false,
       children,
     },
@@ -62,12 +87,16 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
   ) => {
     const form = useForm<EndpointFormData>({
       resolver: zodResolver(endpointSchema),
-      defaultValues: getDefaultValues(initialBillerId),
+      defaultValues: getDefaultValues(
+        initialBillerId,
+        initialMethod,
+        initialUrl
+      ),
     });
 
     useEffect(() => {
-      form.reset(getDefaultValues(initialBillerId));
-    }, [form, initialBillerId]);
+      form.reset(getDefaultValues(initialBillerId, initialMethod, initialUrl));
+    }, [form, initialBillerId, initialMethod, initialUrl]);
 
     useImperativeHandle(ref, () => ({
       reset: () => form.reset(),
@@ -174,7 +203,11 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                     </FieldLabel>
                     <FieldContent>
                       <Select
-                        disabled={isLoadingBillers || billers.length === 0}
+                        disabled={
+                          isBillerReadOnly ||
+                          isLoadingBillers ||
+                          billers.length === 0
+                        }
                         name={field.name}
                         onValueChange={(value) => field.onChange(Number(value))}
                         value={field.value?.toString()}
@@ -203,9 +236,10 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                         </SelectContent>
                       </Select>
                       <FieldDescription>
-                        {isLoadingBillers
-                          ? messages.endpoints.billersLoading
-                          : messages.endpoints.billerDescription}
+                        {getBillerDescription(
+                          isLoadingBillers,
+                          isBillerReadOnly
+                        )}
                       </FieldDescription>
                     </FieldContent>
                     {fieldState.invalid && (
