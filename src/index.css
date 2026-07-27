@@ -41,7 +41,6 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: Mona Sans, sans-serif;
   --font-mono: Geist Mono, monospace;
-  --font-pixel: Geist Pixel, monospace;
   --font-serif: Georgia, serif;
   --radius: 0.35rem;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
@@ -118,7 +117,6 @@
   --font-sans: Mona Sans, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Geist Mono, monospace;
-  --font-pixel: Geist Pixel, monospace;
   --shadow-color: hsl(0 0% 20% / 0.1);
   --shadow-opacity: 0.15;
   --shadow-blur: 0px;
@@ -180,7 +178,6 @@
   --font-sans: Mona Sans, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Geist Mono, monospace;
-  --font-pixel: Geist Pixel, monospace;
   --shadow-color: hsl(0 0% 20% / 0.1);
   --shadow-opacity: 0.15;
   --shadow-blur: 0px;
