@@ -357,6 +357,7 @@ export const endpointsMessages = {
   urlPlaceholder: "/rest/api/users",
   urlDescription:
     "Enter a valid API path starting with / (e.g., /rest, /rest/api, /api/v1/users)",
+  urlPreviewLabel: "Your endpoint URL will look like this",
   billerLabel: "Biller",
   billerPlaceholder: "Select a biller",
   billersLoading: "Loading billers...",

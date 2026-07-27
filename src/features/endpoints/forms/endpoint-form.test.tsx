@@ -32,9 +32,28 @@ describe("EndpointForm", () => {
 
     const urlInput = screen.getByLabelText("URL") as HTMLInputElement;
     expect(urlInput.value).toBe("/rest");
+    expect(screen.getByText("GET http://localhost:8080/rest")).toBeDefined();
 
     const billerTrigger = screen.getByLabelText("Biller");
     expect(billerTrigger).toBeDefined();
+  });
+
+  test("updates the URL preview as the path changes", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <EndpointForm onSubmit={() => {}}>
+        <button type="submit">{SUBMIT_BUTTON_LABEL}</button>
+      </EndpointForm>
+    );
+
+    const urlInput = screen.getByLabelText("URL") as HTMLInputElement;
+    await user.clear(urlInput);
+    await user.type(urlInput, "/api/v1/users");
+
+    expect(
+      screen.getByText("GET http://localhost:8080/api/v1/users")
+    ).toBeDefined();
   });
 
   test("coerces numeric values before calling onSubmit", async () => {
