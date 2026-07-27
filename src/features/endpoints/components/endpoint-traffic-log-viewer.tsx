@@ -81,6 +81,7 @@ import { formatMessage, formatPluralMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const LOG_LINE_LIMITS = [50, 100, 250, 500, 1000] as const;
+const TRAFFIC_LOG_POLL_INTERVAL_MS = 2000;
 
 type EndpointTrafficLogViewerProps = {
   readonly endpointId: string;
@@ -278,6 +279,7 @@ export function EndpointTrafficLogViewer({
   } = useEndpointTelemetry(endpointId, filters, {
     enabled: autoRefresh,
     includeMetrics: false,
+    refetchInterval: autoRefresh ? TRAFFIC_LOG_POLL_INTERVAL_MS : false,
     selectedLogId,
   });
   const {

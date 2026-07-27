@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
@@ -59,5 +59,29 @@ describe("Endpoint data hooks", () => {
     });
 
     await waitFor(() => expect(result.current.endpoints.data).toHaveLength(2));
+  });
+
+  test("polls telemetry when a refetch interval is configured", async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const adapter = createAdapter();
+    const listTrafficLogs = mock(adapter.listTrafficLogs);
+    const telemetryAdapter = { ...adapter, listTrafficLogs };
+
+    renderHook(
+      () =>
+        useEndpointTelemetry(
+          "1",
+          { includeBody: true, limit: 10, search: "", status: "all" },
+          { includeMetrics: false, refetchInterval: 10 },
+          telemetryAdapter
+        ),
+      { wrapper: createWrapper(queryClient) }
+    );
+
+    await waitFor(() => {
+      expect(listTrafficLogs.mock.calls.length).toBeGreaterThan(1);
+    });
   });
 });
