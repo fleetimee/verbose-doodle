@@ -345,6 +345,17 @@ describe("EndpointsPage catalog actions", () => {
     });
   });
 
+  test("constrains long endpoint paths in grid cards", async () => {
+    const longPath =
+      "/xapi-pbb/api/payment/inquiry/with-a-very-long-resource-name";
+    currentEndpoint = { ...endpoints[0], url: longPath };
+    renderEndpointsPage();
+
+    const path = await screen.findByText(longPath);
+    expect(path.className).toContain("truncate");
+    expect(path.parentElement?.className).toContain("w-full");
+  });
+
   test("keeps the edit sheet open when the update fails", async () => {
     const user = userEvent.setup();
     shouldFailUpdate = true;
