@@ -85,10 +85,15 @@ function parseBillerId(value: string | null): number | null {
 
 function filterEndpointsByBiller(
   endpoints: Endpoint[],
-  billerId: number | null
+  billerId: number | null,
+  isBillerScoped: boolean
 ): Endpoint[] {
-  if (billerId === null) {
+  if (!isBillerScoped) {
     return endpoints;
+  }
+
+  if (billerId === null) {
+    return [];
   }
 
   return endpoints.filter((endpoint) => endpoint.billerId === billerId);
@@ -310,8 +315,8 @@ export function EndpointsPage() {
     deleteEndpointMutation;
 
   const scopedEndpoints = useMemo(
-    () => filterEndpointsByBiller(endpoints, selectedBillerId),
-    [endpoints, selectedBillerId]
+    () => filterEndpointsByBiller(endpoints, selectedBillerId, isBillerScoped),
+    [endpoints, isBillerScoped, selectedBillerId]
   );
 
   const filteredEndpoints = useMemo(

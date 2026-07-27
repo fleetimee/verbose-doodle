@@ -294,6 +294,21 @@ describe("EndpointsPage catalog actions", () => {
     expect(await screen.findByText("Biller not found")).toBeDefined();
   });
 
+  test("keeps a malformed biller URL scoped instead of showing other endpoints", async () => {
+    extraCatalogEndpoint = pdamEndpoint;
+    renderEndpointsPage(["/dashboard/endpoints?billerId=abc"]);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("button", { name: endpointButtonName })
+      ).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: pdamEndpointButtonName })
+      ).toBeNull();
+    });
+    expect(await screen.findByText("Biller not found")).toBeDefined();
+  });
+
   test("opens the global form without automatically selecting a biller", async () => {
     const user = userEvent.setup();
     renderEndpointsPage();
