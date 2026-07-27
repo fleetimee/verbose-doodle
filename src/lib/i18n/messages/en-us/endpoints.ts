@@ -196,11 +196,18 @@ export const endpointsMessages = {
   editEndpointDescription:
     "Update the method and URL for this endpoint. The biller cannot be changed here.",
   editEndpointMenuItem: "Edit endpoint",
+  deleteEndpointMenuItem: "Delete endpoint",
+  deleteEndpointConfirmTitle: "Delete Endpoint?",
+  deleteEndpointConfirmDescription:
+    "This action cannot be undone and will permanently remove the endpoint configuration",
+  deleteEndpointResponseDescription: "It also removes",
+  deleteEndpointConfirmAction: "Delete Endpoint",
   saveEndpointTooltip: "Save endpoint changes",
   saveEndpoint: "Save Changes",
   cancelEndpointEditTooltip: "Cancel endpoint edit",
   editEndpointTooltip: "Edit endpoint URL and method",
   updating: "Saving...",
+  deleting: "Deleting...",
   deleteEndpointTooltip: "Delete endpoint and all responses",
   creating: "Creating...",
   createEndpoint: "Create Endpoint",
