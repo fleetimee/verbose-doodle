@@ -97,7 +97,19 @@ describe("NFC bridge lifecycle", () => {
       decodedText: "Hello",
       decodingStatus: "decoded",
       rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
-      records: [],
+      records: [
+        {
+          id: null,
+          idHex: null,
+          index: 0,
+          payload: "Hello",
+          payloadHex: "02 65 6E 48 65 6C 6C 6F",
+          raw: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
+          tnf: 1,
+          type: "T",
+          typeHex: "54",
+        },
+      ],
       timestamp: "2026-07-24T12:00:00.000Z",
       uid: "04 AA BB CC",
     });
