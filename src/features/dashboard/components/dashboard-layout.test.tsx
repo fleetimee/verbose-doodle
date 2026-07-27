@@ -92,12 +92,21 @@ function installApiMock() {
 
     if (
       url === "/api/endpoint/endpoint-1" ||
-      url === "/api/endpoint/endpoint-2"
+      url === "/api/endpoint/endpoint-2" ||
+      url === "/api/endpoint/endpoint-pdam"
     ) {
+      let detailEndpoint = pdamEndpoint;
+
+      if (url.endsWith("endpoint-1")) {
+        detailEndpoint = endpoint;
+      } else if (url.endsWith("endpoint-2")) {
+        detailEndpoint = alternateEndpoint;
+      }
+
       return Promise.resolve(
         jsonResponse({
           data: {
-            endpoint: url.endsWith("endpoint-1") ? endpoint : alternateEndpoint,
+            endpoint: detailEndpoint,
           },
         })
       );
@@ -178,7 +187,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     ).toContain("PLN");
   });
 
-  test("navigates to the selected biller endpoint list", async () => {
+  test("stays on endpoint details and selects the first endpoint for a new biller", async () => {
     const user = userEvent.setup();
     renderDashboard();
 
@@ -187,7 +196,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        "/dashboard/endpoints?billerId=2"
+        `/dashboard/endpoints/${encodeId("endpoint-pdam")}`
       );
     });
   });

@@ -301,9 +301,16 @@ function BillerBreadcrumbSelector({
     <Select
       onValueChange={(value) => {
         const nextBillerId = Number(value);
+        const firstEndpoint = endpoints.find(
+          (endpoint) => endpoint.billerId === nextBillerId
+        );
 
-        if (Number.isSafeInteger(nextBillerId) && nextBillerId !== billerId) {
-          navigate(`/dashboard/endpoints?billerId=${nextBillerId}`);
+        if (
+          Number.isSafeInteger(nextBillerId) &&
+          nextBillerId !== billerId &&
+          firstEndpoint
+        ) {
+          navigate(`/dashboard/endpoints/${encodeId(firstEndpoint.id)}`);
         }
       }}
       value={String(billerId)}
