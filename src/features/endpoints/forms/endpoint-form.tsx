@@ -1,6 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forwardRef, useEffect, useImperativeHandle } from "react";
-import { Controller, type UseFormReturn, useForm } from "react-hook-form";
+import {
+  Controller,
+  type UseFormReturn,
+  useForm,
+  useWatch,
+} from "react-hook-form";
 import {
   Field,
   FieldContent,
@@ -26,6 +31,8 @@ import {
 } from "@/features/endpoints/schemas/endpoint-schema";
 import { getMethodTextColor } from "@/features/endpoints/utils/http-method-colors";
 import { messages } from "@/lib/i18n";
+
+const TRAILING_SLASHES_PATTERN = /\/+$/;
 
 type EndpointFormProps = {
   onSubmit: (data: EndpointFormData) => void;
@@ -63,6 +70,21 @@ function getBillerDescription(
   }
 
   return messages.endpoints.billerDescription;
+}
+
+function getEndpointPreviewUrl(baseUrl: string, path: string) {
+  const normalizedBaseUrl = baseUrl.replace(TRAILING_SLASHES_PATTERN, "");
+  const normalizedPath = path.trim();
+
+  if (!normalizedPath) {
+    return normalizedBaseUrl || "/";
+  }
+
+  if (!normalizedBaseUrl) {
+    return normalizedPath;
+  }
+
+  return `${normalizedBaseUrl}${normalizedPath.startsWith("/") ? normalizedPath : `/${normalizedPath}`}`;
 }
 
 export type EndpointFormHandle = {
@@ -103,6 +125,13 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
       getValues: () => form.getValues(),
       form,
     }));
+
+    const previewMethod = useWatch({ control: form.control, name: "method" });
+    const previewPath = useWatch({ control: form.control, name: "url" });
+    const previewUrl = getEndpointPreviewUrl(
+      import.meta.env.VITE_ENDPOINT_URL || "",
+      previewPath
+    );
 
     const handleSubmit = (data: EndpointFormData) => {
       onSubmit(data);
@@ -185,6 +214,17 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                       <FieldDescription>
                         {messages.endpoints.urlDescription}
                       </FieldDescription>
+                      <div
+                        aria-live="polite"
+                        className="rounded-md border border-border/70 bg-muted/40 px-3 py-2"
+                      >
+                        <p className="mb-1 text-muted-foreground text-xs">
+                          {messages.endpoints.urlPreviewLabel}
+                        </p>
+                        <code className="block break-all font-mono text-foreground text-sm">
+                          {previewMethod} {previewUrl}
+                        </code>
+                      </div>
                     </FieldContent>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
