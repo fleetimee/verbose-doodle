@@ -123,7 +123,9 @@ export function DashboardLayout() {
                   {breadcrumbItems.map((item) => (
                     <React.Fragment key={item.href}>
                       <BreadcrumbItem
-                        className={item.isLast ? "" : "hidden md:block"}
+                        className={
+                          item.isLast ? "min-w-0 max-w-full" : "hidden md:block"
+                        }
                       >
                         <DashboardBreadcrumbContent item={item} />
                       </BreadcrumbItem>
@@ -160,13 +162,13 @@ function DashboardBreadcrumbContent({
     return (
       <BreadcrumbPage>
         {item.method && item.url ? (
-          <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
             <HttpMethodBadge
               className="shrink-0"
               method={item.method}
               variant="text"
             />
-            <span>{item.url}</span>
+            <span className="min-w-0 truncate">{item.url}</span>
           </span>
         ) : (
           item.label
