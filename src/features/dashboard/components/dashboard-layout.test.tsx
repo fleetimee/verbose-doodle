@@ -12,6 +12,7 @@ const encodedEndpointId = encodeId("endpoint-1");
 let availableBillers = [
   { biller_name: "PLN", id: 1 },
   { biller_name: "PDAM", id: 2 },
+  { biller_name: "Empty Biller", id: 3 },
 ];
 
 function createAdminToken() {
@@ -34,7 +35,7 @@ function installApiMock() {
     biller_name: "PLN",
     endpoint_id: "endpoint-1",
     method: "POST",
-    responses: [],
+    responses: [{ response_id: "response-1" }],
     url: "/xapi-pbb/api/user/login",
   };
   const alternateEndpoint = {
@@ -42,8 +43,24 @@ function installApiMock() {
     biller_name: "PLN",
     endpoint_id: "endpoint-2",
     method: "GET",
-    responses: [],
+    responses: [{ response_id: "response-2" }],
     url: "/xapi-pbb/api/user/status",
+  };
+  const emptyEndpoint = {
+    biller_id: 3,
+    biller_name: "Empty Biller",
+    endpoint_id: "endpoint-3",
+    method: "GET",
+    responses: [],
+    url: "/xapi-pbb/api/empty/status",
+  };
+  const pdamEndpoint = {
+    biller_id: 2,
+    biller_name: "PDAM",
+    endpoint_id: "endpoint-pdam",
+    method: "GET",
+    responses: [{ response_id: "response-pdam" }],
+    url: "/xapi-pbb/api/payment/status",
   };
   const mockFetch = (input: Parameters<typeof globalThis.fetch>[0]) => {
     const url = String(input);
@@ -61,7 +78,14 @@ function installApiMock() {
     if (url === "/api/endpoint") {
       return Promise.resolve(
         jsonResponse({
-          data: { endpoints: [endpoint, alternateEndpoint] },
+          data: {
+            endpoints: [
+              endpoint,
+              alternateEndpoint,
+              pdamEndpoint,
+              emptyEndpoint,
+            ],
+          },
         })
       );
     }
@@ -129,6 +153,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     availableBillers = [
       { biller_name: "PLN", id: 1 },
       { biller_name: "PDAM", id: 2 },
+      { biller_name: "Empty Biller", id: 3 },
     ];
     installApiMock();
   });
@@ -165,6 +190,17 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
         "/dashboard/endpoints?billerId=2"
       );
     });
+  });
+
+  test("only lists billers with configured responses", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.click(await screen.findByRole("combobox", { name: "Biller" }));
+
+    expect(await screen.findByRole("option", { name: "PLN" })).toBeDefined();
+    expect(await screen.findByRole("option", { name: "PDAM" })).toBeDefined();
+    expect(screen.queryByRole("option", { name: "Empty Biller" })).toBeNull();
   });
 
   test("navigates directly to another endpoint for the current biller", async () => {

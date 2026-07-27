@@ -276,9 +276,24 @@ function BillerBreadcrumbSelector({
 }) {
   const navigate = useNavigate();
   const { data: billers = [], isPending: isLoadingBillers } = useGetBillers();
-  const currentBiller = billers.find((biller) => biller.id === billerId);
+  const { endpoints: endpointQuery } = useEndpointCatalog();
+  const { data: endpoints = [], isPending: isLoadingEndpoints } = endpointQuery;
+  const billersWithResponses = billers.filter((biller) =>
+    endpoints.some(
+      (endpoint) =>
+        endpoint.billerId === biller.id && endpoint.responses.length > 0
+    )
+  );
+  const currentBiller = billersWithResponses.find(
+    (biller) => biller.id === billerId
+  );
 
-  if (isLoadingBillers || billerId === undefined || !currentBiller) {
+  if (
+    isLoadingBillers ||
+    isLoadingEndpoints ||
+    billerId === undefined ||
+    !currentBiller
+  ) {
     return <span className="text-muted-foreground">{fallbackLabel}</span>;
   }
 
@@ -300,7 +315,7 @@ function BillerBreadcrumbSelector({
         <SelectValue>{currentBiller.name}</SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {billers.map((biller) => (
+        {billersWithResponses.map((biller) => (
           <SelectItem key={biller.id} value={String(biller.id)}>
             {biller.name}
           </SelectItem>
