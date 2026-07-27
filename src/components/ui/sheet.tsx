@@ -77,13 +77,15 @@ function SheetOverlay({
 function SheetContent({
   className,
   children,
+  keepMounted = false,
   side = "right",
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Popup> & {
+  keepMounted?: boolean
   side?: "top" | "right" | "bottom" | "left"
 }) {
   return (
-    <SheetPortal>
+    <SheetPortal keepMounted={keepMounted}>
       <SheetOverlay />
       <SheetPrimitive.Popup
         data-side={side}
