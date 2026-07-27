@@ -423,7 +423,7 @@ export function EndpointTrafficLogViewer({
       >
         <div
           className={cn(
-            "p-4 font-mono text-[#e7e7e7] text-[13px] leading-5",
+            "p-4 font-mono text-[#e7e7e7] text-[11px] leading-4",
             wrapLines ? "w-full" : "min-w-max"
           )}
         >
