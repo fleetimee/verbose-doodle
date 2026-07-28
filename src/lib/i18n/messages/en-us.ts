@@ -1,5 +1,6 @@
 import { aboutMessages } from "@/lib/i18n/messages/en-us/about";
 import { authMessages } from "@/lib/i18n/messages/en-us/auth";
+import { billersMessages } from "@/lib/i18n/messages/en-us/billers";
 import { commonMessages } from "@/lib/i18n/messages/en-us/common";
 import { cronParserMessages } from "@/lib/i18n/messages/en-us/cron-parser";
 import { dateConverterMessages } from "@/lib/i18n/messages/en-us/date-converter";
@@ -24,6 +25,7 @@ export const enUsMessages = {
   about: aboutMessages,
   errors: errorsMessages,
   auth: authMessages,
+  billers: billersMessages,
   theme: themeMessages,
   users: usersMessages,
   overview: overviewMessages,

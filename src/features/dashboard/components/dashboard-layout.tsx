@@ -39,6 +39,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
+import { AddBillerSheet } from "@/features/billers/components/add-biller-sheet";
+import { useCreateBiller } from "@/features/billers/hooks/use-create-biller";
 import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
 import {
   DashboardNavigationProvider,
@@ -111,8 +113,11 @@ export function DashboardLayout() {
   const { createEndpoint: createEndpointMutation } = useEndpointCatalog();
   const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
     createEndpointMutation;
+  const { mutate: createBiller, isPending: isCreatingBiller } =
+    useCreateBiller();
   const [initialBillerId, setInitialBillerId] = useState<number | undefined>();
   const [isAddEndpointOpen, setIsAddEndpointOpen] = useState(false);
+  const [isAddBillerOpen, setIsAddBillerOpen] = useState(false);
 
   const handleOpenAddEndpoint = (billerId: number) => {
     setInitialBillerId(billerId);
@@ -123,6 +128,15 @@ export function DashboardLayout() {
     createEndpoint(data, {
       onSuccess: () => setIsAddEndpointOpen(false),
     });
+  };
+
+  const handleOpenAddBiller = () => setIsAddBillerOpen(true);
+
+  const handleAddBiller = (billerName: string) => {
+    createBiller(
+      { billerName },
+      { onSuccess: () => setIsAddBillerOpen(false) }
+    );
   };
 
   const pathSegments = location.pathname
@@ -218,6 +232,7 @@ export function DashboardLayout() {
                         >
                           <DashboardBreadcrumbContent
                             item={item}
+                            onAddBiller={handleOpenAddBiller}
                             onAddEndpoint={handleOpenAddEndpoint}
                           />
                         </BreadcrumbItem>
@@ -251,16 +266,29 @@ export function DashboardLayout() {
                   <Outlet />
                 </Suspense>
               </main>
-              <ProtectedAction ability="canAddEndpoint">
-                <AddEndpointSheet
-                  initialBillerId={initialBillerId}
-                  isSubmitting={isCreatingEndpoint}
-                  onOpenChange={setIsAddEndpointOpen}
-                  onSubmit={handleAddEndpoint}
-                  open={isAddEndpointOpen}
-                  showTrigger={false}
-                />
-              </ProtectedAction>
+              {isAddEndpointOpen && (
+                <ProtectedAction ability="canAddEndpoint">
+                  <AddEndpointSheet
+                    initialBillerId={initialBillerId}
+                    isSubmitting={isCreatingEndpoint}
+                    onOpenChange={setIsAddEndpointOpen}
+                    onSubmit={handleAddEndpoint}
+                    open
+                    showTrigger={false}
+                  />
+                </ProtectedAction>
+              )}
+              {isAddBillerOpen && (
+                <ProtectedAction ability="canAddBiller">
+                  <AddBillerSheet
+                    isSubmitting={isCreatingBiller}
+                    onOpenChange={setIsAddBillerOpen}
+                    onSubmit={handleAddBiller}
+                    open
+                    showTrigger={false}
+                  />
+                </ProtectedAction>
+              )}
             </SidebarInset>
           </SidebarProvider>
           {isSocksRelayRoute ? null : <SocketBridgeFloatingStatus />}
@@ -272,9 +300,11 @@ export function DashboardLayout() {
 
 function DashboardBreadcrumbContent({
   item,
+  onAddBiller,
   onAddEndpoint,
 }: {
   readonly item: DashboardBreadcrumbItem;
+  readonly onAddBiller: () => void;
   readonly onAddEndpoint: (billerId: number) => void;
 }) {
   if (item.kind === "biller") {
@@ -282,6 +312,7 @@ function DashboardBreadcrumbContent({
       <BillerBreadcrumbSelector
         billerId={item.billerId}
         fallbackLabel={item.label}
+        onAddBiller={onAddBiller}
       />
     );
   }
@@ -339,9 +370,11 @@ function EndpointBreadcrumbLabel({
 function BillerBreadcrumbSelector({
   billerId,
   fallbackLabel,
+  onAddBiller,
 }: {
   readonly billerId?: number;
   readonly fallbackLabel: string;
+  readonly onAddBiller: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const {
@@ -430,6 +463,19 @@ function BillerBreadcrumbSelector({
           <CommandList className="max-h-72 p-1">
             <CommandEmpty>No biller found.</CommandEmpty>
             <CommandGroup className="p-0">
+              <ProtectedAction ability="canAddBiller">
+                <CommandItem
+                  className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
+                  onSelect={() => {
+                    setOpen(false);
+                    onAddBiller();
+                  }}
+                  value={messages.billers.addNewBiller}
+                >
+                  <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+                  <span>{messages.billers.addNewBiller}</span>
+                </CommandItem>
+              </ProtectedAction>
               {billersWithEndpoints.map((biller) => (
                 <CommandItem
                   className="min-h-10 px-3 py-2 text-[0.95rem]"

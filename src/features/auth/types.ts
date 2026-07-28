@@ -7,6 +7,7 @@ export const ROLE_ABILITIES = {
 
     // Configuration
     canViewEndpoints: true,
+    canAddBiller: true,
     canAddEndpoint: true,
     canEditEndpoint: true,
     canAddResponse: true,
@@ -24,6 +25,7 @@ export const ROLE_ABILITIES = {
 
     // Configuration
     canViewEndpoints: true, // Read-only
+    canAddBiller: false,
     canAddEndpoint: false,
     canEditEndpoint: false,
     canAddResponse: false,

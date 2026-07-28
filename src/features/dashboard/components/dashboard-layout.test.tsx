@@ -113,6 +113,16 @@ function installApiMock() {
       );
     }
 
+    if (url === "/api/biller" && init?.method === "POST") {
+      return Promise.resolve(
+        jsonResponse({
+          data: {
+            biller: { biller_name: "New Biller", id: 9 },
+          },
+        })
+      );
+    }
+
     if (url === "/api/biller") {
       return Promise.resolve(
         jsonResponse({
@@ -347,6 +357,50 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     expect(
       await screen.findByRole("option", { name: "Empty Biller" })
     ).toBeDefined();
+  });
+
+  test("opens add biller from the top of the biller selector", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.click(await screen.findByRole("combobox", { name: "Biller" }));
+    await user.click(
+      await screen.findByRole("option", { name: "Add New Biller" })
+    );
+
+    expect(
+      await screen.findByText(
+        "Create a biller that can own simulated endpoints."
+      )
+    ).toBeDefined();
+    expect(screen.getByTestId("location").textContent).toBe(
+      `/dashboard/endpoints/${encodedEndpointId}`
+    );
+  });
+
+  test("creates a biller from the breadcrumb without leaving the detail page", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.click(await screen.findByRole("combobox", { name: "Biller" }));
+    await user.click(
+      await screen.findByRole("option", { name: "Add New Biller" })
+    );
+    await screen.findByText(
+      "Create a biller that can own simulated endpoints."
+    );
+
+    await user.type(screen.getByLabelText("Biller Name"), "New Biller");
+    await user.click(screen.getByRole("button", { name: "Create Biller" }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Create a biller that can own simulated endpoints.")
+      ).toBeNull();
+    });
+    expect(screen.getByTestId("location").textContent).toBe(
+      `/dashboard/endpoints/${encodedEndpointId}`
+    );
   });
 
   test("filters billers from the breadcrumb selector", async () => {

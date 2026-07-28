@@ -110,6 +110,10 @@ export function getAdminBillerList(): string {
   return API_ENDPOINTS.admin.billers.list;
 }
 
+export function getAdminBillerCreateUrl(): string {
+  return API_ENDPOINTS.admin.billers.create;
+}
+
 /**
  * Helper function to get login URL
  */
