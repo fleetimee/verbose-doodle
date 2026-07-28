@@ -1,6 +1,6 @@
 import { Add01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -12,7 +12,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
+import { AddBillerDialog } from "@/features/billers/components/add-biller-dialog";
+import { useCreateBiller } from "@/features/billers/hooks/use-create-biller";
 import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
+import type { Biller } from "@/features/billers/types";
 import {
   EndpointForm,
   type EndpointFormHandle,
@@ -40,7 +43,21 @@ export function AddEndpointSheet({
   onTriggerClick,
 }: AddEndpointSheetProps) {
   const formRef = useRef<EndpointFormHandle>(null);
+  const [createdBiller, setCreatedBiller] = useState<Biller | null>(null);
+  const [isAddBillerOpen, setIsAddBillerOpen] = useState(false);
   const { data: billers = [], isLoading: isLoadingBillers } = useGetBillers();
+  const { mutate: createBiller, isPending: isCreatingBiller } =
+    useCreateBiller();
+  const availableBillers = useMemo(() => {
+    if (
+      !createdBiller ||
+      billers.some((biller) => biller.id === createdBiller.id)
+    ) {
+      return billers;
+    }
+
+    return [createdBiller, ...billers];
+  }, [billers, createdBiller]);
 
   const handleFormSubmit = (data: EndpointFormData) => {
     onSubmit(data);
@@ -50,8 +67,26 @@ export function AddEndpointSheet({
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       formRef.current?.reset();
+      setCreatedBiller(null);
+      setIsAddBillerOpen(false);
     }
     onOpenChange?.(newOpen);
+  };
+
+  const handleAddBiller = (billerName: string) => {
+    createBiller(
+      { billerName },
+      {
+        onSuccess: (biller) => {
+          setCreatedBiller(biller);
+          setIsAddBillerOpen(false);
+          formRef.current?.form.setValue("billerId", biller.id, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        },
+      }
+    );
   };
 
   return (
@@ -77,9 +112,10 @@ export function AddEndpointSheet({
         </SheetHeader>
         <div className="flex flex-1 flex-col overflow-hidden">
           <EndpointForm
-            billers={billers}
+            billers={availableBillers}
             initialBillerId={initialBillerId}
             isLoadingBillers={isLoadingBillers}
+            onAddBiller={() => setIsAddBillerOpen(true)}
             onSubmit={handleFormSubmit}
             ref={formRef}
           >
@@ -94,6 +130,12 @@ export function AddEndpointSheet({
           </EndpointForm>
         </div>
       </SheetContent>
+      <AddBillerDialog
+        isSubmitting={isCreatingBiller}
+        onOpenChange={setIsAddBillerOpen}
+        onSubmit={handleAddBiller}
+        open={isAddBillerOpen}
+      />
     </Sheet>
   );
 }

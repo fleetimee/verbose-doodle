@@ -32,6 +32,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -458,9 +459,9 @@ function BillerBreadcrumbSelector({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[min(22rem,calc(100vw-2rem))] translate-y-2 overflow-hidden p-0"
+        className="w-[min(22rem,calc(100vw-2rem))] overflow-hidden p-0"
         finalFocus={false}
-        sideOffset={12}
+        sideOffset={0}
       >
         <Command>
           <CommandInput
@@ -468,46 +469,50 @@ function BillerBreadcrumbSelector({
             className="h-11"
             placeholder="Search billers..."
           />
-          <CommandList className="max-h-72 p-1">
-            <CommandEmpty>No biller found.</CommandEmpty>
-            <CommandGroup className="p-0">
-              <ProtectedAction ability="canAddBiller">
-                <CommandItem
-                  className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
-                  onSelect={() => {
-                    setOpen(false);
-                    if (pendingAddRef.current !== null) {
-                      window.cancelAnimationFrame(pendingAddRef.current);
-                    }
-                    pendingAddRef.current = window.requestAnimationFrame(() => {
-                      pendingAddRef.current = null;
-                      onAddBiller();
-                    });
-                  }}
-                  value={messages.billers.addNewBiller}
-                >
-                  <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
-                  <span>{messages.billers.addNewBiller}</span>
-                </CommandItem>
-              </ProtectedAction>
-              {billersWithEndpoints.map((biller) => (
-                <CommandItem
-                  className="min-h-10 px-3 py-2 text-[0.95rem]"
-                  key={biller.id}
-                  onSelect={() => selectBiller(biller.id)}
-                  value={`${biller.name} ${biller.id}`}
-                >
-                  <span className="truncate">{biller.name}</span>
-                  <HugeiconsIcon
-                    aria-hidden="true"
-                    className={`ml-auto size-4 ${biller.id === billerId ? "opacity-100" : "opacity-0"}`}
-                    icon={Tick02Icon}
-                    strokeWidth={2}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
+          <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
+            <CommandList className="max-h-none overflow-visible p-1">
+              <CommandEmpty>No biller found.</CommandEmpty>
+              <CommandGroup className="p-0">
+                <ProtectedAction ability="canAddBiller">
+                  <CommandItem
+                    className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
+                    onSelect={() => {
+                      setOpen(false);
+                      if (pendingAddRef.current !== null) {
+                        window.cancelAnimationFrame(pendingAddRef.current);
+                      }
+                      pendingAddRef.current = window.requestAnimationFrame(
+                        () => {
+                          pendingAddRef.current = null;
+                          onAddBiller();
+                        }
+                      );
+                    }}
+                    value={messages.billers.addNewBiller}
+                  >
+                    <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+                    <span>{messages.billers.addNewBiller}</span>
+                  </CommandItem>
+                </ProtectedAction>
+                {billersWithEndpoints.map((biller) => (
+                  <CommandItem
+                    className="min-h-10 px-3 py-2 text-[0.95rem]"
+                    key={biller.id}
+                    onSelect={() => selectBiller(biller.id)}
+                    value={`${biller.name} ${biller.id}`}
+                  >
+                    <span className="truncate">{biller.name}</span>
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      className={`ml-auto size-4 ${biller.id === billerId ? "opacity-100" : "opacity-0"}`}
+                      icon={Tick02Icon}
+                      strokeWidth={2}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </ScrollArea>
         </Command>
       </PopoverContent>
     </Popover>
@@ -613,9 +618,9 @@ function EndpointBreadcrumbSelector({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[min(32rem,calc(100vw-2rem))] translate-y-2 overflow-hidden p-0"
+        className="w-[min(32rem,calc(100vw-2rem))] overflow-hidden p-0"
         finalFocus={false}
-        sideOffset={12}
+        sideOffset={0}
       >
         <Command>
           <CommandInput
@@ -623,51 +628,55 @@ function EndpointBreadcrumbSelector({
             className="h-11"
             placeholder="Search endpoints..."
           />
-          <CommandList className="max-h-72 p-1">
-            <CommandEmpty>No endpoint found.</CommandEmpty>
-            <CommandGroup className="p-0">
-              <ProtectedAction ability="canAddEndpoint">
-                <CommandItem
-                  className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
-                  onSelect={() => {
-                    setOpen(false);
-                    if (pendingAddRef.current !== null) {
-                      window.cancelAnimationFrame(pendingAddRef.current);
-                    }
-                    pendingAddRef.current = window.requestAnimationFrame(() => {
-                      pendingAddRef.current = null;
-                      onAddEndpoint(currentEndpoint.billerId);
-                    });
-                  }}
-                  value={messages.endpoints.addNewEndpoint}
-                >
-                  <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
-                  <span>{messages.endpoints.addNewEndpoint}</span>
-                </CommandItem>
-              </ProtectedAction>
-              {billerEndpoints.map((endpoint) => (
-                <CommandItem
-                  className="min-h-10 px-3 py-2 text-[0.95rem]"
-                  key={endpoint.id}
-                  onSelect={() => selectEndpoint(endpoint.id)}
-                  value={`${endpoint.method} ${endpoint.url}`}
-                >
-                  <HttpMethodBadge
-                    className="shrink-0"
-                    method={endpoint.method}
-                    variant="text"
-                  />
-                  <span className="min-w-0 truncate">{endpoint.url}</span>
-                  <HugeiconsIcon
-                    aria-hidden="true"
-                    className={`ml-auto size-4 ${endpoint.id === endpointId ? "opacity-100" : "opacity-0"}`}
-                    icon={Tick02Icon}
-                    strokeWidth={2}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
+          <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
+            <CommandList className="max-h-none overflow-visible p-1">
+              <CommandEmpty>No endpoint found.</CommandEmpty>
+              <CommandGroup className="p-0">
+                <ProtectedAction ability="canAddEndpoint">
+                  <CommandItem
+                    className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
+                    onSelect={() => {
+                      setOpen(false);
+                      if (pendingAddRef.current !== null) {
+                        window.cancelAnimationFrame(pendingAddRef.current);
+                      }
+                      pendingAddRef.current = window.requestAnimationFrame(
+                        () => {
+                          pendingAddRef.current = null;
+                          onAddEndpoint(currentEndpoint.billerId);
+                        }
+                      );
+                    }}
+                    value={messages.endpoints.addNewEndpoint}
+                  >
+                    <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+                    <span>{messages.endpoints.addNewEndpoint}</span>
+                  </CommandItem>
+                </ProtectedAction>
+                {billerEndpoints.map((endpoint) => (
+                  <CommandItem
+                    className="min-h-10 px-3 py-2 text-[0.95rem]"
+                    key={endpoint.id}
+                    onSelect={() => selectEndpoint(endpoint.id)}
+                    value={`${endpoint.method} ${endpoint.url}`}
+                  >
+                    <HttpMethodBadge
+                      className="shrink-0"
+                      method={endpoint.method}
+                      variant="text"
+                    />
+                    <span className="min-w-0 truncate">{endpoint.url}</span>
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      className={`ml-auto size-4 ${endpoint.id === endpointId ? "opacity-100" : "opacity-0"}`}
+                      icon={Tick02Icon}
+                      strokeWidth={2}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </ScrollArea>
         </Command>
       </PopoverContent>
     </Popover>

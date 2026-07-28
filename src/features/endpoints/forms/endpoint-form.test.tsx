@@ -79,6 +79,22 @@ describe("EndpointForm", () => {
     expect(payload).toEqual({ billerId: 1, method: "GET", url: "/rest" });
   });
 
+  test("offers the add-biller action from the biller selector", async () => {
+    const user = userEvent.setup();
+    const handleAddBiller = mock(() => {});
+
+    render(
+      <EndpointForm onAddBiller={handleAddBiller} onSubmit={() => {}}>
+        <button type="submit">{SUBMIT_BUTTON_LABEL}</button>
+      </EndpointForm>
+    );
+
+    await user.click(screen.getByRole("combobox", { name: "Biller" }));
+    await user.click(screen.getByRole("option", { name: "Add New Biller" }));
+
+    expect(handleAddBiller).toHaveBeenCalledTimes(1);
+  });
+
   test("displays validation errors from the schema on submit", async () => {
     const user = userEvent.setup();
     const handleSubmit = mock((_data: EndpointFormData) => {});

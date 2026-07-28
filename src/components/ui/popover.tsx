@@ -52,6 +52,7 @@ function PopoverContent({
       <PopoverPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}
+        className="isolate z-50"
         side={side}
         sideOffset={sideOffset}
       >

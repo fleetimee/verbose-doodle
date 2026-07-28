@@ -1,11 +1,28 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { forwardRef, useEffect, useImperativeHandle } from "react";
+import {
+  Add01Icon,
+  Tick02Icon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import {
   Controller,
+  type ControllerFieldState,
+  type ControllerRenderProps,
   type UseFormReturn,
   useForm,
   useWatch,
 } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Field,
   FieldContent,
@@ -17,12 +34,11 @@ import {
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Biller } from "@/features/billers/types";
 import {
   type EndpointFormData,
@@ -35,6 +51,7 @@ import { messages } from "@/lib/i18n";
 const TRAILING_SLASHES_PATTERN = /\/+$/;
 
 type EndpointFormProps = {
+  onAddBiller?: () => void;
   onSubmit: (data: EndpointFormData) => void;
   billers?: Biller[];
   isLoadingBillers?: boolean;
@@ -93,10 +110,186 @@ export type EndpointFormHandle = {
   form: UseFormReturn<EndpointFormData>;
 };
 
+function MethodCombobox({
+  field,
+  fieldState,
+}: {
+  readonly field: ControllerRenderProps<EndpointFormData, "method">;
+  readonly fieldState: ControllerFieldState;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover onOpenChange={setOpen} open={open}>
+      <PopoverTrigger asChild>
+        <Button
+          aria-expanded={open}
+          aria-invalid={fieldState.invalid}
+          aria-label="Method"
+          className="w-full justify-between"
+          id="endpoint-method"
+          role="combobox"
+          type="button"
+          variant="outline"
+        >
+          <span className={getMethodTextColor(field.value)}>{field.value}</span>
+          <HugeiconsIcon
+            aria-hidden="true"
+            className="size-4 shrink-0 opacity-50"
+            icon={UnfoldMoreIcon}
+            strokeWidth={2}
+          />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-[min(22rem,calc(100vw-2rem))] overflow-hidden p-0"
+        finalFocus={false}
+        sideOffset={0}
+      >
+        <Command>
+          <CommandInput
+            aria-label="Search methods"
+            className="h-11"
+            placeholder="Search methods..."
+          />
+          <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
+            <CommandList className="max-h-none overflow-visible p-1">
+              <CommandEmpty>No method found.</CommandEmpty>
+              <CommandGroup className="p-0">
+                {httpMethods.map((method) => (
+                  <CommandItem
+                    className="min-h-10 px-3 py-2 text-[0.95rem]"
+                    key={method}
+                    onSelect={() => {
+                      field.onChange(method);
+                      setOpen(false);
+                    }}
+                    value={method}
+                  >
+                    <span className={getMethodTextColor(method)}>{method}</span>
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      className={`ml-auto size-4 ${method === field.value ? "opacity-100" : "opacity-0"}`}
+                      icon={Tick02Icon}
+                      strokeWidth={2}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </ScrollArea>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function BillerCombobox({
+  billers,
+  disabled,
+  field,
+  fieldState,
+  onAddBiller,
+}: {
+  readonly billers: Biller[];
+  readonly disabled: boolean;
+  readonly field: ControllerRenderProps<EndpointFormData, "billerId">;
+  readonly fieldState: ControllerFieldState;
+  readonly onAddBiller?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selectedBiller = billers.find((biller) => biller.id === field.value);
+
+  return (
+    <Popover onOpenChange={setOpen} open={open}>
+      <PopoverTrigger asChild>
+        <Button
+          aria-expanded={open}
+          aria-invalid={fieldState.invalid}
+          aria-label="Biller"
+          className="w-full justify-between"
+          disabled={disabled}
+          id="endpoint-biller"
+          role="combobox"
+          type="button"
+          variant="outline"
+        >
+          <span
+            className={selectedBiller ? "truncate" : "text-muted-foreground"}
+          >
+            {selectedBiller?.name ?? messages.endpoints.billerPlaceholder}
+          </span>
+          <HugeiconsIcon
+            aria-hidden="true"
+            className="size-4 shrink-0 opacity-50"
+            icon={UnfoldMoreIcon}
+            strokeWidth={2}
+          />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-[min(22rem,calc(100vw-2rem))] overflow-hidden p-0"
+        finalFocus={false}
+        sideOffset={0}
+      >
+        <Command>
+          <CommandInput
+            aria-label="Search billers"
+            className="h-11"
+            placeholder="Search billers..."
+          />
+          <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
+            <CommandList className="max-h-none overflow-visible p-1">
+              <CommandEmpty>No biller found.</CommandEmpty>
+              <CommandGroup className="p-0">
+                {onAddBiller && (
+                  <CommandItem
+                    className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
+                    onSelect={() => {
+                      setOpen(false);
+                      onAddBiller();
+                    }}
+                    value={messages.billers.addNewBiller}
+                  >
+                    <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+                    <span>{messages.billers.addNewBiller}</span>
+                  </CommandItem>
+                )}
+                {billers.map((biller) => (
+                  <CommandItem
+                    className="min-h-10 px-3 py-2 text-[0.95rem]"
+                    key={biller.id}
+                    onSelect={() => {
+                      field.onChange(biller.id);
+                      setOpen(false);
+                    }}
+                    value={`${biller.name} ${biller.id}`}
+                  >
+                    <span className="truncate">{biller.name}</span>
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      className={`ml-auto size-4 ${biller.id === field.value ? "opacity-100" : "opacity-0"}`}
+                      icon={Tick02Icon}
+                      strokeWidth={2}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </ScrollArea>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
   (
     {
       onSubmit,
+      onAddBiller,
       billers = [],
       initialBillerId,
       initialMethod,
@@ -154,36 +347,7 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                       {messages.endpoints.methodLabel}
                     </FieldLabel>
                     <FieldContent>
-                      <Select
-                        name={field.name}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <SelectTrigger
-                          aria-invalid={fieldState.invalid}
-                          className="w-full"
-                          id="endpoint-method"
-                        >
-                          <SelectValue
-                            placeholder={messages.endpoints.methodPlaceholder}
-                          >
-                            {field.value && (
-                              <span className={getMethodTextColor(field.value)}>
-                                {field.value}
-                              </span>
-                            )}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {httpMethods.map((method) => (
-                            <SelectItem key={method} value={method}>
-                              <span className={getMethodTextColor(method)}>
-                                {method}
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <MethodCombobox field={field} fieldState={fieldState} />
                       <FieldDescription>
                         {messages.endpoints.methodDescription}
                       </FieldDescription>
@@ -242,39 +406,17 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                       {messages.endpoints.billerLabel}
                     </FieldLabel>
                     <FieldContent>
-                      <Select
+                      <BillerCombobox
+                        billers={billers}
                         disabled={
                           isBillerReadOnly ||
                           isLoadingBillers ||
-                          billers.length === 0
+                          (billers.length === 0 && !onAddBiller)
                         }
-                        name={field.name}
-                        onValueChange={(value) => field.onChange(Number(value))}
-                        value={field.value?.toString()}
-                      >
-                        <SelectTrigger
-                          aria-invalid={fieldState.invalid}
-                          className="w-full"
-                          id="endpoint-biller"
-                        >
-                          <SelectValue
-                            placeholder={messages.endpoints.billerPlaceholder}
-                          >
-                            {field.value &&
-                              billers.find((b) => b.id === field.value)?.name}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[300px]">
-                          {billers.map((biller) => (
-                            <SelectItem
-                              key={biller.id}
-                              value={biller.id.toString()}
-                            >
-                              {biller.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        field={field}
+                        fieldState={fieldState}
+                        onAddBiller={onAddBiller}
+                      />
                       <FieldDescription>
                         {getBillerDescription(
                           isLoadingBillers,
