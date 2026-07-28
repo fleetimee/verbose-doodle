@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Code2, FileText, Hash } from "@/components/hugeicons";
@@ -35,6 +36,7 @@ type EditResponseStepperProps = {
     json?: string;
   }) => void;
   onCancel: () => void;
+  onDirtyChange?: (isDirty: boolean) => void;
   isSubmitting?: boolean;
 };
 
@@ -101,6 +103,7 @@ export function EditResponseStepper({
   editType,
   onSubmit,
   onCancel,
+  onDirtyChange,
   isSubmitting = false,
 }: EditResponseStepperProps) {
   const step = stepConfig[editType];
@@ -139,6 +142,11 @@ export function EditResponseStepper({
   };
 
   const canSubmit = form.formState.isValid && !isSubmitting;
+
+  useEffect(() => {
+    onDirtyChange?.(form.formState.isDirty);
+    return () => onDirtyChange?.(false);
+  }, [form.formState.isDirty, onDirtyChange]);
 
   return (
     <motion.div

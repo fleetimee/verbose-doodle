@@ -8,6 +8,7 @@ import type {
   UpdateResponseInput,
 } from "@/features/endpoints/data/endpoint-data-adapter";
 import { endpointDataQueryKeys } from "@/features/endpoints/data/endpoint-data-query-keys";
+import { ENDPOINT_MUTATION_KEY } from "@/features/endpoints/data/endpoint-mutation-key";
 import { httpEndpointAdapter } from "@/features/endpoints/data/http-endpoint-adapter";
 import type { Endpoint, EndpointResponse } from "@/features/endpoints/types";
 import { overviewQueryKeys } from "@/features/overview/query-keys";
@@ -23,7 +24,12 @@ export function useEndpointWorkspace(
   adapter: EndpointDataAdapter = httpEndpointAdapter
 ) {
   const queryClient = useQueryClient();
+  const catalogEndpoint = queryClient
+    .getQueryData<Endpoint[]>(endpointDataQueryKeys.catalog)
+    ?.find((candidate) => candidate.id === endpointId);
   const endpoint = useQuery<Endpoint | null, ApiError>({
+    initialData: catalogEndpoint,
+    initialDataUpdatedAt: catalogEndpoint ? 0 : undefined,
     queryKey: endpointDataQueryKeys.workspace(endpointId),
     queryFn: () => adapter.getEndpoint(endpointId),
     enabled: Boolean(endpointId),
@@ -43,6 +49,7 @@ export function useEndpointWorkspace(
     ApiError,
     CreateResponseInput
   >({
+    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.createResponse,
     onSuccess: async (response) => {
       toast.success(messages.endpoints.responseCreateSuccess, {
@@ -66,6 +73,7 @@ export function useEndpointWorkspace(
     ApiError,
     UpdateResponseInput
   >({
+    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.updateResponse,
     onSuccess: async () => {
       toast.success(messages.endpoints.responseUpdateSuccess);
@@ -78,6 +86,7 @@ export function useEndpointWorkspace(
     },
   });
   const deleteResponse = useMutation<void, ApiError, ResponseActivationInput>({
+    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.deleteResponse,
     onSuccess: async () => {
       toast.success(messages.endpoints.responseDeleteSuccessTitle, {
@@ -96,6 +105,7 @@ export function useEndpointWorkspace(
     ApiError,
     ResponseActivationInput
   >({
+    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.activateResponse,
     onSuccess: invalidateWorkspace,
     onError: (error) => {
@@ -109,6 +119,7 @@ export function useEndpointWorkspace(
     ApiError,
     ResponseActivationInput
   >({
+    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.deactivateResponse,
     onSuccess: invalidateWorkspace,
     onError: (error) => {
@@ -122,6 +133,7 @@ export function useEndpointWorkspace(
     ApiError,
     ResponseSimulationInput
   >({
+    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.updateResponseSimulation,
     onSuccess: async () => {
       toast.success("Simulation settings updated successfully");

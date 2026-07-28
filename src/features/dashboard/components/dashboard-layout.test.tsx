@@ -21,7 +21,7 @@ type MockEndpoint = {
   biller_name: string | undefined;
   endpoint_id: string;
   method: string;
-  responses: { response_id: string }[];
+  responses: { activated?: boolean; response_id: string }[];
   url: string;
 };
 
@@ -69,7 +69,7 @@ function installApiMock() {
     biller_name: "PDAM",
     endpoint_id: "endpoint-pdam",
     method: "GET",
-    responses: [{ response_id: "response-pdam" }],
+    responses: [{ activated: true, response_id: "response-pdam" }],
     url: "/xapi-pbb/api/payment/status",
   };
   const mockFetch = (input: Parameters<typeof globalThis.fetch>[0]) => {
@@ -234,6 +234,39 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
       })
     );
 
+    await waitFor(() => {
+      expect(screen.getByTestId("location").textContent).toBe(
+        `/dashboard/endpoints/${encodeId("endpoint-2")}`
+      );
+    });
+  });
+
+  test("remembers the last endpoint for each biller during the session", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.click(await screen.findByRole("combobox", { name: "Endpoint" }));
+    await user.click(
+      await screen.findByRole("option", {
+        name: "GET /xapi-pbb/api/user/status",
+      })
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("location").textContent).toBe(
+        `/dashboard/endpoints/${encodeId("endpoint-2")}`
+      );
+    });
+
+    await user.click(await screen.findByRole("combobox", { name: "Biller" }));
+    await user.click(await screen.findByRole("option", { name: "PDAM" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("location").textContent).toBe(
+        `/dashboard/endpoints/${encodeId("endpoint-pdam")}`
+      );
+    });
+
+    await user.click(await screen.findByRole("combobox", { name: "Biller" }));
+    await user.click(await screen.findByRole("option", { name: "PLN" }));
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
         `/dashboard/endpoints/${encodeId("endpoint-2")}`

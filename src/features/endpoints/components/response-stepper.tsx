@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,12 +74,14 @@ const getRailStepStatus = (isActive: boolean, isComplete: boolean) => {
 type ResponseStepperProps = {
   onSubmit: (data: ResponseFormData) => void;
   onCancel: () => void;
+  onDirtyChange?: (isDirty: boolean) => void;
   isSubmitting?: boolean;
 };
 
 export function ResponseStepper({
   onSubmit,
   onCancel,
+  onDirtyChange,
   isSubmitting = false,
 }: ResponseStepperProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -176,6 +178,11 @@ export function ResponseStepper({
   const progress = ((currentStepIndex + 1) / STEPS.length) * PERCENT_MULTIPLIER;
 
   const formValues = form.watch();
+
+  useEffect(() => {
+    onDirtyChange?.(form.formState.isDirty);
+    return () => onDirtyChange?.(false);
+  }, [form.formState.isDirty, onDirtyChange]);
 
   const MIN_HTTP_STATUS = 100;
   const MAX_HTTP_STATUS = 599;
