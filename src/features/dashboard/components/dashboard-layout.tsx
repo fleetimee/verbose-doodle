@@ -1,4 +1,6 @@
-import React, { Suspense, useEffect } from "react";
+import { Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import React, { Suspense, useEffect, useState } from "react";
 import { Link, Outlet, useLocation, useParams } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useTheme } from "@/components/theme-provider";
@@ -12,13 +14,20 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -295,6 +304,7 @@ function BillerBreadcrumbSelector({
   readonly billerId?: number;
   readonly fallbackLabel: string;
 }) {
+  const [open, setOpen] = useState(false);
   const {
     endpointMutationPending,
     forgetEndpoint,
@@ -320,56 +330,88 @@ function BillerBreadcrumbSelector({
     return <span className="text-muted-foreground">{fallbackLabel}</span>;
   }
 
+  const selectBiller = (nextBillerId: number) => {
+    const billerEndpoints = endpoints.filter(
+      (endpoint) => endpoint.billerId === nextBillerId
+    );
+    const rememberedEndpoint = getRememberedEndpoint(nextBillerId);
+    const nextEndpoint = selectEndpointForBiller(
+      endpoints,
+      nextBillerId,
+      rememberedEndpoint
+    );
+
+    if (
+      rememberedEndpoint &&
+      !billerEndpoints.some((endpoint) => endpoint.id === rememberedEndpoint)
+    ) {
+      forgetEndpoint(rememberedEndpoint);
+    }
+
+    if (nextBillerId !== billerId && nextEndpoint) {
+      setOpen(false);
+      requestEndpointNavigation(
+        `/dashboard/endpoints/${encodeId(nextEndpoint.id)}`
+      );
+    }
+  };
+
   return (
-    <Select
-      onValueChange={(value) => {
-        const nextBillerId = Number(value);
-        const billerEndpoints = endpoints.filter(
-          (endpoint) => endpoint.billerId === nextBillerId
-        );
-        const rememberedEndpoint = getRememberedEndpoint(nextBillerId);
-        const nextEndpoint = selectEndpointForBiller(
-          endpoints,
-          nextBillerId,
-          rememberedEndpoint
-        );
-
-        if (
-          rememberedEndpoint &&
-          !billerEndpoints.some(
-            (endpoint) => endpoint.id === rememberedEndpoint
-          )
-        ) {
-          forgetEndpoint(rememberedEndpoint);
-        }
-
-        if (
-          Number.isSafeInteger(nextBillerId) &&
-          nextBillerId !== billerId &&
-          nextEndpoint
-        ) {
-          requestEndpointNavigation(
-            `/dashboard/endpoints/${encodeId(nextEndpoint.id)}`
-          );
-        }
-      }}
-      value={String(billerId)}
-    >
-      <SelectTrigger
-        aria-label="Biller"
-        className="h-8 max-w-48 border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
-        disabled={endpointMutationPending}
+    <Popover onOpenChange={setOpen} open={open}>
+      <PopoverTrigger asChild>
+        <Button
+          aria-expanded={open}
+          aria-label="Biller"
+          className="h-8 max-w-48 justify-between border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+          disabled={endpointMutationPending}
+          role="combobox"
+          type="button"
+          variant="ghost"
+        >
+          <span className="truncate">{currentBiller.name}</span>
+          <HugeiconsIcon
+            aria-hidden="true"
+            className="size-4 shrink-0 opacity-45"
+            icon={UnfoldMoreIcon}
+            strokeWidth={2}
+          />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-[min(22rem,calc(100vw-2rem))] translate-y-2 overflow-hidden p-0"
+        sideOffset={12}
       >
-        <SelectValue>{currentBiller.name}</SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {billersWithEndpoints.map((biller) => (
-          <SelectItem key={biller.id} value={String(biller.id)}>
-            {biller.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+        <Command>
+          <CommandInput
+            aria-label="Search billers"
+            className="h-11"
+            placeholder="Search billers..."
+          />
+          <CommandList className="max-h-72 p-1">
+            <CommandEmpty>No biller found.</CommandEmpty>
+            <CommandGroup className="p-0">
+              {billersWithEndpoints.map((biller) => (
+                <CommandItem
+                  className="min-h-10 px-3 py-2 text-[0.95rem]"
+                  key={biller.id}
+                  onSelect={() => selectBiller(biller.id)}
+                  value={`${biller.name} ${biller.id}`}
+                >
+                  <span className="truncate">{biller.name}</span>
+                  <HugeiconsIcon
+                    aria-hidden="true"
+                    className={`ml-auto size-4 ${biller.id === billerId ? "opacity-100" : "opacity-0"}`}
+                    icon={Tick02Icon}
+                    strokeWidth={2}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -384,6 +426,7 @@ function EndpointBreadcrumbSelector({
   readonly fallbackMethod?: HttpMethod;
   readonly fallbackUrl?: string;
 }) {
+  const [open, setOpen] = useState(false);
   const {
     endpointMutationPending,
     rememberEndpoint,
@@ -424,35 +467,79 @@ function EndpointBreadcrumbSelector({
     );
   }
 
+  const selectEndpoint = (nextEndpointId: string) => {
+    if (nextEndpointId !== currentEndpoint.id) {
+      setOpen(false);
+      requestEndpointNavigation(
+        `/dashboard/endpoints/${encodeId(nextEndpointId)}`
+      );
+    }
+  };
+
   return (
-    <Select
-      onValueChange={(value) => {
-        if (value && value !== currentEndpoint.id) {
-          requestEndpointNavigation(`/dashboard/endpoints/${encodeId(value)}`);
-        }
-      }}
-      value={currentEndpoint.id}
-    >
-      <SelectTrigger
-        aria-label="Endpoint"
-        className="h-8 max-w-[min(32rem,50vw)] border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
-        disabled={endpointMutationPending}
-      >
-        <SelectValue>
+    <Popover onOpenChange={setOpen} open={open}>
+      <PopoverTrigger asChild>
+        <Button
+          aria-expanded={open}
+          aria-label="Endpoint"
+          className="h-8 max-w-[min(32rem,50vw)] justify-between border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+          disabled={endpointMutationPending}
+          role="combobox"
+          type="button"
+          variant="ghost"
+        >
           <EndpointBreadcrumbLabel
             method={currentEndpoint.method}
             url={currentEndpoint.url}
           />
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {billerEndpoints.map((endpoint) => (
-          <SelectItem key={endpoint.id} value={endpoint.id}>
-            {endpoint.method} {endpoint.url}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+          <HugeiconsIcon
+            aria-hidden="true"
+            className="size-4 shrink-0 opacity-45"
+            icon={UnfoldMoreIcon}
+            strokeWidth={2}
+          />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-[min(32rem,calc(100vw-2rem))] translate-y-2 overflow-hidden p-0"
+        sideOffset={12}
+      >
+        <Command>
+          <CommandInput
+            aria-label="Search endpoints"
+            className="h-11"
+            placeholder="Search endpoints..."
+          />
+          <CommandList className="max-h-72 p-1">
+            <CommandEmpty>No endpoint found.</CommandEmpty>
+            <CommandGroup className="p-0">
+              {billerEndpoints.map((endpoint) => (
+                <CommandItem
+                  className="min-h-10 px-3 py-2 text-[0.95rem]"
+                  key={endpoint.id}
+                  onSelect={() => selectEndpoint(endpoint.id)}
+                  value={`${endpoint.method} ${endpoint.url}`}
+                >
+                  <HttpMethodBadge
+                    className="shrink-0"
+                    method={endpoint.method}
+                    variant="text"
+                  />
+                  <span className="min-w-0 truncate">{endpoint.url}</span>
+                  <HugeiconsIcon
+                    aria-hidden="true"
+                    className={`ml-auto size-4 ${endpoint.id === endpointId ? "opacity-100" : "opacity-0"}`}
+                    icon={Tick02Icon}
+                    strokeWidth={2}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
 
