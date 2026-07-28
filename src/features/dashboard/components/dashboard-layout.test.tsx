@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useMutation,
+} from "@tanstack/react-query";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   MemoryRouter,
@@ -11,6 +15,7 @@ import {
 } from "react-router";
 import { AuthProvider } from "@/features/auth/context";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
+import { ENDPOINT_MUTATION_KEY } from "@/features/endpoints/data/endpoint-mutation-key";
 import { encodeId } from "@/lib/id-encoder";
 
 const originalFetch = globalThis.fetch;
@@ -21,6 +26,7 @@ let availableBillers = [
   { biller_name: "Empty Biller", id: 3 },
 ];
 let endpointBillerName: string | undefined = "PLN";
+let resolveEndpointMutation: (() => void) | null = null;
 
 type MockEndpoint = {
   biller_id: number;
@@ -163,6 +169,22 @@ function HistoryControls() {
   );
 }
 
+function EndpointMutationProbe() {
+  const mutation = useMutation<void, Error>({
+    mutationKey: ENDPOINT_MUTATION_KEY,
+    mutationFn: () =>
+      new Promise<void>((resolve) => {
+        resolveEndpointMutation = resolve;
+      }),
+  });
+
+  return (
+    <button onClick={() => mutation.mutate()} type="button">
+      Start endpoint mutation
+    </button>
+  );
+}
+
 function renderDashboard() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -209,6 +231,36 @@ function renderHistoryDashboard() {
   );
 }
 
+function renderMutationDashboard() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
+  return render(
+    <MemoryRouter
+      initialEntries={[`/dashboard/endpoints/${encodedEndpointId}`]}
+    >
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Routes>
+            <Route element={<DashboardLayout />} path="/dashboard">
+              <Route
+                element={
+                  <>
+                    <LocationProbe />
+                    <EndpointMutationProbe />
+                  </>
+                }
+                path="endpoints/:id"
+              />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </QueryClientProvider>
+    </MemoryRouter>
+  );
+}
+
 describe("DashboardLayout endpoint breadcrumbs", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -220,6 +272,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
       { biller_name: "Empty Biller", id: 3 },
     ];
     endpointBillerName = "PLN";
+    resolveEndpointMutation = null;
     installApiMock();
   });
 
@@ -349,6 +402,36 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
       expect(screen.getByTestId("location").textContent).toBe(
         `/dashboard/endpoints/${encodeId("endpoint-2")}`
       );
+    });
+  });
+
+  test("disables both workspace selectors while an endpoint mutation is pending", async () => {
+    const user = userEvent.setup();
+    renderMutationDashboard();
+
+    const billerSelector = await screen.findByRole("combobox", {
+      name: "Biller",
+    });
+    const endpointSelector = await screen.findByRole("combobox", {
+      name: "Endpoint",
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: "Start endpoint mutation" })
+    );
+
+    await waitFor(() => {
+      expect((billerSelector as HTMLButtonElement).disabled).toBe(true);
+      expect((endpointSelector as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    act(() => {
+      resolveEndpointMutation?.();
+    });
+
+    await waitFor(() => {
+      expect((billerSelector as HTMLButtonElement).disabled).toBe(false);
+      expect((endpointSelector as HTMLButtonElement).disabled).toBe(false);
     });
   });
 

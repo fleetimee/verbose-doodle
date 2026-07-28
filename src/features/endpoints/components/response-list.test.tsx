@@ -55,6 +55,7 @@ mock.module("motion/react", () => ({
 
 mock.module("@/components/ui/scroll-area", () => ({
   ScrollArea: Slot,
+  ScrollBar: Slot,
 }));
 
 mock.module("@/components/ui/separator", () => ({
