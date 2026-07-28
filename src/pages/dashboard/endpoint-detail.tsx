@@ -15,7 +15,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { type TourStep, useTour } from "@/components/tour";
 import {
@@ -109,6 +109,10 @@ function getHistoryIndex() {
   return typeof index === "number" ? index : null;
 }
 
+function getCurrentHistoryPath() {
+  return `${window.location.pathname}${window.location.search}${window.location.hash}`;
+}
+
 function TourStepContent({
   title,
   description,
@@ -135,8 +139,11 @@ export function EndpointDetailPage() {
   const {
     forgetEndpoint,
     navigateToEndpoint,
+    rememberEndpoint,
     registerEndpointNavigationGuard,
+    requestEndpointNavigation: requestDashboardEndpointNavigation,
   } = useDashboardNavigation();
+  const location = useLocation();
   const canAddResponse = session.can("canAddResponse");
   const canEditEndpoint = session.can("canEditEndpoint");
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -239,7 +246,7 @@ export function EndpointDetailPage() {
     setIsResponseEditDirty(false);
   }, []);
 
-  const requestEndpointNavigation = useCallback(
+  const prepareEndpointNavigation = useCallback(
     (path: string) => {
       if (hasDirtyEndpointForm) {
         setPendingNavigationPath(path);
@@ -254,9 +261,13 @@ export function EndpointDetailPage() {
   );
 
   useEffect(
-    () => registerEndpointNavigationGuard(requestEndpointNavigation),
-    [registerEndpointNavigationGuard, requestEndpointNavigation]
+    () => registerEndpointNavigationGuard(prepareEndpointNavigation),
+    [prepareEndpointNavigation, registerEndpointNavigationGuard]
   );
+
+  useEffect(() => {
+    currentHistoryIndexRef.current = getHistoryIndex();
+  }, [location.key]);
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
@@ -270,7 +281,6 @@ export function EndpointDetailPage() {
       }
 
       if (
-        !hasDirtyEndpointForm ||
         currentHistoryIndex === null ||
         nextHistoryIndex === null ||
         currentHistoryIndex === nextHistoryIndex
@@ -279,9 +289,13 @@ export function EndpointDetailPage() {
         return;
       }
 
+      if (prepareEndpointNavigation(getCurrentHistoryPath())) {
+        currentHistoryIndexRef.current = nextHistoryIndex;
+        return;
+      }
+
       const delta = nextHistoryIndex - currentHistoryIndex;
       pendingHistoryDeltaRef.current = delta;
-      setShowDiscardChangesDialog(true);
       event.preventDefault();
       event.stopImmediatePropagation();
       window.history.go(-delta);
@@ -289,7 +303,7 @@ export function EndpointDetailPage() {
 
     window.addEventListener("popstate", handlePopState, true);
     return () => window.removeEventListener("popstate", handlePopState, true);
-  }, [hasDirtyEndpointForm]);
+  }, [prepareEndpointNavigation]);
 
   useEffect(() => {
     if (!endpoint) {
@@ -301,6 +315,10 @@ export function EndpointDetailPage() {
 
     if (endpointChanged) {
       previousEndpointIdRef.current = endpoint.id;
+      rememberEndpoint({
+        billerId: endpoint.billerId,
+        endpointId: endpoint.id,
+      });
       closeEndpointScopedOverlays();
       const nextResponse = selectActiveResponse(endpoint);
       selectedResponseWasActiveRef.current = nextResponse !== null;
@@ -327,7 +345,12 @@ export function EndpointDetailPage() {
         });
       }
     }
-  }, [closeEndpointScopedOverlays, endpoint, selectedResponse]);
+  }, [
+    closeEndpointScopedOverlays,
+    endpoint,
+    rememberEndpoint,
+    selectedResponse,
+  ]);
 
   useEffect(() => {
     if (!(endpoint && hasEndpointError && endpointError)) {
@@ -506,7 +529,7 @@ export function EndpointDetailPage() {
   }, [activeTourId, isActive, setHasSeenEndpointDetailTour]);
 
   const handleBack = () => {
-    navigate("/dashboard/endpoints");
+    requestDashboardEndpointNavigation("/dashboard/endpoints");
   };
 
   const handleSelectResponse = (responseId: string) => {

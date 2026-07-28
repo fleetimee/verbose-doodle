@@ -2,7 +2,13 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes, useLocation } from "react-router";
+import {
+  MemoryRouter,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router";
 import { AuthProvider } from "@/features/auth/context";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
 import { encodeId } from "@/lib/id-encoder";
@@ -141,6 +147,22 @@ function LocationProbe() {
   );
 }
 
+function HistoryControls() {
+  const navigate = useNavigate();
+
+  return (
+    <>
+      <LocationProbe />
+      <button onClick={() => navigate(-1)} type="button">
+        Back
+      </button>
+      <button onClick={() => navigate(1)} type="button">
+        Forward
+      </button>
+    </>
+  );
+}
+
 function renderDashboard() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -156,6 +178,29 @@ function renderDashboard() {
             <Route element={<DashboardLayout />} path="/dashboard">
               <Route element={<LocationProbe />} path="endpoints" />
               <Route element={<LocationProbe />} path="endpoints/:id" />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </QueryClientProvider>
+    </MemoryRouter>
+  );
+}
+
+function renderHistoryDashboard() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
+  return render(
+    <MemoryRouter
+      initialEntries={[`/dashboard/endpoints/${encodedEndpointId}`]}
+    >
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Routes>
+            <Route element={<DashboardLayout />} path="/dashboard">
+              <Route element={<HistoryControls />} path="endpoints" />
+              <Route element={<HistoryControls />} path="endpoints/:id" />
             </Route>
           </Routes>
         </AuthProvider>
@@ -212,7 +257,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     });
   });
 
-  test("only lists billers with configured responses", async () => {
+  test("lists billers with endpoints even when no response is active", async () => {
     const user = userEvent.setup();
     renderDashboard();
 
@@ -220,7 +265,9 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
 
     expect(await screen.findByRole("option", { name: "PLN" })).toBeDefined();
     expect(await screen.findByRole("option", { name: "PDAM" })).toBeDefined();
-    expect(screen.queryByRole("option", { name: "Empty Biller" })).toBeNull();
+    expect(
+      await screen.findByRole("option", { name: "Empty Biller" })
+    ).toBeDefined();
   });
 
   test("navigates directly to another endpoint for the current biller", async () => {
@@ -267,6 +314,37 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
 
     await user.click(await screen.findByRole("combobox", { name: "Biller" }));
     await user.click(await screen.findByRole("option", { name: "PLN" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("location").textContent).toBe(
+        `/dashboard/endpoints/${encodeId("endpoint-2")}`
+      );
+    });
+  });
+
+  test("applies the same endpoint transition when moving through browser history", async () => {
+    const user = userEvent.setup();
+    renderHistoryDashboard();
+
+    await user.click(await screen.findByRole("combobox", { name: "Endpoint" }));
+    await user.click(
+      await screen.findByRole("option", {
+        name: "GET /xapi-pbb/api/user/status",
+      })
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("location").textContent).toBe(
+        `/dashboard/endpoints/${encodeId("endpoint-2")}`
+      );
+    });
+
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("location").textContent).toBe(
+        `/dashboard/endpoints/${encodedEndpointId}`
+      );
+    });
+
+    await user.click(screen.getByRole("button", { name: "Forward" }));
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
         `/dashboard/endpoints/${encodeId("endpoint-2")}`
