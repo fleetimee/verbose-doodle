@@ -56,6 +56,7 @@ type ResponseListItemProps = {
   onSelect: (id: string) => void;
   onActivate: (response: EndpointResponse) => void;
   onDeactivate: (response: EndpointResponse) => void;
+  onEditDirtyChange?: (isDirty: boolean) => void;
 };
 
 // Helper to get status code badge variant
@@ -94,6 +95,7 @@ export function ResponseListItem({
   onSelect,
   onActivate,
   onDeactivate,
+  onEditDirtyChange,
 }: ResponseListItemProps) {
   const { session } = useAuth();
   const canActivateResponse = session.can("canActivateResponse");
@@ -378,6 +380,7 @@ export function ResponseListItem({
             editType={editType}
             isSubmitting={isUpdating}
             onCancel={() => setShowEditStepper(false)}
+            onDirtyChange={onEditDirtyChange}
             onSubmit={handleEditSubmit}
             response={response}
           />

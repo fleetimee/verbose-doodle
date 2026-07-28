@@ -12,7 +12,8 @@ import {
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AnimatePresence, motion } from "motion/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
@@ -52,6 +53,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useAuth } from "@/features/auth/context";
+import { useDashboardNavigation } from "@/features/dashboard/dashboard-navigation-context";
 import { EndpointDetailLayout } from "@/features/endpoints/components/endpoint-detail-layout";
 import { EndpointDetailSkeleton } from "@/features/endpoints/components/endpoint-detail-skeleton";
 import { EndpointMetricsSheet } from "@/features/endpoints/components/endpoint-metrics-sheet";
@@ -60,7 +62,15 @@ import { ResponseStepper } from "@/features/endpoints/components/response-steppe
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
 import type { ResponseFormData } from "@/features/endpoints/schemas/response-schema";
-import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
+import type {
+  Endpoint,
+  EndpointResponse,
+  HttpMethod,
+} from "@/features/endpoints/types";
+import {
+  getActiveResponses,
+  selectActiveResponse,
+} from "@/features/endpoints/utils/endpoint-selection";
 import {
   abbreviateMethod,
   getMethodBadgeColor,
@@ -70,11 +80,13 @@ import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { messages } from "@/lib/i18n";
 import { decodeId } from "@/lib/id-encoder";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 // Animation constants
 const PAGE_ANIMATION_DURATION = 0.4;
 const HEADER_TOGGLE_ANIMATION_DURATION = 0.18;
 const STAGGER_DELAY = 0.1;
+const ENDPOINT_SWITCH_DURATION = MOTION_DURATION.press;
 const HTTP_METHODS: readonly HttpMethod[] = [
   "GET",
   "POST",
@@ -91,6 +103,11 @@ const ENDPOINT_DETAIL_TOUR_TARGETS = {
   preview: "endpoint-detail-tour-preview",
   trafficLogs: "endpoint-detail-tour-traffic-logs",
 } as const;
+
+function getHistoryIndex() {
+  const index = window.history.state?.idx;
+  return typeof index === "number" ? index : null;
+}
 
 function TourStepContent({
   title,
@@ -109,12 +126,20 @@ function TourStepContent({
   );
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This page coordinates the endpoint workspace state machine and its guarded overlays.
 export function EndpointDetailPage() {
   const { id: encodedId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { session } = useAuth();
+  const {
+    forgetEndpoint,
+    navigateToEndpoint,
+    registerEndpointNavigationGuard,
+  } = useDashboardNavigation();
   const canAddResponse = session.can("canAddResponse");
   const canEditEndpoint = session.can("canEditEndpoint");
+  const shouldReduceMotion = useReducedMotion() ?? false;
 
   // Decode the ID from the URL
   const decodedId = useMemo(() => {
@@ -132,6 +157,13 @@ export function EndpointDetailPage() {
   const [isEditingUrl, setIsEditingUrl] = useState(false);
   const [editedUrl, setEditedUrl] = useState("");
   const [editedMethod, setEditedMethod] = useState<HttpMethod>("GET");
+  const [isAddResponseDirty, setIsAddResponseDirty] = useState(false);
+  const [isResponseEditDirty, setIsResponseEditDirty] = useState(false);
+  const [showDiscardChangesDialog, setShowDiscardChangesDialog] =
+    useState(false);
+  const [pendingNavigationPath, setPendingNavigationPath] = useState<
+    string | null
+  >(null);
   const [showDeleteEndpointDialog, setShowDeleteEndpointDialog] =
     useState(false);
   const [hasSeenEndpointDetailTour, setHasSeenEndpointDetailTour] =
@@ -139,6 +171,13 @@ export function EndpointDetailPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const hasAutoStartedTour = useRef(false);
   const shouldMarkTourSeenOnEnd = useRef(false);
+  const previousEndpointIdRef = useRef<string | null>(null);
+  const selectedResponseWasActiveRef = useRef(false);
+  const reportedMultipleActiveRef = useRef<string | null>(null);
+  const reportedRefreshErrorRef = useRef<string | null>(null);
+  const currentHistoryIndexRef = useRef<number | null>(getHistoryIndex());
+  const pendingHistoryDeltaRef = useRef<number | null>(null);
+  const allowHistoryNavigationRef = useRef(false);
   const { activeTourId, isActive, setSteps, startTour } = useTour();
 
   const {
@@ -147,7 +186,13 @@ export function EndpointDetailPage() {
     activateResponse: activateResponseMutation,
     deactivateResponse: deactivateResponseMutation,
   } = useEndpointWorkspace(decodedId ?? "");
-  const { data: endpoint, isPending: isLoadingEndpoint } = endpointQuery;
+  const {
+    data: endpoint,
+    error: endpointError,
+    isError: hasEndpointError,
+    isFetching: isFetchingEndpoint,
+    isPending: isLoadingEndpoint,
+  } = endpointQuery;
   const { mutate: createResponse, isPending: isCreatingResponse } =
     createResponseMutation;
   const { mutate: activateResponse, isPending: isActivatingResponse } =
@@ -174,6 +219,167 @@ export function EndpointDetailPage() {
     }
     return endpoint.responses.find((r) => r.id === selectedResponseId) ?? null;
   }, [endpoint, selectedResponseId]);
+
+  const isDirtyEndpointEdit = Boolean(
+    endpoint &&
+      isEditingUrl &&
+      (editedUrl !== endpoint.url || editedMethod !== endpoint.method)
+  );
+  const hasDirtyEndpointForm =
+    isDirtyEndpointEdit || isAddResponseDirty || isResponseEditDirty;
+
+  const closeEndpointScopedOverlays = useCallback(() => {
+    setIsStepperOpen(false);
+    setIsMetricsOpen(false);
+    setShowDeleteEndpointDialog(false);
+    setIsEditingUrl(false);
+    setEditedUrl("");
+    setEditedMethod("GET");
+    setIsAddResponseDirty(false);
+    setIsResponseEditDirty(false);
+  }, []);
+
+  const requestEndpointNavigation = useCallback(
+    (path: string) => {
+      if (hasDirtyEndpointForm) {
+        setPendingNavigationPath(path);
+        setShowDiscardChangesDialog(true);
+        return false;
+      }
+
+      closeEndpointScopedOverlays();
+      return true;
+    },
+    [closeEndpointScopedOverlays, hasDirtyEndpointForm]
+  );
+
+  useEffect(
+    () => registerEndpointNavigationGuard(requestEndpointNavigation),
+    [registerEndpointNavigationGuard, requestEndpointNavigation]
+  );
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const nextHistoryIndex = getHistoryIndex();
+      const currentHistoryIndex = currentHistoryIndexRef.current;
+
+      if (allowHistoryNavigationRef.current) {
+        allowHistoryNavigationRef.current = false;
+        currentHistoryIndexRef.current = nextHistoryIndex;
+        return;
+      }
+
+      if (
+        !hasDirtyEndpointForm ||
+        currentHistoryIndex === null ||
+        nextHistoryIndex === null ||
+        currentHistoryIndex === nextHistoryIndex
+      ) {
+        currentHistoryIndexRef.current = nextHistoryIndex;
+        return;
+      }
+
+      const delta = nextHistoryIndex - currentHistoryIndex;
+      pendingHistoryDeltaRef.current = delta;
+      setShowDiscardChangesDialog(true);
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      window.history.go(-delta);
+    };
+
+    window.addEventListener("popstate", handlePopState, true);
+    return () => window.removeEventListener("popstate", handlePopState, true);
+  }, [hasDirtyEndpointForm]);
+
+  useEffect(() => {
+    if (!endpoint) {
+      return;
+    }
+
+    const activeResponses = getActiveResponses(endpoint);
+    const endpointChanged = previousEndpointIdRef.current !== endpoint.id;
+
+    if (endpointChanged) {
+      previousEndpointIdRef.current = endpoint.id;
+      closeEndpointScopedOverlays();
+      const nextResponse = selectActiveResponse(endpoint);
+      selectedResponseWasActiveRef.current = nextResponse !== null;
+      setSelectedResponseId(nextResponse?.id ?? null);
+    } else if (
+      selectedResponseWasActiveRef.current &&
+      selectedResponse &&
+      !selectedResponse.activated
+    ) {
+      const nextResponse = selectActiveResponse(endpoint);
+      selectedResponseWasActiveRef.current = nextResponse !== null;
+      setSelectedResponseId(nextResponse?.id ?? null);
+    }
+
+    if (activeResponses.length > 1) {
+      const warningKey = `${endpoint.id}:${activeResponses
+        .map((response) => response.id)
+        .join(",")}`;
+      if (reportedMultipleActiveRef.current !== warningKey) {
+        reportedMultipleActiveRef.current = warningKey;
+        toast.warning("Multiple active responses detected", {
+          description:
+            "The first active response is selected. Server data was not changed.",
+        });
+      }
+    }
+  }, [closeEndpointScopedOverlays, endpoint, selectedResponse]);
+
+  useEffect(() => {
+    if (!(endpoint && hasEndpointError && endpointError)) {
+      if (!hasEndpointError) {
+        reportedRefreshErrorRef.current = null;
+      }
+      return;
+    }
+
+    const errorKey = `${endpoint.id}:${endpointError.message}`;
+    if (reportedRefreshErrorRef.current === errorKey) {
+      return;
+    }
+
+    reportedRefreshErrorRef.current = errorKey;
+    toast.error("Failed to refresh endpoint", {
+      description: endpointError.message,
+    });
+  }, [endpoint, endpointError, hasEndpointError]);
+
+  useEffect(() => {
+    if (
+      endpointQuery.data !== null ||
+      isLoadingEndpoint ||
+      isFetchingEndpoint
+    ) {
+      return;
+    }
+
+    if (decodedId) {
+      queryClient.removeQueries({
+        queryKey: ["endpoint-data", "workspace", decodedId],
+      });
+      queryClient.setQueryData(
+        ["endpoint-data", "catalog"],
+        (catalog: Endpoint[] | undefined) =>
+          catalog?.filter((candidate) => candidate.id !== decodedId)
+      );
+      forgetEndpoint(decodedId);
+    }
+
+    toast.error("Endpoint no longer exists");
+    navigate("/dashboard/endpoints", { replace: true });
+  }, [
+    decodedId,
+    endpointQuery.data,
+    forgetEndpoint,
+    isFetchingEndpoint,
+    isLoadingEndpoint,
+    navigate,
+    queryClient,
+  ]);
 
   const tourSteps = useMemo<TourStep[]>(() => {
     if (!endpoint) {
@@ -303,6 +509,38 @@ export function EndpointDetailPage() {
     navigate("/dashboard/endpoints");
   };
 
+  const handleSelectResponse = (responseId: string) => {
+    const response = endpoint?.responses.find(
+      (candidate) => candidate.id === responseId
+    );
+    selectedResponseWasActiveRef.current = response?.activated ?? false;
+    setSelectedResponseId(responseId);
+  };
+
+  const handleDiscardChanges = () => {
+    closeEndpointScopedOverlays();
+    setPendingNavigationPath(null);
+    setShowDiscardChangesDialog(false);
+
+    const pendingHistoryDelta = pendingHistoryDeltaRef.current;
+    if (pendingHistoryDelta !== null) {
+      pendingHistoryDeltaRef.current = null;
+      allowHistoryNavigationRef.current = true;
+      window.history.go(pendingHistoryDelta);
+      return;
+    }
+
+    if (pendingNavigationPath) {
+      navigateToEndpoint(pendingNavigationPath);
+    }
+  };
+
+  const handleKeepEditing = () => {
+    pendingHistoryDeltaRef.current = null;
+    setPendingNavigationPath(null);
+    setShowDiscardChangesDialog(false);
+  };
+
   const handleAddResponse = (data: ResponseFormData) => {
     if (!endpoint) {
       return;
@@ -338,6 +576,8 @@ export function EndpointDetailPage() {
       {
         onSuccess: () => {
           toast.success(`Response "${response.name}" activated`);
+          selectedResponseWasActiveRef.current = true;
+          setSelectedResponseId(response.id);
         },
         onError: () => {
           toast.error("Failed to activate response");
@@ -359,6 +599,7 @@ export function EndpointDetailPage() {
       {
         onSuccess: () => {
           toast.success(`Response "${response.name}" deactivated`);
+          selectedResponseWasActiveRef.current = true;
         },
         onError: () => {
           toast.error("Failed to deactivate response");
@@ -784,16 +1025,30 @@ export function EndpointDetailPage() {
                       ease: "easeOut",
                     }}
                   >
-                    <span
-                      className={`shrink-0 rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
-                        endpoint.method
-                      )}`}
+                    <motion.div
+                      animate={{
+                        opacity: 1,
+                        y: shouldReduceMotion ? 0 : 0,
+                      }}
+                      className="flex flex-wrap items-center gap-2 md:gap-3"
+                      initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 4 }}
+                      key={`endpoint-identity-${endpoint.id}`}
+                      transition={{
+                        duration: ENDPOINT_SWITCH_DURATION,
+                        ease: MOTION_EASE.out,
+                      }}
                     >
-                      {abbreviateMethod(endpoint.method)}
-                    </span>
-                    <h1 className="break-all font-bold font-mono text-xl tracking-tight lg:text-2xl">
-                      {endpoint.url}
-                    </h1>
+                      <span
+                        className={`shrink-0 rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
+                          endpoint.method
+                        )}`}
+                      >
+                        {abbreviateMethod(endpoint.method)}
+                      </span>
+                      <h1 className="break-all font-bold font-mono text-xl tracking-tight lg:text-2xl">
+                        {endpoint.url}
+                      </h1>
+                    </motion.div>
                     <ProtectedAction ability="canEditEndpoint">
                       <div
                         className="flex items-center gap-1"
@@ -851,7 +1106,16 @@ export function EndpointDetailPage() {
                 )}
               </AnimatePresence>
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-3 flex flex-wrap items-center gap-2"
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 4 }}
+              key={`endpoint-meta-${endpoint.id}`}
+              transition={{
+                duration: ENDPOINT_SWITCH_DURATION,
+                ease: MOTION_EASE.out,
+              }}
+            >
               <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 bg-background/70 px-2.5 font-medium text-muted-foreground text-xs shadow-xs">
                 <HugeiconsIcon
                   className="size-3.5 text-primary"
@@ -876,7 +1140,7 @@ export function EndpointDetailPage() {
                   response{endpoint.responses.length === 1 ? "" : "s"}
                 </span>
               </span>
-            </div>
+            </motion.div>
           </div>
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 xl:w-auto">
@@ -941,7 +1205,8 @@ export function EndpointDetailPage() {
           isDeactivating={isDeactivatingResponse}
           onActivateResponse={handleActivateResponse}
           onDeactivateResponse={handleDeactivateResponse}
-          onSelectResponse={setSelectedResponseId}
+          onEditResponseDirtyChange={setIsResponseEditDirty}
+          onSelectResponse={handleSelectResponse}
           previewTourId={ENDPOINT_DETAIL_TOUR_TARGETS.preview}
           responses={endpoint.responses}
           responsesTourId={ENDPOINT_DETAIL_TOUR_TARGETS.responses}
@@ -974,6 +1239,7 @@ export function EndpointDetailPage() {
           <ResponseStepper
             isSubmitting={isCreatingResponse}
             onCancel={() => setIsStepperOpen(false)}
+            onDirtyChange={setIsAddResponseDirty}
             onSubmit={handleAddResponse}
           />
         )}
@@ -985,6 +1251,28 @@ export function EndpointDetailPage() {
         onOpenChange={setIsMetricsOpen}
         open={isMetricsOpen}
       />
+
+      <AlertDialog
+        onOpenChange={setShowDiscardChangesDialog}
+        open={showDiscardChangesDialog}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your endpoint changes will be lost if you switch workspaces now.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleKeepEditing}>
+              Keep editing
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDiscardChanges}>
+              Discard and switch
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         onOpenChange={setShowDeleteEndpointDialog}

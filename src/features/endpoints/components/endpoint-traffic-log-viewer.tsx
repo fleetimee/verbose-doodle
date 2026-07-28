@@ -10,7 +10,7 @@ import {
   SearchIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { type ReactNode, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   CircleAlert,
@@ -264,6 +264,12 @@ export function EndpointTrafficLogViewer({
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
   const [showClearLogsDialog, setShowClearLogsDialog] = useState(false);
   const trafficLogViewportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSelectedIds(new Set());
+    setSelectedLogId(null);
+    setShowClearLogsDialog(false);
+  }, [endpointId]);
 
   const filters = useMemo<EndpointTrafficLogsFilters>(
     () => ({

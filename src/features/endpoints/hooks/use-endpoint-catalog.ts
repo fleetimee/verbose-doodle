@@ -6,6 +6,7 @@ import type {
   UpdateEndpointInput,
 } from "@/features/endpoints/data/endpoint-data-adapter";
 import { endpointDataQueryKeys } from "@/features/endpoints/data/endpoint-data-query-keys";
+import { ENDPOINT_MUTATION_KEY } from "@/features/endpoints/data/endpoint-mutation-key";
 import { httpEndpointAdapter } from "@/features/endpoints/data/http-endpoint-adapter";
 import type { Endpoint } from "@/features/endpoints/types";
 import { overviewQueryKeys } from "@/features/overview/query-keys";
@@ -27,6 +28,7 @@ export function useEndpointCatalog(
     staleTime: 5 * 60 * 1000,
   });
   const createEndpoint = useMutation<Endpoint, ApiError, CreateEndpointInput>({
+    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.createEndpoint,
     onSuccess: async () => {
       toast.success("Success", {
@@ -44,6 +46,7 @@ export function useEndpointCatalog(
     },
   });
   const updateEndpoint = useMutation<Endpoint, ApiError, UpdateEndpointInput>({
+    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.updateEndpoint,
     onSuccess: async (_, input) => {
       toast.success("Success", {
@@ -64,6 +67,7 @@ export function useEndpointCatalog(
     },
   });
   const deleteEndpoint = useMutation<void, ApiError, string>({
+    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.deleteEndpoint,
     onSuccess: async (_, endpointId) => {
       toast.success("Success", {

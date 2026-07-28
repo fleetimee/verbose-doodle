@@ -1,11 +1,5 @@
-import React, { Suspense } from "react";
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router";
+import React, { Suspense, useEffect } from "react";
+import { Link, Outlet, useLocation, useParams } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -32,6 +26,10 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
+import {
+  DashboardNavigationProvider,
+  useDashboardNavigation,
+} from "@/features/dashboard/dashboard-navigation-context";
 import { HttpMethodBadge } from "@/features/endpoints/components/http-method-badge";
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
@@ -161,49 +159,67 @@ export function DashboardLayout() {
 
   return (
     <TourProvider closeable>
-      <SocketBridgeProvider>
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset className="overflow-hidden border border-border/70 bg-card shadow-sm">
-            <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-3 border-b bg-card/95 px-4 backdrop-blur supports-backdrop-filter:bg-card/80">
-              <SidebarTrigger className="-ml-1 rounded-md" />
-              <Separator
-                className="mr-2 data-[orientation=vertical]:h-4"
-                orientation="vertical"
-              />
-              <Breadcrumb>
-                <BreadcrumbList>
-                  {breadcrumbItems.map((item, index) => (
-                    <React.Fragment
-                      key={`${item.href}-${item.kind ?? "route"}-${index}`}
-                    >
-                      <BreadcrumbItem
-                        className={
-                          item.isLast ? "min-w-0 max-w-full" : "hidden md:block"
-                        }
+      <DashboardNavigationProvider>
+        <SocketBridgeProvider>
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset className="overflow-hidden border border-border/70 bg-card shadow-sm">
+              <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-3 border-b bg-card/95 px-4 backdrop-blur supports-backdrop-filter:bg-card/80">
+                <SidebarTrigger className="-ml-1 rounded-md" />
+                <Separator
+                  className="mr-2 data-[orientation=vertical]:h-4"
+                  orientation="vertical"
+                />
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    {breadcrumbItems.map((item, index) => (
+                      <React.Fragment
+                        key={`${item.href}-${item.kind ?? "route"}-${index}`}
                       >
-                        <DashboardBreadcrumbContent item={item} />
-                      </BreadcrumbItem>
-                      {!item.isLast && (
-                        <BreadcrumbSeparator className="hidden md:block" />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </BreadcrumbList>
-              </Breadcrumb>
-              <div className="ml-auto">
-                <ThemeSwitcher onChange={setTheme} value={themeSwitcherValue} />
-              </div>
-            </header>
-            <main className="flex flex-1 flex-col gap-4 overflow-auto bg-background/70 p-4 md:p-6">
-              <Suspense fallback={<DashboardPageFallback />}>
-                <Outlet />
-              </Suspense>
-            </main>
-          </SidebarInset>
-        </SidebarProvider>
-        {isSocksRelayRoute ? null : <SocketBridgeFloatingStatus />}
-      </SocketBridgeProvider>
+                        <BreadcrumbItem
+                          className={
+                            item.isLast
+                              ? "min-w-0 max-w-full"
+                              : "hidden md:block"
+                          }
+                        >
+                          <DashboardBreadcrumbContent item={item} />
+                        </BreadcrumbItem>
+                        {!item.isLast && (
+                          <BreadcrumbSeparator className="hidden md:block" />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </BreadcrumbList>
+                </Breadcrumb>
+                {isEndpointDetail && endpointQuery.isFetching && (
+                  <span
+                    aria-label="Refreshing endpoint"
+                    className="ml-2 inline-flex items-center gap-1.5 text-muted-foreground text-xs"
+                    data-testid="endpoint-refresh-indicator"
+                    role="status"
+                  >
+                    <span className="size-3 animate-spin rounded-full border-2 border-current border-r-transparent" />
+                    <span className="hidden sm:inline">Refreshing</span>
+                  </span>
+                )}
+                <div className="ml-auto">
+                  <ThemeSwitcher
+                    onChange={setTheme}
+                    value={themeSwitcherValue}
+                  />
+                </div>
+              </header>
+              <main className="flex flex-1 flex-col gap-4 overflow-auto bg-background/70 p-4 md:p-6">
+                <Suspense fallback={<DashboardPageFallback />}>
+                  <Outlet />
+                </Suspense>
+              </main>
+            </SidebarInset>
+          </SidebarProvider>
+          {isSocksRelayRoute ? null : <SocketBridgeFloatingStatus />}
+        </SocketBridgeProvider>
+      </DashboardNavigationProvider>
     </TourProvider>
   );
 }
@@ -278,7 +294,11 @@ function BillerBreadcrumbSelector({
   readonly billerId?: number;
   readonly fallbackLabel: string;
 }) {
-  const navigate = useNavigate();
+  const {
+    endpointMutationPending,
+    getRememberedEndpoint,
+    requestEndpointNavigation,
+  } = useDashboardNavigation();
   const { data: billers = [], isPending: isLoadingBillers } = useGetBillers();
   const { endpoints: endpointQuery } = useEndpointCatalog();
   const { data: endpoints = [], isPending: isLoadingEndpoints } = endpointQuery;
@@ -305,16 +325,27 @@ function BillerBreadcrumbSelector({
     <Select
       onValueChange={(value) => {
         const nextBillerId = Number(value);
-        const firstEndpoint = endpoints.find(
+        const billerEndpoints = endpoints.filter(
           (endpoint) => endpoint.billerId === nextBillerId
         );
+        const rememberedEndpoint = getRememberedEndpoint(nextBillerId);
+        const nextEndpoint =
+          billerEndpoints.find(
+            (endpoint) => endpoint.id === rememberedEndpoint
+          ) ??
+          billerEndpoints.find((endpoint) =>
+            endpoint.responses.some((response) => response.activated)
+          ) ??
+          billerEndpoints[0];
 
         if (
           Number.isSafeInteger(nextBillerId) &&
           nextBillerId !== billerId &&
-          firstEndpoint
+          nextEndpoint
         ) {
-          navigate(`/dashboard/endpoints/${encodeId(firstEndpoint.id)}`);
+          requestEndpointNavigation(
+            `/dashboard/endpoints/${encodeId(nextEndpoint.id)}`
+          );
         }
       }}
       value={String(billerId)}
@@ -322,6 +353,7 @@ function BillerBreadcrumbSelector({
       <SelectTrigger
         aria-label="Biller"
         className="h-8 max-w-48 border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+        disabled={endpointMutationPending}
       >
         <SelectValue>{currentBiller.name}</SelectValue>
       </SelectTrigger>
@@ -347,7 +379,11 @@ function EndpointBreadcrumbSelector({
   readonly fallbackMethod?: HttpMethod;
   readonly fallbackUrl?: string;
 }) {
-  const navigate = useNavigate();
+  const {
+    endpointMutationPending,
+    rememberEndpoint,
+    requestEndpointNavigation,
+  } = useDashboardNavigation();
   const { endpoints: endpointQuery } = useEndpointCatalog();
   const { data: endpoints = [], isPending: isLoadingEndpoints } = endpointQuery;
   const billerEndpoints = endpoints.filter(
@@ -356,6 +392,15 @@ function EndpointBreadcrumbSelector({
   const currentEndpoint = billerEndpoints.find(
     (endpoint) => endpoint.id === endpointId
   );
+
+  useEffect(() => {
+    if (currentEndpoint) {
+      rememberEndpoint({
+        billerId: currentEndpoint.billerId,
+        endpointId: currentEndpoint.id,
+      });
+    }
+  }, [currentEndpoint, rememberEndpoint]);
 
   if (
     isLoadingEndpoints ||
@@ -378,7 +423,7 @@ function EndpointBreadcrumbSelector({
     <Select
       onValueChange={(value) => {
         if (value && value !== currentEndpoint.id) {
-          navigate(`/dashboard/endpoints/${encodeId(value)}`);
+          requestEndpointNavigation(`/dashboard/endpoints/${encodeId(value)}`);
         }
       }}
       value={currentEndpoint.id}
@@ -386,6 +431,7 @@ function EndpointBreadcrumbSelector({
       <SelectTrigger
         aria-label="Endpoint"
         className="h-8 max-w-[min(32rem,50vw)] border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+        disabled={endpointMutationPending}
       >
         <SelectValue>
           <EndpointBreadcrumbLabel

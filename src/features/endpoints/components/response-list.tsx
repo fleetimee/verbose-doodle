@@ -29,6 +29,7 @@ type ResponseListProps = {
   onSelectResponse: (id: string) => void;
   onActivateResponse: (response: EndpointResponse) => void;
   onDeactivateResponse: (response: EndpointResponse) => void;
+  onEditResponseDirtyChange?: (isDirty: boolean) => void;
 };
 
 type AnimatedResponseListItemProps = Parameters<typeof ResponseListItem>[0];
@@ -82,6 +83,7 @@ export function ResponseList({
   onSelectResponse,
   onActivateResponse,
   onDeactivateResponse,
+  onEditResponseDirtyChange,
 }: ResponseListProps) {
   const layoutNamespace = useId();
   // Group responses by active/inactive status
@@ -126,6 +128,7 @@ export function ResponseList({
                         layoutNamespace={layoutNamespace}
                         onActivate={onActivateResponse}
                         onDeactivate={onDeactivateResponse}
+                        onEditDirtyChange={onEditResponseDirtyChange}
                         onSelect={onSelectResponse}
                         response={response}
                       />
@@ -189,6 +192,7 @@ export function ResponseList({
                         layoutNamespace={layoutNamespace}
                         onActivate={onActivateResponse}
                         onDeactivate={onDeactivateResponse}
+                        onEditDirtyChange={onEditResponseDirtyChange}
                         onSelect={onSelectResponse}
                         response={response}
                       />

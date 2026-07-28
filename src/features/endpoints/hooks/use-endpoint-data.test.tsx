@@ -2,6 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { endpointDataQueryKeys } from "@/features/endpoints/data/endpoint-data-query-keys";
 import { createInMemoryEndpointAdapter } from "@/features/endpoints/data/in-memory-endpoint-adapter";
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import { useEndpointTelemetry } from "@/features/endpoints/hooks/use-endpoint-telemetry";
@@ -59,6 +60,32 @@ describe("Endpoint data hooks", () => {
     });
 
     await waitFor(() => expect(result.current.endpoints.data).toHaveLength(2));
+  });
+
+  test("seeds a workspace from catalog data while refreshing its detail", () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const catalogEndpoint = {
+      id: "catalog-endpoint",
+      method: "POST" as const,
+      url: "/catalog-backed",
+      billerId: 1,
+      responses: [],
+    };
+    queryClient.setQueryData(endpointDataQueryKeys.catalog, [catalogEndpoint]);
+
+    const adapter = {
+      ...createAdapter(),
+      getEndpoint: () => new Promise<null>(() => undefined),
+    };
+    const { result } = renderHook(
+      () => useEndpointWorkspace(catalogEndpoint.id, adapter),
+      { wrapper: createWrapper(queryClient) }
+    );
+
+    expect(result.current.endpoint.data).toEqual(catalogEndpoint);
+    expect(result.current.endpoint.isFetching).toBe(true);
   });
 
   test("polls telemetry when a refetch interval is configured", async () => {
