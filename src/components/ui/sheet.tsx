@@ -91,7 +91,7 @@ function SheetContent({
         data-side={side}
         data-slot="sheet-content"
         className={cn(
-          "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition-transform ease-in-out data-closed:duration-300 data-open:duration-500",
+          "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition-transform ease-in-out data-closed:duration-200 data-open:duration-300",
           side === "right" &&
             "inset-y-0 right-0 h-full w-3/4 border-l data-ending-style:translate-x-full data-starting-style:translate-x-full sm:max-w-sm",
           side === "left" &&

@@ -4,7 +4,7 @@ import {
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useParams } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useTheme } from "@/components/theme-provider";
@@ -81,7 +81,6 @@ const routeLabels: Record<string, string> = {
 
 // Updated regex to match encoded IDs (base64 URL-safe characters)
 const ENDPOINT_DETAIL_REGEX = /^\/dashboard\/endpoints\/([A-Za-z0-9_-]+)$/;
-
 type DashboardBreadcrumbItem = {
   readonly billerId?: number;
   readonly href: string;
@@ -130,7 +129,9 @@ export function DashboardLayout() {
     });
   };
 
-  const handleOpenAddBiller = () => setIsAddBillerOpen(true);
+  const handleOpenAddBiller = () => {
+    setIsAddBillerOpen(true);
+  };
 
   const handleAddBiller = (billerName: string) => {
     createBiller(
@@ -266,29 +267,25 @@ export function DashboardLayout() {
                   <Outlet />
                 </Suspense>
               </main>
-              {isAddEndpointOpen && (
-                <ProtectedAction ability="canAddEndpoint">
-                  <AddEndpointSheet
-                    initialBillerId={initialBillerId}
-                    isSubmitting={isCreatingEndpoint}
-                    onOpenChange={setIsAddEndpointOpen}
-                    onSubmit={handleAddEndpoint}
-                    open
-                    showTrigger={false}
-                  />
-                </ProtectedAction>
-              )}
-              {isAddBillerOpen && (
-                <ProtectedAction ability="canAddBiller">
-                  <AddBillerSheet
-                    isSubmitting={isCreatingBiller}
-                    onOpenChange={setIsAddBillerOpen}
-                    onSubmit={handleAddBiller}
-                    open
-                    showTrigger={false}
-                  />
-                </ProtectedAction>
-              )}
+              <ProtectedAction ability="canAddEndpoint">
+                <AddEndpointSheet
+                  initialBillerId={initialBillerId}
+                  isSubmitting={isCreatingEndpoint}
+                  onOpenChange={setIsAddEndpointOpen}
+                  onSubmit={handleAddEndpoint}
+                  open={isAddEndpointOpen}
+                  showTrigger={false}
+                />
+              </ProtectedAction>
+              <ProtectedAction ability="canAddBiller">
+                <AddBillerSheet
+                  isSubmitting={isCreatingBiller}
+                  onOpenChange={setIsAddBillerOpen}
+                  onSubmit={handleAddBiller}
+                  open={isAddBillerOpen}
+                  showTrigger={false}
+                />
+              </ProtectedAction>
             </SidebarInset>
           </SidebarProvider>
           {isSocksRelayRoute ? null : <SocketBridgeFloatingStatus />}
@@ -377,6 +374,7 @@ function BillerBreadcrumbSelector({
   readonly onAddBiller: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const pendingAddRef = useRef<number | null>(null);
   const {
     endpointMutationPending,
     forgetEndpoint,
@@ -391,6 +389,15 @@ function BillerBreadcrumbSelector({
   );
   const currentBiller = billersWithEndpoints.find(
     (biller) => biller.id === billerId
+  );
+
+  useEffect(
+    () => () => {
+      if (pendingAddRef.current !== null) {
+        window.cancelAnimationFrame(pendingAddRef.current);
+      }
+    },
+    []
   );
 
   if (
@@ -452,6 +459,7 @@ function BillerBreadcrumbSelector({
       <PopoverContent
         align="start"
         className="w-[min(22rem,calc(100vw-2rem))] translate-y-2 overflow-hidden p-0"
+        finalFocus={false}
         sideOffset={12}
       >
         <Command>
@@ -468,7 +476,13 @@ function BillerBreadcrumbSelector({
                   className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
                   onSelect={() => {
                     setOpen(false);
-                    onAddBiller();
+                    if (pendingAddRef.current !== null) {
+                      window.cancelAnimationFrame(pendingAddRef.current);
+                    }
+                    pendingAddRef.current = window.requestAnimationFrame(() => {
+                      pendingAddRef.current = null;
+                      onAddBiller();
+                    });
                   }}
                   value={messages.billers.addNewBiller}
                 >
@@ -514,6 +528,7 @@ function EndpointBreadcrumbSelector({
   readonly onAddEndpoint: (billerId: number) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const pendingAddRef = useRef<number | null>(null);
   const {
     endpointMutationPending,
     rememberEndpoint,
@@ -536,6 +551,15 @@ function EndpointBreadcrumbSelector({
       });
     }
   }, [currentEndpoint, rememberEndpoint]);
+
+  useEffect(
+    () => () => {
+      if (pendingAddRef.current !== null) {
+        window.cancelAnimationFrame(pendingAddRef.current);
+      }
+    },
+    []
+  );
 
   if (
     isLoadingEndpoints ||
@@ -590,6 +614,7 @@ function EndpointBreadcrumbSelector({
       <PopoverContent
         align="start"
         className="w-[min(32rem,calc(100vw-2rem))] translate-y-2 overflow-hidden p-0"
+        finalFocus={false}
         sideOffset={12}
       >
         <Command>
@@ -606,7 +631,13 @@ function EndpointBreadcrumbSelector({
                   className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
                   onSelect={() => {
                     setOpen(false);
-                    onAddEndpoint(currentEndpoint.billerId);
+                    if (pendingAddRef.current !== null) {
+                      window.cancelAnimationFrame(pendingAddRef.current);
+                    }
+                    pendingAddRef.current = window.requestAnimationFrame(() => {
+                      pendingAddRef.current = null;
+                      onAddEndpoint(currentEndpoint.billerId);
+                    });
                   }}
                   value={messages.endpoints.addNewEndpoint}
                 >
