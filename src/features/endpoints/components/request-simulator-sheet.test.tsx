@@ -22,6 +22,7 @@ mock.module("@/components/ui/sheet", () => ({
 
 mock.module("@/components/ui/scroll-area", () => ({
   ScrollArea: Slot,
+  ScrollBar: Slot,
 }));
 
 mock.module("@/components/ui/hover-card", () => ({

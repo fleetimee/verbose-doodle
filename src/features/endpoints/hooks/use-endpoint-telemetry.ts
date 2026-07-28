@@ -9,6 +9,7 @@ import {
   endpointDataQueryKeys,
   endpointDataTelemetryPrefix,
 } from "@/features/endpoints/data/endpoint-data-query-keys";
+import { ENDPOINT_MUTATION_KEY } from "@/features/endpoints/data/endpoint-mutation-key";
 import { httpEndpointAdapter } from "@/features/endpoints/data/http-endpoint-adapter";
 import type {
   EndpointHourlyMetric,
@@ -84,6 +85,7 @@ export function useEndpointTelemetry(
     staleTime: 15 * 1000,
   });
   const clearTrafficLogs = useMutation<void, ApiError, string>({
+    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.clearTrafficLogs,
     onSuccess: async (_, clearedEndpointId) => {
       toast.success(messages.endpoints.trafficLogsCleared, {
