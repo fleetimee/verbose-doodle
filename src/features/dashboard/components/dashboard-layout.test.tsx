@@ -323,6 +323,20 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     ).toBeDefined();
   });
 
+  test("filters billers from the breadcrumb selector", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.click(await screen.findByRole("combobox", { name: "Biller" }));
+    await user.type(
+      await screen.findByPlaceholderText("Search billers..."),
+      "PD"
+    );
+
+    expect(await screen.findByRole("option", { name: "PDAM" })).toBeDefined();
+    expect(screen.queryByRole("option", { name: "PLN" })).toBeNull();
+  });
+
   test("navigates directly to another endpoint for the current biller", async () => {
     const user = userEvent.setup();
     renderDashboard();
@@ -339,6 +353,28 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
         `/dashboard/endpoints/${encodeId("endpoint-2")}`
       );
     });
+  });
+
+  test("filters endpoints from the breadcrumb selector", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.click(await screen.findByRole("combobox", { name: "Endpoint" }));
+    await user.type(
+      await screen.findByPlaceholderText("Search endpoints..."),
+      "status"
+    );
+
+    expect(
+      await screen.findByRole("option", {
+        name: "GET /xapi-pbb/api/user/status",
+      })
+    ).toBeDefined();
+    expect(
+      screen.queryByRole("option", {
+        name: "POST /xapi-pbb/api/user/login",
+      })
+    ).toBeNull();
   });
 
   test("remembers the last endpoint for each biller during the session", async () => {
