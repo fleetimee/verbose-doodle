@@ -197,6 +197,7 @@ export const endpointsMessages = {
     },
   },
   addEndpoint: "Add Endpoint",
+  addNewEndpoint: "Add New Endpoint",
   addEndpointDescription: "Create a new API endpoint for a specific biller ID.",
   editEndpoint: "Edit Endpoint",
   editEndpointDescription:

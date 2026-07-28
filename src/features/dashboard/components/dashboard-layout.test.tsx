@@ -84,8 +84,34 @@ function installApiMock() {
     responses: [{ activated: true, response_id: "response-pdam" }],
     url: "/xapi-pbb/api/payment/status",
   };
-  const mockFetch = (input: Parameters<typeof globalThis.fetch>[0]) => {
+  const mockFetch = (
+    input: Parameters<typeof globalThis.fetch>[0],
+    init?: RequestInit
+  ) => {
     const url = String(input);
+
+    if (url === "/api/endpoint" && init?.method === "POST") {
+      const request = JSON.parse(String(init.body)) as {
+        billerId: number;
+        method: string;
+        url: string;
+      };
+
+      return Promise.resolve(
+        jsonResponse({
+          data: {
+            endpoint: {
+              biller_id: request.billerId,
+              biller_name: "PLN",
+              endpoint_id: "created-endpoint",
+              method: request.method,
+              responses: [],
+              url: request.url,
+            },
+          },
+        })
+      );
+    }
 
     if (url === "/api/biller") {
       return Promise.resolve(
@@ -353,6 +379,55 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
         `/dashboard/endpoints/${encodeId("endpoint-2")}`
       );
     });
+  });
+
+  test("opens add endpoint from the top of the endpoint selector", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.click(await screen.findByRole("combobox", { name: "Endpoint" }));
+    await user.click(
+      await screen.findByRole("option", { name: "Add New Endpoint" })
+    );
+
+    expect(
+      await screen.findByText(
+        "Create a new API endpoint for a specific biller ID."
+      )
+    ).toBeDefined();
+    const billerSelectors = screen.getAllByRole("combobox", { name: "Biller" });
+    expect(billerSelectors.at(-1)?.textContent).toContain("PLN");
+    expect(screen.getByTestId("location").textContent).toBe(
+      `/dashboard/endpoints/${encodedEndpointId}`
+    );
+  });
+
+  test("closes the add endpoint sheet after creation without leaving the detail page", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await user.click(await screen.findByRole("combobox", { name: "Endpoint" }));
+    await user.click(
+      await screen.findByRole("option", { name: "Add New Endpoint" })
+    );
+    await screen.findByText(
+      "Create a new API endpoint for a specific biller ID."
+    );
+
+    await user.clear(screen.getByLabelText("URL"));
+    await user.type(screen.getByLabelText("URL"), "/from-breadcrumb");
+    await user.click(screen.getByRole("button", { name: "Create Endpoint" }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(
+          "Create a new API endpoint for a specific biller ID."
+        )
+      ).toBeNull();
+    });
+    expect(screen.getByTestId("location").textContent).toBe(
+      `/dashboard/endpoints/${encodedEndpointId}`
+    );
   });
 
   test("filters endpoints from the breadcrumb selector", async () => {

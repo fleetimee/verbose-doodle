@@ -1,4 +1,8 @@
-import { Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import {
+  Add01Icon,
+  Tick02Icon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import React, { Suspense, useEffect, useState } from "react";
 import { Link, Outlet, useLocation, useParams } from "react-router";
@@ -34,14 +38,17 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
 import {
   DashboardNavigationProvider,
   useDashboardNavigation,
 } from "@/features/dashboard/dashboard-navigation-context";
+import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
 import { HttpMethodBadge } from "@/features/endpoints/components/http-method-badge";
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
+import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import type { HttpMethod } from "@/features/endpoints/types";
 import { selectEndpointForBiller } from "@/features/endpoints/utils/endpoint-selection";
 import { SocketBridgeFloatingStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
@@ -101,6 +108,22 @@ export function DashboardLayout() {
 
   const { endpoint: endpointQuery } = useEndpointWorkspace(decodedId || "");
   const { data: endpoint } = endpointQuery;
+  const { createEndpoint: createEndpointMutation } = useEndpointCatalog();
+  const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
+    createEndpointMutation;
+  const [initialBillerId, setInitialBillerId] = useState<number | undefined>();
+  const [isAddEndpointOpen, setIsAddEndpointOpen] = useState(false);
+
+  const handleOpenAddEndpoint = (billerId: number) => {
+    setInitialBillerId(billerId);
+    setIsAddEndpointOpen(true);
+  };
+
+  const handleAddEndpoint = (data: EndpointFormData) => {
+    createEndpoint(data, {
+      onSuccess: () => setIsAddEndpointOpen(false),
+    });
+  };
 
   const pathSegments = location.pathname
     .split("/")
@@ -193,7 +216,10 @@ export function DashboardLayout() {
                               : "hidden md:block"
                           }
                         >
-                          <DashboardBreadcrumbContent item={item} />
+                          <DashboardBreadcrumbContent
+                            item={item}
+                            onAddEndpoint={handleOpenAddEndpoint}
+                          />
                         </BreadcrumbItem>
                         {!item.isLast && (
                           <BreadcrumbSeparator className="hidden md:block" />
@@ -225,6 +251,16 @@ export function DashboardLayout() {
                   <Outlet />
                 </Suspense>
               </main>
+              <ProtectedAction ability="canAddEndpoint">
+                <AddEndpointSheet
+                  initialBillerId={initialBillerId}
+                  isSubmitting={isCreatingEndpoint}
+                  onOpenChange={setIsAddEndpointOpen}
+                  onSubmit={handleAddEndpoint}
+                  open={isAddEndpointOpen}
+                  showTrigger={false}
+                />
+              </ProtectedAction>
             </SidebarInset>
           </SidebarProvider>
           {isSocksRelayRoute ? null : <SocketBridgeFloatingStatus />}
@@ -236,8 +272,10 @@ export function DashboardLayout() {
 
 function DashboardBreadcrumbContent({
   item,
+  onAddEndpoint,
 }: {
   readonly item: DashboardBreadcrumbItem;
+  readonly onAddEndpoint: (billerId: number) => void;
 }) {
   if (item.kind === "biller") {
     return (
@@ -255,6 +293,7 @@ function DashboardBreadcrumbContent({
         endpointId={item.endpointId}
         fallbackMethod={item.method}
         fallbackUrl={item.url}
+        onAddEndpoint={onAddEndpoint}
       />
     );
   }
@@ -420,11 +459,13 @@ function EndpointBreadcrumbSelector({
   endpointId,
   fallbackMethod,
   fallbackUrl,
+  onAddEndpoint,
 }: {
   readonly billerId?: number;
   readonly endpointId?: string;
   readonly fallbackMethod?: HttpMethod;
   readonly fallbackUrl?: string;
+  readonly onAddEndpoint: (billerId: number) => void;
 }) {
   const [open, setOpen] = useState(false);
   const {
@@ -514,6 +555,19 @@ function EndpointBreadcrumbSelector({
           <CommandList className="max-h-72 p-1">
             <CommandEmpty>No endpoint found.</CommandEmpty>
             <CommandGroup className="p-0">
+              <ProtectedAction ability="canAddEndpoint">
+                <CommandItem
+                  className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
+                  onSelect={() => {
+                    setOpen(false);
+                    onAddEndpoint(currentEndpoint.billerId);
+                  }}
+                  value={messages.endpoints.addNewEndpoint}
+                >
+                  <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+                  <span>{messages.endpoints.addNewEndpoint}</span>
+                </CommandItem>
+              </ProtectedAction>
               {billerEndpoints.map((endpoint) => (
                 <CommandItem
                   className="min-h-10 px-3 py-2 text-[0.95rem]"
