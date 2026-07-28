@@ -34,6 +34,7 @@ import { HttpMethodBadge } from "@/features/endpoints/components/http-method-bad
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
 import type { HttpMethod } from "@/features/endpoints/types";
+import { selectEndpointForBiller } from "@/features/endpoints/utils/endpoint-selection";
 import { SocketBridgeFloatingStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
 import { SocketBridgeProvider } from "@/features/socket-tester/context/socket-bridge-context";
 import { messages } from "@/lib/i18n";
@@ -296,19 +297,17 @@ function BillerBreadcrumbSelector({
 }) {
   const {
     endpointMutationPending,
+    forgetEndpoint,
     getRememberedEndpoint,
     requestEndpointNavigation,
   } = useDashboardNavigation();
   const { data: billers = [], isPending: isLoadingBillers } = useGetBillers();
   const { endpoints: endpointQuery } = useEndpointCatalog();
   const { data: endpoints = [], isPending: isLoadingEndpoints } = endpointQuery;
-  const billersWithResponses = billers.filter((biller) =>
-    endpoints.some(
-      (endpoint) =>
-        endpoint.billerId === biller.id && endpoint.responses.length > 0
-    )
+  const billersWithEndpoints = billers.filter((biller) =>
+    endpoints.some((endpoint) => endpoint.billerId === biller.id)
   );
-  const currentBiller = billersWithResponses.find(
+  const currentBiller = billersWithEndpoints.find(
     (biller) => biller.id === billerId
   );
 
@@ -329,14 +328,20 @@ function BillerBreadcrumbSelector({
           (endpoint) => endpoint.billerId === nextBillerId
         );
         const rememberedEndpoint = getRememberedEndpoint(nextBillerId);
-        const nextEndpoint =
-          billerEndpoints.find(
+        const nextEndpoint = selectEndpointForBiller(
+          endpoints,
+          nextBillerId,
+          rememberedEndpoint
+        );
+
+        if (
+          rememberedEndpoint &&
+          !billerEndpoints.some(
             (endpoint) => endpoint.id === rememberedEndpoint
-          ) ??
-          billerEndpoints.find((endpoint) =>
-            endpoint.responses.some((response) => response.activated)
-          ) ??
-          billerEndpoints[0];
+          )
+        ) {
+          forgetEndpoint(rememberedEndpoint);
+        }
 
         if (
           Number.isSafeInteger(nextBillerId) &&
@@ -358,7 +363,7 @@ function BillerBreadcrumbSelector({
         <SelectValue>{currentBiller.name}</SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {billersWithResponses.map((biller) => (
+        {billersWithEndpoints.map((biller) => (
           <SelectItem key={biller.id} value={String(biller.id)}>
             {biller.name}
           </SelectItem>
