@@ -4,6 +4,7 @@ import {
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useParams } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -58,6 +59,7 @@ import { SocketBridgeFloatingStatus } from "@/features/socket-tester/components/
 import { SocketBridgeProvider } from "@/features/socket-tester/context/socket-bridge-context";
 import { messages } from "@/lib/i18n";
 import { decodeId, encodeId } from "@/lib/id-encoder";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const routeLabels: Record<string, string> = {
@@ -397,6 +399,38 @@ function EndpointBreadcrumbLabel({
   );
 }
 
+function AnimatedBreadcrumbValue({
+  children,
+  value,
+}: {
+  readonly children?: React.ReactNode;
+  readonly value: string;
+}) {
+  const shouldReduceMotion = useReducedMotion() ?? false;
+
+  return (
+    <AnimatePresence initial={false} mode="wait">
+      <motion.span
+        animate={{ opacity: 1 }}
+        className={
+          children ? "inline-flex min-w-0 max-w-full" : "min-w-0 truncate"
+        }
+        exit={{ opacity: 0 }}
+        initial={{ opacity: shouldReduceMotion ? 0.85 : 0 }}
+        key={value}
+        transition={{
+          duration: shouldReduceMotion
+            ? MOTION_DURATION.instant
+            : MOTION_DURATION.fast,
+          ease: MOTION_EASE.out,
+        }}
+      >
+        {children ?? value}
+      </motion.span>
+    </AnimatePresence>
+  );
+}
+
 function BillerBreadcrumbSelector({
   billerId,
   fallbackLabel,
@@ -480,10 +514,13 @@ function BillerBreadcrumbSelector({
           type="button"
           variant="ghost"
         >
-          <span className="truncate">{currentBiller.name}</span>
+          <AnimatedBreadcrumbValue value={currentBiller.name} />
           <HugeiconsIcon
             aria-hidden="true"
-            className="size-4 shrink-0 opacity-45"
+            className={cn(
+              "size-4 shrink-0 opacity-45 transition-transform duration-[150ms] ease-[var(--ease-out)] motion-reduce:duration-[10ms]",
+              open && "rotate-180"
+            )}
             icon={UnfoldMoreIcon}
             strokeWidth={2}
           />
@@ -636,13 +673,20 @@ function EndpointBreadcrumbSelector({
           type="button"
           variant="ghost"
         >
-          <EndpointBreadcrumbLabel
-            method={currentEndpoint.method}
-            url={currentEndpoint.url}
-          />
+          <AnimatedBreadcrumbValue
+            value={`${currentEndpoint.id}:${currentEndpoint.method}:${currentEndpoint.url}`}
+          >
+            <EndpointBreadcrumbLabel
+              method={currentEndpoint.method}
+              url={currentEndpoint.url}
+            />
+          </AnimatedBreadcrumbValue>
           <HugeiconsIcon
             aria-hidden="true"
-            className="size-4 shrink-0 opacity-45"
+            className={cn(
+              "size-4 shrink-0 opacity-45 transition-transform duration-[150ms] ease-[var(--ease-out)] motion-reduce:duration-[10ms]",
+              open && "rotate-180"
+            )}
             icon={UnfoldMoreIcon}
             strokeWidth={2}
           />
