@@ -1,5 +1,6 @@
 import {
   Add01Icon,
+  ArrowUp01Icon,
   Tick02Icon,
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
@@ -122,7 +123,9 @@ export function DashboardLayout() {
   const [isAddEndpointOpen, setIsAddEndpointOpen] = useState(false);
   const [isAddBillerOpen, setIsAddBillerOpen] = useState(false);
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion() ?? false;
 
   useEffect(() => {
     const viewport = scrollViewportRef.current;
@@ -132,6 +135,7 @@ export function DashboardLayout() {
 
     const updateHeaderScrollState = () => {
       setIsHeaderScrolled(viewport.scrollTop > 2);
+      setShowScrollToTop(viewport.scrollTop > 600);
     };
 
     updateHeaderScrollState();
@@ -163,6 +167,13 @@ export function DashboardLayout() {
       { billerName },
       { onSuccess: () => setIsAddBillerOpen(false) }
     );
+  };
+
+  const handleScrollToTop = () => {
+    scrollViewportRef.current?.scrollTo({
+      behavior: shouldReduceMotion ? "auto" : "smooth",
+      top: 0,
+    });
   };
 
   const pathSegments = location.pathname
@@ -302,6 +313,38 @@ export function DashboardLayout() {
                   </Suspense>
                 </main>
               </ScrollArea>
+              <AnimatePresence initial={false}>
+                {showScrollToTop && (
+                  <motion.div
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    className="pointer-events-none fixed right-4 bottom-24 z-40"
+                    exit={{ opacity: 0, scale: 0.9, y: 8 }}
+                    initial={{ opacity: 0, scale: 0.9, y: 8 }}
+                    transition={{
+                      duration: shouldReduceMotion
+                        ? MOTION_DURATION.instant
+                        : MOTION_DURATION.press,
+                      ease: MOTION_EASE.out,
+                    }}
+                  >
+                    <Button
+                      aria-label="Scroll to top"
+                      className="pointer-events-auto size-10 rounded-full border-border/70 bg-background/95 shadow-lg backdrop-blur"
+                      onClick={handleScrollToTop}
+                      size="icon"
+                      type="button"
+                      variant="outline"
+                    >
+                      <HugeiconsIcon
+                        aria-hidden="true"
+                        icon={ArrowUp01Icon}
+                        strokeWidth={2}
+                      />
+                      <span className="sr-only">Scroll to top</span>
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <ProtectedAction ability="canAddEndpoint">
                 <AddEndpointSheet
                   initialBillerId={initialBillerId}
