@@ -58,6 +58,7 @@ import { SocketBridgeFloatingStatus } from "@/features/socket-tester/components/
 import { SocketBridgeProvider } from "@/features/socket-tester/context/socket-bridge-context";
 import { messages } from "@/lib/i18n";
 import { decodeId, encodeId } from "@/lib/id-encoder";
+import { cn } from "@/lib/utils";
 
 const routeLabels: Record<string, string> = {
   overview: "Overview",
@@ -118,6 +119,27 @@ export function DashboardLayout() {
   const [initialBillerId, setInitialBillerId] = useState<number | undefined>();
   const [isAddEndpointOpen, setIsAddEndpointOpen] = useState(false);
   const [isAddBillerOpen, setIsAddBillerOpen] = useState(false);
+  const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const viewport = scrollViewportRef.current;
+    if (!viewport) {
+      return;
+    }
+
+    const updateHeaderScrollState = () => {
+      setIsHeaderScrolled(viewport.scrollTop > 2);
+    };
+
+    updateHeaderScrollState();
+    viewport.addEventListener("scroll", updateHeaderScrollState, {
+      passive: true,
+    });
+
+    return () =>
+      viewport.removeEventListener("scroll", updateHeaderScrollState);
+  }, []);
 
   const handleOpenAddEndpoint = (billerId: number) => {
     setInitialBillerId(billerId);
@@ -212,62 +234,72 @@ export function DashboardLayout() {
         <SocketBridgeProvider>
           <SidebarProvider>
             <AppSidebar />
-            <SidebarInset className="overflow-hidden border border-border/70 bg-card shadow-sm">
-              <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-3 border-b bg-card/95 px-4 backdrop-blur supports-backdrop-filter:bg-card/80">
-                <SidebarTrigger className="-ml-1 rounded-md" />
-                <Separator
-                  className="mr-2 data-[orientation=vertical]:h-4"
-                  orientation="vertical"
-                />
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    {breadcrumbItems.map((item, index) => (
-                      <React.Fragment
-                        key={`${item.href}-${item.kind ?? "route"}-${index}`}
-                      >
-                        <BreadcrumbItem
-                          className={
-                            item.isLast
-                              ? "min-w-0 max-w-full"
-                              : "hidden md:block"
-                          }
-                        >
-                          <DashboardBreadcrumbContent
-                            item={item}
-                            onAddBiller={handleOpenAddBiller}
-                            onAddEndpoint={handleOpenAddEndpoint}
-                          />
-                        </BreadcrumbItem>
-                        {!item.isLast && (
-                          <BreadcrumbSeparator className="hidden md:block" />
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </BreadcrumbList>
-                </Breadcrumb>
-                {isEndpointDetail && endpointQuery.isFetching && (
-                  <span
-                    aria-label="Refreshing endpoint"
-                    className="ml-2 inline-flex items-center gap-1.5 text-muted-foreground text-xs"
-                    data-testid="endpoint-refresh-indicator"
-                    role="status"
-                  >
-                    <span className="size-3 animate-spin rounded-full border-2 border-current border-r-transparent" />
-                    <span className="hidden sm:inline">Refreshing</span>
-                  </span>
-                )}
-                <div className="ml-auto">
-                  <ThemeSwitcher
-                    onChange={setTheme}
-                    value={themeSwitcherValue}
+            <SidebarInset className="h-svh min-h-0 overflow-hidden border border-border/70 bg-card shadow-sm md:h-[calc(100svh-1rem)]">
+              <ScrollArea
+                className="[&>[data-slot=scroll-area-viewport]>[role=presentation]]:!min-w-0 h-full min-h-0 w-full"
+                viewportRef={scrollViewportRef}
+              >
+                <header
+                  className={cn(
+                    "relative sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b bg-card/95 px-4 backdrop-blur after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-2 after:h-2 after:bg-gradient-to-b after:from-foreground/10 after:to-transparent after:opacity-0 after:transition-opacity after:duration-200 after:ease-[var(--ease-out)] supports-backdrop-filter:bg-card/80 motion-reduce:after:duration-[10ms]",
+                    isHeaderScrolled && "after:opacity-100"
+                  )}
+                >
+                  <SidebarTrigger className="-ml-1 rounded-md" />
+                  <Separator
+                    className="mr-2 data-[orientation=vertical]:h-4"
+                    orientation="vertical"
                   />
-                </div>
-              </header>
-              <main className="flex flex-1 flex-col gap-4 overflow-auto bg-background/70 p-4 md:p-6">
-                <Suspense fallback={<DashboardPageFallback />}>
-                  <Outlet />
-                </Suspense>
-              </main>
+                  <Breadcrumb>
+                    <BreadcrumbList>
+                      {breadcrumbItems.map((item, index) => (
+                        <React.Fragment
+                          key={`${item.href}-${item.kind ?? "route"}-${index}`}
+                        >
+                          <BreadcrumbItem
+                            className={
+                              item.isLast
+                                ? "min-w-0 max-w-full"
+                                : "hidden md:block"
+                            }
+                          >
+                            <DashboardBreadcrumbContent
+                              item={item}
+                              onAddBiller={handleOpenAddBiller}
+                              onAddEndpoint={handleOpenAddEndpoint}
+                            />
+                          </BreadcrumbItem>
+                          {!item.isLast && (
+                            <BreadcrumbSeparator className="hidden md:block" />
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                  {isEndpointDetail && endpointQuery.isFetching && (
+                    <span
+                      aria-label="Refreshing endpoint"
+                      className="ml-2 inline-flex items-center gap-1.5 text-muted-foreground text-xs"
+                      data-testid="endpoint-refresh-indicator"
+                      role="status"
+                    >
+                      <span className="size-3 animate-spin rounded-full border-2 border-current border-r-transparent" />
+                      <span className="hidden sm:inline">Refreshing</span>
+                    </span>
+                  )}
+                  <div className="ml-auto">
+                    <ThemeSwitcher
+                      onChange={setTheme}
+                      value={themeSwitcherValue}
+                    />
+                  </div>
+                </header>
+                <main className="flex min-h-full min-w-0 flex-col gap-4 bg-background/70 p-4 md:p-6">
+                  <Suspense fallback={<DashboardPageFallback />}>
+                    <Outlet />
+                  </Suspense>
+                </main>
+              </ScrollArea>
               <ProtectedAction ability="canAddEndpoint">
                 <AddEndpointSheet
                   initialBillerId={initialBillerId}
