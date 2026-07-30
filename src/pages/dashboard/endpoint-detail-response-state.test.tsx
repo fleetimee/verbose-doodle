@@ -4,7 +4,13 @@ import {
   QueryClientProvider,
   useQueryClient,
 } from "@tanstack/react-query";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import {
@@ -312,11 +318,11 @@ async function findResponseButton(name: string) {
 
 function expectResponseSelection(name: string, isSelected: boolean) {
   const buttons = screen.getAllByRole("button", {
-    name: isSelected ? `Edit ${name}` : `Select ${name} to edit`,
+    name: `More response actions for ${name}`,
   });
-  for (const button of buttons) {
-    expect(button.hasAttribute("disabled")).toBe(!isSelected);
-  }
+  expect(
+    buttons.some((button) => button.hasAttribute("disabled") === !isSelected)
+  ).toBe(true);
 }
 
 describe("EndpointDetailPage response state", () => {
@@ -336,11 +342,24 @@ describe("EndpointDetailPage response state", () => {
     globalThis.fetch = originalFetch;
   });
 
+  test("opens response actions from the context menu", async () => {
+    const user = userEvent.setup();
+    renderEndpointDetail();
+
+    const responseName = (await screen.findAllByText("Primary response"))[0];
+    fireEvent.contextMenu(responseName);
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Edit Name" })
+    );
+
+    expect(await screen.findByDisplayValue("Primary response")).toBeDefined();
+  });
+
   test("selects an activated response after activation succeeds", async () => {
     const user = userEvent.setup();
     renderEndpointDetail();
 
-    await findResponseButton("Edit Primary response");
+    await findResponseButton("More response actions for Primary response");
     await user.click(await findResponseButton("Activate Backup response"));
     await user.click(await screen.findByRole("button", { name: "Activate" }));
 
@@ -369,8 +388,12 @@ describe("EndpointDetailPage response state", () => {
     }
     renderEndpointDetail();
 
-    await findResponseButton("Edit Primary response");
-    await user.click(await findResponseButton("Deactivate Primary response"));
+    await user.click(
+      await findResponseButton("More response actions for Primary response")
+    );
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Deactivate response" })
+    );
     await user.click(await screen.findByRole("button", { name: "Deactivate" }));
 
     await waitFor(() => {
@@ -393,7 +416,9 @@ describe("EndpointDetailPage response state", () => {
       await screen.findByText("Multiple active responses detected")
     ).toBeDefined();
     expect(
-      screen.getAllByRole("button", { name: "Edit Primary response" })
+      screen.getAllByRole("button", {
+        name: "More response actions for Primary response",
+      })
     ).toHaveLength(2);
     expectResponseSelection("Primary response", true);
     expectResponseSelection("Backup response", false);

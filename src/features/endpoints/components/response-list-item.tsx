@@ -7,10 +7,10 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence } from "motion/react";
 import { useState } from "react";
 import {
-  Circle,
+  CircleOff,
   FileJson,
   Hash,
-  Pen,
+  MoreHorizontal,
   TextCursor,
 } from "@/components/hugeicons";
 import {
@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/features/auth/context";
 import { EditResponseStepper } from "@/features/endpoints/components/edit-response-stepper";
+import { ResponseContextMenu } from "@/features/endpoints/components/response-context-menu";
 import { ResponseSimulationBadge } from "@/features/endpoints/components/response-simulation-badge";
 import { SimulateTimeoutDialog } from "@/features/endpoints/components/simulate-timeout-dialog";
 import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
@@ -65,24 +66,22 @@ function getStatusCodeVariant(statusCode: number) {
 }
 
 // Helper to get item container classes
-function getItemContainerClasses(isSelected: boolean) {
+function getItemContainerClasses(isSelected: boolean, isActive: boolean) {
+  let stateClasses =
+    "border-transparent hover:border-border hover:bg-accent/50 hover:shadow-xs";
+
+  if (isSelected) {
+    stateClasses =
+      "border-primary/35 bg-primary/10 text-accent-foreground shadow-md before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-r-full before:bg-primary dark:bg-primary/15";
+  } else if (isActive) {
+    stateClasses =
+      "border-emerald-500/20 bg-emerald-500/5 before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-r-full before:bg-emerald-500/70 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:shadow-xs dark:bg-emerald-500/[0.04]";
+  }
+
   return cn(
     "relative w-full cursor-pointer overflow-hidden rounded-md border px-4 py-3 text-left transition-[background-color,border-color,box-shadow,color]",
-    isSelected
-      ? "border-primary/35 bg-primary/10 text-accent-foreground shadow-md before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-r-full before:bg-primary dark:bg-primary/15"
-      : "border-transparent hover:border-border hover:bg-accent/50 hover:shadow-xs",
+    stateClasses,
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-  );
-}
-
-// Helper to get activation button classes
-function getActivationButtonClasses(isActive: boolean, isLoading: boolean) {
-  return cn(
-    "border bg-background/80 shadow-xs",
-    isActive
-      ? "border-green-600 text-green-600 hover:bg-green-50 hover:text-green-700 dark:border-green-500 dark:text-green-500 dark:hover:bg-green-950/40 dark:hover:text-green-400"
-      : "text-muted-foreground hover:text-foreground",
-    isLoading ? "opacity-50" : ""
   );
 }
 
@@ -172,22 +171,6 @@ export function ResponseListItem({
     }
   };
 
-  const editButtonTitle = isSelected
-    ? formatMessage(messages.endpoints.editResponseTooltip, {
-        name: response.name,
-      })
-    : formatMessage(messages.endpoints.selectResponseToEditTooltip, {
-        name: response.name,
-      });
-
-  const simulateButtonTitle = isSelected
-    ? formatMessage(messages.endpoints.simulateResponseTooltip, {
-        name: response.name,
-      })
-    : formatMessage(messages.endpoints.selectResponseToSimulateTooltip, {
-        name: response.name,
-      });
-
   const activationButtonTitle = isActive
     ? formatMessage(messages.endpoints.deactivateResponseTooltip, {
         name: response.name,
@@ -196,176 +179,196 @@ export function ResponseListItem({
         name: response.name,
       });
 
+  const moreActionsButtonTitle = `More response actions for ${response.name}`;
+
   return (
     <>
-      {/* biome-ignore lint/a11y/useSemanticElements: Nested action controls prevent using a button element. */}
-      <div
-        className={getItemContainerClasses(isSelected)}
-        onClick={() => {
-          onSelect(response.id);
-        }}
-        onKeyDown={handleKeyDown}
-        role="button"
-        tabIndex={0}
+      <ResponseContextMenu
+        enabled={canActivateResponse}
+        isActive={isActive}
+        isLoading={isLoading}
+        isSelected={isSelected}
+        onActivate={() => setShowConfirmDialog(true)}
+        onDeactivate={() => setShowConfirmDialog(true)}
+        onDelete={handleDeleteClick}
+        onEdit={handleEditClick}
+        onSimulate={() => setShowSimulateDialog(true)}
+        response={response}
       >
-        <div className="relative flex items-start justify-between gap-3">
-          <div className="flex flex-1 flex-col gap-2.5">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-base leading-none">
-                {response.name}
-              </span>
-              {isActive && (
-                <div>
-                  <Badge
-                    className="flex items-center gap-1.5 bg-background/70 text-xs shadow-xs"
-                    variant="secondary"
-                  >
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    </span>
-                    Active
-                  </Badge>
-                </div>
-              )}
+        {/* biome-ignore lint/a11y/useSemanticElements: Nested action controls prevent using a button element. */}
+        <div
+          className={getItemContainerClasses(isSelected, isActive)}
+          onClick={() => {
+            onSelect(response.id);
+          }}
+          onKeyDown={handleKeyDown}
+          role="button"
+          tabIndex={0}
+        >
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="flex flex-1 flex-col gap-2.5">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-base leading-none">
+                  {response.name}
+                </span>
+                {isActive && (
+                  <div>
+                    <Badge
+                      className="flex items-center gap-1.5 bg-background/70 text-xs shadow-xs"
+                      variant="secondary"
+                    >
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      </span>
+                      Active
+                    </Badge>
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Badge
+                  className="font-mono text-xs shadow-xs"
+                  variant={getStatusCodeVariant(response.statusCode)}
+                >
+                  {response.statusCode}
+                </Badge>
+                <ResponseSimulationBadge response={response} />
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <Badge
-                className="font-mono text-xs shadow-xs"
-                variant={getStatusCodeVariant(response.statusCode)}
-              >
-                {response.statusCode}
-              </Badge>
-              <ResponseSimulationBadge response={response} />
-            </div>
-          </div>
-          {canActivateResponse && (
-            <div className="flex items-center gap-1">
-              <DropdownMenu>
-                <Tooltip>
-                  <DropdownMenuTrigger asChild>
+            {canActivateResponse && (
+              <div className="flex items-center gap-1.5">
+                {!isActive && (
+                  <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        aria-label={editButtonTitle}
-                        className="cursor-pointer bg-background/80 shadow-xs"
-                        disabled={!isSelected}
+                        aria-label={activationButtonTitle}
+                        className="border-emerald-500/35 bg-emerald-500/10 text-emerald-700 hover:border-emerald-500/50 hover:bg-emerald-500/15 hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200"
+                        disabled={isLoading}
                         onClick={(e) => {
                           e.stopPropagation();
+                          setShowConfirmDialog(true);
                         }}
-                        size="icon-sm"
+                        size="sm"
                         type="button"
                         variant="outline"
                       >
-                        <Pen />
+                        <HugeiconsIcon
+                          icon={CheckmarkCircle02Icon}
+                          strokeWidth={2}
+                        />
+                        Set active
                       </Button>
                     </TooltipTrigger>
-                  </DropdownMenuTrigger>
-                  <TooltipContent side="top">{editButtonTitle}</TooltipContent>
-                </Tooltip>
-                <DropdownMenuContent
-                  align="end"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditClick("name");
-                    }}
+                    <TooltipContent side="top">
+                      {activationButtonTitle}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                <DropdownMenu>
+                  <Tooltip>
+                    <DropdownMenuTrigger asChild>
+                      <TooltipTrigger asChild>
+                        <Button
+                          aria-label={moreActionsButtonTitle}
+                          className="cursor-pointer"
+                          disabled={!isSelected}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          size="icon-sm"
+                          type="button"
+                          variant="ghost"
+                        >
+                          <MoreHorizontal />
+                        </Button>
+                      </TooltipTrigger>
+                    </DropdownMenuTrigger>
+                    <TooltipContent side="top">
+                      More response actions
+                    </TooltipContent>
+                  </Tooltip>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-52 rounded-xl p-1.5"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <TextCursor className="h-4 w-4" />
-                    Edit Name
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditClick("statusCode");
-                    }}
-                  >
-                    <Hash className="h-4 w-4" />
-                    Edit Status Code
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditClick("json");
-                    }}
-                  >
-                    <FileJson className="h-4 w-4" />
-                    Edit JSON Response
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-red-600 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-950"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteClick();
-                    }}
-                  >
-                    <HugeiconsIcon
-                      className="h-4 w-4 text-red-600"
-                      icon={Delete02Icon}
-                      strokeWidth={2}
-                    />
-                    Delete Response
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    aria-label={simulateButtonTitle}
-                    className="cursor-pointer bg-background/80 shadow-xs"
-                    disabled={!isSelected}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowSimulateDialog(true);
-                    }}
-                    size="icon-sm"
-                    type="button"
-                    variant="outline"
-                  >
-                    <HugeiconsIcon icon={Clock03Icon} strokeWidth={2} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  {simulateButtonTitle}
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    aria-label={activationButtonTitle}
-                    className={cn(
-                      "cursor-pointer",
-                      getActivationButtonClasses(isActive, isLoading)
+                    <DropdownMenuItem
+                      disabled={!isSelected}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditClick("name");
+                      }}
+                    >
+                      <TextCursor className="h-4 w-4" />
+                      Edit Name
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={!isSelected}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditClick("statusCode");
+                      }}
+                    >
+                      <Hash className="h-4 w-4" />
+                      Edit Status Code
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={!isSelected}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditClick("json");
+                      }}
+                    >
+                      <FileJson className="h-4 w-4" />
+                      Edit JSON Response
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      disabled={!isSelected}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowSimulateDialog(true);
+                      }}
+                    >
+                      <HugeiconsIcon icon={Clock03Icon} strokeWidth={2} />
+                      Simulate timeout
+                    </DropdownMenuItem>
+                    {isActive && (
+                      <DropdownMenuItem
+                        disabled={isLoading}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowConfirmDialog(true);
+                        }}
+                      >
+                        <CircleOff className="h-4 w-4" />
+                        Deactivate response
+                      </DropdownMenuItem>
                     )}
-                    disabled={isLoading}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowConfirmDialog(true);
-                    }}
-                    size="icon-sm"
-                    type="button"
-                    variant="outline"
-                  >
-                    {isActive ? (
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-red-600 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-950"
+                      disabled={!isSelected}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick();
+                      }}
+                    >
                       <HugeiconsIcon
-                        icon={CheckmarkCircle02Icon}
+                        className="h-4 w-4 text-red-600"
+                        icon={Delete02Icon}
                         strokeWidth={2}
                       />
-                    ) : (
-                      <Circle />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  {activationButtonTitle}
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          )}
+                      Delete Response
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </ResponseContextMenu>
 
       <SimulateTimeoutDialog
         endpointId={endpointId}
