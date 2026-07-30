@@ -19,6 +19,7 @@ import { ResponseListItem } from "@/features/endpoints/components/response-list-
 import type { EndpointResponse } from "@/features/endpoints/types";
 import { messages } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
 type ResponseListProps = {
   endpointId: string;
@@ -30,6 +31,12 @@ type ResponseListProps = {
   onActivateResponse: (response: EndpointResponse) => void;
   onDeactivateResponse: (response: EndpointResponse) => void;
   onEditResponseDirtyChange?: (isDirty: boolean) => void;
+};
+
+type ResponseSectionHeaderProps = {
+  readonly count: number;
+  readonly isActive: boolean;
+  readonly label: string;
 };
 
 type AnimatedResponseListItemProps = Parameters<typeof ResponseListItem>[0];
@@ -71,6 +78,36 @@ function AnimatedResponseListItem({
     >
       <ResponseListItem {...props} />
     </motion.div>
+  );
+}
+
+function ResponseSectionHeader({
+  count,
+  isActive,
+  label,
+}: ResponseSectionHeaderProps) {
+  return (
+    <div className="flex items-center gap-3 px-2 py-2">
+      <Separator className="flex-1" />
+      <span
+        className={cn(
+          "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 font-medium text-[10px] uppercase tracking-[0.12em]",
+          isActive
+            ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300"
+            : "border-border/70 bg-muted/35 text-muted-foreground"
+        )}
+      >
+        <span
+          className={cn(
+            "size-1.5 rounded-full",
+            isActive ? "bg-emerald-500" : "bg-muted-foreground/45"
+          )}
+        />
+        <span>{label}</span>
+        <span className="font-mono text-[10px] opacity-70">{count}</span>
+      </span>
+      <Separator className="flex-1" />
+    </div>
   );
 }
 
@@ -140,45 +177,34 @@ export function ResponseList({
               {/* Inactive Responses Section */}
               {inactiveResponses.length > 0 && (
                 <div className="space-y-1">
-                  {/* Separator with centered "Inactive" text */}
-                  {activeResponses.length > 0 && (
-                    <div className="relative my-4">
-                      <Separator />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="flex items-center gap-1.5 bg-background px-2 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-                          <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/45" />
-                          Inactive
-                        </span>
+                  {/* Show label only when no active responses */}
+                  {activeResponses.length === 0 && (
+                    <div className="mb-3 rounded-md border border-amber-500/20 bg-amber-500/5 p-3 text-sm shadow-xs dark:border-amber-500/30">
+                      <div className="flex gap-3">
+                        <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 shadow-xs dark:text-amber-400">
+                          <span className="relative flex h-2 w-2">
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 motion-safe:animate-ping" />
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <p className="font-semibold text-amber-800 dark:text-amber-200">
+                            {messages.endpoints.noActiveResponseTitle}
+                          </p>
+                          <p className="text-amber-700/80 text-xs leading-relaxed dark:text-amber-300/80">
+                            {messages.endpoints.noActiveResponseDescription}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Show label only when no active responses */}
-                  {activeResponses.length === 0 && (
-                    <>
-                      <div className="mb-3 rounded-md border border-amber-500/20 bg-amber-500/5 p-3 text-sm shadow-xs dark:border-amber-500/30">
-                        <div className="flex gap-3">
-                          <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 shadow-xs dark:text-amber-400">
-                            <span className="relative flex h-2 w-2">
-                              <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 motion-safe:animate-ping" />
-                              <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
-                            </span>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <p className="font-semibold text-amber-800 dark:text-amber-200">
-                              {messages.endpoints.noActiveResponseTitle}
-                            </p>
-                            <p className="text-amber-700/80 text-xs leading-relaxed dark:text-amber-300/80">
-                              {messages.endpoints.noActiveResponseDescription}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 px-2 py-1 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-                        <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/45" />
-                        {messages.endpoints.inactiveResponsesLabel}
-                      </div>
-                    </>
+                  {activeResponses.length > 0 && (
+                    <ResponseSectionHeader
+                      count={inactiveResponses.length}
+                      isActive={false}
+                      label={messages.endpoints.inactiveResponsesLabel}
+                    />
                   )}
 
                   <AnimatePresence initial={false} mode="popLayout">
