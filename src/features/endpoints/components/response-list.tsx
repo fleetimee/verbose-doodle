@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 
 type ResponseListProps = {
   endpointId: string;
+  endpointSlug: string;
   responses: EndpointResponse[];
   selectedResponseId: string | null;
   isActivating: boolean;
@@ -113,6 +114,7 @@ function ResponseSectionHeader({
 
 export function ResponseList({
   endpointId,
+  endpointSlug,
   responses,
   selectedResponseId,
   isActivating,
@@ -158,6 +160,7 @@ export function ResponseList({
                     {activeResponses.map((response) => (
                       <AnimatedResponseListItem
                         endpointId={endpointId}
+                        endpointSlug={endpointSlug}
                         isActivating={isActivating}
                         isDeactivating={isDeactivating}
                         isSelected={selectedResponseId === response.id}
@@ -211,6 +214,7 @@ export function ResponseList({
                     {inactiveResponses.map((response) => (
                       <AnimatedResponseListItem
                         endpointId={endpointId}
+                        endpointSlug={endpointSlug}
                         isActivating={isActivating}
                         isDeactivating={isDeactivating}
                         isSelected={selectedResponseId === response.id}

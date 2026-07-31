@@ -16,6 +16,7 @@ type EditType = "name" | "statusCode" | "json";
 
 type EditResponseDialogProps = {
   endpointId: string;
+  endpointSlug: string;
   response: EndpointResponse;
   editType: EditType;
   open: boolean;
@@ -24,12 +25,13 @@ type EditResponseDialogProps = {
 
 export function EditResponseDialog({
   endpointId,
+  endpointSlug,
   response,
   editType,
   open,
   onOpenChange,
 }: EditResponseDialogProps) {
-  const { updateResponse } = useEndpointWorkspace(endpointId);
+  const { updateResponse } = useEndpointWorkspace(endpointSlug);
   const { mutate: updateResponseMutation, isPending } = updateResponse;
 
   const handleSubmit = (data: {

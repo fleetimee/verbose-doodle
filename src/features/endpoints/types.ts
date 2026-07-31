@@ -21,6 +21,7 @@ export type EndpointResponse = {
  */
 export type Endpoint = {
   id: string;
+  slug: string;
   method: HttpMethod;
   url: string;
   billerSlug: string;
@@ -39,6 +40,7 @@ type ApiCreateEndpointResponse = {
   data: {
     endpoint: {
       id: number;
+      slug: string;
       method: HttpMethod;
       url: string;
       biller_slug: string;

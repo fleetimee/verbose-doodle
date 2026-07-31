@@ -131,7 +131,7 @@ function TourStepContent({
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This page coordinates the endpoint workspace state machine and its guarded overlays.
 export function EndpointDetailPage() {
-  const { id: endpointId } = useParams<{ id: string }>();
+  const { slug: endpointSlug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { session } = useAuth();
@@ -147,7 +147,7 @@ export function EndpointDetailPage() {
   const canEditEndpoint = session.can("canEditEndpoint");
   const shouldReduceMotion = useReducedMotion() ?? false;
 
-  const routeEndpointId = endpointId ?? null;
+  const routeEndpointSlug = endpointSlug ?? null;
 
   const [selectedResponseId, setSelectedResponseId] = useState<string | null>(
     null
@@ -171,7 +171,7 @@ export function EndpointDetailPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const hasAutoStartedTour = useRef(false);
   const shouldMarkTourSeenOnEnd = useRef(false);
-  const previousEndpointIdRef = useRef<string | null>(null);
+  const previousEndpointSlugRef = useRef<string | null>(null);
   const selectedResponseWasActiveRef = useRef(false);
   const reportedMultipleActiveRef = useRef<string | null>(null);
   const reportedRefreshErrorRef = useRef<string | null>(null);
@@ -185,7 +185,7 @@ export function EndpointDetailPage() {
     createResponse: createResponseMutation,
     activateResponse: activateResponseMutation,
     deactivateResponse: deactivateResponseMutation,
-  } = useEndpointWorkspace(routeEndpointId ?? "");
+  } = useEndpointWorkspace(routeEndpointSlug ?? "");
   const {
     data: endpoint,
     error: endpointError,
@@ -304,13 +304,13 @@ export function EndpointDetailPage() {
     }
 
     const activeResponses = getActiveResponses(endpoint);
-    const endpointChanged = previousEndpointIdRef.current !== endpoint.id;
+    const endpointChanged = previousEndpointSlugRef.current !== endpoint.slug;
 
     if (endpointChanged) {
-      previousEndpointIdRef.current = endpoint.id;
+      previousEndpointSlugRef.current = endpoint.slug;
       rememberEndpoint({
         billerSlug: endpoint.billerSlug,
-        endpointId: endpoint.id,
+        endpointSlug: endpoint.slug,
       });
       closeEndpointScopedOverlays();
       const nextResponse = selectActiveResponse(endpoint);
@@ -366,29 +366,29 @@ export function EndpointDetailPage() {
 
   useEffect(() => {
     if (
-      endpointQuery.data !== null ||
+      (endpointQuery.data !== null && endpointQuery.data !== undefined) ||
       isLoadingEndpoint ||
       isFetchingEndpoint
     ) {
       return;
     }
 
-    if (routeEndpointId) {
+    if (routeEndpointSlug) {
       queryClient.removeQueries({
-        queryKey: ["endpoint-data", "workspace", routeEndpointId],
+        queryKey: ["endpoint-data", "workspace", routeEndpointSlug],
       });
       queryClient.setQueryData(
         ["endpoint-data", "catalog"],
         (catalog: Endpoint[] | undefined) =>
-          catalog?.filter((candidate) => candidate.id !== routeEndpointId)
+          catalog?.filter((candidate) => candidate.slug !== routeEndpointSlug)
       );
-      forgetEndpoint(routeEndpointId);
+      forgetEndpoint(routeEndpointSlug);
     }
 
     toast.error("Endpoint no longer exists");
     navigate("/dashboard/endpoints", { replace: true });
   }, [
-    routeEndpointId,
+    routeEndpointSlug,
     endpointQuery.data,
     forgetEndpoint,
     isFetchingEndpoint,
@@ -657,11 +657,11 @@ export function EndpointDetailPage() {
 
     // Build update payload - only include changed fields
     const updatePayload: {
-      endpointId: string;
+      endpointSlug: string;
       url?: string;
       method?: HttpMethod;
     } = {
-      endpointId: endpoint.id,
+      endpointSlug: endpoint.slug,
     };
 
     if (editedUrl.trim() !== endpoint.url) {
@@ -674,7 +674,7 @@ export function EndpointDetailPage() {
 
     updateEndpoint(
       {
-        endpointId: updatePayload.endpointId,
+        endpointSlug: updatePayload.endpointSlug,
         changes: {
           ...(updatePayload.url ? { url: updatePayload.url } : {}),
           ...(updatePayload.method ? { method: updatePayload.method } : {}),
@@ -711,7 +711,7 @@ export function EndpointDetailPage() {
       return;
     }
 
-    deleteEndpoint(endpoint.id, {
+    deleteEndpoint(endpoint.slug, {
       onSuccess: () => {
         setShowDeleteEndpointDialog(false);
         // Redirect to endpoints page after deletion
@@ -721,7 +721,7 @@ export function EndpointDetailPage() {
   };
 
   // Show an error if the endpoint route parameter is missing
-  if (!routeEndpointId) {
+  if (!routeEndpointSlug) {
     return (
       <motion.div
         animate={{ opacity: 1, y: 0 }}
@@ -761,7 +761,7 @@ export function EndpointDetailPage() {
               <EmptyMedia variant="icon">
                 <HugeiconsIcon icon={CircleDefinition} strokeWidth={2} />
               </EmptyMedia>
-              <EmptyTitle>Invalid endpoint ID</EmptyTitle>
+              <EmptyTitle>Invalid endpoint slug</EmptyTitle>
               <EmptyDescription>
                 The endpoint URL is invalid or has been tampered with.
               </EmptyDescription>
@@ -1216,6 +1216,7 @@ export function EndpointDetailPage() {
         <EndpointDetailLayout
           endpointId={endpoint.id}
           endpointMethod={endpoint.method}
+          endpointSlug={endpoint.slug}
           endpointUrl={endpoint.url}
           isActivating={isActivatingResponse}
           isDeactivating={isDeactivatingResponse}

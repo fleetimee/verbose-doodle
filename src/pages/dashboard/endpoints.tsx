@@ -171,7 +171,7 @@ function GridEndpoints({
         <EndpointContextMenu
           canEdit={canEditEndpoint}
           endpoint={endpoint}
-          key={endpoint.id}
+          key={endpoint.slug}
           onDelete={onDeleteEndpoint}
           onEdit={onEditEndpoint}
         >
@@ -200,7 +200,7 @@ function ListEndpoints({
         <EndpointContextMenu
           canEdit={canEditEndpoint}
           endpoint={endpoint}
-          key={endpoint.id}
+          key={endpoint.slug}
           onDelete={onDeleteEndpoint}
           onEdit={onEditEndpoint}
         >
@@ -365,7 +365,7 @@ export function EndpointsPage() {
 
     updateEndpoint(
       {
-        endpointId: endpointToEdit.id,
+        endpointSlug: endpointToEdit.slug,
         changes: {
           method: data.method,
           url: data.url,
@@ -399,7 +399,7 @@ export function EndpointsPage() {
       return;
     }
 
-    deleteEndpoint(endpointToDelete.id, {
+    deleteEndpoint(endpointToDelete.slug, {
       onSuccess: () => {
         setEndpointToDelete(null);
       },

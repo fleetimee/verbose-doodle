@@ -83,6 +83,7 @@ const response: EndpointResponse = {
 
 const listProps = {
   endpointId: "endpoint-1",
+  endpointSlug: "pln-post-payments-inquiry-a1b2c3",
   isActivating: false,
   isDeactivating: false,
   onActivateResponse: mock(() => undefined),

@@ -24,6 +24,7 @@ const endpoints = [
     billerSlug: "pln",
     billerName: "PLN",
     id: "endpoint-1",
+    slug: "pln-get-inquiry-a1b2c3",
     method: "GET" as const,
     responses: [
       {
@@ -43,6 +44,7 @@ const pdamEndpoint = {
   billerSlug: "pdam",
   billerName: "PDAM",
   id: "endpoint-2",
+  slug: "pdam-post-payment-d4e5f6",
   method: "POST" as const,
   responses: [],
   url: "/payment",
@@ -162,6 +164,7 @@ function installApiMock() {
                 (biller) => biller.slug === body.biller_slug
               )?.name,
               id: "created-endpoint",
+              slug: "pln-get-rest-a1b2c3",
               method: "GET",
               url: "/rest",
             },
@@ -170,7 +173,7 @@ function installApiMock() {
       );
     }
 
-    if (url === "/api/endpoint/endpoint-1" && method === "PATCH") {
+    if (url === "/api/endpoint/pln-get-inquiry-a1b2c3" && method === "PATCH") {
       if (shouldFailUpdate) {
         return Promise.resolve(
           new Response(JSON.stringify({ data: {} }), {
@@ -197,7 +200,7 @@ function installApiMock() {
       );
     }
 
-    if (url === "/api/endpoint/endpoint-1" && method === "DELETE") {
+    if (url === "/api/endpoint/pln-get-inquiry-a1b2c3" && method === "DELETE") {
       lastDeleteId = "endpoint-1";
 
       if (holdDeleteRequest) {

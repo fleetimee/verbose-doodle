@@ -56,7 +56,7 @@ export function useEndpointCatalog(
         queryKey: endpointDataQueryKeys.catalog,
       });
       await queryClient.invalidateQueries({
-        queryKey: endpointDataQueryKeys.workspace(input.endpointId),
+        queryKey: endpointDataQueryKeys.workspace(input.endpointSlug),
       });
       await queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
     },
@@ -69,7 +69,7 @@ export function useEndpointCatalog(
   const deleteEndpoint = useMutation<void, ApiError, string>({
     mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.deleteEndpoint,
-    onSuccess: async (_, endpointId) => {
+    onSuccess: async (_, endpointSlug) => {
       toast.success("Success", {
         description: "Endpoint deleted successfully",
       });
@@ -77,7 +77,7 @@ export function useEndpointCatalog(
         queryKey: endpointDataQueryKeys.catalog,
       });
       queryClient.removeQueries({
-        queryKey: endpointDataQueryKeys.workspace(endpointId),
+        queryKey: endpointDataQueryKeys.workspace(endpointSlug),
       });
       await queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
     },
@@ -99,10 +99,10 @@ export function useEndpointCatalog(
         queryFn: adapter.listEndpoints,
         staleTime: 5 * 60 * 1000,
       }),
-    prefetchEndpoint: (endpointId: string) =>
+    prefetchEndpoint: (endpointSlug: string) =>
       queryClient.prefetchQuery({
-        queryKey: endpointDataQueryKeys.workspace(endpointId),
-        queryFn: () => adapter.getEndpoint(endpointId),
+        queryKey: endpointDataQueryKeys.workspace(endpointSlug),
+        queryFn: () => adapter.getEndpoint(endpointSlug),
         staleTime: 5 * 60 * 1000,
       }),
   };

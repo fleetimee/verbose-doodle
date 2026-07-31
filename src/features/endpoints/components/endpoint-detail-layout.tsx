@@ -19,6 +19,7 @@ const ResponsePreview = lazy(() =>
 
 type EndpointDetailLayoutProps = {
   endpointId: string;
+  endpointSlug: string;
   responses: EndpointResponse[];
   selectedResponse: EndpointResponse | null;
   selectedResponseId: string | null;
@@ -36,6 +37,7 @@ type EndpointDetailLayoutProps = {
 
 export function EndpointDetailLayout({
   endpointId,
+  endpointSlug,
   responses,
   selectedResponse,
   selectedResponseId,
@@ -69,6 +71,7 @@ export function EndpointDetailLayout({
             >
               <ResponseList
                 endpointId={endpointId}
+                endpointSlug={endpointSlug}
                 isActivating={isActivating}
                 isDeactivating={isDeactivating}
                 onActivateResponse={onActivateResponse}
@@ -103,6 +106,7 @@ export function EndpointDetailLayout({
             >
               <ResponseList
                 endpointId={endpointId}
+                endpointSlug={endpointSlug}
                 isActivating={isActivating}
                 isDeactivating={isDeactivating}
                 onActivateResponse={onActivateResponse}

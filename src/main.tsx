@@ -130,7 +130,7 @@ function AppContent() {
             />
             <Route element={<OverviewPage />} path="overview" />
             <Route element={<EndpointsPage />} path="endpoints" />
-            <Route element={<EndpointDetailPage />} path="endpoints/:id" />
+            <Route element={<EndpointDetailPage />} path="endpoints/:slug" />
             <Route element={<SocketTesterPage />} path="socket-tester" />
             <Route element={<TcpClientPage />} path="socket-test/tcp-client" />
             <Route element={<TcpServerPage />} path="socket-test/tcp-server" />

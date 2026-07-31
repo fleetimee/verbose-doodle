@@ -18,7 +18,7 @@ import { DashboardLayout } from "@/features/dashboard/components/dashboard-layou
 import { ENDPOINT_MUTATION_KEY } from "@/features/endpoints/data/endpoint-mutation-key";
 
 const originalFetch = globalThis.fetch;
-const endpointId = "endpoint-1";
+const endpointId = "pln-post-login-a1b2c3";
 let availableBillers = [
   { biller_name: "PLN", slug: "pln" },
   { biller_name: "PDAM", slug: "pdam" },
@@ -31,6 +31,7 @@ type MockEndpoint = {
   biller_slug: string;
   biller_name: string | undefined;
   endpoint_id: string;
+  slug: string;
   method: string;
   responses: { activated?: boolean; response_id: string }[];
   url: string;
@@ -55,6 +56,7 @@ function installApiMock() {
     biller_slug: "pln",
     biller_name: endpointBillerName,
     endpoint_id: "endpoint-1",
+    slug: "pln-post-login-a1b2c3",
     method: "POST",
     responses: [{ response_id: "response-1" }],
     url: "/xapi-pbb/api/user/login",
@@ -63,6 +65,7 @@ function installApiMock() {
     biller_slug: "pln",
     biller_name: "PLN",
     endpoint_id: "endpoint-2",
+    slug: "pln-get-status-d4e5f6",
     method: "GET",
     responses: [{ response_id: "response-2" }],
     url: "/xapi-pbb/api/user/status",
@@ -71,6 +74,7 @@ function installApiMock() {
     biller_slug: "empty-biller",
     biller_name: "Empty Biller",
     endpoint_id: "endpoint-3",
+    slug: "empty-biller-get-status-a1b2c3",
     method: "GET",
     responses: [],
     url: "/xapi-pbb/api/empty/status",
@@ -79,6 +83,7 @@ function installApiMock() {
     biller_slug: "pdam",
     biller_name: "PDAM",
     endpoint_id: "endpoint-pdam",
+    slug: "pdam-get-payment-status-a1b2c3",
     method: "GET",
     responses: [{ activated: true, response_id: "response-pdam" }],
     url: "/xapi-pbb/api/payment/status",
@@ -103,6 +108,7 @@ function installApiMock() {
               biller_slug: request.biller_slug,
               biller_name: "PLN",
               endpoint_id: "created-endpoint",
+              slug: "pln-get-created-a1b2c3",
               method: request.method,
               responses: [],
               url: request.url,
@@ -148,15 +154,15 @@ function installApiMock() {
     }
 
     if (
-      url === "/api/endpoint/endpoint-1" ||
-      url === "/api/endpoint/endpoint-2" ||
-      url === "/api/endpoint/endpoint-pdam"
+      url === "/api/endpoint/pln-post-login-a1b2c3" ||
+      url === "/api/endpoint/pln-get-status-d4e5f6" ||
+      url === "/api/endpoint/pdam-get-payment-status-a1b2c3"
     ) {
       let detailEndpoint = pdamEndpoint;
 
-      if (url.endsWith("endpoint-1")) {
+      if (url.endsWith("pln-post-login-a1b2c3")) {
         detailEndpoint = endpoint;
-      } else if (url.endsWith("endpoint-2")) {
+      } else if (url.endsWith("pln-get-status-d4e5f6")) {
         detailEndpoint = alternateEndpoint;
       }
 
@@ -232,7 +238,7 @@ function renderDashboard() {
           <Routes>
             <Route element={<DashboardLayout />} path="/dashboard">
               <Route element={<LocationProbe />} path="endpoints" />
-              <Route element={<LocationProbe />} path="endpoints/:id" />
+              <Route element={<LocationProbe />} path="endpoints/:slug" />
             </Route>
           </Routes>
         </AuthProvider>
@@ -253,7 +259,7 @@ function renderHistoryDashboard() {
           <Routes>
             <Route element={<DashboardLayout />} path="/dashboard">
               <Route element={<HistoryControls />} path="endpoints" />
-              <Route element={<HistoryControls />} path="endpoints/:id" />
+              <Route element={<HistoryControls />} path="endpoints/:slug" />
             </Route>
           </Routes>
         </AuthProvider>
@@ -280,7 +286,7 @@ function renderMutationDashboard() {
                     <EndpointMutationProbe />
                   </>
                 }
-                path="endpoints/:id"
+                path="endpoints/:slug"
               />
             </Route>
           </Routes>
@@ -334,7 +340,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        "/dashboard/endpoints/endpoint-pdam"
+        "/dashboard/endpoints/pdam-get-payment-status-a1b2c3"
       );
     });
   });
@@ -423,7 +429,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        "/dashboard/endpoints/endpoint-2"
+        "/dashboard/endpoints/pln-get-status-d4e5f6"
       );
     });
   });
@@ -507,7 +513,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     );
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        "/dashboard/endpoints/endpoint-2"
+        "/dashboard/endpoints/pln-get-status-d4e5f6"
       );
     });
 
@@ -515,7 +521,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     await user.click(await screen.findByRole("option", { name: "PDAM" }));
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        "/dashboard/endpoints/endpoint-pdam"
+        "/dashboard/endpoints/pdam-get-payment-status-a1b2c3"
       );
     });
 
@@ -523,7 +529,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     await user.click(await screen.findByRole("option", { name: "PLN" }));
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        "/dashboard/endpoints/endpoint-2"
+        "/dashboard/endpoints/pln-get-status-d4e5f6"
       );
     });
   });
@@ -540,7 +546,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     );
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        "/dashboard/endpoints/endpoint-2"
+        "/dashboard/endpoints/pln-get-status-d4e5f6"
       );
     });
 
@@ -554,7 +560,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     await user.click(screen.getByRole("button", { name: "Forward" }));
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        "/dashboard/endpoints/endpoint-2"
+        "/dashboard/endpoints/pln-get-status-d4e5f6"
       );
     });
   });

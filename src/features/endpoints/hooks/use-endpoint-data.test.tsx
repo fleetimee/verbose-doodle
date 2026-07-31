@@ -21,6 +21,7 @@ function createAdapter() {
     endpoints: [
       {
         id: "1",
+        slug: "pln-get-health-a1b2c3",
         method: "GET",
         url: "/health",
         billerSlug: "pln",
@@ -68,6 +69,7 @@ describe("Endpoint data hooks", () => {
     });
     const catalogEndpoint = {
       id: "catalog-endpoint",
+      slug: "pln-post-catalog-backed-a1b2c3",
       method: "POST" as const,
       url: "/catalog-backed",
       billerSlug: "pln",
@@ -80,7 +82,7 @@ describe("Endpoint data hooks", () => {
       getEndpoint: () => new Promise<null>(() => undefined),
     };
     const { result } = renderHook(
-      () => useEndpointWorkspace(catalogEndpoint.id, adapter),
+      () => useEndpointWorkspace(catalogEndpoint.slug, adapter),
       { wrapper: createWrapper(queryClient) }
     );
 
