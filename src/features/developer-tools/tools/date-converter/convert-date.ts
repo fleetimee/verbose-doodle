@@ -33,8 +33,8 @@ export type DateConversionErrorCode =
 export class DateConversionError extends Error {
   readonly code: DateConversionErrorCode;
 
-  constructor(code: DateConversionErrorCode, message: string) {
-    super(message);
+  constructor(code: DateConversionErrorCode, message: string, cause?: unknown) {
+    super(message, { cause });
     this.name = "DateConversionError";
     this.code = code;
   }
@@ -141,10 +141,12 @@ function hasValidIsoParts(match: RegExpExecArray) {
 function validateTimeZone(timeZone: string) {
   try {
     new Intl.DateTimeFormat("en-US", { timeZone }).format();
-  } catch {
+  } catch (error) {
+    // biome-ignore lint/style/useErrorCause: DateConversionError forwards the cause through its constructor.
     throw new DateConversionError(
       "invalid-timezone",
-      `Unknown IANA timezone: ${timeZone}`
+      `Unknown IANA timezone: ${timeZone}`,
+      error
     );
   }
 }

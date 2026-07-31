@@ -219,7 +219,6 @@ export function extractNdefMessage(memory: Uint8Array): Uint8Array | undefined {
     }
     offset += length;
   }
-  return;
 }
 
 export function parseNdefMessage(

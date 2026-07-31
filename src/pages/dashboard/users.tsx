@@ -22,9 +22,9 @@ import { messages } from "@/lib/i18n";
 
 export function UsersPage() {
   useDocumentMeta({
-    title: messages.users.documentTitle,
     description: messages.users.documentDescription,
     keywords: ["user management", "permissions", "team", "users"],
+    title: messages.users.documentTitle,
   });
 
   const { data: users = [], isPending: isLoadingUsers } = useGetUsers();
@@ -52,8 +52,8 @@ export function UsersPage() {
   };
 
   const columns = createColumns({
-    onEdit: handleEditUser,
     onDelete: handleDeleteUser,
+    onEdit: handleEditUser,
   });
 
   return (

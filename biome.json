@@ -4,10 +4,27 @@
   "javascript": {
     "globals": ["Bun"]
   },
+  "assist": {
+    "actions": {
+      "source": {
+        "useSortedKeys": "off"
+      }
+    }
+  },
   "linter": {
     "rules": {
       "style": {
-        "useConsistentTypeDefinitions": "off"
+        "useConsistentTypeDefinitions": "off",
+        "useDestructuring": "off",
+        "noIncrementDecrement": "off"
+      },
+      "performance": {
+        "noJsxPropsBind": "off",
+        "noAwaitInLoops": "off"
+      },
+      "suspicious": {
+        "noShadow": "off",
+        "noUnnecessaryConditions": "off"
       }
     }
   },

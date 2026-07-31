@@ -52,10 +52,6 @@ const MIN_STATUS_CODE = 100;
 const MAX_STATUS_CODE = 599;
 
 const editSchemas = {
-  name: z.object({ name: z.string().min(1, "Name is required") }),
-  statusCode: z.object({
-    statusCode: z.number().min(MIN_STATUS_CODE).max(MAX_STATUS_CODE),
-  }),
   json: z.object({
     json: z
       .string()
@@ -72,29 +68,33 @@ const editSchemas = {
         { message: "Must be valid JSON" }
       ),
   }),
+  name: z.object({ name: z.string().min(1, "Name is required") }),
+  statusCode: z.object({
+    statusCode: z.number().min(MIN_STATUS_CODE).max(MAX_STATUS_CODE),
+  }),
 };
 
 const stepConfig = {
-  name: {
-    title: "Edit Response Name",
-    description: "Update the name of this response configuration",
-    icon: FileText,
-    color: "text-primary",
-    bgColor: "bg-primary/10 dark:bg-primary/20",
-  },
-  statusCode: {
-    title: "Edit Status Code",
-    description: "Update the HTTP status code for this response",
-    icon: Hash,
-    color: "text-primary",
-    bgColor: "bg-primary/10 dark:bg-primary/20",
-  },
   json: {
-    title: "Edit JSON Response",
+    bgColor: "bg-primary/10 dark:bg-primary/20",
+    color: "text-primary",
     description: "Update the JSON response body",
     icon: Code2,
-    color: "text-primary",
+    title: "Edit JSON Response",
+  },
+  name: {
     bgColor: "bg-primary/10 dark:bg-primary/20",
+    color: "text-primary",
+    description: "Update the name of this response configuration",
+    icon: FileText,
+    title: "Edit Response Name",
+  },
+  statusCode: {
+    bgColor: "bg-primary/10 dark:bg-primary/20",
+    color: "text-primary",
+    description: "Update the HTTP status code for this response",
+    icon: Hash,
+    title: "Edit Status Code",
   },
 };
 
@@ -121,11 +121,11 @@ export function EditResponseStepper({
   };
 
   const form = useForm({
-    resolver: zodResolver(schema),
     defaultValues: {
       [editType]: getDefaultValue(),
     },
     mode: "onChange",
+    resolver: zodResolver(schema),
   });
 
   const handleSubmit = form.handleSubmit((data) => {

@@ -40,81 +40,81 @@ import { messages } from "@/lib/i18n";
 const data = {
   navMain: [
     {
+      groupLabel: "Overview",
+      icon: LayoutDashboard,
       title: "Overview",
       url: "/dashboard/overview",
-      icon: LayoutDashboard,
-      groupLabel: "Overview",
     },
     {
+      groupLabel: "Biller Simulator",
+      icon: Plug,
       title: "Endpoints",
       url: "/dashboard/endpoints",
-      icon: Plug,
-      groupLabel: "Biller Simulator",
     },
     {
-      title: "Socket Test",
-      icon: RadioTower,
       groupLabel: "Socket Test",
+      icon: RadioTower,
       items: [
         {
+          icon: RadioTower,
           title: "TCP Client",
           url: "/dashboard/socket-test/tcp-client",
-          icon: RadioTower,
         },
         {
+          icon: Server,
           title: "TCP Server",
           url: "/dashboard/socket-test/tcp-server",
-          icon: Server,
         },
         {
+          icon: Waves,
           title: "UDP",
           url: "/dashboard/socket-test/udp",
-          icon: Waves,
         },
       ],
+      title: "Socket Test",
     },
     {
-      title: messages.developerTools.catalogNavigation,
-      url: "/dashboard/developer-tools",
-      icon: LayoutGrid,
-      groupLabel: messages.developerTools.navigationGroup,
       badge: String(DEVELOPER_TOOL_COUNT),
       exact: true,
+      groupLabel: messages.developerTools.navigationGroup,
+      icon: LayoutGrid,
+      title: messages.developerTools.catalogNavigation,
+      url: "/dashboard/developer-tools",
     },
     ...DEVELOPER_TOOL_CATEGORIES.map((category) => ({
-      title: category.name,
-      icon: category.icon,
       groupLabel: messages.developerTools.navigationGroup,
+      icon: category.icon,
       items: category.tools.map((tool) => ({
+        icon: tool.icon,
         title: tool.name,
         url: getDeveloperToolHref(tool),
-        icon: tool.icon,
       })),
+      title: category.name,
     })),
     {
-      title: "Socks Relay",
-      icon: Network,
-      groupLabel: "Socks Relay",
       adminOnly: true,
+      groupLabel: "Socks Relay",
+      icon: Network,
       items: [
         {
+          icon: Route,
           title: "REST API",
           url: "/dashboard/socks-relay/rest-api",
-          icon: Route,
         },
         {
+          icon: Network,
           title: "ISO 8583",
           url: "/dashboard/socks-relay/iso-8583",
-          icon: Network,
         },
       ],
+      title: "Socks Relay",
     },
   ],
   navSecondary: [
     {
+      icon: Info,
       title: "About",
       url: "/about",
-      icon: Info,
     },
   ],
 };
@@ -129,14 +129,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Construct user object for NavUser component
   const user = snapshot.user
     ? {
-        name: snapshot.user.username,
-        email: `${snapshot.user.role.toLowerCase()}@fleetime-labs.local`,
         avatar: "", // No avatar for now, will show initials
+        email: `${snapshot.user.role.toLowerCase()}@fleetime-labs.local`,
+        name: snapshot.user.username,
       }
     : {
-        name: "Guest",
-        email: "guest@fleetime-labs.local",
         avatar: "",
+        email: "guest@fleetime-labs.local",
+        name: "Guest",
       };
 
   const isAdmin = snapshot.user?.role === "ADMIN";

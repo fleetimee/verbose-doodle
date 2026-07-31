@@ -33,10 +33,10 @@ export function EditResponseNameForm({
   isLoading,
 }: EditResponseNameFormProps) {
   const form = useForm<EditNameFormData>({
-    resolver: zodResolver(editNameSchema),
     defaultValues: {
       name: defaultValue,
     },
+    resolver: zodResolver(editNameSchema),
   });
 
   return (

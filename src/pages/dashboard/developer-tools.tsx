@@ -4,7 +4,6 @@ import { messages } from "@/lib/i18n";
 
 export function DeveloperToolsPage() {
   useDocumentMeta({
-    title: messages.developerTools.documentTitle,
     description: messages.developerTools.documentDescription,
     keywords: [
       "developer tools",
@@ -20,6 +19,7 @@ export function DeveloperToolsPage() {
       "conversion",
       "scheduling",
     ],
+    title: messages.developerTools.documentTitle,
   });
 
   return <DeveloperToolsCatalog />;

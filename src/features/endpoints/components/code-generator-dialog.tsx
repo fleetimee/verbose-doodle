@@ -93,8 +93,8 @@ export function CodeGeneratorDialog({
     () =>
       generateCode(selectedLanguage, {
         baseUrl,
-        path,
         method,
+        path,
         response,
         token,
       }),
@@ -170,9 +170,9 @@ export function CodeGeneratorDialog({
                 className="flex h-full flex-col"
                 data={[
                   {
-                    language: highlightLanguage,
-                    filename: "request.sh",
                     code: generatedCode,
+                    filename: "request.sh",
+                    language: highlightLanguage,
                   },
                 ]}
                 defaultValue={highlightLanguage}

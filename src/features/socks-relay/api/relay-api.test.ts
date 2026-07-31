@@ -12,20 +12,20 @@ import type {
 } from "@/features/socks-relay/types";
 
 const relay: RelayInstance = {
-  relayId: "relay-1",
-  mode: "REST_API",
-  listeningPort: 8080,
   hostAddress: "127.0.0.1",
   hostPort: 8081,
-  running: true,
+  listeningPort: 8080,
+  mode: "REST_API",
   options: {
-    holdClient: false,
-    holdHost: false,
     dropClient: false,
     dropHost: false,
+    holdClient: false,
+    holdHost: false,
     removeHeaders: false,
     timerMs: 1000,
   },
+  relayId: "relay-1",
+  running: true,
 };
 
 const originalFetch = globalThis.fetch;
@@ -50,9 +50,9 @@ describe("relay api", () => {
     const logs = [
       {
         id: 1,
-        type: "relay_started",
         occurredAt: "2026-01-01T00:00:00Z",
         payload: {},
+        type: "relay_started",
       },
     ];
     globalThis.fetch = mock(() =>
@@ -81,11 +81,11 @@ describe("relay api", () => {
   test("starts a relay with fixed mode payload", async () => {
     const input: RelayStartInput = {
       ...relay.options,
-      relayId: "relay-1",
-      mode: "ISO_8583",
-      listeningPort: 9090,
       hostAddress: "10.0.0.5",
       hostPort: 9091,
+      listeningPort: 9090,
+      mode: "ISO_8583",
+      relayId: "relay-1",
     };
     globalThis.fetch = mock(() =>
       Promise.resolve(jsonResponse({ data: { relay } }))
@@ -105,11 +105,11 @@ describe("relay api", () => {
   test("passes blank relay ID through for backend generation", async () => {
     const input: RelayStartInput = {
       ...relay.options,
-      relayId: "",
-      mode: "REST_API",
-      listeningPort: 9090,
       hostAddress: "10.0.0.5",
       hostPort: 9091,
+      listeningPort: 9090,
+      mode: "REST_API",
+      relayId: "",
     };
     globalThis.fetch = mock(() =>
       Promise.resolve(jsonResponse({ data: { relay } }))
@@ -145,8 +145,8 @@ describe("relay api", () => {
     ) as unknown as typeof fetch;
 
     await updateRelayOptions({
-      relayId: "relay-1",
       options: { ...relay.options, holdClient: true },
+      relayId: "relay-1",
     });
 
     expect(getFetchMock()).toHaveBeenCalledWith(

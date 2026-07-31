@@ -24,10 +24,10 @@ async function fetchUsers(): Promise<User[]> {
   const data = await apiGet<ApiResponse>(getAdminUserList());
 
   return data.data.users.map((apiEndpoint) => ({
-    id: apiEndpoint.userId,
-    username: apiEndpoint.username,
-    role: apiEndpoint.role,
     active: apiEndpoint.active,
+    id: apiEndpoint.userId,
+    role: apiEndpoint.role,
+    username: apiEndpoint.username,
   }));
 }
 
@@ -42,8 +42,8 @@ export function usePrefetchUsers() {
     // Prefetch immediately on hover - no delay
     // This ensures when user clicks, data is already cached (< 100ms response)
     queryClient.prefetchQuery({
-      queryKey: userQueryKeys.all,
       queryFn: fetchUsers,
+      queryKey: userQueryKeys.all,
       staleTime: TIME_DURATIONS.FIVE_MINUTES,
     });
   };

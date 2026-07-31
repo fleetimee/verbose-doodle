@@ -24,20 +24,20 @@ async function fetchUsers(): Promise<User[]> {
   const data = await apiGet<ApiResponse>(getAdminUserList());
 
   return data.data.users.map((apiEndpoint) => ({
-    id: apiEndpoint.userId,
-    username: apiEndpoint.username,
-    role: apiEndpoint.role,
     active: apiEndpoint.active,
+    id: apiEndpoint.userId,
+    role: apiEndpoint.role,
+    username: apiEndpoint.username,
   }));
 }
 
 export function useGetUsers() {
   const useQuery = createQueryHook<User[]>({
-    queryKey: userQueryKeys.all,
-    queryFn: fetchUsers,
     options: {
       staleTime: TIME_DURATIONS.FIVE_MINUTES,
     },
+    queryFn: fetchUsers,
+    queryKey: userQueryKeys.all,
   });
 
   return useQuery();

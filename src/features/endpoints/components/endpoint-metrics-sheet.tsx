@@ -71,41 +71,41 @@ import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const TIME_WINDOW_LABELS: Record<PersistedMetricsTimeWindow, string> = {
-  "24h": messages.endpoints.metrics.timeWindows["24h"],
   "7d": messages.endpoints.metrics.timeWindows["7d"],
+  "24h": messages.endpoints.metrics.timeWindows["24h"],
   "30d": messages.endpoints.metrics.timeWindows["30d"],
 };
 
 const latencyChartConfig = {
   avgMs: {
-    label: messages.endpoints.metrics.charts.avgLabel,
     color: "var(--chart-1)",
+    label: messages.endpoints.metrics.charts.avgLabel,
   },
 } satisfies ChartConfig;
 
 const volumeChartConfig = {
+  errors: {
+    color: "var(--chart-5)",
+    label: messages.endpoints.metrics.charts.errorsLabel,
+  },
   requests: {
-    label: messages.endpoints.metrics.charts.requestsLabel,
     color: "var(--chart-1)",
+    label: messages.endpoints.metrics.charts.requestsLabel,
   },
   successes: {
-    label: messages.endpoints.metrics.charts.successesLabel,
     color: "var(--chart-2)",
-  },
-  errors: {
-    label: messages.endpoints.metrics.charts.errorsLabel,
-    color: "var(--chart-5)",
+    label: messages.endpoints.metrics.charts.successesLabel,
   },
 } satisfies ChartConfig;
 
 const emptyMetric = {
-  requestCount: 0,
+  averageDurationMs: 0,
   hitStatusCounts: {},
   httpStatusCounts: {},
-  totalDurationMs: 0,
-  minDurationMs: null,
   maxDurationMs: null,
-  averageDurationMs: 0,
+  minDurationMs: null,
+  requestCount: 0,
+  totalDurationMs: 0,
 };
 
 type EndpointMetricsSheetProps = {
@@ -133,10 +133,10 @@ export function EndpointMetricsSheet({
     useState<PersistedMetricsTimeWindow>("24h");
   const range = useMemo(() => getMetricRange(timeWindow), [timeWindow]);
   const telemetryFilters: EndpointTrafficLogsFilters = {
-    limit: 1,
-    status: "all",
-    search: "",
     includeBody: false,
+    limit: 1,
+    search: "",
+    status: "all",
   };
   const { metricsSummary: summaryQuery, hourlyMetrics: hourlyQuery } =
     useEndpointTelemetry(endpointId, telemetryFilters, {

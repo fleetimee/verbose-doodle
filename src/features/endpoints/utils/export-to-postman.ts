@@ -62,17 +62,17 @@ function parseUrl(url: string) {
     // Use {{baseUrl}} variable for the protocol and host
     const rawUrl = `{{baseUrl}}${urlObj.pathname}${urlObj.search}`;
     return {
-      raw: rawUrl,
       host: ["{{baseUrl}}"],
       path: urlObj.pathname.split("/").filter((segment) => segment.length > 0),
+      raw: rawUrl,
     };
   } catch {
     // If URL is relative or invalid, prepend {{baseUrl}}
     const cleanPath = url.startsWith("/") ? url : `/${url}`;
     return {
-      raw: `{{baseUrl}}${cleanPath}`,
       host: ["{{baseUrl}}"],
       path: cleanPath.split("/").filter((segment) => segment.length > 0),
+      raw: `{{baseUrl}}${cleanPath}`,
     };
   }
 }
@@ -84,8 +84,8 @@ function endpointToPostmanItem(endpoint: Endpoint): PostmanItem {
   const headers: PostmanHeader[] = [
     {
       key: "Content-Type",
-      value: "application/json",
       type: "text",
+      value: "application/json",
     },
   ];
 
@@ -97,22 +97,22 @@ function endpointToPostmanItem(endpoint: Endpoint): PostmanItem {
     endpoint.method !== "GET" && endpoint.method !== "DELETE"
       ? {
           mode: "raw",
-          raw: exampleResponse?.json
-            ? JSON.stringify(JSON.parse(exampleResponse.json), null, 2)
-            : "{}",
           options: {
             raw: {
               language: "json",
             },
           },
+          raw: exampleResponse?.json
+            ? JSON.stringify(JSON.parse(exampleResponse.json), null, 2)
+            : "{}",
         }
       : undefined;
 
   return {
     name: `${endpoint.method} ${endpoint.url}`,
     request: {
-      method: endpoint.method,
       header: headers,
+      method: endpoint.method,
       ...(body && { body }),
       url: parseUrl(endpoint.url),
     },
@@ -128,17 +128,17 @@ export function convertToPostmanCollection(
   collectionName = "Fleetime Labs API"
 ): PostmanCollection {
   const folders: PostmanFolder[] = groupedEndpoints.map((group) => ({
-    name: group.billerName,
     item: group.endpoints.map(endpointToPostmanItem),
+    name: group.billerName,
   }));
 
   return {
     info: {
-      name: collectionName,
+      _postman_id: generateUUID(),
       description: `Exported from Fleetime Labs on ${new Date().toISOString()}`,
+      name: collectionName,
       schema:
         "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-      _postman_id: generateUUID(),
     },
     item: folders,
   };
@@ -198,17 +198,17 @@ export function createPostmanEnvironment(
   const baseUrl = getBaseUrl();
 
   return {
+    _postman_variable_scope: "environment",
     id: generateUUID(),
     name: environmentName,
     values: [
       {
-        key: "baseUrl",
-        value: baseUrl,
-        type: "default",
         enabled: true,
+        key: "baseUrl",
+        type: "default",
+        value: baseUrl,
       },
     ],
-    _postman_variable_scope: "environment",
   };
 }
 

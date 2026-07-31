@@ -34,9 +34,9 @@ export function LoggedOut() {
   const { theme, setTheme } = useTheme();
 
   useDocumentMeta({
-    title: messages.auth.loggedOutTitle,
     description: messages.auth.loggedOutDocumentDescription,
     keywords: ["logout", "sign out", "authentication"],
+    title: messages.auth.loggedOutTitle,
   });
 
   if (snapshot.isAuthenticated) {

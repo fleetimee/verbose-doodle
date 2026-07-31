@@ -1,11 +1,11 @@
 export const commonMessages = {
   appName: "Fleetime Labs",
-  goHome: "Go Home",
-  explore: "Explore",
-  tryAgain: "Try Again",
   cancel: "Cancel",
-  save: "Save",
   delete: "Delete",
   deleting: "Deleting...",
+  explore: "Explore",
+  goHome: "Go Home",
+  save: "Save",
+  tryAgain: "Try Again",
   unexpectedError: "An unexpected error occurred",
 } as const;

@@ -111,9 +111,9 @@ export const initialNfcBridgeState: NfcBridgeState = {
   capabilities: [],
   connectionStatus: "disconnected",
   error: null,
+  latestScan: null,
   readerName: null,
   readerState: "unavailable",
   reason: null,
   scanStatus: "stopped",
-  latestScan: null,
 };

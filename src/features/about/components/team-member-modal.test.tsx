@@ -7,14 +7,14 @@ import {
 } from "@/features/about/components/team-member-modal";
 
 const sampleMember: TeamMemberProfile = {
-  id: 4,
-  name: "Novian Andika",
-  designation: "Frontend Developer",
-  image: "/assets/teams/45744788-1x.webp",
   bio: "Lead Frontend Developer & System Architect driving React 19 architecture.",
-  githubUsername: "fleetime",
-  roles: ["Frontend Architecture", "Base UI Systems"],
   contributions: ["React 19 & Base UI Seam Architecture"],
+  designation: "Frontend Developer",
+  githubUsername: "fleetime",
+  id: 4,
+  image: "/assets/teams/45744788-1x.webp",
+  name: "Novian Andika",
+  roles: ["Frontend Architecture", "Base UI Systems"],
   socials: {
     github: "https://github.com/fleetime",
   },
@@ -60,11 +60,11 @@ describe("TeamMemberModal component", () => {
     const user = userEvent.setup();
     const openChanges: boolean[] = [];
     const member: TeamMemberProfile = {
-      id: 7,
-      name: "Fallback Profile",
       designation: "Engineer",
-      image: "/fallback.webp",
       githubUsername: "fallback-user",
+      id: 7,
+      image: "/fallback.webp",
+      name: "Fallback Profile",
       socials: {
         linkedin: "https://www.linkedin.com/in/fallback-user",
       },
@@ -97,12 +97,12 @@ describe("TeamMemberModal component", () => {
     render(
       <TeamMemberModal
         member={{
-          id: 8,
-          name: "Minimal Profile",
-          designation: "Engineer",
-          image: "/minimal.webp",
-          roles: [],
           contributions: [],
+          designation: "Engineer",
+          id: 8,
+          image: "/minimal.webp",
+          name: "Minimal Profile",
+          roles: [],
         }}
         onOpenChange={() => undefined}
         open

@@ -49,8 +49,8 @@ export function createQueryHook<TData, TError = ApiError>(config: {
 }) {
   return (): UseQueryResult<TData, TError> =>
     useQuery({
-      queryKey: config.queryKey,
       queryFn: config.queryFn,
+      queryKey: config.queryKey,
       ...config.options,
     });
 }

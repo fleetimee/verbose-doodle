@@ -63,24 +63,24 @@ import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const routeLabels: Record<string, string> = {
-  overview: "Overview",
+  "cron-parser": messages.cronParser.title,
+  "date-converter": messages.dateConverter.title,
+  "developer-tools": messages.developerTools.navigationGroup,
   endpoints: "Endpoints",
-  "socks-relay": "Socks Relay",
-  "rest-api": "REST API",
   "iso-8583": "ISO 8583",
+  "json-schema-validator": messages.jsonSchemaValidator.title,
+  "jwt-inspector": messages.jwtInspector.title,
+  "number-base-converter": messages.numberBaseConverter.title,
+  overview: "Overview",
+  "rest-api": "REST API",
+  settings: "Settings",
   "socket-test": "SocketTest",
   "socket-tester": "Socket Tester",
+  "socks-relay": "Socks Relay",
   "tcp-client": "TCP Client",
   "tcp-server": "TCP Server",
   udp: "UDP",
   users: "Users",
-  settings: "Settings",
-  "developer-tools": messages.developerTools.navigationGroup,
-  "json-schema-validator": messages.jsonSchemaValidator.title,
-  "cron-parser": messages.cronParser.title,
-  "number-base-converter": messages.numberBaseConverter.title,
-  "date-converter": messages.dateConverter.title,
-  "jwt-inspector": messages.jwtInspector.title,
 };
 
 const ENDPOINT_DETAIL_REGEX = /^\/dashboard\/endpoints\/([^/]+)$/;

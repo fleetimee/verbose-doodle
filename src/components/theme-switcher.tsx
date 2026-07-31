@@ -10,13 +10,13 @@ import { cn } from "@/lib/utils";
 
 const themes = [
   {
-    key: "light",
     icon: Sun,
+    key: "light",
     label: messages.theme.lightTheme,
   },
   {
-    key: "dark",
     icon: Moon,
+    key: "dark",
     label: messages.theme.darkTheme,
   },
 ];
@@ -100,7 +100,7 @@ export const ThemeSwitcher = ({
                 transition={
                   shouldReduceMotion
                     ? { duration: MOTION_DURATION.instant }
-                    : { type: "spring", stiffness: 300, damping: 30 }
+                    : { damping: 30, stiffness: 300, type: "spring" }
                 }
               />
             )}

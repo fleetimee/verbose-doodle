@@ -31,8 +31,8 @@ type CreateTodoInput = {
  */
 export function useTodos() {
   return useQuery({
-    queryKey: ["todos"],
     queryFn: () => apiGet<Todo[]>("/todos"),
+    queryKey: ["todos"],
     // Optional: Add custom options
     staleTime: ONE_MINUTE, // 1 minute
   });
@@ -44,9 +44,9 @@ export function useTodos() {
  */
 export function useTodo(id: number) {
   return useQuery({
-    queryKey: ["todos", id],
-    queryFn: () => apiGet<Todo>(`/todos/${id}`),
     enabled: id > 0,
+    queryFn: () => apiGet<Todo>(`/todos/${id}`),
+    queryKey: ["todos", id],
   });
 }
 

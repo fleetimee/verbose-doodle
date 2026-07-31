@@ -10,9 +10,9 @@ const TRAFFIC_LOG_LINE_PATTERN = /request_id:req-1/;
 
 const trafficLog = {
   biller_id: "1",
+  delay_ms: null,
   destination_ip: null,
   destination_port: null,
-  delay_ms: null,
   duration_ms: 24,
   endpoint_id: "endpoint-1",
   forwarded_for: null,

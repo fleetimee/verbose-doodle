@@ -13,31 +13,31 @@ function createLog(
   overrides: Partial<EndpointTrafficLog> = {}
 ): EndpointTrafficLog {
   return {
-    id: overrides.id ?? "log-1",
-    requestId: overrides.requestId ?? "request-1",
-    occurredAt: overrides.occurredAt ?? new Date(NOW).toISOString(),
-    endpointId: overrides.endpointId ?? "endpoint-1",
-    responseId: overrides.responseId ?? "response-1",
     billerId: overrides.billerId ?? "1",
-    method: overrides.method ?? "GET",
-    path: overrides.path ?? "/rest",
-    queryString: overrides.queryString ?? null,
-    matched: overrides.matched ?? true,
-    hitStatus: overrides.hitStatus ?? "matched_success",
-    httpStatusCode: overrides.httpStatusCode ?? 200,
-    responseName: overrides.responseName ?? "Success",
-    sourceIp: overrides.sourceIp ?? "127.0.0.1",
-    sourcePort: overrides.sourcePort ?? null,
+    delayMs: overrides.delayMs ?? null,
     destinationIp: overrides.destinationIp ?? null,
     destinationPort: overrides.destinationPort ?? null,
-    forwardedFor: overrides.forwardedFor ?? null,
-    userAgent: overrides.userAgent ?? null,
     durationMs:
       "durationMs" in overrides ? (overrides.durationMs ?? null) : 100,
-    delayMs: overrides.delayMs ?? null,
-    simulateTimeout: overrides.simulateTimeout ?? false,
+    endpointId: overrides.endpointId ?? "endpoint-1",
+    forwardedFor: overrides.forwardedFor ?? null,
+    hitStatus: overrides.hitStatus ?? "matched_success",
+    httpStatusCode: overrides.httpStatusCode ?? 200,
+    id: overrides.id ?? "log-1",
+    matched: overrides.matched ?? true,
+    method: overrides.method ?? "GET",
+    occurredAt: overrides.occurredAt ?? new Date(NOW).toISOString(),
+    path: overrides.path ?? "/rest",
+    queryString: overrides.queryString ?? null,
     requestBodyPreview: overrides.requestBodyPreview ?? null,
+    requestId: overrides.requestId ?? "request-1",
     responseBodyPreview: overrides.responseBodyPreview ?? null,
+    responseId: overrides.responseId ?? "response-1",
+    responseName: overrides.responseName ?? "Success",
+    simulateTimeout: overrides.simulateTimeout ?? false,
+    sourceIp: overrides.sourceIp ?? "127.0.0.1",
+    sourcePort: overrides.sourcePort ?? null,
+    userAgent: overrides.userAgent ?? null,
   };
 }
 
@@ -50,7 +50,7 @@ describe("endpoint metrics utilities", () => {
 
   test("calculates p50, p95, and p99 for sorted logs", () => {
     const logs = [100, 200, 300, 400, 500].map((durationMs, index) =>
-      createLog({ id: `log-${index}`, durationMs })
+      createLog({ durationMs, id: `log-${index}` })
     );
 
     expect(calculatePercentile(logs, 50)).toBe(300);
@@ -60,7 +60,7 @@ describe("endpoint metrics utilities", () => {
 
   test("calculates percentiles for unsorted logs", () => {
     const logs = [500, 100, 400, 200, 300].map((durationMs, index) =>
-      createLog({ id: `log-${index}`, durationMs })
+      createLog({ durationMs, id: `log-${index}` })
     );
 
     expect(calculatePercentile(logs, 50)).toBe(300);
@@ -70,9 +70,9 @@ describe("endpoint metrics utilities", () => {
 
   test("ignores null duration logs in percentile calculation", () => {
     const logs = [
-      createLog({ id: "log-1", durationMs: null }),
-      createLog({ id: "log-2", durationMs: 100 }),
-      createLog({ id: "log-3", durationMs: 300 }),
+      createLog({ durationMs: null, id: "log-1" }),
+      createLog({ durationMs: 100, id: "log-2" }),
+      createLog({ durationMs: 300, id: "log-3" }),
     ];
 
     expect(calculatePercentile(logs, 50)).toBe(200);
@@ -105,19 +105,19 @@ describe("endpoint metrics utilities", () => {
     const windowStart = NOW - 12_000;
     const logs = [
       createLog({
+        hitStatus: "matched_success",
         id: "success",
         occurredAt: new Date(windowStart + 500).toISOString(),
-        hitStatus: "matched_success",
       }),
       createLog({
+        hitStatus: "backend_error",
         id: "error",
         occurredAt: new Date(windowStart + 1500).toISOString(),
-        hitStatus: "backend_error",
       }),
       createLog({
+        hitStatus: "matched_delayed",
         id: "delayed",
         occurredAt: new Date(windowStart + 11_500).toISOString(),
-        hitStatus: "matched_delayed",
       }),
     ];
 
@@ -135,35 +135,35 @@ describe("endpoint metrics utilities", () => {
   test("summarizes throughput and status categories", () => {
     const logs = [
       createLog({
-        id: "success",
-        occurredAt: new Date(NOW - 60_000).toISOString(),
         durationMs: 90,
         hitStatus: "matched_success",
+        id: "success",
+        occurredAt: new Date(NOW - 60_000).toISOString(),
       }),
       createLog({
-        id: "delayed",
-        occurredAt: new Date(NOW - 45_000).toISOString(),
         durationMs: 240,
         hitStatus: "matched_delayed",
+        id: "delayed",
+        occurredAt: new Date(NOW - 45_000).toISOString(),
       }),
       createLog({
-        id: "timeout",
-        occurredAt: new Date(NOW - 30_000).toISOString(),
         durationMs: null,
         hitStatus: "matched_timeout",
+        id: "timeout",
+        occurredAt: new Date(NOW - 30_000).toISOString(),
         simulateTimeout: true,
       }),
       createLog({
-        id: "unmatched",
-        occurredAt: new Date(NOW - 15_000).toISOString(),
         durationMs: 40,
         hitStatus: "unmatched_endpoint",
+        id: "unmatched",
+        occurredAt: new Date(NOW - 15_000).toISOString(),
       }),
       createLog({
-        id: "backend",
-        occurredAt: new Date(NOW).toISOString(),
         durationMs: 320,
         hitStatus: "backend_error",
+        id: "backend",
+        occurredAt: new Date(NOW).toISOString(),
       }),
     ];
 

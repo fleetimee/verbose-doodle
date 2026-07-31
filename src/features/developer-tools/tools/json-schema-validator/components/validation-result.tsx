@@ -25,24 +25,24 @@ const outcomeCopy: Record<
 > = {
   PARSE_ERROR: {
     code: messages.jsonSchemaValidator.parseCode,
-    title: messages.jsonSchemaValidator.parseTitle,
     description: messages.jsonSchemaValidator.parseDescription,
-    tone: "text-amber-700 dark:text-amber-400",
     rule: "border-amber-500/40",
+    title: messages.jsonSchemaValidator.parseTitle,
+    tone: "text-amber-700 dark:text-amber-400",
   },
   SCHEMA_ERROR: {
     code: messages.jsonSchemaValidator.schemaErrorCode,
-    title: messages.jsonSchemaValidator.schemaErrorTitle,
     description: messages.jsonSchemaValidator.schemaErrorDescription,
-    tone: "text-amber-700 dark:text-amber-400",
     rule: "border-amber-500/40",
+    title: messages.jsonSchemaValidator.schemaErrorTitle,
+    tone: "text-amber-700 dark:text-amber-400",
   },
   TIMEOUT: {
     code: messages.jsonSchemaValidator.timeoutCode,
-    title: messages.jsonSchemaValidator.timeoutTitle,
     description: messages.jsonSchemaValidator.timeoutDescription,
-    tone: "text-amber-700 dark:text-amber-400",
     rule: "border-amber-500/40",
+    title: messages.jsonSchemaValidator.timeoutTitle,
+    tone: "text-amber-700 dark:text-amber-400",
   },
 } as const;
 
@@ -53,21 +53,21 @@ export function ValidationResult({ result }: ValidationResultProps) {
   } else if (result.valid) {
     details = {
       code: messages.jsonSchemaValidator.validCode,
-      title: messages.jsonSchemaValidator.validTitle,
       description: messages.jsonSchemaValidator.validDescription,
-      tone: "text-emerald-700 dark:text-emerald-400",
       rule: "border-emerald-600/40",
+      title: messages.jsonSchemaValidator.validTitle,
+      tone: "text-emerald-700 dark:text-emerald-400",
     };
   } else {
     details = {
       code: messages.jsonSchemaValidator.invalidCode,
-      title: messages.jsonSchemaValidator.invalidTitle,
       description: formatPluralMessage(
         messages.jsonSchemaValidator.invalidDescription,
         result.errorCount
       ),
-      tone: "text-destructive",
       rule: "border-destructive/40",
+      title: messages.jsonSchemaValidator.invalidTitle,
+      tone: "text-destructive",
     };
   }
 
@@ -79,7 +79,7 @@ export function ValidationResult({ result }: ValidationResultProps) {
       exit={{ opacity: 0, y: -8 }}
       initial={{ opacity: 0, y: 8 }}
       layout
-      transition={{ type: "spring", duration: 0.32, bounce: 0.08 }}
+      transition={{ bounce: 0.08, duration: 0.32, type: "spring" }}
     >
       <div className="grid gap-4 sm:grid-cols-[90px_minmax(0,1fr)_auto] sm:items-start">
         <span

@@ -17,11 +17,11 @@ export class ErrorBoundary extends Component<
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { error: null, hasError: false };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+    return { error, hasError: true };
   }
 
   componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo): void {
@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<
   }
 
   resetError = (): void => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ error: null, hasError: false });
   };
 
   render(): ReactNode {

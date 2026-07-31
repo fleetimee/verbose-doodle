@@ -14,13 +14,13 @@ import type { OverviewData } from "@/features/overview/types";
 import { cn } from "@/lib/utils";
 
 const methodColors: Record<HttpMethod, string> = {
-  GET: "border-sky-500/25 bg-sky-500/10 text-sky-600 group-hover:border-sky-400/45 group-hover:bg-sky-500/18 group-hover:text-sky-500 group-focus-visible:border-sky-400/45 group-focus-visible:bg-sky-500/18 group-focus-visible:text-sky-500 dark:text-sky-300",
-  POST: "border-emerald-500/25 bg-emerald-500/10 text-emerald-600 group-hover:border-emerald-400/45 group-hover:bg-emerald-500/18 group-hover:text-emerald-500 group-focus-visible:border-emerald-400/45 group-focus-visible:bg-emerald-500/18 group-focus-visible:text-emerald-500 dark:text-emerald-300",
-  PUT: "border-amber-500/25 bg-amber-500/10 text-amber-600 group-hover:border-amber-400/45 group-hover:bg-amber-500/18 group-hover:text-amber-500 group-focus-visible:border-amber-400/45 group-focus-visible:bg-amber-500/18 group-focus-visible:text-amber-500 dark:text-amber-300",
   DELETE:
     "border-rose-500/25 bg-rose-500/10 text-rose-600 group-hover:border-rose-400/45 group-hover:bg-rose-500/18 group-hover:text-rose-500 group-focus-visible:border-rose-400/45 group-focus-visible:bg-rose-500/18 group-focus-visible:text-rose-500 dark:text-rose-300",
+  GET: "border-sky-500/25 bg-sky-500/10 text-sky-600 group-hover:border-sky-400/45 group-hover:bg-sky-500/18 group-hover:text-sky-500 group-focus-visible:border-sky-400/45 group-focus-visible:bg-sky-500/18 group-focus-visible:text-sky-500 dark:text-sky-300",
   PATCH:
     "border-violet-500/25 bg-violet-500/10 text-violet-600 group-hover:border-violet-400/45 group-hover:bg-violet-500/18 group-hover:text-violet-500 group-focus-visible:border-violet-400/45 group-focus-visible:bg-violet-500/18 group-focus-visible:text-violet-500 dark:text-violet-300",
+  POST: "border-emerald-500/25 bg-emerald-500/10 text-emerald-600 group-hover:border-emerald-400/45 group-hover:bg-emerald-500/18 group-hover:text-emerald-500 group-focus-visible:border-emerald-400/45 group-focus-visible:bg-emerald-500/18 group-focus-visible:text-emerald-500 dark:text-emerald-300",
+  PUT: "border-amber-500/25 bg-amber-500/10 text-amber-600 group-hover:border-amber-400/45 group-hover:bg-amber-500/18 group-hover:text-amber-500 group-focus-visible:border-amber-400/45 group-focus-visible:bg-amber-500/18 group-focus-visible:text-amber-500 dark:text-amber-300",
 };
 
 type RecentEndpointsProps = {

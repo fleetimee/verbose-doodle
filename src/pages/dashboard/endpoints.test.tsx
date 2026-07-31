@@ -15,16 +15,15 @@ import { AuthProvider } from "@/features/auth/context";
 import { EndpointsPage } from "@/pages/dashboard/endpoints";
 
 const billers = [
-  { slug: "pln", name: "PLN" },
-  { slug: "pdam", name: "PDAM" },
+  { name: "PLN", slug: "pln" },
+  { name: "PDAM", slug: "pdam" },
 ];
 
 const endpoints = [
   {
-    billerSlug: "pln",
     billerName: "PLN",
+    billerSlug: "pln",
     id: "endpoint-1",
-    slug: "pln-get-inquiry-a1b2c3",
     method: "GET" as const,
     responses: [
       {
@@ -36,17 +35,18 @@ const endpoints = [
         statusCode: 200,
       },
     ],
+    slug: "pln-get-inquiry-a1b2c3",
     url: "/inquiry",
   },
 ];
 
 const pdamEndpoint = {
-  billerSlug: "pdam",
   billerName: "PDAM",
+  billerSlug: "pdam",
   id: "endpoint-2",
-  slug: "pdam-post-payment-d4e5f6",
   method: "POST" as const,
   responses: [],
+  slug: "pdam-post-payment-d4e5f6",
   url: "/payment",
 };
 
@@ -159,13 +159,13 @@ function installApiMock() {
         jsonResponse({
           data: {
             endpoint: {
-              biller_slug: body.biller_slug,
               biller_name: billers.find(
                 (biller) => biller.slug === body.biller_slug
               )?.name,
+              biller_slug: body.biller_slug,
               id: "created-endpoint",
-              slug: "pln-get-rest-a1b2c3",
               method: "GET",
+              slug: "pln-get-rest-a1b2c3",
               url: "/rest",
             },
           },
@@ -466,51 +466,51 @@ describe("EndpointsPage catalog actions", () => {
     ).toBeNull();
   });
 
-  test.each([
-    "grid",
-    "list",
-  ] as const)("edits an endpoint from the %s view without changing its biller", async (viewMode) => {
-    const user = userEvent.setup();
-    localStorage.setItem("endpoints-view-mode", JSON.stringify(viewMode));
-    renderEndpointsPage();
+  test.each(["grid", "list"] as const)(
+    "edits an endpoint from the %s view without changing its biller",
+    async (viewMode) => {
+      const user = userEvent.setup();
+      localStorage.setItem("endpoints-view-mode", JSON.stringify(viewMode));
+      renderEndpointsPage();
 
-    const endpointButton = await screen.findByRole("button", {
-      name: endpointButtonName,
-    });
-    const closedEditSheet = document.querySelector(
-      '[data-slot="sheet-content"]'
-    );
-    expect(closedEditSheet).toBeDefined();
-    expect(closedEditSheet?.getAttribute("data-closed")).toBe("");
+      const endpointButton = await screen.findByRole("button", {
+        name: endpointButtonName,
+      });
+      const closedEditSheet = document.querySelector(
+        '[data-slot="sheet-content"]'
+      );
+      expect(closedEditSheet).toBeDefined();
+      expect(closedEditSheet?.getAttribute("data-closed")).toBe("");
 
-    act(() => {
-      fireEvent.contextMenu(endpointButton);
-    });
-    await user.click(
-      await screen.findByRole("menuitem", { name: "Edit endpoint" })
-    );
+      act(() => {
+        fireEvent.contextMenu(endpointButton);
+      });
+      await user.click(
+        await screen.findByRole("menuitem", { name: "Edit endpoint" })
+      );
 
-    const dialog = await screen.findByRole("dialog");
-    expect(dialog).toBe(closedEditSheet as HTMLElement);
-    expect(within(dialog).getByDisplayValue("/inquiry")).toBeDefined();
-    expect(within(dialog).getByText("PLN")).toBeDefined();
+      const dialog = await screen.findByRole("dialog");
+      expect(dialog).toBe(closedEditSheet as HTMLElement);
+      expect(within(dialog).getByDisplayValue("/inquiry")).toBeDefined();
+      expect(within(dialog).getByText("PLN")).toBeDefined();
 
-    await user.click(within(dialog).getByLabelText("Method"));
-    await user.click(await screen.findByRole("option", { name: "POST" }));
-    await user.clear(within(dialog).getByLabelText("URL"));
-    await user.type(within(dialog).getByLabelText("URL"), "/payment");
-    await user.click(
-      within(dialog).getByRole("button", { name: "Save Changes" })
-    );
+      await user.click(within(dialog).getByLabelText("Method"));
+      await user.click(await screen.findByRole("option", { name: "POST" }));
+      await user.clear(within(dialog).getByLabelText("URL"));
+      await user.type(within(dialog).getByLabelText("URL"), "/payment");
+      await user.click(
+        within(dialog).getByRole("button", { name: "Save Changes" })
+      );
 
-    await waitFor(() => {
-      expect(lastUpdateBody).toEqual({ method: "POST", url: "/payment" });
-    });
-    await waitFor(() => {
-      expect(screen.queryByRole("dialog")).toBeNull();
-      expect(screen.getByText("/payment")).toBeDefined();
-    });
-  });
+      await waitFor(() => {
+        expect(lastUpdateBody).toEqual({ method: "POST", url: "/payment" });
+      });
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).toBeNull();
+        expect(screen.getByText("/payment")).toBeDefined();
+      });
+    }
+  );
 
   test("constrains long endpoint paths in grid cards", async () => {
     const longPath =
@@ -585,72 +585,72 @@ describe("EndpointsPage catalog actions", () => {
     });
   });
 
-  test.each([
-    "grid",
-    "list",
-  ] as const)("deletes an endpoint from the %s view after confirmation and preserves catalog state", async (viewMode) => {
-    const user = userEvent.setup();
-    localStorage.setItem("endpoints-view-mode", JSON.stringify(viewMode));
-    renderEndpointsPage();
+  test.each(["grid", "list"] as const)(
+    "deletes an endpoint from the %s view after confirmation and preserves catalog state",
+    async (viewMode) => {
+      const user = userEvent.setup();
+      localStorage.setItem("endpoints-view-mode", JSON.stringify(viewMode));
+      renderEndpointsPage();
 
-    const endpointButton = await screen.findByRole("button", {
-      name: endpointButtonName,
-    });
-    const searchInput = await screen.findByPlaceholderText(
-      "Search endpoints..."
-    );
-    await user.type(searchInput, "/inquiry");
-    expect((searchInput as HTMLInputElement).value).toBe("/inquiry");
-
-    act(() => {
-      fireEvent.contextMenu(endpointButton);
-    });
-    await user.click(
-      await screen.findByRole("menuitem", { name: "Delete endpoint" })
-    );
-
-    const dialog = await screen.findByRole("alertdialog");
-    expect(within(dialog).getByText("GET /inquiry")).toBeDefined();
-    expect(within(dialog).getByText(configuredResponseName)).toBeDefined();
-
-    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
-    expect(lastDeleteId).toBeNull();
-    expect(
-      screen.getByRole("button", { name: endpointButtonName })
-    ).toBeDefined();
-
-    act(() => {
-      fireEvent.contextMenu(
-        screen.getByRole("button", { name: endpointButtonName })
+      const endpointButton = await screen.findByRole("button", {
+        name: endpointButtonName,
+      });
+      const searchInput = await screen.findByPlaceholderText(
+        "Search endpoints..."
       );
-    });
-    await user.click(
-      await screen.findByRole("menuitem", { name: "Delete endpoint" })
-    );
-    await user.click(
-      within(await screen.findByRole("alertdialog")).getByRole("button", {
-        name: "Delete Endpoint",
-      })
-    );
+      await user.type(searchInput, "/inquiry");
+      expect((searchInput as HTMLInputElement).value).toBe("/inquiry");
 
-    await waitFor(() => {
-      expect(lastDeleteId).toBe("endpoint-1");
+      act(() => {
+        fireEvent.contextMenu(endpointButton);
+      });
+      await user.click(
+        await screen.findByRole("menuitem", { name: "Delete endpoint" })
+      );
+
+      const dialog = await screen.findByRole("alertdialog");
+      expect(within(dialog).getByText("GET /inquiry")).toBeDefined();
+      expect(within(dialog).getByText(configuredResponseName)).toBeDefined();
+
+      await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+      expect(lastDeleteId).toBeNull();
       expect(
-        screen.queryByRole("button", { name: endpointButtonName })
-      ).toBeNull();
-    });
-    expect(
-      (screen.getByPlaceholderText("Search endpoints...") as HTMLInputElement)
-        .value
-    ).toBe("/inquiry");
-    expect(
-      screen
-        .getByRole("button", {
-          name: `${viewMode === "grid" ? "Grid" : "List"} view`,
+        screen.getByRole("button", { name: endpointButtonName })
+      ).toBeDefined();
+
+      act(() => {
+        fireEvent.contextMenu(
+          screen.getByRole("button", { name: endpointButtonName })
+        );
+      });
+      await user.click(
+        await screen.findByRole("menuitem", { name: "Delete endpoint" })
+      );
+      await user.click(
+        within(await screen.findByRole("alertdialog")).getByRole("button", {
+          name: "Delete Endpoint",
         })
-        .getAttribute("aria-pressed")
-    ).toBe("true");
-  });
+      );
+
+      await waitFor(() => {
+        expect(lastDeleteId).toBe("endpoint-1");
+        expect(
+          screen.queryByRole("button", { name: endpointButtonName })
+        ).toBeNull();
+      });
+      expect(
+        (screen.getByPlaceholderText("Search endpoints...") as HTMLInputElement)
+          .value
+      ).toBe("/inquiry");
+      expect(
+        screen
+          .getByRole("button", {
+            name: `${viewMode === "grid" ? "Grid" : "List"} view`,
+          })
+          .getAttribute("aria-pressed")
+      ).toBe("true");
+    }
+  );
 
   test("disables duplicate deletion while the request is pending", async () => {
     const user = userEvent.setup();

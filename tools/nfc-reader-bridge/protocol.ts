@@ -108,12 +108,12 @@ export function parseBridgeCommand(
     ) {
       return {
         error: {
-          protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
-          type: "error",
+          action: "Update the bridge and reload the browser tool.",
           code: "protocol-mismatch",
           message:
             "This browser tool and bridge use different protocol versions.",
-          action: "Update the bridge and reload the browser tool.",
+          protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+          type: "error",
         },
       };
     }
@@ -133,21 +133,21 @@ export function parseBridgeCommand(
 
     return {
       error: {
-        protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
-        type: "error",
+        action: "Use a supported bridge command.",
         code: "invalid-message",
         message: "The bridge does not recognize this command.",
-        action: "Use a supported bridge command.",
+        protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+        type: "error",
       },
     };
   } catch {
     return {
       error: {
-        protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
-        type: "error",
+        action: "Send a versioned JSON command.",
         code: "invalid-message",
         message: "The bridge received malformed JSON.",
-        action: "Send a versioned JSON command.",
+        protocolVersion: NFC_BRIDGE_PROTOCOL_VERSION,
+        type: "error",
       },
     };
   }

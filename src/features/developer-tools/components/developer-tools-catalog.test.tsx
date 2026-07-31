@@ -15,7 +15,7 @@ describe("DeveloperToolsCatalog", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Developer Tools", level: 1 })
+      screen.getByRole("heading", { level: 1, name: "Developer Tools" })
     ).toBeDefined();
     expect(screen.getByRole("button", { name: "Validation" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Conversion" })).toBeDefined();

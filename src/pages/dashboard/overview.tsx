@@ -80,7 +80,7 @@ function OverviewContentGrid({
       animate={{ opacity: 1 }}
       className={`grid grid-cols-1 gap-4 lg:gap-5 ${isAdmin ? "md:grid-cols-3 lg:grid-cols-4" : "md:grid-cols-3"}`}
       initial={{ opacity: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 }}
+      transition={{ delay: 0.1, duration: 0.5 }}
     >
       <StatsCards data={data} />
       {isAdmin && data.userStats && <UserStatsCards data={data} />}
@@ -114,7 +114,6 @@ export function OverviewPage() {
   const { data, isLoading, error } = useGetOverview();
 
   useDocumentMeta({
-    title: messages.overview.documentTitle,
     description: messages.overview.documentDescription,
     keywords: [
       "dashboard",
@@ -123,6 +122,7 @@ export function OverviewPage() {
       "endpoints",
       "responses",
     ],
+    title: messages.overview.documentTitle,
   });
 
   return (

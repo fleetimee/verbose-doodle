@@ -82,9 +82,9 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
         <CodeBlock
           data={[
             {
-              language: "json",
-              filename: "response.json",
               code: formValues.json,
+              filename: "response.json",
+              language: "json",
             },
           ]}
           defaultValue="json"

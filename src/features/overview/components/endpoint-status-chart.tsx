@@ -37,11 +37,11 @@ export function EndpointStatusChart({
 
   // Transform data to include fill property
   const chartData = data.responseStatusDistribution.map((item, index) => ({
-    statusKey: `status-${item.statusCode}`,
-    statusCode: `HTTP ${item.statusCode}`,
-    statusLabel: item.label,
     count: item.count,
     fill: `var(--chart-${(index % CHART_COLOR_VARIANTS) + CHART_COLOR_OFFSET})`,
+    statusCode: `HTTP ${item.statusCode}`,
+    statusKey: `status-${item.statusCode}`,
+    statusLabel: item.label,
   }));
 
   // Dynamically generate chart config from the data
@@ -53,8 +53,8 @@ export function EndpointStatusChart({
       chartData.map((item) => [
         item.statusKey,
         {
-          label: `${item.statusCode} · ${item.statusLabel}`,
           color: item.fill,
+          label: `${item.statusCode} · ${item.statusLabel}`,
         },
       ])
     ),

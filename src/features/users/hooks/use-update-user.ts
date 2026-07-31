@@ -38,15 +38,15 @@ async function updateUser(
       ApiUpdateUserResponse,
       Omit<UpdateUserRequest, "user_id">
     >(getUserUpdateUrl(data.user_id), {
-      username: data.username,
-      role: data.role,
       active: data.active,
+      role: data.role,
+      username: data.username,
     });
 
     if (!apiResponse.responseCode) {
       throw {
-        message: "Invalid response structure from server",
         code: "INVALID_RESPONSE",
+        message: "Invalid response structure from server",
         status: 500,
       } as ApiError;
     }
@@ -71,6 +71,11 @@ export function useUpdateUser() {
     UpdateUserRequest,
     ApiError
   >(updateUser, {
+    onError: (error) => {
+      toast.error("Failed to update user", {
+        description: error.message || "An unexpected error occurred",
+      });
+    },
     onSuccess: () => {
       toast.success("User updated successfully");
 
@@ -79,11 +84,6 @@ export function useUpdateUser() {
       // Invalidate overview to update user statistics (e.g., active/inactive counts)
       queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
       // queryClient.invalidateQueries({ queryKey: userQueryKeys.detail(data.user_id) });
-    },
-    onError: (error) => {
-      toast.error("Failed to update user", {
-        description: error.message || "An unexpected error occurred",
-      });
     },
   });
 

@@ -22,12 +22,12 @@ function createAdapter() {
   return createInMemoryEndpointAdapter({
     endpoints: [
       {
-        id: "1",
-        slug: "pln-get-health-a1b2c3",
-        method: "GET",
-        url: "/health",
         billerSlug: "pln",
+        id: "1",
+        method: "GET",
         responses: [],
+        slug: "pln-get-health-a1b2c3",
+        url: "/health",
       },
     ],
   });
@@ -43,8 +43,8 @@ describe("Endpoint data hooks", () => {
   test("refetch the catalog after a catalog mutation", async () => {
     const queryClient = new QueryClient({
       defaultOptions: {
-        queries: { retry: false },
         mutations: { retry: false },
+        queries: { retry: false },
       },
     });
     const adapter = createAdapter();
@@ -56,9 +56,9 @@ describe("Endpoint data hooks", () => {
 
     await act(async () => {
       await result.current.createEndpoint.mutateAsync({
+        billerSlug: "pln",
         method: "POST",
         url: "/payments",
-        billerSlug: "pln",
       });
     });
 
@@ -70,8 +70,8 @@ describe("Endpoint data hooks", () => {
     successToast.mockClear();
     const queryClient = new QueryClient({
       defaultOptions: {
-        queries: { retry: false },
         mutations: { retry: false },
+        queries: { retry: false },
       },
     });
     const { result } = renderHook(
@@ -106,8 +106,8 @@ describe("Endpoint data hooks", () => {
     errorToast.mockClear();
     const queryClient = new QueryClient({
       defaultOptions: {
-        queries: { retry: false },
         mutations: { retry: false },
+        queries: { retry: false },
       },
     });
     const error: ApiError = {
@@ -154,12 +154,12 @@ describe("Endpoint data hooks", () => {
       defaultOptions: { queries: { retry: false } },
     });
     const catalogEndpoint = {
-      id: "catalog-endpoint",
-      slug: "pln-post-catalog-backed-a1b2c3",
-      method: "POST" as const,
-      url: "/catalog-backed",
       billerSlug: "pln",
+      id: "catalog-endpoint",
+      method: "POST" as const,
       responses: [],
+      slug: "pln-post-catalog-backed-a1b2c3",
+      url: "/catalog-backed",
     };
     queryClient.setQueryData(endpointDataQueryKeys.catalog, [catalogEndpoint]);
 

@@ -28,11 +28,11 @@ type ApiRecord = Record<string, unknown>;
 type ApiTransport = EndpointDataTransport;
 
 const defaultTransport: ApiTransport = {
+  delete: apiDelete,
   get: apiGet,
+  patch: apiPatch,
   post: apiPost,
   put: apiPut,
-  patch: apiPatch,
-  delete: apiDelete,
 };
 
 const HTTP_NOT_FOUND = 404;
@@ -54,7 +54,6 @@ function value(record: ApiRecord, ...keys: string[]): unknown {
       return record[key];
     }
   }
-  return;
 }
 
 function stringValue(input: unknown, fallback = ""): string {
@@ -103,15 +102,15 @@ function objectValue(input: unknown): Record<string, unknown> {
 function mapResponse(input: unknown): EndpointResponse {
   const response = objectValue(input);
   return {
-    id: stringValue(value(response, "id", "response_id")),
-    name: stringValue(value(response, "name")),
-    json: stringValue(value(response, "json"), "{}"),
-    statusCode: numberValue(value(response, "statusCode", "status_code")),
     activated: booleanValue(value(response, "activated")),
     delayMs: numberValue(value(response, "delayMs", "delay_ms"), 0),
+    id: stringValue(value(response, "id", "response_id")),
+    json: stringValue(value(response, "json"), "{}"),
+    name: stringValue(value(response, "name")),
     simulateTimeout: booleanValue(
       value(response, "simulateTimeout", "simulate_timeout")
     ),
+    statusCode: numberValue(value(response, "statusCode", "status_code")),
   };
 }
 
@@ -119,14 +118,14 @@ function mapEndpoint(input: unknown): Endpoint {
   const endpoint = objectValue(input);
   const responses = value(endpoint, "responses");
   return {
-    id: stringValue(value(endpoint, "id", "endpoint_id")),
-    slug: stringValue(value(endpoint, "slug", "endpoint_slug")),
-    method: stringValue(value(endpoint, "method")) as Endpoint["method"],
-    url: stringValue(value(endpoint, "url")),
-    billerSlug: stringValue(value(endpoint, "billerSlug", "biller_slug")),
     billerName:
       nullableString(value(endpoint, "billerName", "biller_name")) ?? undefined,
+    billerSlug: stringValue(value(endpoint, "billerSlug", "biller_slug")),
+    id: stringValue(value(endpoint, "id", "endpoint_id")),
+    method: stringValue(value(endpoint, "method")) as Endpoint["method"],
     responses: Array.isArray(responses) ? responses.map(mapResponse) : [],
+    slug: stringValue(value(endpoint, "slug", "endpoint_slug")),
+    url: stringValue(value(endpoint, "url")),
   };
 }
 
@@ -162,45 +161,45 @@ function mapTrafficLog(input: unknown): EndpointTrafficLog {
     ? (rawStatus as EndpointTrafficLogStatus)
     : "backend_error";
   return {
-    id: stringValue(value(log, "id")),
-    requestId: stringValue(value(log, "requestId", "request_id")),
-    occurredAt: stringValue(
-      value(log, "occurredAt", "occurred_at"),
-      new Date(0).toISOString()
-    ),
-    endpointId: nullableString(value(log, "endpointId", "endpoint_id")),
-    responseId: nullableString(value(log, "responseId", "response_id")),
     billerId: nullableString(value(log, "billerId", "biller_id")),
-    method: stringValue(value(log, "method"), "-"),
-    path: stringValue(value(log, "path"), "-"),
-    queryString: nullableString(value(log, "queryString", "query_string")),
-    matched: booleanValue(value(log, "matched")),
-    hitStatus: status,
-    httpStatusCode: nullableNumber(
-      value(log, "httpStatusCode", "http_status_code")
-    ),
-    responseName: nullableString(value(log, "responseName", "response_name")),
-    sourceIp: stringValue(value(log, "sourceIp", "source_ip"), "-"),
-    sourcePort: nullableNumber(value(log, "sourcePort", "source_port")),
+    delayMs: nullableNumber(value(log, "delayMs", "delay_ms")),
     destinationIp: nullableString(
       value(log, "destinationIp", "destination_ip")
     ),
     destinationPort: nullableNumber(
       value(log, "destinationPort", "destination_port")
     ),
-    forwardedFor: nullableString(value(log, "forwardedFor", "forwarded_for")),
-    userAgent: nullableString(value(log, "userAgent", "user_agent")),
     durationMs: nullableNumber(value(log, "durationMs", "duration_ms")),
-    delayMs: nullableNumber(value(log, "delayMs", "delay_ms")),
-    simulateTimeout: booleanValue(
-      value(log, "simulateTimeout", "simulate_timeout")
+    endpointId: nullableString(value(log, "endpointId", "endpoint_id")),
+    forwardedFor: nullableString(value(log, "forwardedFor", "forwarded_for")),
+    hitStatus: status,
+    httpStatusCode: nullableNumber(
+      value(log, "httpStatusCode", "http_status_code")
     ),
+    id: stringValue(value(log, "id")),
+    matched: booleanValue(value(log, "matched")),
+    method: stringValue(value(log, "method"), "-"),
+    occurredAt: stringValue(
+      value(log, "occurredAt", "occurred_at"),
+      new Date(0).toISOString()
+    ),
+    path: stringValue(value(log, "path"), "-"),
+    queryString: nullableString(value(log, "queryString", "query_string")),
     requestBodyPreview: nullableString(
       value(log, "requestBodyPreview", "request_body_preview")
     ),
+    requestId: stringValue(value(log, "requestId", "request_id")),
     responseBodyPreview: nullableString(
       value(log, "responseBodyPreview", "response_body_preview")
     ),
+    responseId: nullableString(value(log, "responseId", "response_id")),
+    responseName: nullableString(value(log, "responseName", "response_name")),
+    simulateTimeout: booleanValue(
+      value(log, "simulateTimeout", "simulate_timeout")
+    ),
+    sourceIp: stringValue(value(log, "sourceIp", "source_ip"), "-"),
+    sourcePort: nullableNumber(value(log, "sourcePort", "source_port")),
+    userAgent: nullableString(value(log, "userAgent", "user_agent")),
   };
 }
 
@@ -209,21 +208,21 @@ function mapTrafficLogDetail(input: unknown): EndpointTrafficLogDetail {
   const mapped = mapTrafficLog(log);
   return {
     ...mapped,
+    errorMessage: nullableString(value(log, "errorMessage", "error_message")),
+    requestBody: value(log, "requestBody", "request_body") ?? null,
     requestHeaders: isRecord(value(log, "requestHeaders", "request_headers"))
       ? (value(log, "requestHeaders", "request_headers") as Record<
           string,
           unknown
         >)
       : null,
-    requestBody: value(log, "requestBody", "request_body") ?? null,
+    responseBody: value(log, "responseBody", "response_body") ?? null,
     responseHeaders: isRecord(value(log, "responseHeaders", "response_headers"))
       ? (value(log, "responseHeaders", "response_headers") as Record<
           string,
           unknown
         >)
       : null,
-    responseBody: value(log, "responseBody", "response_body") ?? null,
-    errorMessage: nullableString(value(log, "errorMessage", "error_message")),
   };
 }
 
@@ -236,7 +235,9 @@ function mapMetric(input: unknown): EndpointMetric {
     value(metric, "httpStatusCounts", "http_status_counts")
   );
   return {
-    requestCount: numberValue(value(metric, "requestCount", "request_count")),
+    averageDurationMs: numberValue(
+      value(metric, "averageDurationMs", "average_duration_ms")
+    ),
     hitStatusCounts: Object.fromEntries(
       Object.entries(hitStatusCounts).map(([key, item]) => [
         key,
@@ -249,17 +250,15 @@ function mapMetric(input: unknown): EndpointMetric {
         numberValue(item),
       ])
     ),
-    totalDurationMs: numberValue(
-      value(metric, "totalDurationMs", "total_duration_ms")
+    maxDurationMs: nullableNumber(
+      value(metric, "maxDurationMs", "max_duration_ms")
     ),
     minDurationMs: nullableNumber(
       value(metric, "minDurationMs", "min_duration_ms")
     ),
-    maxDurationMs: nullableNumber(
-      value(metric, "maxDurationMs", "max_duration_ms")
-    ),
-    averageDurationMs: numberValue(
-      value(metric, "averageDurationMs", "average_duration_ms")
+    requestCount: numberValue(value(metric, "requestCount", "request_count")),
+    totalDurationMs: numberValue(
+      value(metric, "totalDurationMs", "total_duration_ms")
     ),
   };
 }
@@ -293,12 +292,70 @@ export function createHttpEndpointAdapter(
   transport: EndpointDataTransport = defaultTransport
 ): EndpointDataAdapter {
   return {
-    async listEndpoints() {
-      const response = await transport.get<unknown>(
-        API_ENDPOINTS.admin.endpoints.list
+    async activateResponse(input) {
+      const response = await transport.put<unknown, Record<string, never>>(
+        API_ENDPOINTS.admin.responses.activate(
+          input.endpointId,
+          input.responseId
+        ),
+        {}
       );
-      const data = payload(response);
-      return listValue(data, "endpoints").map(mapEndpoint);
+      return responseFromResponse(response);
+    },
+    async clearTrafficLogs(endpointId) {
+      await transport.delete<unknown>(
+        API_ENDPOINTS.admin.endpoints.trafficLogs.clear(endpointId)
+      );
+    },
+    async createEndpoint(input) {
+      const response = await transport.post<
+        unknown,
+        {
+          method: CreateEndpointInput["method"];
+          url: string;
+          biller_slug: string;
+        }
+      >(API_ENDPOINTS.admin.endpoints.create, {
+        biller_slug: input.billerSlug,
+        method: input.method,
+        url: input.url,
+      });
+      return endpointFromResponse(response);
+    },
+    async createResponse(input) {
+      const response = await transport.post<unknown, Record<string, unknown>>(
+        API_ENDPOINTS.admin.responses.create,
+        {
+          activated: "0",
+          delayMs: input.delayMs ?? 0,
+          endpointId: Number(input.endpointId),
+          json: input.json,
+          name: input.name,
+          simulateTimeout: input.simulateTimeout ?? false,
+          statusCode: String(input.statusCode),
+        }
+      );
+      return responseFromResponse(response);
+    },
+    async deactivateResponse(input) {
+      const response = await transport.put<unknown, Record<string, never>>(
+        API_ENDPOINTS.admin.responses.deactivate(
+          input.endpointId,
+          input.responseId
+        ),
+        {}
+      );
+      return responseFromResponse(response);
+    },
+    async deleteEndpoint(endpointSlug) {
+      await transport.delete<unknown>(
+        API_ENDPOINTS.admin.endpoints.delete(endpointSlug)
+      );
+    },
+    async deleteResponse(input) {
+      await transport.delete<unknown>(
+        API_ENDPOINTS.admin.responses.detail(input.responseId)
+      );
     },
     async getEndpoint(endpointSlug) {
       try {
@@ -313,105 +370,42 @@ export function createHttpEndpointAdapter(
         throw error as ApiError;
       }
     },
-    async createEndpoint(input) {
-      const response = await transport.post<
-        unknown,
-        {
-          method: CreateEndpointInput["method"];
-          url: string;
-          biller_slug: string;
-        }
-      >(API_ENDPOINTS.admin.endpoints.create, {
-        method: input.method,
-        url: input.url,
-        biller_slug: input.billerSlug,
-      });
-      return endpointFromResponse(response);
+    async getHourlyMetrics(input) {
+      const query = new URLSearchParams({ from: input.from, to: input.to });
+      const response = await transport.get<unknown>(
+        `${API_ENDPOINTS.admin.endpoints.metrics.hourly(input.endpointId)}?${query.toString()}`
+      );
+      const rawData =
+        isRecord(response) && response.data !== undefined
+          ? response.data
+          : response;
+      const data = payload(rawData);
+      const items = Array.isArray(rawData)
+        ? rawData
+        : listValue(data, "hourly", "items", "metrics");
+      return items.map(mapHourlyMetric);
     },
-    async updateEndpoint(input) {
-      const response = await transport.patch<
-        unknown,
-        Partial<{
-          method: CreateEndpointInput["method"];
-          url: string;
-          biller_slug: string;
-        }>
-      >(API_ENDPOINTS.admin.endpoints.update(input.endpointSlug), {
-        ...(input.changes.method ? { method: input.changes.method } : {}),
-        ...(input.changes.url ? { url: input.changes.url } : {}),
-        ...(input.changes.billerSlug
-          ? { biller_slug: input.changes.billerSlug }
-          : {}),
-      });
-      return endpointFromResponse(response);
+    async getMetricsSummary(endpointId) {
+      const response = await transport.get<unknown>(
+        API_ENDPOINTS.admin.endpoints.metrics.summary(endpointId)
+      );
+      return mapMetric(metricsPayload(response));
     },
-    async deleteEndpoint(endpointSlug) {
-      await transport.delete<unknown>(
-        API_ENDPOINTS.admin.endpoints.delete(endpointSlug)
+    async getTrafficLogDetail(endpointId, logId) {
+      const response = await transport.get<unknown>(
+        API_ENDPOINTS.admin.endpoints.trafficLogs.detail(endpointId, logId)
+      );
+      const data = payload(response);
+      return mapTrafficLogDetail(
+        value(data, "log", "trafficLog", "traffic_log") ?? data
       );
     },
-    async createResponse(input) {
-      const response = await transport.post<unknown, Record<string, unknown>>(
-        API_ENDPOINTS.admin.responses.create,
-        {
-          endpointId: Number(input.endpointId),
-          json: input.json,
-          statusCode: String(input.statusCode),
-          activated: "0",
-          name: input.name,
-          delayMs: input.delayMs ?? 0,
-          simulateTimeout: input.simulateTimeout ?? false,
-        }
+    async listEndpoints() {
+      const response = await transport.get<unknown>(
+        API_ENDPOINTS.admin.endpoints.list
       );
-      return responseFromResponse(response);
-    },
-    async updateResponse(input) {
-      const changes = Object.fromEntries(
-        Object.entries(input.changes).map(([key, item]) => [
-          key === "statusCode" ? key : key,
-          key === "statusCode" ? String(item) : item,
-        ])
-      );
-      const response = await transport.patch<unknown, Record<string, unknown>>(
-        API_ENDPOINTS.admin.responses.detail(input.responseId),
-        changes
-      );
-      return responseFromResponse(response);
-    },
-    async deleteResponse(input) {
-      await transport.delete<unknown>(
-        API_ENDPOINTS.admin.responses.detail(input.responseId)
-      );
-    },
-    async activateResponse(input) {
-      const response = await transport.put<unknown, Record<string, never>>(
-        API_ENDPOINTS.admin.responses.activate(
-          input.endpointId,
-          input.responseId
-        ),
-        {}
-      );
-      return responseFromResponse(response);
-    },
-    async deactivateResponse(input) {
-      const response = await transport.put<unknown, Record<string, never>>(
-        API_ENDPOINTS.admin.responses.deactivate(
-          input.endpointId,
-          input.responseId
-        ),
-        {}
-      );
-      return responseFromResponse(response);
-    },
-    async updateResponseSimulation(input) {
-      const response = await transport.patch<unknown, Record<string, unknown>>(
-        API_ENDPOINTS.admin.responses.updateSimulation(input.responseId),
-        {
-          delayMs: input.delayMs,
-          simulateTimeout: input.simulateTimeout,
-        }
-      );
-      return responseFromResponse(response);
+      const data = payload(response);
+      return listValue(data, "endpoints").map(mapEndpoint);
     },
     async listTrafficLogs(input) {
       const params = new URLSearchParams();
@@ -431,45 +425,50 @@ export function createHttpEndpointAdapter(
       const data = trafficPayload(response);
       const items = listValue(data, "items", "logs").map(mapTrafficLog);
       return {
+        hasMore: booleanValue(value(data, "hasMore", "has_more")),
         items,
         nextCursor: nullableString(value(data, "nextCursor", "next_cursor")),
-        hasMore: booleanValue(value(data, "hasMore", "has_more")),
       } satisfies EndpointTrafficLogsResult;
     },
-    async getTrafficLogDetail(endpointId, logId) {
-      const response = await transport.get<unknown>(
-        API_ENDPOINTS.admin.endpoints.trafficLogs.detail(endpointId, logId)
-      );
-      const data = payload(response);
-      return mapTrafficLogDetail(
-        value(data, "log", "trafficLog", "traffic_log") ?? data
-      );
+    async updateEndpoint(input) {
+      const response = await transport.patch<
+        unknown,
+        Partial<{
+          method: CreateEndpointInput["method"];
+          url: string;
+          biller_slug: string;
+        }>
+      >(API_ENDPOINTS.admin.endpoints.update(input.endpointSlug), {
+        ...(input.changes.method ? { method: input.changes.method } : {}),
+        ...(input.changes.url ? { url: input.changes.url } : {}),
+        ...(input.changes.billerSlug
+          ? { biller_slug: input.changes.billerSlug }
+          : {}),
+      });
+      return endpointFromResponse(response);
     },
-    async clearTrafficLogs(endpointId) {
-      await transport.delete<unknown>(
-        API_ENDPOINTS.admin.endpoints.trafficLogs.clear(endpointId)
+    async updateResponse(input) {
+      const changes = Object.fromEntries(
+        Object.entries(input.changes).map(([key, item]) => [
+          key === "statusCode" ? key : key,
+          key === "statusCode" ? String(item) : item,
+        ])
       );
+      const response = await transport.patch<unknown, Record<string, unknown>>(
+        API_ENDPOINTS.admin.responses.detail(input.responseId),
+        changes
+      );
+      return responseFromResponse(response);
     },
-    async getMetricsSummary(endpointId) {
-      const response = await transport.get<unknown>(
-        API_ENDPOINTS.admin.endpoints.metrics.summary(endpointId)
+    async updateResponseSimulation(input) {
+      const response = await transport.patch<unknown, Record<string, unknown>>(
+        API_ENDPOINTS.admin.responses.updateSimulation(input.responseId),
+        {
+          delayMs: input.delayMs,
+          simulateTimeout: input.simulateTimeout,
+        }
       );
-      return mapMetric(metricsPayload(response));
-    },
-    async getHourlyMetrics(input) {
-      const query = new URLSearchParams({ from: input.from, to: input.to });
-      const response = await transport.get<unknown>(
-        `${API_ENDPOINTS.admin.endpoints.metrics.hourly(input.endpointId)}?${query.toString()}`
-      );
-      const rawData =
-        isRecord(response) && response.data !== undefined
-          ? response.data
-          : response;
-      const data = payload(rawData);
-      const items = Array.isArray(rawData)
-        ? rawData
-        : listValue(data, "hourly", "items", "metrics");
-      return items.map(mapHourlyMetric);
+      return responseFromResponse(response);
     },
   };
 }

@@ -49,8 +49,8 @@ describe("LoginForm", () => {
     test("should display error alert when error prop is provided", () => {
       const mockOnSubmit = mock(() => {});
       const error = {
-        message: "Authentication failed",
         description: "Invalid credentials",
+        message: "Authentication failed",
       };
 
       render(<LoginForm error={error} onSubmit={mockOnSubmit} />);

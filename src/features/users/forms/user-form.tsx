@@ -84,20 +84,20 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
     const [showPassword, setShowPassword] = useState(false);
 
     const form = useForm<UserFormData>({
-      resolver: zodResolver(userSchema),
       defaultValues: {
-        username: "",
-        role: "USER",
         active: true,
         password: "",
+        role: "USER",
+        username: "",
         ...defaultValues,
       },
+      resolver: zodResolver(userSchema),
     });
 
     useImperativeHandle(ref, () => ({
-      reset: (values) => form.reset(values),
-      getValues: () => form.getValues(),
       form,
+      getValues: () => form.getValues(),
+      reset: (values) => form.reset(values),
     }));
 
     const handleSubmit = (data: UserFormData) => {
@@ -115,7 +115,7 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                 <motion.div
                   animate={{ opacity: 1, y: 0 }}
                   initial={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
+                  transition={{ delay: 0.1, duration: 0.3 }}
                 >
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel
@@ -157,7 +157,7 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                   <motion.div
                     animate={{ opacity: 1, y: 0 }}
                     initial={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
+                    transition={{ delay: 0.2, duration: 0.3 }}
                   >
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel
@@ -226,10 +226,10 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                   animate={{ opacity: 1, y: 0 }}
                   initial={{ opacity: 0, y: 10 }}
                   transition={{
-                    duration: ANIMATION_DURATION,
                     delay: showPasswordField
                       ? ROLE_DELAY_WITH_PASSWORD
                       : ROLE_DELAY_WITHOUT_PASSWORD,
+                    duration: ANIMATION_DURATION,
                   }}
                 >
                   <Field data-invalid={fieldState.invalid}>
@@ -314,10 +314,10 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                   animate={{ opacity: 1, y: 0 }}
                   initial={{ opacity: 0, y: 10 }}
                   transition={{
-                    duration: ANIMATION_DURATION,
                     delay: showPasswordField
                       ? ACTIVE_DELAY_WITH_PASSWORD
                       : ACTIVE_DELAY_WITHOUT_PASSWORD,
+                    duration: ANIMATION_DURATION,
                   }}
                 >
                   <Field

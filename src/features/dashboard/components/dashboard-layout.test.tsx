@@ -53,39 +53,39 @@ function jsonResponse(body: unknown) {
 
 function installApiMock() {
   const endpoint: MockEndpoint = {
-    biller_slug: "pln",
     biller_name: endpointBillerName,
+    biller_slug: "pln",
     endpoint_id: "endpoint-1",
-    slug: "pln-post-login-a1b2c3",
     method: "POST",
     responses: [{ response_id: "response-1" }],
+    slug: "pln-post-login-a1b2c3",
     url: "/xapi-pbb/api/user/login",
   };
   const alternateEndpoint: MockEndpoint = {
-    biller_slug: "pln",
     biller_name: "PLN",
+    biller_slug: "pln",
     endpoint_id: "endpoint-2",
-    slug: "pln-get-status-d4e5f6",
     method: "GET",
     responses: [{ response_id: "response-2" }],
+    slug: "pln-get-status-d4e5f6",
     url: "/xapi-pbb/api/user/status",
   };
   const emptyEndpoint: MockEndpoint = {
-    biller_slug: "empty-biller",
     biller_name: "Empty Biller",
+    biller_slug: "empty-biller",
     endpoint_id: "endpoint-3",
-    slug: "empty-biller-get-status-a1b2c3",
     method: "GET",
     responses: [],
+    slug: "empty-biller-get-status-a1b2c3",
     url: "/xapi-pbb/api/empty/status",
   };
   const pdamEndpoint: MockEndpoint = {
-    biller_slug: "pdam",
     biller_name: "PDAM",
+    biller_slug: "pdam",
     endpoint_id: "endpoint-pdam",
-    slug: "pdam-get-payment-status-a1b2c3",
     method: "GET",
     responses: [{ activated: true, response_id: "response-pdam" }],
+    slug: "pdam-get-payment-status-a1b2c3",
     url: "/xapi-pbb/api/payment/status",
   };
   const mockFetch = (
@@ -105,12 +105,12 @@ function installApiMock() {
         jsonResponse({
           data: {
             endpoint: {
-              biller_slug: request.biller_slug,
               biller_name: "PLN",
+              biller_slug: request.biller_slug,
               endpoint_id: "created-endpoint",
-              slug: "pln-get-created-a1b2c3",
               method: request.method,
               responses: [],
+              slug: "pln-get-created-a1b2c3",
               url: request.url,
             },
           },
@@ -212,11 +212,11 @@ function HistoryControls() {
 
 function EndpointMutationProbe() {
   const mutation = useMutation<void, Error>({
-    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: () =>
       new Promise<void>((resolve) => {
         resolveEndpointMutation = resolve;
       }),
+    mutationKey: ENDPOINT_MUTATION_KEY,
   });
 
   return (

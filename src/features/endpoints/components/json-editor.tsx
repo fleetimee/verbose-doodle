@@ -74,8 +74,8 @@ export const JsonEditor = forwardRef<HTMLDivElement, JsonEditorProps>(
       });
 
       observer.observe(document.documentElement, {
-        attributes: true,
         attributeFilter: ["class"],
+        attributes: true,
       });
 
       return () => observer.disconnect();
@@ -131,14 +131,14 @@ export const JsonEditor = forwardRef<HTMLDivElement, JsonEditorProps>(
           <CodeMirror
             autoFocus={autoFocus}
             basicSetup={{
-              lineNumbers: true,
-              highlightActiveLineGutter: true,
-              highlightActiveLine: true,
-              foldGutter: true,
+              autocompletion: true,
               bracketMatching: true,
               closeBrackets: true,
-              autocompletion: true,
+              foldGutter: true,
+              highlightActiveLine: true,
+              highlightActiveLineGutter: true,
               highlightSelectionMatches: true,
+              lineNumbers: true,
             }}
             extensions={extensions}
             height={height}

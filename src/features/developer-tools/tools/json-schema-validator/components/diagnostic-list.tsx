@@ -19,8 +19,8 @@ function diagnosticPath(diagnostic: JsonSchemaDiagnostic): string {
   }
   if (diagnostic.line && diagnostic.column) {
     return formatMessage(messages.jsonSchemaValidator.diagnosticLineColumn, {
-      line: diagnostic.line,
       column: diagnostic.column,
+      line: diagnostic.line,
     });
   }
   return diagnostic.source === "SCHEMA"

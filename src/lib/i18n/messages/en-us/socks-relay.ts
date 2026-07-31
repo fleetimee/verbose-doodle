@@ -1,33 +1,33 @@
 export const socksRelayMessages = {
+  aboutTab: "About",
   actionsHeader: "Actions",
   allRelaysLabel: "All relays",
   appliesToNewTrafficLabel: "Applies to new traffic",
-  aboutTab: "About",
   behaviorNotesTitle: "Behavior notes",
   clearButton: "Clear",
   clearLiveButton: "Clear live view",
   codeHeader: "Code",
-  editRelayOptionsTitle: "Edit relay options",
-  editRelayOptionsDescription: "{relayId} updates apply to new relay traffic.",
-  editRelayOptionsFallback: "Relay",
-  eventTab: "Event",
   dropClientLabel: "Drop client",
   dropHostLabel: "Drop host",
+  editRelayOptionsDescription: "{relayId} updates apply to new relay traffic.",
+  editRelayOptionsFallback: "Relay",
+  editRelayOptionsTitle: "Edit relay options",
+  eventTab: "Event",
   failedStartRelay: "Failed to start relay",
   failedStopRelay: "Failed to stop relay",
   failedUpdateRelayOptions: "Failed to update relay options",
   focusedLogScope: "Focused on {relayId}",
   holdClientLabel: "Hold client",
   holdHostLabel: "Hold host",
-  hostAddressLabel: "Host address",
   hostAddressDescription:
     "Use a reachable hostname or IP from the backend container.",
-  hostPortLabel: "Host port",
+  hostAddressLabel: "Host address",
   hostPortDescription: "Destination service port that the relay forwards to.",
+  hostPortLabel: "Host port",
   listenHeader: "Listen",
-  listeningPortLabel: "Listening port",
   listeningPortDescription:
     "Use a published Portainer relay port from 18090 to 18100.",
+  listeningPortLabel: "Listening port",
   liveControlsDescription:
     "{relayId} runtime options update immediately for new messages.",
   liveControlsEmptyDescription:
@@ -47,61 +47,61 @@ export const socksRelayMessages = {
   noRelaysTitle: "No {modeLabel} relays",
   noteHeader: "Note",
   optionsHeader: "Options",
+  refreshLogsButton: "Refresh history",
   relayEventsLabel: "Relay events",
-  relayIdLabel: "Relay ID",
-  relayIdPlaceholder: "Auto-generated if blank",
+  relayHeader: "Relay",
   relayIdDescription:
     "Leave blank and the backend will create one automatically.",
+  relayIdLabel: "Relay ID",
+  relayIdPlaceholder: "Auto-generated if blank",
   relayInstancesDescription:
     "Running {modeLabel} listeners and their active simulation options.",
   relayInstancesTitle: "Relay instances",
   relayLogsTitle: "Relay logs",
-  savedHistoryLabel: "Saved history",
-  savedHistoryDescription: "Stored on the server and restored after refresh.",
-  refreshLogsButton: "Refresh history",
+  relayOptionsDescription:
+    "Pick one hold/drop behavior. Remove headers is mainly for REST relay traffic.",
   relayStarted: "{modeLabel} relay started",
   relayStartedDescription: "{relayId} is listening on {port}.",
   relayStopped: "Relay stopped",
   relayUpdated: "Relay options updated",
-  relayHeader: "Relay",
   removeHeadersLabel: "Remove headers",
-  relayOptionsDescription:
-    "Pick one hold/drop behavior. Remove headers is mainly for REST relay traffic.",
+  savedHistoryDescription: "Stored on the server and restored after refresh.",
+  savedHistoryLabel: "Saved history",
   saveOptionsButton: "Save options",
   selectedLogScope: "Select a relay row to focus its logs",
   showingAllLogScope: "Showing all {modeLabel} relays",
-  startRelayButton: "Start relay",
   startingRelayButton: "Starting...",
+  startRelayButton: "Start relay",
   startRelayDescription: "Mode is fixed to {modeLabel} for this page.",
   startRelayTitle: "Start relay",
   statusHeader: "Status",
   targetHeader: "Target",
   timerMsLabel: "Timer ms",
   tour: {
-    startButton: "Start tour",
-    headerTitle: "Socks Relay workspace",
-    headerDescription:
-      "Use this workspace to watch relay event connectivity, confirm the active mode, and start the relay workflow.",
-    connectionTitle: "Relay event status",
     connectionDescription:
       "This badge shows whether live relay events are connected and calls out malformed relay events when they appear.",
-    metricsTitle: "Relay metrics",
-    metricsDescription:
-      "Track active relays, running listeners, message traffic, lifecycle events, and malformed event counts while traffic flows.",
-    startFormTitle: "Start a relay",
-    startFormDescription:
-      "Set a relay ID, listening port, target host, target port, and timer before starting a new relay instance.",
-    optionsTitle: "Simulation options",
-    optionsDescription:
-      "Choose one hold or drop behavior, remove REST headers when needed, and tune how traffic is simulated before the relay starts.",
-    relaysTitle: "Relay instances",
-    relaysDescription:
-      "Running listeners appear here. Select a relay row to focus its logs, stop it, or open live controls for new traffic.",
-    liveControlsTitle: "Live controls",
+    connectionTitle: "Relay event status",
+    headerDescription:
+      "Use this workspace to watch relay event connectivity, confirm the active mode, and start the relay workflow.",
+    headerTitle: "Socks Relay workspace",
     liveControlsDescription:
       "Open live controls from here to adjust hold, drop, header, and timer behavior for new messages on the selected relay.",
-    logsTitle: "Relay logs",
+    liveControlsTitle: "Live controls",
     logsDescription:
       "Inspect message and lifecycle tabs, clear the console, switch between focused and all-relay logs, and use the About tab to decode flow codes.",
+    logsTitle: "Relay logs",
+    metricsDescription:
+      "Track active relays, running listeners, message traffic, lifecycle events, and malformed event counts while traffic flows.",
+    metricsTitle: "Relay metrics",
+    optionsDescription:
+      "Choose one hold or drop behavior, remove REST headers when needed, and tune how traffic is simulated before the relay starts.",
+    optionsTitle: "Simulation options",
+    relaysDescription:
+      "Running listeners appear here. Select a relay row to focus its logs, stop it, or open live controls for new traffic.",
+    relaysTitle: "Relay instances",
+    startButton: "Start tour",
+    startFormDescription:
+      "Set a relay ID, listening port, target host, target port, and timer before starting a new relay instance.",
+    startFormTitle: "Start a relay",
   },
 } as const;

@@ -56,7 +56,7 @@ export const ChoiceboxItem = ({
   const id = providedId || generatedId;
 
   return (
-    <ChoiceboxItemContext.Provider value={{ value, id }}>
+    <ChoiceboxItemContext.Provider value={{ id, value }}>
       <FieldLabel
         className={cn("w-full cursor-pointer", className)}
         htmlFor={id}

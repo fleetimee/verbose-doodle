@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { AuthProvider, useAuth } from "@/features/auth/context";
 
-const TRAILING_PADDING_REGEX = /=+$/u;
+const TRAILING_PADDING_REGEX = /[=]+$/u;
 
 function toBase64Url(value: string): string {
   return Buffer.from(value, "utf8")

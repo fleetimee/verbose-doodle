@@ -2,9 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { endpointSchema } from "@/features/endpoints/schemas/endpoint-schema";
 
 const VALID_ENDPOINT_INPUT = {
+  billerSlug: "pln",
   method: "GET" as const,
   url: "/api/demo",
-  billerSlug: "pln",
 };
 
 function getIssueMessage(

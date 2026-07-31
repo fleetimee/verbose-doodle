@@ -39,19 +39,19 @@ const socketTestCopy: Record<
   }
 > = {
   "tcp-client": {
-    title: "TCP Client",
     description:
       "Connect to a TCP endpoint through the backend bridge, send payloads, and inspect response bytes.",
+    title: "TCP Client",
   },
   "tcp-server": {
-    title: "TCP Server",
     description:
       "Start a local TCP listener through the backend bridge, track connected clients, and send server responses.",
+    title: "TCP Server",
   },
   udp: {
-    title: "UDP",
     description:
       "Send UDP datagrams and optionally listen for inbound packets with shared packet logs and byte inspection.",
+    title: "UDP",
   },
 };
 
@@ -170,36 +170,36 @@ export function SocketTesterLayout({
   const tourSteps = useMemo<TourStep[]>(() => {
     const sharedSteps: TourStep[] = [
       {
-        selectorId: tourConfig.targets.header,
-        position: "bottom",
         content: (
           <TourStepContent
             description={tourCopy.shared.headerDescription}
             title={tourCopy.shared.headerTitle}
           />
         ),
+        position: "bottom",
+        selectorId: tourConfig.targets.header,
       },
       {
-        selectorId: tourConfig.targets.metrics,
-        position: "bottom",
         content: (
           <TourStepContent
             description={tourCopy.shared.metricsDescription}
             title={tourCopy.shared.metricsTitle}
           />
         ),
+        position: "bottom",
+        selectorId: tourConfig.targets.metrics,
       },
     ];
 
     const trafficStep: TourStep = {
-      selectorId: tourConfig.targets.trafficConsole,
-      position: "top",
       content: (
         <TourStepContent
           description={tourCopy.shared.trafficConsoleDescription}
           title={tourCopy.shared.trafficConsoleTitle}
         />
       ),
+      position: "top",
+      selectorId: tourConfig.targets.trafficConsole,
     };
 
     if (mode === "tcp-client") {
@@ -208,34 +208,34 @@ export function SocketTesterLayout({
       return [
         ...sharedSteps,
         {
-          selectorId: tcpClientTargets.status,
-          position: "bottom",
           content: (
             <TourStepContent
               description={tourCopy.tcpClient.statusDescription}
               title={tourCopy.tcpClient.statusTitle}
             />
           ),
+          position: "bottom",
+          selectorId: tcpClientTargets.status,
         },
         {
-          selectorId: tcpClientTargets.connection,
-          position: "top",
           content: (
             <TourStepContent
               description={tourCopy.tcpClient.connectionDescription}
               title={tourCopy.tcpClient.connectionTitle}
             />
           ),
+          position: "top",
+          selectorId: tcpClientTargets.connection,
         },
         {
-          selectorId: tcpClientTargets.sendPanel,
-          position: "left",
           content: (
             <TourStepContent
               description={tourCopy.shared.sendPanelDescription}
               title={tourCopy.shared.sendPanelTitle}
             />
           ),
+          position: "left",
+          selectorId: tcpClientTargets.sendPanel,
         },
         trafficStep,
       ];
@@ -247,44 +247,44 @@ export function SocketTesterLayout({
       return [
         ...sharedSteps,
         {
-          selectorId: tcpServerTargets.listener,
-          position: "right",
           content: (
             <TourStepContent
               description={tourCopy.tcpServer.listenerDescription}
               title={tourCopy.tcpServer.listenerTitle}
             />
           ),
+          position: "right",
+          selectorId: tcpServerTargets.listener,
         },
         {
-          selectorId: tcpServerTargets.status,
-          position: "right",
           content: (
             <TourStepContent
               description={tourCopy.tcpServer.statusDescription}
               title={tourCopy.tcpServer.statusTitle}
             />
           ),
+          position: "right",
+          selectorId: tcpServerTargets.status,
         },
         {
-          selectorId: tcpServerTargets.clients,
-          position: "right",
           content: (
             <TourStepContent
               description={tourCopy.tcpServer.clientsDescription}
               title={tourCopy.tcpServer.clientsTitle}
             />
           ),
+          position: "right",
+          selectorId: tcpServerTargets.clients,
         },
         {
-          selectorId: tcpServerTargets.sendPanel,
-          position: "left",
           content: (
             <TourStepContent
               description={tourCopy.shared.sendPanelDescription}
               title={tourCopy.shared.sendPanelTitle}
             />
           ),
+          position: "left",
+          selectorId: tcpServerTargets.sendPanel,
         },
         trafficStep,
       ];
@@ -295,44 +295,44 @@ export function SocketTesterLayout({
     return [
       ...sharedSteps,
       {
-        selectorId: udpTargets.target,
-        position: "right",
         content: (
           <TourStepContent
             description={tourCopy.udp.targetDescription}
             title={tourCopy.udp.targetTitle}
           />
         ),
+        position: "right",
+        selectorId: udpTargets.target,
       },
       {
-        selectorId: udpTargets.listener,
-        position: "right",
         content: (
           <TourStepContent
             description={tourCopy.udp.listenerDescription}
             title={tourCopy.udp.listenerTitle}
           />
         ),
+        position: "right",
+        selectorId: udpTargets.listener,
       },
       {
-        selectorId: udpTargets.status,
-        position: "right",
         content: (
           <TourStepContent
             description={tourCopy.udp.statusDescription}
             title={tourCopy.udp.statusTitle}
           />
         ),
+        position: "right",
+        selectorId: udpTargets.status,
       },
       {
-        selectorId: udpTargets.sendPanel,
-        position: "left",
         content: (
           <TourStepContent
             description={tourCopy.shared.sendPanelDescription}
             title={tourCopy.shared.sendPanelTitle}
           />
         ),
+        position: "left",
+        selectorId: udpTargets.sendPanel,
       },
       trafficStep,
     ];
@@ -477,10 +477,10 @@ export function SocketTesterLayout({
               key={metric.label}
               style={sectionStyle}
               transition={{
-                type: "spring",
-                stiffness: 420,
                 damping: 32,
                 delay: shouldReduceMotion ? 0 : 0.12 + index * 0.045,
+                stiffness: 420,
+                type: "spring",
               }}
             >
               <SocketStatusCard

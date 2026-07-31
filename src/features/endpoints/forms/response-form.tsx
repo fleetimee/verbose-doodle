@@ -33,19 +33,19 @@ export type ResponseFormHandle = {
 export const ResponseForm = forwardRef<ResponseFormHandle, ResponseFormProps>(
   ({ onSubmit, children }, ref) => {
     const form = useForm<ResponseFormData>({
-      resolver: zodResolver(responseSchema),
       defaultValues: {
-        name: "",
-        json: "{}",
-        statusCode: 200,
         activated: false,
+        json: "{}",
+        name: "",
+        statusCode: 200,
       },
+      resolver: zodResolver(responseSchema),
     });
 
     useImperativeHandle(ref, () => ({
-      reset: () => form.reset(),
-      getValues: () => form.getValues(),
       form,
+      getValues: () => form.getValues(),
+      reset: () => form.reset(),
     }));
 
     const handleSubmit = (data: ResponseFormData) => {

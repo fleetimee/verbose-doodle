@@ -40,7 +40,7 @@ export function SimulateTimeoutDialog({
       return { type: SIMULATION_TYPE.TIMEOUT };
     }
     if (response.delayMs && response.delayMs > 0) {
-      return { type: SIMULATION_TYPE.DELAY, delayMs: response.delayMs };
+      return { delayMs: response.delayMs, type: SIMULATION_TYPE.DELAY };
     }
     return { type: SIMULATION_TYPE.NONE };
   };
@@ -54,8 +54,8 @@ export function SimulateTimeoutDialog({
         initialValues = { type: SIMULATION_TYPE.TIMEOUT };
       } else if (response.delayMs && response.delayMs > 0) {
         initialValues = {
-          type: SIMULATION_TYPE.DELAY,
           delayMs: response.delayMs,
+          type: SIMULATION_TYPE.DELAY,
         };
       } else {
         initialValues = { type: SIMULATION_TYPE.NONE };
@@ -68,12 +68,12 @@ export function SimulateTimeoutDialog({
   const handleSubmit = (values: SimulationFormValues) => {
     // Convert form values to API request
     const simulationSettings = {
-      responseId: response.id,
-      endpointId,
       delayMs:
         values.type === SIMULATION_TYPE.DELAY && values.delayMs
           ? values.delayMs
           : 0,
+      endpointId,
+      responseId: response.id,
       simulateTimeout: values.type === SIMULATION_TYPE.TIMEOUT,
     };
 

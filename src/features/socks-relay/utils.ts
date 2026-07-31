@@ -23,10 +23,10 @@ const HOLD_DROP_KEYS = [
 const MESSAGE_FLOWS = ["RC", "SH", "RH", "SC", "HC", "HH", "DC", "DH"];
 
 export const DEFAULT_RELAY_OPTIONS: RelayOptions = {
-  holdClient: false,
-  holdHost: false,
   dropClient: false,
   dropHost: false,
+  holdClient: false,
+  holdHost: false,
   removeHeaders: false,
   timerMs: MIN_TIMER_MS,
 };
@@ -41,7 +41,16 @@ export type RelayFormErrors = RelayInputErrors & {
 
 export const relayStartFormSchema = z
   .object({
-    relayId: z.string(),
+    dropClient: z.boolean(),
+    dropHost: z.boolean(),
+    holdClient: z.boolean(),
+    holdHost: z.boolean(),
+    hostAddress: z.string().trim().min(1, "Host address is required."),
+    hostPort: z
+      .number({ message: "Host port is required." })
+      .int("Host port must be an integer.")
+      .min(MIN_PORT, "Host port must be between 1 and 65535.")
+      .max(MAX_PORT, "Host port must be between 1 and 65535."),
     listeningPort: z
       .number({ message: "Listening port is required." })
       .int("Listening port must be an integer.")
@@ -53,16 +62,7 @@ export const relayStartFormSchema = z
         RELAY_LISTENING_PORT_MAX,
         `Listening port must be between ${RELAY_LISTENING_PORT_MIN} and ${RELAY_LISTENING_PORT_MAX}.`
       ),
-    hostAddress: z.string().trim().min(1, "Host address is required."),
-    hostPort: z
-      .number({ message: "Host port is required." })
-      .int("Host port must be an integer.")
-      .min(MIN_PORT, "Host port must be between 1 and 65535.")
-      .max(MAX_PORT, "Host port must be between 1 and 65535."),
-    holdClient: z.boolean(),
-    holdHost: z.boolean(),
-    dropClient: z.boolean(),
-    dropHost: z.boolean(),
+    relayId: z.string(),
     removeHeaders: z.boolean(),
     timerMs: z
       .number({ message: "Timer is required." })
@@ -194,9 +194,9 @@ export function parseRelayEvent(raw: string, id: string): RelayEvent | null {
 
     return {
       id,
+      payload: candidate.payload as RelayEventPayload,
       receivedAt: Date.now(),
       type: candidate.type,
-      payload: candidate.payload as RelayEventPayload,
     };
   } catch {
     return null;

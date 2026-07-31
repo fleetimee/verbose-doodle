@@ -16,11 +16,11 @@ async function fetchBillers(): Promise<Biller[]> {
 
 export function useGetBillers() {
   const useQuery = createQueryHook<Biller[]>({
-    queryKey: billerQueryKeys.all,
-    queryFn: fetchBillers,
     options: {
       staleTime: TIME_DURATIONS.FIVE_MINUTES,
     },
+    queryFn: fetchBillers,
+    queryKey: billerQueryKeys.all,
   });
 
   return useQuery();

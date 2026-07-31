@@ -21,6 +21,9 @@ const API_PATH_PATTERN = /^\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)*\/?$/;
  * Zod schema for endpoint form validation
  */
 export const endpointSchema = z.object({
+  billerSlug: z
+    .string({ message: messages.endpoints.billerRequiredError })
+    .min(MIN_BILLER_SLUG_LENGTH, messages.endpoints.billerRequiredError),
   method: z.enum(httpMethods),
   url: z
     .string()
@@ -31,9 +34,6 @@ export const endpointSchema = z.object({
     )
     .regex(/^\//, messages.endpoints.urlStartError)
     .regex(API_PATH_PATTERN, messages.endpoints.urlPathError),
-  billerSlug: z
-    .string({ message: messages.endpoints.billerRequiredError })
-    .min(MIN_BILLER_SLUG_LENGTH, messages.endpoints.billerRequiredError),
 });
 
 /**

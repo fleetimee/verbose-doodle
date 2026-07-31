@@ -47,25 +47,25 @@ export function useEndpointTelemetry(
   const includeTrafficLogs = options.includeTrafficLogs ?? true;
   const telemetryInput: EndpointTelemetryInput = { endpointId, filters };
   const trafficLogs = useQuery<EndpointTrafficLogsResult, ApiError>({
-    queryKey: endpointDataQueryKeys.telemetry(endpointId, filters),
-    queryFn: () => adapter.listTrafficLogs(telemetryInput),
     enabled: enabled && includeTrafficLogs,
+    queryFn: () => adapter.listTrafficLogs(telemetryInput),
+    queryKey: endpointDataQueryKeys.telemetry(endpointId, filters),
     refetchInterval: options.refetchInterval,
     staleTime: 10 * 1000,
   });
   const trafficLogDetail = useQuery<EndpointTrafficLogDetail, ApiError>({
+    enabled: enabled && includeTrafficLogs && Boolean(options.selectedLogId),
+    queryFn: () =>
+      adapter.getTrafficLogDetail(endpointId, options.selectedLogId ?? ""),
     queryKey: endpointDataQueryKeys.telemetryDetail(
       endpointId,
       options.selectedLogId ?? ""
     ),
-    queryFn: () =>
-      adapter.getTrafficLogDetail(endpointId, options.selectedLogId ?? ""),
-    enabled: enabled && includeTrafficLogs && Boolean(options.selectedLogId),
   });
   const metricsSummary = useQuery<EndpointMetric, ApiError>({
-    queryKey: endpointDataQueryKeys.metrics(endpointId),
-    queryFn: () => adapter.getMetricsSummary(endpointId),
     enabled: enabled && includeMetrics,
+    queryFn: () => adapter.getMetricsSummary(endpointId),
+    queryKey: endpointDataQueryKeys.metrics(endpointId),
     staleTime: 15 * 1000,
   });
   const hourlyInput: EndpointHourlyMetricsInput = {
@@ -74,19 +74,24 @@ export function useEndpointTelemetry(
     to: options.to ?? "",
   };
   const hourlyMetrics = useQuery<EndpointHourlyMetric[], ApiError>({
+    enabled:
+      enabled && includeMetrics && Boolean(options.from) && Boolean(options.to),
+    queryFn: () => adapter.getHourlyMetrics(hourlyInput),
     queryKey: endpointDataQueryKeys.hourlyMetrics(
       endpointId,
       hourlyInput.from,
       hourlyInput.to
     ),
-    queryFn: () => adapter.getHourlyMetrics(hourlyInput),
-    enabled:
-      enabled && includeMetrics && Boolean(options.from) && Boolean(options.to),
     staleTime: 15 * 1000,
   });
   const clearTrafficLogs = useMutation<void, ApiError, string>({
-    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.clearTrafficLogs,
+    mutationKey: ENDPOINT_MUTATION_KEY,
+    onError: (error) => {
+      toast.error(messages.endpoints.trafficLogsClearFailed, {
+        description: error.message,
+      });
+    },
     onSuccess: async (_, clearedEndpointId) => {
       toast.success(messages.endpoints.trafficLogsCleared, {
         description: "All traffic logs for this endpoint were removed.",
@@ -95,18 +100,13 @@ export function useEndpointTelemetry(
         queryKey: endpointDataTelemetryPrefix(clearedEndpointId),
       });
     },
-    onError: (error) => {
-      toast.error(messages.endpoints.trafficLogsClearFailed, {
-        description: error.message,
-      });
-    },
   });
 
   return {
-    trafficLogs,
-    trafficLogDetail,
-    metricsSummary,
-    hourlyMetrics,
     clearTrafficLogs,
+    hourlyMetrics,
+    metricsSummary,
+    trafficLogDetail,
+    trafficLogs,
   };
 }

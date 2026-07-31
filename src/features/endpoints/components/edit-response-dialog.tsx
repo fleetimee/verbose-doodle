@@ -41,9 +41,9 @@ export function EditResponseDialog({
   }) => {
     updateResponseMutation(
       {
+        changes: data,
         endpointId,
         responseId: response.id,
-        changes: data,
       },
       {
         onSuccess: () => {

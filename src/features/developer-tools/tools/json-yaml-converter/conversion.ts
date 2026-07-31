@@ -25,8 +25,8 @@ export class ConversionError extends Error {
   readonly line?: number;
   readonly column?: number;
 
-  constructor(message: string, location: SourceLocation = {}) {
-    super(message);
+  constructor(message: string, location: SourceLocation = {}, cause?: unknown) {
+    super(message, { cause });
     this.name = "ConversionError";
     this.line = location.line;
     this.column = location.column;
@@ -37,8 +37,8 @@ function offsetToLocation(source: string, offset: number): SourceLocation {
   const beforeError = source.slice(0, Math.max(0, offset));
   const lines = beforeError.split("\n");
   return {
-    line: lines.length,
     column: (lines.at(-1)?.length ?? 0) + 1,
+    line: lines.length,
   };
 }
 
@@ -51,12 +51,12 @@ function jsonErrorLocation(source: string, error: SyntaxError): SourceLocation {
   const lineColumnMatch = error.message.match(JSON_LINE_COLUMN_REGEX);
   if (lineColumnMatch?.[1]) {
     return {
-      line: Number(lineColumnMatch[1]),
       column: Number(lineColumnMatch[2] ?? 1),
+      line: Number(lineColumnMatch[1]),
     };
   }
 
-  return { line: 1, column: 1 };
+  return { column: 1, line: 1 };
 }
 
 function parseJson(source: string): JsonValue {
@@ -67,11 +67,13 @@ function parseJson(source: string): JsonValue {
       throw error;
     }
     if (error instanceof SyntaxError) {
+      // biome-ignore lint/style/useErrorCause: ConversionError forwards the cause through its constructor.
       throw new ConversionError(
         formatMessage(messages.jsonYamlConverter.jsonParseError, {
           detail: error.message,
         }),
-        jsonErrorLocation(source, error)
+        jsonErrorLocation(source, error),
+        error
       );
     }
     throw error;
@@ -128,7 +130,7 @@ function yamlErrorLocation(error: {
   readonly linePos?: readonly { readonly line: number; readonly col: number }[];
 }): SourceLocation {
   const start = error.linePos?.[0];
-  return start ? { line: start.line, column: start.col } : {};
+  return start ? { column: start.col, line: start.line } : {};
 }
 
 function normalizeYamlValue(
@@ -248,12 +250,15 @@ function parseYaml(source: string): JsonValue {
     if (error instanceof ConversionError) {
       throw error;
     }
+    // biome-ignore lint/style/useErrorCause: ConversionError forwards the cause through its constructor.
     throw new ConversionError(
       error instanceof Error
         ? formatMessage(messages.jsonYamlConverter.yamlConversionError, {
             detail: error.message,
           })
-        : messages.jsonYamlConverter.errorTitle
+        : messages.jsonYamlConverter.errorTitle,
+      undefined,
+      error
     );
   }
 }
@@ -270,13 +275,13 @@ export function convertDocument(
 
   if (sourceFormat === "json") {
     return {
-      targetFormat: "yaml",
       output: stringify(value, { indent: 2, lineWidth: 0 }),
+      targetFormat: "yaml",
     };
   }
 
   return {
-    targetFormat: "json",
     output: JSON.stringify(value, null, 2),
+    targetFormat: "json",
   };
 }

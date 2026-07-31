@@ -41,27 +41,18 @@ export type CronParseErrorCode =
 export class CronParseError extends Error {
   readonly code: CronParseErrorCode;
 
-  constructor(code: CronParseErrorCode, message: string) {
-    super(message);
+  constructor(code: CronParseErrorCode, message: string, cause?: unknown) {
+    super(message, { cause });
     this.name = "CronParseError";
     this.code = code;
   }
 }
 
 const FIELD_DEFINITIONS: Readonly<Record<CronFieldKey, CronFieldResult>> = {
-  second: { key: "second", label: "Second", range: "0-59", token: "" },
-  minute: { key: "minute", label: "Minute", range: "0-59", token: "" },
-  hour: { key: "hour", label: "Hour", range: "0-23", token: "" },
   dayOfMonth: {
     key: "dayOfMonth",
     label: "Day of month",
     range: "1-31",
-    token: "",
-  },
-  month: {
-    key: "month",
-    label: "Month",
-    range: "1-12 or JAN-DEC",
     token: "",
   },
   dayOfWeek: {
@@ -70,6 +61,15 @@ const FIELD_DEFINITIONS: Readonly<Record<CronFieldKey, CronFieldResult>> = {
     range: "0-7 or SUN-SAT",
     token: "",
   },
+  hour: { key: "hour", label: "Hour", range: "0-23", token: "" },
+  minute: { key: "minute", label: "Minute", range: "0-59", token: "" },
+  month: {
+    key: "month",
+    label: "Month",
+    range: "1-12 or JAN-DEC",
+    token: "",
+  },
+  second: { key: "second", label: "Second", range: "0-59", token: "" },
 };
 
 const FIVE_FIELD_ORDER: readonly CronFieldKey[] = [
@@ -142,10 +142,12 @@ function validateSupportedSyntax(
 function validateTimeZone(timeZone: string) {
   try {
     new Intl.DateTimeFormat("en-US", { timeZone }).format();
-  } catch {
+  } catch (error) {
+    // biome-ignore lint/style/useErrorCause: CronParseError forwards the cause through its constructor.
     throw new CronParseError(
       "invalid-time-zone",
-      "Choose a supported IANA timezone."
+      "Choose a supported IANA timezone.",
+      error
     );
   }
 }
@@ -207,9 +209,11 @@ export function parseCronExpression({
     if (error instanceof CronParseError) {
       throw error;
     }
+    // biome-ignore lint/style/useErrorCause: CronParseError forwards the cause through its constructor.
     throw new CronParseError(
       "invalid-expression",
-      error instanceof Error ? error.message : "The expression is invalid."
+      error instanceof Error ? error.message : "The expression is invalid.",
+      error
     );
   }
 }

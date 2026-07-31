@@ -4,9 +4,9 @@ import type { EndpointResponse } from "@/features/endpoints/types";
  * Simulation mode types
  */
 export const SIMULATION_MODE = {
-  TIMEOUT: "timeout",
   DELAY: "delay",
   NORMAL: "normal",
+  TIMEOUT: "timeout",
 } as const;
 
 export type SimulationMode =

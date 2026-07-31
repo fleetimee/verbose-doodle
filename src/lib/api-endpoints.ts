@@ -24,64 +24,51 @@ export const API_ENDPOINTS = {
    * Admin endpoints - require authentication
    */
   admin: {
+    billers: {
+      create: "/api/biller",
+      delete: (slug: string) => `/api/biller/${slug}`,
+      list: "/api/biller",
+      update: (slug: string) => `/api/biller/${slug}`,
+    },
     endpoints: {
-      list: "/api/endpoint",
-      detail: (slug: string) => `/api/endpoint/${slug}`,
       create: "/api/endpoint",
-      update: (slug: string) => `/api/endpoint/${slug}`,
       delete: (slug: string) => `/api/endpoint/${slug}`,
+      detail: (slug: string) => `/api/endpoint/${slug}`,
+      list: "/api/endpoint",
+      metrics: {
+        hourly: (id: string | number) => `/api/endpoint/${id}/metrics/hourly`,
+        summary: (id: string | number) => `/api/endpoint/${id}/metrics`,
+      },
       trafficLogs: {
-        list: (id: string | number) => `/api/endpoint/${id}/traffic-logs`,
+        clear: (id: string | number) => `/api/endpoint/${id}/traffic-logs`,
         detail: (id: string | number, logId: string | number) =>
           `/api/endpoint/${id}/traffic-logs/${logId}`,
-        clear: (id: string | number) => `/api/endpoint/${id}/traffic-logs`,
         download: (id: string | number) =>
           `/api/endpoint/${id}/traffic-logs/download`,
+        list: (id: string | number) => `/api/endpoint/${id}/traffic-logs`,
       },
-      metrics: {
-        summary: (id: string | number) => `/api/endpoint/${id}/metrics`,
-        hourly: (id: string | number) => `/api/endpoint/${id}/metrics/hourly`,
-      },
+      update: (slug: string) => `/api/endpoint/${slug}`,
     },
+    overview: "/api/overview",
     responses: {
-      list: "/api/response",
-      detail: (id: string | number) => `/api/response/${id}`,
-      create: "/api/response",
-      update: (id: string | number) => `/api/response/${id}`,
-      delete: (id: string | number) => `/api/response/${id}`,
       activate: (endpointId: string | number, responseId: string | number) =>
         `/api/response/${endpointId}/${responseId}/activate`,
+      create: "/api/response",
       deactivate: (endpointId: string | number, responseId: string | number) =>
         `/api/response/${endpointId}/${responseId}/deactivate`,
+      delete: (id: string | number) => `/api/response/${id}`,
+      detail: (id: string | number) => `/api/response/${id}`,
+      list: "/api/response",
+      update: (id: string | number) => `/api/response/${id}`,
       updateSimulation: (id: string | number) =>
         `/api/response/${id}/simulation`,
     },
-    billers: {
-      list: "/api/biller",
-      create: "/api/biller",
-      update: (slug: string) => `/api/biller/${slug}`,
-      delete: (slug: string) => `/api/biller/${slug}`,
-    },
     users: {
-      list: "/api/users",
-      detail: (id: string | number) => `/api/users/${id}`,
       create: "/api/users/add",
-      update: (id: string | number) => `/api/users/${id}`,
       delete: (id: string | number) => `/api/users/${id}`,
-    },
-    overview: "/api/overview",
-  },
-
-  /**
-   * Public endpoints - no authentication required
-   * These are for viewing public data via the /api prefix
-   */
-  public: {
-    endpoints: {
-      view: "/api/endpoint/public",
-    },
-    billers: {
-      view: "/api/biller/public",
+      detail: (id: string | number) => `/api/users/${id}`,
+      list: "/api/users",
+      update: (id: string | number) => `/api/users/${id}`,
     },
   },
 
@@ -90,9 +77,22 @@ export const API_ENDPOINTS = {
    */
   auth: {
     login: "/api/login",
-    refresh: "/api/refresh",
     logout: "/api/logout",
+    refresh: "/api/refresh",
     register: "/api/register",
+  },
+
+  /**
+   * Public endpoints - no authentication required
+   * These are for viewing public data via the /api prefix
+   */
+  public: {
+    billers: {
+      view: "/api/biller/public",
+    },
+    endpoints: {
+      view: "/api/endpoint/public",
+    },
   },
 } as const;
 

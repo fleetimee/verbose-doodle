@@ -9,12 +9,12 @@ export const userQueryKeys = {
   all: ["users"] as const,
 
   /**
-   * Query key for a specific user by ID
-   */
-  detail: (id: string | number) => ["users", id] as const,
-
-  /**
    * Query key for users filtered by role (example)
    */
   byRole: (role: string) => ["users", "role", role] as const,
+
+  /**
+   * Query key for a specific user by ID
+   */
+  detail: (id: string | number) => ["users", id] as const,
 } as const;

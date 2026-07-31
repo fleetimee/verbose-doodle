@@ -32,59 +32,59 @@ interface ArchNode {
 
 const NODES: ArchNode[] = [
   {
-    id: "frontend",
-    label: "React Frontend",
-    sublabel: "Vite + TanStack Query",
-    description:
-      "Single-page application built with React 19, TypeScript, and TanStack Query. Communicates with the backend via REST API and WebSocket bridge for real-time protocol simulation.",
     color: "#3b82f6",
     darkColor: "#60a5fa",
+    description:
+      "Single-page application built with React 19, TypeScript, and TanStack Query. Communicates with the backend via REST API and WebSocket bridge for real-time protocol simulation.",
     glowColor: "rgba(59,130,246,0.25)",
+    id: "frontend",
+    label: "React Frontend",
     layer: 0,
+    sublabel: "Vite + TanStack Query",
   },
   {
-    id: "api-gateway",
-    label: "Spring Boot",
-    sublabel: "Embedded Tomcat + REST",
-    description:
-      "Spring Boot application with an embedded Tomcat servlet container. Exposes REST endpoints under /api/** and handles HTTP lifecycle, request routing, and response serialization.",
     color: "#10b981",
     darkColor: "#34d399",
+    description:
+      "Spring Boot application with an embedded Tomcat servlet container. Exposes REST endpoints under /api/** and handles HTTP lifecycle, request routing, and response serialization.",
     glowColor: "rgba(16,185,129,0.25)",
+    id: "api-gateway",
+    label: "Spring Boot",
     layer: 1,
+    sublabel: "Embedded Tomcat + REST",
   },
   {
-    id: "controller",
-    label: "Catch-all Controller",
-    sublabel: "@Order(LOWEST_PRECEDENCE)",
-    description:
-      "A dynamic catch-all Spring MVC controller registered at the lowest Spring bean priority. It intercepts any unmatched /api/** route and resolves it to the correct JSON-driven biller scenario stored in the database.",
     color: "#f59e0b",
     darkColor: "#fbbf24",
+    description:
+      "A dynamic catch-all Spring MVC controller registered at the lowest Spring bean priority. It intercepts any unmatched /api/** route and resolves it to the correct JSON-driven biller scenario stored in the database.",
     glowColor: "rgba(245,158,11,0.25)",
+    id: "controller",
+    label: "Catch-all Controller",
     layer: 2,
+    sublabel: "@Order(LOWEST_PRECEDENCE)",
   },
   {
-    id: "jwt",
-    label: "JWT Security",
-    sublabel: "Spring Security Filter Chain",
-    description:
-      "Stateless JWT authentication via Spring Security filter chain. Every API request carries a signed Bearer token; the filter validates the signature and injects the user principal into the security context.",
     color: "#8b5cf6",
     darkColor: "#a78bfa",
+    description:
+      "Stateless JWT authentication via Spring Security filter chain. Every API request carries a signed Bearer token; the filter validates the signature and injects the user principal into the security context.",
     glowColor: "rgba(139,92,246,0.25)",
+    id: "jwt",
+    label: "JWT Security",
     layer: 2,
+    sublabel: "Spring Security Filter Chain",
   },
   {
-    id: "database",
-    label: "PostgreSQL",
-    sublabel: "JSON Scenario Data Store",
-    description:
-      "PostgreSQL relational database that stores biller endpoint configurations, JSON scenario payloads, user records, and transaction histories. Accessed via Spring Data JPA repositories.",
     color: "#06b6d4",
     darkColor: "#22d3ee",
+    description:
+      "PostgreSQL relational database that stores biller endpoint configurations, JSON scenario payloads, user records, and transaction histories. Accessed via Spring Data JPA repositories.",
     glowColor: "rgba(6,182,212,0.25)",
+    id: "database",
+    label: "PostgreSQL",
     layer: 3,
+    sublabel: "JSON Scenario Data Store",
   },
 ];
 
@@ -99,11 +99,11 @@ const EDGES: [Exclude<NodeId, null>, Exclude<NodeId, null>][] = [
 
 // Nodes that become "active" (highlighted) when a given node is hovered
 const ACTIVE_MAP: Record<Exclude<NodeId, null>, Set<Exclude<NodeId, null>>> = {
-  frontend: new Set(["frontend", "api-gateway"]),
   "api-gateway": new Set(["frontend", "api-gateway", "controller", "jwt"]),
   controller: new Set(["api-gateway", "controller", "database"]),
-  jwt: new Set(["api-gateway", "jwt", "database"]),
   database: new Set(["controller", "jwt", "database"]),
+  frontend: new Set(["frontend", "api-gateway"]),
+  jwt: new Set(["api-gateway", "jwt", "database"]),
 };
 
 // ---------------------------------------------------------------------------
@@ -118,20 +118,20 @@ const NODE_POSITIONS: Record<
   Exclude<NodeId, null>,
   { x: number; y: number }
 > = {
-  frontend: { x: 250, y: 52 },
   "api-gateway": { x: 250, y: 138 },
   controller: { x: 145, y: 224 },
-  jwt: { x: 355, y: 224 },
   database: { x: 250, y: 285 },
+  frontend: { x: 250, y: 52 },
+  jwt: { x: 355, y: 224 },
 };
 
 // Map of node ID to its icon glyph
 const NODE_GLYPHS: Record<Exclude<NodeId, null>, string> = {
-  frontend: "◈",
   "api-gateway": "⬡",
   controller: "⇌",
-  jwt: "⊕",
   database: "⬡",
+  frontend: "◈",
+  jwt: "⊕",
 };
 
 // Compute edge opacity based on hover state
@@ -191,11 +191,11 @@ function DiagramNode({
       role="button"
       style={{
         cursor: "pointer",
-        transformOrigin: `${pos.x}px ${pos.y}px`,
         opacity: nodeOpacity,
+        transformOrigin: `${pos.x}px ${pos.y}px`,
       }}
       tabIndex={0}
-      transition={{ type: "spring", stiffness: 350, damping: 25 }}
+      transition={{ damping: 25, stiffness: 350, type: "spring" }}
     >
       {/* Glow halo on active */}
       <AnimatePresence>
@@ -235,8 +235,8 @@ function DiagramNode({
         fontWeight="600"
         style={{
           fontFamily: "system-ui, sans-serif",
-          transition: "fill 0.2s ease",
           pointerEvents: "none",
+          transition: "fill 0.2s ease",
           userSelect: "none",
         }}
         textAnchor="middle"
@@ -388,10 +388,10 @@ export function ArchitectureDiagram() {
           {/* Layer labels */}
           {(
             [
-              { y: 14, label: "Client Layer" },
-              { y: 104, label: "Application Layer" },
-              { y: 194, label: "Service Layer" },
-              { y: 270, label: "Data Layer" },
+              { label: "Client Layer", y: 14 },
+              { label: "Application Layer", y: 104 },
+              { label: "Service Layer", y: 194 },
+              { label: "Data Layer", y: 270 },
             ] as const
           ).map(({ y, label }) => (
             <text
@@ -403,10 +403,10 @@ export function ArchitectureDiagram() {
               opacity="0.3"
               style={{
                 fontFamily: "system-ui, sans-serif",
-                pointerEvents: "none",
-                userSelect: "none",
-                textTransform: "uppercase",
                 letterSpacing: "0.05em",
+                pointerEvents: "none",
+                textTransform: "uppercase",
+                userSelect: "none",
               }}
               textAnchor="start"
               x="8"

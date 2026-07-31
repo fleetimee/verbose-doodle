@@ -22,9 +22,9 @@ export function CodeBlockWithThemeSelector() {
     <CodeBlock
       data={[
         {
-          language: "typescript",
-          filename: "example.ts",
           code: exampleCode,
+          filename: "example.ts",
+          language: "typescript",
         },
       ]}
       defaultDarkTheme="github-dark-default"

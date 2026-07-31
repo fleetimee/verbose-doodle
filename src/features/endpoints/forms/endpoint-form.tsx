@@ -68,9 +68,9 @@ function getDefaultValues(
   initialUrl = "/rest"
 ) {
   return {
+    billerSlug: initialBillerSlug,
     method: initialMethod,
     url: initialUrl,
-    billerSlug: initialBillerSlug,
   };
 }
 
@@ -301,12 +301,12 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
     ref
   ) => {
     const form = useForm<EndpointFormData>({
-      resolver: zodResolver(endpointSchema),
       defaultValues: getDefaultValues(
         initialBillerSlug,
         initialMethod,
         initialUrl
       ),
+      resolver: zodResolver(endpointSchema),
     });
 
     useEffect(() => {
@@ -316,9 +316,9 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
     }, [form, initialBillerSlug, initialMethod, initialUrl]);
 
     useImperativeHandle(ref, () => ({
-      reset: () => form.reset(),
-      getValues: () => form.getValues(),
       form,
+      getValues: () => form.getValues(),
+      reset: () => form.reset(),
     }));
 
     const previewMethod = useWatch({ control: form.control, name: "method" });

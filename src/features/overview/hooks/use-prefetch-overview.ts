@@ -27,8 +27,8 @@ export function usePrefetchOverview() {
     // Prefetch immediately on hover - no delay
     // This ensures when user clicks, data is already cached (< 100ms response)
     queryClient.prefetchQuery({
-      queryKey: overviewQueryKeys.all,
       queryFn: fetchOverview,
+      queryKey: overviewQueryKeys.all,
       staleTime: TIME_DURATIONS.FIVE_MINUTES,
     });
   };

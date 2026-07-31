@@ -1,6 +1,6 @@
 const PLUS_REGEX = /\+/g;
 const SLASH_REGEX = /\//g;
-const EQUAL_SIGN_REGEX = /=+$/;
+const EQUAL_SIGN_REGEX = /[=]+$/;
 const HYPHEN_REGEX = /-/g;
 const UNDERSCORE_REGEX = /_/g;
 
@@ -45,13 +45,13 @@ export function parseJwt(token: string): ParsedJwt {
   const parts = token.split(".");
   if (parts.length !== 3) {
     return {
-      raw: token,
-      headerStr: "",
-      payloadStr: "",
-      signatureHex: "",
       header: {},
-      payload: {},
+      headerStr: "",
       isValidStructure: false,
+      payload: {},
+      payloadStr: "",
+      raw: token,
+      signatureHex: "",
     };
   }
 
@@ -62,23 +62,23 @@ export function parseJwt(token: string): ParsedJwt {
     const payload = JSON.parse(payloadStr) as Record<string, unknown>;
 
     return {
-      raw: token,
-      headerStr,
-      payloadStr,
-      signatureHex: parts[2],
       header,
-      payload,
+      headerStr,
       isValidStructure: true,
+      payload,
+      payloadStr,
+      raw: token,
+      signatureHex: parts[2],
     };
   } catch {
     return {
-      raw: token,
-      headerStr: "",
-      payloadStr: "",
-      signatureHex: parts[2] || "",
       header: {},
-      payload: {},
+      headerStr: "",
       isValidStructure: false,
+      payload: {},
+      payloadStr: "",
+      raw: token,
+      signatureHex: parts[2] || "",
     };
   }
 }
@@ -94,7 +94,7 @@ export async function signHS256(
   const key = await crypto.subtle.importKey(
     "raw",
     keyData,
-    { name: "HMAC", hash: { name: "SHA-256" } },
+    { hash: { name: "SHA-256" }, name: "HMAC" },
     false,
     ["sign"]
   );

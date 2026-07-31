@@ -46,10 +46,10 @@ export function EditResponseJsonForm({
   isLoading,
 }: EditResponseJsonFormProps) {
   const form = useForm<EditJsonFormData>({
-    resolver: zodResolver(editJsonSchema),
     defaultValues: {
       json: defaultValue,
     },
+    resolver: zodResolver(editJsonSchema),
   });
 
   return (

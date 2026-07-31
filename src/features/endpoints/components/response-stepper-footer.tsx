@@ -51,10 +51,6 @@ export function ResponseStepperFooter({
             {STEPS.map((step, index) => (
               <motion.div
                 animate={{
-                  scale:
-                    index === currentStepIndex
-                      ? ACTIVE_INDICATOR_SCALE
-                      : INACTIVE_INDICATOR_SCALE,
                   backgroundColor: getStepIndicatorColor(
                     index,
                     currentStepIndex
@@ -63,6 +59,10 @@ export function ResponseStepperFooter({
                     index === currentStepIndex
                       ? ACTIVE_INDICATOR_OPACITY
                       : INACTIVE_INDICATOR_OPACITY,
+                  scale:
+                    index === currentStepIndex
+                      ? ACTIVE_INDICATOR_SCALE
+                      : INACTIVE_INDICATOR_SCALE,
                 }}
                 className="size-2 rounded-full"
                 key={step.id}

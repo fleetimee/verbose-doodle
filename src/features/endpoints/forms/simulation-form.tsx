@@ -52,16 +52,16 @@ export const SimulationForm = forwardRef<
   SimulationFormProps
 >(({ defaultValues, onSubmit, onCancel, isPending = false, children }, ref) => {
   const form = useForm<SimulationFormValues>({
-    resolver: zodResolver(simulationFormSchema),
     defaultValues: defaultValues ?? { type: SIMULATION_TYPE.NONE },
+    resolver: zodResolver(simulationFormSchema),
   });
 
   useImperativeHandle(ref, () => ({
+    form,
+    getValues: () => form.getValues(),
     reset: (values?: SimulationFormValues) => {
       form.reset(values ?? defaultValues ?? { type: SIMULATION_TYPE.NONE });
     },
-    getValues: () => form.getValues(),
-    form,
   }));
 
   const simulationType = form.watch("type");

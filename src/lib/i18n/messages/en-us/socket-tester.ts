@@ -9,6 +9,11 @@ export const socketTesterMessages = {
   clearButton: "Clear",
   connectButton: "Connect",
   connectedStatus: "Connected",
+  copyHexLabel: "Copy hex",
+  copyMetadataLabel: "Copy metadata",
+  copyPayloadLabel: "Copy payload",
+  copyRenderedDataLabel: "Copy rendered data",
+  copyRenderedJsonLabel: "Copy rendered JSON",
   dataTitle: "Data",
   disconnectButton: "Disconnect",
   disconnectedStatus: "Disconnected",
@@ -34,20 +39,16 @@ export const socketTesterMessages = {
     "Appends CRLF, LF, or nothing after the payload. CRLF is common for text protocols; None sends the payload as-is.",
   lineEndingHelpAriaLabel: "What line ending does",
   lineEndingLabel: "Line ending",
-  metadataEmpty: "No metadata captured for this frame.",
+  listenPortLabel: "Listen port",
   metadataCopied: "Metadata copied",
   metadataDescription: "Bridge context attached to this log row.",
+  metadataEmpty: "No metadata captured for this frame.",
   metadataTitle: "Metadata",
-  copyHexLabel: "Copy hex",
-  copyMetadataLabel: "Copy metadata",
-  copyPayloadLabel: "Copy payload",
-  copyRenderedDataLabel: "Copy rendered data",
-  copyRenderedJsonLabel: "Copy rendered JSON",
-  noneDelimiterLabel: "None",
   noActiveConnection: "No active connection",
-  noFramesCapturedTitle: "No frames captured",
   noFramesCapturedDescription:
     "Connect the bridge, start a socket, then send traffic.",
+  noFramesCapturedTitle: "No frames captured",
+  noneDelimiterLabel: "None",
   outboundMetric: "Outbound",
   payloadCopied: "Payload copied",
   payloadFormatLabel: "Payload format",
@@ -57,21 +58,23 @@ export const socketTesterMessages = {
   protocolLabel: "Protocol",
   rawPayloadDescription: "Exact text payload captured from the selected frame.",
   rawPayloadTitle: "Raw payload",
-  renderedReplyDescription:
-    "Rendered reply first, raw payload underneath for byte-for-byte comparison.",
   renderedDataCopied: "Rendered data copied",
   renderedDataDescription:
     "Payload is not valid JSON, so this view shows the reply exactly as received.",
   renderedDataTitle: "Rendered data",
   renderedJsonCopied: "Rendered JSON copied",
   renderedJsonDescription: "Parsed JSON view from the frame payload.",
+  renderedReplyDescription:
+    "Rendered reply first, raw payload underneath for byte-for-byte comparison.",
   saveButton: "Save",
   scopeLabel: "Scope",
   sendButton: "Send",
   sendPanelDescription: "Compose payloads as ASCII, hex, or base64.",
   sendPanelTitle: "Send panel",
-  stopUdpListenerSrLabel: "Stop UDP listener",
   startUdpListenerSrLabel: "Start UDP listener",
+  stopUdpListenerSrLabel: "Stop UDP listener",
+  targetHostLabel: "Target host",
+  targetPortLabel: "Target port",
   tcpClientStatusLabel: "TCP client status",
   tcpConnected: "TCP connected",
   tcpConnectedDescription: "Connected to {host}:{port}",
@@ -80,60 +83,57 @@ export const socketTesterMessages = {
     "{host}:{port} refused the connection. {message}",
   tcpConnectionUnableDescription: "Could not connect to {host}:{port}",
   timestampLabel: "Timestamp",
+  tour: {
+    shared: {
+      headerDescription:
+        "Start here to connect the WebSocket bridge, check bridge status, and choose the socket workflow for this page.",
+      headerTitle: "Socket test workspace",
+      metricsDescription:
+        "Watch active connections, inbound packets, outbound packets, and bridge errors while you test socket traffic.",
+      metricsTitle: "Bridge metrics",
+      sendPanelDescription:
+        "Write a payload, choose ASCII, hex, or base64, then send it once the bridge and socket mode are ready.",
+      sendPanelTitle: "Compose payloads",
+      trafficConsoleDescription:
+        "Captured frames appear here with save, clear, and auto-scroll controls. Click a captured frame to inspect text and bytes.",
+      trafficConsoleTitle: "Inspect traffic",
+    },
+    startButton: "Start tour",
+    tcpClient: {
+      connectionDescription:
+        "Enter the target host and port, connect through the bridge, then use the send panel to transmit payloads.",
+      connectionTitle: "Connect to a TCP endpoint",
+      statusDescription:
+        "This shows whether the TCP client is connected and which host and port are active.",
+      statusTitle: "TCP client status",
+    },
+    tcpServer: {
+      clientsDescription:
+        "Connected clients appear here. Select clients to target specific connections, or leave all unselected to broadcast.",
+      clientsTitle: "Target connected clients",
+      listenerDescription:
+        "Choose a listen port and start or stop the TCP server through the backend bridge.",
+      listenerTitle: "Start the TCP server",
+      statusDescription:
+        "Use this status line to confirm whether the TCP listener is stopped or accepting client connections.",
+      statusTitle: "Server status",
+    },
+    udp: {
+      listenerDescription:
+        "Start the listener when you want inbound datagrams captured in the traffic console.",
+      listenerTitle: "Optional UDP listener",
+      statusDescription:
+        "This line confirms whether the UDP listener is currently off or listening on a port.",
+      statusTitle: "UDP listener status",
+      targetDescription:
+        "Set the destination host and port for stateless UDP datagrams before sending payloads.",
+      targetTitle: "UDP target",
+    },
+  },
   trafficConsoleDescription:
     "Inspect socket frames, payloads, and bridge metadata.",
   trafficConsoleTitle: "Traffic console",
-  unableToCopy: "Unable to copy",
   udpListenerOffStatus: "UDP LISTENER OFF",
   udpListeningStatus: "UDP LISTENING :{port}",
-  targetHostLabel: "Target host",
-  targetPortLabel: "Target port",
-  listenPortLabel: "Listen port",
-  tour: {
-    startButton: "Start tour",
-    shared: {
-      headerTitle: "Socket test workspace",
-      headerDescription:
-        "Start here to connect the WebSocket bridge, check bridge status, and choose the socket workflow for this page.",
-      metricsTitle: "Bridge metrics",
-      metricsDescription:
-        "Watch active connections, inbound packets, outbound packets, and bridge errors while you test socket traffic.",
-      sendPanelTitle: "Compose payloads",
-      sendPanelDescription:
-        "Write a payload, choose ASCII, hex, or base64, then send it once the bridge and socket mode are ready.",
-      trafficConsoleTitle: "Inspect traffic",
-      trafficConsoleDescription:
-        "Captured frames appear here with save, clear, and auto-scroll controls. Click a captured frame to inspect text and bytes.",
-    },
-    tcpClient: {
-      statusTitle: "TCP client status",
-      statusDescription:
-        "This shows whether the TCP client is connected and which host and port are active.",
-      connectionTitle: "Connect to a TCP endpoint",
-      connectionDescription:
-        "Enter the target host and port, connect through the bridge, then use the send panel to transmit payloads.",
-    },
-    tcpServer: {
-      listenerTitle: "Start the TCP server",
-      listenerDescription:
-        "Choose a listen port and start or stop the TCP server through the backend bridge.",
-      statusTitle: "Server status",
-      statusDescription:
-        "Use this status line to confirm whether the TCP listener is stopped or accepting client connections.",
-      clientsTitle: "Target connected clients",
-      clientsDescription:
-        "Connected clients appear here. Select clients to target specific connections, or leave all unselected to broadcast.",
-    },
-    udp: {
-      targetTitle: "UDP target",
-      targetDescription:
-        "Set the destination host and port for stateless UDP datagrams before sending payloads.",
-      listenerTitle: "Optional UDP listener",
-      listenerDescription:
-        "Start the listener when you want inbound datagrams captured in the traffic console.",
-      statusTitle: "UDP listener status",
-      statusDescription:
-        "This line confirms whether the UDP listener is currently off or listening on a port.",
-    },
-  },
+  unableToCopy: "Unable to copy",
 } as const;

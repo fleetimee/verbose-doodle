@@ -41,7 +41,7 @@ export function AboutVersionFooter({
       animate={{ opacity: 1, y: 0 }}
       className="mt-6 flex flex-col gap-4 rounded-xl border border-border/60 bg-card/50 p-5 shadow-xs backdrop-blur-xs transition-colors hover:border-border"
       initial={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.5, delay: 1.3 }}
+      transition={{ delay: 1.3, duration: 0.5 }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">

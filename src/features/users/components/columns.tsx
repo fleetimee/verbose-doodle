@@ -34,7 +34,15 @@ const getStatusStyles = (active: string): string => {
 
 export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
   {
-    id: "select",
+    cell: ({ row }) => (
+      <Checkbox
+        aria-label={messages.users.selectRowAriaLabel}
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+      />
+    ),
+    enableHiding: false,
+    enableSorting: false,
     header: ({ table: tableInstance }) => (
       <Checkbox
         aria-label={messages.users.selectAllAriaLabel}
@@ -48,19 +56,10 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
         }
       />
     ),
-    cell: ({ row }) => (
-      <Checkbox
-        aria-label={messages.users.selectRowAriaLabel}
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
+    id: "select",
   },
   {
     accessorKey: "avatar",
-    header: messages.users.avatarColumn,
     cell: ({ row }) => {
       const user = row.original;
       const initials = user.username
@@ -77,9 +76,13 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
       );
     },
     enableSorting: false,
+    header: messages.users.avatarColumn,
   },
   {
     accessorKey: "username",
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue("username")}</div>
+    ),
     header: ({ column }) => (
       <Button
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -89,18 +92,14 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
         <ArrowUpDown />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("username")}</div>
-    ),
   },
   {
     accessorKey: "role",
-    header: messages.users.roleColumn,
     cell: ({ row }) => <div className="capitalize">{row.getValue("role")}</div>,
+    header: messages.users.roleColumn,
   },
   {
     accessorKey: "active",
-    header: messages.users.statusColumn,
     cell: ({ row }) => {
       const status = row.getValue("active") as string;
 
@@ -114,10 +113,9 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
         </div>
       );
     },
+    header: messages.users.statusColumn,
   },
   {
-    id: "actions",
-    enableHiding: false,
     cell: ({ row }) => {
       const user = row.original;
 
@@ -162,5 +160,7 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
         </DropdownMenu>
       );
     },
+    enableHiding: false,
+    id: "actions",
   },
 ];

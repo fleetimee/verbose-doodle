@@ -183,7 +183,7 @@ export class NfcBridgeClient {
       type: "start-scan",
     });
     if (sent) {
-      this.updateState({ scanStatus: "scanning", error: null });
+      this.updateState({ error: null, scanStatus: "scanning" });
     }
     return sent;
   }
