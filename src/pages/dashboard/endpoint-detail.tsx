@@ -79,7 +79,6 @@ import {
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { messages } from "@/lib/i18n";
-import { decodeId } from "@/lib/id-encoder";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 // Animation constants
@@ -132,7 +131,7 @@ function TourStepContent({
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This page coordinates the endpoint workspace state machine and its guarded overlays.
 export function EndpointDetailPage() {
-  const { id: encodedId } = useParams<{ id: string }>();
+  const { id: endpointId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { session } = useAuth();
@@ -148,13 +147,7 @@ export function EndpointDetailPage() {
   const canEditEndpoint = session.can("canEditEndpoint");
   const shouldReduceMotion = useReducedMotion() ?? false;
 
-  // Decode the ID from the URL
-  const decodedId = useMemo(() => {
-    if (!encodedId) {
-      return null;
-    }
-    return decodeId(encodedId);
-  }, [encodedId]);
+  const routeEndpointId = endpointId ?? null;
 
   const [selectedResponseId, setSelectedResponseId] = useState<string | null>(
     null
@@ -192,7 +185,7 @@ export function EndpointDetailPage() {
     createResponse: createResponseMutation,
     activateResponse: activateResponseMutation,
     deactivateResponse: deactivateResponseMutation,
-  } = useEndpointWorkspace(decodedId ?? "");
+  } = useEndpointWorkspace(routeEndpointId ?? "");
   const {
     data: endpoint,
     error: endpointError,
@@ -380,22 +373,22 @@ export function EndpointDetailPage() {
       return;
     }
 
-    if (decodedId) {
+    if (routeEndpointId) {
       queryClient.removeQueries({
-        queryKey: ["endpoint-data", "workspace", decodedId],
+        queryKey: ["endpoint-data", "workspace", routeEndpointId],
       });
       queryClient.setQueryData(
         ["endpoint-data", "catalog"],
         (catalog: Endpoint[] | undefined) =>
-          catalog?.filter((candidate) => candidate.id !== decodedId)
+          catalog?.filter((candidate) => candidate.id !== routeEndpointId)
       );
-      forgetEndpoint(decodedId);
+      forgetEndpoint(routeEndpointId);
     }
 
     toast.error("Endpoint no longer exists");
     navigate("/dashboard/endpoints", { replace: true });
   }, [
-    decodedId,
+    routeEndpointId,
     endpointQuery.data,
     forgetEndpoint,
     isFetchingEndpoint,
@@ -727,8 +720,8 @@ export function EndpointDetailPage() {
     });
   };
 
-  // Show error if the ID cannot be decoded
-  if (!decodedId) {
+  // Show an error if the endpoint route parameter is missing
+  if (!routeEndpointId) {
     return (
       <motion.div
         animate={{ opacity: 1, y: 0 }}

@@ -30,13 +30,12 @@ import {
 } from "@/features/dashboard/dashboard-navigation-context";
 import { endpointDataQueryKeys } from "@/features/endpoints/data/endpoint-data-query-keys";
 import type { Endpoint } from "@/features/endpoints/types";
-import { encodeId } from "@/lib/id-encoder";
 import { EndpointDetailPage } from "@/pages/dashboard/endpoint-detail";
 
 const endpointOneId = "endpoint-1";
 const endpointTwoId = "endpoint-2";
-const endpointOnePath = `/dashboard/endpoints/${encodeId(endpointOneId)}`;
-const endpointTwoPath = `/dashboard/endpoints/${encodeId(endpointTwoId)}`;
+const endpointOnePath = `/dashboard/endpoints/${endpointOneId}`;
+const endpointTwoPath = `/dashboard/endpoints/${endpointTwoId}`;
 
 const responseOne = {
   activated: true,

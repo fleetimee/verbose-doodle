@@ -11,7 +11,6 @@ import {
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import type { HttpMethod } from "@/features/endpoints/types";
 import type { OverviewData } from "@/features/overview/types";
-import { encodeId } from "@/lib/id-encoder";
 import { cn } from "@/lib/utils";
 
 const methodColors: Record<HttpMethod, string> = {
@@ -53,7 +52,7 @@ export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
               key={endpoint.endpointId}
               onFocus={() => prefetchEndpoint(String(endpoint.endpointId))}
               onMouseEnter={() => prefetchEndpoint(String(endpoint.endpointId))}
-              to={`/dashboard/endpoints/${encodeId(endpoint.endpointId)}`}
+              to={`/dashboard/endpoints/${endpoint.endpointId}`}
             >
               <span className="absolute inset-y-3 left-0 w-0.5 rounded-full bg-primary opacity-0 transition-opacity duration-200 group-hover:opacity-80 group-focus-visible:opacity-80" />
               <div className="min-w-0 flex-1">

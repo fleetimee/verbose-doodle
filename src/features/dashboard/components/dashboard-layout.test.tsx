@@ -16,10 +16,9 @@ import {
 import { AuthProvider } from "@/features/auth/context";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
 import { ENDPOINT_MUTATION_KEY } from "@/features/endpoints/data/endpoint-mutation-key";
-import { encodeId } from "@/lib/id-encoder";
 
 const originalFetch = globalThis.fetch;
-const encodedEndpointId = encodeId("endpoint-1");
+const endpointId = "endpoint-1";
 let availableBillers = [
   { biller_name: "PLN", slug: "pln" },
   { biller_name: "PDAM", slug: "pdam" },
@@ -227,9 +226,7 @@ function renderDashboard() {
   });
 
   return render(
-    <MemoryRouter
-      initialEntries={[`/dashboard/endpoints/${encodedEndpointId}`]}
-    >
+    <MemoryRouter initialEntries={[`/dashboard/endpoints/${endpointId}`]}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Routes>
@@ -250,9 +247,7 @@ function renderHistoryDashboard() {
   });
 
   return render(
-    <MemoryRouter
-      initialEntries={[`/dashboard/endpoints/${encodedEndpointId}`]}
-    >
+    <MemoryRouter initialEntries={[`/dashboard/endpoints/${endpointId}`]}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Routes>
@@ -273,9 +268,7 @@ function renderMutationDashboard() {
   });
 
   return render(
-    <MemoryRouter
-      initialEntries={[`/dashboard/endpoints/${encodedEndpointId}`]}
-    >
+    <MemoryRouter initialEntries={[`/dashboard/endpoints/${endpointId}`]}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Routes>
@@ -341,7 +334,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        `/dashboard/endpoints/${encodeId("endpoint-pdam")}`
+        "/dashboard/endpoints/endpoint-pdam"
       );
     });
   });
@@ -374,7 +367,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
       )
     ).toBeDefined();
     expect(screen.getByTestId("location").textContent).toBe(
-      `/dashboard/endpoints/${encodedEndpointId}`
+      `/dashboard/endpoints/${endpointId}`
     );
   });
 
@@ -399,7 +392,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
       ).toBeNull();
     });
     expect(screen.getByTestId("location").textContent).toBe(
-      `/dashboard/endpoints/${encodedEndpointId}`
+      `/dashboard/endpoints/${endpointId}`
     );
   });
 
@@ -430,7 +423,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        `/dashboard/endpoints/${encodeId("endpoint-2")}`
+        "/dashboard/endpoints/endpoint-2"
       );
     });
   });
@@ -452,7 +445,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     const billerSelectors = screen.getAllByRole("combobox", { name: "Biller" });
     expect(billerSelectors.at(-1)?.textContent).toContain("PLN");
     expect(screen.getByTestId("location").textContent).toBe(
-      `/dashboard/endpoints/${encodedEndpointId}`
+      `/dashboard/endpoints/${endpointId}`
     );
   });
 
@@ -476,7 +469,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
       ).toBeNull();
     });
     expect(screen.getByTestId("location").textContent).toBe(
-      `/dashboard/endpoints/${encodedEndpointId}`
+      `/dashboard/endpoints/${endpointId}`
     );
   });
 
@@ -514,7 +507,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     );
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        `/dashboard/endpoints/${encodeId("endpoint-2")}`
+        "/dashboard/endpoints/endpoint-2"
       );
     });
 
@@ -522,7 +515,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     await user.click(await screen.findByRole("option", { name: "PDAM" }));
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        `/dashboard/endpoints/${encodeId("endpoint-pdam")}`
+        "/dashboard/endpoints/endpoint-pdam"
       );
     });
 
@@ -530,7 +523,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     await user.click(await screen.findByRole("option", { name: "PLN" }));
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        `/dashboard/endpoints/${encodeId("endpoint-2")}`
+        "/dashboard/endpoints/endpoint-2"
       );
     });
   });
@@ -547,21 +540,21 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     );
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        `/dashboard/endpoints/${encodeId("endpoint-2")}`
+        "/dashboard/endpoints/endpoint-2"
       );
     });
 
     await user.click(screen.getByRole("button", { name: "Back" }));
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        `/dashboard/endpoints/${encodedEndpointId}`
+        `/dashboard/endpoints/${endpointId}`
       );
     });
 
     await user.click(screen.getByRole("button", { name: "Forward" }));
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
-        `/dashboard/endpoints/${encodeId("endpoint-2")}`
+        "/dashboard/endpoints/endpoint-2"
       );
     });
   });

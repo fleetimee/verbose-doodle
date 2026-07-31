@@ -14,7 +14,6 @@ import { HttpMethodBadge } from "@/features/endpoints/components/http-method-bad
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import type { Endpoint } from "@/features/endpoints/types";
 import { getMethodColor } from "@/features/endpoints/utils/http-method-colors";
-import { encodeId } from "@/lib/id-encoder";
 import { cn } from "@/lib/utils";
 
 type EndpointCardProps = {
@@ -32,7 +31,7 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
     if (onClick) {
       onClick();
     } else {
-      navigate(`/dashboard/endpoints/${encodeId(endpoint.id)}`);
+      navigate(`/dashboard/endpoints/${endpoint.id}`);
     }
   };
 

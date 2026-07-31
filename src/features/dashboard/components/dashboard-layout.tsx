@@ -59,7 +59,6 @@ import { selectEndpointForBiller } from "@/features/endpoints/utils/endpoint-sel
 import { SocketBridgeFloatingStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
 import { SocketBridgeProvider } from "@/features/socket-tester/context/socket-bridge-context";
 import { messages } from "@/lib/i18n";
-import { decodeId, encodeId } from "@/lib/id-encoder";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -84,8 +83,7 @@ const routeLabels: Record<string, string> = {
   "jwt-inspector": messages.jwtInspector.title,
 };
 
-// Updated regex to match encoded IDs (base64 URL-safe characters)
-const ENDPOINT_DETAIL_REGEX = /^\/dashboard\/endpoints\/([A-Za-z0-9_-]+)$/;
+const ENDPOINT_DETAIL_REGEX = /^\/dashboard\/endpoints\/([^/]+)$/;
 type DashboardBreadcrumbItem = {
   readonly billerSlug?: string;
   readonly href: string;
@@ -107,12 +105,11 @@ export function DashboardLayout() {
   );
 
   const isEndpointDetail = location.pathname.match(ENDPOINT_DETAIL_REGEX);
-  const encodedId = isEndpointDetail ? params.id : undefined;
+  const routeEndpointId = isEndpointDetail ? params.id : undefined;
 
-  // Decode the ID if we're on an endpoint detail page
-  const decodedId = encodedId ? decodeId(encodedId) : undefined;
-
-  const { endpoint: endpointQuery } = useEndpointWorkspace(decodedId || "");
+  const { endpoint: endpointQuery } = useEndpointWorkspace(
+    routeEndpointId || ""
+  );
   const { data: endpoint } = endpointQuery;
   const { createEndpoint: createEndpointMutation } = useEndpointCatalog();
   const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
@@ -195,7 +192,7 @@ export function DashboardLayout() {
       let url: string | undefined;
 
       // If this segment is the encoded ID and we have endpoint data, show the endpoint URL
-      if (isEndpointDetail && segment === encodedId && endpoint) {
+      if (isEndpointDetail && segment === routeEndpointId && endpoint) {
         label = `${endpoint.method} ${endpoint.url}`;
         billerSlug = endpoint.billerSlug;
         endpointId = endpoint.id;
@@ -541,9 +538,7 @@ function BillerBreadcrumbSelector({
 
     if (nextBillerSlug !== billerSlug && nextEndpoint) {
       setOpen(false);
-      requestEndpointNavigation(
-        `/dashboard/endpoints/${encodeId(nextEndpoint.id)}`
-      );
+      requestEndpointNavigation(`/dashboard/endpoints/${nextEndpoint.id}`);
     }
   };
 
@@ -700,9 +695,7 @@ function EndpointBreadcrumbSelector({
   const selectEndpoint = (nextEndpointId: string) => {
     if (nextEndpointId !== currentEndpoint.id) {
       setOpen(false);
-      requestEndpointNavigation(
-        `/dashboard/endpoints/${encodeId(nextEndpointId)}`
-      );
+      requestEndpointNavigation(`/dashboard/endpoints/${nextEndpointId}`);
     }
   };
 
