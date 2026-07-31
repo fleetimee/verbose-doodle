@@ -3,6 +3,7 @@ import type { Endpoint } from "@/features/endpoints/types";
 export const mockEndpoints: Endpoint[] = [
   {
     id: "endpoint-1",
+    slug: "pln-post-payment-process-a1b2c3",
     method: "POST",
     url: "/api/payment/process",
     billerSlug: "pln",
@@ -32,6 +33,7 @@ export const mockEndpoints: Endpoint[] = [
   },
   {
     id: "endpoint-2",
+    slug: "pln-get-payment-status-d4e5f6",
     method: "GET",
     url: "/api/payment/status/{id}",
     billerSlug: "pln",
@@ -54,6 +56,7 @@ export const mockEndpoints: Endpoint[] = [
   },
   {
     id: "endpoint-3",
+    slug: "pln-delete-payment-cancel-a1b2c3",
     method: "DELETE",
     url: "/api/payment/cancel/{id}",
     billerSlug: "pln",
@@ -69,6 +72,7 @@ export const mockEndpoints: Endpoint[] = [
   },
   {
     id: "endpoint-4",
+    slug: "pdam-post-users-register-d4e5f6",
     method: "POST",
     url: "/api/users/register",
     billerSlug: "pdam",
@@ -91,6 +95,7 @@ export const mockEndpoints: Endpoint[] = [
   },
   {
     id: "endpoint-5",
+    slug: "pdam-get-users-a1b2c3",
     method: "GET",
     url: "/api/users/{id}",
     billerSlug: "pdam",
@@ -106,6 +111,7 @@ export const mockEndpoints: Endpoint[] = [
   },
   {
     id: "endpoint-6",
+    slug: "pdam-patch-users-d4e5f6",
     method: "PATCH",
     url: "/api/users/{id}",
     billerSlug: "pdam",
@@ -128,6 +134,7 @@ export const mockEndpoints: Endpoint[] = [
   },
   {
     id: "endpoint-7",
+    slug: "pdam-put-users-profile-a1b2c3",
     method: "PUT",
     url: "/api/users/{id}/profile",
     billerSlug: "pdam",

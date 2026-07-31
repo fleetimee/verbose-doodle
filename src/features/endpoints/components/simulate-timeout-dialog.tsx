@@ -17,6 +17,7 @@ import type { EndpointResponse } from "@/features/endpoints/types";
 
 type SimulateTimeoutDialogProps = {
   endpointId: string;
+  endpointSlug: string;
   response: EndpointResponse;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -24,12 +25,13 @@ type SimulateTimeoutDialogProps = {
 
 export function SimulateTimeoutDialog({
   endpointId,
+  endpointSlug,
   response,
   open,
   onOpenChange,
 }: SimulateTimeoutDialogProps) {
   const formRef = useRef<SimulationFormHandle>(null);
-  const { updateResponseSimulation } = useEndpointWorkspace(endpointId);
+  const { updateResponseSimulation } = useEndpointWorkspace(endpointSlug);
   const { mutate: updateSimulation, isPending } = updateResponseSimulation;
 
   // Determine initial values based on current response settings

@@ -35,13 +35,13 @@ export function EndpointListItem({
     if (onClick) {
       onClick();
     } else {
-      navigate(`/dashboard/endpoints/${endpoint.id}`);
+      navigate(`/dashboard/endpoints/${endpoint.slug}`);
     }
   };
 
   const handleMouseEnter = () => {
     // Prefetch immediately on hover for instant navigation (100ms rule)
-    prefetchEndpoint(endpoint.id);
+    prefetchEndpoint(endpoint.slug);
   };
 
   return (

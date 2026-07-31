@@ -92,7 +92,7 @@ type DashboardBreadcrumbItem = {
   readonly kind?: "biller" | "endpoint";
   readonly label: string;
   readonly method?: HttpMethod;
-  readonly endpointId?: string;
+  readonly endpointSlug?: string;
   readonly url?: string;
 };
 
@@ -105,10 +105,10 @@ export function DashboardLayout() {
   );
 
   const isEndpointDetail = location.pathname.match(ENDPOINT_DETAIL_REGEX);
-  const routeEndpointId = isEndpointDetail ? params.id : undefined;
+  const routeEndpointSlug = isEndpointDetail ? params.slug : undefined;
 
   const { endpoint: endpointQuery } = useEndpointWorkspace(
-    routeEndpointId || ""
+    routeEndpointSlug || ""
   );
   const { data: endpoint } = endpointQuery;
   const { createEndpoint: createEndpointMutation } = useEndpointCatalog();
@@ -187,15 +187,15 @@ export function DashboardLayout() {
         segment.charAt(0).toUpperCase() + segment.slice(1);
       let method: HttpMethod | undefined;
       let billerSlug: string | undefined;
-      let endpointId: string | undefined;
+      let endpointSlug: string | undefined;
       let kind: DashboardBreadcrumbItem["kind"];
       let url: string | undefined;
 
-      // If this segment is the encoded ID and we have endpoint data, show the endpoint URL
-      if (isEndpointDetail && segment === routeEndpointId && endpoint) {
+      // If this segment is the endpoint slug and we have endpoint data, show the endpoint URL
+      if (isEndpointDetail && segment === routeEndpointSlug && endpoint) {
         label = `${endpoint.method} ${endpoint.url}`;
         billerSlug = endpoint.billerSlug;
-        endpointId = endpoint.id;
+        endpointSlug = endpoint.slug;
         kind = "endpoint";
         method = endpoint.method;
         url = endpoint.url;
@@ -206,7 +206,7 @@ export function DashboardLayout() {
 
       return {
         billerSlug,
-        endpointId,
+        endpointSlug,
         href,
         isLast,
         isNavigable,
@@ -395,7 +395,7 @@ function DashboardBreadcrumbContent({
     return (
       <EndpointBreadcrumbSelector
         billerSlug={item.billerSlug}
-        endpointId={item.endpointId}
+        endpointSlug={item.endpointSlug}
         fallbackMethod={item.method}
         fallbackUrl={item.url}
         onAddEndpoint={onAddEndpoint}
@@ -531,14 +531,14 @@ function BillerBreadcrumbSelector({
 
     if (
       rememberedEndpoint &&
-      !billerEndpoints.some((endpoint) => endpoint.id === rememberedEndpoint)
+      !billerEndpoints.some((endpoint) => endpoint.slug === rememberedEndpoint)
     ) {
       forgetEndpoint(rememberedEndpoint);
     }
 
     if (nextBillerSlug !== billerSlug && nextEndpoint) {
       setOpen(false);
-      requestEndpointNavigation(`/dashboard/endpoints/${nextEndpoint.id}`);
+      requestEndpointNavigation(`/dashboard/endpoints/${nextEndpoint.slug}`);
     }
   };
 
@@ -630,13 +630,13 @@ function BillerBreadcrumbSelector({
 
 function EndpointBreadcrumbSelector({
   billerSlug,
-  endpointId,
+  endpointSlug,
   fallbackMethod,
   fallbackUrl,
   onAddEndpoint,
 }: {
   readonly billerSlug?: string;
-  readonly endpointId?: string;
+  readonly endpointSlug?: string;
   readonly fallbackMethod?: HttpMethod;
   readonly fallbackUrl?: string;
   readonly onAddEndpoint: (billerSlug: string) => void;
@@ -654,14 +654,14 @@ function EndpointBreadcrumbSelector({
     (endpoint) => endpoint.billerSlug === billerSlug
   );
   const currentEndpoint = billerEndpoints.find(
-    (endpoint) => endpoint.id === endpointId
+    (endpoint) => endpoint.slug === endpointSlug
   );
 
   useEffect(() => {
     if (currentEndpoint) {
       rememberEndpoint({
         billerSlug: currentEndpoint.billerSlug,
-        endpointId: currentEndpoint.id,
+        endpointSlug: currentEndpoint.slug,
       });
     }
   }, [currentEndpoint, rememberEndpoint]);
@@ -692,10 +692,10 @@ function EndpointBreadcrumbSelector({
     );
   }
 
-  const selectEndpoint = (nextEndpointId: string) => {
-    if (nextEndpointId !== currentEndpoint.id) {
+  const selectEndpoint = (nextEndpointSlug: string) => {
+    if (nextEndpointSlug !== currentEndpoint.slug) {
       setOpen(false);
-      requestEndpointNavigation(`/dashboard/endpoints/${nextEndpointId}`);
+      requestEndpointNavigation(`/dashboard/endpoints/${nextEndpointSlug}`);
     }
   };
 
@@ -712,7 +712,7 @@ function EndpointBreadcrumbSelector({
           variant="ghost"
         >
           <AnimatedBreadcrumbValue
-            value={`${currentEndpoint.id}:${currentEndpoint.method}:${currentEndpoint.url}`}
+            value={`${currentEndpoint.slug}:${currentEndpoint.method}:${currentEndpoint.url}`}
           >
             <EndpointBreadcrumbLabel
               method={currentEndpoint.method}
@@ -770,8 +770,8 @@ function EndpointBreadcrumbSelector({
                 {billerEndpoints.map((endpoint) => (
                   <CommandItem
                     className="min-h-10 px-3 py-2 text-[0.95rem]"
-                    key={endpoint.id}
-                    onSelect={() => selectEndpoint(endpoint.id)}
+                    key={endpoint.slug}
+                    onSelect={() => selectEndpoint(endpoint.slug)}
                     value={`${endpoint.method} ${endpoint.url}`}
                   >
                     <HttpMethodBadge
@@ -782,7 +782,7 @@ function EndpointBreadcrumbSelector({
                     <span className="min-w-0 truncate">{endpoint.url}</span>
                     <HugeiconsIcon
                       aria-hidden="true"
-                      className={`ml-auto size-4 ${endpoint.id === endpointId ? "opacity-100" : "opacity-0"}`}
+                      className={`ml-auto size-4 ${endpoint.slug === endpointSlug ? "opacity-100" : "opacity-0"}`}
                       icon={Tick02Icon}
                       strokeWidth={2}
                     />

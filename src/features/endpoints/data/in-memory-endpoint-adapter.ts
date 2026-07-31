@@ -51,7 +51,16 @@ function createResponseId(endpoints: readonly Endpoint[]): string {
   return String(nextId);
 }
 
-function findEndpoint(
+function createEndpointSlug(input: CreateEndpointInput, id: string): string {
+  const path =
+    input.url
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "root";
+  return `${input.billerSlug}-${input.method.toLowerCase()}-${path}-test${id}`;
+}
+
+function findEndpointById(
   endpoints: readonly Endpoint[],
   endpointId: string
 ): Endpoint {
@@ -62,11 +71,22 @@ function findEndpoint(
   return endpoint;
 }
 
+function findEndpointBySlug(
+  endpoints: readonly Endpoint[],
+  endpointSlug: string
+): Endpoint {
+  const endpoint = endpoints.find((item) => item.slug === endpointSlug);
+  if (!endpoint) {
+    throw new Error(`Endpoint ${endpointSlug} was not found`);
+  }
+  return endpoint;
+}
+
 function findResponse(
   endpoints: readonly Endpoint[],
   input: ResponseActivationInput
 ): EndpointResponse {
-  const endpoint = findEndpoint(endpoints, input.endpointId);
+  const endpoint = findEndpointById(endpoints, input.endpointId);
   const response = endpoint.responses.find(
     (item) => item.id === input.responseId
   );
@@ -102,15 +122,16 @@ export function createInMemoryEndpointAdapter(
       await Promise.resolve();
       return endpoints.map(cloneEndpoint);
     },
-    async getEndpoint(endpointId) {
+    async getEndpoint(endpointSlug) {
       await Promise.resolve();
-      const endpoint = endpoints.find((item) => item.id === endpointId);
+      const endpoint = endpoints.find((item) => item.slug === endpointSlug);
       return endpoint ? cloneEndpoint(endpoint) : null;
     },
     async createEndpoint(input: CreateEndpointInput) {
       await Promise.resolve();
       const endpoint: Endpoint = {
         id: String(endpoints.length + 1),
+        slug: createEndpointSlug(input, String(endpoints.length + 1)),
         method: input.method,
         url: input.url,
         billerSlug: input.billerSlug,
@@ -121,22 +142,23 @@ export function createInMemoryEndpointAdapter(
     },
     async updateEndpoint(input: UpdateEndpointInput) {
       await Promise.resolve();
-      const endpoint = findEndpoint(endpoints, input.endpointId);
+      const endpoint = findEndpointBySlug(endpoints, input.endpointSlug);
       Object.assign(endpoint, input.changes);
       return cloneEndpoint(endpoint);
     },
-    async deleteEndpoint(endpointId) {
+    async deleteEndpoint(endpointSlug) {
       await Promise.resolve();
-      const index = endpoints.findIndex((item) => item.id === endpointId);
+      const index = endpoints.findIndex((item) => item.slug === endpointSlug);
       if (index < 0) {
         return;
       }
+      const endpointId = endpoints[index].id;
       endpoints.splice(index, 1);
       trafficLogs.delete(endpointId);
     },
     async createResponse(input: CreateResponseInput) {
       await Promise.resolve();
-      const endpoint = findEndpoint(endpoints, input.endpointId);
+      const endpoint = findEndpointById(endpoints, input.endpointId);
       const response: EndpointResponse = {
         id: createResponseId(endpoints),
         name: input.name,
@@ -160,14 +182,14 @@ export function createInMemoryEndpointAdapter(
     },
     async deleteResponse(input) {
       await Promise.resolve();
-      const endpoint = findEndpoint(endpoints, input.endpointId);
+      const endpoint = findEndpointById(endpoints, input.endpointId);
       endpoint.responses = endpoint.responses.filter(
         (response) => response.id !== input.responseId
       );
     },
     async activateResponse(input) {
       await Promise.resolve();
-      const endpoint = findEndpoint(endpoints, input.endpointId);
+      const endpoint = findEndpointById(endpoints, input.endpointId);
       for (const response of endpoint.responses) {
         response.activated = response.id === input.responseId;
       }

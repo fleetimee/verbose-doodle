@@ -27,6 +27,7 @@ describe("EndpointDetailLayout", () => {
               <EndpointDetailLayout
                 endpointId="endpoint-1"
                 endpointMethod="POST"
+                endpointSlug="pln-post-payments-inquiry-a1b2c3"
                 endpointUrl="/payments/inquiry"
                 isActivating={false}
                 isDeactivating={false}

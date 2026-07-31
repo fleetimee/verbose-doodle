@@ -120,6 +120,7 @@ function mapEndpoint(input: unknown): Endpoint {
   const responses = value(endpoint, "responses");
   return {
     id: stringValue(value(endpoint, "id", "endpoint_id")),
+    slug: stringValue(value(endpoint, "slug", "endpoint_slug")),
     method: stringValue(value(endpoint, "method")) as Endpoint["method"],
     url: stringValue(value(endpoint, "url")),
     billerSlug: stringValue(value(endpoint, "billerSlug", "biller_slug")),
@@ -299,10 +300,10 @@ export function createHttpEndpointAdapter(
       const data = payload(response);
       return listValue(data, "endpoints").map(mapEndpoint);
     },
-    async getEndpoint(endpointId) {
+    async getEndpoint(endpointSlug) {
       try {
         const response = await transport.get<unknown>(
-          API_ENDPOINTS.admin.endpoints.detail(endpointId)
+          API_ENDPOINTS.admin.endpoints.detail(endpointSlug)
         );
         return endpointFromResponse(response);
       } catch (error) {
@@ -335,7 +336,7 @@ export function createHttpEndpointAdapter(
           url: string;
           biller_slug: string;
         }>
-      >(API_ENDPOINTS.admin.endpoints.update(input.endpointId), {
+      >(API_ENDPOINTS.admin.endpoints.update(input.endpointSlug), {
         ...(input.changes.method ? { method: input.changes.method } : {}),
         ...(input.changes.url ? { url: input.changes.url } : {}),
         ...(input.changes.billerSlug
@@ -344,9 +345,9 @@ export function createHttpEndpointAdapter(
       });
       return endpointFromResponse(response);
     },
-    async deleteEndpoint(endpointId) {
+    async deleteEndpoint(endpointSlug) {
       await transport.delete<unknown>(
-        API_ENDPOINTS.admin.endpoints.delete(endpointId)
+        API_ENDPOINTS.admin.endpoints.delete(endpointSlug)
       );
     },
     async createResponse(input) {

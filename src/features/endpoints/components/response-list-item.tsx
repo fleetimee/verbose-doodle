@@ -50,6 +50,7 @@ import { cn } from "@/lib/utils";
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
 type ResponseListItemProps = {
   endpointId: string;
+  endpointSlug: string;
   response: EndpointResponse;
   isSelected: boolean;
   isActivating: boolean;
@@ -87,6 +88,7 @@ function getItemContainerClasses(isSelected: boolean, isActive: boolean) {
 
 export function ResponseListItem({
   endpointId,
+  endpointSlug,
   response,
   isSelected,
   isActivating,
@@ -110,7 +112,7 @@ export function ResponseListItem({
   );
 
   const { updateResponse: updateResponseMutation, deleteResponse } =
-    useEndpointWorkspace(endpointId);
+    useEndpointWorkspace(endpointSlug);
   const { mutate: updateResponse, isPending: isUpdating } =
     updateResponseMutation;
   const { mutate: deleteResponseMutation, isPending: isDeleting } =
@@ -372,6 +374,7 @@ export function ResponseListItem({
 
       <SimulateTimeoutDialog
         endpointId={endpointId}
+        endpointSlug={endpointSlug}
         onOpenChange={setShowSimulateDialog}
         open={showSimulateDialog}
         response={response}

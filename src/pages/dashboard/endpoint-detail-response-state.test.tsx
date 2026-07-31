@@ -34,8 +34,10 @@ import { EndpointDetailPage } from "@/pages/dashboard/endpoint-detail";
 
 const endpointOneId = "endpoint-1";
 const endpointTwoId = "endpoint-2";
-const endpointOnePath = `/dashboard/endpoints/${endpointOneId}`;
-const endpointTwoPath = `/dashboard/endpoints/${endpointTwoId}`;
+const endpointOneSlug = "pln-get-inquiry-a1b2c3";
+const endpointTwoSlug = "pdam-post-payment-d4e5f6";
+const endpointOnePath = `/dashboard/endpoints/${endpointOneSlug}`;
+const endpointTwoPath = `/dashboard/endpoints/${endpointTwoSlug}`;
 
 const responseOne = {
   activated: true,
@@ -61,6 +63,7 @@ const endpointOne: Endpoint = {
   billerSlug: "pln",
   billerName: "PLN",
   id: endpointOneId,
+  slug: endpointOneSlug,
   method: "GET",
   responses: [responseOne, responseTwo],
   url: "/inquiry",
@@ -70,6 +73,7 @@ const endpointTwo: Endpoint = {
   billerSlug: "pdam",
   billerName: "PDAM",
   id: endpointTwoId,
+  slug: endpointTwoSlug,
   method: "POST",
   responses: [
     {
@@ -130,7 +134,7 @@ function installApiMock() {
       );
     }
 
-    if (url === `/api/endpoint/${endpointOneId}` && method === "GET") {
+    if (url === `/api/endpoint/${endpointOneSlug}` && method === "GET") {
       if (endpointOneNotFound) {
         return Promise.resolve(jsonResponse({ data: {} }, 404));
       }
@@ -145,7 +149,7 @@ function installApiMock() {
       return Promise.resolve(endpointResponse(currentEndpointOne));
     }
 
-    if (url === `/api/endpoint/${endpointTwoId}` && method === "GET") {
+    if (url === `/api/endpoint/${endpointTwoSlug}` && method === "GET") {
       return Promise.resolve(endpointResponse(endpointTwo));
     }
 
@@ -234,7 +238,7 @@ function RefreshProbe() {
       onClick={() => {
         act(() => {
           queryClient.invalidateQueries({
-            queryKey: endpointDataQueryKeys.workspace(endpointOneId),
+            queryKey: endpointDataQueryKeys.workspace(endpointOneSlug),
           });
         });
       }}
@@ -288,7 +292,7 @@ function renderEndpointDetail() {
                         <RememberedEndpointProbe />
                       </>
                     }
-                    path="/dashboard/endpoints/:id"
+                    path="/dashboard/endpoints/:slug"
                   />
                   <Route
                     element={

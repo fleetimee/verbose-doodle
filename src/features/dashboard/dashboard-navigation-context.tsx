@@ -12,12 +12,12 @@ import { ENDPOINT_MUTATION_KEY } from "@/features/endpoints/data/endpoint-mutati
 
 type EndpointMemory = {
   readonly billerSlug: string;
-  readonly endpointId: string;
+  readonly endpointSlug: string;
 };
 
 type DashboardNavigationContextValue = {
   readonly endpointMutationPending: boolean;
-  readonly forgetEndpoint: (endpointId: string) => void;
+  readonly forgetEndpoint: (endpointSlug: string) => void;
   readonly getRememberedEndpoint: (billerSlug: string) => string | undefined;
   readonly navigateToEndpoint: (path: string) => void;
   readonly registerEndpointNavigationGuard: (
@@ -70,7 +70,7 @@ export function DashboardNavigationProvider({
   );
 
   const rememberEndpoint = useCallback((memory: EndpointMemory) => {
-    rememberedEndpointsRef.current.set(memory.billerSlug, memory.endpointId);
+    rememberedEndpointsRef.current.set(memory.billerSlug, memory.endpointSlug);
   }, []);
 
   const getRememberedEndpoint = useCallback(
@@ -78,12 +78,12 @@ export function DashboardNavigationProvider({
     []
   );
 
-  const forgetEndpoint = useCallback((endpointId: string) => {
+  const forgetEndpoint = useCallback((endpointSlug: string) => {
     for (const [
       billerSlug,
       rememberedEndpointId,
     ] of rememberedEndpointsRef.current) {
-      if (rememberedEndpointId === endpointId) {
+      if (rememberedEndpointId === endpointSlug) {
         rememberedEndpointsRef.current.delete(billerSlug);
       }
     }

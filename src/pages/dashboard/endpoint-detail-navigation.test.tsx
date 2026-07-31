@@ -19,6 +19,7 @@ const endpointOne = {
   biller_slug: "pln",
   biller_name: "PLN",
   endpoint_id: "endpoint-1",
+  slug: "pln-get-inquiry-a1b2c3",
   method: "GET",
   responses: [
     {
@@ -36,6 +37,7 @@ const endpointTwo = {
   biller_slug: "pdam",
   biller_name: "PDAM",
   endpoint_id: "endpoint-2",
+  slug: "pdam-post-payment-d4e5f6",
   method: "POST",
   responses: [],
   url: "/payment",
@@ -81,11 +83,11 @@ function installApiMock() {
       );
     }
 
-    if (url === "/api/endpoint/endpoint-1") {
+    if (url === "/api/endpoint/pln-get-inquiry-a1b2c3") {
       return Promise.resolve(jsonResponse({ data: { endpoint: endpointOne } }));
     }
 
-    if (url === "/api/endpoint/endpoint-2") {
+    if (url === "/api/endpoint/pdam-post-payment-d4e5f6") {
       return Promise.resolve(jsonResponse({ data: { endpoint: endpointTwo } }));
     }
 
@@ -116,7 +118,7 @@ function LocationProbe() {
 function NavigationProbe() {
   const navigation = useDashboardNavigation();
   requestEndpointNavigation = navigation.requestEndpointNavigation;
-  const endpointPath = "/dashboard/endpoints/endpoint-2";
+  const endpointPath = "/dashboard/endpoints/pdam-post-payment-d4e5f6";
 
   return (
     <>
@@ -142,7 +144,9 @@ function renderEndpointDetail() {
   });
 
   return render(
-    <MemoryRouter initialEntries={["/dashboard/endpoints/endpoint-1"]}>
+    <MemoryRouter
+      initialEntries={["/dashboard/endpoints/pln-get-inquiry-a1b2c3"]}
+    >
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ThemeProvider defaultTheme="light">
@@ -157,7 +161,7 @@ function renderEndpointDetail() {
                         <NavigationProbe />
                       </>
                     }
-                    path="/dashboard/endpoints/:id"
+                    path="/dashboard/endpoints/:slug"
                   />
                 </Routes>
               </DashboardNavigationProvider>
@@ -189,7 +193,9 @@ async function openResponseEditor(user: ReturnType<typeof userEvent.setup>) {
   await user.click(await screen.findByRole("menuitem", { name: "Edit Name" }));
 }
 
-function requestEndpointSwitch(path = "/dashboard/endpoints/endpoint-2") {
+function requestEndpointSwitch(
+  path = "/dashboard/endpoints/pdam-post-payment-d4e5f6"
+) {
   act(() => {
     requestEndpointNavigation?.(path);
   });
@@ -231,7 +237,9 @@ describe("EndpointDetailPage navigation protection", () => {
     await user.click(screen.getByRole("button", { name: "Keep editing" }));
 
     expect(screen.getByDisplayValue("/changed")).toBeDefined();
-    expect(screen.getByTestId("location").textContent).toContain("endpoint-1");
+    expect(screen.getByTestId("location").textContent).toContain(
+      "pln-get-inquiry-a1b2c3"
+    );
   });
 
   test("protects a dirty Add Response form during browser back navigation", async () => {
@@ -248,14 +256,16 @@ describe("EndpointDetailPage navigation protection", () => {
     requestEndpointSwitch();
 
     expect(await screen.findByRole("alertdialog")).toBeDefined();
-    expect(screen.getByTestId("location").textContent).toContain("endpoint-1");
+    expect(screen.getByTestId("location").textContent).toContain(
+      "pln-get-inquiry-a1b2c3"
+    );
 
     await user.click(
       screen.getByRole("button", { name: "Discard and switch" })
     );
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toContain(
-        "endpoint-2"
+        "pdam-post-payment-d4e5f6"
       );
     });
   });
@@ -278,7 +288,7 @@ describe("EndpointDetailPage navigation protection", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toContain(
-        "endpoint-2"
+        "pdam-post-payment-d4e5f6"
       );
     });
   });
@@ -296,7 +306,7 @@ describe("EndpointDetailPage navigation protection", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).toBeNull();
       expect(screen.getByTestId("location").textContent).toContain(
-        "endpoint-2"
+        "pdam-post-payment-d4e5f6"
       );
     });
   });
@@ -324,7 +334,7 @@ describe("EndpointDetailPage navigation protection", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toContain(
-        "endpoint-2"
+        "pdam-post-payment-d4e5f6"
       );
     });
     expect(screen.queryByPlaceholderText("success_response")).toBeNull();
@@ -346,7 +356,9 @@ describe("EndpointDetailPage navigation protection", () => {
     );
 
     expect(await screen.findByRole("alertdialog")).toBeDefined();
-    expect(screen.getByTestId("location").textContent).toContain("endpoint-1");
+    expect(screen.getByTestId("location").textContent).toContain(
+      "pln-get-inquiry-a1b2c3"
+    );
     await user.click(screen.getByRole("button", { name: "Keep editing" }));
     expect(screen.queryByRole("alertdialog")).toBeNull();
   });

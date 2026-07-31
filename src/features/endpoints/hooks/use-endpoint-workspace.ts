@@ -20,24 +20,24 @@ import { formatMessage, messages } from "@/lib/i18n";
  * Response DTOs and mutation invalidation are intentionally hidden behind this seam.
  */
 export function useEndpointWorkspace(
-  endpointId: string,
+  endpointSlug: string,
   adapter: EndpointDataAdapter = httpEndpointAdapter
 ) {
   const queryClient = useQueryClient();
   const catalogEndpoint = queryClient
     .getQueryData<Endpoint[]>(endpointDataQueryKeys.catalog)
-    ?.find((candidate) => candidate.id === endpointId);
+    ?.find((candidate) => candidate.slug === endpointSlug);
   const endpoint = useQuery<Endpoint | null, ApiError>({
     initialData: catalogEndpoint,
     initialDataUpdatedAt: catalogEndpoint ? 0 : undefined,
-    queryKey: endpointDataQueryKeys.workspace(endpointId),
-    queryFn: () => adapter.getEndpoint(endpointId),
-    enabled: Boolean(endpointId),
+    queryKey: endpointDataQueryKeys.workspace(endpointSlug),
+    queryFn: () => adapter.getEndpoint(endpointSlug),
+    enabled: Boolean(endpointSlug),
     staleTime: 5 * 60 * 1000,
   });
   const invalidateWorkspace = async () => {
     await queryClient.invalidateQueries({
-      queryKey: endpointDataQueryKeys.workspace(endpointId),
+      queryKey: endpointDataQueryKeys.workspace(endpointSlug),
     });
     await queryClient.invalidateQueries({
       queryKey: endpointDataQueryKeys.catalog,

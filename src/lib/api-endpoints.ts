@@ -26,10 +26,10 @@ export const API_ENDPOINTS = {
   admin: {
     endpoints: {
       list: "/api/endpoint",
-      detail: (id: string | number) => `/api/endpoint/${id}`,
+      detail: (slug: string) => `/api/endpoint/${slug}`,
       create: "/api/endpoint",
-      update: (id: string | number) => `/api/endpoint/${id}`,
-      delete: (id: string | number) => `/api/endpoint/${id}`,
+      update: (slug: string) => `/api/endpoint/${slug}`,
+      delete: (slug: string) => `/api/endpoint/${slug}`,
       trafficLogs: {
         list: (id: string | number) => `/api/endpoint/${id}/traffic-logs`,
         detail: (id: string | number, logId: string | number) =>

@@ -17,7 +17,7 @@ export type CreateEndpointInput = {
 };
 
 export type UpdateEndpointInput = {
-  readonly endpointId: string;
+  readonly endpointSlug: string;
   readonly changes: Partial<
     Pick<CreateEndpointInput, "method" | "url" | "billerSlug">
   >;
@@ -68,10 +68,10 @@ export type EndpointHourlyMetricsInput = {
 
 export type EndpointDataAdapter = {
   readonly listEndpoints: () => Promise<Endpoint[]>;
-  readonly getEndpoint: (endpointId: string) => Promise<Endpoint | null>;
+  readonly getEndpoint: (endpointSlug: string) => Promise<Endpoint | null>;
   readonly createEndpoint: (input: CreateEndpointInput) => Promise<Endpoint>;
   readonly updateEndpoint: (input: UpdateEndpointInput) => Promise<Endpoint>;
-  readonly deleteEndpoint: (endpointId: string) => Promise<void>;
+  readonly deleteEndpoint: (endpointSlug: string) => Promise<void>;
   readonly createResponse: (
     input: CreateResponseInput
   ) => Promise<EndpointResponse>;

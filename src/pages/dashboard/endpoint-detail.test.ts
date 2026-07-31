@@ -33,23 +33,23 @@ describe("endpoint detail response selection", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerSlug: "pln", id: "first", responses: [] },
-          { billerSlug: "pln", id: "remembered", responses: [] },
+          { billerSlug: "pln", slug: "first-slug", responses: [] },
+          { billerSlug: "pln", slug: "remembered-slug", responses: [] },
         ],
         "pln",
-        "remembered"
-      )?.id
-    ).toBe("remembered");
+        "remembered-slug"
+      )?.slug
+    ).toBe("remembered-slug");
   });
 
   test("falls back to the first endpoint with an active response", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerSlug: "pln", id: "inactive", responses: [] },
+          { billerSlug: "pln", slug: "inactive-slug", responses: [] },
           {
             billerSlug: "pln",
-            id: "active",
+            slug: "active-slug",
             responses: [
               {
                 activated: true,
@@ -62,18 +62,18 @@ describe("endpoint detail response selection", () => {
           },
         ],
         "pln"
-      )?.id
-    ).toBe("active");
+      )?.slug
+    ).toBe("active-slug");
   });
 
   test("falls back to the first endpoint when no response is active", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerSlug: "pln", id: "first", responses: [] },
+          { billerSlug: "pln", slug: "first-slug", responses: [] },
           {
             billerSlug: "pln",
-            id: "second",
+            slug: "second-slug",
             responses: [
               {
                 activated: false,
@@ -86,18 +86,18 @@ describe("endpoint detail response selection", () => {
           },
         ],
         "pln"
-      )?.id
-    ).toBe("first");
+      )?.slug
+    ).toBe("first-slug");
   });
 
   test("ignores a remembered endpoint that is absent from the catalog", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerSlug: "pln", id: "first", responses: [] },
+          { billerSlug: "pln", slug: "first-slug", responses: [] },
           {
             billerSlug: "pln",
-            id: "active",
+            slug: "active-slug",
             responses: [
               {
                 activated: true,
@@ -111,7 +111,7 @@ describe("endpoint detail response selection", () => {
         ],
         "pln",
         "deleted"
-      )?.id
-    ).toBe("active");
+      )?.slug
+    ).toBe("active-slug");
   });
 });
