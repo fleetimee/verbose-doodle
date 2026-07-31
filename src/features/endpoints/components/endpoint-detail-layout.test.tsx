@@ -32,6 +32,7 @@ describe("EndpointDetailLayout", () => {
                 isActivating={false}
                 isDeactivating={false}
                 onActivateResponse={() => undefined}
+                onCloneResponse={() => undefined}
                 onDeactivateResponse={() => undefined}
                 onSelectResponse={() => undefined}
                 responses={[response]}

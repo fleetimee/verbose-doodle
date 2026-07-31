@@ -30,6 +30,7 @@ type ResponseListProps = {
   isDeactivating: boolean;
   onSelectResponse: (id: string) => void;
   onActivateResponse: (response: EndpointResponse) => void;
+  onCloneResponse: (response: EndpointResponse) => void;
   onDeactivateResponse: (response: EndpointResponse) => void;
   onEditResponseDirtyChange?: (isDirty: boolean) => void;
 };
@@ -121,6 +122,7 @@ export function ResponseList({
   isDeactivating,
   onSelectResponse,
   onActivateResponse,
+  onCloneResponse,
   onDeactivateResponse,
   onEditResponseDirtyChange,
 }: ResponseListProps) {
@@ -167,6 +169,7 @@ export function ResponseList({
                         key={response.id}
                         layoutNamespace={layoutNamespace}
                         onActivate={onActivateResponse}
+                        onClone={onCloneResponse}
                         onDeactivate={onDeactivateResponse}
                         onEditDirtyChange={onEditResponseDirtyChange}
                         onSelect={onSelectResponse}
@@ -221,6 +224,7 @@ export function ResponseList({
                         key={response.id}
                         layoutNamespace={layoutNamespace}
                         onActivate={onActivateResponse}
+                        onClone={onCloneResponse}
                         onDeactivate={onDeactivateResponse}
                         onEditDirtyChange={onEditResponseDirtyChange}
                         onSelect={onSelectResponse}

@@ -595,6 +595,11 @@ export function EndpointDetailPage() {
     );
   };
 
+  const handleCloneResponse = (response: EndpointResponse) => {
+    selectedResponseWasActiveRef.current = false;
+    setSelectedResponseId(response.id);
+  };
+
   const handleDeactivateResponse = (response: EndpointResponse) => {
     if (!endpoint) {
       return;
@@ -1211,6 +1216,7 @@ export function EndpointDetailPage() {
           isActivating={isActivatingResponse}
           isDeactivating={isDeactivatingResponse}
           onActivateResponse={handleActivateResponse}
+          onCloneResponse={handleCloneResponse}
           onDeactivateResponse={handleDeactivateResponse}
           onEditResponseDirtyChange={setIsResponseEditDirty}
           onSelectResponse={handleSelectResponse}

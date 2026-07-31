@@ -11,7 +11,7 @@ function createTransport(
     delete: async <T>(path: string) => responses[path] as T,
     get: async <T>(path: string) => responses[path] as T,
     patch: async <T>(path: string, _body: unknown) => responses[path] as T,
-    post: async <T>(path: string, _body: unknown) => responses[path] as T,
+    post: async <T>(path: string, _body?: unknown) => responses[path] as T,
     put: async <T>(path: string, _body: unknown) => responses[path] as T,
   };
 }
@@ -79,6 +79,43 @@ describe("Endpoint HTTP data adapter", () => {
     });
 
     await expect(adapter.getEndpoint("missing")).resolves.toBeNull();
+  });
+
+  test("clones a response without sending a request body", async () => {
+    const requests: Array<{ body: unknown; path: string }> = [];
+    const adapter = createHttpEndpointAdapter({
+      ...createTransport({}),
+      post: <T>(path: string, body?: unknown) => {
+        requests.push({ body, path });
+        return Promise.resolve({
+          data: {
+            response: {
+              activated: "0",
+              delay_ms: 250,
+              endpoint_id: 7,
+              id: 9,
+              json: '{"ok":true}',
+              name: "Created (Copy)",
+              simulate_timeout: false,
+              status_code: "201",
+            },
+          },
+        } as T);
+      },
+    });
+
+    await expect(
+      adapter.cloneResponse({ endpointId: "7", responseId: "8" })
+    ).resolves.toMatchObject({
+      activated: false,
+      delayMs: 250,
+      id: "9",
+      name: "Created (Copy)",
+      statusCode: 201,
+    });
+    expect(requests).toEqual([
+      { body: undefined, path: "/api/response/8/clone" },
+    ]);
   });
 
   test("uses the slug for endpoint management while retaining numeric child IDs", async () => {
@@ -281,6 +318,60 @@ describe("Endpoint in-memory data adapter", () => {
       adapter.getEndpoint("pdam-post-payment-inquiry-a1b2c3")
     ).resolves.toMatchObject({
       responses: [{ activated: true, id: response.id, simulateTimeout: true }],
+    });
+  });
+
+  test("clones an independent inactive response with numbered names", async () => {
+    const adapter = createInMemoryEndpointAdapter({
+      endpoints: [
+        {
+          billerSlug: "pdam",
+          id: "7",
+          method: "POST",
+          responses: [
+            {
+              activated: true,
+              delayMs: 250,
+              id: "8",
+              json: '{"ok":true}',
+              name: "Created",
+              simulateTimeout: false,
+              statusCode: 201,
+            },
+          ],
+          slug: "pdam-post-payment-inquiry-a1b2c3",
+          url: "/payment/inquiry",
+        },
+      ],
+    });
+
+    const firstClone = await adapter.cloneResponse({
+      endpointId: "7",
+      responseId: "8",
+    });
+    const secondClone = await adapter.cloneResponse({
+      endpointId: "7",
+      responseId: firstClone.id,
+    });
+
+    expect(firstClone).toMatchObject({
+      activated: false,
+      delayMs: 250,
+      id: "9",
+      json: '{"ok":true}',
+      name: "Created (Copy)",
+      simulateTimeout: false,
+      statusCode: 201,
+    });
+    expect(secondClone.name).toBe("Created (Copy 2)");
+    await expect(
+      adapter.getEndpoint("pdam-post-payment-inquiry-a1b2c3")
+    ).resolves.toMatchObject({
+      responses: [
+        { activated: true, id: "8", name: "Created" },
+        { activated: false, id: "9", name: "Created (Copy)" },
+        { activated: false, id: "10", name: "Created (Copy 2)" },
+      ],
     });
   });
 });

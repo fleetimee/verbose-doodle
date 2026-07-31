@@ -27,6 +27,7 @@ type EndpointDetailLayoutProps = {
   isDeactivating: boolean;
   onSelectResponse: (id: string) => void;
   onActivateResponse: (response: EndpointResponse) => void;
+  onCloneResponse: (response: EndpointResponse) => void;
   onDeactivateResponse: (response: EndpointResponse) => void;
   onEditResponseDirtyChange?: (isDirty: boolean) => void;
   endpointUrl?: string;
@@ -45,6 +46,7 @@ export function EndpointDetailLayout({
   isDeactivating,
   onSelectResponse,
   onActivateResponse,
+  onCloneResponse,
   onDeactivateResponse,
   onEditResponseDirtyChange,
   endpointUrl,
@@ -75,6 +77,7 @@ export function EndpointDetailLayout({
                 isActivating={isActivating}
                 isDeactivating={isDeactivating}
                 onActivateResponse={onActivateResponse}
+                onCloneResponse={onCloneResponse}
                 onDeactivateResponse={onDeactivateResponse}
                 onEditResponseDirtyChange={onEditResponseDirtyChange}
                 onSelectResponse={onSelectResponse}
@@ -110,6 +113,7 @@ export function EndpointDetailLayout({
                 isActivating={isActivating}
                 isDeactivating={isDeactivating}
                 onActivateResponse={onActivateResponse}
+                onCloneResponse={onCloneResponse}
                 onDeactivateResponse={onDeactivateResponse}
                 onEditResponseDirtyChange={onEditResponseDirtyChange}
                 onSelectResponse={onSelectResponse}

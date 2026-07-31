@@ -6,6 +6,7 @@ import type {
   EndpointHourlyMetricsInput,
   EndpointTelemetryInput,
   ResponseActivationInput,
+  ResponseCloneInput,
   ResponseSimulationInput,
   UpdateEndpointInput,
   UpdateResponseInput,
@@ -43,12 +44,35 @@ const emptyMetric = (): EndpointMetric => ({
   totalDurationMs: 0,
 });
 
+const MAX_RESPONSE_NAME_LENGTH = 64;
+const COPY_SUFFIX = /^(.*) \(Copy(?: (\d+))?\)$/;
+
 function createResponseId(endpoints: readonly Endpoint[]): string {
   const ids = endpoints.flatMap((endpoint) =>
     endpoint.responses.map((response) => Number(response.id))
   );
   const nextId = Math.max(0, ...ids.filter((id) => Number.isFinite(id))) + 1;
   return String(nextId);
+}
+
+function createResponseCloneName(
+  sourceName: string,
+  responses: readonly EndpointResponse[]
+): string {
+  const match = COPY_SUFFIX.exec(sourceName);
+  const baseName = match?.[1] ?? sourceName;
+  let suffixNumber = match?.[2] ? Number(match[2]) + 1 : 1;
+  const existingNames = new Set(responses.map((response) => response.name));
+
+  while (true) {
+    const suffix = suffixNumber === 1 ? " (Copy)" : ` (Copy ${suffixNumber})`;
+    const baseLength = Math.max(0, MAX_RESPONSE_NAME_LENGTH - suffix.length);
+    const candidate = `${baseName.slice(0, baseLength)}${suffix}`;
+    if (!existingNames.has(candidate)) {
+      return candidate;
+    }
+    suffixNumber += 1;
+  }
 }
 
 function createEndpointSlug(input: CreateEndpointInput, id: string): string {
@@ -154,6 +178,19 @@ export function createInMemoryEndpointAdapter(
         name: input.name,
         simulateTimeout: input.simulateTimeout ?? false,
         statusCode: input.statusCode,
+      };
+      endpoint.responses.push(response);
+      return cloneResponse(response);
+    },
+    async cloneResponse(input: ResponseCloneInput) {
+      await Promise.resolve();
+      const endpoint = findEndpointById(endpoints, input.endpointId);
+      const source = findResponse(endpoints, input);
+      const response: EndpointResponse = {
+        ...source,
+        activated: false,
+        id: createResponseId(endpoints),
+        name: createResponseCloneName(source.name, endpoint.responses),
       };
       endpoint.responses.push(response);
       return cloneResponse(response);

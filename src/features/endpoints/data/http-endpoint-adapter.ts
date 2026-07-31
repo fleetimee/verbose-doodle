@@ -2,6 +2,7 @@ import type {
   CreateEndpointInput,
   EndpointDataAdapter,
   EndpointDataTransport,
+  ResponseCloneInput,
 } from "@/features/endpoints/data/endpoint-data-adapter";
 import type {
   Endpoint,
@@ -334,6 +335,12 @@ export function createHttpEndpointAdapter(
           simulateTimeout: input.simulateTimeout ?? false,
           statusCode: String(input.statusCode),
         }
+      );
+      return responseFromResponse(response);
+    },
+    async cloneResponse(input: ResponseCloneInput) {
+      const response = await transport.post<unknown>(
+        API_ENDPOINTS.admin.responses.clone(input.responseId)
       );
       return responseFromResponse(response);
     },

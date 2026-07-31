@@ -5,7 +5,13 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { ReactElement } from "react";
-import { CircleOff, FileJson, Hash, TextCursor } from "@/components/hugeicons";
+import {
+  CircleOff,
+  CopyIcon,
+  FileJson,
+  Hash,
+  TextCursor,
+} from "@/components/hugeicons";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -21,11 +27,14 @@ type ResponseEditType = "name" | "statusCode" | "json";
 
 type ResponseContextMenuProps = {
   readonly children: ReactElement;
+  readonly canCloneResponse: boolean;
   readonly enabled: boolean;
   readonly isActive: boolean;
+  readonly isCloning: boolean;
   readonly isLoading: boolean;
   readonly isSelected: boolean;
   readonly onActivate: () => void;
+  readonly onClone: () => void;
   readonly onDeactivate: () => void;
   readonly onDelete: () => void;
   readonly onEdit: (type: ResponseEditType) => void;
@@ -34,12 +43,15 @@ type ResponseContextMenuProps = {
 };
 
 export function ResponseContextMenu({
+  canCloneResponse,
   children,
   enabled,
   isActive,
+  isCloning,
   isLoading,
   isSelected,
   onActivate,
+  onClone,
   onDeactivate,
   onDelete,
   onEdit,
@@ -75,6 +87,14 @@ export function ResponseContextMenu({
           </ContextMenuLabel>
         </ContextMenuGroup>
         <ContextMenuSeparator className="my-1.5" />
+        <ContextMenuItem
+          disabled={!canCloneResponse || isCloning}
+          onClick={onClone}
+        >
+          <CopyIcon className="size-4" />
+          {isCloning ? "Cloning response..." : "Clone response"}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
         <ContextMenuItem disabled={!isSelected} onClick={() => onEdit("name")}>
           <TextCursor className="size-4" />
           Edit Name

@@ -53,6 +53,7 @@ export const API_ENDPOINTS = {
     responses: {
       activate: (endpointId: string | number, responseId: string | number) =>
         `/api/response/${endpointId}/${responseId}/activate`,
+      clone: (id: string | number) => `/api/response/${id}/clone`,
       create: "/api/response",
       deactivate: (endpointId: string | number, responseId: string | number) =>
         `/api/response/${endpointId}/${responseId}/deactivate`,

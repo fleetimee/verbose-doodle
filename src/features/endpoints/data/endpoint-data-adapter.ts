@@ -55,6 +55,8 @@ export type ResponseActivationInput = {
   readonly responseId: string;
 };
 
+export type ResponseCloneInput = ResponseActivationInput;
+
 export type EndpointTelemetryInput = {
   readonly endpointId: string;
   readonly filters: EndpointTrafficLogsFilters;
@@ -77,6 +79,9 @@ export type EndpointDataAdapter = {
   ) => Promise<EndpointResponse>;
   readonly updateResponse: (
     input: UpdateResponseInput
+  ) => Promise<EndpointResponse>;
+  readonly cloneResponse: (
+    input: ResponseCloneInput
   ) => Promise<EndpointResponse>;
   readonly deleteResponse: (input: ResponseActivationInput) => Promise<void>;
   readonly activateResponse: (
@@ -104,7 +109,7 @@ export type EndpointDataAdapter = {
 
 export type EndpointDataTransport = {
   readonly get: <T>(path: string) => Promise<T>;
-  readonly post: <T, D>(path: string, body: D) => Promise<T>;
+  readonly post: <T, D = unknown>(path: string, body?: D) => Promise<T>;
   readonly put: <T, D>(path: string, body: D) => Promise<T>;
   readonly patch: <T, D>(path: string, body: D) => Promise<T>;
   readonly delete: <T>(path: string) => Promise<T>;

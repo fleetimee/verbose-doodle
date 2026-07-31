@@ -4,6 +4,7 @@ import type {
   CreateResponseInput,
   EndpointDataAdapter,
   ResponseActivationInput,
+  ResponseCloneInput,
   ResponseSimulationInput,
   UpdateResponseInput,
 } from "@/features/endpoints/data/endpoint-data-adapter";
@@ -85,6 +86,28 @@ export function useEndpointWorkspace(
       await invalidateWorkspace();
     },
   });
+  const cloneResponse = useMutation<
+    EndpointResponse,
+    ApiError,
+    ResponseCloneInput
+  >({
+    mutationFn: adapter.cloneResponse,
+    mutationKey: ENDPOINT_MUTATION_KEY,
+    onError: (error) => {
+      toast.error(messages.endpoints.responseCloneError, {
+        description: error.message,
+      });
+    },
+    onSuccess: async (response) => {
+      toast.success(messages.endpoints.responseCloneSuccess, {
+        description: formatMessage(
+          messages.endpoints.responseCloneDescription,
+          { name: response.name }
+        ),
+      });
+      await invalidateWorkspace();
+    },
+  });
   const deleteResponse = useMutation<void, ApiError, ResponseActivationInput>({
     mutationFn: adapter.deleteResponse,
     mutationKey: ENDPOINT_MUTATION_KEY,
@@ -148,6 +171,7 @@ export function useEndpointWorkspace(
 
   return {
     activateResponse,
+    cloneResponse,
     createResponse,
     deactivateResponse,
     deleteResponse,

@@ -87,6 +87,7 @@ const listProps = {
   isActivating: false,
   isDeactivating: false,
   onActivateResponse: mock(() => undefined),
+  onCloneResponse: mock(() => undefined),
   onDeactivateResponse: mock(() => undefined),
   onSelectResponse: mock(() => undefined),
   selectedResponseId: null,

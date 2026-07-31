@@ -94,10 +94,14 @@ const originalFetch = globalThis.fetch;
 let currentEndpointOne = structuredClone(endpointOne);
 let endpointOneNotFound = false;
 let deferEndpointOneDetail = false;
+let cloneResponseFailure = false;
+let deferCloneResponse = false;
 let activateResponseFailure = false;
 let deactivateResponseFailure = false;
 let resolveEndpointOneDetail: (() => void) | null = null;
+let resolveCloneResponse: (() => void) | null = null;
 let mutationMethods: string[] = [];
+let mutationBodies: unknown[] = [];
 
 function createAdminToken() {
   const payload = btoa(
@@ -127,6 +131,7 @@ function installApiMock() {
 
     if (method !== "GET") {
       mutationMethods.push(`${method} ${url}`);
+      mutationBodies.push(init?.body);
     }
 
     if (url === "/api/endpoint" && method === "GET") {
@@ -154,6 +159,36 @@ function installApiMock() {
 
     if (url === `/api/endpoint/${endpointTwoSlug}` && method === "GET") {
       return Promise.resolve(endpointResponse(endpointTwo));
+    }
+
+    if (url === `/api/response/${responseOne.id}/clone` && method === "POST") {
+      if (cloneResponseFailure) {
+        return Promise.resolve(
+          jsonResponse({ responseDesc: "Unable to clone response" }, 500)
+        );
+      }
+
+      const clonedResponse = {
+        ...responseOne,
+        activated: false,
+        id: "response-4",
+        name: "Primary response (Copy)",
+      };
+      const completeClone = () => {
+        currentEndpointOne = {
+          ...currentEndpointOne,
+          responses: [...currentEndpointOne.responses, clonedResponse],
+        };
+        return jsonResponse({ data: { response: clonedResponse } });
+      };
+
+      if (deferCloneResponse) {
+        return new Promise<Response>((resolve) => {
+          resolveCloneResponse = () => resolve(completeClone());
+        });
+      }
+
+      return Promise.resolve(completeClone());
     }
 
     if (
@@ -353,10 +388,14 @@ describe("EndpointDetailPage response state", () => {
     currentEndpointOne = structuredClone(endpointOne);
     endpointOneNotFound = false;
     deferEndpointOneDetail = false;
+    cloneResponseFailure = false;
+    deferCloneResponse = false;
     activateResponseFailure = false;
     deactivateResponseFailure = false;
     resolveEndpointOneDetail = null;
+    resolveCloneResponse = null;
     mutationMethods = [];
+    mutationBodies = [];
     installApiMock();
   });
 
@@ -389,6 +428,93 @@ describe("EndpointDetailPage response state", () => {
       expectResponseSelection("Backup response", true);
     });
     expectResponseSelection("Primary response", false);
+  });
+
+  test("clones a response, sends no body, refreshes, and selects the clone", async () => {
+    const user = userEvent.setup();
+    renderEndpointDetail();
+
+    await user.click(
+      await findResponseButton("More response actions for Primary response")
+    );
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Clone response" })
+    );
+
+    await waitFor(() => {
+      expect(mutationMethods).toContain(
+        `POST /api/response/${responseOne.id}/clone`
+      );
+      expect(mutationBodies.at(-1)).toBeUndefined();
+      expectResponseSelection("Primary response (Copy)", true);
+    });
+    expectResponseSelection("Primary response", false);
+  });
+
+  test("shows clone loading state and prevents duplicate submissions", async () => {
+    const user = userEvent.setup();
+    deferCloneResponse = true;
+    renderEndpointDetail();
+
+    await user.click(
+      await findResponseButton("More response actions for Primary response")
+    );
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Clone response" })
+    );
+
+    await waitFor(() => {
+      expect(
+        screen
+          .getAllByRole("status")
+          .some((status) => status.textContent === "Cloning response...")
+      ).toBe(true);
+      expect(
+        screen
+          .getAllByRole("button", {
+            name: "More response actions for Primary response",
+          })
+          .some((button) => button.hasAttribute("disabled"))
+      ).toBe(true);
+    });
+    expect(
+      mutationMethods.filter((method) => method.startsWith("POST "))
+    ).toHaveLength(1);
+
+    act(() => {
+      resolveCloneResponse?.();
+    });
+    await waitFor(() =>
+      expectResponseSelection("Primary response (Copy)", true)
+    );
+  });
+
+  test("keeps the response selection usable and shows clone failures", async () => {
+    const user = userEvent.setup();
+    const errorToast = spyOn(toast, "error");
+    errorToast.mockClear();
+    cloneResponseFailure = true;
+
+    try {
+      renderEndpointDetail();
+
+      await user.click(
+        await findResponseButton("More response actions for Primary response")
+      );
+      await user.click(
+        await screen.findByRole("menuitem", { name: "Clone response" })
+      );
+
+      await waitFor(() => {
+        expect(errorToast).toHaveBeenCalledWith("Failed to clone response", {
+          description: "Unable to clone response",
+        });
+        expectResponseSelection("Primary response", true);
+      });
+      expect(screen.queryByText("Primary response (Copy)")).toBeNull();
+    } finally {
+      errorToast.mockRestore();
+    }
   });
 
   test("shows one error toast when activation fails", async () => {

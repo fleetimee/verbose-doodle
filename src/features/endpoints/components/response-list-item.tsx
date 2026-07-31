@@ -8,6 +8,7 @@ import { AnimatePresence } from "motion/react";
 import { useState } from "react";
 import {
   CircleOff,
+  CopyIcon,
   FileJson,
   Hash,
   MoreHorizontal,
@@ -57,6 +58,7 @@ type ResponseListItemProps = {
   isDeactivating: boolean;
   onSelect: (id: string) => void;
   onActivate: (response: EndpointResponse) => void;
+  onClone: (response: EndpointResponse) => void;
   onDeactivate: (response: EndpointResponse) => void;
   onEditDirtyChange?: (isDirty: boolean) => void;
 };
@@ -95,14 +97,15 @@ export function ResponseListItem({
   isDeactivating,
   onSelect,
   onActivate,
+  onClone,
   onDeactivate,
   onEditDirtyChange,
 }: ResponseListItemProps) {
   const { session } = useAuth();
+  const canCloneResponse = session.can("canAddResponse");
   const canActivateResponse = session.can("canActivateResponse");
 
   const isActive = response.activated;
-  const isLoading = isActivating || isDeactivating;
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showSimulateDialog, setShowSimulateDialog] = useState(false);
@@ -111,12 +114,17 @@ export function ResponseListItem({
     "name"
   );
 
-  const { updateResponse: updateResponseMutation, deleteResponse } =
-    useEndpointWorkspace(endpointSlug);
+  const {
+    cloneResponse: cloneResponseMutation,
+    updateResponse: updateResponseMutation,
+    deleteResponse,
+  } = useEndpointWorkspace(endpointSlug);
+  const { mutate: cloneResponse, isPending: isCloning } = cloneResponseMutation;
   const { mutate: updateResponse, isPending: isUpdating } =
     updateResponseMutation;
   const { mutate: deleteResponseMutation, isPending: isDeleting } =
     deleteResponse;
+  const isLoading = isActivating || isCloning || isDeactivating;
 
   const handleConfirm = () => {
     if (isActive) {
@@ -155,6 +163,19 @@ export function ResponseListItem({
     setShowDeleteDialog(true);
   };
 
+  const handleClone = () => {
+    if (isCloning) {
+      return;
+    }
+
+    cloneResponse(
+      { endpointId, responseId: response.id },
+      {
+        onSuccess: onClone,
+      }
+    );
+  };
+
   const handleConfirmDelete = () => {
     deleteResponseMutation(
       { endpointId, responseId: response.id },
@@ -186,11 +207,14 @@ export function ResponseListItem({
   return (
     <>
       <ResponseContextMenu
+        canCloneResponse={canCloneResponse}
         enabled={canActivateResponse}
         isActive={isActive}
+        isCloning={isCloning}
         isLoading={isLoading}
         isSelected={isSelected}
         onActivate={() => setShowConfirmDialog(true)}
+        onClone={handleClone}
         onDeactivate={() => setShowConfirmDialog(true)}
         onDelete={handleDeleteClick}
         onEdit={handleEditClick}
@@ -274,7 +298,7 @@ export function ResponseListItem({
                         <Button
                           aria-label={moreActionsButtonTitle}
                           className="cursor-pointer"
-                          disabled={!isSelected}
+                          disabled={!isSelected || isLoading}
                           onClick={(e) => {
                             e.stopPropagation();
                           }}
@@ -295,6 +319,18 @@ export function ResponseListItem({
                     className="w-52 rounded-xl p-1.5"
                     onClick={(e) => e.stopPropagation()}
                   >
+                    <DropdownMenuItem
+                      disabled={!canCloneResponse || isCloning}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleClone();
+                      }}
+                    >
+                      <CopyIcon className="h-4 w-4" />
+                      {isCloning
+                        ? messages.endpoints.responseCloneLoading
+                        : messages.endpoints.responseCloneAction}
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       disabled={!isSelected}
                       onClick={(e) => {
@@ -371,6 +407,11 @@ export function ResponseListItem({
           </div>
         </div>
       </ResponseContextMenu>
+      {isCloning && (
+        <span className="sr-only" role="status">
+          {messages.endpoints.responseCloneLoading}
+        </span>
+      )}
 
       <SimulateTimeoutDialog
         endpointId={endpointId}
