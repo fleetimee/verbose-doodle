@@ -50,6 +50,8 @@ const pdamEndpoint = {
 
 const originalFetch = globalThis.fetch;
 let lastCreateBody: { biller_slug?: string } | null = null;
+let lastBillerUpdateBody: Record<string, unknown> | null = null;
+let lastBillerUpdateSlug: string | null = null;
 let lastUpdateBody: Record<string, unknown> | null = null;
 let lastDeleteId: string | null = null;
 let currentEndpoint: (typeof endpoints)[number] | null = { ...endpoints[0] };
@@ -58,6 +60,11 @@ let deleteRequestResolver: (() => void) | null = null;
 let holdDeleteRequest = false;
 let shouldFailDelete = false;
 let shouldFailUpdate = false;
+let shouldFailBillerUpdate = false;
+let billerNames = new Map([
+  ["pln", "PLN"],
+  ["pdam", "PDAM"],
+]);
 const endpointButtonName = /GET.*inquiry/i;
 const pdamEndpointButtonName = /POST.*payment/i;
 const configuredResponseName = /1 configured response/;
@@ -101,10 +108,43 @@ function installApiMock() {
       return Promise.resolve(
         jsonResponse({
           data: {
-            billers: billers.map(({ slug, name }) => ({
-              biller_name: name,
+            billers: billers.map(({ slug }) => ({
+              biller_name: billerNames.get(slug),
               slug,
             })),
+          },
+        })
+      );
+    }
+
+    if (url.startsWith("/api/biller/") && method === "PATCH") {
+      lastBillerUpdateSlug = url.replace("/api/biller/", "");
+      lastBillerUpdateBody = JSON.parse(String(init?.body)) as Record<
+        string,
+        unknown
+      >;
+
+      if (shouldFailBillerUpdate) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ responseDesc: "Biller name already exists" }),
+            {
+              headers: { "Content-Type": "application/json" },
+              status: 400,
+            }
+          )
+        );
+      }
+
+      const nextName = String(lastBillerUpdateBody.billerName);
+      billerNames.set(lastBillerUpdateSlug, nextName);
+      if (lastBillerUpdateSlug === "pln" && currentEndpoint) {
+        currentEndpoint = { ...currentEndpoint, billerName: nextName };
+      }
+      return Promise.resolve(
+        jsonResponse({
+          data: {
+            biller: { biller_name: nextName, slug: lastBillerUpdateSlug },
           },
         })
       );
@@ -224,6 +264,8 @@ describe("EndpointsPage catalog actions", () => {
     localStorage.setItem("auth_token", createAdminToken());
     localStorage.setItem("endpoints-tour-seen", "true");
     lastCreateBody = null;
+    lastBillerUpdateBody = null;
+    lastBillerUpdateSlug = null;
     lastUpdateBody = null;
     lastDeleteId = null;
     currentEndpoint = { ...endpoints[0] };
@@ -232,6 +274,11 @@ describe("EndpointsPage catalog actions", () => {
     holdDeleteRequest = false;
     shouldFailDelete = false;
     shouldFailUpdate = false;
+    shouldFailBillerUpdate = false;
+    billerNames = new Map([
+      ["pln", "PLN"],
+      ["pdam", "PDAM"],
+    ]);
     installApiMock();
   });
 
@@ -259,6 +306,56 @@ describe("EndpointsPage catalog actions", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).toBeNull();
     });
+  });
+
+  test("renames a biller by slug and refreshes the catalog label", async () => {
+    const user = userEvent.setup();
+    renderEndpointsPage();
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit biller PLN" })
+    );
+
+    expect(within(screen.getByRole("dialog")).getByText("pln")).toBeDefined();
+    const nameInput = screen.getByLabelText("Biller Name");
+    await user.clear(nameInput);
+    await user.type(nameInput, "PLN Retail");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    expect(lastBillerUpdateSlug).toBe("pln");
+    expect(lastBillerUpdateBody).toEqual({ billerName: "PLN Retail" });
+    expect(
+      await screen.findByRole("heading", { name: "PLN Retail" })
+    ).toBeDefined();
+    expect(screen.queryByRole("dialog")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Add Endpoint" }));
+    const billerSelector = screen.getByLabelText("Biller");
+    await user.click(billerSelector);
+    expect(
+      await screen.findByRole("option", { name: "PLN Retail" })
+    ).toBeDefined();
+  });
+
+  test("keeps the rename interaction open when the backend rejects the name", async () => {
+    const user = userEvent.setup();
+    shouldFailBillerUpdate = true;
+    renderEndpointsPage();
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit biller PLN" })
+    );
+    const nameInput = screen.getByLabelText("Biller Name");
+    await user.clear(nameInput);
+    await user.type(nameInput, "PDAM");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(lastBillerUpdateSlug).toBe("pln");
+      expect(lastBillerUpdateBody).toEqual({ billerName: "PDAM" });
+    });
+    expect(screen.getByRole("dialog")).toBeDefined();
+    expect(screen.getByDisplayValue("PDAM")).toBeDefined();
   });
 
   test("filters the catalog to the selected biller and defaults creation to it", async () => {
