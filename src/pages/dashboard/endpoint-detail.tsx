@@ -569,11 +569,7 @@ export function EndpointDetailPage() {
       },
       {
         onSuccess: () => {
-          toast.success("Response created successfully");
           setIsStepperOpen(false);
-        },
-        onError: () => {
-          toast.error("Failed to create response");
         },
       }
     );
