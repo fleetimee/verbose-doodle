@@ -1,53 +1,34 @@
-# React + TypeScript + Vite
+# Biller Simulator frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and Biome linting powered by Ultracite.
+React and Vite frontend for configuring and testing simulated biller APIs. It connects to the Biller Simulator backend and provides endpoint, response, user, and developer tools.
 
-Currently, two official plugins are available:
+## Requirements
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Bun
+- Access to a running Biller Simulator backend
 
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Ultracite + Biome
-
-Ultracite wraps Biome, providing instant feedback in supported editors and the same configuration that powers CLI checks. The shared settings live in `biome.json`.
-
-### IDE integration
-
-- Configure your editor with the Ultracite (Biome) extension so formatting and auto-fixes run on save and on paste.
-- Introduce a small lint or format issue, save the file, and confirm that Ultracite formats it or highlights remaining problems in the Problems panel.
-- Use the quick-fix lightbulb to apply suggestions that cannot be fixed automatically on save.
-
-### CLI commands
-
-- `bun lint` (alias for `bun run lint`) executes `ultracite check` for linting without writes.
-- `npx ultracite fix` runs the same rules with auto-fixes applied.
-- `npx ultracite fix --unsafe` applies additional unsafe fixes when you explicitly opt in.
-- `npx ultracite doctor` validates your setup if you suspect a configuration issue.
-
-### Pre-commit hook example
-
-Add the following to `.git/hooks/pre-commit` if you want git commits to run lint checks automatically:
+## Development
 
 ```bash
-#!/bin/bash
-echo "Running pre-commit checks..."
-
-if ! npx ultracite check; then
-  echo "Linting errors found. Please fix them before committing."
-  exit 1
-fi
-
-if ! npx ultracite fix; then
-  echo "Formatting issues found. Please format your code before committing."
-  exit 1
-fi
-
-echo "Pre-commit checks passed."
-exit 0
+bun install
+cp .env.example .env
+bun dev
 ```
+
+Set `VITE_ENDPOINT_URL` in `.env` to the backend URL. The default development server runs at `http://localhost:5173`.
+
+## Common commands
+
+```bash
+bun run build       # Type-check and build for production
+bun run type-check  # Run TypeScript without emitting files
+bun run lint        # Check formatting and lint rules
+bun test             # Run the test suite
+bun run preview     # Serve the production build locally
+```
+
+## Documentation
+
+- [Deployment guide](DEPLOYMENT.md)
+- [Domain terms](CONTEXT.md)
+- [NFC reader bridge](tools/nfc-reader-bridge/README.md)

@@ -20,6 +20,7 @@ Applied the conservative Target updates listed below. Deferred the remaining can
 | `@tanstack/react-query` | 5.101.0 | 5.101.4 | Paired with devtools |
 | `@tanstack/react-query-devtools` | 5.101.0 | 5.101.4 | Kept in sync with Query |
 | `@uiw/react-codemirror` | 4.25.10 | 4.25.11 | Editor wrapper update |
+| `@types/node` | 25.9.4 | 26.1.2 | Type-only update; TypeScript 7.0.2 accepts the declarations, and the repository's Node/Vite toolchain remains compatible. |
 | `@types/react` | 19.2.17 | 19.2.18 | React type patch |
 | `@types/react-dom` | 19.2.3 | 19.2.4 | React DOM type patch |
 | `motion` | 12.41.0 | 12.43.0 | Animation library update |
@@ -45,6 +46,8 @@ Applied the conservative Target updates listed below. Deferred the remaining can
 
 `@codemirror/view` was requested at 6.43.7 but remains installed at 6.43.1 because `package.json` intentionally pins it in `resolutions`.
 
+`@types/node` 26.1.2 is compatible with this repository's current toolchain: local Node is 22.22.3, Vite 8 requires Node 20.19+ or 22.12+, and TypeScript is 7.0.2. Because this package only supplies declarations, it does not upgrade the runtime Node version. Projects that intentionally promise only Node 22 at runtime may prefer the matching `@types/node@22` line to avoid exposing newer Node APIs to TypeScript; this frontend already used the newer 25.x declaration line and its build/test workflows remain green after the update. See the [Vite 8 Node support note](https://vite.dev/blog/announcing-vite8) and [@types/node package metadata](https://www.npmjs.com/package/@types/node).
+
 ## Deferred Target updates
 
 | Package | Current | Target | Why deferred |
@@ -54,7 +57,6 @@ Applied the conservative Target updates listed below. Deferred the remaining can
 
 | Package | Current | Latest | Reason |
 | --- | ---: | ---: | --- |
-| `@types/node` | 25.9.4 | 26.1.2 | Major type-surface change |
 
 ## Validation
 
@@ -72,6 +74,7 @@ After the update:
 - Ultracite/Biome initially reported approximately 1,500 diagnostics; after mechanical cleanup and policy adjustments, all 439 checked files pass with zero diagnostics.
 - The `useSortedKeys` assist is disabled because sorting object keys can change insertion-order-sensitive runtime behavior; the `cn` object-input test remains green with its original key order.
 - `@happy-dom/global-registrator` 20.11.1: targeted scroll-area-related tests pass; its existing preload polyfill remains intact.
+- `@types/node` 26.1.2: compatible with the repository's TypeScript 7.0.2 toolchain and Node 22.22.3 development runtime; it updates the root Node declarations and `undici-types` to 8.3.0. This is a type-only major update, so it does not change the deployed Node runtime. The latest package metadata is published on [npm](https://www.npmjs.com/package/@types/node).
 - Before the runner change, `bun test` reproduced 7 DashboardLayout breadcrumb failures from cross-file DOM contamination (duplicate `Biller` comboboxes and stale mutation state). The DashboardLayout file itself passed 15/15 in isolation.
 - The updated `bun run test` command completes the normal suite and then reruns DashboardLayout in a fresh process, eliminating those 7 failures.
 - The `@happy-dom/global-registrator` 20.11.1 update no longer reproduces the earlier `viewport.getAnimations` incompatibility; it remains applied after targeted tests and full-suite validation.
