@@ -1,5 +1,6 @@
 const endpointDataQueryKeys = {
   catalog: ["endpoint-data", "catalog"] as const,
+  workspacePrefix: ["endpoint-data", "workspace"] as const,
   workspace: (endpointId: string) =>
     ["endpoint-data", "workspace", endpointId] as const,
   telemetry: (endpointId: string, filters: unknown) =>

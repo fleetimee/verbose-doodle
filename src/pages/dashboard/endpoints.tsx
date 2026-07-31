@@ -1,4 +1,8 @@
-import { Add01Icon, HelpCircleIcon } from "@hugeicons/core-free-icons";
+import {
+  Add01Icon,
+  HelpCircleIcon,
+  Pen01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -23,7 +27,10 @@ import {
 } from "@/components/ui/tooltip";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
 import { useAuth } from "@/features/auth/context";
+import { EditBillerDialog } from "@/features/billers/components/edit-biller-dialog";
 import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
+import { useUpdateBiller } from "@/features/billers/hooks/use-update-biller";
+import type { Biller } from "@/features/billers/types";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
 import { DeleteEndpointDialog } from "@/features/endpoints/components/delete-endpoint-dialog";
 import { EditEndpointSheet } from "@/features/endpoints/components/edit-endpoint-sheet";
@@ -274,6 +281,7 @@ export function EndpointsPage() {
   const [initialBillerSlug, setInitialBillerSlug] = useState<
     string | undefined
   >();
+  const [billerToEdit, setBillerToEdit] = useState<Biller | null>(null);
   const [endpointToEdit, setEndpointToEdit] = useState<Endpoint | null>(null);
   const [endpointToDelete, setEndpointToDelete] = useState<Endpoint | null>(
     null
@@ -309,6 +317,8 @@ export function EndpointsPage() {
     updateEndpointMutation;
   const { mutate: deleteEndpoint, isPending: isDeletingEndpoint } =
     deleteEndpointMutation;
+  const { mutate: updateBiller, isPending: isUpdatingBiller } =
+    useUpdateBiller();
 
   const scopedEndpoints = useMemo(
     () =>
@@ -364,6 +374,21 @@ export function EndpointsPage() {
       {
         onSuccess: () => {
           setEndpointToEdit(null);
+        },
+      }
+    );
+  };
+
+  const handleEditBiller = (billerName: string) => {
+    if (!billerToEdit) {
+      return;
+    }
+
+    updateBiller(
+      { billerName, slug: billerToEdit.slug },
+      {
+        onSuccess: () => {
+          setBillerToEdit(null);
         },
       }
     );
@@ -580,6 +605,19 @@ export function EndpointsPage() {
               />
             </div>
           </ProtectedAction>
+          <ProtectedAction ability="canAddBiller">
+            <EditBillerDialog
+              biller={billerToEdit}
+              isSubmitting={isUpdatingBiller}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setBillerToEdit(null);
+                }
+              }}
+              onSubmit={handleEditBiller}
+              open={billerToEdit !== null}
+            />
+          </ProtectedAction>
           <ProtectedAction ability="canEditEndpoint">
             <EditEndpointSheet
               endpoint={endpointToEdit}
@@ -788,6 +826,40 @@ export function EndpointsPage() {
                           </TooltipTrigger>
                           <TooltipContent>
                             Add endpoint for {group.billerName}
+                          </TooltipContent>
+                        </Tooltip>
+                      </ProtectedAction>
+                      <ProtectedAction ability="canAddBiller">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              aria-label={`Edit biller ${group.billerName}`}
+                              className="border-border/70 bg-background/70 text-muted-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
+                              onClick={() => {
+                                const biller = billers.find(
+                                  (candidate) =>
+                                    candidate.slug === group.billerSlug
+                                );
+                                setBillerToEdit(
+                                  biller ?? {
+                                    name: group.billerName,
+                                    slug: group.billerSlug,
+                                  }
+                                );
+                              }}
+                              size="icon-xs"
+                              type="button"
+                              variant="outline"
+                            >
+                              <HugeiconsIcon
+                                className="size-3.5"
+                                icon={Pen01Icon}
+                                strokeWidth={2}
+                              />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Edit biller {group.billerName}
                           </TooltipContent>
                         </Tooltip>
                       </ProtectedAction>

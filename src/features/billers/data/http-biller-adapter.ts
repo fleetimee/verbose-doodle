@@ -17,6 +17,8 @@ export type ApiCreateBillerResponse = {
   };
 };
 
+export type ApiUpdateBillerResponse = ApiCreateBillerResponse;
+
 export function mapBiller(apiBiller: ApiBiller): Biller {
   return {
     name: apiBiller.biller_name,
@@ -29,5 +31,9 @@ export function mapBillerList(response: ApiBillerListResponse): Biller[] {
 }
 
 export function mapCreatedBiller(response: ApiCreateBillerResponse): Biller {
+  return mapBiller(response.data.biller);
+}
+
+export function mapUpdatedBiller(response: ApiUpdateBillerResponse): Biller {
   return mapBiller(response.data.biller);
 }

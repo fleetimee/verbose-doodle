@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   mapBillerList,
   mapCreatedBiller,
+  mapUpdatedBiller,
 } from "@/features/billers/data/http-biller-adapter";
 
 describe("Biller HTTP adapter", () => {
@@ -32,5 +33,18 @@ describe("Biller HTTP adapter", () => {
         },
       })
     ).toEqual({ name: "PLN Postpaid", slug: "pln-postpaid-2" });
+  });
+
+  test("maps a rename response without changing the slug", () => {
+    expect(
+      mapUpdatedBiller({
+        data: {
+          biller: {
+            biller_name: "PLN Retail",
+            slug: "pln-postpaid-2",
+          },
+        },
+      })
+    ).toEqual({ name: "PLN Retail", slug: "pln-postpaid-2" });
   });
 });
