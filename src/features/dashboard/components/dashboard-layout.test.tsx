@@ -21,15 +21,15 @@ import { encodeId } from "@/lib/id-encoder";
 const originalFetch = globalThis.fetch;
 const encodedEndpointId = encodeId("endpoint-1");
 let availableBillers = [
-  { biller_name: "PLN", id: 1 },
-  { biller_name: "PDAM", id: 2 },
-  { biller_name: "Empty Biller", id: 3 },
+  { biller_name: "PLN", slug: "pln" },
+  { biller_name: "PDAM", slug: "pdam" },
+  { biller_name: "Empty Biller", slug: "empty-biller" },
 ];
 let endpointBillerName: string | undefined = "PLN";
 let resolveEndpointMutation: (() => void) | null = null;
 
 type MockEndpoint = {
-  biller_id: number;
+  biller_slug: string;
   biller_name: string | undefined;
   endpoint_id: string;
   method: string;
@@ -53,7 +53,7 @@ function jsonResponse(body: unknown) {
 
 function installApiMock() {
   const endpoint: MockEndpoint = {
-    biller_id: 1,
+    biller_slug: "pln",
     biller_name: endpointBillerName,
     endpoint_id: "endpoint-1",
     method: "POST",
@@ -61,7 +61,7 @@ function installApiMock() {
     url: "/xapi-pbb/api/user/login",
   };
   const alternateEndpoint: MockEndpoint = {
-    biller_id: 1,
+    biller_slug: "pln",
     biller_name: "PLN",
     endpoint_id: "endpoint-2",
     method: "GET",
@@ -69,7 +69,7 @@ function installApiMock() {
     url: "/xapi-pbb/api/user/status",
   };
   const emptyEndpoint: MockEndpoint = {
-    biller_id: 3,
+    biller_slug: "empty-biller",
     biller_name: "Empty Biller",
     endpoint_id: "endpoint-3",
     method: "GET",
@@ -77,7 +77,7 @@ function installApiMock() {
     url: "/xapi-pbb/api/empty/status",
   };
   const pdamEndpoint: MockEndpoint = {
-    biller_id: 2,
+    biller_slug: "pdam",
     biller_name: "PDAM",
     endpoint_id: "endpoint-pdam",
     method: "GET",
@@ -92,7 +92,7 @@ function installApiMock() {
 
     if (url === "/api/endpoint" && init?.method === "POST") {
       const request = JSON.parse(String(init.body)) as {
-        billerId: number;
+        biller_slug: string;
         method: string;
         url: string;
       };
@@ -101,7 +101,7 @@ function installApiMock() {
         jsonResponse({
           data: {
             endpoint: {
-              biller_id: request.billerId,
+              biller_slug: request.biller_slug,
               biller_name: "PLN",
               endpoint_id: "created-endpoint",
               method: request.method,
@@ -117,7 +117,7 @@ function installApiMock() {
       return Promise.resolve(
         jsonResponse({
           data: {
-            biller: { biller_name: "New Biller", id: 9 },
+            biller: { biller_name: "New Biller", slug: "new-biller" },
           },
         })
       );
@@ -303,9 +303,9 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     localStorage.setItem("auth_token", createAdminToken());
     localStorage.setItem("socket-tester-bridge-auto-connect", "false");
     availableBillers = [
-      { biller_name: "PLN", id: 1 },
-      { biller_name: "PDAM", id: 2 },
-      { biller_name: "Empty Biller", id: 3 },
+      { biller_name: "PLN", slug: "pln" },
+      { biller_name: "PDAM", slug: "pdam" },
+      { biller_name: "Empty Biller", slug: "empty-biller" },
     ];
     endpointBillerName = "PLN";
     resolveEndpointMutation = null;
@@ -446,7 +446,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
 
     expect(
       await screen.findByText(
-        "Create a new API endpoint for a specific biller ID."
+        "Create a new API endpoint for a specific biller."
       )
     ).toBeDefined();
     const billerSelectors = screen.getAllByRole("combobox", { name: "Biller" });
@@ -464,9 +464,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     await user.click(
       await screen.findByRole("option", { name: "Add New Endpoint" })
     );
-    await screen.findByText(
-      "Create a new API endpoint for a specific biller ID."
-    );
+    await screen.findByText("Create a new API endpoint for a specific biller.");
 
     await user.clear(screen.getByLabelText("URL"));
     await user.type(screen.getByLabelText("URL"), "/from-breadcrumb");
@@ -474,9 +472,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
 
     await waitFor(() => {
       expect(
-        screen.queryByText(
-          "Create a new API endpoint for a specific biller ID."
-        )
+        screen.queryByText("Create a new API endpoint for a specific biller.")
       ).toBeNull();
     });
     expect(screen.getByTestId("location").textContent).toBe(
@@ -601,20 +597,20 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
   });
 
   test("falls back to plain biller text when the current biller is unavailable", async () => {
-    availableBillers = [{ biller_name: "PDAM", id: 2 }];
+    availableBillers = [{ biller_name: "PDAM", slug: "pdam" }];
     renderDashboard();
 
     expect(await screen.findByText("PLN")).toBeDefined();
     expect(screen.queryByRole("combobox", { name: "Biller" })).toBeNull();
   });
 
-  test("falls back to the biller ID when its name is unavailable", async () => {
+  test("falls back to the biller slug when its name is unavailable", async () => {
     availableBillers = [];
     endpointBillerName = undefined;
     installApiMock();
     renderDashboard();
 
-    expect(await screen.findByText("Biller ID 1")).toBeDefined();
+    expect(await screen.findByText("Biller pln")).toBeDefined();
     expect(screen.queryByRole("combobox", { name: "Biller" })).toBeNull();
   });
 });

@@ -17,7 +17,7 @@ const EDIT_ENDPOINT_BUTTON_NAME = /edit endpoint/i;
 const METRICS_BUTTON_NAME = /metrics/i;
 
 const endpointOne = {
-  biller_id: 1,
+  biller_slug: "pln",
   biller_name: "PLN",
   endpoint_id: "endpoint-1",
   method: "GET",
@@ -34,7 +34,7 @@ const endpointOne = {
 };
 
 const endpointTwo = {
-  biller_id: 2,
+  biller_slug: "pdam",
   biller_name: "PDAM",
   endpoint_id: "endpoint-2",
   method: "POST",
@@ -68,8 +68,8 @@ function installApiMock() {
         jsonResponse({
           data: {
             billers: [
-              { biller_name: "PLN", id: 1 },
-              { biller_name: "PDAM", id: 2 },
+              { biller_name: "PLN", slug: "pln" },
+              { biller_name: "PDAM", slug: "pdam" },
             ],
           },
         })
@@ -186,7 +186,7 @@ async function switchBiller(user: ReturnType<typeof userEvent.setup>) {
 
 async function openResponseEditor(user: ReturnType<typeof userEvent.setup>) {
   const editButtons = await screen.findAllByRole("button", {
-    name: "Edit Inquiry response",
+    name: "More response actions for Inquiry response",
   });
   await user.click(editButtons[0]);
   await user.click(await screen.findByRole("menuitem", { name: "Edit Name" }));

@@ -54,7 +54,8 @@ export function EndpointContextMenu({
               {endpoint.url}
             </span>
             <span className="mt-1 block font-normal text-[11px] text-muted-foreground">
-              Biller {endpoint.billerId} · {endpoint.responses.length} response
+              Biller {endpoint.billerSlug} · {endpoint.responses.length}{" "}
+              response
               {endpoint.responses.length === 1 ? "" : "s"}
             </span>
           </ContextMenuLabel>

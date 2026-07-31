@@ -29,7 +29,7 @@ type AddEndpointSheetProps = {
   onOpenChange?: (open: boolean) => void;
   isSubmitting?: boolean;
   showTrigger?: boolean;
-  initialBillerId?: number;
+  initialBillerSlug?: string;
   onTriggerClick?: () => void;
 };
 
@@ -39,7 +39,7 @@ export function AddEndpointSheet({
   onOpenChange,
   isSubmitting = false,
   showTrigger = true,
-  initialBillerId,
+  initialBillerSlug,
   onTriggerClick,
 }: AddEndpointSheetProps) {
   const formRef = useRef<EndpointFormHandle>(null);
@@ -51,7 +51,7 @@ export function AddEndpointSheet({
   const availableBillers = useMemo(() => {
     if (
       !createdBiller ||
-      billers.some((biller) => biller.id === createdBiller.id)
+      billers.some((biller) => biller.slug === createdBiller.slug)
     ) {
       return billers;
     }
@@ -80,7 +80,7 @@ export function AddEndpointSheet({
         onSuccess: (biller) => {
           setCreatedBiller(biller);
           setIsAddBillerOpen(false);
-          formRef.current?.form.setValue("billerId", biller.id, {
+          formRef.current?.form.setValue("billerSlug", biller.slug, {
             shouldDirty: true,
             shouldValidate: true,
           });
@@ -113,7 +113,7 @@ export function AddEndpointSheet({
         <div className="flex flex-1 flex-col overflow-hidden">
           <EndpointForm
             billers={availableBillers}
-            initialBillerId={initialBillerId}
+            initialBillerSlug={initialBillerSlug}
             isLoadingBillers={isLoadingBillers}
             onAddBiller={() => setIsAddBillerOpen(true)}
             onSubmit={handleFormSubmit}

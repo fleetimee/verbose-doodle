@@ -11,14 +11,14 @@ import { useNavigate } from "react-router";
 import { ENDPOINT_MUTATION_KEY } from "@/features/endpoints/data/endpoint-mutation-key";
 
 type EndpointMemory = {
-  readonly billerId: number;
+  readonly billerSlug: string;
   readonly endpointId: string;
 };
 
 type DashboardNavigationContextValue = {
   readonly endpointMutationPending: boolean;
   readonly forgetEndpoint: (endpointId: string) => void;
-  readonly getRememberedEndpoint: (billerId: number) => string | undefined;
+  readonly getRememberedEndpoint: (billerSlug: string) => string | undefined;
   readonly navigateToEndpoint: (path: string) => void;
   readonly registerEndpointNavigationGuard: (
     guard: (path: string) => boolean
@@ -38,7 +38,7 @@ export function DashboardNavigationProvider({
 }) {
   const navigate = useNavigate();
   const guardRef = useRef<(path: string) => boolean>(() => true);
-  const rememberedEndpointsRef = useRef(new Map<number, string>());
+  const rememberedEndpointsRef = useRef(new Map<string, string>());
   const endpointMutationPending = useIsMutating({
     mutationKey: ENDPOINT_MUTATION_KEY,
   });
@@ -70,21 +70,21 @@ export function DashboardNavigationProvider({
   );
 
   const rememberEndpoint = useCallback((memory: EndpointMemory) => {
-    rememberedEndpointsRef.current.set(memory.billerId, memory.endpointId);
+    rememberedEndpointsRef.current.set(memory.billerSlug, memory.endpointId);
   }, []);
 
   const getRememberedEndpoint = useCallback(
-    (billerId: number) => rememberedEndpointsRef.current.get(billerId),
+    (billerSlug: string) => rememberedEndpointsRef.current.get(billerSlug),
     []
   );
 
   const forgetEndpoint = useCallback((endpointId: string) => {
     for (const [
-      billerId,
+      billerSlug,
       rememberedEndpointId,
     ] of rememberedEndpointsRef.current) {
       if (rememberedEndpointId === endpointId) {
-        rememberedEndpointsRef.current.delete(billerId);
+        rememberedEndpointsRef.current.delete(billerSlug);
       }
     }
   }, []);

@@ -4,7 +4,7 @@ import { endpointSchema } from "@/features/endpoints/schemas/endpoint-schema";
 const VALID_ENDPOINT_INPUT = {
   method: "GET" as const,
   url: "/api/demo",
-  billerId: 42,
+  billerSlug: "pln",
 };
 
 function getIssueMessage(
@@ -106,25 +106,21 @@ describe("endpointSchema", () => {
     );
   });
 
-  test("flags non-integer biller IDs", () => {
+  test("requires a biller slug", () => {
     const result = endpointSchema.safeParse({
       ...VALID_ENDPOINT_INPUT,
-      billerId: 7.5,
+      billerSlug: "",
     });
 
-    expect(getIssueMessage(result, "billerId")).toBe(
-      "Biller ID must be an integer"
-    );
+    expect(getIssueMessage(result, "billerSlug")).toBe("Biller is required");
   });
 
-  test("provides a helpful error when biller ID is not numeric", () => {
+  test("rejects non-string biller identities", () => {
     const result = endpointSchema.safeParse({
       ...VALID_ENDPOINT_INPUT,
-      billerId: "123" as unknown as number,
+      billerSlug: 123 as unknown as string,
     });
 
-    expect(getIssueMessage(result, "billerId")).toBe(
-      "Biller ID must be a number"
-    );
+    expect(getIssueMessage(result, "billerSlug")).toBe("Biller is required");
   });
 });

@@ -122,7 +122,7 @@ function mapEndpoint(input: unknown): Endpoint {
     id: stringValue(value(endpoint, "id", "endpoint_id")),
     method: stringValue(value(endpoint, "method")) as Endpoint["method"],
     url: stringValue(value(endpoint, "url")),
-    billerId: numberValue(value(endpoint, "billerId", "biller_id")),
+    billerSlug: stringValue(value(endpoint, "billerSlug", "biller_slug")),
     billerName:
       nullableString(value(endpoint, "billerName", "biller_name")) ?? undefined,
     responses: Array.isArray(responses) ? responses.map(mapResponse) : [],
@@ -313,17 +313,35 @@ export function createHttpEndpointAdapter(
       }
     },
     async createEndpoint(input) {
-      const response = await transport.post<unknown, CreateEndpointInput>(
-        API_ENDPOINTS.admin.endpoints.create,
-        input
-      );
+      const response = await transport.post<
+        unknown,
+        {
+          method: CreateEndpointInput["method"];
+          url: string;
+          biller_slug: string;
+        }
+      >(API_ENDPOINTS.admin.endpoints.create, {
+        method: input.method,
+        url: input.url,
+        biller_slug: input.billerSlug,
+      });
       return endpointFromResponse(response);
     },
     async updateEndpoint(input) {
       const response = await transport.patch<
         unknown,
-        Partial<CreateEndpointInput>
-      >(API_ENDPOINTS.admin.endpoints.update(input.endpointId), input.changes);
+        Partial<{
+          method: CreateEndpointInput["method"];
+          url: string;
+          biller_slug: string;
+        }>
+      >(API_ENDPOINTS.admin.endpoints.update(input.endpointId), {
+        ...(input.changes.method ? { method: input.changes.method } : {}),
+        ...(input.changes.url ? { url: input.changes.url } : {}),
+        ...(input.changes.billerSlug
+          ? { biller_slug: input.changes.billerSlug }
+          : {}),
+      });
       return endpointFromResponse(response);
     },
     async deleteEndpoint(endpointId) {

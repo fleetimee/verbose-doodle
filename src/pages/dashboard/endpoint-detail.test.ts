@@ -33,10 +33,10 @@ describe("endpoint detail response selection", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerId: 1, id: "first", responses: [] },
-          { billerId: 1, id: "remembered", responses: [] },
+          { billerSlug: "pln", id: "first", responses: [] },
+          { billerSlug: "pln", id: "remembered", responses: [] },
         ],
-        1,
+        "pln",
         "remembered"
       )?.id
     ).toBe("remembered");
@@ -46,9 +46,9 @@ describe("endpoint detail response selection", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerId: 1, id: "inactive", responses: [] },
+          { billerSlug: "pln", id: "inactive", responses: [] },
           {
-            billerId: 1,
+            billerSlug: "pln",
             id: "active",
             responses: [
               {
@@ -61,7 +61,7 @@ describe("endpoint detail response selection", () => {
             ],
           },
         ],
-        1
+        "pln"
       )?.id
     ).toBe("active");
   });
@@ -70,9 +70,9 @@ describe("endpoint detail response selection", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerId: 1, id: "first", responses: [] },
+          { billerSlug: "pln", id: "first", responses: [] },
           {
-            billerId: 1,
+            billerSlug: "pln",
             id: "second",
             responses: [
               {
@@ -85,7 +85,7 @@ describe("endpoint detail response selection", () => {
             ],
           },
         ],
-        1
+        "pln"
       )?.id
     ).toBe("first");
   });
@@ -94,9 +94,9 @@ describe("endpoint detail response selection", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerId: 1, id: "first", responses: [] },
+          { billerSlug: "pln", id: "first", responses: [] },
           {
-            billerId: 1,
+            billerSlug: "pln",
             id: "active",
             responses: [
               {
@@ -109,7 +109,7 @@ describe("endpoint detail response selection", () => {
             ],
           },
         ],
-        1,
+        "pln",
         "deleted"
       )?.id
     ).toBe("active");

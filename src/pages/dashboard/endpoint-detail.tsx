@@ -316,7 +316,7 @@ export function EndpointDetailPage() {
     if (endpointChanged) {
       previousEndpointIdRef.current = endpoint.id;
       rememberEndpoint({
-        billerId: endpoint.billerId,
+        billerSlug: endpoint.billerSlug,
         endpointId: endpoint.id,
       });
       closeEndpointScopedOverlays();
@@ -1145,9 +1145,9 @@ export function EndpointDetailPage() {
                   icon={HashIcon}
                   strokeWidth={2}
                 />
-                <span>Biller ID</span>
+                <span>Biller</span>
                 <span className="font-mono text-foreground">
-                  {endpoint.billerId}
+                  {endpoint.billerSlug}
                 </span>
               </span>
               <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 bg-background/70 px-2.5 font-medium text-muted-foreground text-xs shadow-xs">

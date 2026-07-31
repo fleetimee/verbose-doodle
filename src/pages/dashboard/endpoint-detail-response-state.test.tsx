@@ -59,7 +59,7 @@ const responseTwo = {
 };
 
 const endpointOne: Endpoint = {
-  billerId: 1,
+  billerSlug: "pln",
   billerName: "PLN",
   id: endpointOneId,
   method: "GET",
@@ -68,7 +68,7 @@ const endpointOne: Endpoint = {
 };
 
 const endpointTwo: Endpoint = {
-  billerId: 2,
+  billerSlug: "pdam",
   billerName: "PDAM",
   id: endpointTwoId,
   method: "POST",
@@ -249,14 +249,16 @@ function RefreshProbe() {
 function RememberedEndpointProbe() {
   const { getRememberedEndpoint } = useDashboardNavigation();
   const [rememberedEndpoint, setRememberedEndpoint] = useState(
-    getRememberedEndpoint(1) ?? ""
+    getRememberedEndpoint("pln") ?? ""
   );
 
   return (
     <>
       <output data-testid="remembered-endpoint">{rememberedEndpoint}</output>
       <button
-        onClick={() => setRememberedEndpoint(getRememberedEndpoint(1) ?? "")}
+        onClick={() =>
+          setRememberedEndpoint(getRememberedEndpoint("pln") ?? "")
+        }
         type="button"
       >
         Read remembered endpoint

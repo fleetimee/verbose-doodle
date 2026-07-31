@@ -9,5 +9,5 @@ export const billerQueryKeys = {
   list: (filters?: Record<string, unknown>) =>
     [...billerQueryKeys.lists(), filters] as const,
   details: () => [...billerQueryKeys.all, "detail"] as const,
-  detail: (id: string | number) => [...billerQueryKeys.details(), id] as const,
+  detail: (slug: string) => [...billerQueryKeys.details(), slug] as const,
 };

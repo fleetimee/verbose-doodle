@@ -80,7 +80,7 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
         </div>
         <ItemDescription className="text-left">
           <EndpointMetaStrip
-            billerId={endpoint.billerId}
+            billerSlug={endpoint.billerSlug}
             responseCount={endpoint.responses.length}
           />
         </ItemDescription>

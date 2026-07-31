@@ -198,7 +198,7 @@ export const endpointsMessages = {
   },
   addEndpoint: "Add Endpoint",
   addNewEndpoint: "Add New Endpoint",
-  addEndpointDescription: "Create a new API endpoint for a specific biller ID.",
+  addEndpointDescription: "Create a new API endpoint for a specific biller.",
   editEndpoint: "Edit Endpoint",
   editEndpointDescription:
     "Update the method and URL for this endpoint. The biller cannot be changed here.",
@@ -333,7 +333,7 @@ export const endpointsMessages = {
   detailTour: {
     headerTitle: "Endpoint details",
     headerDescription:
-      "This header shows the endpoint method, path, biller ID, response count, and quick actions.",
+      "This header shows the endpoint method, path, biller, response count, and quick actions.",
     editActionsTitle: "Edit endpoint",
     editActionsDescription:
       "Use these controls to update the endpoint method or path, or remove the endpoint when it is no longer needed.",
@@ -408,9 +408,7 @@ export const endpointsMessages = {
   urlStartError: "URL must start with /",
   urlPathError:
     "URL must be a valid API path (e.g., /rest, /rest/api, /api/v1/users)",
-  billerNumberError: "Biller ID must be a number",
-  billerIntegerError: "Biller ID must be an integer",
-  billerMinError: "Biller ID must be at least 1",
+  billerRequiredError: "Biller is required",
   nameRequiredError: "Name is required",
   nameTooLongError: "Name is too long",
   jsonRequiredError: "JSON content is required",

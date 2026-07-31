@@ -70,33 +70,27 @@ const ENDPOINTS_TOUR_TARGETS = {
   export: "endpoints-tour-export",
   firstEndpoint: "endpoints-tour-first-endpoint",
 } as const;
-const BILLER_ID_PATTERN = /^\d+$/;
-
 type EndpointViewMode = "grid" | "list";
 
-function parseBillerId(value: string | null): number | null {
-  if (!(value && BILLER_ID_PATTERN.test(value))) {
-    return null;
-  }
-
-  const billerId = Number(value);
-  return Number.isSafeInteger(billerId) ? billerId : null;
+function parseBillerSlug(value: string | null): string | null {
+  const slug = value?.trim();
+  return slug ? slug : null;
 }
 
 function filterEndpointsByBiller(
   endpoints: Endpoint[],
-  billerId: number | null,
+  billerSlug: string | null,
   isBillerScoped: boolean
 ): Endpoint[] {
   if (!isBillerScoped) {
     return endpoints;
   }
 
-  if (billerId === null) {
+  if (billerSlug === null) {
     return [];
   }
 
-  return endpoints.filter((endpoint) => endpoint.billerId === billerId);
+  return endpoints.filter((endpoint) => endpoint.billerSlug === billerSlug);
 }
 
 function getEmptyStateCopy(
@@ -277,7 +271,9 @@ export function EndpointsPage() {
   const { data: billers = [], isPending: isLoadingBillers } = useGetBillers();
   const { session } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [initialBillerId, setInitialBillerId] = useState<number | undefined>();
+  const [initialBillerSlug, setInitialBillerSlug] = useState<
+    string | undefined
+  >();
   const [endpointToEdit, setEndpointToEdit] = useState<Endpoint | null>(null);
   const [endpointToDelete, setEndpointToDelete] = useState<Endpoint | null>(
     null
@@ -298,12 +294,12 @@ export function EndpointsPage() {
   const prefersReducedMotion = useReducedMotion();
   const shouldReduceMotion = prefersReducedMotion ?? false;
 
-  const billerIdParam = searchParams.get("billerId");
-  const selectedBillerId = parseBillerId(billerIdParam);
-  const isBillerScoped = billerIdParam !== null;
+  const billerSlugParam = searchParams.get("billerSlug");
+  const selectedBillerSlug = parseBillerSlug(billerSlugParam);
+  const isBillerScoped = billerSlugParam !== null;
   const hasKnownBiller =
-    selectedBillerId !== null &&
-    billers.some((biller) => biller.id === selectedBillerId);
+    selectedBillerSlug !== null &&
+    billers.some((biller) => biller.slug === selectedBillerSlug);
   const isUnknownBillerScope =
     isBillerScoped && !isLoadingBillers && !hasKnownBiller;
 
@@ -315,8 +311,9 @@ export function EndpointsPage() {
     deleteEndpointMutation;
 
   const scopedEndpoints = useMemo(
-    () => filterEndpointsByBiller(endpoints, selectedBillerId, isBillerScoped),
-    [endpoints, isBillerScoped, selectedBillerId]
+    () =>
+      filterEndpointsByBiller(endpoints, selectedBillerSlug, isBillerScoped),
+    [endpoints, isBillerScoped, selectedBillerSlug]
   );
 
   const filteredEndpoints = useMemo(
@@ -336,8 +333,10 @@ export function EndpointsPage() {
   const canAddEndpoint = session.can("canAddEndpoint");
   const canEditEndpoint = session.can("canEditEndpoint");
 
-  const handleCreateEndpoint = (billerId = selectedBillerId ?? undefined) => {
-    setInitialBillerId(billerId);
+  const handleCreateEndpoint = (
+    billerSlug = selectedBillerSlug ?? undefined
+  ) => {
+    setInitialBillerSlug(billerSlug);
     setIsDialogOpen(true);
   };
 
@@ -571,7 +570,7 @@ export function EndpointsPage() {
               id={hasEndpoints ? ENDPOINTS_TOUR_TARGETS.addEndpoint : undefined}
             >
               <AddEndpointSheet
-                initialBillerId={initialBillerId}
+                initialBillerSlug={initialBillerSlug}
                 isSubmitting={isCreatingEndpoint}
                 onOpenChange={setIsDialogOpen}
                 onSubmit={handleAddEndpoint}
@@ -761,7 +760,7 @@ export function EndpointsPage() {
               }}
             >
               {groupedEndpoints.map((group, index) => (
-                <section className="space-y-4" key={group.billerId}>
+                <section className="space-y-4" key={group.billerSlug}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="font-semibold text-lg">
@@ -774,7 +773,7 @@ export function EndpointsPage() {
                               aria-label={`Add endpoint for ${group.billerName}`}
                               className="border-border/70 bg-background/70 text-muted-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
                               onClick={() =>
-                                handleCreateEndpoint(group.billerId)
+                                handleCreateEndpoint(group.billerSlug)
                               }
                               size="icon-xs"
                               type="button"
