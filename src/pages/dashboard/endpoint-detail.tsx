@@ -591,9 +591,6 @@ export function EndpointDetailPage() {
           selectedResponseWasActiveRef.current = true;
           setSelectedResponseId(response.id);
         },
-        onError: () => {
-          toast.error("Failed to activate response");
-        },
       }
     );
   };
@@ -612,9 +609,6 @@ export function EndpointDetailPage() {
         onSuccess: () => {
           toast.success(`Response "${response.name}" deactivated`);
           selectedResponseWasActiveRef.current = true;
-        },
-        onError: () => {
-          toast.error("Failed to deactivate response");
         },
       }
     );

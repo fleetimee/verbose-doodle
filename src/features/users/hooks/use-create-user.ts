@@ -76,8 +76,8 @@ export function useCreateUser() {
   >(createUser, {
     onSuccess: (data) => {
       // Show success message
-      toast.success("Response created successfully", {
-        description: `Created response: ${data.user_id}`,
+      toast.success("User created successfully", {
+        description: `Created user: ${data.user_id}`,
       });
 
       // Invalidate and refetch queries to get fresh data from server
@@ -87,7 +87,7 @@ export function useCreateUser() {
     },
     onError: (error) => {
       // Handle errors with toast notification
-      toast.error("Failed to create response", {
+      toast.error("Failed to create user", {
         description: error.message || "An unexpected error occurred",
       });
     },
