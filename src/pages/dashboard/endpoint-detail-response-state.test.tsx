@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import {
   QueryClient,
   QueryClientProvider,
@@ -20,6 +20,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router";
+import { toast } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TourProvider } from "@/components/tour";
 import { Toaster } from "@/components/ui/sonner";
@@ -93,6 +94,8 @@ const originalFetch = globalThis.fetch;
 let currentEndpointOne = structuredClone(endpointOne);
 let endpointOneNotFound = false;
 let deferEndpointOneDetail = false;
+let activateResponseFailure = false;
+let deactivateResponseFailure = false;
 let resolveEndpointOneDetail: (() => void) | null = null;
 let mutationMethods: string[] = [];
 
@@ -157,6 +160,12 @@ function installApiMock() {
       url === `/api/response/${endpointOneId}/${responseTwo.id}/activate` &&
       method === "PUT"
     ) {
+      if (activateResponseFailure) {
+        return Promise.resolve(
+          jsonResponse({ responseDesc: "Unable to activate response" }, 500)
+        );
+      }
+
       currentEndpointOne = {
         ...currentEndpointOne,
         responses: currentEndpointOne.responses.map((response) => ({
@@ -179,6 +188,12 @@ function installApiMock() {
       url === `/api/response/${endpointOneId}/${responseOne.id}/deactivate` &&
       method === "PUT"
     ) {
+      if (deactivateResponseFailure) {
+        return Promise.resolve(
+          jsonResponse({ responseDesc: "Unable to deactivate response" }, 500)
+        );
+      }
+
       currentEndpointOne = {
         ...currentEndpointOne,
         responses: currentEndpointOne.responses.map((response) => ({
@@ -338,6 +353,8 @@ describe("EndpointDetailPage response state", () => {
     currentEndpointOne = structuredClone(endpointOne);
     endpointOneNotFound = false;
     deferEndpointOneDetail = false;
+    activateResponseFailure = false;
+    deactivateResponseFailure = false;
     resolveEndpointOneDetail = null;
     mutationMethods = [];
     installApiMock();
@@ -372,6 +389,49 @@ describe("EndpointDetailPage response state", () => {
       expectResponseSelection("Backup response", true);
     });
     expectResponseSelection("Primary response", false);
+  });
+
+  test("shows one error toast when activation fails", async () => {
+    const user = userEvent.setup();
+    const errorToast = spyOn(toast, "error");
+    errorToast.mockClear();
+    activateResponseFailure = true;
+
+    try {
+      renderEndpointDetail();
+
+      await user.click(await findResponseButton("Activate Backup response"));
+      await user.click(await screen.findByRole("button", { name: "Activate" }));
+
+      await waitFor(() => expect(errorToast).toHaveBeenCalledTimes(1));
+    } finally {
+      errorToast.mockRestore();
+    }
+  });
+
+  test("shows one error toast when deactivation fails", async () => {
+    const user = userEvent.setup();
+    const errorToast = spyOn(toast, "error");
+    errorToast.mockClear();
+    deactivateResponseFailure = true;
+
+    try {
+      renderEndpointDetail();
+
+      await user.click(
+        await findResponseButton("More response actions for Primary response")
+      );
+      await user.click(
+        await screen.findByRole("menuitem", { name: "Deactivate response" })
+      );
+      await user.click(
+        await screen.findByRole("button", { name: "Deactivate" })
+      );
+
+      await waitFor(() => expect(errorToast).toHaveBeenCalledTimes(1));
+    } finally {
+      errorToast.mockRestore();
+    }
   });
 
   test.each([
