@@ -10,7 +10,6 @@ import {
   DashboardNavigationProvider,
   useDashboardNavigation,
 } from "@/features/dashboard/dashboard-navigation-context";
-import { encodeId } from "@/lib/id-encoder";
 import { EndpointDetailPage } from "@/pages/dashboard/endpoint-detail";
 
 const EDIT_ENDPOINT_BUTTON_NAME = /edit endpoint/i;
@@ -117,7 +116,7 @@ function LocationProbe() {
 function NavigationProbe() {
   const navigation = useDashboardNavigation();
   requestEndpointNavigation = navigation.requestEndpointNavigation;
-  const endpointPath = `/dashboard/endpoints/${encodeId("endpoint-2")}`;
+  const endpointPath = "/dashboard/endpoints/endpoint-2";
 
   return (
     <>
@@ -143,9 +142,7 @@ function renderEndpointDetail() {
   });
 
   return render(
-    <MemoryRouter
-      initialEntries={[`/dashboard/endpoints/${encodeId("endpoint-1")}`]}
-    >
+    <MemoryRouter initialEntries={["/dashboard/endpoints/endpoint-1"]}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ThemeProvider defaultTheme="light">
@@ -192,9 +189,7 @@ async function openResponseEditor(user: ReturnType<typeof userEvent.setup>) {
   await user.click(await screen.findByRole("menuitem", { name: "Edit Name" }));
 }
 
-function requestEndpointSwitch(
-  path = `/dashboard/endpoints/${encodeId("endpoint-2")}`
-) {
+function requestEndpointSwitch(path = "/dashboard/endpoints/endpoint-2") {
   act(() => {
     requestEndpointNavigation?.(path);
   });
@@ -236,9 +231,7 @@ describe("EndpointDetailPage navigation protection", () => {
     await user.click(screen.getByRole("button", { name: "Keep editing" }));
 
     expect(screen.getByDisplayValue("/changed")).toBeDefined();
-    expect(screen.getByTestId("location").textContent).toContain(
-      encodeId("endpoint-1")
-    );
+    expect(screen.getByTestId("location").textContent).toContain("endpoint-1");
   });
 
   test("protects a dirty Add Response form during browser back navigation", async () => {
@@ -255,16 +248,14 @@ describe("EndpointDetailPage navigation protection", () => {
     requestEndpointSwitch();
 
     expect(await screen.findByRole("alertdialog")).toBeDefined();
-    expect(screen.getByTestId("location").textContent).toContain(
-      encodeId("endpoint-1")
-    );
+    expect(screen.getByTestId("location").textContent).toContain("endpoint-1");
 
     await user.click(
       screen.getByRole("button", { name: "Discard and switch" })
     );
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toContain(
-        encodeId("endpoint-2")
+        "endpoint-2"
       );
     });
   });
@@ -287,7 +278,7 @@ describe("EndpointDetailPage navigation protection", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toContain(
-        encodeId("endpoint-2")
+        "endpoint-2"
       );
     });
   });
@@ -305,7 +296,7 @@ describe("EndpointDetailPage navigation protection", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).toBeNull();
       expect(screen.getByTestId("location").textContent).toContain(
-        encodeId("endpoint-2")
+        "endpoint-2"
       );
     });
   });
@@ -333,7 +324,7 @@ describe("EndpointDetailPage navigation protection", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toContain(
-        encodeId("endpoint-2")
+        "endpoint-2"
       );
     });
     expect(screen.queryByPlaceholderText("success_response")).toBeNull();
@@ -355,9 +346,7 @@ describe("EndpointDetailPage navigation protection", () => {
     );
 
     expect(await screen.findByRole("alertdialog")).toBeDefined();
-    expect(screen.getByTestId("location").textContent).toContain(
-      encodeId("endpoint-1")
-    );
+    expect(screen.getByTestId("location").textContent).toContain("endpoint-1");
     await user.click(screen.getByRole("button", { name: "Keep editing" }));
     expect(screen.queryByRole("alertdialog")).toBeNull();
   });
