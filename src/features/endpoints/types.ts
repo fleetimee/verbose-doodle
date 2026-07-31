@@ -23,7 +23,7 @@ export type Endpoint = {
   id: string;
   method: HttpMethod;
   url: string;
-  billerId: number;
+  billerSlug: string;
   billerName?: string;
   responses: EndpointResponse[];
   createdAt?: string;
@@ -41,7 +41,7 @@ type ApiCreateEndpointResponse = {
       id: number;
       method: HttpMethod;
       url: string;
-      biller_id: number;
+      biller_slug: string;
       biller_name: string;
     };
   };
@@ -75,7 +75,7 @@ export type EndpointError = {
  * Grouped endpoints by biller
  */
 export type GroupedEndpoints = {
-  billerId: number;
+  billerSlug: string;
   billerName: string;
   endpoints: Endpoint[];
 };

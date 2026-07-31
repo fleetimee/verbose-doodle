@@ -56,12 +56,12 @@ describe("EndpointForm", () => {
     ).toBeDefined();
   });
 
-  test("coerces numeric values before calling onSubmit", async () => {
+  test("submits the selected biller slug", async () => {
     const user = userEvent.setup();
     const handleSubmit = mock((_data: EndpointFormData) => {});
 
     render(
-      <EndpointForm initialBillerId={1} onSubmit={handleSubmit}>
+      <EndpointForm initialBillerSlug="pln" onSubmit={handleSubmit}>
         <button type="submit">{SUBMIT_BUTTON_LABEL}</button>
       </EndpointForm>
     );
@@ -76,7 +76,11 @@ describe("EndpointForm", () => {
     }
 
     const [payload] = firstCall;
-    expect(payload).toEqual({ billerId: 1, method: "GET", url: "/rest" });
+    expect(payload).toEqual({
+      billerSlug: "pln",
+      method: "GET",
+      url: "/rest",
+    });
   });
 
   test("offers the add-biller action from the biller selector", async () => {
@@ -124,7 +128,11 @@ describe("EndpointForm", () => {
     const formRef = createRef<EndpointFormHandle>();
 
     render(
-      <EndpointForm initialBillerId={1} onSubmit={handleSubmit} ref={formRef}>
+      <EndpointForm
+        initialBillerSlug="pln"
+        onSubmit={handleSubmit}
+        ref={formRef}
+      >
         <button type="submit">{SUBMIT_BUTTON_LABEL}</button>
       </EndpointForm>
     );
@@ -145,7 +153,7 @@ describe("EndpointForm", () => {
     });
 
     expect(formRef.current.getValues()).toEqual({
-      billerId: 1,
+      billerSlug: "pln",
       method: "GET",
       url: "/rest",
     });

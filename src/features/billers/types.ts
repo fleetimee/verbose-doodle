@@ -3,6 +3,6 @@
  */
 
 export type Biller = {
-  id: number;
+  slug: string;
   name: string;
 };

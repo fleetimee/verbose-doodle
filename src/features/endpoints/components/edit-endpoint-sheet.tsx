@@ -59,7 +59,7 @@ export function EditEndpointSheet({
           <div className="flex flex-1 flex-col overflow-hidden">
             <EndpointForm
               billers={billers}
-              initialBillerId={endpoint.billerId}
+              initialBillerSlug={endpoint.billerSlug}
               initialMethod={endpoint.method}
               initialUrl={endpoint.url}
               isBillerReadOnly

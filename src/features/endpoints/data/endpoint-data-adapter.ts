@@ -13,13 +13,13 @@ import type {
 export type CreateEndpointInput = {
   readonly method: HttpMethod;
   readonly url: string;
-  readonly billerId: number;
+  readonly billerSlug: string;
 };
 
 export type UpdateEndpointInput = {
   readonly endpointId: string;
   readonly changes: Partial<
-    Pick<CreateEndpointInput, "method" | "url" | "billerId">
+    Pick<CreateEndpointInput, "method" | "url" | "billerSlug">
   >;
 };
 

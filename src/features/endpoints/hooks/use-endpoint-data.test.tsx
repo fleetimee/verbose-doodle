@@ -23,7 +23,7 @@ function createAdapter() {
         id: "1",
         method: "GET",
         url: "/health",
-        billerId: 1,
+        billerSlug: "pln",
         responses: [],
       },
     ],
@@ -55,7 +55,7 @@ describe("Endpoint data hooks", () => {
       await result.current.createEndpoint.mutateAsync({
         method: "POST",
         url: "/payments",
-        billerId: 1,
+        billerSlug: "pln",
       });
     });
 
@@ -70,7 +70,7 @@ describe("Endpoint data hooks", () => {
       id: "catalog-endpoint",
       method: "POST" as const,
       url: "/catalog-backed",
-      billerId: 1,
+      billerSlug: "pln",
       responses: [],
     };
     queryClient.setQueryData(endpointDataQueryKeys.catalog, [catalogEndpoint]);

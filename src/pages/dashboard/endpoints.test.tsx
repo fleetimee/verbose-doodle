@@ -15,13 +15,13 @@ import { AuthProvider } from "@/features/auth/context";
 import { EndpointsPage } from "@/pages/dashboard/endpoints";
 
 const billers = [
-  { id: 1, name: "PLN" },
-  { id: 2, name: "PDAM" },
+  { slug: "pln", name: "PLN" },
+  { slug: "pdam", name: "PDAM" },
 ];
 
 const endpoints = [
   {
-    billerId: 1,
+    billerSlug: "pln",
     billerName: "PLN",
     id: "endpoint-1",
     method: "GET" as const,
@@ -40,7 +40,7 @@ const endpoints = [
 ];
 
 const pdamEndpoint = {
-  billerId: 2,
+  billerSlug: "pdam",
   billerName: "PDAM",
   id: "endpoint-2",
   method: "POST" as const,
@@ -49,7 +49,7 @@ const pdamEndpoint = {
 };
 
 const originalFetch = globalThis.fetch;
-let lastCreateBody: { billerId?: number } | null = null;
+let lastCreateBody: { biller_slug?: string } | null = null;
 let lastUpdateBody: Record<string, unknown> | null = null;
 let lastDeleteId: string | null = null;
 let currentEndpoint: (typeof endpoints)[number] | null = { ...endpoints[0] };
@@ -101,9 +101,9 @@ function installApiMock() {
       return Promise.resolve(
         jsonResponse({
           data: {
-            billers: billers.map(({ id, name }) => ({
+            billers: billers.map(({ slug, name }) => ({
               biller_name: name,
-              id,
+              slug,
             })),
           },
         })
@@ -111,15 +111,16 @@ function installApiMock() {
     }
 
     if (url === "/api/endpoint" && method === "POST") {
-      const body = JSON.parse(String(init?.body)) as { billerId?: number };
+      const body = JSON.parse(String(init?.body)) as { biller_slug?: string };
       lastCreateBody = body;
       return Promise.resolve(
         jsonResponse({
           data: {
             endpoint: {
-              biller_id: body.billerId,
-              biller_name: billers.find((biller) => biller.id === body.billerId)
-                ?.name,
+              biller_slug: body.biller_slug,
+              biller_name: billers.find(
+                (biller) => biller.slug === body.biller_slug
+              )?.name,
               id: "created-endpoint",
               method: "GET",
               url: "/rest",
@@ -254,7 +255,7 @@ describe("EndpointsPage catalog actions", () => {
     expect(within(billerSelect).getByText("PDAM")).toBeDefined();
 
     await user.click(screen.getByRole("button", { name: "Create Endpoint" }));
-    expect(lastCreateBody).toMatchObject({ billerId: 2 });
+    expect(lastCreateBody).toMatchObject({ biller_slug: "pdam" });
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).toBeNull();
     });
@@ -263,7 +264,7 @@ describe("EndpointsPage catalog actions", () => {
   test("filters the catalog to the selected biller and defaults creation to it", async () => {
     const user = userEvent.setup();
     extraCatalogEndpoint = pdamEndpoint;
-    renderEndpointsPage(["/dashboard/endpoints?billerId=2"]);
+    renderEndpointsPage(["/dashboard/endpoints?billerSlug=pdam"]);
 
     expect(
       await screen.findByRole("button", { name: pdamEndpointButtonName })
@@ -281,7 +282,7 @@ describe("EndpointsPage catalog actions", () => {
 
   test("keeps an unknown biller URL scoped instead of showing other endpoints", async () => {
     extraCatalogEndpoint = pdamEndpoint;
-    renderEndpointsPage(["/dashboard/endpoints?billerId=999"]);
+    renderEndpointsPage(["/dashboard/endpoints?billerSlug=unknown"]);
 
     await waitFor(() => {
       expect(
@@ -296,7 +297,7 @@ describe("EndpointsPage catalog actions", () => {
 
   test("keeps a malformed biller URL scoped instead of showing other endpoints", async () => {
     extraCatalogEndpoint = pdamEndpoint;
-    renderEndpointsPage(["/dashboard/endpoints?billerId=abc"]);
+    renderEndpointsPage(["/dashboard/endpoints?billerSlug=%20"]);
 
     await waitFor(() => {
       expect(
@@ -331,7 +332,7 @@ describe("EndpointsPage catalog actions", () => {
     await user.click(screen.getByRole("button", { name: "Create Endpoint" }));
 
     expect(lastCreateBody).toBeNull();
-    expect(screen.getByText("Biller ID must be a number")).toBeDefined();
+    expect(screen.getByText("Biller is required")).toBeDefined();
   });
 
   test("resets unsaved values and reapplies the clicked biller on reopen", async () => {

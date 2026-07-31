@@ -1,5 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  type ApiCreateBillerResponse,
+  mapCreatedBiller,
+} from "@/features/billers/data/http-biller-adapter";
 import { billerQueryKeys } from "@/features/billers/query-keys";
 import type { Biller } from "@/features/billers/types";
 import { type ApiError, apiPost } from "@/lib/api";
@@ -8,15 +12,6 @@ import { createMutationHook } from "@/lib/query-hooks";
 
 export type CreateBillerInput = {
   readonly billerName: string;
-};
-
-type ApiCreateBillerResponse = {
-  data: {
-    biller: {
-      id: number;
-      biller_name: string;
-    };
-  };
 };
 
 async function createBiller(input: CreateBillerInput): Promise<Biller> {
@@ -33,10 +28,7 @@ async function createBiller(input: CreateBillerInput): Promise<Biller> {
     } as ApiError;
   }
 
-  return {
-    id: response.data.biller.id,
-    name: response.data.biller.biller_name,
-  };
+  return mapCreatedBiller(response);
 }
 
 export function useCreateBiller() {
@@ -44,9 +36,9 @@ export function useCreateBiller() {
   const mutation = createMutationHook<Biller, CreateBillerInput, ApiError>(
     createBiller,
     {
-      onSuccess: () => {
+      onSuccess: async () => {
         toast.success("Biller created successfully");
-        queryClient.invalidateQueries({ queryKey: billerQueryKeys.all });
+        await queryClient.invalidateQueries({ queryKey: billerQueryKeys.all });
       },
       onError: (error) => {
         toast.error("Failed to create biller", {

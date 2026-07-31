@@ -87,7 +87,7 @@ const routeLabels: Record<string, string> = {
 // Updated regex to match encoded IDs (base64 URL-safe characters)
 const ENDPOINT_DETAIL_REGEX = /^\/dashboard\/endpoints\/([A-Za-z0-9_-]+)$/;
 type DashboardBreadcrumbItem = {
-  readonly billerId?: number;
+  readonly billerSlug?: string;
   readonly href: string;
   readonly isLast: boolean;
   readonly isNavigable: boolean;
@@ -119,7 +119,9 @@ export function DashboardLayout() {
     createEndpointMutation;
   const { mutate: createBiller, isPending: isCreatingBiller } =
     useCreateBiller();
-  const [initialBillerId, setInitialBillerId] = useState<number | undefined>();
+  const [initialBillerSlug, setInitialBillerSlug] = useState<
+    string | undefined
+  >();
   const [isAddEndpointOpen, setIsAddEndpointOpen] = useState(false);
   const [isAddBillerOpen, setIsAddBillerOpen] = useState(false);
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
@@ -147,8 +149,8 @@ export function DashboardLayout() {
       viewport.removeEventListener("scroll", updateHeaderScrollState);
   }, []);
 
-  const handleOpenAddEndpoint = (billerId: number) => {
-    setInitialBillerId(billerId);
+  const handleOpenAddEndpoint = (billerSlug: string) => {
+    setInitialBillerSlug(billerSlug);
     setIsAddEndpointOpen(true);
   };
 
@@ -187,7 +189,7 @@ export function DashboardLayout() {
         routeLabels[segment] ||
         segment.charAt(0).toUpperCase() + segment.slice(1);
       let method: HttpMethod | undefined;
-      let billerId: number | undefined;
+      let billerSlug: string | undefined;
       let endpointId: string | undefined;
       let kind: DashboardBreadcrumbItem["kind"];
       let url: string | undefined;
@@ -195,7 +197,7 @@ export function DashboardLayout() {
       // If this segment is the encoded ID and we have endpoint data, show the endpoint URL
       if (isEndpointDetail && segment === encodedId && endpoint) {
         label = `${endpoint.method} ${endpoint.url}`;
-        billerId = endpoint.billerId;
+        billerSlug = endpoint.billerSlug;
         endpointId = endpoint.id;
         kind = "endpoint";
         method = endpoint.method;
@@ -206,7 +208,7 @@ export function DashboardLayout() {
       const isNavigable = segment !== "socket-test";
 
       return {
-        billerId,
+        billerSlug,
         endpointId,
         href,
         isLast,
@@ -225,16 +227,16 @@ export function DashboardLayout() {
 
   if (isEndpointDetail && endpointBreadcrumbIndex !== -1) {
     breadcrumbItems.splice(endpointBreadcrumbIndex + 1, 0, {
-      billerId: endpoint?.billerId,
+      billerSlug: endpoint?.billerSlug,
       href: "/dashboard/endpoints",
       isLast: false,
       isNavigable: false,
       kind: "biller",
       label:
         endpoint?.billerName ??
-        (endpoint?.billerId === undefined
+        (endpoint?.billerSlug === undefined
           ? "Biller"
-          : `Biller ID ${endpoint.billerId}`),
+          : `Biller ${endpoint.billerSlug}`),
     });
   }
 
@@ -347,7 +349,7 @@ export function DashboardLayout() {
               </AnimatePresence>
               <ProtectedAction ability="canAddEndpoint">
                 <AddEndpointSheet
-                  initialBillerId={initialBillerId}
+                  initialBillerSlug={initialBillerSlug}
                   isSubmitting={isCreatingEndpoint}
                   onOpenChange={setIsAddEndpointOpen}
                   onSubmit={handleAddEndpoint}
@@ -380,12 +382,12 @@ function DashboardBreadcrumbContent({
 }: {
   readonly item: DashboardBreadcrumbItem;
   readonly onAddBiller: () => void;
-  readonly onAddEndpoint: (billerId: number) => void;
+  readonly onAddEndpoint: (billerSlug: string) => void;
 }) {
   if (item.kind === "biller") {
     return (
       <BillerBreadcrumbSelector
-        billerId={item.billerId}
+        billerSlug={item.billerSlug}
         fallbackLabel={item.label}
         onAddBiller={onAddBiller}
       />
@@ -395,7 +397,7 @@ function DashboardBreadcrumbContent({
   if (item.kind === "endpoint") {
     return (
       <EndpointBreadcrumbSelector
-        billerId={item.billerId}
+        billerSlug={item.billerSlug}
         endpointId={item.endpointId}
         fallbackMethod={item.method}
         fallbackUrl={item.url}
@@ -475,11 +477,11 @@ function AnimatedBreadcrumbValue({
 }
 
 function BillerBreadcrumbSelector({
-  billerId,
+  billerSlug,
   fallbackLabel,
   onAddBiller,
 }: {
-  readonly billerId?: number;
+  readonly billerSlug?: string;
   readonly fallbackLabel: string;
   readonly onAddBiller: () => void;
 }) {
@@ -495,10 +497,10 @@ function BillerBreadcrumbSelector({
   const { endpoints: endpointQuery } = useEndpointCatalog();
   const { data: endpoints = [], isPending: isLoadingEndpoints } = endpointQuery;
   const billersWithEndpoints = billers.filter((biller) =>
-    endpoints.some((endpoint) => endpoint.billerId === biller.id)
+    endpoints.some((endpoint) => endpoint.billerSlug === biller.slug)
   );
   const currentBiller = billersWithEndpoints.find(
-    (biller) => biller.id === billerId
+    (biller) => biller.slug === billerSlug
   );
 
   useEffect(
@@ -513,20 +515,20 @@ function BillerBreadcrumbSelector({
   if (
     isLoadingBillers ||
     isLoadingEndpoints ||
-    billerId === undefined ||
+    billerSlug === undefined ||
     !currentBiller
   ) {
     return <span className="text-muted-foreground">{fallbackLabel}</span>;
   }
 
-  const selectBiller = (nextBillerId: number) => {
+  const selectBiller = (nextBillerSlug: string) => {
     const billerEndpoints = endpoints.filter(
-      (endpoint) => endpoint.billerId === nextBillerId
+      (endpoint) => endpoint.billerSlug === nextBillerSlug
     );
-    const rememberedEndpoint = getRememberedEndpoint(nextBillerId);
+    const rememberedEndpoint = getRememberedEndpoint(nextBillerSlug);
     const nextEndpoint = selectEndpointForBiller(
       endpoints,
-      nextBillerId,
+      nextBillerSlug,
       rememberedEndpoint
     );
 
@@ -537,7 +539,7 @@ function BillerBreadcrumbSelector({
       forgetEndpoint(rememberedEndpoint);
     }
 
-    if (nextBillerId !== billerId && nextEndpoint) {
+    if (nextBillerSlug !== billerSlug && nextEndpoint) {
       setOpen(false);
       requestEndpointNavigation(
         `/dashboard/endpoints/${encodeId(nextEndpoint.id)}`
@@ -609,14 +611,14 @@ function BillerBreadcrumbSelector({
                 {billersWithEndpoints.map((biller) => (
                   <CommandItem
                     className="min-h-10 px-3 py-2 text-[0.95rem]"
-                    key={biller.id}
-                    onSelect={() => selectBiller(biller.id)}
-                    value={`${biller.name} ${biller.id}`}
+                    key={biller.slug}
+                    onSelect={() => selectBiller(biller.slug)}
+                    value={`${biller.name} ${biller.slug}`}
                   >
                     <span className="truncate">{biller.name}</span>
                     <HugeiconsIcon
                       aria-hidden="true"
-                      className={`ml-auto size-4 ${biller.id === billerId ? "opacity-100" : "opacity-0"}`}
+                      className={`ml-auto size-4 ${biller.slug === billerSlug ? "opacity-100" : "opacity-0"}`}
                       icon={Tick02Icon}
                       strokeWidth={2}
                     />
@@ -632,17 +634,17 @@ function BillerBreadcrumbSelector({
 }
 
 function EndpointBreadcrumbSelector({
-  billerId,
+  billerSlug,
   endpointId,
   fallbackMethod,
   fallbackUrl,
   onAddEndpoint,
 }: {
-  readonly billerId?: number;
+  readonly billerSlug?: string;
   readonly endpointId?: string;
   readonly fallbackMethod?: HttpMethod;
   readonly fallbackUrl?: string;
-  readonly onAddEndpoint: (billerId: number) => void;
+  readonly onAddEndpoint: (billerSlug: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const pendingAddRef = useRef<number | null>(null);
@@ -654,7 +656,7 @@ function EndpointBreadcrumbSelector({
   const { endpoints: endpointQuery } = useEndpointCatalog();
   const { data: endpoints = [], isPending: isLoadingEndpoints } = endpointQuery;
   const billerEndpoints = endpoints.filter(
-    (endpoint) => endpoint.billerId === billerId
+    (endpoint) => endpoint.billerSlug === billerSlug
   );
   const currentEndpoint = billerEndpoints.find(
     (endpoint) => endpoint.id === endpointId
@@ -663,7 +665,7 @@ function EndpointBreadcrumbSelector({
   useEffect(() => {
     if (currentEndpoint) {
       rememberEndpoint({
-        billerId: currentEndpoint.billerId,
+        billerSlug: currentEndpoint.billerSlug,
         endpointId: currentEndpoint.id,
       });
     }
@@ -762,7 +764,7 @@ function EndpointBreadcrumbSelector({
                       pendingAddRef.current = window.requestAnimationFrame(
                         () => {
                           pendingAddRef.current = null;
-                          onAddEndpoint(currentEndpoint.billerId);
+                          onAddEndpoint(currentEndpoint.billerSlug);
                         }
                       );
                     }}

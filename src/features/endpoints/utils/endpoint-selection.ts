@@ -7,12 +7,12 @@ type EndpointResponses = {
 };
 
 export function selectEndpointForBiller(
-  endpoints: readonly Pick<Endpoint, "billerId" | "id" | "responses">[],
-  billerId: number,
+  endpoints: readonly Pick<Endpoint, "billerSlug" | "id" | "responses">[],
+  billerSlug: string,
   rememberedEndpointId?: string
-): Pick<Endpoint, "billerId" | "id" | "responses"> | undefined {
+): Pick<Endpoint, "billerSlug" | "id" | "responses"> | undefined {
   const billerEndpoints = endpoints.filter(
-    (endpoint) => endpoint.billerId === billerId
+    (endpoint) => endpoint.billerSlug === billerSlug
   );
 
   return (

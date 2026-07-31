@@ -14,18 +14,18 @@ export function groupEndpointsByBiller(
 
   const groups = new Map<
     string,
-    { billerId: number; billerName: string; endpoints: Endpoint[] }
+    { billerSlug: string; billerName: string; endpoints: Endpoint[] }
   >();
 
   for (const endpoint of endpoints) {
-    const billerName = endpoint.billerName || `Biller ID ${endpoint.billerId}`;
+    const billerName = endpoint.billerName || `Biller ${endpoint.billerSlug}`;
     const existing = groups.get(billerName);
 
     if (existing) {
       existing.endpoints.push(endpoint);
     } else {
       groups.set(billerName, {
-        billerId: endpoint.billerId,
+        billerSlug: endpoint.billerSlug,
         billerName,
         endpoints: [endpoint],
       });
@@ -59,7 +59,7 @@ export function filterEndpoints(
   return endpoints.filter((endpoint) => {
     const matchesUrl = endpoint.url.toLowerCase().includes(searchQuery);
     const matchesMethod = endpoint.method.toLowerCase().includes(searchQuery);
-    const matchesBillerId = endpoint.billerId.toString().includes(searchQuery);
+    const matchesBillerSlug = endpoint.billerSlug.includes(searchQuery);
     const matchesBillerName = endpoint.billerName
       ?.toLowerCase()
       .includes(searchQuery);
@@ -70,7 +70,7 @@ export function filterEndpoints(
     return (
       matchesUrl ||
       matchesMethod ||
-      matchesBillerId ||
+      matchesBillerSlug ||
       matchesBillerName ||
       matchesResponse
     );

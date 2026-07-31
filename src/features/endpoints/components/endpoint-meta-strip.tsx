@@ -2,7 +2,7 @@ import { Hash, MessageSquareText } from "@/components/hugeicons";
 import { cn } from "@/lib/utils";
 
 type EndpointMetaStripProps = {
-  readonly billerId: number;
+  readonly billerSlug: string;
   readonly className?: string;
   readonly responseCount: number;
 };
@@ -16,7 +16,7 @@ function getResponseLabel(responseCount: number) {
 }
 
 export function EndpointMetaStrip({
-  billerId,
+  billerSlug,
   className,
   responseCount,
 }: EndpointMetaStripProps) {
@@ -25,7 +25,7 @@ export function EndpointMetaStrip({
       <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-muted/35 px-2 py-1 font-medium text-muted-foreground text-xs">
         <Hash className="h-3 w-3" />
         <span>Biller</span>
-        <span className="font-mono text-foreground">{billerId}</span>
+        <span className="font-mono text-foreground">{billerSlug}</span>
       </span>
       <span
         className={cn(

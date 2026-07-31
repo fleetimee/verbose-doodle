@@ -59,8 +59,8 @@ export const API_ENDPOINTS = {
     billers: {
       list: "/api/biller",
       create: "/api/biller",
-      update: (id: string | number) => `/api/biller/${id}`,
-      delete: (id: string | number) => `/api/biller/${id}`,
+      update: (slug: string) => `/api/biller/${slug}`,
+      delete: (slug: string) => `/api/biller/${slug}`,
     },
     users: {
       list: "/api/users",

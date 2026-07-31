@@ -113,7 +113,7 @@ export function createInMemoryEndpointAdapter(
         id: String(endpoints.length + 1),
         method: input.method,
         url: input.url,
-        billerId: input.billerId,
+        billerSlug: input.billerSlug,
         responses: [],
       };
       endpoints.push(endpoint);

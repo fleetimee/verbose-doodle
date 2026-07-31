@@ -5,7 +5,7 @@ export const mockEndpoints: Endpoint[] = [
     id: "endpoint-1",
     method: "POST",
     url: "/api/payment/process",
-    billerId: 1,
+    billerSlug: "pln",
     responses: [
       {
         id: "resp-1",
@@ -34,7 +34,7 @@ export const mockEndpoints: Endpoint[] = [
     id: "endpoint-2",
     method: "GET",
     url: "/api/payment/status/{id}",
-    billerId: 1,
+    billerSlug: "pln",
     responses: [
       {
         id: "resp-4",
@@ -56,7 +56,7 @@ export const mockEndpoints: Endpoint[] = [
     id: "endpoint-3",
     method: "DELETE",
     url: "/api/payment/cancel/{id}",
-    billerId: 1,
+    billerSlug: "pln",
     responses: [
       {
         id: "resp-6",
@@ -71,7 +71,7 @@ export const mockEndpoints: Endpoint[] = [
     id: "endpoint-4",
     method: "POST",
     url: "/api/users/register",
-    billerId: 2,
+    billerSlug: "pdam",
     responses: [
       {
         id: "resp-7",
@@ -93,7 +93,7 @@ export const mockEndpoints: Endpoint[] = [
     id: "endpoint-5",
     method: "GET",
     url: "/api/users/{id}",
-    billerId: 2,
+    billerSlug: "pdam",
     responses: [
       {
         id: "resp-9",
@@ -108,7 +108,7 @@ export const mockEndpoints: Endpoint[] = [
     id: "endpoint-6",
     method: "PATCH",
     url: "/api/users/{id}",
-    billerId: 2,
+    billerSlug: "pdam",
     responses: [
       {
         id: "resp-10",
@@ -130,7 +130,7 @@ export const mockEndpoints: Endpoint[] = [
     id: "endpoint-7",
     method: "PUT",
     url: "/api/users/{id}/profile",
-    billerId: 2,
+    billerSlug: "pdam",
     responses: [],
   },
 ];

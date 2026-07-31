@@ -20,7 +20,7 @@ const endpointResponse = {
   endpoint_id: 7,
   method: "POST",
   url: "/payment/inquiry",
-  biller_id: 2,
+  biller_slug: "pdam",
   biller_name: "PDAM",
   responses: [
     {
@@ -52,7 +52,7 @@ describe("Endpoint HTTP data adapter", () => {
         id: "7",
         method: "POST",
         url: "/payment/inquiry",
-        billerId: 2,
+        billerSlug: "pdam",
         billerName: "PDAM",
         responses: [
           {
@@ -131,7 +131,7 @@ describe("Endpoint HTTP data adapter", () => {
       id: "7",
       method: "POST",
       url: "/payment/inquiry",
-      billerId: 2,
+      billerSlug: "pdam",
       responses: [],
     };
     const adapter = createHttpEndpointAdapter({
@@ -154,7 +154,7 @@ describe("Endpoint HTTP data adapter", () => {
     await adapter.createEndpoint({
       method: "POST",
       url: "/payment/inquiry",
-      billerId: 2,
+      billerSlug: "pdam",
     });
     await adapter.createResponse({
       endpointId: "7",
@@ -171,7 +171,11 @@ describe("Endpoint HTTP data adapter", () => {
     expect(requests).toEqual([
       {
         path: "/api/endpoint",
-        body: { method: "POST", url: "/payment/inquiry", billerId: 2 },
+        body: {
+          method: "POST",
+          url: "/payment/inquiry",
+          biller_slug: "pdam",
+        },
       },
       {
         path: "/api/response",
@@ -198,7 +202,7 @@ describe("Endpoint in-memory data adapter", () => {
           id: "7",
           method: "POST",
           url: "/payment/inquiry",
-          billerId: 2,
+          billerSlug: "pdam",
           responses: [],
         },
       ],

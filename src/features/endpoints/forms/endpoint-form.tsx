@@ -55,7 +55,7 @@ type EndpointFormProps = {
   onSubmit: (data: EndpointFormData) => void;
   billers?: Biller[];
   isLoadingBillers?: boolean;
-  initialBillerId?: number;
+  initialBillerSlug?: string;
   initialMethod?: EndpointFormData["method"];
   initialUrl?: string;
   isBillerReadOnly?: boolean;
@@ -63,14 +63,14 @@ type EndpointFormProps = {
 };
 
 function getDefaultValues(
-  initialBillerId?: number,
+  initialBillerSlug?: string,
   initialMethod: EndpointFormData["method"] = "GET",
   initialUrl = "/rest"
 ) {
   return {
     method: initialMethod,
     url: initialUrl,
-    billerId: initialBillerId,
+    billerSlug: initialBillerSlug,
   };
 }
 
@@ -194,12 +194,12 @@ function BillerCombobox({
 }: {
   readonly billers: Biller[];
   readonly disabled: boolean;
-  readonly field: ControllerRenderProps<EndpointFormData, "billerId">;
+  readonly field: ControllerRenderProps<EndpointFormData, "billerSlug">;
   readonly fieldState: ControllerFieldState;
   readonly onAddBiller?: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const selectedBiller = billers.find((biller) => biller.id === field.value);
+  const selectedBiller = billers.find((biller) => biller.slug === field.value);
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -260,17 +260,17 @@ function BillerCombobox({
                 {billers.map((biller) => (
                   <CommandItem
                     className="min-h-10 px-3 py-2 text-[0.95rem]"
-                    key={biller.id}
+                    key={biller.slug}
                     onSelect={() => {
-                      field.onChange(biller.id);
+                      field.onChange(biller.slug);
                       setOpen(false);
                     }}
-                    value={`${biller.name} ${biller.id}`}
+                    value={`${biller.name} ${biller.slug}`}
                   >
                     <span className="truncate">{biller.name}</span>
                     <HugeiconsIcon
                       aria-hidden="true"
-                      className={`ml-auto size-4 ${biller.id === field.value ? "opacity-100" : "opacity-0"}`}
+                      className={`ml-auto size-4 ${biller.slug === field.value ? "opacity-100" : "opacity-0"}`}
                       icon={Tick02Icon}
                       strokeWidth={2}
                     />
@@ -291,7 +291,7 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
       onSubmit,
       onAddBiller,
       billers = [],
-      initialBillerId,
+      initialBillerSlug,
       initialMethod,
       initialUrl,
       isBillerReadOnly = false,
@@ -303,15 +303,17 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
     const form = useForm<EndpointFormData>({
       resolver: zodResolver(endpointSchema),
       defaultValues: getDefaultValues(
-        initialBillerId,
+        initialBillerSlug,
         initialMethod,
         initialUrl
       ),
     });
 
     useEffect(() => {
-      form.reset(getDefaultValues(initialBillerId, initialMethod, initialUrl));
-    }, [form, initialBillerId, initialMethod, initialUrl]);
+      form.reset(
+        getDefaultValues(initialBillerSlug, initialMethod, initialUrl)
+      );
+    }, [form, initialBillerSlug, initialMethod, initialUrl]);
 
     useImperativeHandle(ref, () => ({
       reset: () => form.reset(),
@@ -399,7 +401,7 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
 
               <Controller
                 control={form.control}
-                name="billerId"
+                name="billerSlug"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="endpoint-biller">

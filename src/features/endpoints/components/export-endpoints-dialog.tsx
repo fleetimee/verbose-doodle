@@ -54,8 +54,8 @@ const HTTP_METHODS: readonly HttpMethod[] = [
   "DELETE",
 ];
 
-function createBillerIdSet(groups: readonly GroupedEndpoints[]) {
-  return new Set(groups.map((group) => group.billerId));
+function createBillerSlugSet(groups: readonly GroupedEndpoints[]) {
+  return new Set(groups.map((group) => group.billerSlug));
 }
 
 function getSummary(groups: readonly GroupedEndpoints[]): ExportSummary {
@@ -195,7 +195,7 @@ export function ExportEndpointsDialog({
     DEFAULT_ENVIRONMENT_NAME
   );
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedBillerIds, setSelectedBillerIds] = useState<Set<number>>(
+  const [selectedBillerSlugs, setSelectedBillerSlugs] = useState<Set<string>>(
     new Set()
   );
 
@@ -204,7 +204,7 @@ export function ExportEndpointsDialog({
       setCollectionName(DEFAULT_COLLECTION_NAME);
       setEnvironmentName(DEFAULT_ENVIRONMENT_NAME);
       setSearchTerm("");
-      setSelectedBillerIds(createBillerIdSet(groupedEndpoints));
+      setSelectedBillerSlugs(createBillerSlugSet(groupedEndpoints));
     }
   }, [open, groupedEndpoints]);
 
@@ -227,15 +227,17 @@ export function ExportEndpointsDialog({
 
   const selectedGroups = useMemo(
     () =>
-      groupedEndpoints.filter((group) => selectedBillerIds.has(group.billerId)),
-    [groupedEndpoints, selectedBillerIds]
+      groupedEndpoints.filter((group) =>
+        selectedBillerSlugs.has(group.billerSlug)
+      ),
+    [groupedEndpoints, selectedBillerSlugs]
   );
 
   const visibleSelectedCount = visibleGroups.filter((group) =>
-    selectedBillerIds.has(group.billerId)
+    selectedBillerSlugs.has(group.billerSlug)
   ).length;
-  const allSelected = selectedBillerIds.size === groupedEndpoints.length;
-  const someSelected = selectedBillerIds.size > 0 && !allSelected;
+  const allSelected = selectedBillerSlugs.size === groupedEndpoints.length;
+  const someSelected = selectedBillerSlugs.size > 0 && !allSelected;
   const checkboxState = getSelectionState(allSelected, someSelected);
   const totalSummary = useMemo(
     () => getSummary(groupedEndpoints),
@@ -251,31 +253,31 @@ export function ExportEndpointsDialog({
     environmentName.trim().length > 0;
 
   const handleToggleAll = () => {
-    setSelectedBillerIds(
-      allSelected ? new Set() : createBillerIdSet(groupedEndpoints)
+    setSelectedBillerSlugs(
+      allSelected ? new Set() : createBillerSlugSet(groupedEndpoints)
     );
   };
 
   const handleSelectVisible = () => {
-    setSelectedBillerIds((current) => {
+    setSelectedBillerSlugs((current) => {
       const nextSelected = new Set(current);
 
       for (const group of visibleGroups) {
-        nextSelected.add(group.billerId);
+        nextSelected.add(group.billerSlug);
       }
 
       return nextSelected;
     });
   };
 
-  const handleToggleBiller = (billerId: number) => {
-    setSelectedBillerIds((current) => {
+  const handleToggleBiller = (billerSlug: string) => {
+    setSelectedBillerSlugs((current) => {
       const nextSelected = new Set(current);
 
-      if (nextSelected.has(billerId)) {
-        nextSelected.delete(billerId);
+      if (nextSelected.has(billerSlug)) {
+        nextSelected.delete(billerSlug);
       } else {
-        nextSelected.add(billerId);
+        nextSelected.add(billerSlug);
       }
 
       return nextSelected;
@@ -372,7 +374,7 @@ export function ExportEndpointsDialog({
                     {POSTMAN_EXPORT_MESSAGES.selectVisibleButton}
                   </Button>
                   <Button
-                    onClick={() => setSelectedBillerIds(new Set())}
+                    onClick={() => setSelectedBillerSlugs(new Set())}
                     size="sm"
                     variant="ghost"
                   >
@@ -408,24 +410,24 @@ export function ExportEndpointsDialog({
                       animate={{ opacity: 1, y: 0 }}
                       className={cn(
                         "group flex items-start gap-3 rounded-md border p-3 transition-colors",
-                        selectedBillerIds.has(group.billerId)
+                        selectedBillerSlugs.has(group.billerSlug)
                           ? "border-primary/30 bg-primary/5"
                           : "bg-background hover:bg-muted/45"
                       )}
                       initial={{ opacity: 0, y: 8 }}
-                      key={group.billerId}
+                      key={group.billerSlug}
                       transition={{ delay: Math.min(index, 8) * 0.025 }}
                     >
                       <Checkbox
-                        checked={selectedBillerIds.has(group.billerId)}
-                        id={`biller-${group.billerId}`}
+                        checked={selectedBillerSlugs.has(group.billerSlug)}
+                        id={`biller-${group.billerSlug}`}
                         onCheckedChange={() =>
-                          handleToggleBiller(group.billerId)
+                          handleToggleBiller(group.billerSlug)
                         }
                       />
                       <Label
                         className="grid min-w-0 flex-1 cursor-pointer gap-1"
-                        htmlFor={`biller-${group.billerId}`}
+                        htmlFor={`biller-${group.billerSlug}`}
                       >
                         <span className="truncate font-medium text-sm">
                           {group.billerName}
@@ -437,7 +439,7 @@ export function ExportEndpointsDialog({
                           )}
                         </span>
                       </Label>
-                      {selectedBillerIds.has(group.billerId) && (
+                      {selectedBillerSlugs.has(group.billerSlug) && (
                         <CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" />
                       )}
                     </motion.div>

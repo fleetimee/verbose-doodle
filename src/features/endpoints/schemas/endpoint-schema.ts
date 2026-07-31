@@ -3,7 +3,7 @@ import { formatMessage, messages } from "@/lib/i18n";
 
 const MIN_URL_LENGTH = 1;
 const MAX_URL_LENGTH = 500;
-const MIN_BILLER_ID = 1;
+const MIN_BILLER_SLUG_LENGTH = 1;
 
 /**
  * HTTP methods supported by the API
@@ -31,10 +31,9 @@ export const endpointSchema = z.object({
     )
     .regex(/^\//, messages.endpoints.urlStartError)
     .regex(API_PATH_PATTERN, messages.endpoints.urlPathError),
-  billerId: z
-    .number({ message: messages.endpoints.billerNumberError })
-    .int(messages.endpoints.billerIntegerError)
-    .min(MIN_BILLER_ID, messages.endpoints.billerMinError),
+  billerSlug: z
+    .string({ message: messages.endpoints.billerRequiredError })
+    .min(MIN_BILLER_SLUG_LENGTH, messages.endpoints.billerRequiredError),
 });
 
 /**
