@@ -220,21 +220,21 @@ const RELAY_BEHAVIOR_NOTES = [
 ] as const;
 
 const RELAY_FLOW_TONES: Record<RelayFlow, string> = {
-  RC: "border-sky-600/45 bg-sky-100 text-sky-800 dark:border-sky-400/40 dark:bg-sky-400/15 dark:text-sky-200",
-  SH: "border-indigo-600/45 bg-indigo-100 text-indigo-800 dark:border-indigo-400/40 dark:bg-indigo-400/15 dark:text-indigo-200",
-  RH: "border-emerald-600/45 bg-emerald-100 text-emerald-800 dark:border-emerald-400/40 dark:bg-emerald-400/15 dark:text-emerald-200",
-  SC: "border-teal-600/45 bg-teal-100 text-teal-800 dark:border-teal-400/40 dark:bg-teal-400/15 dark:text-teal-200",
-  HC: "border-amber-600/50 bg-amber-100 text-amber-900 dark:border-amber-400/45 dark:bg-amber-400/15 dark:text-amber-200",
-  HH: "border-orange-600/50 bg-orange-100 text-orange-900 dark:border-orange-400/45 dark:bg-orange-400/15 dark:text-orange-200",
   DC: "border-rose-600/50 bg-rose-100 text-rose-800 dark:border-rose-400/45 dark:bg-rose-400/15 dark:text-rose-200",
   DH: "border-red-600/50 bg-red-100 text-red-800 dark:border-red-400/45 dark:bg-red-400/15 dark:text-red-200",
+  HC: "border-amber-600/50 bg-amber-100 text-amber-900 dark:border-amber-400/45 dark:bg-amber-400/15 dark:text-amber-200",
+  HH: "border-orange-600/50 bg-orange-100 text-orange-900 dark:border-orange-400/45 dark:bg-orange-400/15 dark:text-orange-200",
+  RC: "border-sky-600/45 bg-sky-100 text-sky-800 dark:border-sky-400/40 dark:bg-sky-400/15 dark:text-sky-200",
+  RH: "border-emerald-600/45 bg-emerald-100 text-emerald-800 dark:border-emerald-400/40 dark:bg-emerald-400/15 dark:text-emerald-200",
+  SC: "border-teal-600/45 bg-teal-100 text-teal-800 dark:border-teal-400/40 dark:bg-teal-400/15 dark:text-teal-200",
+  SH: "border-indigo-600/45 bg-indigo-100 text-indigo-800 dark:border-indigo-400/40 dark:bg-indigo-400/15 dark:text-indigo-200",
 };
 
 const EMPTY_FORM: Omit<RelayStartInput, "mode"> = {
-  relayId: "",
-  listeningPort: RELAY_LISTENING_PORT_MIN,
   hostAddress: "127.0.0.1",
   hostPort: 8085,
+  listeningPort: RELAY_LISTENING_PORT_MIN,
+  relayId: "",
   ...DEFAULT_RELAY_OPTIONS,
 };
 
@@ -319,84 +319,84 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
   const tourSteps = useMemo<TourStep[]>(
     () => [
       {
-        selectorId: tourConfig.targets.header,
-        position: "bottom",
         content: (
           <TourStepContent
             description={tourCopy.headerDescription}
             title={tourCopy.headerTitle}
           />
         ),
+        position: "bottom",
+        selectorId: tourConfig.targets.header,
       },
       {
-        selectorId: tourConfig.targets.connection,
-        position: "bottom",
         content: (
           <TourStepContent
             description={tourCopy.connectionDescription}
             title={tourCopy.connectionTitle}
           />
         ),
+        position: "bottom",
+        selectorId: tourConfig.targets.connection,
       },
       {
-        selectorId: tourConfig.targets.metrics,
-        position: "bottom",
         content: (
           <TourStepContent
             description={tourCopy.metricsDescription}
             title={tourCopy.metricsTitle}
           />
         ),
+        position: "bottom",
+        selectorId: tourConfig.targets.metrics,
       },
       {
-        selectorId: tourConfig.targets.startForm,
-        position: "right",
         content: (
           <TourStepContent
             description={tourCopy.startFormDescription}
             title={tourCopy.startFormTitle}
           />
         ),
+        position: "right",
+        selectorId: tourConfig.targets.startForm,
       },
       {
-        selectorId: tourConfig.targets.options,
-        position: "right",
         content: (
           <TourStepContent
             description={tourCopy.optionsDescription}
             title={tourCopy.optionsTitle}
           />
         ),
+        position: "right",
+        selectorId: tourConfig.targets.options,
       },
       {
-        selectorId: tourConfig.targets.relays,
-        position: "left",
         content: (
           <TourStepContent
             description={tourCopy.relaysDescription}
             title={tourCopy.relaysTitle}
           />
         ),
+        position: "left",
+        selectorId: tourConfig.targets.relays,
       },
       {
-        selectorId: tourConfig.targets.liveControls,
-        position: "left",
         content: (
           <TourStepContent
             description={tourCopy.liveControlsDescription}
             title={tourCopy.liveControlsTitle}
           />
         ),
+        position: "left",
+        selectorId: tourConfig.targets.liveControls,
       },
       {
-        selectorId: tourConfig.targets.logs,
-        position: "top",
         content: (
           <TourStepContent
             description={tourCopy.logsDescription}
             title={tourCopy.logsTitle}
           />
         ),
+        position: "top",
+        selectorId: tourConfig.targets.logs,
       },
     ],
     [tourConfig.targets, tourCopy]
@@ -530,10 +530,10 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
               key={metric.label}
               style={sectionStyle}
               transition={{
-                type: "spring",
-                stiffness: 420,
                 damping: 32,
                 delay: shouldReduceMotion ? 0 : 0.12 + index * 0.045,
+                stiffness: 420,
+                type: "spring",
               }}
             >
               <SocketStatusCard
@@ -634,8 +634,8 @@ function RelayStartForm({
 }) {
   const startRelay = useStartRelay();
   const form = useForm<RelayStartFormValues>({
-    resolver: zodResolver(relayStartFormSchema),
     defaultValues: EMPTY_FORM,
+    resolver: zodResolver(relayStartFormSchema),
   });
   const optionError = form.formState.errors.holdClient?.message;
 
@@ -651,9 +651,9 @@ function RelayStartForm({
   const submit = (values: RelayStartFormValues) => {
     const input: RelayStartInput = {
       ...values,
-      relayId: values.relayId.trim(),
       hostAddress: values.hostAddress.trim(),
       mode,
+      relayId: values.relayId.trim(),
     };
 
     startRelay.mutate(input, {
@@ -1218,7 +1218,7 @@ function RelayLiveControls({ relay }: { readonly relay?: RelayInstance }) {
     const previousOptions = options;
     setOptions(safeNextOptions);
     updateOptions.mutate(
-      { relayId: relay.relayId, options: safeNextOptions },
+      { options: safeNextOptions, relayId: relay.relayId },
       {
         onError: () => setOptions(previousOptions),
       }
@@ -1228,10 +1228,10 @@ function RelayLiveControls({ relay }: { readonly relay?: RelayInstance }) {
   const updateHoldDrop = (key: HoldDropKey, checked: boolean) => {
     applyOptions({
       ...options,
-      holdClient: false,
-      holdHost: false,
       dropClient: false,
       dropHost: false,
+      holdClient: false,
+      holdHost: false,
       [key]: checked,
     });
   };
@@ -1496,8 +1496,8 @@ function RelayLogConsole({
 function toRelayEvent(log: RelayEventLog): RelayEvent {
   return {
     id: `saved-${log.id}`,
-    receivedAt: Date.parse(log.occurredAt),
     payload: log.payload,
+    receivedAt: Date.parse(log.occurredAt),
     type: log.type,
   };
 }

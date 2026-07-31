@@ -49,11 +49,11 @@ export function DeveloperToolTourButton({
   const tourSteps = useMemo<TourStep[]>(
     () =>
       steps.map((step) => ({
-        selectorId: step.selectorId,
-        position: step.position,
         content: (
           <TourStepContent description={step.description} title={step.title} />
         ),
+        position: step.position,
+        selectorId: step.selectorId,
       })),
     [steps]
   );

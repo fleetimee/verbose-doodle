@@ -52,8 +52,8 @@ const childVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
+    transition: { bounce: 0.08, duration: 0.32, type: "spring" as const },
     y: 0,
-    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -65,16 +65,16 @@ const JWT_TOUR_TARGETS = {
 
 const JWT_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
   {
-    selectorId: JWT_TOUR_TARGETS.controls,
-    position: "bottom",
-    title: messages.jwtInspector.tour.controlsTitle,
     description: messages.jwtInspector.tour.controlsDescription,
+    position: "bottom",
+    selectorId: JWT_TOUR_TARGETS.controls,
+    title: messages.jwtInspector.tour.controlsTitle,
   },
   {
-    selectorId: JWT_TOUR_TARGETS.editors,
-    position: "top",
-    title: messages.jwtInspector.tour.editorsTitle,
     description: messages.jwtInspector.tour.editorsDescription,
+    position: "top",
+    selectorId: JWT_TOUR_TARGETS.editors,
+    title: messages.jwtInspector.tour.editorsTitle,
   },
 ];
 
@@ -96,24 +96,24 @@ function parseClaim(key: string, val: unknown): ClaimRow {
     const expMs = val * 1000;
     const isExpired = expMs < Date.now();
     return {
-      name: "exp (Expiration Time)",
-      value: valStr,
       description: `${new Date(expMs).toLocaleString()} (${new Date(expMs).toUTCString()})`,
+      name: "exp (Expiration Time)",
       status: isExpired ? "error" : "success",
       statusText: isExpired
         ? messages.jwtInspector.statusExpired
         : messages.jwtInspector.statusActive,
+      value: valStr,
     };
   }
 
   if (key === "iat" && typeof val === "number") {
     const iatMs = val * 1000;
     return {
-      name: "iat (Issued At)",
-      value: valStr,
       description: `${new Date(iatMs).toLocaleString()} (${new Date(iatMs).toUTCString()})`,
+      name: "iat (Issued At)",
       status: "info",
       statusText: "Issued",
+      value: valStr,
     };
   }
 
@@ -121,52 +121,52 @@ function parseClaim(key: string, val: unknown): ClaimRow {
     const nbfMs = val * 1000;
     const isNotActive = nbfMs > Date.now();
     return {
-      name: "nbf (Not Before)",
-      value: valStr,
       description: `${new Date(nbfMs).toLocaleString()} (${new Date(nbfMs).toUTCString()})`,
+      name: "nbf (Not Before)",
       status: isNotActive ? "warning" : "success",
       statusText: isNotActive
         ? messages.jwtInspector.statusNotYetActive
         : messages.jwtInspector.statusActive,
+      value: valStr,
     };
   }
 
   if (key === "iss") {
     return {
-      name: "iss (Issuer)",
-      value: valStr,
       description: messages.jwtInspector.claimIssDescription,
+      name: "iss (Issuer)",
       status: "neutral",
       statusText: "Claim",
+      value: valStr,
     };
   }
 
   if (key === "sub") {
     return {
-      name: "sub (Subject)",
-      value: valStr,
       description: messages.jwtInspector.claimSubDescription,
+      name: "sub (Subject)",
       status: "neutral",
       statusText: "Claim",
+      value: valStr,
     };
   }
 
   if (key === "aud") {
     return {
-      name: "aud (Audience)",
-      value: valStr,
       description: messages.jwtInspector.claimAudDescription,
+      name: "aud (Audience)",
       status: "neutral",
       statusText: "Claim",
+      value: valStr,
     };
   }
 
   return {
-    name: key,
-    value: valStr,
     description: "Custom claim",
+    name: key,
     status: "neutral",
     statusText: "Claim",
+    value: valStr,
   };
 }
 
@@ -194,13 +194,13 @@ export function JwtInspector() {
     const nowSeconds = Math.floor(Date.now() / 1000);
     const h = { alg: "HS256", typ: "JWT" };
     const p = {
-      sub: "admin",
+      aud: "biller-simulator-frontend",
+      exp: nowSeconds + 86_400, // 24 hours
+      iat: nowSeconds,
+      iss: "biller-simulator-backend",
       name: "BPDDIY Administrator",
       role: "ADMIN",
-      iss: "biller-simulator-backend",
-      aud: "biller-simulator-frontend",
-      iat: nowSeconds,
-      exp: nowSeconds + 86_400, // 24 hours
+      sub: "admin",
     };
 
     const hStr = JSON.stringify(h, null, 2);

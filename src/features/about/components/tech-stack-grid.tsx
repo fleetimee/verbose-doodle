@@ -89,84 +89,84 @@ interface TechItem {
 
 const TECH_STACK: TechItem[] = [
   {
-    name: "React 19",
     category: "Core",
     description:
       "UI library with the new compiler for automatic memoization and concurrent rendering.",
     docsUrl: "https://react.dev",
     icon: React,
+    name: "React 19",
   },
   {
-    name: "TypeScript",
     category: "Core",
     description:
       "Typed superset of JavaScript that compiles to plain JS; catches bugs at compile time.",
     docsUrl: "https://www.typescriptlang.org",
     icon: TypeScript,
+    name: "TypeScript",
   },
   {
-    name: "Vite",
     category: "Core",
     description:
       "Lightning-fast build tool powered by native ES modules with instant HMR.",
     docsUrl: "https://vitejs.dev",
     icon: ViteJS,
+    name: "Vite",
   },
   {
-    name: "Bun",
     category: "Core",
     description:
       "All-in-one JavaScript runtime & toolkit: fast package manager, bundler, and test runner.",
     docsUrl: "https://bun.sh",
     icon: BunJs,
+    name: "Bun",
   },
   {
-    name: "Tailwind CSS v4",
     category: "UI & Styling",
     description:
       "Utility-first CSS framework with CSS-native configuration and zero-runtime overhead.",
     docsUrl: "https://tailwindcss.com",
     icon: TailwindCSS,
+    name: "Tailwind CSS v4",
   },
   {
-    name: "Base UI",
     category: "UI & Styling",
     description:
       "Unstyled, accessible UI primitives by MUI for building modern React design systems.",
     docsUrl: "https://base-ui.com",
     icon: BaseUiIcon,
+    name: "Base UI",
   },
   {
-    name: "Motion",
     category: "UI & Styling",
     description:
       "Production-ready animation library for React with declarative, physics-based animations.",
     docsUrl: "https://motion.dev",
     icon: FramerDark,
+    name: "Motion",
   },
   {
-    name: "TanStack Query",
     category: "Tooling & State",
     description:
       "Powerful async state management with automatic caching, background refetching, and stale-while-revalidate.",
     docsUrl: "https://tanstack.com/query",
     icon: ReactQuery,
+    name: "TanStack Query",
   },
   {
-    name: "React Hook Form",
     category: "Tooling & State",
     description:
       "Performant, flexible form management with minimal re-renders and built-in validation.",
     docsUrl: "https://react-hook-form.com",
     icon: ReactHookFormIcon,
+    name: "React Hook Form",
   },
   {
-    name: "React Router v7",
     category: "Tooling & State",
     description:
       "Declarative client-side routing for React with nested routes and loader patterns.",
     docsUrl: "https://reactrouter.com",
     icon: ReactRouter,
+    name: "React Router v7",
   },
 ];
 
@@ -182,20 +182,20 @@ const CATEGORIES: Category[] = [
 // ---------------------------------------------------------------------------
 
 const tabIndicatorVariants = {
-  initial: { opacity: 0, scaleX: 0 },
   animate: { opacity: 1, scaleX: 1 },
   exit: { opacity: 0, scaleX: 0 },
+  initial: { opacity: 0, scaleX: 0 },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 16, scale: 0.95 },
+  exit: { opacity: 0, scale: 0.92, transition: { duration: 0.2 } },
+  hidden: { opacity: 0, scale: 0.95, y: 16 },
   visible: (i: number) => ({
     opacity: 1,
-    y: 0,
     scale: 1,
-    transition: { duration: 0.35, delay: i * 0.06, ease: "easeOut" as const },
+    transition: { delay: i * 0.06, duration: 0.35, ease: "easeOut" as const },
+    y: 0,
   }),
-  exit: { opacity: 0, scale: 0.92, transition: { duration: 0.2 } },
 };
 
 // ---------------------------------------------------------------------------
@@ -229,7 +229,7 @@ function TechCard({ item, index }: TechCardProps) {
       <motion.div
         animate={{ rotate: hovered ? 8 : 0, scale: hovered ? 1.08 : 1 }}
         className="flex size-8 shrink-0 items-center justify-center"
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        transition={{ damping: 20, stiffness: 300, type: "spring" }}
       >
         <IconComponent size={32} />
       </motion.div>
@@ -308,7 +308,7 @@ export function TechStackGrid() {
                   exit="exit"
                   initial="initial"
                   layoutId="active-tab-ring"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  transition={{ damping: 30, stiffness: 400, type: "spring" }}
                   variants={tabIndicatorVariants}
                 />
               )}

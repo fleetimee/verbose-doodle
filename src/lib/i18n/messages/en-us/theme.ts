@@ -1,9 +1,9 @@
 export const themeMessages = {
-  toggleAriaLabel: "Toggle theme",
-  toggleTooltip: "Toggle light/dark mode",
-  lightTheme: "Light theme",
+  dark: "Dark",
   darkTheme: "Dark theme",
   light: "Light",
-  dark: "Dark",
+  lightTheme: "Light theme",
   system: "System",
+  toggleAriaLabel: "Toggle theme",
+  toggleTooltip: "Toggle light/dark mode",
 } as const;

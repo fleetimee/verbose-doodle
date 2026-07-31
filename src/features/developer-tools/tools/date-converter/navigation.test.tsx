@@ -50,7 +50,7 @@ describe("Date Converter navigation", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Date Converter", level: 1 })
+      screen.getByRole("heading", { level: 1, name: "Date Converter" })
     ).toBeDefined();
   });
 });

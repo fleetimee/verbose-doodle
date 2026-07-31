@@ -49,14 +49,14 @@ export type EndpointMetrics = {
 };
 
 export const ENDPOINT_METRICS_TIME_WINDOWS = {
+  "1h": 60 * 60 * 1000,
   "5m": 5 * 60 * 1000,
   "15m": 15 * 60 * 1000,
-  "1h": 60 * 60 * 1000,
 } as const satisfies Record<EndpointMetricsTimeWindow, number>;
 
 export const PERSISTED_METRICS_TIME_WINDOWS = {
-  "24h": 24 * 60 * 60 * 1000,
   "7d": 7 * 24 * 60 * 60 * 1000,
+  "24h": 24 * 60 * 60 * 1000,
   "30d": 30 * 24 * 60 * 60 * 1000,
 } as const satisfies Record<PersistedMetricsTimeWindow, number>;
 
@@ -97,55 +97,55 @@ export function getPersistedEndpointMetrics(
     null;
 
   return {
+    buckets: hourly.map((bucket) => {
+      const bucketSuccesses =
+        (bucket.hitStatusCounts.matched_success ?? 0) +
+        (bucket.hitStatusCounts.matched_delayed ?? 0);
+      return {
+        avgMs:
+          bucket.requestCount === 0
+            ? null
+            : Math.round(bucket.averageDurationMs),
+        bucketStart: Date.parse(bucket.bucketStart),
+        errors: bucket.requestCount - bucketSuccesses,
+        label: formatBucketLabel(Date.parse(bucket.bucketStart)),
+        p50Ms: null,
+        p95Ms: null,
+        p99Ms: null,
+        requests: bucket.requestCount,
+        successes: bucketSuccesses,
+      };
+    }),
     logs: [],
     summary: {
-      requests,
-      successes,
-      errors: requests - successes,
-      delayed,
-      timeouts,
-      unmatched,
+      avgMs: requests === 0 ? null : Math.round(totalDurationMs / requests),
       backendErrors,
-      successRate:
-        requests === 0 ? 0 : Math.round((successes / requests) * 100),
+      delayed,
       errorRate:
         requests === 0
           ? 0
           : Math.round(((requests - successes) / requests) * 100),
+      errors: requests - successes,
+      lastSeenAt,
+      maxMs,
+      minMs,
+      p50Ms: null,
+      p95Ms: null,
+      p99Ms: null,
+      requests,
       requestsPerMinute: Number(
         (
           requests /
           (PERSISTED_METRICS_TIME_WINDOWS[timeWindow] / 60_000)
         ).toFixed(1)
       ),
-      avgMs: requests === 0 ? null : Math.round(totalDurationMs / requests),
-      minMs,
-      maxMs,
-      p50Ms: null,
-      p95Ms: null,
-      p99Ms: null,
       slowestRequestMs: maxMs,
-      lastSeenAt,
+      successes,
+      successRate:
+        requests === 0 ? 0 : Math.round((successes / requests) * 100),
+      timeouts,
+      unmatched,
     },
-    buckets: hourly.map((bucket) => {
-      const bucketSuccesses =
-        (bucket.hitStatusCounts.matched_success ?? 0) +
-        (bucket.hitStatusCounts.matched_delayed ?? 0);
-      return {
-        bucketStart: Date.parse(bucket.bucketStart),
-        label: formatBucketLabel(Date.parse(bucket.bucketStart)),
-        requests: bucket.requestCount,
-        successes: bucketSuccesses,
-        errors: bucket.requestCount - bucketSuccesses,
-        avgMs:
-          bucket.requestCount === 0
-            ? null
-            : Math.round(bucket.averageDurationMs),
-        p50Ms: null,
-        p95Ms: null,
-        p99Ms: null,
-      };
-    }),
   };
 }
 
@@ -160,9 +160,9 @@ export function getEndpointMetrics(
   const summary = getMetricsSummary(filteredLogs, windowMs);
 
   return {
-    summary,
     buckets: getMetricsBuckets(filteredLogs, windowStart, now),
     logs: filteredLogs,
+    summary,
   };
 }
 
@@ -232,21 +232,6 @@ export function getMetricsSummary(
   const windowMinutes = windowMs ? Math.max(windowMs / 60_000, 1) : null;
 
   return {
-    requests,
-    successes,
-    errors,
-    delayed,
-    timeouts,
-    unmatched,
-    backendErrors,
-    successRate: requests === 0 ? 0 : Math.round((successes / requests) * 100),
-    errorRate: requests === 0 ? 0 : Math.round((errors / requests) * 100),
-    requestsPerMinute:
-      requests === 0
-        ? 0
-        : Number(
-            (requests / (windowMinutes ?? getObservedMinutes(logs))).toFixed(1)
-          ),
     avgMs:
       durations.length === 0
         ? null
@@ -254,13 +239,28 @@ export function getMetricsSummary(
             durations.reduce((total, duration) => total + duration, 0) /
               durations.length
           ),
-    minMs: durations.at(0) ?? null,
+    backendErrors,
+    delayed,
+    errorRate: requests === 0 ? 0 : Math.round((errors / requests) * 100),
+    errors,
+    lastSeenAt: getLastSeenAt(logs),
     maxMs: durations.at(-1) ?? null,
+    minMs: durations.at(0) ?? null,
     p50Ms: calculatePercentile(logs, 50),
     p95Ms: calculatePercentile(logs, 95),
     p99Ms: calculatePercentile(logs, 99),
+    requests,
+    requestsPerMinute:
+      requests === 0
+        ? 0
+        : Number(
+            (requests / (windowMinutes ?? getObservedMinutes(logs))).toFixed(1)
+          ),
     slowestRequestMs: durations.at(-1) ?? null,
-    lastSeenAt: getLastSeenAt(logs),
+    successes,
+    successRate: requests === 0 ? 0 : Math.round((successes / requests) * 100),
+    timeouts,
+    unmatched,
   };
 }
 
@@ -296,15 +296,15 @@ export function getMetricsBuckets(
     const summary = getMetricsSummary(bucket.logs);
 
     return {
-      bucketStart: bucket.bucketStart,
-      label: bucket.label,
-      requests: summary.requests,
-      successes: summary.successes,
-      errors: summary.errors,
       avgMs: summary.avgMs,
+      bucketStart: bucket.bucketStart,
+      errors: summary.errors,
+      label: bucket.label,
       p50Ms: summary.p50Ms,
       p95Ms: summary.p95Ms,
       p99Ms: summary.p99Ms,
+      requests: summary.requests,
+      successes: summary.successes,
     };
   });
 }

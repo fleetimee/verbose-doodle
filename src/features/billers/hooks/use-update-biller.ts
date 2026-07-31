@@ -24,8 +24,8 @@ async function updateBiller(input: UpdateBillerInput): Promise<Biller> {
 
   if (!response.data?.biller) {
     throw {
-      message: "Invalid response structure from server",
       code: "INVALID_RESPONSE",
+      message: "Invalid response structure from server",
       status: 500,
     } as ApiError;
   }
@@ -38,6 +38,11 @@ export function useUpdateBiller() {
   const mutation = createMutationHook<Biller, UpdateBillerInput, ApiError>(
     updateBiller,
     {
+      onError: (error) => {
+        toast.error("Failed to update biller", {
+          description: error.message,
+        });
+      },
       onSuccess: async () => {
         toast.success("Biller updated successfully");
         await queryClient.invalidateQueries({ queryKey: billerQueryKeys.all });
@@ -46,11 +51,6 @@ export function useUpdateBiller() {
         });
         await queryClient.invalidateQueries({
           queryKey: endpointDataQueryKeys.workspacePrefix,
-        });
-      },
-      onError: (error) => {
-        toast.error("Failed to update biller", {
-          description: error.message,
         });
       },
     }

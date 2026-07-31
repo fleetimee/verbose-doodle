@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import "@testing-library/react";
 import { createAuthenticatedSession } from "@/features/auth/session";
 
-const TRAILING_PADDING_REGEX = /=+$/u;
+const TRAILING_PADDING_REGEX = /[=]+$/u;
 
 function toBase64Url(value: string): string {
   return Buffer.from(value, "utf8")
@@ -37,39 +37,37 @@ function createHarness(initial?: {
     | undefined;
 
   const session = createAuthenticatedSession({
-    storage: {
-      read: () => ({ ...storage }),
-      write: (tokens) => {
-        storage.accessToken = tokens.accessToken;
-        storage.refreshToken = tokens.refreshToken;
-      },
-      clear: () => {
-        storage.accessToken = undefined;
-        storage.refreshToken = undefined;
-      },
+    clearPrivateCache: () => {
+      cacheClears += 1;
     },
     clock: () => now,
-    scheduler: {
-      schedule: (callback, delayMs) => {
-        scheduled.push({ callback, delayMs });
-        return scheduled.length - 1;
-      },
-      cancel: () => undefined,
-    },
     refresh: () => {
       refreshCalls += 1;
       return new Promise((resolve) => {
         resolveRefresh = resolve;
       });
     },
-    clearPrivateCache: () => {
-      cacheClears += 1;
+    scheduler: {
+      cancel: () => undefined,
+      schedule: (callback, delayMs) => {
+        scheduled.push({ callback, delayMs });
+        return scheduled.length - 1;
+      },
+    },
+    storage: {
+      clear: () => {
+        storage.accessToken = undefined;
+        storage.refreshToken = undefined;
+      },
+      read: () => ({ ...storage }),
+      write: (tokens) => {
+        storage.accessToken = tokens.accessToken;
+        storage.refreshToken = tokens.refreshToken;
+      },
     },
   });
 
   return {
-    session,
-    scheduled,
     get cacheClears() {
       return cacheClears;
     },
@@ -79,6 +77,8 @@ function createHarness(initial?: {
     resolveRefresh: (tokens: { accessToken: string; refreshToken: string }) => {
       resolveRefresh?.(tokens);
     },
+    scheduled,
+    session,
     setNow: (value: number) => {
       now = value;
     },
@@ -87,10 +87,10 @@ function createHarness(initial?: {
 
 function validToken(role = "ADMIN", exp = 2000): string {
   return createJwtToken({
+    exp,
+    role,
     user_id: "user-1",
     username: "alice",
-    role,
-    exp,
   });
 }
 
@@ -104,9 +104,9 @@ describe("authenticated session", () => {
 
     expect(restored.session.getSnapshot()).toMatchObject({
       accessToken: valid,
-      refreshToken: "refresh-1",
       isAuthenticated: true,
-      user: { username: "alice", role: "ADMIN" },
+      refreshToken: "refresh-1",
+      user: { role: "ADMIN", username: "alice" },
     });
 
     const invalid = createHarness({

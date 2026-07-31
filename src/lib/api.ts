@@ -93,8 +93,8 @@ async function fetchWithTimeout(
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
       throw {
-        message: "Request timeout",
         code: "TIMEOUT",
+        message: "Request timeout",
       } as ApiError;
     }
 
@@ -133,9 +133,9 @@ async function createApiError(response: Response): Promise<ApiError> {
   }
 
   return {
+    code: response.status.toString(),
     message,
     status: response.status,
-    code: response.status.toString(),
   };
 }
 
@@ -263,8 +263,8 @@ export function createApiClient({
   ): Promise<T> =>
     apiFetch<T>(endpoint, {
       ...config,
-      method: "POST",
       body: JSON.stringify(data),
+      method: "POST",
     });
 
   const apiPut = <T, D = unknown>(
@@ -274,8 +274,8 @@ export function createApiClient({
   ): Promise<T> =>
     apiFetch<T>(endpoint, {
       ...config,
-      method: "PUT",
       body: JSON.stringify(data),
+      method: "PUT",
     });
 
   const apiPatch = <T, D = unknown>(
@@ -285,8 +285,8 @@ export function createApiClient({
   ): Promise<T> =>
     apiFetch<T>(endpoint, {
       ...config,
-      method: "PATCH",
       body: JSON.stringify(data),
+      method: "PATCH",
     });
 
   const apiDelete = <T>(
@@ -295,12 +295,12 @@ export function createApiClient({
   ): Promise<T> => apiFetch<T>(endpoint, { ...config, method: "DELETE" });
 
   return {
+    apiDelete,
     apiFetch,
     apiGet,
+    apiPatch,
     apiPost,
     apiPut,
-    apiPatch,
-    apiDelete,
   };
 }
 
@@ -314,12 +314,12 @@ const defaultFetch: ApiFetchImplementation = (input, init) =>
   globalThis.fetch(input, init);
 
 let defaultClient = createApiClient({
-  session: defaultSession,
   fetch: defaultFetch,
+  session: defaultSession,
 });
 
 export function setDefaultApiSession(session: ApiSession): void {
-  defaultClient = createApiClient({ session, fetch: defaultFetch });
+  defaultClient = createApiClient({ fetch: defaultFetch, session });
 }
 
 export function apiFetch<T>(

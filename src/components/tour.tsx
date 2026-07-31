@@ -77,10 +77,10 @@ function getElementPosition(element: HTMLElement) {
   const rect = element.getBoundingClientRect();
 
   return {
-    top: rect.top,
-    left: rect.left,
-    width: rect.width,
     height: rect.height,
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
   };
 }
 
@@ -131,7 +131,7 @@ function calculateContentPosition(
     Math.min(left, viewportWidth - contentSize.width - PADDING)
   );
 
-  return { top, left };
+  return { left, top };
 }
 
 export function TourProvider({
@@ -158,7 +158,7 @@ export function TourProvider({
   const shouldReduceMotion = useReducedMotion();
 
   const contentRef = useRef<HTMLDivElement>(null);
-  const [contentSize, setContentSize] = useState({ width: 300, height: 200 });
+  const [contentSize, setContentSize] = useState({ height: 200, width: 300 });
   const contentTransitioning = useRef(false);
   const previousStepRef = useRef(-1);
 
@@ -179,8 +179,8 @@ export function TourProvider({
         return;
       }
       setContentSize({
-        width: entry.contentRect.width,
         height: entry.contentRect.height,
+        width: entry.contentRect.width,
       });
     });
 
@@ -367,7 +367,7 @@ export function TourProvider({
             currentStepData?.position,
             contentSize
           )
-        : { top: 0, left: 0 },
+        : { left: 0, top: 0 },
     [contentSize, currentStepData?.position, elementPosition]
   );
 
@@ -376,16 +376,16 @@ export function TourProvider({
       value={{
         activeTourId,
         currentStep,
-        steps,
-        totalSteps: steps.length,
+        endTour,
         isActive: currentStep >= 0,
         isTourCompleted: isCompleted,
-        startTour,
-        endTour,
-        setSteps,
-        setIsTourCompleted,
-        previousStep,
         nextStep,
+        previousStep,
+        setIsTourCompleted,
+        setSteps,
+        startTour,
+        steps,
+        totalSteps: steps.length,
       }}
     >
       {children}
@@ -434,30 +434,30 @@ export function TourProvider({
                 scale: shouldReduceMotion ? 1 : 0.95,
               }}
               style={{
+                borderRadius: spotlightBorderRadius,
+                height: spotlightHeight,
+                left: elementPosition.left,
                 position: "fixed",
                 top: elementPosition.top,
-                left: elementPosition.left,
                 width: spotlightWidth,
-                height: spotlightHeight,
-                borderRadius: spotlightBorderRadius,
               }}
             />
 
             <motion.div
               animate={{
-                opacity: 1,
-                y: 0,
-                top: contentPosition.top,
                 left: contentPosition.left,
+                opacity: 1,
+                top: contentPosition.top,
+                y: 0,
               }}
               className="relative z-[100] rounded-lg border bg-background p-4 shadow-lg"
               exit={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
               initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
               ref={contentRef}
               style={{
-                position: "fixed",
                 maxWidth: 400,
                 minWidth: 300,
+                position: "fixed",
               }}
               transition={{
                 duration: shouldReduceMotion
@@ -488,17 +488,17 @@ export function TourProvider({
               <AnimatePresence mode="wait">
                 <div>
                   <motion.div
-                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                    animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
                     className="overflow-hidden"
                     exit={{
+                      filter: shouldReduceMotion ? "blur(0px)" : "blur(2px)",
                       opacity: 0,
                       scale: shouldReduceMotion ? 1 : 0.97,
-                      filter: shouldReduceMotion ? "blur(0px)" : "blur(2px)",
                     }}
                     initial={{
+                      filter: shouldReduceMotion ? "blur(0px)" : "blur(2px)",
                       opacity: 0,
                       scale: shouldReduceMotion ? 1 : 0.97,
-                      filter: shouldReduceMotion ? "blur(0px)" : "blur(2px)",
                     }}
                     key={`tour-content-${currentStep}`}
                     onAnimationComplete={() => {
@@ -506,8 +506,8 @@ export function TourProvider({
                       if (contentRef.current) {
                         const rect = contentRef.current.getBoundingClientRect();
                         setContentSize({
-                          width: rect.width,
                           height: rect.height,
+                          width: rect.width,
                         });
                       }
                     }}
@@ -590,31 +590,31 @@ export function TourAlertDialog({
           <div className="relative mb-4">
             <motion.div
               animate={{
-                scale: 1,
                 filter: "blur(0px)",
-                y: shouldReduceMotion ? 0 : [0, -8, 0],
                 rotate: shouldReduceMotion ? 42 : [42, 48, 42],
+                scale: 1,
+                y: shouldReduceMotion ? 0 : [0, -8, 0],
               }}
               initial={{
-                scale: shouldReduceMotion ? 1 : 0.9,
                 filter: shouldReduceMotion ? "blur(0px)" : "blur(10px)",
+                scale: shouldReduceMotion ? 1 : 0.9,
               }}
               transition={{
                 duration: MOTION_DURATION.standard,
                 ease: MOTION_EASE.out,
-                y: shouldReduceMotion
-                  ? { duration: MOTION_DURATION.instant }
-                  : {
-                      duration: 2.5,
-                      repeat: Number.POSITIVE_INFINITY,
-                      ease: "easeInOut",
-                    },
                 rotate: shouldReduceMotion
                   ? { duration: MOTION_DURATION.instant }
                   : {
                       duration: 3,
-                      repeat: Number.POSITIVE_INFINITY,
                       ease: "easeInOut",
+                      repeat: Number.POSITIVE_INFINITY,
+                    },
+                y: shouldReduceMotion
+                  ? { duration: MOTION_DURATION.instant }
+                  : {
+                      duration: 2.5,
+                      ease: "easeInOut",
+                      repeat: Number.POSITIVE_INFINITY,
                     },
               }}
             >

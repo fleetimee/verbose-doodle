@@ -36,10 +36,10 @@ export function EditResponseStatusCodeForm({
   isLoading,
 }: EditResponseStatusCodeFormProps) {
   const form = useForm<EditStatusCodeFormData>({
-    resolver: zodResolver(editStatusCodeSchema),
     defaultValues: {
       statusCode: defaultValue,
     },
+    resolver: zodResolver(editStatusCodeSchema),
   });
 
   return (

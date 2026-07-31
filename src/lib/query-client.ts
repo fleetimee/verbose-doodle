@@ -9,14 +9,14 @@ const DEFAULT_RETRY_COUNT = 1;
  */
 export const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      staleTime: TIME_DURATIONS.FIVE_MINUTES,
-      gcTime: TIME_DURATIONS.TEN_MINUTES,
-      retry: DEFAULT_RETRY_COUNT,
-      refetchOnWindowFocus: false,
-    },
     mutations: {
       retry: DEFAULT_RETRY_COUNT,
+    },
+    queries: {
+      gcTime: TIME_DURATIONS.TEN_MINUTES,
+      refetchOnWindowFocus: false,
+      retry: DEFAULT_RETRY_COUNT,
+      staleTime: TIME_DURATIONS.FIVE_MINUTES,
     },
   },
 });

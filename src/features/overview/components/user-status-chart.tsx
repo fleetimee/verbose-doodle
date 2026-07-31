@@ -12,16 +12,16 @@ import type { OverviewData } from "@/features/overview/types";
 import { messages } from "@/lib/i18n";
 
 const userStatusConfig = {
+  active: {
+    color: "var(--chart-2)",
+    label: messages.overview.chartLabels.activeUsers,
+  },
   count: {
     label: messages.overview.chartLabels.users,
   },
-  active: {
-    label: messages.overview.chartLabels.activeUsers,
-    color: "var(--chart-2)",
-  },
   inactive: {
-    label: messages.overview.chartLabels.inactiveUsers,
     color: "var(--muted)",
+    label: messages.overview.chartLabels.inactiveUsers,
   },
 } satisfies ChartConfig;
 
@@ -60,14 +60,14 @@ export function UserStatusChart({ data }: UserStatusChartProps) {
 
   const chartData = [
     {
-      status: "active",
       count: activeCount,
       fill: "var(--color-active)",
+      status: "active",
     },
     {
-      status: "inactive",
       count: inactiveCount,
       fill: "var(--color-inactive)",
+      status: "inactive",
     },
   ];
 

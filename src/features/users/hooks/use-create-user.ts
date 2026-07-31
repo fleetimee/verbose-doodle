@@ -42,17 +42,17 @@ async function createUser(
         password: string;
       }
     >(getUserCreateUrl(), {
-      username: data.username,
-      role: data.role,
       active: data.active,
       password: data.password,
+      role: data.role,
+      username: data.username,
     });
 
     // Validate that we have the expected response structure
     if (!apiResponse.data) {
       throw {
-        message: "Invalid response structure from server",
         code: "INVALID_RESPONSE",
+        message: "Invalid response structure from server",
         status: 500,
       } as ApiError;
     }
@@ -74,6 +74,12 @@ export function useCreateUser() {
     CreateUserRequest,
     ApiError
   >(createUser, {
+    onError: (error) => {
+      // Handle errors with toast notification
+      toast.error("Failed to create user", {
+        description: error.message || "An unexpected error occurred",
+      });
+    },
     onSuccess: (data) => {
       // Show success message
       toast.success("User created successfully", {
@@ -84,12 +90,6 @@ export function useCreateUser() {
       queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
       // Invalidate overview to update user count statistics
       queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
-    },
-    onError: (error) => {
-      // Handle errors with toast notification
-      toast.error("Failed to create user", {
-        description: error.message || "An unexpected error occurred",
-      });
     },
   });
 

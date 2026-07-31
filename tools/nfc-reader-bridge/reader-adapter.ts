@@ -18,18 +18,18 @@ export type ReaderScanListener = (scan: NdefScanResult) => void;
 
 export interface ReaderAdapter {
   readonly initialStatus: ReaderStatus;
-  start(
+  start: (
     listener: ReaderStatusListener,
     scanListener?: ReaderScanListener
-  ): Promise<void>;
-  stop(): Promise<void>;
+  ) => Promise<void>;
+  stop: () => Promise<void>;
 }
 
 export const pcscUnavailableStatus: ReaderStatus = {
-  readerState: "unavailable",
-  reason: "PC/SC support is unavailable on this computer.",
   action:
     "Install or start the operating system PC/SC service, then restart the bridge.",
+  readerState: "unavailable",
+  reason: "PC/SC support is unavailable on this computer.",
 };
 
 const ACS_READER_NAME = /\bacs\b/i;
@@ -45,8 +45,8 @@ export class FakeReaderAdapter implements ReaderAdapter {
 
   constructor(
     initialStatus: ReaderStatus = {
-      readerState: "waiting",
       readerName: "ACS ACR122U 00 00",
+      readerState: "waiting",
     }
   ) {
     this.initialStatus = initialStatus;
@@ -83,25 +83,25 @@ type PcscReader = {
   readonly SCARD_STATE_PRESENT: number;
   readonly SCARD_LEAVE_CARD: number;
   readonly SCARD_SHARE_SHARED: number;
-  on(
+  on: (
     event: "status" | "error" | "end",
     listener: (...args: never[]) => void
-  ): void;
-  connect(
+  ) => void;
+  connect: (
     options: { readonly share_mode: number },
     callback: (error: Error | null, protocol: number) => void
-  ): void;
-  disconnect(
+  ) => void;
+  disconnect: (
     disposition: number,
     callback: (error: Error | null) => void
-  ): void;
-  transmit(
+  ) => void;
+  transmit: (
     input: Buffer,
     responseLength: number,
     protocol: number,
     callback: (error: Error | null, output: Buffer) => void
-  ): void;
-  close(): void;
+  ) => void;
+  close: () => void;
 };
 
 type PcscWorkerMessage =
@@ -149,10 +149,10 @@ async function resolvePcscHelperPath(): Promise<string> {
 
 export class PcscReaderAdapter implements ReaderAdapter {
   readonly initialStatus: ReaderStatus = {
-    readerState: "unavailable",
-    reason: "No ACS reader has been detected.",
     action:
       "Connect an ACS reader and check that the PC/SC service is running.",
+    readerState: "unavailable",
+    reason: "No ACS reader has been detected.",
   };
   private listener: ReaderStatusListener | null = null;
   private scanListener: ReaderScanListener | null = null;
@@ -240,26 +240,26 @@ export class PcscReaderAdapter implements ReaderAdapter {
     }
     if (message.type === "pcsc-error") {
       this.listener?.({
+        action: "Check the PC/SC service and reader driver.",
         readerState: "unavailable",
         reason: message.message,
-        action: "Check the PC/SC service and reader driver.",
       });
       return;
     }
     if (message.type === "reader" || message.type === "reader-status") {
       if (!isSupportedReaderName(message.name)) {
         this.listener?.({
-          readerState: "unavailable",
-          readerName: message.name,
-          reason: `Unsupported reader detected: ${message.name}.`,
           action: "Connect an ACS PC/SC reader.",
+          readerName: message.name,
+          readerState: "unavailable",
+          reason: `Unsupported reader detected: ${message.name}.`,
         });
         return;
       }
       this.supportedReaders.add(message.name);
       this.listener?.({
-        readerState: message.present ? "detected" : "waiting",
         readerName: message.name,
+        readerState: message.present ? "detected" : "waiting",
         ...(message.present
           ? {}
           : { reason: "The ACS reader is ready and waiting for a tag." }),
@@ -269,19 +269,19 @@ export class PcscReaderAdapter implements ReaderAdapter {
     if (message.type === "reader-end") {
       this.supportedReaders.delete(message.name);
       this.listener?.({
-        readerState: "unavailable",
-        readerName: message.name,
-        reason: "The ACS reader was removed.",
         action: "Reconnect the reader, then retry.",
+        readerName: message.name,
+        readerState: "unavailable",
+        reason: "The ACS reader was removed.",
       });
       return;
     }
     if (message.type === "reader-error") {
       this.listener?.({
-        readerState: "detected",
-        readerName: message.name,
-        reason: message.message,
         action: "Reconnect the reader and restart the PC/SC service if needed.",
+        readerName: message.name,
+        readerState: "detected",
+        reason: message.message,
       });
       return;
     }

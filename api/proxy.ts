@@ -100,9 +100,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Forward the request to the backend
     const response = await fetch(targetUrl, {
-      method: req.method,
-      headers: forwardHeaders,
       body,
+      headers: forwardHeaders,
+      method: req.method,
     });
 
     // Copy response headers

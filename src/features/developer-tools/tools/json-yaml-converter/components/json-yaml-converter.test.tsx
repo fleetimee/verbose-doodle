@@ -82,7 +82,7 @@ describe("JsonYamlConverter", () => {
     });
     act(() => {
       window.dispatchEvent(
-        new KeyboardEvent("keydown", { metaKey: true, key: "Enter" })
+        new KeyboardEvent("keydown", { key: "Enter", metaKey: true })
       );
     });
     await waitFor(() =>

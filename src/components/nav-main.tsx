@@ -154,8 +154,8 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
     }
 
     accumulator.push({
-      label: item.groupLabel,
       items: [item],
+      label: item.groupLabel,
     });
 
     return accumulator;

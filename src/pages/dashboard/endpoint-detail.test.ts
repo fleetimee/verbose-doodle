@@ -33,8 +33,8 @@ describe("endpoint detail response selection", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerSlug: "pln", slug: "first-slug", responses: [] },
-          { billerSlug: "pln", slug: "remembered-slug", responses: [] },
+          { billerSlug: "pln", responses: [], slug: "first-slug" },
+          { billerSlug: "pln", responses: [], slug: "remembered-slug" },
         ],
         "pln",
         "remembered-slug"
@@ -46,10 +46,9 @@ describe("endpoint detail response selection", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerSlug: "pln", slug: "inactive-slug", responses: [] },
+          { billerSlug: "pln", responses: [], slug: "inactive-slug" },
           {
             billerSlug: "pln",
-            slug: "active-slug",
             responses: [
               {
                 activated: true,
@@ -59,6 +58,7 @@ describe("endpoint detail response selection", () => {
                 statusCode: 200,
               },
             ],
+            slug: "active-slug",
           },
         ],
         "pln"
@@ -70,10 +70,9 @@ describe("endpoint detail response selection", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerSlug: "pln", slug: "first-slug", responses: [] },
+          { billerSlug: "pln", responses: [], slug: "first-slug" },
           {
             billerSlug: "pln",
-            slug: "second-slug",
             responses: [
               {
                 activated: false,
@@ -83,6 +82,7 @@ describe("endpoint detail response selection", () => {
                 statusCode: 200,
               },
             ],
+            slug: "second-slug",
           },
         ],
         "pln"
@@ -94,10 +94,9 @@ describe("endpoint detail response selection", () => {
     expect(
       selectEndpointForBiller(
         [
-          { billerSlug: "pln", slug: "first-slug", responses: [] },
+          { billerSlug: "pln", responses: [], slug: "first-slug" },
           {
             billerSlug: "pln",
-            slug: "active-slug",
             responses: [
               {
                 activated: true,
@@ -107,6 +106,7 @@ describe("endpoint detail response selection", () => {
                 statusCode: 200,
               },
             ],
+            slug: "active-slug",
           },
         ],
         "pln",

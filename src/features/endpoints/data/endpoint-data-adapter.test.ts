@@ -8,32 +8,32 @@ function createTransport(
   responses: Record<string, unknown>
 ): EndpointDataTransport {
   return {
+    delete: async <T>(path: string) => responses[path] as T,
     get: async <T>(path: string) => responses[path] as T,
+    patch: async <T>(path: string, _body: unknown) => responses[path] as T,
     post: async <T>(path: string, _body: unknown) => responses[path] as T,
     put: async <T>(path: string, _body: unknown) => responses[path] as T,
-    patch: async <T>(path: string, _body: unknown) => responses[path] as T,
-    delete: async <T>(path: string) => responses[path] as T,
   };
 }
 
 const endpointResponse = {
-  endpoint_id: 7,
-  slug: "pdam-post-payment-inquiry-a1b2c3",
-  method: "POST",
-  url: "/payment/inquiry",
-  biller_slug: "pdam",
   biller_name: "PDAM",
+  biller_slug: "pdam",
+  endpoint_id: 7,
+  method: "POST",
   responses: [
     {
-      response_id: 8,
-      json: '{"ok":true}',
-      status_code: "201",
       activated: "1",
-      name: "Created",
       delay_ms: "250",
+      json: '{"ok":true}',
+      name: "Created",
+      response_id: 8,
       simulate_timeout: false,
+      status_code: "201",
     },
   ],
+  slug: "pdam-post-payment-inquiry-a1b2c3",
+  url: "/payment/inquiry",
 };
 
 describe("Endpoint HTTP data adapter", () => {
@@ -41,32 +41,32 @@ describe("Endpoint HTTP data adapter", () => {
     const adapter = createHttpEndpointAdapter(
       createTransport({
         "/api/endpoint": {
+          endpoints: [endpointResponse],
           response_code: "00",
           response_desc: "success",
-          endpoints: [endpointResponse],
         },
       })
     );
 
     await expect(adapter.listEndpoints()).resolves.toEqual([
       {
-        id: "7",
-        slug: "pdam-post-payment-inquiry-a1b2c3",
-        method: "POST",
-        url: "/payment/inquiry",
-        billerSlug: "pdam",
         billerName: "PDAM",
+        billerSlug: "pdam",
+        id: "7",
+        method: "POST",
         responses: [
           {
-            id: "8",
-            name: "Created",
-            json: '{"ok":true}',
-            statusCode: 201,
             activated: true,
             delayMs: 250,
+            id: "8",
+            json: '{"ok":true}',
+            name: "Created",
             simulateTimeout: false,
+            statusCode: 201,
           },
         ],
+        slug: "pdam-post-payment-inquiry-a1b2c3",
+        url: "/payment/inquiry",
       },
     ]);
   });
@@ -86,6 +86,10 @@ describe("Endpoint HTTP data adapter", () => {
     const requests: string[] = [];
     const adapter = createHttpEndpointAdapter({
       ...createTransport({}),
+      delete: <T>(path: string) => {
+        requests.push(`DELETE ${path}`);
+        return {} as T;
+      },
       get: <T>(path: string) => {
         requests.push(`GET ${path}`);
         return { data: { endpoint: endpointResponse } } as T;
@@ -94,16 +98,12 @@ describe("Endpoint HTTP data adapter", () => {
         requests.push(`PATCH ${path}`);
         return { data: { endpoint: endpointResponse } } as T;
       },
-      delete: <T>(path: string) => {
-        requests.push(`DELETE ${path}`);
-        return {} as T;
-      },
     });
 
     await adapter.getEndpoint(slug);
     await adapter.updateEndpoint({
-      endpointSlug: slug,
       changes: { url: "/payment/updated" },
+      endpointSlug: slug,
     });
     await adapter.deleteEndpoint(slug);
 
@@ -117,58 +117,58 @@ describe("Endpoint HTTP data adapter", () => {
   test("normalizes traffic-log variants and metric defaults", async () => {
     const adapter = createHttpEndpointAdapter(
       createTransport({
+        "/api/endpoint/7/metrics": { data: {} },
         "/api/endpoint/7/traffic-logs?limit=25": {
           data: {
+            has_more: true,
             logs: [
               {
-                id: 10,
-                request_id: "req-10",
-                occurred_at: "2026-07-23T10:00:00Z",
                 endpoint_id: 7,
                 hit_status: "matched_success",
+                id: 10,
                 matched: true,
                 method: "POST",
+                occurred_at: "2026-07-23T10:00:00Z",
                 path: "/payment/inquiry",
+                request_id: "req-10",
               },
             ],
             next_cursor: "next",
-            has_more: true,
           },
         },
-        "/api/endpoint/7/metrics": { data: {} },
       })
     );
 
     await expect(
       adapter.listTrafficLogs({
         endpointId: "7",
-        filters: { limit: 25, status: "all", search: "", includeBody: false },
+        filters: { includeBody: false, limit: 25, search: "", status: "all" },
       })
     ).resolves.toMatchObject({
-      nextCursor: "next",
       hasMore: true,
-      items: [{ id: "10", requestId: "req-10", endpointId: "7" }],
+      items: [{ endpointId: "7", id: "10", requestId: "req-10" }],
+      nextCursor: "next",
     });
     await expect(adapter.getMetricsSummary("7")).resolves.toEqual({
-      requestCount: 0,
+      averageDurationMs: 0,
       hitStatusCounts: {},
       httpStatusCounts: {},
-      totalDurationMs: 0,
-      minDurationMs: null,
       maxDurationMs: null,
-      averageDurationMs: 0,
+      minDurationMs: null,
+      requestCount: 0,
+      totalDurationMs: 0,
     });
   });
 
   test("uses req_res request shapes for endpoint and response mutations", async () => {
     const requests: Array<{ path: string; body: unknown }> = [];
     const endpoint: Endpoint = {
-      id: "7",
-      slug: "pdam-post-payment-inquiry-a1b2c3",
-      method: "POST",
-      url: "/payment/inquiry",
       billerSlug: "pdam",
+      id: "7",
+      method: "POST",
       responses: [],
+      slug: "pdam-post-payment-inquiry-a1b2c3",
+      url: "/payment/inquiry",
     };
     const adapter = createHttpEndpointAdapter({
       ...createTransport({
@@ -177,55 +177,55 @@ describe("Endpoint HTTP data adapter", () => {
         "/api/response": { response: { id: 8, name: "Created" } },
         "/api/response/8": { response: { id: 8, name: "Updated" } },
       }),
-      post: <T>(path: string, body: unknown) => {
-        requests.push({ path, body });
-        return Promise.resolve({ endpoint } as T);
-      },
       patch: <T>(path: string, body: unknown) => {
-        requests.push({ path, body });
+        requests.push({ body, path });
         return Promise.resolve({ response: { id: 8, name: "Updated" } } as T);
+      },
+      post: <T>(path: string, body: unknown) => {
+        requests.push({ body, path });
+        return Promise.resolve({ endpoint } as T);
       },
     });
 
     await adapter.createEndpoint({
+      billerSlug: "pdam",
       method: "POST",
       url: "/payment/inquiry",
-      billerSlug: "pdam",
     });
     await adapter.createResponse({
       endpointId: "7",
-      name: "Created",
       json: "{}",
+      name: "Created",
       statusCode: 201,
     });
     await adapter.updateResponse({
+      changes: { statusCode: 202 },
       endpointId: "7",
       responseId: "8",
-      changes: { statusCode: 202 },
     });
 
     expect(requests).toEqual([
       {
-        path: "/api/endpoint",
         body: {
+          biller_slug: "pdam",
           method: "POST",
           url: "/payment/inquiry",
-          biller_slug: "pdam",
         },
+        path: "/api/endpoint",
       },
       {
-        path: "/api/response",
         body: {
+          activated: "0",
+          delayMs: 0,
           endpointId: 7,
           json: "{}",
-          statusCode: "201",
-          activated: "0",
           name: "Created",
-          delayMs: 0,
           simulateTimeout: false,
+          statusCode: "201",
         },
+        path: "/api/response",
       },
-      { path: "/api/response/8", body: { statusCode: "202" } },
+      { body: { statusCode: "202" }, path: "/api/response/8" },
     ]);
   });
 });
@@ -236,9 +236,9 @@ describe("Endpoint in-memory data adapter", () => {
 
     await expect(
       adapter.createEndpoint({
+        billerSlug: "pdam",
         method: "POST",
         url: "/payment/inquiry",
-        billerSlug: "pdam",
       })
     ).resolves.toMatchObject({
       id: "1",
@@ -250,26 +250,26 @@ describe("Endpoint in-memory data adapter", () => {
     const adapter = createInMemoryEndpointAdapter({
       endpoints: [
         {
-          id: "7",
-          slug: "pdam-post-payment-inquiry-a1b2c3",
-          method: "POST",
-          url: "/payment/inquiry",
           billerSlug: "pdam",
+          id: "7",
+          method: "POST",
           responses: [],
+          slug: "pdam-post-payment-inquiry-a1b2c3",
+          url: "/payment/inquiry",
         },
       ],
     });
 
     const response = await adapter.createResponse({
       endpointId: "7",
-      name: "Success",
       json: "{}",
+      name: "Success",
       statusCode: 200,
     });
     await adapter.updateResponse({
+      changes: { simulateTimeout: true },
       endpointId: "7",
       responseId: response.id,
-      changes: { simulateTimeout: true },
     });
     await adapter.activateResponse({
       endpointId: "7",
@@ -280,7 +280,7 @@ describe("Endpoint in-memory data adapter", () => {
     await expect(
       adapter.getEndpoint("pdam-post-payment-inquiry-a1b2c3")
     ).resolves.toMatchObject({
-      responses: [{ id: response.id, activated: true, simulateTimeout: true }],
+      responses: [{ activated: true, id: response.id, simulateTimeout: true }],
     });
   });
 });

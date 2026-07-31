@@ -46,8 +46,8 @@ const childVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
+    transition: { bounce: 0.08, duration: 0.32, type: "spring" as const },
     y: 0,
-    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -58,16 +58,16 @@ const JSON_SCHEMA_TOUR_TARGETS = {
 } as const;
 const JSON_SCHEMA_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
   {
-    selectorId: JSON_SCHEMA_TOUR_TARGETS.controls,
-    position: "bottom",
-    title: messages.jsonSchemaValidator.tour.controlsTitle,
     description: messages.jsonSchemaValidator.tour.controlsDescription,
+    position: "bottom",
+    selectorId: JSON_SCHEMA_TOUR_TARGETS.controls,
+    title: messages.jsonSchemaValidator.tour.controlsTitle,
   },
   {
-    selectorId: JSON_SCHEMA_TOUR_TARGETS.editors,
-    position: "top",
-    title: messages.jsonSchemaValidator.tour.editorsTitle,
     description: messages.jsonSchemaValidator.tour.editorsDescription,
+    position: "top",
+    selectorId: JSON_SCHEMA_TOUR_TARGETS.editors,
+    title: messages.jsonSchemaValidator.tour.editorsTitle,
   },
 ];
 
@@ -77,16 +77,16 @@ function serviceError(error: ApiError | null) {
   }
   if (error.status === 413) {
     return {
-      title: messages.jsonSchemaValidator.inputTooLargeTitle,
       description: messages.jsonSchemaValidator.inputTooLargeDescription,
+      title: messages.jsonSchemaValidator.inputTooLargeTitle,
     };
   }
   return {
-    title: messages.jsonSchemaValidator.serviceUnavailableTitle,
     description:
       error.status === 503
         ? messages.jsonSchemaValidator.serviceBusyDescription
         : messages.jsonSchemaValidator.serviceFailureDescription,
+    title: messages.jsonSchemaValidator.serviceUnavailableTitle,
   };
 }
 
@@ -311,13 +311,13 @@ export function JsonSchemaValidator() {
         <AnimatePresence>
           {isValidating ? (
             <motion.div
-              animate={{ opacity: 1, height: "auto" }}
+              animate={{ height: "auto", opacity: 1 }}
               aria-live="polite"
               className="mt-8 overflow-hidden border-y py-5"
-              exit={{ opacity: 0, height: 0 }}
-              initial={{ opacity: 0, height: 0 }}
+              exit={{ height: 0, opacity: 0 }}
+              initial={{ height: 0, opacity: 0 }}
               role="status"
-              transition={{ type: "spring", duration: 0.32, bounce: 0.08 }}
+              transition={{ bounce: 0.08, duration: 0.32, type: "spring" }}
             >
               <div className="mb-3 flex items-center justify-between font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
                 <span>{messages.jsonSchemaValidator.validationInProgress}</span>
@@ -346,7 +346,7 @@ export function JsonSchemaValidator() {
               className="mt-8 grid gap-2 border-destructive/30 border-y py-5 sm:grid-cols-[180px_1fr]"
               exit={{ opacity: 0, y: -6 }}
               initial={{ opacity: 0, y: 6 }}
-              transition={{ type: "spring", duration: 0.32, bounce: 0.08 }}
+              transition={{ bounce: 0.08, duration: 0.32, type: "spring" }}
             >
               <h2 className="font-semibold text-destructive text-sm">
                 {error.title}

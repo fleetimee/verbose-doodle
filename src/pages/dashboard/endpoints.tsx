@@ -69,13 +69,13 @@ const SKELETON_KEYS = Array.from(
 
 const ENDPOINTS_TOUR_ID = "endpoints-intro";
 const ENDPOINTS_TOUR_TARGETS = {
-  header: "endpoints-tour-header",
   addEndpoint: "endpoints-tour-add-endpoint",
   createFirstEndpoint: "endpoints-tour-create-first-endpoint",
-  search: "endpoints-tour-search",
-  viewMode: "endpoints-tour-view-mode",
   export: "endpoints-tour-export",
   firstEndpoint: "endpoints-tour-first-endpoint",
+  header: "endpoints-tour-header",
+  search: "endpoints-tour-search",
+  viewMode: "endpoints-tour-view-mode",
 } as const;
 type EndpointViewMode = "grid" | "list";
 
@@ -261,9 +261,9 @@ function AnimatedEndpointGroup({
 
 export function EndpointsPage() {
   useDocumentMeta({
-    title: "Endpoint",
     description: messages.endpoints.documentDescription,
     keywords: ["api endpoints", "integrations", "api management", "endpoints"],
+    title: "Endpoint",
   });
 
   const {
@@ -365,11 +365,11 @@ export function EndpointsPage() {
 
     updateEndpoint(
       {
-        endpointSlug: endpointToEdit.slug,
         changes: {
           method: data.method,
           url: data.url,
         },
+        endpointSlug: endpointToEdit.slug,
       },
       {
         onSuccess: () => {
@@ -413,14 +413,14 @@ export function EndpointsPage() {
   const tourSteps = useMemo<TourStep[]>(() => {
     const baseSteps: TourStep[] = [
       {
-        selectorId: ENDPOINTS_TOUR_TARGETS.header,
-        position: "bottom",
         content: (
           <TourStepContent
             description={messages.endpoints.tour.workspaceDescription}
             title={messages.endpoints.tour.workspaceTitle}
           />
         ),
+        position: "bottom",
+        selectorId: ENDPOINTS_TOUR_TARGETS.header,
       },
     ];
 
@@ -428,14 +428,14 @@ export function EndpointsPage() {
       return [
         ...baseSteps,
         {
-          selectorId: ENDPOINTS_TOUR_TARGETS.createFirstEndpoint,
-          position: "top",
           content: (
             <TourStepContent
               description={messages.endpoints.tour.createFirstDescription}
               title={messages.endpoints.tour.createFirstTitle}
             />
           ),
+          position: "top",
+          selectorId: ENDPOINTS_TOUR_TARGETS.createFirstEndpoint,
         },
       ];
     }
@@ -445,58 +445,58 @@ export function EndpointsPage() {
       ...(canAddEndpoint
         ? [
             {
-              selectorId: ENDPOINTS_TOUR_TARGETS.addEndpoint,
-              position: "left" as const,
               content: (
                 <TourStepContent
                   description={messages.endpoints.tour.addEndpointDescription}
                   title={messages.endpoints.tour.addEndpointTitle}
                 />
               ),
+              position: "left" as const,
+              selectorId: ENDPOINTS_TOUR_TARGETS.addEndpoint,
             },
           ]
         : []),
       {
-        selectorId: ENDPOINTS_TOUR_TARGETS.search,
-        position: "bottom",
         content: (
           <TourStepContent
             description={messages.endpoints.tour.searchDescription}
             title={messages.endpoints.tour.searchTitle}
           />
         ),
+        position: "bottom",
+        selectorId: ENDPOINTS_TOUR_TARGETS.search,
       },
       {
-        selectorId: ENDPOINTS_TOUR_TARGETS.viewMode,
-        position: "bottom",
         content: (
           <TourStepContent
             description={messages.endpoints.tour.viewModeDescription}
             title={messages.endpoints.tour.viewModeTitle}
           />
         ),
+        position: "bottom",
+        selectorId: ENDPOINTS_TOUR_TARGETS.viewMode,
       },
       {
-        selectorId: ENDPOINTS_TOUR_TARGETS.export,
-        position: "left",
         content: (
           <TourStepContent
             description={messages.endpoints.tour.exportDescription}
             title={messages.endpoints.tour.exportTitle}
           />
         ),
+        position: "left",
+        selectorId: ENDPOINTS_TOUR_TARGETS.export,
       },
       ...(hasFilteredEndpoints
         ? [
             {
-              selectorId: ENDPOINTS_TOUR_TARGETS.firstEndpoint,
-              position: "top" as const,
               content: (
                 <TourStepContent
                   description={messages.endpoints.tour.detailsDescription}
                   title={messages.endpoints.tour.detailsTitle}
                 />
               ),
+              position: "top" as const,
+              selectorId: ENDPOINTS_TOUR_TARGETS.firstEndpoint,
             },
           ]
         : []),

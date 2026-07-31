@@ -9,8 +9,8 @@ export const MAX_DELAY_MS = 60_000; // 60 seconds
  * Simulation type options
  */
 export const SIMULATION_TYPE = {
-  NONE: "none",
   DELAY: "delay",
+  NONE: "none",
   TIMEOUT: "timeout",
 } as const;
 
@@ -47,12 +47,12 @@ export type DelayConfigFormValues = z.infer<typeof delayConfigSchema>;
  */
 export const simulationFormSchema = z
   .object({
+    delayMs: z.number().optional(),
     type: z.enum([
       SIMULATION_TYPE.NONE,
       SIMULATION_TYPE.DELAY,
       SIMULATION_TYPE.TIMEOUT,
     ]),
-    delayMs: z.number().optional(),
   })
   .refine(
     (data) => {

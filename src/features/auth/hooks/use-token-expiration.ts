@@ -30,9 +30,9 @@ export function useTokenExpiration(): TokenExpirationInfo | null {
 
   const remainingMs = snapshot.expiresAt - now;
   return {
-    remainingMs,
-    isExpired: remainingMs <= 0,
     formattedTime: formatRemainingTime(remainingMs),
+    isExpired: remainingMs <= 0,
+    remainingMs,
   };
 }
 

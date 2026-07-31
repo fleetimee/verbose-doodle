@@ -30,12 +30,12 @@ describe("NFC reader adapter seam", () => {
     const states: string[] = [];
     await adapter.start((status) => states.push(status.readerState));
     adapter.setStatus({
-      readerState: "detected",
       readerName: "ACS ACR122U 00 00",
+      readerState: "detected",
     });
     adapter.setStatus({
-      readerState: "waiting",
       readerName: "ACS ACR122U 00 00",
+      readerState: "waiting",
       reason: "The ACS reader is ready and waiting for a tag.",
     });
     expect(states).toEqual(["waiting", "detected", "waiting"]);
@@ -68,11 +68,6 @@ describe("NFC reader adapter seam", () => {
       0x6c, 0x6c, 0x6f, 0xfe,
     ]);
     const reader = {
-      SCARD_LEAVE_CARD: 0,
-      SCARD_PROTOCOL_T0: 1,
-      SCARD_PROTOCOL_T1: 2,
-      SCARD_SHARE_SHARED: 2,
-      SCARD_STATE_PRESENT: 1,
       close: () => undefined,
       connect: (
         _options: { readonly share_mode: number },
@@ -84,6 +79,11 @@ describe("NFC reader adapter seam", () => {
       ) => callback(null),
       name: "ACS ACR1252U 00 00",
       on: () => undefined,
+      SCARD_LEAVE_CARD: 0,
+      SCARD_PROTOCOL_T0: 1,
+      SCARD_PROTOCOL_T1: 2,
+      SCARD_SHARE_SHARED: 2,
+      SCARD_STATE_PRESENT: 1,
       state: 1,
       transmit: (
         input: Buffer,

@@ -65,7 +65,7 @@ describe("JWT parser utility", () => {
 describe("JWT crypto utilities (HS256)", () => {
   const secret = "test-secret-key-12345";
   const header = { alg: "HS256", typ: "JWT" };
-  const payload = { sub: "user_test", iat: 1_516_239_022 };
+  const payload = { iat: 1_516_239_022, sub: "user_test" };
   const hEnc = base64UrlEncode(JSON.stringify(header));
   const pEnc = base64UrlEncode(JSON.stringify(payload));
   const hp = `${hEnc}.${pEnc}`;
@@ -90,7 +90,7 @@ describe("JWT crypto utilities (HS256)", () => {
     const signature = await signHS256(hp, secret);
 
     // Mutate the payload slightly
-    const mutatedPayload = { sub: "user_mutated", iat: 1_516_239_022 };
+    const mutatedPayload = { iat: 1_516_239_022, sub: "user_mutated" };
     const mpEnc = base64UrlEncode(JSON.stringify(mutatedPayload));
     const mutatedToken = `${hEnc}.${mpEnc}.${signature}`;
 

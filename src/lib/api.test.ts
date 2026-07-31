@@ -34,14 +34,14 @@ describe("API utilities", () => {
     const injectedFetch = (_input: RequestInfo | URL, init?: RequestInit) => {
       fetchCalls.push(init ?? {});
       return Promise.resolve({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({ ok: true }),
+        ok: true,
+        status: 200,
       } as Response);
     };
 
-    const client = createApiClient({ session, fetch: injectedFetch });
+    const client = createApiClient({ fetch: injectedFetch, session });
 
     await expect(client.apiGet<{ ok: boolean }>("/injected")).resolves.toEqual({
       ok: true,
@@ -55,10 +55,10 @@ describe("API utilities", () => {
     test("makes successful GET request", async () => {
       const mockData = { id: 1, name: "Test" };
       fetchSpy.mockResolvedValue({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => mockData,
+        ok: true,
+        status: 200,
       } as Response);
 
       const result = await apiFetch("/test");
@@ -69,10 +69,10 @@ describe("API utilities", () => {
     test("uses custom baseUrl when provided", async () => {
       const mockData = { success: true };
       fetchSpy.mockResolvedValue({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => mockData,
+        ok: true,
+        status: 200,
       } as Response);
 
       await apiFetch("/test", { baseUrl: "https://api.example.com" });
@@ -89,10 +89,10 @@ describe("API utilities", () => {
 
     test("includes default Content-Type header", async () => {
       fetchSpy.mockResolvedValue({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({}),
+        ok: true,
+        status: 200,
       } as Response);
 
       await apiFetch("/test");
@@ -109,10 +109,10 @@ describe("API utilities", () => {
 
     test("merges custom headers with defaults", async () => {
       fetchSpy.mockResolvedValue({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({}),
+        ok: true,
+        status: 200,
       } as Response);
 
       await apiFetch("/test", {
@@ -123,8 +123,8 @@ describe("API utilities", () => {
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
-            "Content-Type": "application/json",
             Authorization: "Bearer token123",
+            "Content-Type": "application/json",
           }),
         })
       );
@@ -132,9 +132,9 @@ describe("API utilities", () => {
 
     test("handles non-JSON response", async () => {
       fetchSpy.mockResolvedValue({
+        headers: new Headers({ "content-type": "text/plain" }),
         ok: true,
         status: 200,
-        headers: new Headers({ "content-type": "text/plain" }),
       } as Response);
 
       const result = await apiFetch("/test");
@@ -143,41 +143,42 @@ describe("API utilities", () => {
 
     test("throws error for failed request", async () => {
       fetchSpy.mockResolvedValue({
+        headers: new Headers(),
+        json: async () => ({ message: "Resource not found" }),
         ok: false,
         status: 404,
         statusText: "Not Found",
-        headers: new Headers(),
-        json: async () => ({ message: "Resource not found" }),
       } as Response);
 
       await expect(apiFetch("/test")).rejects.toEqual({
+        code: "404",
         message: "Resource not found",
         status: 404,
-        code: "404",
       });
     });
 
     test("handles error response without JSON body", async () => {
       fetchSpy.mockResolvedValue({
-        ok: false,
-        status: 500,
-        statusText: "Internal Server Error",
         headers: new Headers(),
         json: () => {
           throw new Error("Not JSON");
         },
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
       } as unknown as Response);
 
       await expect(apiFetch("/test")).rejects.toEqual({
+        code: "500",
         message: "Internal Server Error",
         status: 500,
-        code: "500",
       });
     });
 
     test("signs out through the session on an authenticated 401", async () => {
       let signOutCalls = 0;
       const client = createApiClient({
+        fetch: fetchSpy as unknown as typeof fetch,
         session: {
           getSnapshot: () => ({ accessToken: "access-token" }),
           refresh: () => Promise.resolve(),
@@ -185,23 +186,22 @@ describe("API utilities", () => {
             signOutCalls += 1;
           },
         },
-        fetch: fetchSpy as unknown as typeof fetch,
       });
 
       fetchSpy.mockResolvedValue({
+        headers: new Headers(),
+        json: async () => ({ message: "Unauthorized" }),
         ok: false,
         status: 401,
         statusText: "Unauthorized",
-        headers: new Headers(),
-        json: async () => ({ message: "Unauthorized" }),
       } as Response);
 
       await expect(
         client.apiFetch("/test", { retryOnUnauthorized: false })
       ).rejects.toEqual({
+        code: "401",
         message: "Unauthorized",
         status: 401,
-        code: "401",
       });
 
       expect(signOutCalls).toBe(1);
@@ -212,6 +212,7 @@ describe("API utilities", () => {
       let refreshCalls = 0;
       let signOutCalls = 0;
       const client = createApiClient({
+        fetch: fetchSpy as unknown as typeof fetch,
         session: {
           getSnapshot: () => ({ accessToken }),
           refresh: () => {
@@ -223,23 +224,22 @@ describe("API utilities", () => {
             signOutCalls += 1;
           },
         },
-        fetch: fetchSpy as unknown as typeof fetch,
       });
       const mockData = { ok: true };
 
       fetchSpy
         .mockResolvedValueOnce({
+          headers: new Headers(),
+          json: async () => ({ message: "Unauthorized" }),
           ok: false,
           status: 401,
           statusText: "Unauthorized",
-          headers: new Headers(),
-          json: async () => ({ message: "Unauthorized" }),
         } as Response)
         .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
           headers: new Headers({ "content-type": "application/json" }),
           json: async () => mockData,
+          ok: true,
+          status: 200,
         } as Response);
 
       const result = await client.apiFetch("/test");
@@ -272,6 +272,7 @@ describe("API utilities", () => {
         resolveRefresh = resolve;
       });
       const client = createApiClient({
+        fetch: fetchSpy as unknown as typeof fetch,
         session: {
           getSnapshot: () => ({ accessToken }),
           refresh: () => {
@@ -282,7 +283,6 @@ describe("API utilities", () => {
           },
           signOut: () => undefined,
         },
-        fetch: fetchSpy as unknown as typeof fetch,
       });
 
       fetchSpy.mockImplementation(
@@ -294,19 +294,19 @@ describe("API utilities", () => {
 
           if (authorization === "Bearer old-access-token") {
             return Promise.resolve({
+              headers: new Headers(),
+              json: async () => ({ message: "Unauthorized" }),
               ok: false,
               status: 401,
               statusText: "Unauthorized",
-              headers: new Headers(),
-              json: async () => ({ message: "Unauthorized" }),
             } as Response);
           }
 
           return Promise.resolve({
-            ok: true,
-            status: 200,
             headers: new Headers({ "content-type": "application/json" }),
             json: async () => ({ url }),
+            ok: true,
+            status: 200,
           } as Response);
         }
       );
@@ -325,6 +325,7 @@ describe("API utilities", () => {
     test("emits one logout transition when a shared refresh fails", async () => {
       let signOutCalls = 0;
       const client = createApiClient({
+        fetch: fetchSpy as unknown as typeof fetch,
         session: {
           getSnapshot: () => ({ accessToken: "old-access-token" }),
           refresh: () => Promise.reject(new Error("refresh failed")),
@@ -332,15 +333,14 @@ describe("API utilities", () => {
             signOutCalls += 1;
           },
         },
-        fetch: fetchSpy as unknown as typeof fetch,
       });
 
       fetchSpy.mockResolvedValue({
+        headers: new Headers(),
+        json: async () => ({ message: "Unauthorized" }),
         ok: false,
         status: 401,
         statusText: "Unauthorized",
-        headers: new Headers(),
-        json: async () => ({ message: "Unauthorized" }),
       } as Response);
 
       const results = await Promise.allSettled([
@@ -357,6 +357,7 @@ describe("API utilities", () => {
     test("does not sign out when unauthorized handling is disabled", async () => {
       let signOutCalls = 0;
       const client = createApiClient({
+        fetch: fetchSpy as unknown as typeof fetch,
         session: {
           getSnapshot: () => ({ accessToken: null }),
           refresh: () => Promise.resolve(),
@@ -364,15 +365,14 @@ describe("API utilities", () => {
             signOutCalls += 1;
           },
         },
-        fetch: fetchSpy as unknown as typeof fetch,
       });
 
       fetchSpy.mockResolvedValue({
+        headers: new Headers(),
+        json: async () => ({ message: "Unauthorized" }),
         ok: false,
         status: 401,
         statusText: "Unauthorized",
-        headers: new Headers(),
-        json: async () => ({ message: "Unauthorized" }),
       } as Response);
 
       await expect(
@@ -382,9 +382,9 @@ describe("API utilities", () => {
           retryOnUnauthorized: false,
         })
       ).rejects.toEqual({
+        code: "401",
         message: "Unauthorized",
         status: 401,
-        code: "401",
       });
 
       expect(signOutCalls).toBe(0);
@@ -405,18 +405,18 @@ describe("API utilities", () => {
           // Simulate slow response (longer than timeout)
           setTimeout(() => {
             resolve({
-              ok: true,
-              status: 200,
               headers: new Headers({ "content-type": "application/json" }),
               json: async () => ({}),
+              ok: true,
+              status: 200,
             } as Response);
           }, 1000);
         });
       });
 
       await expect(apiFetch("/test", { timeout: 50 })).rejects.toEqual({
-        message: "Request timeout",
         code: "TIMEOUT",
+        message: "Request timeout",
       });
     });
   });
@@ -424,10 +424,10 @@ describe("API utilities", () => {
   describe("HTTP method helpers", () => {
     test("apiGet makes GET request", async () => {
       fetchSpy.mockResolvedValue({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({ data: "test" }),
+        ok: true,
+        status: 200,
       } as Response);
 
       await apiGet("/test");
@@ -442,10 +442,10 @@ describe("API utilities", () => {
 
     test("apiPost makes POST request with body", async () => {
       fetchSpy.mockResolvedValue({
-        ok: true,
-        status: 201,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({ id: 1 }),
+        ok: true,
+        status: 201,
       } as Response);
 
       const postData = { name: "Test" };
@@ -454,18 +454,18 @@ describe("API utilities", () => {
       expect(fetchSpy).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          method: "POST",
           body: JSON.stringify(postData),
+          method: "POST",
         })
       );
     });
 
     test("apiPut makes PUT request with body", async () => {
       fetchSpy.mockResolvedValue({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({ updated: true }),
+        ok: true,
+        status: 200,
       } as Response);
 
       const putData = { name: "Updated" };
@@ -474,18 +474,18 @@ describe("API utilities", () => {
       expect(fetchSpy).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          method: "PUT",
           body: JSON.stringify(putData),
+          method: "PUT",
         })
       );
     });
 
     test("apiPatch makes PATCH request with body", async () => {
       fetchSpy.mockResolvedValue({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({ patched: true }),
+        ok: true,
+        status: 200,
       } as Response);
 
       const patchData = { status: "active" };
@@ -494,17 +494,17 @@ describe("API utilities", () => {
       expect(fetchSpy).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          method: "PATCH",
           body: JSON.stringify(patchData),
+          method: "PATCH",
         })
       );
     });
 
     test("apiDelete makes DELETE request", async () => {
       fetchSpy.mockResolvedValue({
+        headers: new Headers(),
         ok: true,
         status: 204,
-        headers: new Headers(),
       } as Response);
 
       await apiDelete("/test/1");

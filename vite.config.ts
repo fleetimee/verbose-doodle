@@ -4,11 +4,11 @@ import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from "vite";
 
 const manualChunkGroups = {
-  "react-vendor": ["react", "react-dom", "react-router"],
   "base-ui": ["@base-ui/react", "@base-ui/utils"],
-  "query-vendor": ["@tanstack/react-query"],
   charts: ["recharts"],
   "form-vendor": ["react-hook-form", "@hookform/resolvers", "zod"],
+  "query-vendor": ["@tanstack/react-query"],
+  "react-vendor": ["react", "react-dom", "react-router"],
   "ui-utils": [
     "lucide-react",
     "motion",
@@ -51,6 +51,14 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   return {
+    build: {
+      chunkSizeWarningLimit: 1700,
+      rollupOptions: {
+        output: {
+          manualChunks: getManualChunk,
+        },
+      },
+    },
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
@@ -59,26 +67,18 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy: {
-        "/simulate": {
+        "/api": {
+          changeOrigin: true,
+          secure: false,
           target: env.VITE_ENDPOINT_URL,
+          ws: true,
+        },
+        "/simulate": {
           changeOrigin: true,
           rewrite: (requestPath) =>
             requestPath.replace(SIMULATE_PROXY_PREFIX_REGEX, ""),
           secure: false,
-        },
-        "/api": {
           target: env.VITE_ENDPOINT_URL,
-          changeOrigin: true,
-          ws: true,
-          secure: false,
-        },
-      },
-    },
-    build: {
-      chunkSizeWarningLimit: 1700,
-      rollupOptions: {
-        output: {
-          manualChunks: getManualChunk,
         },
       },
     },

@@ -16,138 +16,138 @@ import { type AppLocale, getActiveLocale, getMessages } from "@/lib/i18n";
 
 const teamMembers: AnimatedTooltipItem[] = [
   {
-    id: 1,
-    name: "Nashira Oksani Ardine Santosa",
-    designation: "Technical Writer & Frontend Developer",
-    image: "/assets/teams/103569160-1x.webp",
-    imageWebp1x: "/assets/teams/103569160-1x.webp",
-    imageWebp2x: "/assets/teams/103569160-2x.webp",
-    width: 56,
-    height: 56,
     bio: "Technical Writer & Frontend Developer specializing in developer documentation, UI component guidelines, and user experience for billing workflow simulators.",
-    githubUsername: "nashira-oksani",
-    roles: [
-      "Technical Documentation",
-      "Frontend Architecture",
-      "UI Guidelines",
-    ],
     contributions: [
       "Auth Flow & Session Guidelines",
       "Component Accessibility Specs",
       "Error Handling Seam Documentation",
     ],
+    designation: "Technical Writer & Frontend Developer",
+    githubUsername: "nashira-oksani",
+    height: 56,
+    id: 1,
+    image: "/assets/teams/103569160-1x.webp",
+    imageWebp1x: "/assets/teams/103569160-1x.webp",
+    imageWebp2x: "/assets/teams/103569160-2x.webp",
+    name: "Nashira Oksani Ardine Santosa",
+    roles: [
+      "Technical Documentation",
+      "Frontend Architecture",
+      "UI Guidelines",
+    ],
     socials: {
       github: "https://github.com/nashira-oksani",
     },
+    width: 56,
   },
   {
-    id: 2,
-    name: "Novianto Eko Budiman",
-    designation: "Backend Developer",
-    image: "/assets/teams/15899547-1x.webp",
-    imageWebp1x: "/assets/teams/15899547-1x.webp",
-    imageWebp2x: "/assets/teams/15899547-2x.webp",
-    width: 56,
-    height: 56,
     bio: "Senior Backend Engineer focusing on high-concurrency billing microservices, protocol state machine engines, and socket relay infrastructure.",
-    githubUsername: "novianto-eb",
-    roles: [
-      "Backend Engineering",
-      "Socket Bridge Architecture",
-      "API Endpoints",
-    ],
     contributions: [
       "SocketBridgeEngine State Machine",
       "TCP/UDP Protocol Parser",
       "JSON Scenario Schema Validation",
     ],
+    designation: "Backend Developer",
+    githubUsername: "novianto-eb",
+    height: 56,
+    id: 2,
+    image: "/assets/teams/15899547-1x.webp",
+    imageWebp1x: "/assets/teams/15899547-1x.webp",
+    imageWebp2x: "/assets/teams/15899547-2x.webp",
+    name: "Novianto Eko Budiman",
+    roles: [
+      "Backend Engineering",
+      "Socket Bridge Architecture",
+      "API Endpoints",
+    ],
     socials: {
       github: "https://github.com/novianto-eb",
     },
+    width: 56,
   },
   {
-    id: 3,
-    name: "Bacharuddin Adieb Pratama",
-    designation: "Backend Developer",
-    image: "/assets/teams/22101214-1x.webp",
-    imageWebp1x: "/assets/teams/22101214-1x.webp",
-    imageWebp2x: "/assets/teams/22101214-2x.webp",
-    width: 56,
-    height: 56,
     bio: "Backend Developer expert in transaction processing systems, database optimization, and ISO-8583 message parsing.",
-    githubUsername: "bacharuddin-ap",
-    roles: ["Database Systems", "Transaction Engine", "ISO-8583 Seams"],
     contributions: [
       "Transaction Query Seams",
       "Biller Endpoint Execution Engine",
       "Batch Settlement Reconciliation",
     ],
+    designation: "Backend Developer",
+    githubUsername: "bacharuddin-ap",
+    height: 56,
+    id: 3,
+    image: "/assets/teams/22101214-1x.webp",
+    imageWebp1x: "/assets/teams/22101214-1x.webp",
+    imageWebp2x: "/assets/teams/22101214-2x.webp",
+    name: "Bacharuddin Adieb Pratama",
+    roles: ["Database Systems", "Transaction Engine", "ISO-8583 Seams"],
     socials: {
       github: "https://github.com/bacharuddin-ap",
     },
+    width: 56,
   },
   {
-    id: 4,
-    name: "Novian Andika",
-    designation: "Frontend Developer",
-    image: "/assets/teams/45744788-1x.webp",
-    imageWebp1x: "/assets/teams/45744788-1x.webp",
-    imageWebp2x: "/assets/teams/45744788-2x.webp",
-    width: 56,
-    height: 56,
     bio: "Lead Frontend Developer & System Architect driving React 19 architecture, Base UI design systems, and token-optimized developer tools.",
-    githubUsername: "fleetime",
-    roles: ["Frontend Architecture", "Base UI Systems", "State Seams"],
     contributions: [
       "React 19 & Base UI Seam Architecture",
       "Unified Developer Tools Module",
       "i18n Multilingual Engine",
     ],
+    designation: "Frontend Developer",
+    githubUsername: "fleetime",
+    height: 56,
+    id: 4,
+    image: "/assets/teams/45744788-1x.webp",
+    imageWebp1x: "/assets/teams/45744788-1x.webp",
+    imageWebp2x: "/assets/teams/45744788-2x.webp",
+    name: "Novian Andika",
+    roles: ["Frontend Architecture", "Base UI Systems", "State Seams"],
     socials: {
       github: "https://github.com/fleetime",
     },
+    width: 56,
   },
   {
-    id: 5,
-    name: "Rosinta Anggraini",
-    designation: "Technical Writer & Backend Developer",
-    image: "/assets/teams/48322786-1x.webp",
-    imageWebp1x: "/assets/teams/48322786-1x.webp",
-    imageWebp2x: "/assets/teams/48322786-2x.webp",
-    width: 56,
-    height: 56,
     bio: "Full-stack engineer & Technical Writer specializing in REST API schemas, user management access control, and integration test harnesses.",
-    githubUsername: "rosinta-a",
-    roles: ["Full-stack Engineering", "API Schema Design", "Security Audit"],
     contributions: [
       "User Administration Seams",
       "JSON Schema Validator Tool",
       "Security Access Controls",
     ],
+    designation: "Technical Writer & Backend Developer",
+    githubUsername: "rosinta-a",
+    height: 56,
+    id: 5,
+    image: "/assets/teams/48322786-1x.webp",
+    imageWebp1x: "/assets/teams/48322786-1x.webp",
+    imageWebp2x: "/assets/teams/48322786-2x.webp",
+    name: "Rosinta Anggraini",
+    roles: ["Full-stack Engineering", "API Schema Design", "Security Audit"],
     socials: {
       github: "https://github.com/rosinta-a",
     },
+    width: 56,
   },
   {
-    id: 6,
-    name: "Aulia Ariobimo",
-    designation: "Frontend Developer",
-    image: "/assets/teams/57403869-1x.webp",
-    imageWebp1x: "/assets/teams/57403869-1x.webp",
-    imageWebp2x: "/assets/teams/57403869-2x.webp",
-    width: 56,
-    height: 56,
     bio: "Frontend Developer focused on dynamic animations, responsive UI layouts, interactive previews, and real-time dashboard visualizers.",
-    githubUsername: "aulia-ariobimo",
-    roles: ["UI Engineering", "Framer Motion", "Realtime Dashboard"],
     contributions: [
       "Interactive Simulator Preview Component",
       "Theme Transition Engine",
       "Sidebar Keyboard Navigation",
     ],
+    designation: "Frontend Developer",
+    githubUsername: "aulia-ariobimo",
+    height: 56,
+    id: 6,
+    image: "/assets/teams/57403869-1x.webp",
+    imageWebp1x: "/assets/teams/57403869-1x.webp",
+    imageWebp2x: "/assets/teams/57403869-2x.webp",
+    name: "Aulia Ariobimo",
+    roles: ["UI Engineering", "Framer Motion", "Realtime Dashboard"],
     socials: {
       github: "https://github.com/aulia-ariobimo",
     },
+    width: 56,
   },
 ];
 
@@ -174,8 +174,8 @@ export function AboutContent({ locale }: AboutContentProps) {
       transition: shouldReduceMotion
         ? { duration: 0 }
         : {
-            staggerChildren: 0.1,
             delayChildren: 0.1,
+            staggerChildren: 0.1,
           },
     },
   };
@@ -184,10 +184,10 @@ export function AboutContent({ locale }: AboutContentProps) {
     hidden: shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 25 },
     visible: {
       opacity: 1,
-      y: 0,
       transition: shouldReduceMotion
         ? { duration: 0 }
         : { duration: 0.45, ease: "easeOut" },
+      y: 0,
     },
   };
 
@@ -207,10 +207,10 @@ export function AboutContent({ locale }: AboutContentProps) {
     hidden: shouldReduceMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -16 },
     visible: {
       opacity: 1,
-      x: 0,
       transition: shouldReduceMotion
         ? { duration: 0 }
         : { duration: 0.35, ease: "easeOut" },
+      x: 0,
     },
   };
 
@@ -282,32 +282,32 @@ export function AboutContent({ locale }: AboutContentProps) {
           >
             {[
               {
-                title: activeMessages.about.endpointManagementTitle,
                 desc: activeMessages.about.endpointManagementDescription,
+                title: activeMessages.about.endpointManagementTitle,
               },
               {
-                title: activeMessages.about.developerToolsTitle,
                 desc: activeMessages.about.developerToolsDescription,
+                title: activeMessages.about.developerToolsTitle,
               },
               {
-                title: activeMessages.about.socketTestingTitle,
                 desc: activeMessages.about.socketTestingDescription,
+                title: activeMessages.about.socketTestingTitle,
               },
               {
-                title: activeMessages.about.socksRelayTitle,
                 desc: activeMessages.about.socksRelayDescription,
+                title: activeMessages.about.socksRelayTitle,
               },
               {
-                title: activeMessages.about.userAdministrationTitle,
                 desc: activeMessages.about.userAdministrationDescription,
+                title: activeMessages.about.userAdministrationTitle,
               },
               {
-                title: activeMessages.about.jsonDrivenTitle,
                 desc: activeMessages.about.jsonDrivenDescription,
+                title: activeMessages.about.jsonDrivenTitle,
               },
               {
-                title: activeMessages.about.modernStackTitle,
                 desc: activeMessages.about.modernStackDescription,
+                title: activeMessages.about.modernStackTitle,
               },
             ].map((feature) => (
               <motion.li

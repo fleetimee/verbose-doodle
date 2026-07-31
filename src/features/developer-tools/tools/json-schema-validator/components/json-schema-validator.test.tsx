@@ -27,18 +27,18 @@ function renderValidator() {
 
 function successResponse(overrides: Record<string, unknown> = {}): Response {
   return Response.json({
-    responseCode: "00",
-    responseDesc: "success",
     data: {
-      outcome: "VALIDATION_RESULT",
-      valid: true,
-      resolvedDialect: "DRAFT_2020_12",
-      errorCount: 0,
-      truncated: false,
-      durationMs: 2,
       diagnostics: [],
+      durationMs: 2,
+      errorCount: 0,
+      outcome: "VALIDATION_RESULT",
+      resolvedDialect: "DRAFT_2020_12",
+      truncated: false,
+      valid: true,
       ...overrides,
     },
+    responseCode: "00",
+    responseDesc: "success",
   });
 }
 
@@ -128,17 +128,17 @@ describe("JsonSchemaValidator", () => {
     });
     globalThis.fetch = mock(async () =>
       successResponse({
-        valid: false,
-        errorCount: 1,
         diagnostics: [
           {
-            source: "INSTANCE",
-            message: "must be string",
             instancePath: "/email",
-            schemaPath: "#/properties/email/type",
             keyword: "type",
+            message: "must be string",
+            schemaPath: "#/properties/email/type",
+            source: "INSTANCE",
           },
         ],
+        errorCount: 1,
+        valid: false,
       })
     ) as unknown as typeof fetch;
     renderValidator();
@@ -155,22 +155,22 @@ describe("JsonSchemaValidator", () => {
     const user = userEvent.setup();
     const responses = [
       successResponse({
-        outcome: "PARSE_ERROR",
-        valid: null,
-        resolvedDialect: null,
+        diagnostics: [{ message: "Unexpected token", source: "SCHEMA" }],
         errorCount: 1,
-        diagnostics: [{ source: "SCHEMA", message: "Unexpected token" }],
+        outcome: "PARSE_ERROR",
+        resolvedDialect: null,
+        valid: null,
       }),
       successResponse({
+        diagnostics: [{ message: "Invalid type", source: "SCHEMA" }],
+        errorCount: 1,
         outcome: "SCHEMA_ERROR",
         valid: null,
-        errorCount: 1,
-        diagnostics: [{ source: "SCHEMA", message: "Invalid type" }],
       }),
       successResponse({
         outcome: "TIMEOUT",
-        valid: null,
         resolvedDialect: null,
+        valid: null,
       }),
       Response.json(
         { responseCode: "413", responseDesc: "too large" },

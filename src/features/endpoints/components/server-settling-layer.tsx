@@ -69,9 +69,9 @@ export function ServerSettlingLayer({
       transition={{ duration: MOTION_DURATION.fast, ease: MOTION_EASE.out }}
     >
       <motion.div
-        animate={{ scale: 1, opacity: 1 }}
+        animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md space-y-8 px-8"
-        initial={{ scale: shouldReduceMotion ? 1 : 0.95, opacity: 0 }}
+        initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.95 }}
         transition={{
           duration: MOTION_DURATION.standard,
           ease: MOTION_EASE.out,
@@ -96,8 +96,8 @@ export function ServerSettlingLayer({
               className="absolute inset-0 rounded-full bg-primary/5"
               transition={{
                 duration: PULSE_DURATION_S,
-                repeat: shouldReduceMotion ? 0 : Number.POSITIVE_INFINITY,
                 ease: "easeInOut",
+                repeat: shouldReduceMotion ? 0 : Number.POSITIVE_INFINITY,
               }}
             />
           </div>

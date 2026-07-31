@@ -8,9 +8,9 @@ describe("loginSchema", () => {
   describe("with valid credentials", () => {
     test("should accept valid username and password", () => {
       const validData = {
-        username: "user123",
-        password: "password123",
         captchaVerified: true,
+        password: "password123",
+        username: "user123",
       };
 
       const result = loginSchema.safeParse(validData);
@@ -19,9 +19,9 @@ describe("loginSchema", () => {
 
     test("should accept valid credentials with captcha verified", () => {
       const validData = {
-        username: "admin",
-        password: "securePass123",
         captchaVerified: true,
+        password: "securePass123",
+        username: "admin",
       };
 
       const result = loginSchema.safeParse(validData);
@@ -33,9 +33,9 @@ describe("loginSchema", () => {
 
     test("should accept exactly 8 character password", () => {
       const validData = {
-        username: "testuser",
-        password: "12345678",
         captchaVerified: true,
+        password: "12345678",
+        username: "testuser",
       };
 
       const result = loginSchema.safeParse(validData);
@@ -46,9 +46,9 @@ describe("loginSchema", () => {
   describe("with invalid username", () => {
     test("should reject empty username", () => {
       const invalidData = {
-        username: "",
-        password: "validPassword123",
         captchaVerified: true,
+        password: "validPassword123",
+        username: "",
       };
 
       const result = loginSchema.safeParse(invalidData);
@@ -66,9 +66,9 @@ describe("loginSchema", () => {
   describe("with invalid password", () => {
     test("should reject password shorter than 8 characters", () => {
       const invalidData = {
-        username: "user123",
-        password: "short",
         captchaVerified: true,
+        password: "short",
+        username: "user123",
       };
 
       const result = loginSchema.safeParse(invalidData);
@@ -84,9 +84,9 @@ describe("loginSchema", () => {
 
     test("should reject 7 character password", () => {
       const invalidData = {
-        username: "user123",
-        password: "1234567", // exactly 7 chars
         captchaVerified: true,
+        password: "1234567", // exactly 7 chars
+        username: "user123",
       };
 
       const result = loginSchema.safeParse(invalidData);
@@ -95,9 +95,9 @@ describe("loginSchema", () => {
 
     test("should reject empty password", () => {
       const invalidData = {
-        username: "user123",
-        password: "",
         captchaVerified: true,
+        password: "",
+        username: "user123",
       };
 
       const result = loginSchema.safeParse(invalidData);
@@ -108,8 +108,8 @@ describe("loginSchema", () => {
   describe("with missing fields", () => {
     test("should reject missing username", () => {
       const invalidData = {
-        password: "validPassword123",
         captchaVerified: true,
+        password: "validPassword123",
       };
 
       const result = loginSchema.safeParse(invalidData);
@@ -118,8 +118,8 @@ describe("loginSchema", () => {
 
     test("should reject missing password", () => {
       const invalidData = {
-        username: "user123",
         captchaVerified: true,
+        username: "user123",
       };
 
       const result = loginSchema.safeParse(invalidData);
@@ -128,8 +128,8 @@ describe("loginSchema", () => {
 
     test("should reject missing captchaVerified", () => {
       const invalidData = {
-        username: "user123",
         password: "validPassword123",
+        username: "user123",
       };
 
       const result = loginSchema.safeParse(invalidData);
@@ -148,9 +148,9 @@ describe("loginSchema", () => {
   describe("with invalid captcha", () => {
     test("should reject when captchaVerified is false", () => {
       const invalidData = {
-        username: "user123",
-        password: "validPassword123",
         captchaVerified: false,
+        password: "validPassword123",
+        username: "user123",
       };
 
       const result = loginSchema.safeParse(invalidData);
@@ -168,9 +168,9 @@ describe("loginSchema", () => {
   describe("type inference", () => {
     test("should have correct TypeScript type", () => {
       const validData: LoginFormData = {
-        username: "user123",
-        password: "password123",
         captchaVerified: true,
+        password: "password123",
+        username: "user123",
       };
 
       expect(validData.username).toBeString();

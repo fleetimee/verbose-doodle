@@ -99,8 +99,8 @@ describe("NFC Reader Inspector", () => {
       bridgeVersion: "0.1.0",
       connectionStatus: "connected",
       latestScan: {
-        decodingStatus: "decoded",
         decodedText: "Hello",
+        decodingStatus: "decoded",
         rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
         records: [
           {

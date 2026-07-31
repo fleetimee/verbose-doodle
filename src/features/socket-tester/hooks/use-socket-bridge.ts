@@ -25,13 +25,13 @@ function appendBridgeError(
   error?: unknown
 ) {
   engine.appendLog({
-    id: crypto.randomUUID(),
-    timestamp: new Date().toLocaleTimeString(),
+    data: message,
     direction: "err",
+    format: "text",
+    id: crypto.randomUUID(),
     protocol: "tcp-client",
     scope: "bridge",
-    data: message,
-    format: "text",
+    timestamp: new Date().toLocaleTimeString(),
     ...(error === undefined ? {} : { metadata: { error: String(error) } }),
   });
 }
@@ -135,14 +135,14 @@ export function useSocketBridge() {
       if (!connection.send(JSON.stringify(command))) {
         toast.error(messages.socketTester.bridgeConnectFirstError);
         engine.appendLog({
-          id: crypto.randomUUID(),
-          timestamp: new Date().toLocaleTimeString(),
+          data: "Command rejected: bridge is offline",
           direction: "err",
+          format: "text",
+          id: crypto.randomUUID(),
+          metadata: { command },
           protocol: "tcp-client",
           scope: "bridge",
-          data: "Command rejected: bridge is offline",
-          format: "text",
-          metadata: { command },
+          timestamp: new Date().toLocaleTimeString(),
         });
         return false;
       }

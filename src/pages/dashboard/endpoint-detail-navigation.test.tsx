@@ -16,10 +16,9 @@ const EDIT_ENDPOINT_BUTTON_NAME = /edit endpoint/i;
 const METRICS_BUTTON_NAME = /metrics/i;
 
 const endpointOne = {
-  biller_slug: "pln",
   biller_name: "PLN",
+  biller_slug: "pln",
   endpoint_id: "endpoint-1",
-  slug: "pln-get-inquiry-a1b2c3",
   method: "GET",
   responses: [
     {
@@ -30,16 +29,17 @@ const endpointOne = {
       status_code: 200,
     },
   ],
+  slug: "pln-get-inquiry-a1b2c3",
   url: "/inquiry",
 };
 
 const endpointTwo = {
-  biller_slug: "pdam",
   biller_name: "PDAM",
+  biller_slug: "pdam",
   endpoint_id: "endpoint-2",
-  slug: "pdam-post-payment-d4e5f6",
   method: "POST",
   responses: [],
+  slug: "pdam-post-payment-d4e5f6",
   url: "/payment",
 };
 
@@ -93,7 +93,7 @@ function installApiMock() {
 
     if (url.includes("/traffic-logs")) {
       return Promise.resolve(
-        jsonResponse({ data: { items: [], hasMore: false, nextCursor: null } })
+        jsonResponse({ data: { hasMore: false, items: [], nextCursor: null } })
       );
     }
 
@@ -220,27 +220,30 @@ describe("EndpointDetailPage navigation protection", () => {
   test.each([
     ["endpoint", switchEndpoint],
     ["biller", switchBiller],
-  ])("guards a dirty URL edit before an %s switch and keeps editing when cancelled", async (_scope, switchWorkspace) => {
-    const user = userEvent.setup();
-    renderEndpointDetail();
+  ])(
+    "guards a dirty URL edit before an %s switch and keeps editing when cancelled",
+    async (_scope, switchWorkspace) => {
+      const user = userEvent.setup();
+      renderEndpointDetail();
 
-    await user.click(
-      await screen.findByRole("button", { name: EDIT_ENDPOINT_BUTTON_NAME })
-    );
-    const urlInput = await screen.findByDisplayValue("/inquiry");
-    await user.clear(urlInput);
-    await user.type(urlInput, "/changed");
+      await user.click(
+        await screen.findByRole("button", { name: EDIT_ENDPOINT_BUTTON_NAME })
+      );
+      const urlInput = await screen.findByDisplayValue("/inquiry");
+      await user.clear(urlInput);
+      await user.type(urlInput, "/changed");
 
-    await switchWorkspace(user);
+      await switchWorkspace(user);
 
-    expect(await screen.findByRole("alertdialog")).toBeDefined();
-    await user.click(screen.getByRole("button", { name: "Keep editing" }));
+      expect(await screen.findByRole("alertdialog")).toBeDefined();
+      await user.click(screen.getByRole("button", { name: "Keep editing" }));
 
-    expect(screen.getByDisplayValue("/changed")).toBeDefined();
-    expect(screen.getByTestId("location").textContent).toContain(
-      "pln-get-inquiry-a1b2c3"
-    );
-  });
+      expect(screen.getByDisplayValue("/changed")).toBeDefined();
+      expect(screen.getByTestId("location").textContent).toContain(
+        "pln-get-inquiry-a1b2c3"
+      );
+    }
+  );
 
   test("protects a dirty Add Response form during browser back navigation", async () => {
     const user = userEvent.setup();
@@ -311,35 +314,37 @@ describe("EndpointDetailPage navigation protection", () => {
     });
   });
 
-  test.each([
-    "Add Response",
-    "response editor",
-  ] as const)("closes a clean %s overlay before an allowed browser-history switch", async (overlay) => {
-    const user = userEvent.setup();
-    renderEndpointDetail();
+  test.each(["Add Response", "response editor"] as const)(
+    "closes a clean %s overlay before an allowed browser-history switch",
+    async (overlay) => {
+      const user = userEvent.setup();
+      renderEndpointDetail();
 
-    if (overlay === "Add Response") {
-      await user.click(
-        await screen.findByRole("button", { name: "Add Response" })
-      );
-      expect(
-        await screen.findByPlaceholderText("success_response")
-      ).toBeDefined();
-    } else {
-      await openResponseEditor(user);
-      expect(await screen.findByDisplayValue("Inquiry response")).toBeDefined();
+      if (overlay === "Add Response") {
+        await user.click(
+          await screen.findByRole("button", { name: "Add Response" })
+        );
+        expect(
+          await screen.findByPlaceholderText("success_response")
+        ).toBeDefined();
+      } else {
+        await openResponseEditor(user);
+        expect(
+          await screen.findByDisplayValue("Inquiry response")
+        ).toBeDefined();
+      }
+
+      requestEndpointSwitch();
+
+      await waitFor(() => {
+        expect(screen.getByTestId("location").textContent).toContain(
+          "pdam-post-payment-d4e5f6"
+        );
+      });
+      expect(screen.queryByPlaceholderText("success_response")).toBeNull();
+      expect(screen.queryByDisplayValue("Inquiry response")).toBeNull();
     }
-
-    requestEndpointSwitch();
-
-    await waitFor(() => {
-      expect(screen.getByTestId("location").textContent).toContain(
-        "pdam-post-payment-d4e5f6"
-      );
-    });
-    expect(screen.queryByPlaceholderText("success_response")).toBeNull();
-    expect(screen.queryByDisplayValue("Inquiry response")).toBeNull();
-  });
+  );
 
   test("guards native browser history while a response edit is dirty", async () => {
     const user = userEvent.setup();

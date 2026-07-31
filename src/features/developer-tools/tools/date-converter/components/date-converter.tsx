@@ -92,8 +92,8 @@ const childVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
+    transition: { bounce: 0.08, duration: 0.32, type: "spring" as const },
     y: 0,
-    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -105,22 +105,22 @@ const TOUR_TARGETS = {
 } as const;
 const TOUR_STEPS: readonly DeveloperToolTourStep[] = [
   {
-    selectorId: TOUR_TARGETS.controls,
-    position: "bottom",
-    title: messages.dateConverter.tour.controlsTitle,
     description: messages.dateConverter.tour.controlsDescription,
+    position: "bottom",
+    selectorId: TOUR_TARGETS.controls,
+    title: messages.dateConverter.tour.controlsTitle,
   },
   {
-    selectorId: TOUR_TARGETS.results,
-    position: "top",
-    title: messages.dateConverter.tour.resultsTitle,
     description: messages.dateConverter.tour.resultsDescription,
+    position: "top",
+    selectorId: TOUR_TARGETS.results,
+    title: messages.dateConverter.tour.resultsTitle,
   },
   {
-    selectorId: TOUR_TARGETS.timezone,
-    position: "top",
-    title: messages.dateConverter.tour.timezoneTitle,
     description: messages.dateConverter.tour.timezoneDescription,
+    position: "top",
+    selectorId: TOUR_TARGETS.timezone,
+    title: messages.dateConverter.tour.timezoneTitle,
   },
 ];
 

@@ -82,12 +82,12 @@ function decodeToken(
     }
 
     return {
+      expiresAt,
       user: {
+        role: payload.role,
         user_id: payload.user_id,
         username: payload.username,
-        role: payload.role,
       },
-      expiresAt,
     };
   } catch {
     return null;
@@ -102,11 +102,11 @@ export function createAuthenticatedSession(
   let refreshOperation: Promise<AuthenticatedSessionSnapshot> | null = null;
   let disposed = false;
   let snapshot: AuthenticatedSessionSnapshot = {
-    user: null,
     accessToken: null,
-    refreshToken: null,
     expiresAt: null,
     isAuthenticated: false,
+    refreshToken: null,
+    user: null,
   };
 
   const notify = () => {
@@ -149,11 +149,11 @@ export function createAuthenticatedSession(
     if (!decoded) {
       options.storage.clear();
       snapshot = {
-        user: null,
         accessToken: null,
-        refreshToken: null,
         expiresAt: null,
         isAuthenticated: false,
+        refreshToken: null,
+        user: null,
       };
       cancelExpiry();
       if (notifyListeners) {
@@ -164,11 +164,11 @@ export function createAuthenticatedSession(
 
     options.storage.write(tokens);
     snapshot = {
-      user: decoded.user,
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
       expiresAt: decoded.expiresAt,
       isAuthenticated: true,
+      refreshToken: tokens.refreshToken,
+      user: decoded.user,
     };
     scheduleRefresh();
     if (notifyListeners) {
@@ -178,36 +178,20 @@ export function createAuthenticatedSession(
   };
 
   const session = {
-    getSnapshot: () => snapshot,
-
-    subscribe: (listener: Listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
+    can: (ability: Ability) => {
+      const role = snapshot.user?.role;
+      return role ? ROLE_ABILITIES[role][ability] : false;
     },
 
-    signIn: (tokens: SessionTokens) => {
-      if (disposed || !setSnapshot(tokens)) {
-        return false;
-      }
-      return true;
-    },
-
-    signOut: () => {
-      if (disposed || !snapshot.isAuthenticated) {
+    dispose: () => {
+      if (disposed) {
         return;
       }
+      disposed = true;
       cancelExpiry();
-      options.storage.clear();
-      options.clearPrivateCache();
-      snapshot = {
-        user: null,
-        accessToken: null,
-        refreshToken: null,
-        expiresAt: null,
-        isAuthenticated: false,
-      };
-      notify();
+      listeners.clear();
     },
+    getSnapshot: () => snapshot,
 
     refresh: (): Promise<AuthenticatedSessionSnapshot> => {
       if (disposed || snapshot.refreshToken === null) {
@@ -232,18 +216,33 @@ export function createAuthenticatedSession(
       return refreshOperation;
     },
 
-    can: (ability: Ability) => {
-      const role = snapshot.user?.role;
-      return role ? ROLE_ABILITIES[role][ability] : false;
+    signIn: (tokens: SessionTokens) => {
+      if (disposed || !setSnapshot(tokens)) {
+        return false;
+      }
+      return true;
     },
 
-    dispose: () => {
-      if (disposed) {
+    signOut: () => {
+      if (disposed || !snapshot.isAuthenticated) {
         return;
       }
-      disposed = true;
       cancelExpiry();
-      listeners.clear();
+      options.storage.clear();
+      options.clearPrivateCache();
+      snapshot = {
+        accessToken: null,
+        expiresAt: null,
+        isAuthenticated: false,
+        refreshToken: null,
+        user: null,
+      };
+      notify();
+    },
+
+    subscribe: (listener: Listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
     },
   };
 

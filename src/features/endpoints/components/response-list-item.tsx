@@ -139,9 +139,9 @@ export function ResponseListItem({
   }) => {
     updateResponse(
       {
+        changes: data,
         endpointId,
         responseId: response.id,
-        changes: data,
       },
       {
         onSuccess: () => {

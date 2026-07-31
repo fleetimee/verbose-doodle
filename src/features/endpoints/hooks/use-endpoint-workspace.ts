@@ -28,11 +28,11 @@ export function useEndpointWorkspace(
     .getQueryData<Endpoint[]>(endpointDataQueryKeys.catalog)
     ?.find((candidate) => candidate.slug === endpointSlug);
   const endpoint = useQuery<Endpoint | null, ApiError>({
+    enabled: Boolean(endpointSlug),
     initialData: catalogEndpoint,
     initialDataUpdatedAt: catalogEndpoint ? 0 : undefined,
-    queryKey: endpointDataQueryKeys.workspace(endpointSlug),
     queryFn: () => adapter.getEndpoint(endpointSlug),
-    enabled: Boolean(endpointSlug),
+    queryKey: endpointDataQueryKeys.workspace(endpointSlug),
     staleTime: 5 * 60 * 1000,
   });
   const invalidateWorkspace = async () => {
@@ -49,8 +49,13 @@ export function useEndpointWorkspace(
     ApiError,
     CreateResponseInput
   >({
-    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.createResponse,
+    mutationKey: ENDPOINT_MUTATION_KEY,
+    onError: (error) => {
+      toast.error(messages.endpoints.responseCreateError, {
+        description: error.message,
+      });
+    },
     onSuccess: async (response) => {
       toast.success(messages.endpoints.responseCreateSuccess, {
         description: formatMessage(
@@ -62,42 +67,37 @@ export function useEndpointWorkspace(
       });
       await invalidateWorkspace();
     },
-    onError: (error) => {
-      toast.error(messages.endpoints.responseCreateError, {
-        description: error.message,
-      });
-    },
   });
   const updateResponse = useMutation<
     EndpointResponse,
     ApiError,
     UpdateResponseInput
   >({
-    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.updateResponse,
-    onSuccess: async () => {
-      toast.success(messages.endpoints.responseUpdateSuccess);
-      await invalidateWorkspace();
-    },
+    mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
       toast.error(messages.endpoints.responseUpdateError, {
         description: error.message,
       });
     },
+    onSuccess: async () => {
+      toast.success(messages.endpoints.responseUpdateSuccess);
+      await invalidateWorkspace();
+    },
   });
   const deleteResponse = useMutation<void, ApiError, ResponseActivationInput>({
-    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.deleteResponse,
+    mutationKey: ENDPOINT_MUTATION_KEY,
+    onError: (error) => {
+      toast.error(messages.endpoints.responseDeleteError, {
+        description: error.message,
+      });
+    },
     onSuccess: async () => {
       toast.success(messages.endpoints.responseDeleteSuccessTitle, {
         description: messages.endpoints.responseDeleteSuccessDescription,
       });
       await invalidateWorkspace();
-    },
-    onError: (error) => {
-      toast.error(messages.endpoints.responseDeleteError, {
-        description: error.message,
-      });
     },
   });
   const activateResponse = useMutation<
@@ -105,54 +105,54 @@ export function useEndpointWorkspace(
     ApiError,
     ResponseActivationInput
   >({
-    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.activateResponse,
-    onSuccess: invalidateWorkspace,
+    mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
       toast.error("Failed to activate response", {
         description: error.message,
       });
     },
+    onSuccess: invalidateWorkspace,
   });
   const deactivateResponse = useMutation<
     EndpointResponse,
     ApiError,
     ResponseActivationInput
   >({
-    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.deactivateResponse,
-    onSuccess: invalidateWorkspace,
+    mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
       toast.error("Failed to deactivate response", {
         description: error.message,
       });
     },
+    onSuccess: invalidateWorkspace,
   });
   const updateResponseSimulation = useMutation<
     EndpointResponse,
     ApiError,
     ResponseSimulationInput
   >({
-    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.updateResponseSimulation,
-    onSuccess: async () => {
-      toast.success("Simulation settings updated successfully");
-      await invalidateWorkspace();
-    },
+    mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
       toast.error("Failed to update simulation settings", {
         description: error.message,
       });
     },
+    onSuccess: async () => {
+      toast.success("Simulation settings updated successfully");
+      await invalidateWorkspace();
+    },
   });
 
   return {
-    endpoint,
-    createResponse,
-    updateResponse,
-    deleteResponse,
     activateResponse,
+    createResponse,
     deactivateResponse,
+    deleteResponse,
+    endpoint,
+    updateResponse,
     updateResponseSimulation,
   };
 }

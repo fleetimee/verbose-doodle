@@ -40,7 +40,6 @@ describe("convertDocument", () => {
     const scalar = convertDocument("こんにちは", "yaml");
 
     expect(collection).toEqual({
-      targetFormat: "json",
       output: [
         "{",
         '  "customer": {',
@@ -54,6 +53,7 @@ describe("convertDocument", () => {
         '  "nothing": null',
         "}",
       ].join("\n"),
+      targetFormat: "json",
     });
     expect(scalar.output).toBe('"こんにちは"');
   });

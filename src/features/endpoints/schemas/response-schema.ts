@@ -6,10 +6,7 @@ const MIN_STATUS_CODE = 100;
 const MAX_STATUS_CODE = 599;
 
 export const responseSchema = z.object({
-  name: z
-    .string()
-    .min(1, messages.endpoints.nameRequiredError)
-    .max(MAX_NAME_LENGTH, messages.endpoints.nameTooLongError),
+  activated: z.boolean().optional(),
   json: z
     .string()
     .min(1, messages.endpoints.jsonRequiredError)
@@ -26,12 +23,15 @@ export const responseSchema = z.object({
         message: messages.endpoints.invalidJsonError,
       }
     ),
+  name: z
+    .string()
+    .min(1, messages.endpoints.nameRequiredError)
+    .max(MAX_NAME_LENGTH, messages.endpoints.nameTooLongError),
   statusCode: z
     .number()
     .int()
     .min(MIN_STATUS_CODE, messages.endpoints.statusCodeRangeError)
     .max(MAX_STATUS_CODE, messages.endpoints.statusCodeRangeError),
-  activated: z.boolean().optional(),
 });
 
 export type ResponseFormData = z.infer<typeof responseSchema>;

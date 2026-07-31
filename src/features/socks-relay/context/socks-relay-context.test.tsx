@@ -52,7 +52,7 @@ class FakeWebSocket {
   }
 }
 
-const TRAILING_PADDING_REGEX = /=+$/u;
+const TRAILING_PADDING_REGEX = /[=]+$/u;
 
 function createRelayToken(): string {
   const encode = (value: string) =>
@@ -108,15 +108,15 @@ describe("SocksRelayProvider", () => {
     const fetchMock = (() => {
       ticketNumber += 1;
       return Promise.resolve({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({
           data: {
-            ticket: `ticket-${ticketNumber}`,
             expiresAt: "2026-07-14T00:00:30Z",
+            ticket: `ticket-${ticketNumber}`,
           },
         }),
+        ok: true,
+        status: 200,
       } as Response);
     }) as unknown as typeof fetch;
     fetchSpy = spyOn(globalThis, "fetch").mockImplementation(fetchMock);
@@ -148,12 +148,12 @@ describe("SocksRelayProvider", () => {
     act(() => {
       FakeWebSocket.instances[0]?.onmessage?.({
         data: JSON.stringify({
-          type: "relay_started",
           payload: {
-            relayId: "relay-smoke-18096",
-            mode: "REST_API",
             listeningPort: 18_096,
+            mode: "REST_API",
+            relayId: "relay-smoke-18096",
           },
+          type: "relay_started",
         }),
       });
     });
@@ -210,8 +210,8 @@ describe("SocksRelayProvider", () => {
       for (let index = 0; index <= 1000; index += 1) {
         FakeWebSocket.instances[0]?.onmessage?.({
           data: JSON.stringify({
+            payload: { mode: "REST_API", relayId: `relay-${index}` },
             type: "relay_message",
-            payload: { relayId: `relay-${index}`, mode: "REST_API" },
           }),
         });
       }
@@ -230,15 +230,15 @@ describe("SocksRelayProvider", () => {
       })) as unknown as typeof fetch;
     const currentFetch = (() =>
       Promise.resolve({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({
           data: {
-            ticket: "current-ticket",
             expiresAt: "2026-07-14T00:00:30Z",
+            ticket: "current-ticket",
           },
         }),
+        ok: true,
+        status: 200,
       } as Response)) as unknown as typeof fetch;
     fetchSpy.mockImplementationOnce(deferredFetch);
     fetchSpy.mockImplementationOnce(currentFetch);
@@ -259,15 +259,15 @@ describe("SocksRelayProvider", () => {
 
     await act(async () => {
       resolveFirstTicket?.({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({
           data: {
-            ticket: "stale-ticket",
             expiresAt: "2026-07-14T00:00:30Z",
+            ticket: "stale-ticket",
           },
         }),
+        ok: true,
+        status: 200,
       } as Response);
       await Promise.resolve();
     });

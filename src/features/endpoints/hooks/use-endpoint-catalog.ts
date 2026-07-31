@@ -23,13 +23,18 @@ export function useEndpointCatalog(
 ) {
   const queryClient = useQueryClient();
   const endpoints = useQuery<Endpoint[], ApiError>({
-    queryKey: endpointDataQueryKeys.catalog,
     queryFn: adapter.listEndpoints,
+    queryKey: endpointDataQueryKeys.catalog,
     staleTime: 5 * 60 * 1000,
   });
   const createEndpoint = useMutation<Endpoint, ApiError, CreateEndpointInput>({
-    mutationKey: ENDPOINT_MUTATION_KEY,
     mutationFn: adapter.createEndpoint,
+    mutationKey: ENDPOINT_MUTATION_KEY,
+    onError: (error) => {
+      toast.error("Failed to create endpoint", {
+        description: error.message,
+      });
+    },
     onSuccess: async () => {
       toast.success("Success", {
         description: "Endpoint created successfully",
@@ -39,15 +44,15 @@ export function useEndpointCatalog(
       });
       await queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
     },
+  });
+  const updateEndpoint = useMutation<Endpoint, ApiError, UpdateEndpointInput>({
+    mutationFn: adapter.updateEndpoint,
+    mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
-      toast.error("Failed to create endpoint", {
+      toast.error("Failed to update endpoint", {
         description: error.message,
       });
     },
-  });
-  const updateEndpoint = useMutation<Endpoint, ApiError, UpdateEndpointInput>({
-    mutationKey: ENDPOINT_MUTATION_KEY,
-    mutationFn: adapter.updateEndpoint,
     onSuccess: async (_, input) => {
       toast.success("Success", {
         description: "Endpoint updated successfully",
@@ -60,15 +65,15 @@ export function useEndpointCatalog(
       });
       await queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
     },
+  });
+  const deleteEndpoint = useMutation<void, ApiError, string>({
+    mutationFn: adapter.deleteEndpoint,
+    mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
-      toast.error("Failed to update endpoint", {
+      toast.error("Failed to delete endpoint", {
         description: error.message,
       });
     },
-  });
-  const deleteEndpoint = useMutation<void, ApiError, string>({
-    mutationKey: ENDPOINT_MUTATION_KEY,
-    mutationFn: adapter.deleteEndpoint,
     onSuccess: async (_, endpointSlug) => {
       toast.success("Success", {
         description: "Endpoint deleted successfully",
@@ -81,29 +86,24 @@ export function useEndpointCatalog(
       });
       await queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
     },
-    onError: (error) => {
-      toast.error("Failed to delete endpoint", {
-        description: error.message,
-      });
-    },
   });
 
   return {
-    endpoints,
     createEndpoint,
-    updateEndpoint,
     deleteEndpoint,
-    prefetchEndpoints: () =>
-      queryClient.prefetchQuery({
-        queryKey: endpointDataQueryKeys.catalog,
-        queryFn: adapter.listEndpoints,
-        staleTime: 5 * 60 * 1000,
-      }),
+    endpoints,
     prefetchEndpoint: (endpointSlug: string) =>
       queryClient.prefetchQuery({
-        queryKey: endpointDataQueryKeys.workspace(endpointSlug),
         queryFn: () => adapter.getEndpoint(endpointSlug),
+        queryKey: endpointDataQueryKeys.workspace(endpointSlug),
         staleTime: 5 * 60 * 1000,
       }),
+    prefetchEndpoints: () =>
+      queryClient.prefetchQuery({
+        queryFn: adapter.listEndpoints,
+        queryKey: endpointDataQueryKeys.catalog,
+        staleTime: 5 * 60 * 1000,
+      }),
+    updateEndpoint,
   };
 }

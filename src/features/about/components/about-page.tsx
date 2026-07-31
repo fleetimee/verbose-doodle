@@ -12,27 +12,27 @@ export function AboutPage() {
   const shouldReduceMotion = useReducedMotion();
 
   const pageContainerVariants: Variants = {
+    exit: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: shouldReduceMotion
         ? { duration: 0 }
         : {
-            staggerChildren: 0.15,
             delayChildren: 0.05,
+            staggerChildren: 0.15,
           },
     },
-    exit: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
   };
 
   const footerItemVariants: Variants = {
     hidden: shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
-      y: 0,
       transition: shouldReduceMotion
         ? { duration: 0 }
         : { duration: 0.4, ease: "easeOut" },
+      y: 0,
     },
   };
 

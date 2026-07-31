@@ -23,14 +23,14 @@ export function UserRoleCard({ data }: UserRoleCardProps) {
   const totalUsers = data.userStats.totalUsers;
   const roles = [
     {
+      icon: ShieldCheck,
       label: messages.overview.userRoleAdmin,
       value: data.userStats.adminUsers,
-      icon: ShieldCheck,
     },
     {
+      icon: User,
       label: messages.overview.userRoleRegular,
       value: data.userStats.regularUsers,
-      icon: User,
     },
   ];
 

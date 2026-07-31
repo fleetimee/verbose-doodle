@@ -58,12 +58,12 @@ export const LoginForm = ({
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
-      password: "",
       captchaVerified: false,
+      password: "",
+      username: "",
     },
+    resolver: zodResolver(loginSchema),
   });
 
   // Reset captcha when login fails

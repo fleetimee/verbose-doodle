@@ -34,8 +34,8 @@ async function deleteUser({
 
     if (!apiResponse.responseCode) {
       throw {
-        message: "Invalid response structure from server",
         code: "INVALID_RESPONSE",
+        message: "Invalid response structure from server",
         status: 500,
       } as ApiError;
     }
@@ -60,17 +60,17 @@ export function useDeleteUser() {
     DeleteUserRequest,
     ApiError
   >(deleteUser, {
+    onError: (error) => {
+      toast.error("Failed to delete user", {
+        description: error.message || "An unexpected error occurred",
+      });
+    },
     onSuccess: () => {
       toast.success("User deleted successfully");
 
       queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
       // Invalidate overview to update user count statistics
       queryClient.invalidateQueries({ queryKey: overviewQueryKeys.all });
-    },
-    onError: (error) => {
-      toast.error("Failed to delete user", {
-        description: error.message || "An unexpected error occurred",
-      });
     },
   });
 

@@ -14,8 +14,8 @@ describe("Error Handler utilities", () => {
   describe("getErrorMessage", () => {
     test("returns message for ApiError with code", () => {
       const error: ApiError = {
-        message: "Request timed out",
         code: "TIMEOUT",
+        message: "Request timed out",
       };
       expect(getErrorMessage(error)).toBe(
         "Request timed out. Please try again."
@@ -40,8 +40,8 @@ describe("Error Handler utilities", () => {
 
     test("prioritizes code over status when both exist", () => {
       const error: ApiError = {
-        message: "Some error",
         code: "TIMEOUT",
+        message: "Some error",
         status: 401,
       };
       // Should use TIMEOUT code, not 401 status
@@ -166,8 +166,8 @@ describe("Error Handler utilities", () => {
 
     test("showErrorToast calls toast.error with correct parameters", () => {
       const error: ApiError = {
-        message: "Test error",
         code: "TIMEOUT",
+        message: "Test error",
       };
 
       showErrorToast(error);

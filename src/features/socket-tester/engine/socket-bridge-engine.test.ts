@@ -40,30 +40,30 @@ describe("SocketBridgeEngine state machine", () => {
 
     // TCP client connected event
     engine.handleBridgeEvent({
-      type: "tcp_client_connected",
       payload: {},
+      type: "tcp_client_connected",
     });
     expect(engine.getState().tcpClient.connected).toBeTrue();
 
     // TCP server started event
     engine.handleBridgeEvent({
-      type: "tcp_server_started",
       payload: {},
+      type: "tcp_server_started",
     });
     expect(engine.getState().tcpServer.listening).toBeTrue();
 
     // TCP client connected to server
     engine.handleBridgeEvent({
+      payload: { address: "192.168.1.50:5000", clientId: "client-100" },
       type: "tcp_server_client_connected",
-      payload: { clientId: "client-100", address: "192.168.1.50:5000" },
     });
     expect(engine.getState().tcpServer.clients).toHaveLength(1);
     expect(engine.getState().tcpServer.clients[0].id).toBe("client-100");
 
     // UDP server started
     engine.handleBridgeEvent({
-      type: "udp_server_started",
       payload: {},
+      type: "udp_server_started",
     });
     expect(engine.getState().udpServer.listening).toBeTrue();
 
@@ -99,8 +99,8 @@ describe("SocketBridgeEngine state machine", () => {
 
     engine.prepareConnectTcpClient("127.0.0.1", 8080);
     engine.handleBridgeEvent({
-      type: "tcp_client_error",
       payload: { error: "Connection refused" },
+      type: "tcp_client_error",
     });
 
     expect(toastTriggered).toBeTrue();
@@ -110,9 +110,9 @@ describe("SocketBridgeEngine state machine", () => {
   test("resets connection states on bridge close", () => {
     const engine = new SocketBridgeEngine();
 
-    engine.handleBridgeEvent({ type: "tcp_client_connected", payload: {} });
-    engine.handleBridgeEvent({ type: "tcp_server_started", payload: {} });
-    engine.handleBridgeEvent({ type: "udp_server_started", payload: {} });
+    engine.handleBridgeEvent({ payload: {}, type: "tcp_client_connected" });
+    engine.handleBridgeEvent({ payload: {}, type: "tcp_server_started" });
+    engine.handleBridgeEvent({ payload: {}, type: "udp_server_started" });
 
     engine.resetOnClose();
     const state = engine.getState();

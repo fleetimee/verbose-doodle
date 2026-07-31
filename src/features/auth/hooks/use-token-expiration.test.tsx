@@ -5,7 +5,7 @@ import { MemoryRouter } from "react-router";
 import { AuthProvider } from "@/features/auth/context";
 import { useTokenExpiration } from "@/features/auth/hooks/use-token-expiration";
 
-const TRAILING_PADDING_REGEX = /=+$/u;
+const TRAILING_PADDING_REGEX = /[=]+$/u;
 const REMAINING_TIME_PATTERN = /^1m \d+s$/u;
 
 function toBase64Url(value: string): string {

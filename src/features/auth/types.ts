@@ -4,38 +4,38 @@ export const ROLE_ABILITIES = {
   ADMIN: {
     // Dynamic Endpoints
     canAccessEndpoints: true,
+    canActivateResponse: true,
+    canAddBiller: true,
+    canAddEndpoint: true,
+    canAddResponse: true,
+    canCreateUser: true,
+    canDeleteUser: true,
+    canEditEndpoint: true,
+    canUpdateUser: true,
 
     // Configuration
     canViewEndpoints: true,
-    canAddBiller: true,
-    canAddEndpoint: true,
-    canEditEndpoint: true,
-    canAddResponse: true,
-    canActivateResponse: true,
 
     // User Management
     canViewUsers: true,
-    canCreateUser: true,
-    canUpdateUser: true,
-    canDeleteUser: true,
   },
   USER: {
     // Dynamic Endpoints
     canAccessEndpoints: true,
+    canActivateResponse: false,
+    canAddBiller: false,
+    canAddEndpoint: false,
+    canAddResponse: false,
+    canCreateUser: false,
+    canDeleteUser: false,
+    canEditEndpoint: false,
+    canUpdateUser: false,
 
     // Configuration
     canViewEndpoints: true, // Read-only
-    canAddBiller: false,
-    canAddEndpoint: false,
-    canEditEndpoint: false,
-    canAddResponse: false,
-    canActivateResponse: false,
 
     // User Management
     canViewUsers: false,
-    canCreateUser: false,
-    canUpdateUser: false,
-    canDeleteUser: false,
   },
 } as const;
 

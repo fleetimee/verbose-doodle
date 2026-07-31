@@ -40,7 +40,35 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 function createBrowserSession(): AuthenticatedSession {
   return createAuthenticatedSession({
+    clearPrivateCache: () => queryClient.clear(),
+    clock: () => Date.now(),
+    refresh: async (refreshToken) => {
+      const response = await apiFetch<RefreshTokenResponse>(
+        API_ENDPOINTS.auth.refresh,
+        {
+          auth: false,
+          body: JSON.stringify({ refreshToken }),
+          emitUnauthorized: false,
+          method: "POST",
+          retryOnUnauthorized: false,
+        }
+      );
+
+      if (response.responseCode !== "00") {
+        throw new Error(response.responseDesc || "Failed to refresh token");
+      }
+
+      return response.data;
+    },
+    scheduler: {
+      cancel: (handle) => globalThis.clearTimeout(handle as number),
+      schedule: (callback, delayMs) => globalThis.setTimeout(callback, delayMs),
+    },
     storage: {
+      clear: () => {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("refresh_token");
+      },
       read: () => ({
         accessToken: localStorage.getItem("auth_token") ?? undefined,
         refreshToken: localStorage.getItem("refresh_token") ?? undefined,
@@ -53,35 +81,7 @@ function createBrowserSession(): AuthenticatedSession {
           localStorage.removeItem("refresh_token");
         }
       },
-      clear: () => {
-        localStorage.removeItem("auth_token");
-        localStorage.removeItem("refresh_token");
-      },
     },
-    clock: () => Date.now(),
-    scheduler: {
-      schedule: (callback, delayMs) => globalThis.setTimeout(callback, delayMs),
-      cancel: (handle) => globalThis.clearTimeout(handle as number),
-    },
-    refresh: async (refreshToken) => {
-      const response = await apiFetch<RefreshTokenResponse>(
-        API_ENDPOINTS.auth.refresh,
-        {
-          auth: false,
-          emitUnauthorized: false,
-          method: "POST",
-          retryOnUnauthorized: false,
-          body: JSON.stringify({ refreshToken }),
-        }
-      );
-
-      if (response.responseCode !== "00") {
-        throw new Error(response.responseDesc || "Failed to refresh token");
-      }
-
-      return response.data;
-    },
-    clearPrivateCache: () => queryClient.clear(),
   });
 }
 
@@ -144,11 +144,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        session,
-        snapshot,
         login,
         logout,
         refreshAuth,
+        session,
+        snapshot,
       }}
     >
       {children}

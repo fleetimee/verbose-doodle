@@ -22,8 +22,8 @@ async function createBiller(input: CreateBillerInput): Promise<Biller> {
 
   if (!response.data?.biller) {
     throw {
-      message: "Invalid response structure from server",
       code: "INVALID_RESPONSE",
+      message: "Invalid response structure from server",
       status: 500,
     } as ApiError;
   }
@@ -36,14 +36,14 @@ export function useCreateBiller() {
   const mutation = createMutationHook<Biller, CreateBillerInput, ApiError>(
     createBiller,
     {
-      onSuccess: async () => {
-        toast.success("Biller created successfully");
-        await queryClient.invalidateQueries({ queryKey: billerQueryKeys.all });
-      },
       onError: (error) => {
         toast.error("Failed to create biller", {
           description: error.message,
         });
+      },
+      onSuccess: async () => {
+        toast.success("Biller created successfully");
+        await queryClient.invalidateQueries({ queryKey: billerQueryKeys.all });
       },
     }
   );

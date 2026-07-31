@@ -6,12 +6,12 @@ import { messages } from "@/lib/i18n";
  */
 export const endpointUsageConfig = {
   requests: {
-    label: messages.overview.chartLabels.totalRequests,
     color: "var(--chart-1)",
+    label: messages.overview.chartLabels.totalRequests,
   },
   success: {
-    label: messages.overview.chartLabels.successful,
     color: "var(--chart-2)",
+    label: messages.overview.chartLabels.successful,
   },
 } satisfies ChartConfig;
 
@@ -19,25 +19,25 @@ export const endpointUsageConfig = {
  * Chart configuration for HTTP method distribution
  */
 export const methodDistributionConfig = {
-  get: {
-    label: "GET",
-    color: "var(--chart-1)",
-  },
-  post: {
-    label: "POST",
-    color: "var(--chart-2)",
-  },
-  put: {
-    label: "PUT",
-    color: "var(--chart-3)",
-  },
   delete: {
-    label: "DELETE",
     color: "var(--chart-4)",
+    label: "DELETE",
+  },
+  get: {
+    color: "var(--chart-1)",
+    label: "GET",
   },
   patch: {
-    label: "PATCH",
     color: "var(--chart-5)",
+    label: "PATCH",
+  },
+  post: {
+    color: "var(--chart-2)",
+    label: "POST",
+  },
+  put: {
+    color: "var(--chart-3)",
+    label: "PUT",
   },
 } satisfies ChartConfig;
 
@@ -46,12 +46,12 @@ export const methodDistributionConfig = {
  */
 export const responseTimeConfig = {
   avgResponseTime: {
-    label: messages.overview.chartLabels.avgResponseTime,
     color: "var(--chart-1)",
+    label: messages.overview.chartLabels.avgResponseTime,
   },
   p95ResponseTime: {
-    label: messages.overview.chartLabels.p95ResponseTime,
     color: "var(--chart-2)",
+    label: messages.overview.chartLabels.p95ResponseTime,
   },
 } satisfies ChartConfig;
 
@@ -60,15 +60,15 @@ export const responseTimeConfig = {
  */
 export const endpointStatusConfig = {
   active: {
-    label: messages.overview.chartLabels.active,
     color: "var(--chart-2)",
-  },
-  inactive: {
-    label: messages.overview.chartLabels.inactive,
-    color: "var(--chart-3)",
+    label: messages.overview.chartLabels.active,
   },
   deprecated: {
-    label: messages.overview.chartLabels.deprecated,
     color: "var(--chart-4)",
+    label: messages.overview.chartLabels.deprecated,
+  },
+  inactive: {
+    color: "var(--chart-3)",
+    label: messages.overview.chartLabels.inactive,
   },
 } satisfies ChartConfig;

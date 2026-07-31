@@ -2,10 +2,10 @@ import { describe, expect, test } from "bun:test";
 import { responseSchema } from "@/features/endpoints/schemas/response-schema";
 
 const VALID_RESPONSE_INPUT = {
-  name: "Demo Response",
-  json: '{"message":"ok"}',
-  statusCode: 200,
   activated: true,
+  json: '{"message":"ok"}',
+  name: "Demo Response",
+  statusCode: 200,
 };
 
 function getIssueMessage(

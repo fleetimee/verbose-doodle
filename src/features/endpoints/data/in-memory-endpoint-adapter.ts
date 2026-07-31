@@ -34,13 +34,13 @@ const cloneLog = (log: EndpointTrafficLog): EndpointTrafficLog => ({
 });
 
 const emptyMetric = (): EndpointMetric => ({
-  requestCount: 0,
+  averageDurationMs: 0,
   hitStatusCounts: {},
   httpStatusCounts: {},
-  totalDurationMs: 0,
-  minDurationMs: null,
   maxDurationMs: null,
-  averageDurationMs: 0,
+  minDurationMs: null,
+  requestCount: 0,
+  totalDurationMs: 0,
 });
 
 function createResponseId(endpoints: readonly Endpoint[]): string {
@@ -118,33 +118,51 @@ export function createInMemoryEndpointAdapter(
   );
 
   return {
-    async listEndpoints() {
+    async activateResponse(input) {
       await Promise.resolve();
-      return endpoints.map(cloneEndpoint);
+      const endpoint = findEndpointById(endpoints, input.endpointId);
+      for (const response of endpoint.responses) {
+        response.activated = response.id === input.responseId;
+      }
+      return cloneResponse(findResponse(endpoints, input));
     },
-    async getEndpoint(endpointSlug) {
+    async clearTrafficLogs(endpointId) {
       await Promise.resolve();
-      const endpoint = endpoints.find((item) => item.slug === endpointSlug);
-      return endpoint ? cloneEndpoint(endpoint) : null;
+      trafficLogs.set(endpointId, []);
     },
     async createEndpoint(input: CreateEndpointInput) {
       await Promise.resolve();
       const endpoint: Endpoint = {
-        id: String(endpoints.length + 1),
-        slug: createEndpointSlug(input, String(endpoints.length + 1)),
-        method: input.method,
-        url: input.url,
         billerSlug: input.billerSlug,
+        id: String(endpoints.length + 1),
+        method: input.method,
         responses: [],
+        slug: createEndpointSlug(input, String(endpoints.length + 1)),
+        url: input.url,
       };
       endpoints.push(endpoint);
       return cloneEndpoint(endpoint);
     },
-    async updateEndpoint(input: UpdateEndpointInput) {
+    async createResponse(input: CreateResponseInput) {
       await Promise.resolve();
-      const endpoint = findEndpointBySlug(endpoints, input.endpointSlug);
-      Object.assign(endpoint, input.changes);
-      return cloneEndpoint(endpoint);
+      const endpoint = findEndpointById(endpoints, input.endpointId);
+      const response: EndpointResponse = {
+        activated: endpoint.responses.length === 0,
+        delayMs: input.delayMs ?? 0,
+        id: createResponseId(endpoints),
+        json: input.json,
+        name: input.name,
+        simulateTimeout: input.simulateTimeout ?? false,
+        statusCode: input.statusCode,
+      };
+      endpoint.responses.push(response);
+      return cloneResponse(response);
+    },
+    async deactivateResponse(input) {
+      await Promise.resolve();
+      const response = findResponse(endpoints, input);
+      response.activated = false;
+      return cloneResponse(response);
     },
     async deleteEndpoint(endpointSlug) {
       await Promise.resolve();
@@ -156,30 +174,6 @@ export function createInMemoryEndpointAdapter(
       endpoints.splice(index, 1);
       trafficLogs.delete(endpointId);
     },
-    async createResponse(input: CreateResponseInput) {
-      await Promise.resolve();
-      const endpoint = findEndpointById(endpoints, input.endpointId);
-      const response: EndpointResponse = {
-        id: createResponseId(endpoints),
-        name: input.name,
-        json: input.json,
-        statusCode: input.statusCode,
-        activated: endpoint.responses.length === 0,
-        delayMs: input.delayMs ?? 0,
-        simulateTimeout: input.simulateTimeout ?? false,
-      };
-      endpoint.responses.push(response);
-      return cloneResponse(response);
-    },
-    async updateResponse(input: UpdateResponseInput) {
-      await Promise.resolve();
-      const response = findResponse(endpoints, {
-        endpointId: input.endpointId,
-        responseId: input.responseId,
-      });
-      Object.assign(response, updateResponseFields(response, input.changes));
-      return cloneResponse(response);
-    },
     async deleteResponse(input) {
       await Promise.resolve();
       const endpoint = findEndpointById(endpoints, input.endpointId);
@@ -187,72 +181,18 @@ export function createInMemoryEndpointAdapter(
         (response) => response.id !== input.responseId
       );
     },
-    async activateResponse(input) {
+    async getEndpoint(endpointSlug) {
       await Promise.resolve();
-      const endpoint = findEndpointById(endpoints, input.endpointId);
-      for (const response of endpoint.responses) {
-        response.activated = response.id === input.responseId;
-      }
-      return cloneResponse(findResponse(endpoints, input));
+      const endpoint = endpoints.find((item) => item.slug === endpointSlug);
+      return endpoint ? cloneEndpoint(endpoint) : null;
     },
-    async deactivateResponse(input) {
-      await Promise.resolve();
-      const response = findResponse(endpoints, input);
-      response.activated = false;
-      return cloneResponse(response);
-    },
-    async updateResponseSimulation(input: ResponseSimulationInput) {
-      await Promise.resolve();
-      const response = findResponse(endpoints, input);
-      if (input.delayMs !== undefined) {
-        response.delayMs = input.delayMs;
-      }
-      if (input.simulateTimeout !== undefined) {
-        response.simulateTimeout = input.simulateTimeout;
-      }
-      return cloneResponse(response);
-    },
-    async listTrafficLogs(input: EndpointTelemetryInput) {
-      await Promise.resolve();
-      const logs = (trafficLogs.get(input.endpointId) ?? []).filter((log) => {
-        const matchesStatus =
-          input.filters.status === "all" ||
-          log.hitStatus === input.filters.status;
-        const search = input.filters.search.trim().toLowerCase();
-        const matchesSearch =
-          !search ||
-          log.path.toLowerCase().includes(search) ||
-          log.method.toLowerCase().includes(search) ||
-          log.requestId.toLowerCase().includes(search);
-        return matchesStatus && matchesSearch;
-      });
-      const items = logs.slice(0, input.filters.limit).map(cloneLog);
-      return {
-        items,
-        nextCursor: null,
-        hasMore: items.length < logs.length,
-      } satisfies EndpointTrafficLogsResult;
-    },
-    async getTrafficLogDetail(endpointId, logId) {
-      await Promise.resolve();
-      const log = trafficLogs
-        .get(endpointId)
-        ?.find((item) => item.id === logId);
-      if (!log) {
-        throw new Error(`Traffic log ${logId} was not found`);
-      }
-      return {
-        ...cloneLog(log),
-        requestHeaders: null,
-        requestBody: null,
-        responseHeaders: null,
-        responseBody: null,
-        errorMessage: null,
-      } satisfies EndpointTrafficLogDetail;
-    },
-    async clearTrafficLogs(endpointId) {
-      await Promise.resolve();
-      trafficLogs.set(endpointId, []);
+    async getHourlyMetrics(input: EndpointHourlyMetricsInput) {
+      const summary = await this.getMetricsSummary(input.endpointId);
+      const bucket: EndpointHourlyMetric = {
+        ...summary,
+        bucketStart: input.from,
+      };
+      return [bucket];
     },
     async getMetricsSummary(endpointId) {
       await Promise.resolve();
@@ -278,24 +218,84 @@ export function createInMemoryEndpointAdapter(
         }
       }
       return {
-        requestCount: logs.length,
-        hitStatusCounts,
-        httpStatusCounts,
-        totalDurationMs,
-        minDurationMs: durations.length ? Math.min(...durations) : null,
-        maxDurationMs: durations.length ? Math.max(...durations) : null,
         averageDurationMs: durations.length
           ? totalDurationMs / durations.length
           : 0,
+        hitStatusCounts,
+        httpStatusCounts,
+        maxDurationMs: durations.length ? Math.max(...durations) : null,
+        minDurationMs: durations.length ? Math.min(...durations) : null,
+        requestCount: logs.length,
+        totalDurationMs,
       };
     },
-    async getHourlyMetrics(input: EndpointHourlyMetricsInput) {
-      const summary = await this.getMetricsSummary(input.endpointId);
-      const bucket: EndpointHourlyMetric = {
-        ...summary,
-        bucketStart: input.from,
-      };
-      return [bucket];
+    async getTrafficLogDetail(endpointId, logId) {
+      await Promise.resolve();
+      const log = trafficLogs
+        .get(endpointId)
+        ?.find((item) => item.id === logId);
+      if (!log) {
+        throw new Error(`Traffic log ${logId} was not found`);
+      }
+      return {
+        ...cloneLog(log),
+        errorMessage: null,
+        requestBody: null,
+        requestHeaders: null,
+        responseBody: null,
+        responseHeaders: null,
+      } satisfies EndpointTrafficLogDetail;
+    },
+    async listEndpoints() {
+      await Promise.resolve();
+      return endpoints.map(cloneEndpoint);
+    },
+    async listTrafficLogs(input: EndpointTelemetryInput) {
+      await Promise.resolve();
+      const logs = (trafficLogs.get(input.endpointId) ?? []).filter((log) => {
+        const matchesStatus =
+          input.filters.status === "all" ||
+          log.hitStatus === input.filters.status;
+        const search = input.filters.search.trim().toLowerCase();
+        const matchesSearch =
+          !search ||
+          log.path.toLowerCase().includes(search) ||
+          log.method.toLowerCase().includes(search) ||
+          log.requestId.toLowerCase().includes(search);
+        return matchesStatus && matchesSearch;
+      });
+      const items = logs.slice(0, input.filters.limit).map(cloneLog);
+      return {
+        hasMore: items.length < logs.length,
+        items,
+        nextCursor: null,
+      } satisfies EndpointTrafficLogsResult;
+    },
+    async updateEndpoint(input: UpdateEndpointInput) {
+      await Promise.resolve();
+      const endpoint = findEndpointBySlug(endpoints, input.endpointSlug);
+      Object.assign(endpoint, input.changes);
+      return cloneEndpoint(endpoint);
+    },
+    async updateResponse(input: UpdateResponseInput) {
+      await Promise.resolve();
+      const response = findResponse(endpoints, {
+        endpointId: input.endpointId,
+        responseId: input.responseId,
+      });
+      Object.assign(response, updateResponseFields(response, input.changes));
+      return cloneResponse(response);
+    },
+    async updateResponseSimulation(input: ResponseSimulationInput) {
+      await Promise.resolve();
+      const response = findResponse(endpoints, input);
+      if (input.delayMs !== undefined) {
+        response.delayMs = input.delayMs;
+      }
+      if (input.simulateTimeout !== undefined) {
+        response.simulateTimeout = input.simulateTimeout;
+      }
+      return cloneResponse(response);
     },
   };
 }

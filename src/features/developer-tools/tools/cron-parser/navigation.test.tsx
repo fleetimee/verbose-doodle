@@ -47,7 +47,7 @@ describe("Cron Parser navigation", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Cron Parser", level: 1 })
+      screen.getByRole("heading", { level: 1, name: "Cron Parser" })
     ).toBeDefined();
   });
 });

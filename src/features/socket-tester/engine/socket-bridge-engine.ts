@@ -76,9 +76,9 @@ export function readNumber(
 export function nowTimestamp(): string {
   return new Intl.DateTimeFormat("en-US", {
     hour: "2-digit",
+    hour12: false,
     minute: "2-digit",
     second: "2-digit",
-    hour12: false,
   }).format(new Date());
 }
 
@@ -91,14 +91,14 @@ export function toLogEntry(
   metadata?: Record<string, unknown>
 ): TrafficLogEntry {
   return {
-    id: generateUUID(),
-    timestamp: nowTimestamp(),
+    data,
     direction,
+    format,
+    id: generateUUID(),
+    metadata,
     protocol,
     scope,
-    data,
-    format,
-    metadata,
+    timestamp: nowTimestamp(),
   };
 }
 
@@ -107,10 +107,10 @@ export function parseBridgeEvent(raw: string): BridgeEvent {
     return JSON.parse(raw) as BridgeEvent;
   } catch {
     return {
-      type: "message",
       payload: {
         data: raw,
       },
+      type: "message",
     };
   }
 }
@@ -134,21 +134,21 @@ export class SocketBridgeEngine {
   private bridgeStatus: BridgeStatus = "disconnected";
   private logs: TrafficLogEntry[] = [];
   private tcpClient: TcpClientState = {
-    connectionId: createId("tcp-client"),
     connected: false,
+    connectionId: createId("tcp-client"),
     host: "127.0.0.1",
     port: DEFAULT_TCP_CLIENT_PORT,
   };
   private tcpServer: TcpServerState = {
-    serverId: createId("tcp-server"),
+    clients: [],
     listening: false,
     port: DEFAULT_TCP_SERVER_PORT,
-    clients: [],
+    serverId: createId("tcp-server"),
   };
   private udpServer: UdpServerState = {
-    serverId: createId("udp-server"),
     listening: false,
     port: DEFAULT_UDP_SERVER_PORT,
+    serverId: createId("udp-server"),
   };
 
   private pendingTcpClient: {
@@ -190,10 +190,10 @@ export class SocketBridgeEngine {
     return {
       bridgeStatus: this.bridgeStatus,
       logs: this.logs,
+      metrics: this.getMetrics(),
       tcpClient: this.tcpClient,
       tcpServer: this.tcpServer,
       udpServer: this.udpServer,
-      metrics: this.getMetrics(),
     };
   }
 
@@ -296,12 +296,12 @@ export class SocketBridgeEngine {
       this.pendingTcpClient = null;
       this.tcpClient = { ...this.tcpClient, connected: false };
       this.notifyToast({
-        type: "error",
-        title: messages.socketTester.tcpConnectionFailed,
         description: formatMessage(
           messages.socketTester.tcpConnectionRefusedDescription,
           { host, message: errorMessage, port }
         ),
+        title: messages.socketTester.tcpConnectionFailed,
+        type: "error",
       });
     }
 
@@ -318,8 +318,6 @@ export class SocketBridgeEngine {
       const connectedTarget = this.pendingTcpClient;
       if (connectedTarget) {
         this.notifyToast({
-          type: "success",
-          title: messages.socketTester.tcpConnected,
           description: formatMessage(
             messages.socketTester.tcpConnectedDescription,
             {
@@ -327,6 +325,8 @@ export class SocketBridgeEngine {
               port: connectedTarget.port,
             }
           ),
+          title: messages.socketTester.tcpConnected,
+          type: "success",
         });
         this.pendingTcpClient = null;
       }
@@ -354,8 +354,6 @@ export class SocketBridgeEngine {
       this.tcpClient = { ...this.tcpClient, connected: false };
       if (wasPending && failedTarget) {
         this.notifyToast({
-          type: "error",
-          title: messages.socketTester.tcpConnectionFailed,
           description: formatMessage(
             messages.socketTester.tcpConnectionUnableDescription,
             {
@@ -363,6 +361,8 @@ export class SocketBridgeEngine {
               port: failedTarget.port,
             }
           ),
+          title: messages.socketTester.tcpConnectionFailed,
+          type: "error",
         });
       }
       this.appendLog(
@@ -429,9 +429,9 @@ export class SocketBridgeEngine {
         formatClientAddress(payload)
       );
       const client: TcpServerClient = {
-        id,
         address: readString(payload, ["address"], id),
         connectedAt: nowTimestamp(),
+        id,
       };
       this.tcpServer = {
         ...this.tcpServer,
@@ -545,7 +545,7 @@ export class SocketBridgeEngine {
   prepareConnectTcpClient(host: string, port: number): SocketCommand {
     const connectionId = createId("tcp-client");
     this.pendingTcpClient = { connectionId, host, port };
-    this.tcpClient = { connectionId, connected: false, host, port };
+    this.tcpClient = { connected: false, connectionId, host, port };
     this.appendLog(
       toLogEntry(
         "sys",
@@ -556,8 +556,8 @@ export class SocketBridgeEngine {
       )
     );
     return {
-      type: "tcp_client_connect",
       payload: { connectionId, host, port },
+      type: "tcp_client_connect",
     };
   }
 
@@ -565,8 +565,8 @@ export class SocketBridgeEngine {
     this.tcpClient = { ...this.tcpClient, connected: false };
     this.notifyStateChange();
     return {
-      type: "tcp_client_disconnect",
       payload: { connectionId: this.tcpClient.connectionId },
+      type: "tcp_client_disconnect",
     };
   }
 
@@ -585,25 +585,25 @@ export class SocketBridgeEngine {
       )
     );
     return {
-      type: "tcp_client_send",
       payload: {
         connectionId: this.tcpClient.connectionId,
         data,
         delimiter,
         format,
       },
+      type: "tcp_client_send",
     };
   }
 
   prepareStartTcpServer(port: number): SocketCommand {
     const serverId = createId("tcp-server");
-    this.tcpServer = { serverId, listening: false, port, clients: [] };
+    this.tcpServer = { clients: [], listening: false, port, serverId };
     this.appendLog(
       toLogEntry("sys", "tcp-server", `:${port}`, "Starting TCP server", "text")
     );
     return {
+      payload: { port, serverId },
       type: "tcp_server_start",
-      payload: { serverId, port },
     };
   }
 
@@ -615,8 +615,8 @@ export class SocketBridgeEngine {
     };
     this.notifyStateChange();
     return {
-      type: "tcp_server_stop",
       payload: { serverId: this.tcpServer.serverId },
+      type: "tcp_server_stop",
     };
   }
 
@@ -628,26 +628,26 @@ export class SocketBridgeEngine {
   ): SocketCommand {
     this.appendLog(toLogEntry("out", "tcp-server", clientId, data, format));
     return {
-      type: "tcp_server_send",
       payload: {
-        serverId: this.tcpServer.serverId,
         clientId,
         data,
         delimiter,
         format,
+        serverId: this.tcpServer.serverId,
       },
+      type: "tcp_server_send",
     };
   }
 
   prepareStartUdpServer(port: number): SocketCommand {
     const serverId = createId("udp-server");
-    this.udpServer = { serverId, listening: false, port };
+    this.udpServer = { listening: false, port, serverId };
     this.appendLog(
       toLogEntry("sys", "udp", `:${port}`, "Starting UDP listener", "text")
     );
     return {
+      payload: { port, serverId },
       type: "udp_server_start",
-      payload: { serverId, port },
     };
   }
 
@@ -655,8 +655,8 @@ export class SocketBridgeEngine {
     this.udpServer = { ...this.udpServer, listening: false };
     this.notifyStateChange();
     return {
-      type: "udp_server_stop",
       payload: { serverId: this.udpServer.serverId },
+      type: "udp_server_stop",
     };
   }
 
@@ -668,8 +668,8 @@ export class SocketBridgeEngine {
   ): SocketCommand {
     this.appendLog(toLogEntry("out", "udp", `${host}:${port}`, data, format));
     return {
+      payload: { data, format, host, port },
       type: "udp_send",
-      payload: { host, port, data, format },
     };
   }
 

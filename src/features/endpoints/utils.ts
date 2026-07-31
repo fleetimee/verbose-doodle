@@ -25,8 +25,8 @@ export function groupEndpointsByBiller(
       existing.endpoints.push(endpoint);
     } else {
       groups.set(billerName, {
-        billerSlug: endpoint.billerSlug,
         billerName,
+        billerSlug: endpoint.billerSlug,
         endpoints: [endpoint],
       });
     }

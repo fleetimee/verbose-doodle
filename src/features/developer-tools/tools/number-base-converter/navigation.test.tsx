@@ -52,8 +52,8 @@ describe("Number Base Converter navigation", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "Number Base Converter",
         level: 1,
+        name: "Number Base Converter",
       })
     ).toBeDefined();
   });

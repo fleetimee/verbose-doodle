@@ -90,9 +90,6 @@ export function createFakeRealtimeSocketAdapter(): RealtimeSocketAdapter & {
     connect: (url, handlers) => {
       let closed = false;
       const socket: FakeRealtimeSocket = {
-        readyState: 0,
-        sent: [],
-        url,
         close: () => {
           if (closed) {
             return;
@@ -111,6 +108,7 @@ export function createFakeRealtimeSocketAdapter(): RealtimeSocketAdapter & {
           socket.readyState = SOCKET_OPEN;
           handlers.onOpen();
         },
+        readyState: 0,
         receive: (data) => {
           if (!closed) {
             handlers.onMessage(data);
@@ -122,6 +120,8 @@ export function createFakeRealtimeSocketAdapter(): RealtimeSocketAdapter & {
           }
           socket.sent.push(data);
         },
+        sent: [],
+        url,
       };
       sockets.push(socket);
       return socket;

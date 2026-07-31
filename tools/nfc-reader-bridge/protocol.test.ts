@@ -49,20 +49,20 @@ describe("NFC bridge protocol", () => {
         tokenRequired: true,
       },
       reader: {
-        readerState: "waiting",
         readerName: "ACS ACR122U 00 00",
+        readerState: "waiting",
       },
       scanStatus: "stopped",
     });
 
     expect(JSON.parse(serializeBridgeEvent(events[0]))).toEqual({
-      protocolVersion: "1",
-      type: "bridge-status",
       bridgeVersion: "0.1.0",
       capabilities: ["health", "reader-status"],
       host: "127.0.0.1",
       port: 7788,
+      protocolVersion: "1",
       tokenRequired: true,
+      type: "bridge-status",
     });
     expect(events[1].type).toBe("reader-status");
     expect(events[2]).toMatchObject({

@@ -24,11 +24,11 @@ const RELAY_LOG_REFRESH_INTERVAL_MS = 10_000;
 
 export function useGetRelays() {
   const useQuery = createQueryHook<RelayInstance[]>({
-    queryKey: socksRelayQueryKeys.all,
-    queryFn: listRelays,
     options: {
       staleTime: TIME_DURATIONS.ONE_MINUTE,
     },
+    queryFn: listRelays,
+    queryKey: socksRelayQueryKeys.all,
   });
 
   return useQuery();
@@ -36,12 +36,12 @@ export function useGetRelays() {
 
 export function useGetRelayLogs() {
   const useQuery = createQueryHook<RelayEventLog[]>({
-    queryKey: socksRelayQueryKeys.logs(),
-    queryFn: listRelayLogs,
     options: {
       refetchInterval: RELAY_LOG_REFRESH_INTERVAL_MS,
       staleTime: RELAY_LOG_REFRESH_INTERVAL_MS,
     },
+    queryFn: listRelayLogs,
+    queryKey: socksRelayQueryKeys.logs(),
   });
 
   return useQuery();
@@ -52,6 +52,11 @@ export function useStartRelay() {
   const mutation = createMutationHook<RelayInstance, RelayStartInput, ApiError>(
     startRelay,
     {
+      onError: (error) => {
+        toast.error(messages.socksRelay.failedStartRelay, {
+          description: error.message,
+        });
+      },
       onSuccess: (relay) => {
         const modeLabel = getModeLabel(relay.mode);
         toast.success(
@@ -68,11 +73,6 @@ export function useStartRelay() {
         );
         queryClient.invalidateQueries({ queryKey: socksRelayQueryKeys.all });
       },
-      onError: (error) => {
-        toast.error(messages.socksRelay.failedStartRelay, {
-          description: error.message,
-        });
-      },
     }
   );
 
@@ -84,16 +84,16 @@ export function useStopRelay() {
   const mutation = createMutationHook<RelayInstance, string, ApiError>(
     stopRelay,
     {
+      onError: (error) => {
+        toast.error(messages.socksRelay.failedStopRelay, {
+          description: error.message,
+        });
+      },
       onSuccess: (relay) => {
         toast.success(messages.socksRelay.relayStopped, {
           description: relay.relayId,
         });
         queryClient.invalidateQueries({ queryKey: socksRelayQueryKeys.all });
-      },
-      onError: (error) => {
-        toast.error(messages.socksRelay.failedStopRelay, {
-          description: error.message,
-        });
       },
     }
   );
@@ -108,6 +108,11 @@ export function useUpdateRelayOptions() {
     { readonly options: RelayUpdateOptionsInput; readonly relayId: string },
     ApiError
   >(updateRelayOptions, {
+    onError: (error) => {
+      toast.error(messages.socksRelay.failedUpdateRelayOptions, {
+        description: error.message,
+      });
+    },
     onSuccess: (relay) => {
       toast.success(messages.socksRelay.relayUpdated, {
         description: relay.relayId,
@@ -115,11 +120,6 @@ export function useUpdateRelayOptions() {
       queryClient.invalidateQueries({ queryKey: socksRelayQueryKeys.all });
       queryClient.invalidateQueries({
         queryKey: socksRelayQueryKeys.detail(relay.relayId),
-      });
-    },
-    onError: (error) => {
-      toast.error(messages.socksRelay.failedUpdateRelayOptions, {
-        description: error.message,
       });
     },
   });

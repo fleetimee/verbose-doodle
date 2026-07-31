@@ -488,16 +488,16 @@ export const generateCode = (
 
 export const CODE_LANGUAGE_LABELS: Record<CodeLanguage, string> = {
   curl: "cURL",
+  go: "Go net/http",
   httpie: "HTTPie",
-  wget: "Wget",
-  "javascript-fetch": "JavaScript Fetch",
+  java: "Java OkHttp",
   "javascript-axios": "JavaScript Axios",
+  "javascript-fetch": "JavaScript Fetch",
+  php: "PHP cURL",
   python: "Python Requests",
   ruby: "Ruby Net::HTTP",
-  php: "PHP cURL",
-  go: "Go net/http",
-  java: "Java OkHttp",
   rust: "Rust reqwest",
+  wget: "Wget",
 };
 
 export const getCodeLanguageForHighlight = (

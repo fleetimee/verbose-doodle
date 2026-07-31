@@ -19,30 +19,30 @@ type CodeLanguageOptionProps = {
 
 const CODE_LANGUAGE_ICONS = {
   curl: SiCurl,
+  go: Go,
   httpie: SiHttpie,
-  wget: SiGnu,
+  java: Java,
   "javascript-axios": SiAxios,
   "javascript-fetch": JavaScript,
-  java: Java,
-  go: Go,
   php: PHP,
   python: Python,
   ruby: Ruby,
   rust: RustDark,
+  wget: SiGnu,
 } satisfies Record<CodeLanguage, unknown>;
 
 const CODE_LANGUAGE_ICON_COLORS: Record<CodeLanguage, string> = {
   curl: "#073551",
+  go: "#00add8",
   httpie: "#111827",
-  wget: "#111827",
+  java: "#5382a1",
   "javascript-axios": "#5a29e4",
   "javascript-fetch": "#f7df1e",
-  java: "#5382a1",
-  go: "#00add8",
   php: "#777bb4",
   python: "#3776ab",
   ruby: "#cc342d",
   rust: "#dea584",
+  wget: "#111827",
 };
 
 export function CodeLanguageOption({

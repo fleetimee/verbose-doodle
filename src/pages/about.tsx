@@ -4,9 +4,9 @@ import { messages } from "@/lib/i18n";
 
 export function About() {
   useDocumentMeta({
-    title: messages.about.documentTitle,
     description: messages.about.documentDescription,
     keywords: ["about", "billing simulator", "information"],
+    title: messages.about.documentTitle,
   });
 
   return <AboutPage />;

@@ -52,8 +52,8 @@ export function EndpointsByBillerChart({
       data.endpointsByBiller.map((item, index) => [
         item.billerName,
         {
-          label: item.billerName,
           color: `var(--chart-${(index % CHART_COLOR_VARIANTS) + CHART_COLOR_OFFSET})`,
+          label: item.billerName,
         },
       ])
     ),

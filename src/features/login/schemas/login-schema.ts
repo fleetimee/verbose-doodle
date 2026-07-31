@@ -11,11 +11,11 @@ const MIN_PASSWORD_LENGTH = 8;
  * Validates username and password requirements
  */
 export const loginSchema = z.object({
-  username: z.string().min(1, messages.auth.usernameRequiredError),
-  password: z.string().min(MIN_PASSWORD_LENGTH, messages.auth.passwordMinError),
   captchaVerified: z
     .boolean()
     .refine((val) => val === true, messages.auth.captchaRequiredError),
+  password: z.string().min(MIN_PASSWORD_LENGTH, messages.auth.passwordMinError),
+  username: z.string().min(1, messages.auth.usernameRequiredError),
 });
 
 /**

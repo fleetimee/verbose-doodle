@@ -46,8 +46,8 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
       transition: shouldReduceMotion
         ? { duration: 0 }
         : {
-            staggerChildren: 0.12,
             delayChildren: 0.05,
+            staggerChildren: 0.12,
           },
     },
   };
@@ -56,21 +56,21 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
     hidden: shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
-      y: 0,
       transition: shouldReduceMotion
         ? { duration: 0 }
         : { duration: 0.5, ease: "easeOut" },
+      y: 0,
     },
   };
 
   const logoVariants: Variants = {
     hidden: shouldReduceMotion
-      ? { opacity: 1, scale: 1, rotate: 0 }
-      : { opacity: 0, scale: 0.8, rotate: -8 },
+      ? { opacity: 1, rotate: 0, scale: 1 }
+      : { opacity: 0, rotate: -8, scale: 0.8 },
     visible: {
       opacity: 1,
-      scale: 1,
       rotate: 0,
+      scale: 1,
       transition: shouldReduceMotion
         ? { duration: 0 }
         : { duration: 0.6, ease: BOUNCE_EASE_CURVE },

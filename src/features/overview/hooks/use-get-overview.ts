@@ -32,11 +32,11 @@ async function fetchOverview(): Promise<OverviewData> {
  */
 export function useGetOverview() {
   const useQuery = createQueryHook<OverviewData>({
-    queryKey: overviewQueryKeys.all,
-    queryFn: fetchOverview,
     options: {
       staleTime: TIME_DURATIONS.FIVE_MINUTES,
     },
+    queryFn: fetchOverview,
+    queryKey: overviewQueryKeys.all,
   });
 
   return useQuery();

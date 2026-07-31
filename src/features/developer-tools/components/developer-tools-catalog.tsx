@@ -38,8 +38,8 @@ const childVariants = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
+    transition: { bounce: 0.08, duration: 0.32, type: "spring" as const },
     y: 0,
-    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -56,8 +56,8 @@ const cardEntranceVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
+    transition: { bounce: 0.08, duration: 0.32, type: "spring" as const },
     y: 0,
-    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -79,9 +79,9 @@ function ToolCard({
           ? "flex h-full flex-col border p-5"
           : "grid border-y px-4 py-5 sm:px-5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-7"
       )}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      transition={{ damping: 30, stiffness: 400, type: "spring" }}
       variants={cardEntranceVariants}
-      whileHover={shouldReduceMotion ? {} : { y: -2, scale: 1.012 }}
+      whileHover={shouldReduceMotion ? {} : { scale: 1.012, y: -2 }}
       whileTap={shouldReduceMotion ? {} : { scale: 0.985 }}
     >
       <div

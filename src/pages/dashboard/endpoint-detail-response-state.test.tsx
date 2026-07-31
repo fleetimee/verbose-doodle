@@ -61,20 +61,19 @@ const responseTwo = {
 };
 
 const endpointOne: Endpoint = {
-  billerSlug: "pln",
   billerName: "PLN",
+  billerSlug: "pln",
   id: endpointOneId,
-  slug: endpointOneSlug,
   method: "GET",
   responses: [responseOne, responseTwo],
+  slug: endpointOneSlug,
   url: "/inquiry",
 };
 
 const endpointTwo: Endpoint = {
-  billerSlug: "pdam",
   billerName: "PDAM",
+  billerSlug: "pdam",
   id: endpointTwoId,
-  slug: endpointTwoSlug,
   method: "POST",
   responses: [
     {
@@ -87,6 +86,7 @@ const endpointTwo: Endpoint = {
       statusCode: 201,
     },
   ],
+  slug: endpointTwoSlug,
   url: "/payment",
 };
 
@@ -437,35 +437,40 @@ describe("EndpointDetailPage response state", () => {
   test.each([
     ["another active response", true],
     ["no remaining active response", false],
-  ])("updates the preview selection after deactivation with %s", async (_caseName, hasRemainingActiveResponse) => {
-    const user = userEvent.setup();
-    currentEndpointOne = {
-      ...currentEndpointOne,
-      responses: currentEndpointOne.responses.map((response) => ({
-        ...response,
-        activated: response.id === responseOne.id,
-      })),
-    };
-    if (hasRemainingActiveResponse) {
-      currentEndpointOne.responses = currentEndpointOne.responses.map(
-        (response) => ({ ...response, activated: true })
+  ])(
+    "updates the preview selection after deactivation with %s",
+    async (_caseName, hasRemainingActiveResponse) => {
+      const user = userEvent.setup();
+      currentEndpointOne = {
+        ...currentEndpointOne,
+        responses: currentEndpointOne.responses.map((response) => ({
+          ...response,
+          activated: response.id === responseOne.id,
+        })),
+      };
+      if (hasRemainingActiveResponse) {
+        currentEndpointOne.responses = currentEndpointOne.responses.map(
+          (response) => ({ ...response, activated: true })
+        );
+      }
+      renderEndpointDetail();
+
+      await user.click(
+        await findResponseButton("More response actions for Primary response")
       );
+      await user.click(
+        await screen.findByRole("menuitem", { name: "Deactivate response" })
+      );
+      await user.click(
+        await screen.findByRole("button", { name: "Deactivate" })
+      );
+
+      await waitFor(() => {
+        expectResponseSelection("Backup response", hasRemainingActiveResponse);
+        expectResponseSelection("Primary response", false);
+      });
     }
-    renderEndpointDetail();
-
-    await user.click(
-      await findResponseButton("More response actions for Primary response")
-    );
-    await user.click(
-      await screen.findByRole("menuitem", { name: "Deactivate response" })
-    );
-    await user.click(await screen.findByRole("button", { name: "Deactivate" }));
-
-    await waitFor(() => {
-      expectResponseSelection("Backup response", hasRemainingActiveResponse);
-      expectResponseSelection("Primary response", false);
-    });
-  });
+  );
 
   test("warns on multiple active responses without repairing server data", async () => {
     currentEndpointOne = {

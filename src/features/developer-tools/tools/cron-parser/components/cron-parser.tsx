@@ -38,8 +38,8 @@ const childVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
+    transition: { bounce: 0.08, duration: 0.32, type: "spring" as const },
     y: 0,
-    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -51,22 +51,22 @@ const CRON_PARSER_TOUR_TARGETS = {
 } as const;
 const CRON_PARSER_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
   {
-    selectorId: CRON_PARSER_TOUR_TARGETS.controls,
-    position: "bottom",
-    title: messages.cronParser.tour.controlsTitle,
     description: messages.cronParser.tour.controlsDescription,
+    position: "bottom",
+    selectorId: CRON_PARSER_TOUR_TARGETS.controls,
+    title: messages.cronParser.tour.controlsTitle,
   },
   {
-    selectorId: CRON_PARSER_TOUR_TARGETS.fields,
-    position: "top",
-    title: messages.cronParser.tour.fieldsTitle,
     description: messages.cronParser.tour.fieldsDescription,
+    position: "top",
+    selectorId: CRON_PARSER_TOUR_TARGETS.fields,
+    title: messages.cronParser.tour.fieldsTitle,
   },
   {
-    selectorId: CRON_PARSER_TOUR_TARGETS.runs,
-    position: "top",
-    title: messages.cronParser.tour.runsTitle,
     description: messages.cronParser.tour.runsDescription,
+    position: "top",
+    selectorId: CRON_PARSER_TOUR_TARGETS.runs,
+    title: messages.cronParser.tour.runsTitle,
   },
 ];
 

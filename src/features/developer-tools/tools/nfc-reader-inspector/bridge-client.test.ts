@@ -176,8 +176,8 @@ describe("NFC bridge browser client", () => {
     socket?.open();
     socket?.receive(
       JSON.stringify({
-        decodingStatus: "decoded",
         decodedText: "Hello",
+        decodingStatus: "decoded",
         protocolVersion: "1",
         rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
         records: [
@@ -201,8 +201,8 @@ describe("NFC bridge browser client", () => {
 
     expect(client.getState().readerState).toBe("tag-detected");
     expect(client.getState().latestScan).toEqual({
-      decodingStatus: "decoded",
       decodedText: "Hello",
+      decodingStatus: "decoded",
       rawNdef: "D1 01 08 54 02 65 6E 48 65 6C 6C 6F",
       records: [
         {

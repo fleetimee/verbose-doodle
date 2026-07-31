@@ -37,8 +37,8 @@ const childVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
+    transition: { bounce: 0.08, duration: 0.32, type: "spring" as const },
     y: 0,
-    transition: { type: "spring" as const, duration: 0.32, bounce: 0.08 },
   },
 };
 
@@ -50,22 +50,22 @@ const JSON_YAML_TOUR_TARGETS = {
 } as const;
 const JSON_YAML_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
   {
-    selectorId: JSON_YAML_TOUR_TARGETS.controls,
-    position: "bottom",
-    title: messages.jsonYamlConverter.tour.controlsTitle,
     description: messages.jsonYamlConverter.tour.controlsDescription,
+    position: "bottom",
+    selectorId: JSON_YAML_TOUR_TARGETS.controls,
+    title: messages.jsonYamlConverter.tour.controlsTitle,
   },
   {
-    selectorId: JSON_YAML_TOUR_TARGETS.editors,
-    position: "top",
-    title: messages.jsonYamlConverter.tour.editorsTitle,
     description: messages.jsonYamlConverter.tour.editorsDescription,
+    position: "top",
+    selectorId: JSON_YAML_TOUR_TARGETS.editors,
+    title: messages.jsonYamlConverter.tour.editorsTitle,
   },
   {
-    selectorId: JSON_YAML_TOUR_TARGETS.output,
-    position: "top",
-    title: messages.jsonYamlConverter.tour.outputTitle,
     description: messages.jsonYamlConverter.tour.outputDescription,
+    position: "top",
+    selectorId: JSON_YAML_TOUR_TARGETS.output,
+    title: messages.jsonYamlConverter.tour.outputTitle,
   },
 ];
 
@@ -366,7 +366,7 @@ export function JsonYamlConverter() {
               exit={{ opacity: 0, y: -6 }}
               initial={{ opacity: 0, y: 6 }}
               role="alert"
-              transition={{ type: "spring", duration: 0.32, bounce: 0.08 }}
+              transition={{ bounce: 0.08, duration: 0.32, type: "spring" }}
             >
               <h2 className="font-semibold text-destructive text-sm">
                 {messages.jsonYamlConverter.errorTitle}
@@ -380,8 +380,8 @@ export function JsonYamlConverter() {
                 {error?.line && error.column ? (
                   <p className="mt-1 font-mono text-[11px]">
                     {formatMessage(messages.jsonYamlConverter.errorLocation, {
-                      line: error.line,
                       column: error.column,
+                      line: error.line,
                     })}
                   </p>
                 ) : null}

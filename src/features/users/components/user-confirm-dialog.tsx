@@ -39,12 +39,12 @@ export const UserConfirmDialog = ({
     deleteUser(
       { user_id: user.id },
       {
+        onError: () => {
+          setIsDeleting(false);
+        },
         onSuccess: () => {
           setIsDeleting(false);
           onOpenChange(false);
-        },
-        onError: () => {
-          setIsDeleting(false);
         },
       }
     );

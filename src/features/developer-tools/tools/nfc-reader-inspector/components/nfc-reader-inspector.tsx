@@ -29,10 +29,10 @@ const connectionTone = {
     "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   connecting:
     "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  reconnecting:
-    "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
   disconnected: "border-muted-foreground/25 bg-muted text-muted-foreground",
   error: "border-destructive/30 bg-destructive/10 text-destructive",
+  reconnecting:
+    "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
 } as const;
 
 const readerTone = {
@@ -56,28 +56,28 @@ const NFC_READER_TOUR_TARGETS = {
 } as const;
 const NFC_READER_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
   {
-    selectorId: NFC_READER_TOUR_TARGETS.bridge,
-    position: "bottom",
-    title: messages.developerTools.nfcTour.bridgeTitle,
     description: messages.developerTools.nfcTour.bridgeDescription,
+    position: "bottom",
+    selectorId: NFC_READER_TOUR_TARGETS.bridge,
+    title: messages.developerTools.nfcTour.bridgeTitle,
   },
   {
-    selectorId: NFC_READER_TOUR_TARGETS.session,
-    position: "bottom",
-    title: messages.developerTools.nfcTour.sessionTitle,
     description: messages.developerTools.nfcTour.sessionDescription,
-  },
-  {
-    selectorId: NFC_READER_TOUR_TARGETS.scan,
-    position: "top",
-    title: messages.developerTools.nfcTour.scanTitle,
-    description: messages.developerTools.nfcTour.scanDescription,
-  },
-  {
-    selectorId: NFC_READER_TOUR_TARGETS.release,
     position: "bottom",
-    title: messages.developerTools.nfcTour.releaseTitle,
+    selectorId: NFC_READER_TOUR_TARGETS.session,
+    title: messages.developerTools.nfcTour.sessionTitle,
+  },
+  {
+    description: messages.developerTools.nfcTour.scanDescription,
+    position: "top",
+    selectorId: NFC_READER_TOUR_TARGETS.scan,
+    title: messages.developerTools.nfcTour.scanTitle,
+  },
+  {
     description: messages.developerTools.nfcTour.releaseDescription,
+    position: "bottom",
+    selectorId: NFC_READER_TOUR_TARGETS.release,
+    title: messages.developerTools.nfcTour.releaseTitle,
   },
 ];
 

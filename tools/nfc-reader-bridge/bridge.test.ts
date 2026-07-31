@@ -69,15 +69,15 @@ describe("NFC bridge lifecycle", () => {
     expect(port).toBeGreaterThan(0);
     expect(bridge.getHealthResponse().status).toBe(200);
     expect(await bridge.getHealthResponse().json()).toMatchObject({
-      protocolVersion: "1",
-      status: "ok",
       bridge: {
         host: "127.0.0.1",
         tokenRequired: true,
       },
+      protocolVersion: "1",
       reader: {
         readerState: "waiting",
       },
+      status: "ok",
     });
   });
 

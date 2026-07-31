@@ -8,15 +8,15 @@ import {
 } from "@/features/socks-relay/utils";
 
 const VALID_INPUT: RelayStartInput = {
-  relayId: "relay-1",
-  mode: "REST_API",
-  listeningPort: 18_090,
-  hostAddress: "127.0.0.1",
-  hostPort: 8081,
-  holdClient: false,
-  holdHost: false,
   dropClient: false,
   dropHost: false,
+  holdClient: false,
+  holdHost: false,
+  hostAddress: "127.0.0.1",
+  hostPort: 8081,
+  listeningPort: 18_090,
+  mode: "REST_API",
+  relayId: "relay-1",
   removeHeaders: false,
   timerMs: 1000,
 };
@@ -38,10 +38,10 @@ describe("socks relay validation", () => {
   test("rejects required host fields, invalid ports, and short timer", () => {
     const errors = validateRelayStartInput({
       ...VALID_INPUT,
-      relayId: "",
-      listeningPort: 0,
       hostAddress: "",
       hostPort: 70_000,
+      listeningPort: 0,
+      relayId: "",
       timerMs: 999,
     });
 
@@ -55,8 +55,8 @@ describe("socks relay validation", () => {
   test("rejects multiple hold or drop options", () => {
     const errors = validateRelayStartInput({
       ...VALID_INPUT,
-      holdClient: true,
       dropHost: true,
+      holdClient: true,
     });
 
     expect(errors.options).toBeDefined();
@@ -67,14 +67,14 @@ describe("socks relay events", () => {
   test("parses a valid relay event", () => {
     const event = parseRelayEvent(
       JSON.stringify({
-        type: "relay_message",
         payload: {
-          relayId: "relay-1",
-          mode: "REST_API",
-          flow: "RC",
           data: "hello",
           displayLine: "2026-07-03 12:00:00 1200000000 RC hello",
+          flow: "RC",
+          mode: "REST_API",
+          relayId: "relay-1",
         },
+        type: "relay_message",
       }),
       "event-1"
     );

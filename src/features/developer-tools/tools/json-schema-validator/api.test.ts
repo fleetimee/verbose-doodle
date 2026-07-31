@@ -11,26 +11,26 @@ describe("validateJsonSchema", () => {
   test("serializes the editor content and validation controls", async () => {
     const fetchMock = mock(async () =>
       Response.json({
+        data: {
+          diagnostics: [],
+          durationMs: 3,
+          errorCount: 0,
+          outcome: "VALIDATION_RESULT",
+          resolvedDialect: "DRAFT_7",
+          truncated: false,
+          valid: true,
+        },
         responseCode: "00",
         responseDesc: "success",
-        data: {
-          outcome: "VALIDATION_RESULT",
-          valid: true,
-          resolvedDialect: "DRAFT_7",
-          errorCount: 0,
-          truncated: false,
-          durationMs: 3,
-          diagnostics: [],
-        },
       })
     );
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     await validateJsonSchema({
-      schema: '{"type":"string"}',
-      instance: '"value"',
       dialect: "DRAFT_7",
       formatAssertions: false,
+      instance: '"value"',
+      schema: '{"type":"string"}',
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -41,10 +41,10 @@ describe("validateJsonSchema", () => {
     expect(url).toBe("/api/tools/json-schema/validate");
     expect(config.method).toBe("POST");
     expect(JSON.parse(String(config.body))).toEqual({
-      schema: '{"type":"string"}',
-      instance: '"value"',
       dialect: "DRAFT_7",
       formatAssertions: false,
+      instance: '"value"',
+      schema: '{"type":"string"}',
     });
   });
 });

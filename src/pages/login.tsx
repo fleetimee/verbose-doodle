@@ -31,15 +31,15 @@ const GRID_SQUARES_HORIZONTAL = 50;
 const GRID_SQUARES_VERTICAL = 50;
 
 const EXPIRATION_MESSAGES = {
+  "expired-during-request": messages.auth.expiredWhileActive,
   "expired-while-active": messages.auth.expiredWhileActive,
   "expired-while-away": messages.auth.expiredWhileAway,
-  "expired-during-request": messages.auth.expiredWhileActive,
 };
 
 const AUTO_LOGIN_CREDENTIALS = {
-  username: "admin",
-  password: "password123",
   captchaVerified: true,
+  password: "password123",
+  username: "admin",
 };
 
 const REDIRECT_DELAY_MS = 700;
@@ -61,9 +61,9 @@ export const Login = () => {
   const hasAttemptedLogin = useRef(false);
 
   useDocumentMeta({
-    title: messages.auth.loginDocumentTitle,
     description: messages.auth.loginDocumentDescription,
     keywords: ["login", "sign in", "authentication"],
+    title: messages.auth.loginDocumentTitle,
   });
 
   const {
@@ -147,13 +147,13 @@ export const Login = () => {
   let loginError: { message: string; description?: string } | null = null;
   if (isError) {
     loginError = {
-      message: messages.auth.loginFailedTitle,
       description: getErrorMessage(error),
+      message: messages.auth.loginFailedTitle,
     };
   } else if (expirationMessage && !hasAttemptedLogin.current) {
     loginError = {
-      message: messages.auth.sessionExpiredTitle,
       description: expirationMessage,
+      message: messages.auth.sessionExpiredTitle,
     };
   }
 

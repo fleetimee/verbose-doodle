@@ -74,15 +74,15 @@ describe("useSocketBridge", () => {
     const fetchMock = (() => {
       ticketNumber += 1;
       return Promise.resolve({
-        ok: true,
-        status: 200,
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({
           data: {
-            ticket: `socket-ticket-${ticketNumber}`,
             expiresAt: "2026-07-14T00:00:30Z",
+            ticket: `socket-ticket-${ticketNumber}`,
           },
         }),
+        ok: true,
+        status: 200,
       } as Response);
     }) as unknown as typeof fetch;
     fetchSpy = spyOn(globalThis, "fetch").mockImplementation(fetchMock);
@@ -120,27 +120,27 @@ describe("useSocketBridge", () => {
     act(() => {
       socket?.emit(
         "message",
-        JSON.stringify({ type: "tcp_client_connected", payload: {} })
+        JSON.stringify({ payload: {}, type: "tcp_client_connected" })
       );
       socket?.emit("message", "not-json");
       socket?.emit(
         "message",
-        JSON.stringify({ type: "tcp_server_started", payload: {} })
+        JSON.stringify({ payload: {}, type: "tcp_server_started" })
       );
       socket?.emit(
         "message",
         JSON.stringify({
+          payload: { address: "127.0.0.1:4000", clientId: "client-1" },
           type: "tcp_server_client_connected",
-          payload: { clientId: "client-1", address: "127.0.0.1:4000" },
         })
       );
       socket?.emit(
         "message",
-        JSON.stringify({ type: "udp_server_started", payload: {} })
+        JSON.stringify({ payload: {}, type: "udp_server_started" })
       );
       socket?.emit(
         "message",
-        JSON.stringify({ type: "udp_sent", payload: { data: "ok" } })
+        JSON.stringify({ payload: { data: "ok" }, type: "udp_sent" })
       );
     });
 
@@ -171,7 +171,7 @@ describe("useSocketBridge", () => {
       for (let index = 0; index < 610; index += 1) {
         socket?.emit(
           "message",
-          JSON.stringify({ type: "udp_data", payload: { data: String(index) } })
+          JSON.stringify({ payload: { data: String(index) }, type: "udp_data" })
         );
       }
     });

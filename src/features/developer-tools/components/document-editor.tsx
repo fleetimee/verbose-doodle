@@ -19,17 +19,17 @@ type DocumentEditorProps = {
 };
 
 const editorTheme = EditorView.theme({
-  "&": { backgroundColor: "transparent", fontSize: "13px" },
+  ".cm-activeLine": { backgroundColor: "hsl(var(--muted) / 0.35)" },
+  ".cm-activeLineGutter": { backgroundColor: "hsl(var(--muted) / 0.35)" },
   ".cm-content": { fontFamily: "Geist Mono, monospace", padding: "16px 0" },
+  ".cm-cursor": { borderLeftColor: "hsl(var(--foreground))" },
   ".cm-gutters": {
     backgroundColor: "transparent",
     borderRight: "1px solid hsl(var(--border) / 0.55)",
     color: "hsl(var(--muted-foreground) / 0.65)",
   },
-  ".cm-activeLine": { backgroundColor: "hsl(var(--muted) / 0.35)" },
-  ".cm-activeLineGutter": { backgroundColor: "hsl(var(--muted) / 0.35)" },
-  ".cm-cursor": { borderLeftColor: "hsl(var(--foreground))" },
   ".cm-scroller": { minHeight: "400px" },
+  "&": { backgroundColor: "transparent", fontSize: "13px" },
 });
 
 export function DocumentEditor({

@@ -19,28 +19,28 @@ import { createMutationHook } from "@/lib/query-hooks";
 async function loginUser(data: LoginFormData): Promise<LoginResponse> {
   try {
     const apiResponse = await apiFetch<ApiLoginResponse>(getLoginUrl(), {
-      method: "POST",
       body: JSON.stringify({
-        username: data.username,
         password: data.password,
+        username: data.username,
       }),
+      method: "POST",
     });
 
     // Check if login was successful
     if (apiResponse.responseCode !== "00") {
       // Throw error with the API's response description
       throw {
-        message: apiResponse.responseDesc || messages.auth.loginFailed,
         code: apiResponse.responseCode,
+        message: apiResponse.responseDesc || messages.auth.loginFailed,
         status: 401,
       } as LoginError;
     }
 
     return {
-      responseCode: apiResponse.responseCode,
-      responseDesc: apiResponse.responseDesc,
       accessToken: apiResponse.data.accessToken,
       refreshToken: apiResponse.data.refreshToken,
+      responseCode: apiResponse.responseCode,
+      responseDesc: apiResponse.responseDesc,
     };
   } catch (error) {
     throw error as LoginError;
@@ -78,6 +78,10 @@ export function useLogin({
   const mutation = createMutationHook<LoginResponse, LoginFormData, LoginError>(
     loginUser,
     {
+      onError: (error) => {
+        // Handle authentication errors with toast notifications
+        handleAuthError(error);
+      },
       onSuccess: (data, variables) => {
         // Check if login was successful based on responseCode
         if (data.responseCode === "00") {
@@ -105,10 +109,6 @@ export function useLogin({
         }
         // Note: If responseCode is not "00", the mutation should throw an error
         // This is handled in the loginUser function
-      },
-      onError: (error) => {
-        // Handle authentication errors with toast notifications
-        handleAuthError(error);
       },
     }
   );

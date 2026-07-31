@@ -95,11 +95,11 @@ const HTTP_METHODS: readonly HttpMethod[] = [
 ];
 const ENDPOINT_DETAIL_TOUR_ID = "endpoint-detail-intro";
 const ENDPOINT_DETAIL_TOUR_TARGETS = {
-  header: "endpoint-detail-tour-header",
-  editActions: "endpoint-detail-tour-edit-actions",
   addResponse: "endpoint-detail-tour-add-response",
-  responses: "endpoint-detail-tour-responses",
+  editActions: "endpoint-detail-tour-edit-actions",
+  header: "endpoint-detail-tour-header",
   preview: "endpoint-detail-tour-preview",
+  responses: "endpoint-detail-tour-responses",
   trafficLogs: "endpoint-detail-tour-traffic-logs",
 } as const;
 
@@ -209,8 +209,8 @@ export function EndpointDetailPage() {
     deleteEndpointMutation;
 
   useDocumentMeta({
-    title: endpoint ? `${endpoint.method} ${endpoint.url}` : "Endpoint Detail",
     description: "View and manage endpoint responses",
+    title: endpoint ? `${endpoint.method} ${endpoint.url}` : "Endpoint Detail",
   });
 
   const selectedResponse = useMemo(() => {
@@ -404,20 +404,18 @@ export function EndpointDetailPage() {
 
     return [
       {
-        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.header,
-        position: "bottom",
         content: (
           <TourStepContent
             description={messages.endpoints.detailTour.headerDescription}
             title={messages.endpoints.detailTour.headerTitle}
           />
         ),
+        position: "bottom",
+        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.header,
       },
       ...(canEditEndpoint
         ? [
             {
-              selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.editActions,
-              position: "bottom" as const,
               content: (
                 <TourStepContent
                   description={
@@ -426,14 +424,14 @@ export function EndpointDetailPage() {
                   title={messages.endpoints.detailTour.editActionsTitle}
                 />
               ),
+              position: "bottom" as const,
+              selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.editActions,
             },
           ]
         : []),
       ...(canAddResponse
         ? [
             {
-              selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.addResponse,
-              position: "left" as const,
               content: (
                 <TourStepContent
                   description={
@@ -442,38 +440,40 @@ export function EndpointDetailPage() {
                   title={messages.endpoints.detailTour.addResponseTitle}
                 />
               ),
+              position: "left" as const,
+              selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.addResponse,
             },
           ]
         : []),
       {
-        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.responses,
-        position: "right",
         content: (
           <TourStepContent
             description={messages.endpoints.detailTour.responsesDescription}
             title={messages.endpoints.detailTour.responsesTitle}
           />
         ),
+        position: "right",
+        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.responses,
       },
       {
-        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.preview,
-        position: "left",
         content: (
           <TourStepContent
             description={messages.endpoints.detailTour.previewDescription}
             title={messages.endpoints.detailTour.previewTitle}
           />
         ),
+        position: "left",
+        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.preview,
       },
       {
-        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.trafficLogs,
-        position: "top",
         content: (
           <TourStepContent
             description={messages.endpoints.detailTour.trafficLogsDescription}
             title={messages.endpoints.detailTour.trafficLogsTitle}
           />
         ),
+        position: "top",
+        selectorId: ENDPOINT_DETAIL_TOUR_TARGETS.trafficLogs,
       },
     ];
   }, [canAddResponse, canEditEndpoint, endpoint]);
@@ -664,21 +664,21 @@ export function EndpointDetailPage() {
 
     updateEndpoint(
       {
-        endpointSlug: updatePayload.endpointSlug,
         changes: {
           ...(updatePayload.url ? { url: updatePayload.url } : {}),
           ...(updatePayload.method ? { method: updatePayload.method } : {}),
         },
+        endpointSlug: updatePayload.endpointSlug,
       },
       {
+        onError: () => {
+          // Error toast is handled by the hook
+          // Keep editing mode open so user can correct the error
+        },
         onSuccess: () => {
           setIsEditingUrl(false);
           setEditedUrl("");
           setEditedMethod("GET");
-        },
-        onError: () => {
-          // Error toast is handled by the hook
-          // Keep editing mode open so user can correct the error
         },
       }
     );
@@ -723,8 +723,8 @@ export function EndpointDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 20 }}
           transition={{
-            duration: PAGE_ANIMATION_DURATION,
             delay: STAGGER_DELAY,
+            duration: PAGE_ANIMATION_DURATION,
             ease: "easeOut",
           }}
         >
@@ -741,8 +741,8 @@ export function EndpointDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 20 }}
           transition={{
-            duration: PAGE_ANIMATION_DURATION,
             delay: STAGGER_DELAY * 2,
+            duration: PAGE_ANIMATION_DURATION,
             ease: "easeOut",
           }}
         >
@@ -778,8 +778,8 @@ export function EndpointDetailPage() {
           className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
           initial={{ opacity: 0, y: 20 }}
           transition={{
-            duration: PAGE_ANIMATION_DURATION,
             delay: STAGGER_DELAY,
+            duration: PAGE_ANIMATION_DURATION,
             ease: "easeOut",
           }}
         >
@@ -802,8 +802,8 @@ export function EndpointDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 20 }}
           transition={{
-            duration: PAGE_ANIMATION_DURATION,
             delay: STAGGER_DELAY * 2,
+            duration: PAGE_ANIMATION_DURATION,
             ease: "easeOut",
           }}
         >
@@ -825,8 +825,8 @@ export function EndpointDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 20 }}
           transition={{
-            duration: PAGE_ANIMATION_DURATION,
             delay: STAGGER_DELAY,
+            duration: PAGE_ANIMATION_DURATION,
             ease: "easeOut",
           }}
         >
@@ -843,8 +843,8 @@ export function EndpointDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           initial={{ opacity: 0, y: 20 }}
           transition={{
-            duration: PAGE_ANIMATION_DURATION,
             delay: STAGGER_DELAY * 2,
+            duration: PAGE_ANIMATION_DURATION,
             ease: "easeOut",
           }}
         >
@@ -881,8 +881,8 @@ export function EndpointDetailPage() {
         id={ENDPOINT_DETAIL_TOUR_TARGETS.header}
         initial={{ opacity: 0, y: 20 }}
         transition={{
-          duration: PAGE_ANIMATION_DURATION,
           delay: STAGGER_DELAY,
+          duration: PAGE_ANIMATION_DURATION,
           ease: "easeOut",
         }}
       >
@@ -1198,8 +1198,8 @@ export function EndpointDetailPage() {
         animate={{ opacity: 1, y: 0 }}
         initial={{ opacity: 0, y: 20 }}
         transition={{
-          duration: PAGE_ANIMATION_DURATION,
           delay: STAGGER_DELAY * 2,
+          duration: PAGE_ANIMATION_DURATION,
           ease: "easeOut",
         }}
       >
@@ -1226,8 +1226,8 @@ export function EndpointDetailPage() {
         animate={{ opacity: 1, y: 0 }}
         initial={{ opacity: 0, y: 20 }}
         transition={{
-          duration: PAGE_ANIMATION_DURATION,
           delay: STAGGER_DELAY * 3,
+          duration: PAGE_ANIMATION_DURATION,
           ease: "easeOut",
         }}
       >

@@ -76,8 +76,8 @@ export function ResponsePreview({
     }
 
     const currentSimulation = {
-      responseId: response.id,
       delayMs: response.delayMs,
+      responseId: response.id,
       simulateTimeout: response.simulateTimeout,
     };
 
@@ -319,9 +319,9 @@ export function ResponsePreview({
                 className="max-w-full"
                 data={[
                   {
-                    language: "json",
-                    filename: "response.json",
                     code: formattedResponseJson,
+                    filename: "response.json",
+                    language: "json",
                   },
                 ]}
                 defaultValue="json"

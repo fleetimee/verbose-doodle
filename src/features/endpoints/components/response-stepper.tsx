@@ -89,13 +89,13 @@ export function ResponseStepper({
   const currentStep = STEPS[currentStepIndex];
 
   const form = useForm<ResponseFormData>({
-    resolver: zodResolver(responseSchema),
     defaultValues: {
-      name: "",
       json: "{}",
+      name: "",
       statusCode: 200,
     },
     mode: "onChange",
+    resolver: zodResolver(responseSchema),
   });
 
   const canProceed = () => {

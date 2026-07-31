@@ -46,45 +46,45 @@ export const UserFormDialog = ({
   const defaultValues =
     mode === "edit" && userData
       ? {
-          username: userData.username,
-          role: userData.role,
           active: userData.active,
           password: "",
+          role: userData.role,
+          username: userData.username,
         }
       : {
-          username: "",
-          role: "USER" as const,
           active: true,
           password: "",
+          role: "USER" as const,
+          username: "",
         };
 
   const onSubmit = (data: UserFormData) => {
     if (mode === "edit" && userData?.id) {
       updateUser(
         {
+          active: data.active,
+          role: data.role,
           user_id: userData.id,
           username: data.username,
-          role: data.role,
-          active: data.active,
         },
         {
+          onError: () => {
+            // Error is handled by the mutation hook with toast notification
+          },
           onSuccess: () => {
             onOpenChange(false);
             formRef.current?.reset();
-          },
-          onError: () => {
-            // Error is handled by the mutation hook with toast notification
           },
         }
       );
     } else {
       createUser(data as CreateUserRequest, {
+        onError: () => {
+          // Error is handled by the mutation hook with toast notification
+        },
         onSuccess: () => {
           onOpenChange(false);
           formRef.current?.reset();
-        },
-        onError: () => {
-          // Error is handled by the mutation hook with toast notification
         },
       });
     }

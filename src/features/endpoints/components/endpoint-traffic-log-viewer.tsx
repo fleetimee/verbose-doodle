@@ -97,13 +97,13 @@ type TerminalTone = "empty" | "error" | "emergency";
 type ExchangeTone = "request" | "response";
 
 const STATUS_LABELS: Record<EndpointTrafficLogStatus, string> = {
-  matched_success: messages.endpoints.trafficLogStatusLabels.matchedSuccess,
-  matched_empty: messages.endpoints.trafficLogStatusLabels.matchedEmpty,
-  matched_timeout: messages.endpoints.trafficLogStatusLabels.matchedTimeout,
+  backend_error: messages.endpoints.trafficLogStatusLabels.backendError,
   matched_delayed: messages.endpoints.trafficLogStatusLabels.matchedDelayed,
+  matched_empty: messages.endpoints.trafficLogStatusLabels.matchedEmpty,
+  matched_success: messages.endpoints.trafficLogStatusLabels.matchedSuccess,
+  matched_timeout: messages.endpoints.trafficLogStatusLabels.matchedTimeout,
   unmatched_endpoint:
     messages.endpoints.trafficLogStatusLabels.unmatchedEndpoint,
-  backend_error: messages.endpoints.trafficLogStatusLabels.backendError,
 };
 
 const STATUS_FILTER_LABELS: Record<EndpointTrafficLogStatusFilter, string> = {
@@ -273,10 +273,10 @@ export function EndpointTrafficLogViewer({
 
   const filters = useMemo<EndpointTrafficLogsFilters>(
     () => ({
-      limit: lineLimit,
-      status,
-      search,
       includeBody: true,
+      limit: lineLimit,
+      search,
+      status,
     }),
     [lineLimit, search, status]
   );

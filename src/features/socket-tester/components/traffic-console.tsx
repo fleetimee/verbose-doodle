@@ -140,8 +140,8 @@ export function TrafficConsole({
     );
 
     viewport?.scrollTo({
-      top: viewport.scrollHeight,
       behavior: "smooth",
+      top: viewport.scrollHeight,
     });
   }, [autoScroll, logs.length]);
 

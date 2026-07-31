@@ -5,12 +5,12 @@ import type { ApiError } from "@/lib/api";
  * Error message mapping for common error codes
  */
 const ERROR_MESSAGES: Record<string, string> = {
-  TIMEOUT: "Request timed out. Please try again.",
-  NETWORK_ERROR: "Network error. Please check your connection.",
-  UNAUTHORIZED: "Invalid email or password.",
   FORBIDDEN: "Access denied.",
+  NETWORK_ERROR: "Network error. Please check your connection.",
   NOT_FOUND: "Resource not found.",
   SERVER_ERROR: "Server error. Please try again later.",
+  TIMEOUT: "Request timed out. Please try again.",
+  UNAUTHORIZED: "Invalid email or password.",
   VALIDATION_ERROR: "Please check your input and try again.",
 };
 
@@ -18,15 +18,15 @@ const ERROR_MESSAGES: Record<string, string> = {
  * HTTP status codes
  */
 const HTTP_STATUS = {
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  VALIDATION_ERROR: 422,
-  TOO_MANY_REQUESTS: 429,
-  INTERNAL_SERVER_ERROR: 500,
   BAD_GATEWAY: 502,
-  SERVICE_UNAVAILABLE: 503,
+  FORBIDDEN: 403,
   GATEWAY_TIMEOUT: 504,
+  INTERNAL_SERVER_ERROR: 500,
+  NOT_FOUND: 404,
+  SERVICE_UNAVAILABLE: 503,
+  TOO_MANY_REQUESTS: 429,
+  UNAUTHORIZED: 401,
+  VALIDATION_ERROR: 422,
 } as const;
 
 /**

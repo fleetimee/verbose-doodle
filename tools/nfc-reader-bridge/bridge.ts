@@ -115,9 +115,9 @@ export class NfcBridge {
       adapter ??
       ({
         initialStatus: {
+          action: "Start the bridge again.",
           readerState: "unavailable",
           reason: "Reader adapter is not initialized.",
-          action: "Start the bridge again.",
         },
         start: async () => undefined,
         stop: async () => undefined,
@@ -160,13 +160,13 @@ export class NfcBridge {
       hostname: this.config.host,
       port: this.config.port,
       websocket: {
+        close: (socket) => {
+          this.clients.delete(socket);
+        },
         message: (socket, raw) => this.handleMessage(socket, String(raw)),
         open: (socket) => {
           this.clients.add(socket);
           this.sendSnapshot(socket);
-        },
-        close: (socket) => {
-          this.clients.delete(socket);
         },
       },
     });
@@ -230,13 +230,13 @@ export class NfcBridge {
     );
     if (!handshake.ok && handshake.code === "origin-rejected") {
       return Response.json(
-        { error: "Origin is not allowed", code: "origin-rejected" },
+        { code: "origin-rejected", error: "Origin is not allowed" },
         { status: 403 }
       );
     }
     if (!handshake.ok) {
       return Response.json(
-        { error: "Bridge token is invalid", code: "unauthorized" },
+        { code: "unauthorized", error: "Bridge token is invalid" },
         { status: 401 }
       );
     }
