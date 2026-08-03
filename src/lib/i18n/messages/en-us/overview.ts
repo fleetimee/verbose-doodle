@@ -2,6 +2,9 @@ export const overviewMessages = {
   activeResponsesDescription: "Active templates",
   activeResponsesTitle: "Active Responses",
   activeUsersTitle: "Active Users",
+  accountActivityDescription:
+    "Current access and user status across the workspace.",
+  accountActivityTitle: "Account activity",
   adminUsersTitle: "Admin Users",
   chartLabels: {
     active: "Active",
@@ -15,6 +18,12 @@ export const overviewMessages = {
     totalRequests: "Total Requests",
     users: "Users",
   },
+  configurationSignalDescription:
+    "Read endpoint and response distribution at a glance.",
+  configurationSignalTitle: "Configuration signal",
+  coverageDescription:
+    "Configured billers, endpoints, and response templates in one view.",
+  coverageTitle: "Simulator coverage",
   currentActiveAccountsDescription: "Current active user accounts",
   documentDescription:
     "View your Fleetime Labs statistics, configured endpoints, and response distributions",
@@ -31,6 +40,7 @@ export const overviewMessages = {
     "Inspect endpoint coverage, response templates, and account activity without leaving the simulator workspace.",
   pageTitle: "Overview",
   readOnlyAnalytics: "Read-only analytics",
+  retry: "Try again",
   registeredAccounts: "Registered accounts",
   regularUsers: "{count} regular",
   responseTimeTrendsDescription:

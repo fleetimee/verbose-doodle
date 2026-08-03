@@ -1,4 +1,4 @@
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { ArrowRight01Icon, Route01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Link } from "react-router";
 import {
@@ -45,46 +45,61 @@ export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="divide-y divide-border/70">
-          {data.recentEndpoints.map((endpoint) => (
-            <Link
-              className="group relative -mx-3 flex items-center justify-between gap-3 rounded-md border border-transparent px-3 py-4 outline-none transition-[color,background-color,border-color,box-shadow] duration-200 ease-[var(--ease-out)] first:-mt-2 last:-mb-2 hover:border-border/70 hover:bg-[linear-gradient(90deg,color-mix(in_oklab,var(--primary)_13%,transparent),color-mix(in_oklab,var(--accent)_38%,transparent))] hover:shadow-[0_16px_40px_-28px_var(--primary)] focus-visible:border-border/70 focus-visible:bg-[linear-gradient(90deg,color-mix(in_oklab,var(--primary)_13%,transparent),color-mix(in_oklab,var(--accent)_38%,transparent))] focus-visible:ring-2 focus-visible:ring-primary/25 motion-reduce:transition-none"
-              key={endpoint.endpointId}
-              onFocus={() => prefetchEndpoint(String(endpoint.endpointId))}
-              onMouseEnter={() => prefetchEndpoint(String(endpoint.endpointId))}
-              to={`/dashboard/endpoints/${endpoint.endpointId}`}
-            >
-              <span className="absolute inset-y-3 left-0 w-0.5 rounded-full bg-primary opacity-0 transition-opacity duration-200 group-hover:opacity-80 group-focus-visible:opacity-80" />
-              <div className="min-w-0 flex-1">
-                <p className="break-all font-medium font-mono text-sm leading-relaxed transition-colors group-hover:text-primary group-focus-visible:text-primary">
-                  {endpoint.url}
-                </p>
-                <div className="mt-1 flex flex-wrap items-center gap-2 transition-colors group-hover:text-foreground/80 group-focus-visible:text-foreground/80">
-                  <p className="text-muted-foreground text-xs transition-colors group-hover:text-foreground/70 group-focus-visible:text-foreground/70">
-                    {endpoint.billerName}
-                  </p>
-                  <span className="text-muted-foreground transition-colors group-hover:text-primary/70 group-focus-visible:text-primary/70">
-                    •
-                  </span>
-                  <p className="text-muted-foreground text-xs transition-colors group-hover:text-foreground/70 group-focus-visible:text-foreground/70">
-                    {endpoint.responseCount} response
-                    {endpoint.responseCount === 1 ? "" : "s"}
-                  </p>
-                </div>
-              </div>
-              <div
-                className={`shrink-0 rounded-full border px-2.5 py-0.5 font-semibold text-xs shadow-[inset_0_1px_0_color-mix(in_oklab,var(--background)_45%,transparent)] transition-[color,background-color,border-color,transform] duration-[160ms] ease-[var(--ease-out)] group-hover:scale-105 group-focus-visible:scale-105 motion-reduce:transform-none motion-reduce:transition-none ${methodColors[endpoint.method]}`}
+        {data.recentEndpoints.length === 0 ? (
+          <div className="flex min-h-48 flex-col items-center justify-center px-4 py-10 text-center">
+            <div className="flex size-10 items-center justify-center rounded-md border border-border/70 bg-background text-muted-foreground shadow-xs">
+              <HugeiconsIcon aria-hidden icon={Route01Icon} strokeWidth={2} />
+            </div>
+            <p className="mt-4 font-semibold text-sm">No endpoints yet</p>
+            <p className="mt-1 max-w-[38ch] text-muted-foreground text-xs leading-relaxed">
+              Recently configured endpoints will appear here once they are
+              available.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border/70">
+            {data.recentEndpoints.map((endpoint) => (
+              <Link
+                className="group relative -mx-3 flex items-center justify-between gap-3 rounded-md border border-transparent px-3 py-4 outline-none transition-[color,background-color,border-color,box-shadow] duration-200 ease-[var(--ease-out)] first:-mt-2 last:-mb-2 hover:border-border/70 hover:bg-accent/50 hover:shadow-[0_16px_40px_-28px_var(--foreground)] focus-visible:border-border/70 focus-visible:bg-accent/50 focus-visible:ring-2 focus-visible:ring-primary/25 motion-reduce:transition-none"
+                key={endpoint.endpointId}
+                onFocus={() => prefetchEndpoint(String(endpoint.endpointId))}
+                onMouseEnter={() =>
+                  prefetchEndpoint(String(endpoint.endpointId))
+                }
+                to={`/dashboard/endpoints/${endpoint.endpointId}`}
               >
-                {endpoint.method}
-              </div>
-              <HugeiconsIcon
-                className="h-4 w-4 shrink-0 text-muted-foreground transition-[color,transform] duration-[160ms] ease-[var(--ease-out)] group-hover:translate-x-1 group-hover:text-primary group-focus-visible:translate-x-1 group-focus-visible:text-primary motion-reduce:transform-none motion-reduce:transition-none"
-                icon={ArrowRight01Icon}
-                strokeWidth={2}
-              />
-            </Link>
-          ))}
-        </div>
+                <span className="absolute inset-y-3 left-0 w-0.5 rounded-full bg-primary opacity-0 transition-opacity duration-200 group-hover:opacity-80 group-focus-visible:opacity-80" />
+                <div className="min-w-0 flex-1">
+                  <p className="break-all font-medium font-mono text-sm leading-relaxed transition-colors group-hover:text-primary group-focus-visible:text-primary">
+                    {endpoint.url}
+                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 transition-colors group-hover:text-foreground/80 group-focus-visible:text-foreground/80">
+                    <p className="text-muted-foreground text-xs transition-colors group-hover:text-foreground/70 group-focus-visible:text-foreground/70">
+                      {endpoint.billerName}
+                    </p>
+                    <span className="text-muted-foreground transition-colors group-hover:text-primary/70 group-focus-visible:text-primary/70">
+                      •
+                    </span>
+                    <p className="text-muted-foreground text-xs transition-colors group-hover:text-foreground/70 group-focus-visible:text-foreground/70">
+                      {endpoint.responseCount} response
+                      {endpoint.responseCount === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                </div>
+                <div
+                  className={`shrink-0 rounded-full border px-2.5 py-0.5 font-semibold text-xs shadow-[inset_0_1px_0_color-mix(in_oklab,var(--background)_45%,transparent)] transition-[color,background-color,border-color,transform] duration-[160ms] ease-[var(--ease-out)] group-hover:scale-105 group-focus-visible:scale-105 motion-reduce:transform-none motion-reduce:transition-none ${methodColors[endpoint.method]}`}
+                >
+                  {endpoint.method}
+                </div>
+                <HugeiconsIcon
+                  className="h-4 w-4 shrink-0 text-muted-foreground transition-[color,transform] duration-[160ms] ease-[var(--ease-out)] group-hover:translate-x-1 group-hover:text-primary group-focus-visible:translate-x-1 group-focus-visible:text-primary motion-reduce:transform-none motion-reduce:transition-none"
+                  icon={ArrowRight01Icon}
+                  strokeWidth={2}
+                />
+              </Link>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

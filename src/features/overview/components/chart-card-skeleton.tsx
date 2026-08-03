@@ -13,13 +13,13 @@ type ChartCardSkeletonProps = {
 
 export function ChartCardSkeleton({ className }: ChartCardSkeletonProps) {
   return (
-    <Card className={className}>
+    <Card className={`border-border/70 bg-card/90 ${className ?? ""}`}>
       <CardHeader className="pb-2">
         <CardTitle>
-          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-5 w-48 max-w-full" />
         </CardTitle>
         <CardDescription>
-          <Skeleton className="h-4 w-64" />
+          <Skeleton className="h-3 w-64 max-w-full" />
         </CardDescription>
       </CardHeader>
       <CardContent>

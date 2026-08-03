@@ -16,7 +16,7 @@ import type { OverviewData } from "@/features/overview/types";
 
 // Chart color constants
 const CHART_COLOR_VARIANTS = 5;
-const CHART_COLOR_OFFSET = 2; // Start from chart-2 for better color variety
+const CHART_COLOR_OFFSET = 1;
 
 // Bar presentation constants
 const BAR_CORNER_RADIUS = 6;
@@ -38,7 +38,7 @@ export function EndpointStatusChart({
   // Transform data to include fill property
   const chartData = data.responseStatusDistribution.map((item, index) => ({
     count: item.count,
-    fill: `var(--chart-${(index % CHART_COLOR_VARIANTS) + CHART_COLOR_OFFSET})`,
+    fill: `var(--chart-${((index + CHART_COLOR_OFFSET) % CHART_COLOR_VARIANTS) + 1})`,
     statusCode: `HTTP ${item.statusCode}`,
     statusKey: `status-${item.statusCode}`,
     statusLabel: item.label,

@@ -18,13 +18,18 @@ export function RecentEndpointsSkeleton({
   className,
 }: RecentEndpointsSkeletonProps) {
   return (
-    <Card className={cn("md:col-span-3 lg:col-span-3", className)}>
-      <CardHeader>
+    <Card
+      className={cn(
+        "border-border/70 bg-card/90 md:col-span-3 lg:col-span-3",
+        className
+      )}
+    >
+      <CardHeader className="pb-2">
         <CardTitle>
-          <Skeleton className="h-6 w-36" />
+          <Skeleton className="h-5 w-36" />
         </CardTitle>
         <CardDescription>
-          <Skeleton className="h-4 w-64" />
+          <Skeleton className="h-3 w-64 max-w-full" />
         </CardDescription>
       </CardHeader>
       <CardContent>

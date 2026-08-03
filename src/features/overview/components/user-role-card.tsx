@@ -8,14 +8,16 @@ import {
 } from "@/components/ui/card";
 import type { OverviewData } from "@/features/overview/types";
 import { formatMessage, messages } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 const PERCENTAGE_MULTIPLIER = 100;
 
 type UserRoleCardProps = {
   readonly data: OverviewData;
+  readonly className?: string;
 };
 
-export function UserRoleCard({ data }: UserRoleCardProps) {
+export function UserRoleCard({ data, className }: UserRoleCardProps) {
   if (!data.userStats) {
     return null;
   }
@@ -35,7 +37,12 @@ export function UserRoleCard({ data }: UserRoleCardProps) {
   ];
 
   return (
-    <Card className="border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-1">
+    <Card
+      className={cn(
+        "border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-1",
+        className
+      )}
+    >
       <CardHeader className="pb-2">
         <CardTitle className="text-base">
           {messages.overview.userRolesTitle}

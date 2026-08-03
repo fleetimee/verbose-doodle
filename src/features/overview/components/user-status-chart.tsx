@@ -10,6 +10,7 @@ import type { ChartConfig } from "@/components/ui/chart";
 import { ChartContainer } from "@/components/ui/chart";
 import type { OverviewData } from "@/features/overview/types";
 import { messages } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 const userStatusConfig = {
   active: {
@@ -31,9 +32,10 @@ const CHART_OUTER_RADIUS = 88;
 
 type UserStatusChartProps = {
   data: OverviewData;
+  className?: string;
 };
 
-export function UserStatusChart({ data }: UserStatusChartProps) {
+export function UserStatusChart({ data, className }: UserStatusChartProps) {
   // Early return if no user status data available
   if (
     !data.userStatusDistribution ||
@@ -54,9 +56,10 @@ export function UserStatusChart({ data }: UserStatusChartProps) {
   );
   const activeCount = activeUsers?.count ?? 0;
   const inactiveCount = inactiveUsers?.count ?? 0;
-  const percentage = Math.round(
-    (activeCount / totalUsers) * PERCENTAGE_MULTIPLIER
-  );
+  const percentage =
+    totalUsers > 0
+      ? Math.round((activeCount / totalUsers) * PERCENTAGE_MULTIPLIER)
+      : 0;
 
   const chartData = [
     {
@@ -72,7 +75,12 @@ export function UserStatusChart({ data }: UserStatusChartProps) {
   ];
 
   return (
-    <Card className="border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-1">
+    <Card
+      className={cn(
+        "border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-1",
+        className
+      )}
+    >
       <CardHeader className="pb-2">
         <CardTitle className="text-base">
           {messages.overview.activeUsersTitle}
