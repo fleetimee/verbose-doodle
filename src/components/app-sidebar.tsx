@@ -187,12 +187,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarSeparator />
       <SidebarContent className="group-data-[collapsible=icon]:items-center">
         <NavMain items={navMain} />
-        <NavSecondary className="mt-auto" items={data.navSecondary}>
-          <SessionTimer />
-        </NavSecondary>
       </SidebarContent>
       <SidebarSeparator />
       <SidebarFooter className="p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
+        <NavSecondary className="p-0" items={data.navSecondary}>
+          <SessionTimer />
+        </NavSecondary>
         <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
