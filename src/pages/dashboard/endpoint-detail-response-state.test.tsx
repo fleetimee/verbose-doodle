@@ -440,6 +440,11 @@ describe("EndpointDetailPage response state", () => {
     await user.click(
       await screen.findByRole("menuitem", { name: "Clone response" })
     );
+    expect(screen.getByRole("alertdialog")).toBeDefined();
+    expect(mutationMethods).toHaveLength(0);
+    await user.click(
+      await screen.findByRole("button", { name: "Clone response" })
+    );
 
     await waitFor(() => {
       expect(mutationMethods).toContain(
@@ -449,6 +454,22 @@ describe("EndpointDetailPage response state", () => {
       expectResponseSelection("Primary response (Copy)", true);
     });
     expectResponseSelection("Primary response", false);
+  });
+
+  test("cancels the clone confirmation without sending a request", async () => {
+    const user = userEvent.setup();
+    renderEndpointDetail();
+
+    await user.click(
+      await findResponseButton("More response actions for Primary response")
+    );
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Clone response" })
+    );
+    await user.click(await screen.findByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(mutationMethods).toHaveLength(0);
   });
 
   test("shows clone loading state and prevents duplicate submissions", async () => {
@@ -461,6 +482,9 @@ describe("EndpointDetailPage response state", () => {
     );
     await user.click(
       await screen.findByRole("menuitem", { name: "Clone response" })
+    );
+    await user.click(
+      await screen.findByRole("button", { name: "Clone response" })
     );
 
     await waitFor(() => {
@@ -503,6 +527,9 @@ describe("EndpointDetailPage response state", () => {
       );
       await user.click(
         await screen.findByRole("menuitem", { name: "Clone response" })
+      );
+      await user.click(
+        await screen.findByRole("button", { name: "Clone response" })
       );
 
       await waitFor(() => {

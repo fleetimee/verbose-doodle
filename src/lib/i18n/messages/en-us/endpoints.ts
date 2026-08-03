@@ -295,6 +295,10 @@ export const endpointsMessages = {
   responseCreateError: "Failed to create response",
   responseCreateSuccess: "Response created successfully",
   responseCloneAction: "Clone response",
+  responseCloneConfirmAction: "Clone response",
+  responseCloneConfirmDescription:
+    'Are you sure you want to create a copy of "{name}"? The new response will be created as inactive.',
+  responseCloneConfirmTitle: "Clone response?",
   responseCloneDescription: "Created clone: {name}",
   responseCloneError: "Failed to clone response",
   responseCloneLoading: "Cloning response...",

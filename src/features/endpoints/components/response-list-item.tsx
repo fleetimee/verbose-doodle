@@ -107,6 +107,7 @@ export function ResponseListItem({
 
   const isActive = response.activated;
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showCloneDialog, setShowCloneDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showSimulateDialog, setShowSimulateDialog] = useState(false);
   const [showEditStepper, setShowEditStepper] = useState(false);
@@ -163,11 +164,20 @@ export function ResponseListItem({
     setShowDeleteDialog(true);
   };
 
-  const handleClone = () => {
+  const handleCloneClick = () => {
     if (isCloning) {
       return;
     }
 
+    setShowCloneDialog(true);
+  };
+
+  const handleConfirmClone = () => {
+    if (isCloning) {
+      return;
+    }
+
+    setShowCloneDialog(false);
     cloneResponse(
       { endpointId, responseId: response.id },
       {
@@ -214,7 +224,7 @@ export function ResponseListItem({
         isLoading={isLoading}
         isSelected={isSelected}
         onActivate={() => setShowConfirmDialog(true)}
-        onClone={handleClone}
+        onClone={handleCloneClick}
         onDeactivate={() => setShowConfirmDialog(true)}
         onDelete={handleDeleteClick}
         onEdit={handleEditClick}
@@ -323,7 +333,7 @@ export function ResponseListItem({
                       disabled={!canCloneResponse || isCloning}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleClone();
+                        handleCloneClick();
                       }}
                     >
                       <CopyIcon className="h-4 w-4" />
@@ -420,6 +430,35 @@ export function ResponseListItem({
         open={showSimulateDialog}
         response={response}
       />
+
+      <AlertDialog onOpenChange={setShowCloneDialog} open={showCloneDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {messages.endpoints.responseCloneConfirmTitle}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {formatMessage(
+                messages.endpoints.responseCloneConfirmDescription,
+                { name: response.name }
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isCloning}>
+              {messages.common.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isCloning}
+              onClick={handleConfirmClone}
+            >
+              {isCloning
+                ? messages.endpoints.responseCloneLoading
+                : messages.endpoints.responseCloneConfirmAction}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AnimatePresence>
         {showEditStepper && (
