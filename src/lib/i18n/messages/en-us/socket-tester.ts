@@ -54,7 +54,7 @@ export const socketTesterMessages = {
   payloadFormatLabel: "Payload format",
   payloadPlaceholder: "Type a payload...",
   portLabel: "Port",
-  portRangeDescription: "Use port 1-65535.",
+  portRangeDescription: "Enter a destination port from 1–65535.",
   protocolLabel: "Protocol",
   rawPayloadDescription: "Exact text payload captured from the selected frame.",
   rawPayloadTitle: "Raw payload",
@@ -75,6 +75,8 @@ export const socketTesterMessages = {
   stopUdpListenerSrLabel: "Stop UDP listener",
   targetHostLabel: "Target host",
   targetPortLabel: "Target port",
+  tcpClientPortDescription:
+    "Destination port: 1–65535. Local port is OS-assigned.",
   tcpClientStatusLabel: "TCP client status",
   tcpConnected: "TCP connected",
   tcpConnectedDescription: "Connected to {host}:{port}",
@@ -82,6 +84,8 @@ export const socketTesterMessages = {
   tcpConnectionRefusedDescription:
     "{host}:{port} refused the connection. {message}",
   tcpConnectionUnableDescription: "Could not connect to {host}:{port}",
+  tcpServerPortDescription:
+    "Default listener range: 18110–18120. Choose any free port in this range.",
   timestampLabel: "Timestamp",
   tour: {
     shared: {

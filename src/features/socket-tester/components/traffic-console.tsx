@@ -289,7 +289,7 @@ export function TrafficConsole({
             </div>
           </div>
         ) : (
-          <div className="min-w-max p-4 font-mono text-[#e7e7e7] text-[13px] leading-5">
+          <div className="w-full min-w-0 p-4 font-mono text-[#e7e7e7] text-[13px] leading-5">
             {logs.map((entry) => (
               <button
                 className="group grid w-full min-w-0 grid-cols-[76px_64px_92px_minmax(140px,1fr)] items-start gap-2 rounded px-2 py-1 text-left tabular-nums transition-[background-color,transform] duration-150 ease-out hover:bg-white/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 active:scale-[0.997]"

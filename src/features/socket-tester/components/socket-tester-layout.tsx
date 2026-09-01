@@ -555,6 +555,7 @@ export function SocketTesterLayout({
 
       <motion.div
         animate={sectionAnimate}
+        className="min-w-0"
         initial={sectionInitial}
         style={sectionStyle}
         transition={{

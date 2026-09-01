@@ -90,7 +90,7 @@ export function TcpClientPanel({
         </div>
 
         <FieldGroup
-          className="gap-3 md:grid md:grid-cols-[1fr_140px_auto] md:items-start"
+          className="gap-3 md:grid md:grid-cols-[minmax(0,1fr)_140px_140px] md:items-start"
           id={tourIds?.connection}
         >
           <Field data-disabled={state.connected} data-invalid={!hostIsValid}>
@@ -124,16 +124,16 @@ export function TcpClientPanel({
               placeholder="8080"
               value={port}
             />
-            {portIsValid ? null : (
-              <FieldDescription>
-                {socketMessages.portRangeDescription}
-              </FieldDescription>
-            )}
+            <FieldDescription>
+              {portIsValid
+                ? socketMessages.tcpClientPortDescription
+                : socketMessages.portRangeDescription}
+            </FieldDescription>
           </Field>
           <div className="flex items-end md:pt-6">
             {state.connected ? (
               <Button
-                className="w-full md:w-auto"
+                className="w-full"
                 onClick={onDisconnect}
                 type="button"
                 variant="destructive"
@@ -143,7 +143,7 @@ export function TcpClientPanel({
               </Button>
             ) : (
               <Button
-                className="w-full md:w-auto"
+                className="w-full"
                 disabled={!canConnect}
                 onClick={() => onConnect(trimmedHost, parsedPort)}
                 type="button"

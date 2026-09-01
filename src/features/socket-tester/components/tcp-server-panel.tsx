@@ -4,12 +4,14 @@ import { useMemo, useState } from "react";
 import { RadioTower, UsersRound } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FieldDescription } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { SendPanel } from "@/features/socket-tester/components/send-panel";
 import type {
   PayloadFormat,
   TcpServerState,
 } from "@/features/socket-tester/types";
+import { messages } from "@/lib/i18n";
 
 type TcpServerPanelProps = {
   readonly bridgeConnected: boolean;
@@ -41,6 +43,7 @@ export function TcpServerPanel({
   const [port, setPort] = useState(String(state.port));
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const parsedPort = Number(port);
+  const socketMessages = messages.socketTester;
   const targets = useMemo(
     () =>
       selectedClients.length > 0
@@ -53,17 +56,22 @@ export function TcpServerPanel({
     <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
       <section className="grid content-start gap-4 border-border/70 border-b pb-4 xl:border-r xl:border-b-0 xl:pr-4 xl:pb-0">
         <div className="grid gap-3" id={tourIds?.listener}>
-          <label className="grid gap-1.5" htmlFor="tcp-server-port">
-            <span className="font-medium text-muted-foreground text-xs">
-              Listen port
-            </span>
-            <Input
-              id="tcp-server-port"
-              inputMode="numeric"
-              onChange={(event) => setPort(event.target.value)}
-              value={port}
-            />
-          </label>
+          <div className="grid gap-1.5">
+            <label className="grid gap-1.5" htmlFor="tcp-server-port">
+              <span className="font-medium text-muted-foreground text-xs">
+                Listen port
+              </span>
+              <Input
+                id="tcp-server-port"
+                inputMode="numeric"
+                onChange={(event) => setPort(event.target.value)}
+                value={port}
+              />
+            </label>
+            <FieldDescription>
+              {socketMessages.tcpServerPortDescription}
+            </FieldDescription>
+          </div>
           {state.listening ? (
             <Button
               className="gap-2"
