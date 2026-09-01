@@ -43,6 +43,11 @@ describe("DeveloperToolsCatalog", () => {
     ).toBe("/dashboard/developer-tools/number-base-converter");
     expect(
       screen
+        .getByRole("link", { name: "Open ISO 8583 Generator" })
+        .getAttribute("href")
+    ).toBe("/dashboard/developer-tools/iso8583-generator");
+    expect(
+      screen
         .getByRole("link", { name: "Open Date Converter" })
         .getAttribute("href")
     ).toBe("/dashboard/developer-tools/date-converter");

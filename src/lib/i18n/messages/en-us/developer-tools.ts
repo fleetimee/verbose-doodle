@@ -33,6 +33,11 @@ export const developerToolsMessages = {
   filesValue: "No uploads",
   gridView: "Grid view",
   inspectionCategory: "Inspection",
+  iso8583GeneratorDescription:
+    "Assemble framed ISO 8583 messages with field-aware inputs, live bitmaps, and TCP handoff.",
+  iso8583GeneratorLimit: "128 data elements",
+  iso8583GeneratorRuntime: "Browser + TCP bridge",
+  iso8583GeneratorTags: ["ISO 8583", "MTI", "Bitmaps", "TCP"],
   jwtInspectorDescription:
     "Decode, inspect, edit, and verify JSON Web Tokens (JWT) using secure, client-side Web Crypto.",
   jwtInspectorLimit: "Standard JWT structure",

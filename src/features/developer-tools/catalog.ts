@@ -4,6 +4,7 @@ import {
   Braces,
   CalendarClock,
   CalendarDays,
+  Code2,
   FileJson,
   Fingerprint,
   RadioReceiver,
@@ -119,6 +120,11 @@ const loadJsonYamlConverter: DeveloperToolLoader = () =>
     ({ JsonYamlConverterPage }) => ({ default: JsonYamlConverterPage })
   );
 
+const loadIso8583Generator: DeveloperToolLoader = () =>
+  import("@/pages/dashboard/iso8583-generator").then(
+    ({ Iso8583GeneratorPage }) => ({ default: Iso8583GeneratorPage })
+  );
+
 const loadNumberBaseConverter: DeveloperToolLoader = () =>
   import("@/pages/dashboard/number-base-converter").then(
     ({ NumberBaseConverterPage }) => ({ default: NumberBaseConverterPage })
@@ -185,6 +191,23 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     path: "developer-tools/date-converter",
     runtime: messages.developerTools.dateConverterRuntime,
     tags: messages.developerTools.dateConverterTags,
+  },
+  {
+    categoryId: "conversion",
+    description: messages.developerTools.iso8583GeneratorDescription,
+    document: {
+      description: messages.iso8583Generator.documentDescription,
+      keywords: messages.iso8583Generator.documentKeywords,
+      title: messages.iso8583Generator.title,
+    },
+    icon: Code2,
+    id: "iso8583-generator",
+    limit: messages.developerTools.iso8583GeneratorLimit,
+    load: loadIso8583Generator,
+    name: messages.iso8583Generator.title,
+    path: "developer-tools/iso8583-generator",
+    runtime: messages.developerTools.iso8583GeneratorRuntime,
+    tags: messages.developerTools.iso8583GeneratorTags,
   },
   {
     categoryId: "conversion",
