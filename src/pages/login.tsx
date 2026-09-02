@@ -174,7 +174,7 @@ export const Login = () => {
         {/* Logo or Brand */}
         <div className="mb-8 text-center">
           <div className="mb-3 flex justify-center">
-            <Logo size="md" theme="auto" variant="icon" />
+            <Logo size="md" variant="icon" />
           </div>
           <div className="mb-2">
             <SlicedText

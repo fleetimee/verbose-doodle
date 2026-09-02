@@ -60,7 +60,7 @@ export function LoggedOut() {
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-3 flex justify-center">
-            <Logo size="md" theme="auto" variant="icon" />
+            <Logo size="md" variant="icon" />
           </div>
           <div className="mb-2">
             <SlicedText

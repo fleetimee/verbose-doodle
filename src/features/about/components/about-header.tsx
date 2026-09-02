@@ -1,6 +1,6 @@
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import { useState } from "react";
-import { useTheme } from "@/components/theme-provider";
+import { APP_ICON_SRC } from "@/components/ui/logo";
 import { LanguageToggle } from "@/features/about/components/language-toggle";
 import { type AppLocale, getActiveLocale, getMessages } from "@/lib/i18n";
 
@@ -16,7 +16,6 @@ export type AboutHeaderProps = {
 };
 
 export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
-  const { theme } = useTheme();
   const shouldReduceMotion = useReducedMotion();
   const [currentLocale, setCurrentLocale] = useState<AppLocale>(() =>
     getActiveLocale()
@@ -29,15 +28,6 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
       onLocaleChange(locale);
     }
   };
-
-  let resolvedTheme = theme;
-  if (theme === "system" && typeof window !== "undefined") {
-    const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    resolvedTheme = isDark ? "dark" : "light";
-  }
-
-  const logoSrc =
-    resolvedTheme === "dark" ? "/logo-dark.svg" : "/logo-icon.svg";
 
   const headerContainerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -90,9 +80,9 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
       </div>
       <motion.img
         alt={activeMessages.about.logoAlt}
-        className="h-32 w-32 transition-transform duration-300 md:h-40 md:w-40"
+        className="h-32 w-32 rounded-full transition-transform duration-300 md:h-40 md:w-40"
         height="200"
-        src={logoSrc}
+        src={APP_ICON_SRC}
         variants={logoVariants}
         width="200"
       />

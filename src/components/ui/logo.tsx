@@ -4,12 +4,9 @@ import { cn } from "@/lib/utils";
 export interface LogoProps extends Omit<ComponentPropsWithoutRef<"img">, "src"> {
   variant?: "main" | "icon" | "wordmark" | "dark";
   size?: "sm" | "md" | "lg" | "xl";
-  /**
-   * Theme mode - can be manually set or use 'auto' to detect from media query
-   * @default "light"
-   */
-  theme?: "light" | "dark" | "auto";
 }
+
+export const APP_ICON_SRC = "/brand/biller-app-icon.png";
 
 const sizeClasses = {
   sm: "h-8 w-8",
@@ -33,9 +30,6 @@ const wordmarkSizes = {
  * <Logo variant="main" size="md" />
  *
  * @example
- * // With theme detection
- * <Logo variant="main" size="lg" theme="auto" />
- *
  * @example
  * // Icon variant for navbar
  * <Logo variant="icon" size="sm" />
@@ -43,37 +37,16 @@ const wordmarkSizes = {
 export function Logo({
   variant = "main",
   size = "md",
-  theme = "light",
   className,
   alt = "Biller JSON Simulator",
   ...props
 }: LogoProps) {
   const getLogoSrc = () => {
-    if (variant === "icon") {
-      return "/logo-icon.svg";
-    }
-
     if (variant === "wordmark") {
       return "/logo-wordmark.svg";
     }
 
-    if (variant === "dark") {
-      return "/logo-dark.svg";
-    }
-
-    // For main variant, determine theme
-    if (variant === "main") {
-      // If theme is auto, use media query detection
-      if (theme === "auto" && typeof window !== "undefined") {
-        const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        return isDark ? "/logo-dark.svg" : "/logo.svg";
-      }
-
-      // Use explicit theme
-      return theme === "dark" ? "/logo-dark.svg" : "/logo.svg";
-    }
-
-    return "/logo.svg";
+    return APP_ICON_SRC;
   };
 
   const sizeClass =
@@ -83,7 +56,11 @@ export function Logo({
     <img
       src={getLogoSrc()}
       alt={alt}
-      className={cn(sizeClass, className)}
+      className={cn(
+        sizeClass,
+        variant !== "wordmark" && "rounded-full",
+        className
+      )}
       width={variant === "wordmark" ? undefined : sizeClasses[size].split("-")[1]}
       height={sizeClasses[size].split("-")[1]}
       {...props}

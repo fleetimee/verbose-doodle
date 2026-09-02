@@ -172,7 +172,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <Logo
                   className="size-6 group-data-[collapsible=icon]:size-5"
                   size="sm"
-                  theme="auto"
                   variant="icon"
                 />
               </div>
