@@ -13,7 +13,9 @@ describe("Number Base Converter navigation", () => {
     const queryClient = new QueryClient();
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter>
+        <MemoryRouter
+          initialEntries={["/dashboard/developer-tools/number-base-converter"]}
+        >
           <AuthProvider>
             <SidebarProvider>
               <AppSidebar />

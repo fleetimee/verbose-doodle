@@ -16,8 +16,8 @@ import { formatMessage, messages } from "@/lib/i18n";
 import { generateUUID } from "@/lib/utils";
 
 export const DEFAULT_TCP_CLIENT_PORT = 8080;
-export const DEFAULT_TCP_SERVER_PORT = 18110;
-export const DEFAULT_UDP_SERVER_PORT = 18111;
+export const DEFAULT_TCP_SERVER_PORT = 18_110;
+export const DEFAULT_UDP_SERVER_PORT = 18_111;
 export const MAX_LOG_ENTRIES = 600;
 
 export type ToastEvent = {

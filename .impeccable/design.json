@@ -8,147 +8,397 @@
         "role": "primary",
         "displayName": "Harbor Teal, Light UI",
         "canonical": "oklch(0.51 0.08 185)",
-        "tonalRamp": ["oklch(0.15 0.08 185)", "oklch(0.25 0.08 185)", "oklch(0.35 0.08 185)", "oklch(0.45 0.08 185)", "oklch(0.55 0.08 185)", "oklch(0.65 0.08 185)", "oklch(0.8 0.08 185)", "oklch(0.95 0.08 185)"]
+        "tonalRamp": [
+          "oklch(0.15 0.08 185)",
+          "oklch(0.25 0.08 185)",
+          "oklch(0.35 0.08 185)",
+          "oklch(0.45 0.08 185)",
+          "oklch(0.55 0.08 185)",
+          "oklch(0.65 0.08 185)",
+          "oklch(0.8 0.08 185)",
+          "oklch(0.95 0.08 185)"
+        ]
       },
       "harbor-teal-dark": {
         "role": "primary",
         "displayName": "Harbor Teal, Dark UI",
         "canonical": "oklch(0.67 0.075 185)",
-        "tonalRamp": ["oklch(0.15 0.075 185)", "oklch(0.25 0.075 185)", "oklch(0.35 0.075 185)", "oklch(0.45 0.075 185)", "oklch(0.55 0.075 185)", "oklch(0.65 0.075 185)", "oklch(0.8 0.075 185)", "oklch(0.95 0.075 185)"]
+        "tonalRamp": [
+          "oklch(0.15 0.075 185)",
+          "oklch(0.25 0.075 185)",
+          "oklch(0.35 0.075 185)",
+          "oklch(0.45 0.075 185)",
+          "oklch(0.55 0.075 185)",
+          "oklch(0.65 0.075 185)",
+          "oklch(0.8 0.075 185)",
+          "oklch(0.95 0.075 185)"
+        ]
       },
       "harbor-contrast-light": {
         "role": "neutral",
         "displayName": "Harbor Contrast, Light UI",
         "canonical": "oklch(0.985 0.004 180)",
-        "tonalRamp": ["oklch(0.15 0.004 180)", "oklch(0.25 0.004 180)", "oklch(0.35 0.004 180)", "oklch(0.45 0.004 180)", "oklch(0.55 0.004 180)", "oklch(0.65 0.004 180)", "oklch(0.8 0.004 180)", "oklch(0.95 0.004 180)"]
+        "tonalRamp": [
+          "oklch(0.15 0.004 180)",
+          "oklch(0.25 0.004 180)",
+          "oklch(0.35 0.004 180)",
+          "oklch(0.45 0.004 180)",
+          "oklch(0.55 0.004 180)",
+          "oklch(0.65 0.004 180)",
+          "oklch(0.8 0.004 180)",
+          "oklch(0.95 0.004 180)"
+        ]
       },
       "harbor-contrast-dark": {
         "role": "neutral",
         "displayName": "Harbor Contrast, Dark UI",
         "canonical": "oklch(0.17 0.014 240)",
-        "tonalRamp": ["oklch(0.15 0.014 240)", "oklch(0.25 0.014 240)", "oklch(0.35 0.014 240)", "oklch(0.45 0.014 240)", "oklch(0.55 0.014 240)", "oklch(0.65 0.014 240)", "oklch(0.8 0.014 240)", "oklch(0.95 0.014 240)"]
+        "tonalRamp": [
+          "oklch(0.15 0.014 240)",
+          "oklch(0.25 0.014 240)",
+          "oklch(0.35 0.014 240)",
+          "oklch(0.45 0.014 240)",
+          "oklch(0.55 0.014 240)",
+          "oklch(0.65 0.014 240)",
+          "oklch(0.8 0.014 240)",
+          "oklch(0.95 0.014 240)"
+        ]
       },
       "cool-paper": {
         "role": "neutral",
         "displayName": "Cool Paper",
         "canonical": "oklch(0.973 0.006 180)",
-        "tonalRamp": ["oklch(0.15 0.006 180)", "oklch(0.25 0.006 180)", "oklch(0.35 0.006 180)", "oklch(0.45 0.006 180)", "oklch(0.55 0.006 180)", "oklch(0.65 0.006 180)", "oklch(0.8 0.006 180)", "oklch(0.95 0.006 180)"]
+        "tonalRamp": [
+          "oklch(0.15 0.006 180)",
+          "oklch(0.25 0.006 180)",
+          "oklch(0.35 0.006 180)",
+          "oklch(0.45 0.006 180)",
+          "oklch(0.55 0.006 180)",
+          "oklch(0.65 0.006 180)",
+          "oklch(0.8 0.006 180)",
+          "oklch(0.95 0.006 180)"
+        ]
       },
       "porcelain-surface": {
         "role": "neutral",
         "displayName": "Porcelain Surface",
         "canonical": "oklch(0.995 0.002 180)",
-        "tonalRamp": ["oklch(0.15 0.002 180)", "oklch(0.25 0.002 180)", "oklch(0.35 0.002 180)", "oklch(0.45 0.002 180)", "oklch(0.55 0.002 180)", "oklch(0.65 0.002 180)", "oklch(0.8 0.002 180)", "oklch(0.95 0.002 180)"]
+        "tonalRamp": [
+          "oklch(0.15 0.002 180)",
+          "oklch(0.25 0.002 180)",
+          "oklch(0.35 0.002 180)",
+          "oklch(0.45 0.002 180)",
+          "oklch(0.55 0.002 180)",
+          "oklch(0.65 0.002 180)",
+          "oklch(0.8 0.002 180)",
+          "oklch(0.95 0.002 180)"
+        ]
       },
       "ink-slate": {
         "role": "neutral",
         "displayName": "Ink Slate",
         "canonical": "oklch(0.245 0.012 240)",
-        "tonalRamp": ["oklch(0.15 0.012 240)", "oklch(0.25 0.012 240)", "oklch(0.35 0.012 240)", "oklch(0.45 0.012 240)", "oklch(0.55 0.012 240)", "oklch(0.65 0.012 240)", "oklch(0.8 0.012 240)", "oklch(0.95 0.012 240)"]
+        "tonalRamp": [
+          "oklch(0.15 0.012 240)",
+          "oklch(0.25 0.012 240)",
+          "oklch(0.35 0.012 240)",
+          "oklch(0.45 0.012 240)",
+          "oklch(0.55 0.012 240)",
+          "oklch(0.65 0.012 240)",
+          "oklch(0.8 0.012 240)",
+          "oklch(0.95 0.012 240)"
+        ]
       },
       "quiet-slate": {
         "role": "neutral",
         "displayName": "Quiet Slate",
         "canonical": "oklch(0.485 0.016 230)",
-        "tonalRamp": ["oklch(0.15 0.016 230)", "oklch(0.25 0.016 230)", "oklch(0.35 0.016 230)", "oklch(0.45 0.016 230)", "oklch(0.55 0.016 230)", "oklch(0.65 0.016 230)", "oklch(0.8 0.016 230)", "oklch(0.95 0.016 230)"]
+        "tonalRamp": [
+          "oklch(0.15 0.016 230)",
+          "oklch(0.25 0.016 230)",
+          "oklch(0.35 0.016 230)",
+          "oklch(0.45 0.016 230)",
+          "oklch(0.55 0.016 230)",
+          "oklch(0.65 0.016 230)",
+          "oklch(0.8 0.016 230)",
+          "oklch(0.95 0.016 230)"
+        ]
       },
       "mist-border": {
         "role": "neutral",
         "displayName": "Mist Border",
         "canonical": "oklch(0.86 0.008 210)",
-        "tonalRamp": ["oklch(0.15 0.008 210)", "oklch(0.25 0.008 210)", "oklch(0.35 0.008 210)", "oklch(0.45 0.008 210)", "oklch(0.55 0.008 210)", "oklch(0.65 0.008 210)", "oklch(0.8 0.008 210)", "oklch(0.95 0.008 210)"]
+        "tonalRamp": [
+          "oklch(0.15 0.008 210)",
+          "oklch(0.25 0.008 210)",
+          "oklch(0.35 0.008 210)",
+          "oklch(0.45 0.008 210)",
+          "oklch(0.55 0.008 210)",
+          "oklch(0.65 0.008 210)",
+          "oklch(0.8 0.008 210)",
+          "oklch(0.95 0.008 210)"
+        ]
       },
       "deep-workshop": {
         "role": "neutral",
         "displayName": "Deep Workshop",
         "canonical": "oklch(0.19 0.014 240)",
-        "tonalRamp": ["oklch(0.15 0.014 240)", "oklch(0.25 0.014 240)", "oklch(0.35 0.014 240)", "oklch(0.45 0.014 240)", "oklch(0.55 0.014 240)", "oklch(0.65 0.014 240)", "oklch(0.8 0.014 240)", "oklch(0.95 0.014 240)"]
+        "tonalRamp": [
+          "oklch(0.15 0.014 240)",
+          "oklch(0.25 0.014 240)",
+          "oklch(0.35 0.014 240)",
+          "oklch(0.45 0.014 240)",
+          "oklch(0.55 0.014 240)",
+          "oklch(0.65 0.014 240)",
+          "oklch(0.8 0.014 240)",
+          "oklch(0.95 0.014 240)"
+        ]
       },
       "workshop-surface": {
         "role": "neutral",
         "displayName": "Workshop Surface",
         "canonical": "oklch(0.225 0.014 240)",
-        "tonalRamp": ["oklch(0.15 0.014 240)", "oklch(0.25 0.014 240)", "oklch(0.35 0.014 240)", "oklch(0.45 0.014 240)", "oklch(0.55 0.014 240)", "oklch(0.65 0.014 240)", "oklch(0.8 0.014 240)", "oklch(0.95 0.014 240)"]
+        "tonalRamp": [
+          "oklch(0.15 0.014 240)",
+          "oklch(0.25 0.014 240)",
+          "oklch(0.35 0.014 240)",
+          "oklch(0.45 0.014 240)",
+          "oklch(0.55 0.014 240)",
+          "oklch(0.65 0.014 240)",
+          "oklch(0.8 0.014 240)",
+          "oklch(0.95 0.014 240)"
+        ]
       },
       "workshop-text": {
         "role": "neutral",
         "displayName": "Workshop Text",
         "canonical": "oklch(0.9 0.008 205)",
-        "tonalRamp": ["oklch(0.15 0.008 205)", "oklch(0.25 0.008 205)", "oklch(0.35 0.008 205)", "oklch(0.45 0.008 205)", "oklch(0.55 0.008 205)", "oklch(0.65 0.008 205)", "oklch(0.8 0.008 205)", "oklch(0.95 0.008 205)"]
+        "tonalRamp": [
+          "oklch(0.15 0.008 205)",
+          "oklch(0.25 0.008 205)",
+          "oklch(0.35 0.008 205)",
+          "oklch(0.45 0.008 205)",
+          "oklch(0.55 0.008 205)",
+          "oklch(0.65 0.008 205)",
+          "oklch(0.8 0.008 205)",
+          "oklch(0.95 0.008 205)"
+        ]
       },
       "workshop-muted": {
         "role": "neutral",
         "displayName": "Workshop Muted",
         "canonical": "oklch(0.67 0.014 220)",
-        "tonalRamp": ["oklch(0.15 0.014 220)", "oklch(0.25 0.014 220)", "oklch(0.35 0.014 220)", "oklch(0.45 0.014 220)", "oklch(0.55 0.014 220)", "oklch(0.65 0.014 220)", "oklch(0.8 0.014 220)", "oklch(0.95 0.014 220)"]
+        "tonalRamp": [
+          "oklch(0.15 0.014 220)",
+          "oklch(0.25 0.014 220)",
+          "oklch(0.35 0.014 220)",
+          "oklch(0.45 0.014 220)",
+          "oklch(0.55 0.014 220)",
+          "oklch(0.65 0.014 220)",
+          "oklch(0.8 0.014 220)",
+          "oklch(0.95 0.014 220)"
+        ]
       },
       "workshop-border": {
         "role": "neutral",
         "displayName": "Workshop Border",
         "canonical": "oklch(0.34 0.014 235)",
-        "tonalRamp": ["oklch(0.15 0.014 235)", "oklch(0.25 0.014 235)", "oklch(0.35 0.014 235)", "oklch(0.45 0.014 235)", "oklch(0.55 0.014 235)", "oklch(0.65 0.014 235)", "oklch(0.8 0.014 235)", "oklch(0.95 0.014 235)"]
+        "tonalRamp": [
+          "oklch(0.15 0.014 235)",
+          "oklch(0.25 0.014 235)",
+          "oklch(0.35 0.014 235)",
+          "oklch(0.45 0.014 235)",
+          "oklch(0.55 0.014 235)",
+          "oklch(0.65 0.014 235)",
+          "oklch(0.8 0.014 235)",
+          "oklch(0.95 0.014 235)"
+        ]
       },
       "warning-red-light": {
         "role": "tertiary",
         "displayName": "Warning Red, Light UI",
         "canonical": "oklch(0.5594 0.19 25.8625)",
-        "tonalRamp": ["oklch(0.15 0.19 25.8625)", "oklch(0.25 0.19 25.8625)", "oklch(0.35 0.19 25.8625)", "oklch(0.45 0.19 25.8625)", "oklch(0.55 0.19 25.8625)", "oklch(0.65 0.19 25.8625)", "oklch(0.8 0.19 25.8625)", "oklch(0.95 0.19 25.8625)"]
+        "tonalRamp": [
+          "oklch(0.15 0.19 25.8625)",
+          "oklch(0.25 0.19 25.8625)",
+          "oklch(0.35 0.19 25.8625)",
+          "oklch(0.45 0.19 25.8625)",
+          "oklch(0.55 0.19 25.8625)",
+          "oklch(0.65 0.19 25.8625)",
+          "oklch(0.8 0.19 25.8625)",
+          "oklch(0.95 0.19 25.8625)"
+        ]
       },
       "warning-red-dark": {
         "role": "tertiary",
         "displayName": "Warning Red, Dark UI",
         "canonical": "oklch(0.6591 0.153 22.1703)",
-        "tonalRamp": ["oklch(0.15 0.153 22.1703)", "oklch(0.25 0.153 22.1703)", "oklch(0.35 0.153 22.1703)", "oklch(0.45 0.153 22.1703)", "oklch(0.55 0.153 22.1703)", "oklch(0.65 0.153 22.1703)", "oklch(0.8 0.153 22.1703)", "oklch(0.95 0.153 22.1703)"]
+        "tonalRamp": [
+          "oklch(0.15 0.153 22.1703)",
+          "oklch(0.25 0.153 22.1703)",
+          "oklch(0.35 0.153 22.1703)",
+          "oklch(0.45 0.153 22.1703)",
+          "oklch(0.55 0.153 22.1703)",
+          "oklch(0.65 0.153 22.1703)",
+          "oklch(0.8 0.153 22.1703)",
+          "oklch(0.95 0.153 22.1703)"
+        ]
       },
       "chart-green": {
         "role": "secondary",
         "displayName": "Measured Green",
         "canonical": "oklch(0.58 0.06 170)",
-        "tonalRamp": ["oklch(0.15 0.06 170)", "oklch(0.25 0.06 170)", "oklch(0.35 0.06 170)", "oklch(0.45 0.06 170)", "oklch(0.55 0.06 170)", "oklch(0.65 0.06 170)", "oklch(0.8 0.06 170)", "oklch(0.95 0.06 170)"]
+        "tonalRamp": [
+          "oklch(0.15 0.06 170)",
+          "oklch(0.25 0.06 170)",
+          "oklch(0.35 0.06 170)",
+          "oklch(0.45 0.06 170)",
+          "oklch(0.55 0.06 170)",
+          "oklch(0.65 0.06 170)",
+          "oklch(0.8 0.06 170)",
+          "oklch(0.95 0.06 170)"
+        ]
       },
       "chart-blue": {
         "role": "secondary",
         "displayName": "Instrument Blue",
         "canonical": "oklch(0.62 0.045 215)",
-        "tonalRamp": ["oklch(0.15 0.045 215)", "oklch(0.25 0.045 215)", "oklch(0.35 0.045 215)", "oklch(0.45 0.045 215)", "oklch(0.55 0.045 215)", "oklch(0.65 0.045 215)", "oklch(0.8 0.045 215)", "oklch(0.95 0.045 215)"]
+        "tonalRamp": [
+          "oklch(0.15 0.045 215)",
+          "oklch(0.25 0.045 215)",
+          "oklch(0.35 0.045 215)",
+          "oklch(0.45 0.045 215)",
+          "oklch(0.55 0.045 215)",
+          "oklch(0.65 0.045 215)",
+          "oklch(0.8 0.045 215)",
+          "oklch(0.95 0.045 215)"
+        ]
       },
       "chart-indigo": {
         "role": "tertiary",
         "displayName": "Quiet Indigo",
         "canonical": "oklch(0.58 0.038 245)",
-        "tonalRamp": ["oklch(0.15 0.038 245)", "oklch(0.25 0.038 245)", "oklch(0.35 0.038 245)", "oklch(0.45 0.038 245)", "oklch(0.55 0.038 245)", "oklch(0.65 0.038 245)", "oklch(0.8 0.038 245)", "oklch(0.95 0.038 245)"]
+        "tonalRamp": [
+          "oklch(0.15 0.038 245)",
+          "oklch(0.25 0.038 245)",
+          "oklch(0.35 0.038 245)",
+          "oklch(0.45 0.038 245)",
+          "oklch(0.55 0.038 245)",
+          "oklch(0.65 0.038 245)",
+          "oklch(0.8 0.038 245)",
+          "oklch(0.95 0.038 245)"
+        ]
       },
       "chart-olive": {
         "role": "tertiary",
         "displayName": "Ledger Olive",
         "canonical": "oklch(0.68 0.045 92)",
-        "tonalRamp": ["oklch(0.15 0.045 92)", "oklch(0.25 0.045 92)", "oklch(0.35 0.045 92)", "oklch(0.45 0.045 92)", "oklch(0.55 0.045 92)", "oklch(0.65 0.045 92)", "oklch(0.8 0.045 92)", "oklch(0.95 0.045 92)"]
+        "tonalRamp": [
+          "oklch(0.15 0.045 92)",
+          "oklch(0.25 0.045 92)",
+          "oklch(0.35 0.045 92)",
+          "oklch(0.45 0.045 92)",
+          "oklch(0.55 0.045 92)",
+          "oklch(0.65 0.045 92)",
+          "oklch(0.8 0.045 92)",
+          "oklch(0.95 0.045 92)"
+        ]
       }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Short page titles and major workspace headings." },
-      "headline": { "displayName": "Headline", "purpose": "Major panel and dialog headings." },
-      "title": { "displayName": "Title", "purpose": "Card, list-item, and grouped-control titles." },
-      "body": { "displayName": "Body", "purpose": "Descriptions, instructions, and working copy." },
-      "label": { "displayName": "Label", "purpose": "Eyebrows, compact categories, and status metadata." },
-      "mono": { "displayName": "Technical Mono", "purpose": "Paths, methods, payloads, identifiers, and numeric readouts." }
+      "display": {
+        "displayName": "Display",
+        "purpose": "Short page titles and major workspace headings."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Major panel and dialog headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card, list-item, and grouped-control titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Descriptions, instructions, and working copy."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Eyebrows, compact categories, and status metadata."
+      },
+      "mono": {
+        "displayName": "Technical Mono",
+        "purpose": "Paths, methods, payloads, identifiers, and numeric readouts."
+      }
     },
     "shadows": [
-      { "name": "grounding-edge", "value": "0 2px 0 0 hsl(0 0% 20% / 0.07)", "purpose": "Inputs, outlined controls, and compact static surfaces." },
-      { "name": "surface-edge", "value": "0 2px 0 0 hsl(0 0% 20% / 0.15), 0 1px 2px -1px hsl(0 0% 20% / 0.15)", "purpose": "Cards, sidebar shells, tabs, and interactive list items." },
-      { "name": "ambient-dashboard", "value": "0 18px 45px -32px color-mix(in oklab, var(--foreground) 45%, transparent)", "purpose": "Overview analytics cards that need separation from the canvas." },
-      { "name": "ambient-dashboard-hover", "value": "0 24px 55px -34px color-mix(in oklab, var(--primary) 65%, transparent)", "purpose": "Hover feedback for summary cards, paired with a 2px lift." },
-      { "name": "floating-layer", "value": "0 2px 0 0 hsl(0 0% 20% / 0.15), 0 4px 6px -1px hsl(0 0% 20% / 0.15)", "purpose": "Dialogs, sheets, popovers, menus, and floating actions." }
+      {
+        "name": "grounding-edge",
+        "value": "0 2px 0 0 hsl(0 0% 20% / 0.07)",
+        "purpose": "Inputs, outlined controls, and compact static surfaces."
+      },
+      {
+        "name": "surface-edge",
+        "value": "0 2px 0 0 hsl(0 0% 20% / 0.15), 0 1px 2px -1px hsl(0 0% 20% / 0.15)",
+        "purpose": "Cards, sidebar shells, tabs, and interactive list items."
+      },
+      {
+        "name": "ambient-dashboard",
+        "value": "0 18px 45px -32px color-mix(in oklab, var(--foreground) 45%, transparent)",
+        "purpose": "Overview analytics cards that need separation from the canvas."
+      },
+      {
+        "name": "ambient-dashboard-hover",
+        "value": "0 24px 55px -34px color-mix(in oklab, var(--primary) 65%, transparent)",
+        "purpose": "Hover feedback for summary cards, paired with a 2px lift."
+      },
+      {
+        "name": "floating-layer",
+        "value": "0 2px 0 0 hsl(0 0% 20% / 0.15), 0 4px 6px -1px hsl(0 0% 20% / 0.15)",
+        "purpose": "Dialogs, sheets, popovers, menus, and floating actions."
+      }
     ],
     "motion": [
-      { "name": "duration-instant", "value": "10ms", "purpose": "Reduced-motion state changes and immediate substitutions." },
-      { "name": "duration-fast", "value": "150ms", "purpose": "Card hover, arrow movement, and small state changes." },
-      { "name": "duration-press", "value": "160ms", "purpose": "Button presses and direct manipulation feedback." },
-      { "name": "duration-step", "value": "180ms", "purpose": "Stepper and compact staged transitions." },
-      { "name": "duration-standard", "value": "200ms", "purpose": "Theme controls, navigation, and ordinary UI transitions." },
-      { "name": "duration-panel", "value": "250ms", "purpose": "Panels, sheets, and larger workspace changes." },
-      { "name": "ease-out", "value": "cubic-bezier(0.23, 1, 0.32, 1)", "purpose": "Entrances, direct feedback, and elements settling into place." },
-      { "name": "ease-in-out", "value": "cubic-bezier(0.77, 0, 0.175, 1)", "purpose": "Reversible state changes and theme transitions." }
+      {
+        "name": "duration-instant",
+        "value": "10ms",
+        "purpose": "Reduced-motion state changes and immediate substitutions."
+      },
+      {
+        "name": "duration-fast",
+        "value": "150ms",
+        "purpose": "Card hover, arrow movement, and small state changes."
+      },
+      {
+        "name": "duration-press",
+        "value": "160ms",
+        "purpose": "Button presses and direct manipulation feedback."
+      },
+      {
+        "name": "duration-step",
+        "value": "180ms",
+        "purpose": "Stepper and compact staged transitions."
+      },
+      {
+        "name": "duration-standard",
+        "value": "200ms",
+        "purpose": "Theme controls, navigation, and ordinary UI transitions."
+      },
+      {
+        "name": "duration-panel",
+        "value": "250ms",
+        "purpose": "Panels, sheets, and larger workspace changes."
+      },
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Entrances, direct feedback, and elements settling into place."
+      },
+      {
+        "name": "ease-in-out",
+        "value": "cubic-bezier(0.77, 0, 0.175, 1)",
+        "purpose": "Reversible state changes and theme transitions."
+      }
     ],
     "breakpoints": [
       { "name": "sm", "value": "640px" },
@@ -234,16 +484,56 @@
       "Dense modules that remain scannable at desktop and collapse cleanly on smaller screens."
     ],
     "rules": [
-      { "name": "The Harbor Accent Rule", "body": "Harbor Teal marks action, selection, focus, or data. Do not flood large background regions with it.", "section": "colors" },
-      { "name": "The Theme Pairing Rule", "body": "Tune each theme for its own contrast. Do not derive the dark theme by simply reversing the light theme.", "section": "colors" },
-      { "name": "The Status Color Rule", "body": "HTTP method colors and alert colors carry meaning. Do not reuse them as decoration.", "section": "colors" },
-      { "name": "The Technical Type Rule", "body": "Monospace signals machine-readable content. Do not use it for ordinary navigation, prose, or headings.", "section": "typography" },
-      { "name": "The Label Discipline Rule", "body": "Wide uppercase labels introduce sections; they do not replace body text or button labels.", "section": "typography" },
-      { "name": "The Workbench Density Rule", "body": "Prefer compact groups with clear labels over large empty areas. Add space at section boundaries, not between every control.", "section": "layout" },
-      { "name": "The Collapse Without Loss Rule", "body": "Responsive layouts may stack, hide secondary breadcrumb segments, or collapse navigation. They must preserve the current task, primary action, and status.", "section": "layout" },
-      { "name": "The Structural First Rule", "body": "Start with a border and a tonal shift. Add a shadow only when the layer floats, responds to interaction, or must separate from a dense background.", "section": "elevation" },
-      { "name": "The One Lift Rule", "body": "Hoverable cards may rise by 2px. Nested controls inside the card should not rise independently.", "section": "elevation" },
-      { "name": "The Radius Hierarchy Rule", "body": "Small controls use tighter corners than the containers that hold them. Do not apply the largest radius to every layer.", "section": "shapes" }
+      {
+        "name": "The Harbor Accent Rule",
+        "body": "Harbor Teal marks action, selection, focus, or data. Do not flood large background regions with it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Theme Pairing Rule",
+        "body": "Tune each theme for its own contrast. Do not derive the dark theme by simply reversing the light theme.",
+        "section": "colors"
+      },
+      {
+        "name": "The Status Color Rule",
+        "body": "HTTP method colors and alert colors carry meaning. Do not reuse them as decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Technical Type Rule",
+        "body": "Monospace signals machine-readable content. Do not use it for ordinary navigation, prose, or headings.",
+        "section": "typography"
+      },
+      {
+        "name": "The Label Discipline Rule",
+        "body": "Wide uppercase labels introduce sections; they do not replace body text or button labels.",
+        "section": "typography"
+      },
+      {
+        "name": "The Workbench Density Rule",
+        "body": "Prefer compact groups with clear labels over large empty areas. Add space at section boundaries, not between every control.",
+        "section": "layout"
+      },
+      {
+        "name": "The Collapse Without Loss Rule",
+        "body": "Responsive layouts may stack, hide secondary breadcrumb segments, or collapse navigation. They must preserve the current task, primary action, and status.",
+        "section": "layout"
+      },
+      {
+        "name": "The Structural First Rule",
+        "body": "Start with a border and a tonal shift. Add a shadow only when the layer floats, responds to interaction, or must separate from a dense background.",
+        "section": "elevation"
+      },
+      {
+        "name": "The One Lift Rule",
+        "body": "Hoverable cards may rise by 2px. Nested controls inside the card should not rise independently.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Radius Hierarchy Rule",
+        "body": "Small controls use tighter corners than the containers that hold them. Do not apply the largest radius to every layer.",
+        "section": "shapes"
+      }
     ],
     "dos": [
       "Do use Harbor Teal for primary actions, selection, focus, and key data.",

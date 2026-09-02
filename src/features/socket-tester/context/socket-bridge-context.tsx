@@ -21,6 +21,10 @@ export function SocketBridgeProvider({
   );
 }
 
+export function useOptionalSocketBridgeContext() {
+  return useContext(SocketBridgeContext);
+}
+
 export function useSocketBridgeContext() {
   const context = useContext(SocketBridgeContext);
 

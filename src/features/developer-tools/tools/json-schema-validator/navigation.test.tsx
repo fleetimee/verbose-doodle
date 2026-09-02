@@ -11,7 +11,9 @@ describe("JSON Schema Validator navigation", () => {
     const queryClient = new QueryClient();
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={["/dashboard/overview"]}>
+        <MemoryRouter
+          initialEntries={["/dashboard/developer-tools/json-schema-validator"]}
+        >
           <AuthProvider>
             <SidebarProvider>
               <AppSidebar />

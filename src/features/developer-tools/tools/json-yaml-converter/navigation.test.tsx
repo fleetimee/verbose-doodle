@@ -13,7 +13,9 @@ describe("JSON/YAML Converter navigation", () => {
     const queryClient = new QueryClient();
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter>
+        <MemoryRouter
+          initialEntries={["/dashboard/developer-tools/json-yaml-converter"]}
+        >
           <AuthProvider>
             <SidebarProvider>
               <AppSidebar />

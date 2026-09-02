@@ -13,7 +13,9 @@ describe("Date Converter navigation", () => {
     const queryClient = new QueryClient();
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter>
+        <MemoryRouter
+          initialEntries={["/dashboard/developer-tools/date-converter"]}
+        >
           <AuthProvider>
             <SidebarProvider>
               <AppSidebar />

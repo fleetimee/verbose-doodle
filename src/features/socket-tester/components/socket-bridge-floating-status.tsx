@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useSocketBridgeContext } from "@/features/socket-tester/context/socket-bridge-context";
+import { useOptionalSocketBridgeContext } from "@/features/socket-tester/context/socket-bridge-context";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -24,8 +24,11 @@ const bridgeTone = {
 };
 
 export function SocketBridgeStatus() {
-  const bridge = useSocketBridgeContext();
+  const bridge = useOptionalSocketBridgeContext();
   const shouldReduceMotion = useReducedMotion() ?? false;
+  if (!bridge) {
+    return null;
+  }
   const contentScale = shouldReduceMotion ? 1 : 0.97;
   const contentTransition = {
     duration: MOTION_DURATION.fast,

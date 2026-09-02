@@ -13,7 +13,9 @@ describe("Cron Parser navigation", () => {
     const queryClient = new QueryClient();
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter>
+        <MemoryRouter
+          initialEntries={["/dashboard/developer-tools/cron-parser"]}
+        >
           <AuthProvider>
             <SidebarProvider>
               <AppSidebar />
