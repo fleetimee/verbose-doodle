@@ -159,8 +159,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     });
 
   return (
-    <Sidebar collapsible="icon" variant="inset" {...props}>
-      <SidebarHeader className="p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
+    <Sidebar
+      className="relative"
+      collapsible="icon"
+      variant="inset"
+      {...props}
+    >
+      <SidebarHeader className="relative z-10 p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -183,12 +188,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarSeparator />
-      <SidebarContent className="group-data-[collapsible=icon]:items-center">
+      <div
+        aria-hidden="true"
+        className="sidebar-mascot-backdrop hidden md:block group-data-[collapsible=icon]:hidden"
+      >
+        <img
+          alt=""
+          className="sidebar-mascot-image"
+          decoding="async"
+          height={1536}
+          src="/brand/biller-operator-mascot.png"
+          width={1024}
+        />
+      </div>
+      <SidebarSeparator className="relative z-10" />
+      <SidebarContent className="relative z-10 group-data-[collapsible=icon]:items-center">
         <NavMain items={navMain} />
       </SidebarContent>
-      <SidebarSeparator />
-      <SidebarFooter className="p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
+      <SidebarSeparator className="relative z-10" />
+      <SidebarFooter className="relative z-10 p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
         <NavSecondary className="p-0" items={data.navSecondary}>
           <SessionTimer />
         </NavSecondary>

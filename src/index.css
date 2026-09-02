@@ -387,6 +387,33 @@
   }
 }
 
+.sidebar-mascot-backdrop {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  z-index: 0;
+  height: clamp(18rem, 42vh, 24rem);
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sidebar-mascot-image {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-end: -3.5rem;
+  width: 22rem;
+  max-width: none;
+  height: auto;
+  object-fit: contain;
+  object-position: center bottom;
+  opacity: 0.14;
+}
+
+.dark .sidebar-mascot-image {
+  opacity: 0.1;
+}
+
 /* Conversational overview: live simulator data is revealed as an answer, not a wall of cards. */
 .overview-chat-page {
   --overview-chat-column-width: 58rem;
