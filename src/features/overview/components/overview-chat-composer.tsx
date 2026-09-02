@@ -281,6 +281,7 @@ export function OverviewChatComposer({
   const [isComposerExpanded, setIsComposerExpanded] = useState(false);
   const [isComposerOverflowing, setIsComposerOverflowing] = useState(false);
   const [selectedSlashIndex, setSelectedSlashIndex] = useState(0);
+  const slashMenuRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useLayoutEffect(() => {
@@ -322,6 +323,22 @@ export function OverviewChatComposer({
   useEffect(() => {
     setSelectedSlashIndex(0);
   }, [draft]);
+
+  useLayoutEffect(() => {
+    if (!isSlashCommandPaletteOpen) {
+      return;
+    }
+
+    const selectedCommand = filteredSlashCommands[selectedSlashIndex];
+    if (!selectedCommand) {
+      return;
+    }
+
+    const selectedOption = slashMenuRef.current?.querySelector<HTMLElement>(
+      `#overview-chat-slash-${selectedCommand.id}`
+    );
+    selectedOption?.scrollIntoView({ block: "nearest" });
+  }, [filteredSlashCommands, isSlashCommandPaletteOpen, selectedSlashIndex]);
 
   const handleSlashCommandSelect = useCallback(
     (command: string) => {
@@ -385,6 +402,7 @@ export function OverviewChatComposer({
             }}
             key="overview-chat-slash-menu"
             onMouseDown={(event) => event.preventDefault()}
+            ref={slashMenuRef}
             role="listbox"
             transition={{ duration: 0.18, ease: MOTION_EASE.apple }}
           >

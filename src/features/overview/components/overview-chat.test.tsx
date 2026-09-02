@@ -9,6 +9,7 @@ import type { ApiError } from "@/lib/api";
 const conversationStorageKey = "fleetime-labs.overview.conversation";
 const clearChatOptionPattern = /Clear chat/;
 const jwtInspectorLinkPattern = /JWT inspector/i;
+const refreshOverviewOptionPattern = /Refresh overview/;
 
 function findStreamingText(text: string) {
   return screen.findByText(
@@ -82,7 +83,9 @@ function renderOverview(isAdmin = true) {
   return {
     container: view.container,
     getRefetchCalls: () => refetchCalls,
-    input: screen.getByLabelText("Ask the simulator") as HTMLTextAreaElement,
+    input: screen.getByLabelText(
+      "Ask the biller operator"
+    ) as HTMLTextAreaElement,
   };
 }
 
@@ -99,7 +102,12 @@ describe("Overview chat", () => {
     const { container } = renderOverview();
 
     expect(
-      screen.getByRole("heading", { name: "Ask the simulator" })
+      screen.getByRole("heading", { name: "What should we look up?" })
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("img", {
+        name: "Biller operator mascot reading a tablet",
+      })
     ).toBeTruthy();
     expect(
       container.querySelector('[data-slot="overview-chat-ambient"]')
@@ -212,6 +220,33 @@ describe("Overview chat", () => {
     ).toBeTruthy();
     expect(input.value).toBe("");
     expect(window.sessionStorage.getItem(conversationStorageKey)).toBeNull();
+  });
+
+  test("keeps the selected slash command visible while navigating", async () => {
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    let scrollCalls = 0;
+    Element.prototype.scrollIntoView = () => {
+      scrollCalls += 1;
+    };
+
+    try {
+      const { input } = renderOverview();
+
+      fireEvent.change(input, { target: { value: "/" } });
+      scrollCalls = 0;
+      fireEvent.keyDown(input, { key: "ArrowDown" });
+
+      await waitFor(() => {
+        expect(scrollCalls).toBeGreaterThan(0);
+      });
+      expect(
+        screen
+          .getByRole("option", { name: refreshOverviewOptionPattern })
+          .getAttribute("aria-selected")
+      ).toBe("true");
+    } finally {
+      Element.prototype.scrollIntoView = originalScrollIntoView;
+    }
   });
 
   test("refreshes the overview through the slash command", async () => {

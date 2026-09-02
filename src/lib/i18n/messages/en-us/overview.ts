@@ -15,10 +15,10 @@ export const overviewMessages = {
     clearChat: "Reset chat",
     composerHint:
       "Type / for slash commands · Enter to send · Shift + Enter for a new line",
-    composerLabel: "Ask the simulator",
+    composerLabel: "Ask the biller operator",
     emptyDescription:
       "Explore billers, endpoints, response templates, and integration signals in plain language.",
-    emptyTitle: "Ask the simulator",
+    emptyTitle: "What should we look up?",
     endpointWithoutResponse: "{count} endpoint has no response template",
     endpointsLabel: "Endpoints",
     endpointsWithoutResponses: "{count} endpoints have no response template",
@@ -39,6 +39,7 @@ export const overviewMessages = {
     slashCommands: "Slash commands",
     tryAQuestion: "Try a question",
     updatedSource: "Read from the Overview API",
+    workspaceShortcuts: "Workspace shortcuts",
   },
   chartLabels: {
     active: "Active",

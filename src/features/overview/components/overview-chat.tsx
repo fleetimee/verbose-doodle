@@ -27,16 +27,13 @@ import {
   CircleAlert,
   Clock3,
   Code2,
-  Compass,
   FileJson,
   Fingerprint,
-  Globe,
   Info,
   MessageSquareText,
   Network,
   Plug,
   RadioReceiver,
-  ShieldAlert,
   ShieldCheck,
   Timer,
   Users,
@@ -2173,6 +2170,16 @@ export function OverviewChat({
                       ease: MOTION_EASE.apple,
                     }}
                   >
+                    <div className="overview-chat-welcome-art">
+                      <img
+                        alt="Biller operator mascot reading a tablet"
+                        className="overview-chat-welcome-image"
+                        decoding="async"
+                        height={1536}
+                        src="/brand/biller-operator-mascot-chibi.png"
+                        width={1024}
+                      />
+                    </div>
                     <h2>{messages.overview.chat.emptyTitle}</h2>
                     <p>{messages.overview.chat.emptyDescription}</p>
                   </motion.div>
