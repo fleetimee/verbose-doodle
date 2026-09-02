@@ -1951,6 +1951,16 @@ function OverviewChatTranscript({
 
 const MotionMessageScrollerItem = motion.create(MessageScrollerItem);
 
+function OverviewChatAmbient() {
+  return (
+    <div
+      aria-hidden="true"
+      className="overview-chat-ambient"
+      data-slot="overview-chat-ambient"
+    />
+  );
+}
+
 export function OverviewChat({
   data,
   error,
@@ -2135,6 +2145,7 @@ export function OverviewChat({
             aria-label="Simulator overview conversation"
             className="overview-chat-panel"
           >
+            {hasConversation ? null : <OverviewChatAmbient />}
             <h1 className="sr-only">{messages.overview.pageTitle}</h1>
             <div className="overview-chat-viewport-shell">
               <AnimatePresence initial={false} mode="sync">

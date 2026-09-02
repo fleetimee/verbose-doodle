@@ -67,7 +67,7 @@ function renderOverview(isAdmin = true) {
     } as unknown as QueryObserverResult<OverviewData, ApiError>);
   };
 
-  render(
+  const view = render(
     <MemoryRouter>
       <OverviewChat
         data={overviewData}
@@ -80,6 +80,7 @@ function renderOverview(isAdmin = true) {
   );
 
   return {
+    container: view.container,
     getRefetchCalls: () => refetchCalls,
     input: screen.getByLabelText("Ask the simulator") as HTMLTextAreaElement,
   };
@@ -95,10 +96,13 @@ describe("Overview chat", () => {
   });
 
   test("starts with a focused welcome state and suggested questions", () => {
-    renderOverview();
+    const { container } = renderOverview();
 
     expect(
       screen.getByRole("heading", { name: "Ask the simulator" })
+    ).toBeTruthy();
+    expect(
+      container.querySelector('[data-slot="overview-chat-ambient"]')
     ).toBeTruthy();
     expect(screen.getByText("Try a question")).toBeTruthy();
     expect(
@@ -154,12 +158,18 @@ describe("Overview chat", () => {
   });
 
   test("answers a snapshot question with live coverage and endpoint actions", async () => {
-    const { input } = renderOverview();
+    const { container, input } = renderOverview();
 
     fireEvent.change(input, {
       target: { value: "Show me a simulator snapshot" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
+
+    await waitFor(() => {
+      expect(
+        container.querySelector('[data-slot="overview-chat-ambient"]')
+      ).toBeNull();
+    });
 
     expect(screen.getByRole("status").querySelector(".shimmer")).toBeTruthy();
     expect(await screen.findByText("Live simulator snapshot")).toBeTruthy();
@@ -177,7 +187,7 @@ describe("Overview chat", () => {
   });
 
   test("supports slash commands and clears the persisted conversation", async () => {
-    const { input } = renderOverview();
+    const { container, input } = renderOverview();
 
     fireEvent.change(input, { target: { value: "Show recent endpoints" } });
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -197,6 +207,9 @@ describe("Overview chat", () => {
     await waitFor(() => {
       expect(screen.queryByText("Live simulator snapshot")).toBeNull();
     });
+    expect(
+      container.querySelector('[data-slot="overview-chat-ambient"]')
+    ).toBeTruthy();
     expect(input.value).toBe("");
     expect(window.sessionStorage.getItem(conversationStorageKey)).toBeNull();
   });
