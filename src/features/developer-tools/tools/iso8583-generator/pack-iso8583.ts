@@ -1,6 +1,11 @@
 export type Iso8583PresetId =
   | "sign-on"
   | "account-inquiry"
+  | "transaction"
+  | "notification"
+  | "network-response"
+  | "transaction-response"
+  | "notification-response"
   | "authorization"
   | "reversal"
   | "batch";
@@ -60,6 +65,7 @@ export type PackedIso8583Message = {
 };
 
 type Iso8583FieldDefinition = Omit<Iso8583Field, "enabled" | "value"> & {
+  readonly defaultEnabled: boolean;
   readonly defaultValue: string;
 };
 
@@ -75,9 +81,11 @@ function field(
   length: number,
   defaultValue = "",
   helper?: Iso8583FieldHelper,
-  hidden = false
+  hidden = false,
+  defaultEnabled = true
 ): Iso8583FieldDefinition {
   return {
+    defaultEnabled,
     defaultValue,
     helper,
     hidden,
@@ -89,12 +97,11 @@ function field(
 }
 
 function fieldsFromDefinitions(
-  definitions: readonly Iso8583FieldDefinition[],
-  enabled = true
+  definitions: readonly Iso8583FieldDefinition[]
 ): Iso8583Field[] {
-  return definitions.map(({ defaultValue, ...definition }) => ({
+  return definitions.map(({ defaultEnabled, defaultValue, ...definition }) => ({
     ...definition,
-    enabled,
+    enabled: defaultEnabled,
     value: defaultValue,
   }));
 }
@@ -162,6 +169,16 @@ function commonTransactionFields(): readonly Iso8583FieldDefinition[] {
     field(42, "Card acceptor ID code", "ans", 15, "000000000000000"),
     field(43, "Card acceptor name / location", "ans", 40, " ".repeat(40)),
     field(49, "Currency code, transaction", "n", 3, "360"),
+    field(
+      62,
+      "Reserved private data",
+      "lllvar",
+      999,
+      "",
+      undefined,
+      false,
+      false
+    ),
   ];
 }
 
@@ -192,6 +209,55 @@ const PRESET_DEFINITIONS: readonly {
     id: "authorization",
     label: "0100 · Authorization",
     mti: "0100",
+  },
+  {
+    description: "Financial transaction starter fields.",
+    fields: commonTransactionFields(),
+    id: "transaction",
+    label: "0200 · Transaction",
+    mti: "0200",
+  },
+  {
+    description: "Financial notification or advice starter fields.",
+    fields: [
+      ...commonTransactionFields(),
+      field(38, "Authorization ID", "ans", 6, "ABCD12"),
+      field(39, "Response code", "n", 2, "00"),
+      field(63, "Private / additional data", "lllvar", 999),
+    ],
+    id: "notification",
+    label: "0220 · Notification",
+    mti: "0220",
+  },
+  {
+    description: "Network management response starter fields.",
+    fields: [...SIGN_ON_FIELDS, field(39, "Response code", "n", 2, "00")],
+    id: "network-response",
+    label: "0810 · Network Response",
+    mti: "0810",
+  },
+  {
+    description: "Financial transaction response starter fields.",
+    fields: [
+      ...commonTransactionFields(),
+      field(38, "Authorization ID", "ans", 6, "ABCD12"),
+      field(39, "Response code", "n", 2, "00"),
+    ],
+    id: "transaction-response",
+    label: "0210 · Transaction Response",
+    mti: "0210",
+  },
+  {
+    description: "Financial notification response starter fields.",
+    fields: [
+      ...commonTransactionFields(),
+      field(38, "Authorization ID", "ans", 6, "ABCD12"),
+      field(39, "Response code", "n", 2, "00"),
+      field(63, "Private / additional data", "lllvar", 999),
+    ],
+    id: "notification-response",
+    label: "0230 · Notification Response",
+    mti: "0230",
   },
   {
     description: "Financial reversal request starter fields.",

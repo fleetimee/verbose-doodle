@@ -51,7 +51,7 @@ function NavMenuItem({
       currentPath === subItem.url || currentPath.startsWith(`${subItem.url}/`)
   );
 
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(Boolean(isChildActive));
 
   useEffect(() => {
     if (isChildActive) {

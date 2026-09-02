@@ -56,7 +56,6 @@ import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-wo
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import type { HttpMethod } from "@/features/endpoints/types";
 import { selectEndpointForBiller } from "@/features/endpoints/utils/endpoint-selection";
-import { SocketBridgeFloatingStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
 import { SocketBridgeProvider } from "@/features/socket-tester/context/socket-bridge-context";
 import { messages } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
@@ -100,10 +99,6 @@ export function DashboardLayout() {
   const location = useLocation();
   const params = useParams();
   const { theme, setTheme } = useTheme();
-  const isSocksRelayRoute = location.pathname.startsWith(
-    "/dashboard/socks-relay"
-  );
-
   const isEndpointDetail = location.pathname.match(ENDPOINT_DETAIL_REGEX);
   const routeEndpointSlug = isEndpointDetail ? params.slug : undefined;
 
@@ -365,7 +360,6 @@ export function DashboardLayout() {
               </ProtectedAction>
             </SidebarInset>
           </SidebarProvider>
-          {isSocksRelayRoute ? null : <SocketBridgeFloatingStatus />}
         </SocketBridgeProvider>
       </DashboardNavigationProvider>
     </TourProvider>

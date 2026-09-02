@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import {
-  Binary,
   Check,
   ClipboardCopy,
   Code2,
@@ -21,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Iso8583Generator as SimpleIso8583Generator } from "@/features/developer-tools/tools/iso8583-generator/components/simple-iso8583-generator";
 import {
   cloneIso8583Fields,
   fieldTypeLabel,
@@ -185,121 +185,40 @@ function FieldRow({
   );
 }
 
-function BitmapGrid({
-  label,
-  start,
-  value,
-}: {
-  readonly label: string;
-  readonly start: number;
-  readonly value: string;
-}) {
-  const bits = [...value]
-    .flatMap((character) =>
-      Number.parseInt(character, 16).toString(2).padStart(4, "0").split("")
-    )
-    .map((bit) => bit === "1");
-
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
-          {label}
-        </span>
-        <code className="font-mono text-[10px] text-foreground tracking-wider">
-          {value || "--"}
-        </code>
-      </div>
-      {value ? (
-        <ul
-          aria-label={`${label} bit map`}
-          className="m-0 grid list-none grid-cols-16 gap-1 p-0"
-        >
-          {bits.map((active, index) => {
-            const fieldNumber = start + index;
-            return (
-              <li
-                aria-label={`Bit ${fieldNumber} ${active ? "active" : "inactive"}`}
-                className={cn(
-                  "grid aspect-square min-w-0 place-items-center border font-mono text-[8px] transition-colors",
-                  active
-                    ? "border-primary/60 bg-primary text-primary-foreground"
-                    : "border-border/60 bg-muted/20 text-muted-foreground/70"
-                )}
-                key={fieldNumber}
-                title={`Bit ${fieldNumber}`}
-              >
-                {active ? "1" : "0"}
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
-    </div>
-  );
-}
-
 function BitmapInspector({
   message,
 }: {
   readonly message: PackedIso8583Message;
 }) {
   return (
-    <section aria-label="Bitmap inspector" className="border-t p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="font-semibold text-sm">Bitmap inspector</h2>
-        </div>
-        <Binary className="size-4 text-muted-foreground" />
+    <section
+      aria-label="Bitmap inspector"
+      className="border-t px-4 py-4 sm:px-5"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-medium text-sm">Bitmap</h2>
+        <code className="font-mono text-xs">{message.primaryBitmap}</code>
       </div>
-      <div className="mt-4 grid gap-5">
-        <BitmapGrid
-          label={copy.primaryBitmap}
-          start={1}
-          value={message.primaryBitmap}
-        />
-        {message.secondaryBitmap ? (
-          <BitmapGrid
-            label={copy.secondaryBitmap}
-            start={65}
-            value={message.secondaryBitmap}
-          />
-        ) : null}
+      {message.secondaryBitmap ? (
+        <code className="mt-2 block font-mono text-xs">
+          {message.secondaryBitmap}
+        </code>
+      ) : null}
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {message.activeFields.map((fieldNumber) => (
+          <span
+            className="rounded-sm bg-muted px-1.5 py-1 font-mono text-[10px] text-muted-foreground"
+            key={fieldNumber}
+          >
+            Bit {fieldNumber}
+          </span>
+        ))}
       </div>
-      <div className="mt-5 border-t pt-4">
-        <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
-          {copy.activeBits}
-        </p>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {message.activeFields.map((fieldNumber) => (
-            <span
-              className="border bg-muted/20 px-1.5 py-1 font-mono text-[10px]"
-              key={fieldNumber}
-            >
-              Bit {fieldNumber}
-            </span>
-          ))}
-        </div>
-      </div>
-      <dl className="mt-5 grid grid-cols-2 gap-x-4 border-t text-xs">
-        <div className="border-r py-3">
-          <dt className="text-muted-foreground">{copy.bodyLength}</dt>
-          <dd className="mt-1 font-mono">
-            {message.bodyLength} {copy.wireBytes}
-          </dd>
-        </div>
-        <div className="py-3 pl-4">
-          <dt className="text-muted-foreground">{copy.totalLength}</dt>
-          <dd className="mt-1 font-mono">
-            {message.totalLength} {copy.wireBytes}
-          </dd>
-        </div>
-      </dl>
     </section>
   );
 }
 
-export function Iso8583Generator() {
+export function LegacyIso8583Generator() {
   const bridge = useSocketBridgeContext();
   const [presetId, setPresetId] = useState<Iso8583PresetId>("sign-on");
   const [mti, setMti] = useState(getIso8583Preset("sign-on").mti);
@@ -899,4 +818,8 @@ export function Iso8583Generator() {
       </footer>
     </div>
   );
+}
+
+export function Iso8583Generator() {
+  return <SimpleIso8583Generator />;
 }

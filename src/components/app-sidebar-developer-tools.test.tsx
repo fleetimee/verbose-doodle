@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -24,7 +24,13 @@ describe("AppSidebar developer tools navigation", () => {
     const catalogLink = await screen.findByRole("link", {
       name: "Tool catalog",
     });
-    const validatorLink = screen.getByRole("link", {
+    expect(
+      screen.queryByRole("link", { name: "JSON Schema Validator" })
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Validation" }));
+
+    const validatorLink = await screen.findByRole("link", {
       name: "JSON Schema Validator",
     });
     const links = screen.getAllByRole("link");

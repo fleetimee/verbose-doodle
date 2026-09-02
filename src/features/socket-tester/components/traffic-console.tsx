@@ -267,28 +267,42 @@ export function TrafficConsole({
         </div>
       </div>
 
-      <ScrollArea
-        className="h-[560px] min-h-[480px] min-w-0 rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner xl:h-[64vh]"
-        ref={scrollAreaRef}
-      >
-        {logs.length === 0 ? (
-          <div className="grid h-full place-items-center bg-[#151515] px-6 text-center">
-            <div className="w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner">
-              <div className="mb-3 flex items-center justify-center gap-2 text-[#d4d4d4]">
-                <MousePointerClick className="size-5" />
-                <span className="font-semibold">
-                  {socketMessages.noFramesCapturedTitle}
-                </span>
-              </div>
-              <p className="text-[#a3a3a3]">
+      {logs.length === 0 ? (
+        <div
+          className="flex h-[560px] min-w-0 items-center justify-center rounded-lg border border-[#2f2f2f] bg-[#151515] px-6 shadow-inner"
+          data-testid="socket-console-empty"
+        >
+          <div className="w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner">
+            <div className="mb-3 flex items-center gap-2 text-[#d4d4d4]">
+              <MousePointerClick className="size-5" />
+              <span className="font-semibold">
+                {socketMessages.noFramesCapturedTitle}
+              </span>
+            </div>
+            <div className="grid gap-1 text-[#a3a3a3]">
+              <p>
+                <span className="text-[#60a5fa]">simulator@socket</span>
+                <span className="text-[#737373]">:~$</span>{" "}
+                <span className="text-[#d4d4d4]">tail -f socket.log</span>
+              </p>
+              <p className="text-[#b8b8b8]">
                 {socketMessages.noFramesCapturedDescription}
               </p>
-              <p className="mt-3 text-[#60a5fa]">
-                socket-console --waiting-for-frames
+              <p className="flex items-center gap-1.5 text-[#737373]">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full rounded-full bg-emerald-400/60 opacity-75 motion-safe:animate-ping" />
+                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                </span>
+                <span>Waiting for frames...</span>
               </p>
             </div>
           </div>
-        ) : (
+        </div>
+      ) : (
+        <ScrollArea
+          className="h-[560px] min-w-0 rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner"
+          ref={scrollAreaRef}
+        >
           <div className="w-full min-w-0 p-4 font-mono text-[#e7e7e7] text-[13px] leading-5">
             {logs.map((entry) => (
               <button
@@ -308,9 +322,9 @@ export function TrafficConsole({
               </button>
             ))}
           </div>
-        )}
-        <ScrollBar className="hidden" orientation="horizontal" />
-      </ScrollArea>
+          <ScrollBar className="hidden" orientation="horizontal" />
+        </ScrollArea>
+      )}
     </section>
   );
 }

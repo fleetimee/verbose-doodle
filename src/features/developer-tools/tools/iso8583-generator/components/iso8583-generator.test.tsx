@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Iso8583Generator } from "@/features/developer-tools/tools/iso8583-generator/components/iso8583-generator";
 
@@ -19,7 +19,6 @@ const originalClipboard = Object.getOwnPropertyDescriptor(
 
 afterEach(() => {
   sendTcpClient.mockClear();
-  localStorage.clear();
   if (originalClipboard) {
     Object.defineProperty(navigator, "clipboard", originalClipboard);
   } else {
@@ -32,34 +31,142 @@ function renderGenerator() {
 }
 
 describe("Iso8583Generator", () => {
-  test("loads the Sign-On sample and shows the resolved bitmap", () => {
+  test("shows the simple three-message workflow", () => {
     renderGenerator();
 
-    const output = screen.getByRole("textbox", { name: "Raw stream" });
-    expect((output as HTMLTextAreaElement).value).toBe(
-      "0060080082200000800000000400000000000000090108003700364503112001"
-    );
-    expect(screen.getByText("8220000080000000")).toBeDefined();
-    expect(screen.getByText("0400000000000000")).toBeDefined();
-    expect(screen.getAllByText("Bit 70").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByRole("tab")).toHaveLength(3);
+    expect(screen.getByRole("tab", { name: "0800 Sign-On" })).toBeDefined();
+    expect(screen.getByRole("tab", { name: "0200 Transaction" })).toBeDefined();
+    expect(
+      screen.getByRole("tab", { name: "0220 Notification" })
+    ).toBeDefined();
+    expect(
+      screen.getByRole("combobox", { name: "More messages" })
+    ).toBeDefined();
+    expect(screen.queryByRole("textbox", { name: "Raw stream" })).toBeNull();
   });
 
-  test("switches to the Account Inquiry preset with its full sample stream", async () => {
+  test("loads additional request and response MTIs from one menu", async () => {
     const user = userEvent.setup();
     renderGenerator();
 
-    await user.click(screen.getByRole("combobox", { name: "Preset" }));
+    await user.click(screen.getByRole("combobox", { name: "More messages" }));
+    expect(await screen.findAllByRole("option")).toHaveLength(6);
     await user.click(
-      await screen.findByRole("option", { name: "0200 · Account Inquiry" })
+      screen.getByRole("option", { name: "0210 · Transaction Response" })
     );
 
-    const output = screen.getByRole("textbox", { name: "Raw stream" });
+    expect(screen.getByText("MTI 0210")).toBeDefined();
     expect(
-      (output as HTMLTextAreaElement).value.startsWith("03730200F23A")
+      screen.getByRole("textbox", { name: "Bit 39 Response code" })
+    ).toBeDefined();
+  });
+
+  test("explains a field without adding permanent form copy", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+
+    await user.click(screen.getByRole("button", { name: "Explain bit 7" }));
+
+    expect(
+      screen.getByRole("heading", {
+        name: "Bit 7: Transmission date / time",
+      })
+    ).toBeDefined();
+    expect(screen.getByText("Exactly 10 digits.")).toBeDefined();
+    expect(
+      screen.getByText(
+        "The date and time the message enters the network, formatted as MMDDhhmmss."
+      )
+    ).toBeDefined();
+  });
+
+  test("refreshes transmission time and STAN when generating", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+
+    await user.click(
+      screen.getByRole("button", { name: "Generate raw message" })
+    );
+    expect(screen.getByRole("dialog", { name: "Raw message" })).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Bit 7 Transmission date / time",
+        }) as HTMLInputElement
+      ).value
+    ).not.toBe("0901080037");
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Bit 11 System trace audit number",
+        }) as HTMLInputElement
+      ).value
+    ).toBe("003646");
+    expect(
+      screen.getByRole("button", { name: "View raw message" })
+    ).toBeDefined();
+  });
+
+  test("offers bit 62 as an optional transaction field", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+
+    await user.click(screen.getByRole("tab", { name: "0200 Transaction" }));
+
+    expect(
+      screen
+        .getByRole("checkbox", { name: "Enable bit 62" })
+        .getAttribute("aria-checked")
+    ).toBe("false");
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Bit 62 Reserved private data",
+        }) as HTMLInputElement
+      ).disabled
     ).toBe(true);
-    expect((output as HTMLTextAreaElement).value.length).toBe(377);
-    expect(screen.getAllByText("Bit 106").length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText("Bit 111")).toBeDefined();
+  });
+
+  test("uses a field-aware time picker for ISO time values", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+
+    await user.click(screen.getByRole("tab", { name: "0200 Transaction" }));
+    await user.click(
+      screen.getByRole("button", { name: "Pick value for bit 12" })
+    );
+    fireEvent.change(screen.getByLabelText("Time"), {
+      target: { value: "14:25:30" },
+    });
+
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Bit 12 Local transaction time",
+        }) as HTMLInputElement
+      ).value
+    ).toBe("142530");
+    expect(
+      screen.getByRole("button", { name: "Pick value for bit 13" })
+    ).toBeDefined();
+    expect(
+      screen.getByRole("button", { name: "Pick value for bit 14" })
+    ).toBeDefined();
+  });
+
+  test("switches to the notification form", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+
+    await user.click(screen.getByRole("tab", { name: "0220 Notification" }));
+
+    expect(screen.getByText("MTI 0220")).toBeDefined();
+    expect(
+      screen.getByRole("textbox", { name: "Bit 39 Response code" })
+    ).toBeDefined();
   });
 
   test("updates the bitmap when a bit is disabled", async () => {
@@ -67,12 +174,14 @@ describe("Iso8583Generator", () => {
     renderGenerator();
 
     await user.click(screen.getByRole("checkbox", { name: "Enable bit 70" }));
+    await user.click(
+      screen.getByRole("button", { name: "Generate raw message" })
+    );
 
     expect(screen.getByText("0220000080000000")).toBeDefined();
-    expect(screen.queryByText("0400000000000000")).toBeNull();
   });
 
-  test("copies the printable stream and sends it to the TCP bridge", async () => {
+  test("copies and sends the generated stream", async () => {
     const user = userEvent.setup();
     const writeText = mock(async () => undefined);
     Object.defineProperty(navigator, "clipboard", {
@@ -81,37 +190,16 @@ describe("Iso8583Generator", () => {
     });
     renderGenerator();
 
-    await user.click(screen.getByRole("button", { name: "Copy" }));
-    expect(writeText).toHaveBeenCalledWith(
-      "0060080082200000800000000400000000000000090108003700364503112001"
+    await user.click(
+      screen.getByRole("button", { name: "Generate raw message" })
     );
-    expect(screen.getByRole("status").textContent).toContain("Copied");
+    const generatedValue = (
+      screen.getByRole("textbox", { name: "Raw stream" }) as HTMLTextAreaElement
+    ).value;
+    await user.click(screen.getByRole("button", { name: "Copy" }));
+    expect(writeText).toHaveBeenCalledWith(generatedValue);
 
     await user.click(screen.getByRole("button", { name: "Send to TCP" }));
-    expect(sendTcpClient).toHaveBeenCalledWith(
-      "0060080082200000800000000400000000000000090108003700364503112001",
-      "ascii",
-      ""
-    );
-  });
-
-  test("offers bit-aware helpers and saves the current template locally", async () => {
-    const user = userEvent.setup();
-    renderGenerator();
-
-    await user.click(screen.getByRole("button", { name: "Auto +1 Bit 11" }));
-    expect(
-      (
-        screen.getByRole("textbox", {
-          name: "Bit 11 System trace audit number",
-        }) as HTMLInputElement
-      ).value
-    ).toBe("003646");
-
-    await user.click(screen.getByRole("button", { name: "Save template" }));
-    expect(localStorage.getItem("iso8583-generator-template")).toContain(
-      '"presetId":"sign-on"'
-    );
-    expect(screen.getByRole("status").textContent).toContain("Template saved");
+    expect(sendTcpClient).toHaveBeenCalledWith(generatedValue, "ascii", "");
   });
 });

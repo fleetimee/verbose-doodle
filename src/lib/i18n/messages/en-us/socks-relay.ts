@@ -77,6 +77,7 @@ export const socksRelayMessages = {
   statusHeader: "Status",
   targetHeader: "Target",
   timerMsLabel: "Timer ms",
+  waitingForRelayEvents: "Waiting for relay events...",
   tour: {
     connectionDescription:
       "This badge shows whether live relay events are connected and calls out malformed relay events when they appear.",

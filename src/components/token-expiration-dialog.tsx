@@ -57,14 +57,19 @@ export function TokenExpirationDialog() {
         });
         setShowWarning(false);
       } else {
+        setShowWarning(false);
         toast.error(messages.auth.refreshFailedTitle, {
           description: messages.auth.refreshFailedDescription,
         });
+        navigate("/login?reason=refresh-failed", { replace: true });
       }
     } catch {
+      logout();
+      setShowWarning(false);
       toast.error(messages.auth.refreshFailedTitle, {
         description: messages.auth.refreshFailedDescription,
       });
+      navigate("/login?reason=refresh-failed", { replace: true });
     } finally {
       setIsRefreshing(false);
     }

@@ -1,10 +1,11 @@
 import type React from "react";
 import { Link } from "react-router";
 import {
+  Binary,
   Info,
   LayoutDashboard,
   LayoutGrid,
-  Network,
+  MonitorUp,
   Plug,
   RadioTower,
   Route,
@@ -35,28 +36,29 @@ import {
 } from "@/features/developer-tools/catalog";
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import { usePrefetchOverview } from "@/features/overview/hooks/use-prefetch-overview";
+import { SocketBridgeStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
 import { messages } from "@/lib/i18n";
 
 const data = {
   navMain: [
     {
-      groupLabel: "Overview",
+      groupLabel: "Workspace",
       icon: LayoutDashboard,
       title: "Overview",
       url: "/dashboard/overview",
     },
     {
-      groupLabel: "Biller Simulator",
+      groupLabel: "Workspace",
       icon: Plug,
       title: "Endpoints",
       url: "/dashboard/endpoints",
     },
     {
-      groupLabel: "Socket Test",
+      groupLabel: "Network Tools",
       icon: RadioTower,
       items: [
         {
-          icon: RadioTower,
+          icon: MonitorUp,
           title: "TCP Client",
           url: "/dashboard/socket-test/tcp-client",
         },
@@ -71,7 +73,25 @@ const data = {
           url: "/dashboard/socket-test/udp",
         },
       ],
-      title: "Socket Test",
+      title: "Socket Tester",
+    },
+    {
+      adminOnly: true,
+      groupLabel: "Network Tools",
+      icon: Route,
+      items: [
+        {
+          icon: Plug,
+          title: "REST API",
+          url: "/dashboard/socks-relay/rest-api",
+        },
+        {
+          icon: Binary,
+          title: "ISO 8583",
+          url: "/dashboard/socks-relay/iso-8583",
+        },
+      ],
+      title: "SOCKS Relay",
     },
     {
       badge: String(DEVELOPER_TOOL_COUNT),
@@ -91,24 +111,6 @@ const data = {
       })),
       title: category.name,
     })),
-    {
-      adminOnly: true,
-      groupLabel: "Socks Relay",
-      icon: Network,
-      items: [
-        {
-          icon: Route,
-          title: "REST API",
-          url: "/dashboard/socks-relay/rest-api",
-        },
-        {
-          icon: Network,
-          title: "ISO 8583",
-          url: "/dashboard/socks-relay/iso-8583",
-        },
-      ],
-      title: "Socks Relay",
-    },
   ],
   navSecondary: [
     {
@@ -193,6 +195,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary className="p-0" items={data.navSecondary}>
           <SessionTimer />
         </NavSecondary>
+        <SocketBridgeStatus />
         <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />

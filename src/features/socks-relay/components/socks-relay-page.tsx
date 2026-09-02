@@ -1585,20 +1585,33 @@ function RelayEventList({
 }) {
   if (events.length === 0) {
     return (
-      <div className="grid min-h-80 place-items-center rounded-lg border border-[#2f2f2f] bg-[#151515] px-6 text-center">
+      <div className="flex h-[560px] items-center justify-center rounded-lg border border-[#2f2f2f] bg-[#151515] px-6 shadow-inner">
         <div className="w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner">
-          <div className="mb-3 flex items-center justify-center gap-2 text-[#d4d4d4]">
+          <div className="mb-3 flex items-center gap-2 text-[#d4d4d4]">
             <TimerReset className="size-5" />
             <span className="font-semibold">{emptyLabel}</span>
           </div>
-          <p className="text-[#60a5fa]">relay-console --waiting-for-events</p>
+          <div className="grid gap-1 text-[#a3a3a3]">
+            <p>
+              <span className="text-[#60a5fa]">simulator@relay</span>
+              <span className="text-[#737373]">:~$</span>{" "}
+              <span className="text-[#d4d4d4]">tail -f relay.log</span>
+            </p>
+            <p className="flex items-center gap-1.5 text-[#737373]">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full rounded-full bg-emerald-400/60 opacity-75 motion-safe:animate-ping" />
+                <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+              </span>
+              <span>{messages.socksRelay.waitingForRelayEvents}</span>
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <ScrollArea className="h-[520px] min-h-[420px] min-w-0 rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner">
+    <ScrollArea className="h-[560px] min-w-0 rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner">
       <div className="min-w-max p-3 font-mono text-[#e7e7e7] text-[12px] leading-5">
         <div className="grid gap-2">
           {events
