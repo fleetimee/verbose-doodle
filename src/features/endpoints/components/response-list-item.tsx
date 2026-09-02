@@ -24,7 +24,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -63,26 +62,21 @@ type ResponseListItemProps = {
   onEditDirtyChange?: (isDirty: boolean) => void;
 };
 
-// Helper to get status code badge variant
-function getStatusCodeVariant(statusCode: number) {
-  return statusCode < SUCCESS_STATUS_CODE_THRESHOLD ? "default" : "destructive";
-}
-
 // Helper to get item container classes
 function getItemContainerClasses(isSelected: boolean, isActive: boolean) {
   let stateClasses =
-    "border-transparent hover:border-border hover:bg-accent/50 hover:shadow-xs";
+    "border-border/60 bg-card hover:border-border hover:bg-accent/40";
 
   if (isSelected) {
     stateClasses =
-      "border-primary/35 bg-primary/10 text-accent-foreground shadow-md before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-r-full before:bg-primary dark:bg-primary/15";
+      "border-primary/50 border-b-[3px] bg-primary/10 text-accent-foreground shadow-xs dark:bg-primary/15";
   } else if (isActive) {
     stateClasses =
-      "border-emerald-500/20 bg-emerald-500/5 before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-r-full before:bg-emerald-500/70 hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:shadow-xs dark:bg-emerald-500/[0.04]";
+      "border-emerald-500/35 border-b-[3px] bg-emerald-500/5 hover:border-emerald-500/40 hover:bg-emerald-500/10 dark:bg-emerald-500/[0.04]";
   }
 
   return cn(
-    "relative w-full cursor-pointer overflow-hidden rounded-md border px-4 py-3 text-left transition-[background-color,border-color,box-shadow,color]",
+    "relative w-full cursor-pointer overflow-hidden rounded-xl border p-3.5 text-left transition-all duration-150 ease-out",
     stateClasses,
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
   );
@@ -249,26 +243,27 @@ export function ResponseListItem({
                 </span>
                 {isActive && (
                   <div>
-                    <Badge
-                      className="flex items-center gap-1.5 bg-background/70 text-xs shadow-xs"
-                      variant="secondary"
-                    >
+                    <span className="inline-flex select-none items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 font-bold text-emerald-700 text-xs dark:text-emerald-300">
                       <span className="relative flex h-1.5 w-1.5">
                         <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" />
                         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                       </span>
                       Active
-                    </Badge>
+                    </span>
                   </div>
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
-                <Badge
-                  className="font-mono text-xs shadow-xs"
-                  variant={getStatusCodeVariant(response.statusCode)}
+                <span
+                  className={cn(
+                    "inline-flex select-none items-center rounded-lg border px-2 py-0.5 font-bold font-mono text-xs",
+                    response.statusCode < SUCCESS_STATUS_CODE_THRESHOLD
+                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                      : "border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-300"
+                  )}
                 >
                   {response.statusCode}
-                </Badge>
+                </span>
                 <ResponseSimulationBadge response={response} />
               </div>
             </div>
@@ -279,7 +274,7 @@ export function ResponseListItem({
                     <TooltipTrigger asChild>
                       <Button
                         aria-label={activationButtonTitle}
-                        className="border-emerald-500/35 bg-emerald-500/10 text-emerald-700 hover:border-emerald-500/50 hover:bg-emerald-500/15 hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200"
+                        className="rounded-xl border border-emerald-600/40 bg-emerald-500 font-medium text-white shadow-xs transition-all duration-150 hover:bg-emerald-600 active:translate-y-0.5"
                         disabled={isLoading}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -287,7 +282,6 @@ export function ResponseListItem({
                         }}
                         size="sm"
                         type="button"
-                        variant="outline"
                       >
                         <HugeiconsIcon
                           icon={CheckmarkCircle02Icon}
@@ -307,7 +301,7 @@ export function ResponseListItem({
                       <TooltipTrigger asChild>
                         <Button
                           aria-label={moreActionsButtonTitle}
-                          className="cursor-pointer"
+                          className="cursor-pointer rounded-lg border border-border/70 bg-background/80 shadow-xs transition-all duration-150 hover:bg-accent"
                           disabled={!isSelected || isLoading}
                           onClick={(e) => {
                             e.stopPropagation();

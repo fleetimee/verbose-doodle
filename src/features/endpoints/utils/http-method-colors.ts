@@ -19,39 +19,44 @@ export function getMethodColor(method: HttpMethod): MethodColorConfig {
   switch (method) {
     case "GET":
       return {
-        bg: "bg-blue-50 dark:bg-blue-950",
-        border: "border-blue-200 dark:border-blue-800",
-        text: "text-blue-600 dark:text-blue-400",
+        bg: "bg-sky-500/15 dark:bg-sky-950/60",
+        border:
+          "border-sky-500/40 border-b-sky-500/80 dark:border-sky-500/50 dark:border-b-sky-400",
+        text: "text-sky-600 dark:text-sky-300",
       };
     case "POST":
       return {
-        bg: "bg-green-50 dark:bg-green-950",
-        border: "border-green-200 dark:border-green-800",
-        text: "text-green-600 dark:text-green-400",
+        bg: "bg-emerald-500/15 dark:bg-emerald-950/60",
+        border:
+          "border-emerald-500/40 border-b-emerald-500/80 dark:border-emerald-500/50 dark:border-b-emerald-400",
+        text: "text-emerald-600 dark:text-emerald-300",
       };
     case "PUT":
       return {
-        bg: "bg-orange-50 dark:bg-orange-950",
-        border: "border-orange-200 dark:border-orange-800",
-        text: "text-orange-600 dark:text-orange-400",
+        bg: "bg-amber-500/15 dark:bg-amber-950/60",
+        border:
+          "border-amber-500/40 border-b-amber-500/80 dark:border-amber-500/50 dark:border-b-amber-400",
+        text: "text-amber-600 dark:text-amber-300",
       };
     case "DELETE":
       return {
-        bg: "bg-red-50 dark:bg-red-950",
-        border: "border-red-200 dark:border-red-800",
-        text: "text-red-600 dark:text-red-400",
+        bg: "bg-rose-500/15 dark:bg-rose-950/60",
+        border:
+          "border-rose-500/40 border-b-rose-500/80 dark:border-rose-500/50 dark:border-b-rose-400",
+        text: "text-rose-600 dark:text-rose-300",
       };
     case "PATCH":
       return {
-        bg: "bg-purple-50 dark:bg-purple-950",
-        border: "border-purple-200 dark:border-purple-800",
-        text: "text-purple-600 dark:text-purple-400",
+        bg: "bg-purple-500/15 dark:bg-purple-950/60",
+        border:
+          "border-purple-500/40 border-b-purple-500/80 dark:border-purple-500/50 dark:border-b-purple-400",
+        text: "text-purple-600 dark:text-purple-300",
       };
     default:
       return {
-        bg: "bg-gray-50 dark:bg-gray-950",
-        border: "border-gray-200 dark:border-gray-800",
-        text: "text-gray-600 dark:text-gray-400",
+        bg: "bg-muted dark:bg-muted",
+        border: "border-border border-b-muted-foreground/50",
+        text: "text-muted-foreground",
       };
   }
 }

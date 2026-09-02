@@ -894,7 +894,7 @@ export function EndpointDetailPage() {
         <div className="flex items-start gap-3 xl:items-center xl:gap-4">
           <Button
             aria-label="Back to Endpoints"
-            className="mt-1 bg-background/80 shadow-xs md:mt-0"
+            className="mt-1 rounded-xl border border-border/80 bg-background/80 shadow-xs transition-all duration-150 hover:bg-accent md:mt-0"
             onClick={handleBack}
             size="icon-sm"
             type="button"
@@ -932,7 +932,7 @@ export function EndpointDetailPage() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <SelectTrigger
-                            className={`h-auto w-auto gap-1 rounded-md px-2 py-1 font-mono font-semibold text-xs shadow-none focus:ring-0 focus-visible:ring-0 ${getMethodBadgeColor(
+                            className={`h-auto w-auto gap-1 rounded-xl border-2 border-b-[3px] px-2.5 py-0.5 font-black font-mono text-xs shadow-none focus:ring-0 focus-visible:ring-0 ${getMethodBadgeColor(
                               editedMethod
                             )}`}
                           >
@@ -979,7 +979,7 @@ export function EndpointDetailPage() {
                         <TooltipTrigger asChild>
                           <Button
                             aria-label={messages.endpoints.saveEndpointTooltip}
-                            className="border-green-600/40 bg-green-50 text-green-700 shadow-xs hover:bg-green-100 hover:text-green-800 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/50"
+                            className="rounded-lg border border-green-600/40 bg-green-50 text-green-700 shadow-xs hover:bg-green-100 hover:text-green-800 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/50"
                             disabled={isUpdatingEndpoint || !editedUrl.trim()}
                             onClick={handleSaveUrl}
                             size="icon-sm"
@@ -1003,7 +1003,7 @@ export function EndpointDetailPage() {
                             aria-label={
                               messages.endpoints.cancelEndpointEditTooltip
                             }
-                            className="border-destructive/40 bg-destructive/10 text-destructive shadow-xs hover:bg-destructive/15 hover:text-destructive"
+                            className="rounded-lg border border-destructive/40 bg-destructive/10 text-destructive shadow-xs hover:bg-destructive/15 hover:text-destructive"
                             disabled={isUpdatingEndpoint}
                             onClick={handleCancelEdit}
                             size="icon-sm"
@@ -1050,7 +1050,7 @@ export function EndpointDetailPage() {
                       }}
                     >
                       <span
-                        className={`shrink-0 rounded-md px-2 py-1 font-mono font-semibold text-xs ${getMethodBadgeColor(
+                        className={`shrink-0 select-none rounded-xl border-2 border-b-[3px] px-2.5 py-0.5 font-black font-mono text-xs tracking-wider ${getMethodBadgeColor(
                           endpoint.method
                         )}`}
                       >
@@ -1071,7 +1071,7 @@ export function EndpointDetailPage() {
                               aria-label={
                                 messages.endpoints.editEndpointTooltip
                               }
-                              className="bg-background/80 shadow-xs"
+                              className="rounded-lg border border-border/70 bg-background/80 shadow-xs hover:bg-accent"
                               onClick={handleEditUrl}
                               size="icon-sm"
                               type="button"
@@ -1094,7 +1094,7 @@ export function EndpointDetailPage() {
                               aria-label={
                                 messages.endpoints.deleteEndpointTooltip
                               }
-                              className="border-destructive/40 bg-background/80 text-destructive shadow-xs hover:bg-destructive/10 hover:text-destructive"
+                              className="rounded-lg border border-destructive/40 bg-background/80 text-destructive shadow-xs hover:bg-destructive/10 hover:text-destructive"
                               onClick={handleDeleteEndpointClick}
                               size="icon-sm"
                               type="button"
@@ -1127,18 +1127,18 @@ export function EndpointDetailPage() {
                 ease: MOTION_EASE.out,
               }}
             >
-              <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 bg-background/70 px-2.5 font-medium text-muted-foreground text-xs shadow-xs">
+              <span className="inline-flex h-7 select-none items-center gap-1.5 rounded-lg border border-border/70 bg-muted/40 px-2.5 font-medium text-muted-foreground text-xs shadow-xs">
                 <HugeiconsIcon
                   className="size-3.5 text-primary"
                   icon={HashIcon}
                   strokeWidth={2}
                 />
-                <span>Biller</span>
+                <span className="text-muted-foreground/80">Biller</span>
                 <span className="font-mono text-foreground">
                   {endpoint.billerSlug}
                 </span>
               </span>
-              <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border/70 bg-background/70 px-2.5 font-medium text-muted-foreground text-xs shadow-xs">
+              <span className="inline-flex h-7 select-none items-center gap-1.5 rounded-lg border border-border/70 bg-muted/40 px-2.5 font-medium text-muted-foreground text-xs shadow-xs">
                 <HugeiconsIcon
                   className="size-3.5 text-primary"
                   icon={Menu01Icon}
@@ -1156,6 +1156,7 @@ export function EndpointDetailPage() {
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 xl:w-auto">
           <Button
+            className="rounded-xl border border-border/80 bg-background/80 font-medium transition-all duration-150 hover:bg-accent"
             onClick={() => setIsMetricsOpen(true)}
             size="sm"
             type="button"
@@ -1169,6 +1170,7 @@ export function EndpointDetailPage() {
             {messages.endpoints.metrics.button}
           </Button>
           <Button
+            className="rounded-xl border border-border/80 bg-background/80 font-medium transition-all duration-150 hover:bg-accent"
             onClick={handleStartTour}
             size="sm"
             type="button"
@@ -1183,6 +1185,7 @@ export function EndpointDetailPage() {
           </Button>
           <ProtectedAction ability="canAddResponse">
             <Button
+              className="rounded-xl border-2 border-primary/40 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/95 active:translate-y-0.5 active:border-b-2"
               id={ENDPOINT_DETAIL_TOUR_TARGETS.addResponse}
               onClick={() => setIsStepperOpen(true)}
               size="sm"

@@ -223,7 +223,7 @@ export function EndpointMetricsSheet({
             <div className="flex flex-wrap items-center gap-2">
               <ToggleGroup
                 aria-label={messages.endpoints.metrics.timeWindowAriaLabel}
-                className="rounded-lg border bg-muted/40 p-1"
+                className="rounded-xl border border-border/80 bg-muted/40 p-1"
                 onValueChange={handleTimeWindowChange}
                 spacing={1}
                 value={[timeWindow]}
@@ -234,7 +234,7 @@ export function EndpointMetricsSheet({
                       messages.endpoints.metrics.timeWindowItemAriaLabel,
                       { label }
                     )}
-                    className="data-pressed:bg-background data-pressed:shadow-xs"
+                    className="rounded-lg font-medium text-xs data-pressed:bg-background data-pressed:shadow-xs"
                     key={value}
                     size="sm"
                     value={value}
@@ -244,7 +244,7 @@ export function EndpointMetricsSheet({
                 ))}
               </ToggleGroup>
               <Button
-                className="transition-transform active:scale-[0.98]"
+                className="rounded-xl border border-border/80 bg-background font-medium hover:bg-accent"
                 disabled={summaryQuery.isFetching || hourlyQuery.isFetching}
                 onClick={async () => {
                   await Promise.all([
@@ -293,12 +293,12 @@ function MetricsContent({
   return (
     <>
       <div className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
-        <Card className="overflow-hidden border-border/60 bg-background shadow-[0_24px_50px_-34px_rgba(15,23,42,0.55)]">
+        <Card className="overflow-hidden rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
           <CardContent className="p-0">
             <div className="grid gap-0 md:grid-cols-[1fr_220px]">
               <div className="flex min-h-[220px] flex-col justify-between gap-8 p-6 md:p-8">
                 <div className="flex flex-col gap-3">
-                  <div className="inline-flex w-fit items-center gap-2 rounded-full border bg-muted/50 px-3 py-1 font-medium text-muted-foreground text-xs">
+                  <div className="inline-flex w-fit select-none items-center gap-2 rounded-lg border border-border/70 bg-muted/40 px-2.5 py-0.5 font-medium text-muted-foreground text-xs">
                     <span
                       aria-hidden="true"
                       className={cn(
@@ -312,7 +312,7 @@ function MetricsContent({
                     <p className="font-semibold text-muted-foreground text-sm">
                       {messages.endpoints.metrics.requestHealthLabel}
                     </p>
-                    <h3 className="mt-2 font-mono font-semibold text-5xl tracking-tight md:text-6xl">
+                    <h3 className="mt-2 font-bold font-mono text-5xl tracking-tight md:text-6xl">
                       {formatRate(summary.successRate)}
                     </h3>
                   </div>
@@ -349,7 +349,7 @@ function MetricsContent({
           </CardContent>
         </Card>
 
-        <Card className="border-border/60 bg-background shadow-[0_24px_50px_-34px_rgba(15,23,42,0.55)]">
+        <Card className="rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Signal aria-hidden="true" />
@@ -432,7 +432,7 @@ function MetricsContent({
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <Card>
+        <Card className="rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <HugeiconsIcon
@@ -483,7 +483,7 @@ function MetricsContent({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <TrendingUp aria-hidden="true" />
@@ -543,10 +543,10 @@ function MiniStat({
 }) {
   return (
     <div className="flex min-h-0 flex-col justify-center gap-1 border-b px-5 py-4 last:border-b-0">
-      <span className="font-medium text-muted-foreground text-xs uppercase tracking-[0.14em]">
+      <span className="font-bold text-muted-foreground text-xs uppercase tracking-[0.14em]">
         {label}
       </span>
-      <span className="break-words font-mono font-semibold text-xl tracking-tight">
+      <span className="break-words font-bold font-mono text-xl tracking-tight">
         {value}
       </span>
     </div>
@@ -617,12 +617,12 @@ function StatusRow({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm">{label}</span>
-        <span className="font-mono text-muted-foreground text-sm">
+        <span className="font-semibold text-sm">{label}</span>
+        <span className="font-bold font-mono text-muted-foreground text-sm">
           {formatInteger(value)}
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-muted">
+      <div className="h-2.5 overflow-hidden rounded-full bg-muted">
         <div
           aria-hidden="true"
           className="h-full rounded-full bg-primary/70 transition-[width] duration-300"
@@ -642,31 +642,35 @@ function MetricCard({
 }: MetricCardProps) {
   const toneClassName = {
     danger: "border-destructive/30 bg-destructive/5",
-    default: "border-border/60 bg-background",
-    success: "border-primary/25 bg-primary/5",
-    warning: "border-primary/20 bg-primary/5",
+    default: "border-border/70 bg-card",
+    success: "border-emerald-500/30 bg-emerald-500/5",
+    warning: "border-amber-500/30 bg-amber-500/5",
   }[tone ?? "default"];
 
   return (
     <Card
       className={cn(
-        "overflow-hidden shadow-[0_20px_40px_-34px_rgba(15,23,42,0.45)] transition-transform duration-300 active:scale-[0.99]",
+        "overflow-hidden rounded-2xl border shadow-xs transition-transform duration-150 active:scale-[0.99]",
         toneClassName
       )}
     >
       <CardHeader className="flex flex-row items-start justify-between gap-3 pb-2">
         <div className="min-w-0">
-          <CardDescription>{label}</CardDescription>
-          <CardTitle className="mt-2 break-words font-mono text-xl leading-tight md:text-2xl">
+          <CardDescription className="font-semibold text-xs uppercase tracking-wider">
+            {label}
+          </CardDescription>
+          <CardTitle className="mt-1.5 break-words font-bold font-mono text-xl leading-tight md:text-2xl">
             {value}
           </CardTitle>
         </div>
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background/75 text-muted-foreground">
-          <Icon aria-hidden="true" />
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/40 text-muted-foreground shadow-xs">
+          <Icon aria-hidden="true" className="size-4" />
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground text-xs">{description}</p>
+        <p className="text-muted-foreground text-xs leading-relaxed">
+          {description}
+        </p>
       </CardContent>
     </Card>
   );

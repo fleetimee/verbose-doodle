@@ -57,7 +57,7 @@ export function EndpointDetailLayout({
   return (
     <>
       {/* Mobile: Tabs layout */}
-      <Card className="overflow-hidden lg:hidden">
+      <Card className="overflow-hidden rounded-2xl border-2 border-border/80 border-b-4 bg-card/90 shadow-sm lg:hidden">
         <Tabs defaultValue="responses">
           <div className="border-b px-4 py-2">
             <TabsList className="w-auto">
@@ -101,7 +101,7 @@ export function EndpointDetailLayout({
       </Card>
 
       {/* Desktop: Resizable panels */}
-      <Card className="hidden overflow-hidden lg:block">
+      <Card className="hidden overflow-hidden rounded-2xl border-2 border-border/80 border-b-4 bg-card/90 shadow-sm lg:block">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={35} id={responsesTourId} minSize={25}>
             <EndpointContentTransition

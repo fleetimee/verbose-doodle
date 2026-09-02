@@ -1,5 +1,4 @@
 import { motion } from "motion/react";
-import { Badge } from "@/components/ui/badge";
 import type { EndpointResponse } from "@/features/endpoints/types";
 import {
   formatDelayValue,
@@ -33,19 +32,19 @@ export function ResponseSimulationBadge({
       }}
     >
       {mode === SIMULATION_MODE.TIMEOUT && (
-        <Badge className="text-xs" variant="destructive">
+        <span className="inline-flex select-none items-center rounded-xl border-2 border-rose-500/40 border-b-[3px] bg-rose-500/15 px-2 py-0.5 font-black text-rose-600 text-xs dark:border-rose-500/50 dark:border-b-rose-400 dark:bg-rose-500/20 dark:text-rose-300">
           Timeout
-        </Badge>
+        </span>
       )}
       {mode === SIMULATION_MODE.DELAY && (
-        <Badge className="text-xs" variant="secondary">
+        <span className="inline-flex select-none items-center rounded-xl border-2 border-amber-500/40 border-b-[3px] bg-amber-500/15 px-2 py-0.5 font-bold text-amber-700 text-xs dark:border-amber-500/50 dark:border-b-amber-400 dark:bg-amber-500/20 dark:text-amber-300">
           Delay: {formatDelayValue(response.delayMs ?? 0)}
-        </Badge>
+        </span>
       )}
       {mode === SIMULATION_MODE.NORMAL && (
-        <Badge className="text-xs" variant="outline">
+        <span className="inline-flex select-none items-center rounded-xl border-2 border-border/80 border-b-[3px] bg-muted/40 px-2 py-0.5 font-bold text-muted-foreground text-xs">
           Normal
-        </Badge>
+        </span>
       )}
     </motion.div>
   );

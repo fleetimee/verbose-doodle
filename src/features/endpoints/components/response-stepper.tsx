@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -43,20 +42,20 @@ const COMMON_STATUS_CODES = [
 
 const getRailStepClasses = (isActive: boolean, isComplete: boolean) => {
   if (isActive) {
-    return "border-primary/40 bg-primary/10";
+    return "border border-primary/40 bg-primary/10 text-foreground";
   }
   if (isComplete) {
-    return "border-border bg-muted/50";
+    return "border border-border/70 bg-muted/30 text-foreground";
   }
-  return "border-transparent bg-transparent";
+  return "border border-transparent bg-transparent text-muted-foreground";
 };
 
 const getRailStepIconClasses = (isActive: boolean, isComplete: boolean) => {
   if (isActive) {
-    return "bg-primary text-primary-foreground";
+    return "bg-primary text-primary-foreground font-bold";
   }
   if (isComplete) {
-    return "bg-primary/20 text-primary";
+    return "bg-primary/20 text-primary font-bold";
   }
   return "bg-muted text-muted-foreground";
 };
@@ -228,7 +227,7 @@ export function ResponseStepper({
             formValues={formValues}
           />
 
-          <section className="min-w-0 rounded-lg border bg-card shadow-sm">
+          <section className="min-w-0 rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
             {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: Form needs keyboard navigation for stepper UX */}
             <form
               className="flex min-h-[34rem] flex-col"
@@ -257,20 +256,20 @@ export function ResponseStepper({
                 >
                   <div className="flex items-start gap-3 border-b pb-5">
                     <div
-                      className={`flex size-9 shrink-0 items-center justify-center rounded-md ${currentStep.bgColor}`}
+                      className={`flex size-10 shrink-0 items-center justify-center rounded-xl border-2 border-border/80 border-b-[3px] shadow-xs ${currentStep.bgColor}`}
                     >
                       <currentStep.icon
                         className={`size-5 ${currentStep.color}`}
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <Badge className="mb-3" variant="secondary">
+                      <span className="mb-2 inline-flex select-none items-center rounded-lg border border-border/70 bg-muted/50 px-2.5 py-0.5 font-medium text-muted-foreground text-xs">
                         Step {currentStepIndex + 1}
-                      </Badge>
-                      <h2 className="font-semibold text-2xl tracking-tight md:text-3xl">
+                      </span>
+                      <h2 className="font-bold text-2xl tracking-tight md:text-3xl">
                         {currentStep.title}
                       </h2>
-                      <p className="mt-2 max-w-2xl text-muted-foreground">
+                      <p className="mt-1.5 max-w-2xl text-muted-foreground text-sm">
                         {currentStep.description}
                       </p>
                     </div>
@@ -289,18 +288,18 @@ export function ResponseStepper({
                                 aria-invalid={fieldState.invalid}
                                 autoComplete="off"
                                 autoFocus
-                                className="h-16 rounded-md border bg-background px-4 font-mono text-2xl shadow-xs focus-visible:ring-2 aria-invalid:border-destructive md:text-3xl"
+                                className="h-12 rounded-xl border bg-background px-4 font-mono text-lg shadow-xs focus-visible:ring-2 aria-invalid:border-destructive"
                                 id="response-name"
                                 placeholder="success_response"
                               />
-                              <div className="mt-4 flex flex-wrap gap-2">
+                              <div className="mt-3 flex flex-wrap gap-2">
                                 {[
                                   "success_response",
                                   "validation_error",
                                   "timeout_fallback",
                                 ].map((example) => (
                                   <button
-                                    className="rounded-md border bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+                                    className="rounded-lg border border-border/60 bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
                                     key={example}
                                     onClick={() => {
                                       field.onChange(example);
@@ -314,7 +313,7 @@ export function ResponseStepper({
                                   </button>
                                 ))}
                               </div>
-                              <FieldDescription className="mt-4">
+                              <FieldDescription className="mt-3">
                                 Choose a stable name your team can recognize in
                                 tests and traffic logs.
                               </FieldDescription>
@@ -337,7 +336,11 @@ export function ResponseStepper({
                               <div className="mb-4 grid gap-2 sm:grid-cols-5">
                                 {COMMON_STATUS_CODES.map((status) => (
                                   <Button
-                                    className="h-auto min-h-16 flex-col gap-1 px-3 py-3"
+                                    className={`h-auto min-h-14 flex-col gap-1 rounded-xl transition-all duration-150 ${
+                                      field.value === status.code
+                                        ? "border-2 border-primary/50 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs"
+                                        : "border border-border/80 bg-card font-medium text-foreground hover:bg-accent/50"
+                                    }`}
                                     key={status.code}
                                     onClick={() => {
                                       field.onChange(status.code);
@@ -346,16 +349,12 @@ export function ResponseStepper({
                                         .catch(() => undefined);
                                     }}
                                     type="button"
-                                    variant={
-                                      field.value === status.code
-                                        ? "default"
-                                        : "outline"
-                                    }
+                                    variant="ghost"
                                   >
-                                    <span className="font-mono text-base">
+                                    <span className="font-bold font-mono text-base">
                                       {status.code}
                                     </span>
-                                    <span className="max-w-full truncate text-xs">
+                                    <span className="max-w-full truncate text-xs opacity-80">
                                       {status.label}
                                     </span>
                                   </Button>
@@ -387,11 +386,13 @@ export function ResponseStepper({
                         render={({ field, fieldState }) => (
                           <Field data-invalid={fieldState.invalid}>
                             <FieldContent>
-                              <div className="overflow-hidden rounded-lg border bg-background shadow-xs">
-                                <div className="flex items-center justify-between border-b bg-muted/35 px-4 py-3">
+                              <div className="overflow-hidden rounded-xl border bg-background shadow-xs">
+                                <div className="flex items-center justify-between border-b bg-muted/35 px-4 py-2.5">
                                   <div className="flex items-center gap-2">
-                                    <Badge variant="outline">JSON</Badge>
-                                    <span className="text-muted-foreground text-sm">
+                                    <span className="inline-flex select-none items-center rounded-md border border-border/70 bg-muted/60 px-2 py-0.5 font-mono text-xs">
+                                      JSON
+                                    </span>
+                                    <span className="font-mono text-muted-foreground text-sm">
                                       response.json
                                     </span>
                                   </div>
@@ -411,10 +412,10 @@ export function ResponseStepper({
                                   value={field.value}
                                 />
                               </div>
-                              <div className="mt-4 flex flex-wrap gap-2">
-                                {JSON_PRESETS.map((preset) => (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {[...JSON_PRESETS].map((preset) => (
                                   <button
-                                    className="rounded-md border bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+                                    className="rounded-lg border border-border/60 bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
                                     key={preset.name}
                                     onClick={() => {
                                       field.onChange(preset.value);
@@ -477,14 +478,14 @@ function ResponseBuilderRail({
   formValues,
 }: ResponseBuilderRailProps) {
   return (
-    <aside className="hidden rounded-lg border bg-card p-4 shadow-sm lg:sticky lg:top-6 lg:block lg:self-start">
+    <aside className="hidden rounded-2xl border-2 border-border/80 border-b-4 bg-card p-4 shadow-sm lg:sticky lg:top-6 lg:block lg:self-start">
       <div className="flex flex-col gap-5">
         <div>
-          <div className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+          <div className="font-bold text-muted-foreground text-xs uppercase tracking-wider">
             Builder
           </div>
-          <div className="mt-1 font-semibold text-lg">Response contract</div>
-          <p className="mt-2 text-muted-foreground text-sm">
+          <div className="mt-1 font-bold text-lg">Response contract</div>
+          <p className="mt-1 text-muted-foreground text-sm">
             Define the mock response returned by this endpoint.
           </p>
         </div>
@@ -497,14 +498,14 @@ function ResponseBuilderRail({
 
             return (
               <div
-                className={`flex items-center gap-3 rounded-md border px-3 py-3 transition-colors ${getRailStepClasses(
+                className={`flex items-center gap-3 rounded-xl border-2 px-3 py-3 transition-colors ${getRailStepClasses(
                   isActive,
                   isComplete
                 )}`}
                 key={step.id}
               >
                 <div
-                  className={`flex size-8 shrink-0 items-center justify-center rounded-md ${getRailStepIconClasses(
+                  className={`flex size-8 shrink-0 items-center justify-center rounded-xl shadow-xs ${getRailStepIconClasses(
                     isActive,
                     isComplete
                   )}`}
@@ -512,10 +513,8 @@ function ResponseBuilderRail({
                   <Icon className="size-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="truncate font-medium text-sm">
-                    {step.title}
-                  </div>
-                  <div className="text-muted-foreground text-xs">
+                  <div className="truncate font-bold text-sm">{step.title}</div>
+                  <div className="font-medium text-muted-foreground text-xs">
                     {getRailStepStatus(isActive, isComplete)}
                   </div>
                 </div>
@@ -524,24 +523,24 @@ function ResponseBuilderRail({
           })}
         </div>
 
-        <div className="rounded-md border bg-muted/35 p-3">
-          <div className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+        <div className="rounded-xl border border-border/70 bg-muted/30 p-3.5">
+          <div className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
             Draft
           </div>
           <dl className="mt-3 flex flex-col gap-2 text-sm">
             <div className="flex items-center justify-between gap-3">
               <dt className="text-muted-foreground">Name</dt>
-              <dd className="truncate font-mono">
+              <dd className="truncate font-medium font-mono">
                 {formValues.name || "Not set"}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3">
               <dt className="text-muted-foreground">Status</dt>
-              <dd className="font-mono">{formValues.statusCode}</dd>
+              <dd className="font-medium font-mono">{formValues.statusCode}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
               <dt className="text-muted-foreground">Payload</dt>
-              <dd className="font-mono">
+              <dd className="font-medium font-mono">
                 {formValues.json?.trim() ? "JSON" : "Empty"}
               </dd>
             </div>

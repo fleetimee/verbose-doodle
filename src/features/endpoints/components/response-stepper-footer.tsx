@@ -1,7 +1,6 @@
 import { ArrowRight01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -70,14 +69,15 @@ export function ResponseStepperFooter({
               />
             ))}
           </div>
-          <Badge className="max-w-[52vw] truncate" variant="secondary">
+          <span className="max-w-[52vw] select-none truncate rounded-xl border-2 border-border/80 border-b-[3px] bg-muted/60 px-3 py-1 font-bold text-muted-foreground text-xs shadow-xs">
             {currentStep.title}
-          </Badge>
+          </span>
         </div>
 
         <div className="flex shrink-0">
           {isLastStep ? (
             <Button
+              className="rounded-xl border-2 border-primary/40 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/95 active:translate-y-1 active:border-b-2"
               disabled={!isFormReadyToSubmit}
               onClick={onSubmit}
               size="lg"
@@ -93,7 +93,7 @@ export function ResponseStepperFooter({
                   <HugeiconsIcon
                     data-icon="inline-start"
                     icon={Tick02Icon}
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                   />
                   Create Response
                 </>
@@ -101,6 +101,7 @@ export function ResponseStepperFooter({
             </Button>
           ) : (
             <Button
+              className="rounded-xl border-2 border-primary/40 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/95 active:translate-y-1 active:border-b-2"
               disabled={!canProceed}
               onClick={onNext}
               size="lg"
@@ -110,7 +111,7 @@ export function ResponseStepperFooter({
               <HugeiconsIcon
                 data-icon="inline-end"
                 icon={ArrowRight01Icon}
-                strokeWidth={2}
+                strokeWidth={2.5}
               />
             </Button>
           )}

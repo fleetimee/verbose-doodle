@@ -47,7 +47,7 @@ export function EndpointListItem({
   return (
     <Item
       className={cn(
-        "relative w-full cursor-pointer overflow-hidden rounded-lg border border-border/40 bg-card/80 p-0 transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:border-primary/25 hover:bg-accent/40 hover:shadow-sm active:scale-[0.995]",
+        "group/item relative w-full cursor-pointer overflow-hidden rounded-2xl border-2 border-border/80 border-b-4 bg-card/85 p-0 transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-border/90 hover:border-b-primary/60 hover:bg-accent/40 hover:shadow-sm active:translate-y-1 active:border-b-2",
         "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/45"
       )}
       render={
@@ -65,7 +65,7 @@ export function EndpointListItem({
       <span
         aria-hidden="true"
         className={cn(
-          "absolute inset-y-0 left-0 w-1",
+          "absolute inset-y-0 left-0 w-1.5 rounded-l-2xl",
           methodColors.bg,
           methodColors.border
         )}
@@ -78,7 +78,7 @@ export function EndpointListItem({
               method={endpoint.method}
               variant="badge"
             />
-            <ItemTitle className="min-w-0">
+            <ItemTitle className="min-w-0 font-bold text-foreground">
               <EndpointPathTitle path={endpoint.url} />
             </ItemTitle>
           </div>
@@ -90,11 +90,11 @@ export function EndpointListItem({
           </ItemDescription>
         </ItemContent>
         <ItemActions>
-          <span className="flex size-8 items-center justify-center rounded-md border border-transparent text-muted-foreground transition-[border-color,background-color,color,transform] duration-150 ease-out group-hover/item:translate-x-0.5 group-hover/item:border-border group-hover/item:bg-background/80 group-hover/item:text-foreground">
+          <span className="flex size-9 items-center justify-center rounded-xl border-2 border-border/70 border-b-4 bg-muted/40 text-muted-foreground transition-all duration-150 ease-out group-hover/item:translate-x-0.5 group-hover/item:border-primary/40 group-hover/item:border-b-primary/70 group-hover/item:bg-primary group-hover/item:text-primary-foreground group-active/item:translate-y-0.5 group-active/item:border-b-2">
             <HugeiconsIcon
               className="size-4"
               icon={ArrowRight01Icon}
-              strokeWidth={2}
+              strokeWidth={2.5}
             />
           </span>
         </ItemActions>

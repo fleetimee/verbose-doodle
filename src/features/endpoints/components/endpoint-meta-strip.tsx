@@ -21,21 +21,33 @@ export function EndpointMetaStrip({
   responseCount,
 }: EndpointMetaStripProps) {
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)}>
-      <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-muted/35 px-2 py-1 font-medium text-muted-foreground text-xs">
-        <Hash className="h-3 w-3" />
-        <span>Biller</span>
-        <span className="font-mono text-foreground">{billerSlug}</span>
+    <div
+      className={cn(
+        "flex min-w-0 items-center gap-2 overflow-hidden",
+        className
+      )}
+    >
+      <span
+        className="inline-flex min-w-0 max-w-[160px] shrink items-center gap-1.5 rounded-xl border-2 border-border/80 border-b-[3px] bg-muted/50 px-2.5 py-0.5 font-bold text-muted-foreground text-xs transition-colors"
+        title={billerSlug}
+      >
+        <Hash className="size-3 shrink-0 text-muted-foreground/75" />
+        <span className="shrink-0 text-muted-foreground/80 text-xs">
+          Biller
+        </span>
+        <span className="truncate font-bold font-mono text-foreground">
+          {billerSlug}
+        </span>
       </span>
       <span
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-medium text-xs",
+          "inline-flex shrink-0 items-center gap-1.5 rounded-xl border-2 border-b-[3px] px-2.5 py-0.5 font-black text-xs transition-colors",
           responseCount > 0
-            ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-            : "border-border/70 bg-muted/35 text-muted-foreground"
+            ? "border-emerald-500/40 border-b-emerald-600/70 bg-emerald-500/15 text-emerald-600 dark:border-emerald-500/50 dark:border-b-emerald-400 dark:bg-emerald-500/20 dark:text-emerald-300"
+            : "border-border/80 border-b-border/90 bg-muted/40 text-muted-foreground"
         )}
       >
-        <MessageSquareText className="h-3 w-3" />
+        <MessageSquareText className="size-3 shrink-0" />
         <span>{getResponseLabel(responseCount)}</span>
       </span>
     </div>

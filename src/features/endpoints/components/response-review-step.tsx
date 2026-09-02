@@ -9,7 +9,6 @@ import {
   CodeBlockHeader,
   CodeBlockItem,
 } from "@/components/kibo-ui/code-block";
-import { Badge } from "@/components/ui/badge";
 import { HTTP_STATUS_CODES } from "@/features/endpoints/constants/http-status-codes";
 import type { ResponseFormData } from "@/features/endpoints/schemas/response-schema";
 
@@ -23,19 +22,21 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
       ?.label || String(formValues.statusCode);
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="rounded-lg border bg-primary/5 p-5">
+    <div className="flex flex-col gap-4">
+      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 shadow-xs">
         <div className="flex items-start gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-xs">
             <HugeiconsIcon
-              className="size-5"
+              className="size-4"
               icon={CheckmarkCircle02Icon}
               strokeWidth={2}
             />
           </div>
           <div className="min-w-0">
-            <div className="font-semibold text-lg">Ready to create</div>
-            <p className="mt-1 text-muted-foreground text-sm">
+            <div className="font-semibold text-base text-emerald-950 dark:text-emerald-100">
+              Ready to create
+            </div>
+            <p className="mt-0.5 text-emerald-800/80 text-xs leading-relaxed dark:text-emerald-300/80">
               Check the response contract before adding it to the endpoint.
             </p>
           </div>
@@ -43,41 +44,45 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-lg border bg-background p-4 shadow-xs">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+        <div className="rounded-xl border border-border/70 bg-card p-4 shadow-xs">
+          <div className="flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
             <HugeiconsIcon
-              className="size-4"
+              className="size-3.5"
               icon={File01Icon}
               strokeWidth={2}
             />
             Response Name
           </div>
-          <div className="mt-3 truncate font-mono font-semibold text-xl">
+          <div className="mt-2 truncate font-bold font-mono text-lg">
             {formValues.name}
           </div>
         </div>
 
-        <div className="rounded-lg border bg-background p-4 shadow-xs">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Hash className="size-4" />
+        <div className="rounded-xl border border-border/70 bg-card p-4 shadow-xs">
+          <div className="flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+            <Hash className="size-3.5" />
             Status Code
           </div>
-          <div className="mt-3 flex min-w-0 items-center gap-2">
-            <Badge variant="secondary">{formValues.statusCode}</Badge>
-            <span className="truncate font-semibold text-xl">
+          <div className="mt-2 flex min-w-0 items-center gap-2">
+            <span className="inline-flex select-none items-center rounded-lg border border-border/70 bg-muted/60 px-2.5 py-0.5 font-bold font-mono text-xs">
+              {formValues.statusCode}
+            </span>
+            <span className="truncate font-semibold text-lg">
               {statusLabel.replace(`${formValues.statusCode} `, "")}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="rounded-lg border bg-background p-4 shadow-xs">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Code2 className="size-4" />
+      <div className="rounded-xl border border-border/70 bg-card p-4 shadow-xs">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+            <Code2 className="size-3.5" />
             JSON Response
           </div>
-          <Badge variant="outline">response.json</Badge>
+          <span className="inline-flex select-none items-center rounded-xl border-2 border-border/80 border-b-[3px] bg-muted/60 px-2.5 py-0.5 font-bold font-mono text-xs">
+            response.json
+          </span>
         </div>
         <CodeBlock
           data={[

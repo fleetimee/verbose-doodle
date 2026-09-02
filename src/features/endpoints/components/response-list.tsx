@@ -93,10 +93,10 @@ function ResponseSectionHeader({
       <Separator className="flex-1" />
       <span
         className={cn(
-          "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 font-medium text-[10px] uppercase tracking-[0.12em]",
+          "inline-flex shrink-0 select-none items-center gap-1.5 rounded-xl border-2 border-b-[3px] px-2.5 py-1 font-bold text-[10px] uppercase tracking-wider",
           isActive
-            ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300"
-            : "border-border/70 bg-muted/35 text-muted-foreground"
+            ? "border-emerald-500/30 border-b-emerald-600/60 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+            : "border-border/80 border-b-border/90 bg-muted/50 text-muted-foreground"
         )}
       >
         <span
@@ -106,7 +106,9 @@ function ResponseSectionHeader({
           )}
         />
         <span>{label}</span>
-        <span className="font-mono text-[10px] opacity-70">{count}</span>
+        <span className="font-bold font-mono text-[10px] opacity-75">
+          {count}
+        </span>
       </span>
       <Separator className="flex-1" />
     </div>
@@ -137,7 +139,7 @@ export function ResponseList({
   return (
     <div className="flex h-full flex-col">
       <div className="border-b px-4 py-3">
-        <h2 className="font-semibold text-sm">Responses</h2>
+        <h2 className="font-bold text-sm tracking-tight">Responses</h2>
       </div>
       <ScrollArea className="flex-1">
         {responses.length === 0 ? (
@@ -185,19 +187,19 @@ export function ResponseList({
                 <div className="space-y-1">
                   {/* Show label only when no active responses */}
                   {activeResponses.length === 0 && (
-                    <div className="mb-3 rounded-md border border-amber-500/20 bg-amber-500/5 p-3 text-sm shadow-xs dark:border-amber-500/30">
+                    <div className="mb-3 rounded-2xl border-2 border-amber-500/30 border-b-4 bg-amber-500/10 p-3.5 text-sm shadow-xs dark:border-amber-500/40">
                       <div className="flex gap-3">
-                        <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 shadow-xs dark:text-amber-400">
+                        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border-2 border-amber-500/40 border-b-[3px] bg-amber-500/15 text-amber-600 shadow-xs dark:text-amber-400">
                           <span className="relative flex h-2 w-2">
                             <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 motion-safe:animate-ping" />
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
                           </span>
                         </div>
                         <div className="flex flex-col gap-1">
-                          <p className="font-semibold text-amber-800 dark:text-amber-200">
+                          <p className="font-bold text-amber-800 dark:text-amber-200">
                             {messages.endpoints.noActiveResponseTitle}
                           </p>
-                          <p className="text-amber-700/80 text-xs leading-relaxed dark:text-amber-300/80">
+                          <p className="text-amber-700/85 text-xs leading-relaxed dark:text-amber-300/85">
                             {messages.endpoints.noActiveResponseDescription}
                           </p>
                         </div>

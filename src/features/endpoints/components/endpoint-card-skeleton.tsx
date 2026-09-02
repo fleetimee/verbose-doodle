@@ -3,34 +3,30 @@ import {
   ItemActions,
   ItemContent,
   ItemDescription,
-  ItemMedia,
-  ItemTitle,
 } from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function EndpointCardSkeleton() {
   return (
     <Item
-      className="rounded-lg border bg-card shadow-sm"
+      className="min-h-24 rounded-2xl border-2 border-border/80 border-b-4 bg-card/95 p-0 shadow-xs"
       size="default"
       variant="default"
     >
-      <ItemMedia variant="default">
-        <Skeleton className="h-7 w-[52px] rounded-md" />
-      </ItemMedia>
-      <ItemContent>
-        <ItemTitle>
-          <Skeleton className="h-5 w-[180px]" />
-        </ItemTitle>
+      <ItemContent className="min-w-0 gap-3 py-4 pr-3 pl-5">
+        <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+          <Skeleton className="h-6 w-14 rounded-xl" />
+          <Skeleton className="h-5 w-[160px] rounded-lg" />
+        </div>
         <ItemDescription className="text-left">
-          <div className="flex flex-col gap-0.5">
-            <Skeleton className="h-3.5 w-[85px]" />
-            <Skeleton className="h-4 w-[75px]" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-5 w-28 rounded-xl" />
+            <Skeleton className="h-5 w-20 rounded-xl" />
           </div>
         </ItemDescription>
       </ItemContent>
-      <ItemActions>
-        <Skeleton className="h-5 w-5" />
+      <ItemActions className="self-center pr-4">
+        <Skeleton className="size-9 rounded-xl" />
       </ItemActions>
     </Item>
   );

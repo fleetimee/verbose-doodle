@@ -19,20 +19,20 @@ type ResponseStepperHeaderProps = {
 
 const getHeaderStepClasses = (isActive: boolean, isComplete: boolean) => {
   if (isActive) {
-    return "border-primary/40 bg-primary/10 text-foreground";
+    return "border border-primary/40 bg-primary/10 text-foreground";
   }
   if (isComplete) {
-    return "border-border bg-muted/40 text-foreground";
+    return "border border-border/70 bg-muted/30 text-foreground";
   }
-  return "border-border/70 bg-background text-muted-foreground";
+  return "border border-border/50 bg-background text-muted-foreground";
 };
 
 const getHeaderStepIconClasses = (isActive: boolean, isComplete: boolean) => {
   if (isActive) {
-    return "bg-primary text-primary-foreground";
+    return "bg-primary text-primary-foreground font-bold";
   }
   if (isComplete) {
-    return "bg-primary/20 text-primary";
+    return "bg-primary/20 text-primary font-bold";
   }
   return "bg-muted text-muted-foreground";
 };
@@ -70,6 +70,7 @@ export function ResponseStepperHeader({
                   ? endpointMessages.responseBuilderCloseAriaLabel
                   : endpointMessages.responseBuilderBackAriaLabel
               }
+              className="rounded-xl border border-border/80 bg-background/80 shadow-xs hover:bg-accent"
               onClick={isFirstStep ? onCancel : onBack}
               size="icon"
               variant="ghost"
@@ -77,19 +78,20 @@ export function ResponseStepperHeader({
               <HugeiconsIcon icon={ArrowLeft02Icon} strokeWidth={2} />
             </Button>
             <div className="min-w-0">
-              <div className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              <div className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
                 {formatMessage(endpointMessages.responseBuilderStepLabel, {
                   current: currentStepIndex + 1,
                   total: STEPS.length,
                 })}
               </div>
-              <h1 className="truncate font-semibold text-lg tracking-tight">
+              <h1 className="truncate font-bold text-lg tracking-tight">
                 {endpointMessages.responseBuilderTitle}
               </h1>
             </div>
           </div>
           <Button
             aria-label={endpointMessages.responseBuilderCancelAriaLabel}
+            className="rounded-xl border border-border/80 bg-background/80 shadow-xs hover:bg-accent"
             onClick={onCancel}
             size="icon"
             variant="ghost"
@@ -106,14 +108,14 @@ export function ResponseStepperHeader({
 
             return (
               <div
-                className={`flex min-w-0 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors ${getHeaderStepClasses(
+                className={`flex min-w-0 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${getHeaderStepClasses(
                   isActive,
                   isComplete
                 )}`}
                 key={step.id}
               >
                 <div
-                  className={`flex size-7 shrink-0 items-center justify-center rounded-md ${getHeaderStepIconClasses(
+                  className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${getHeaderStepIconClasses(
                     isActive,
                     isComplete
                   )}`}

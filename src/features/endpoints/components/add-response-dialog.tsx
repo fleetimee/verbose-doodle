@@ -52,19 +52,24 @@ export function AddResponseDialog({
     <Dialog onOpenChange={handleOpenChange} open={open}>
       {showTrigger && (
         <DialogTrigger asChild>
-          <Button size="sm">
+          <Button
+            className="rounded-xl border-2 border-primary/40 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/95 active:translate-y-1 active:border-b-2"
+            size="sm"
+          >
             <HugeiconsIcon
               className="mr-2 h-4 w-4"
               icon={Add01Icon}
-              strokeWidth={2}
+              strokeWidth={2.5}
             />
             {messages.endpoints.addResponse}
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-lg">
         <DialogHeader>
-          <DialogTitle>{messages.endpoints.addNewResponse}</DialogTitle>
+          <DialogTitle className="font-bold text-xl">
+            {messages.endpoints.addNewResponse}
+          </DialogTitle>
           <DialogDescription>
             {messages.endpoints.addResponseDescription}
           </DialogDescription>
@@ -72,13 +77,18 @@ export function AddResponseDialog({
         <ResponseForm onSubmit={handleSubmit} ref={formRef}>
           <DialogFooter>
             <Button
+              className="rounded-xl border-2 border-border/80 border-b-[3px] bg-background font-bold shadow-xs transition-all duration-150 hover:bg-accent active:translate-y-0.5 active:border-b-2"
               onClick={() => handleOpenChange(false)}
               type="button"
               variant="outline"
             >
               {messages.common.cancel}
             </Button>
-            <Button disabled={isSubmitting} type="submit">
+            <Button
+              className="rounded-xl border-2 border-primary/40 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/95 active:translate-y-1 active:border-b-2"
+              disabled={isSubmitting}
+              type="submit"
+            >
               {isSubmitting && <Spinner className="mr-2" />}
               {isSubmitting
                 ? messages.endpoints.adding

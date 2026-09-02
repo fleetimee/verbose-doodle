@@ -160,7 +160,12 @@ export function EditResponseStepper({
       <div className="border-b px-4 py-4 md:px-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button onClick={onCancel} size="icon" variant="ghost">
+            <Button
+              className="rounded-xl border border-border/80 bg-background/80 shadow-xs hover:bg-accent"
+              onClick={onCancel}
+              size="icon"
+              variant="ghost"
+            >
               <HugeiconsIcon
                 className="h-5 w-5"
                 icon={ArrowLeft02Icon}
@@ -168,12 +173,20 @@ export function EditResponseStepper({
               />
             </Button>
             <div>
-              <div className="font-medium text-muted-foreground text-sm">
-                Editing: {response.name}
+              <div className="font-semibold text-muted-foreground text-sm">
+                Editing:{" "}
+                <span className="font-mono text-foreground">
+                  {response.name}
+                </span>
               </div>
             </div>
           </div>
-          <Button onClick={onCancel} size="sm" variant="ghost">
+          <Button
+            className="rounded-xl border border-border/80 bg-background/80 font-medium shadow-xs hover:bg-accent"
+            onClick={onCancel}
+            size="sm"
+            variant="ghost"
+          >
             Cancel
           </Button>
         </div>
@@ -181,7 +194,7 @@ export function EditResponseStepper({
 
       {/* Content */}
       <div className="flex flex-1 items-center justify-center overflow-auto bg-muted/20 px-4 py-8 md:px-8 md:pb-8">
-        <Card className="w-full max-w-3xl border bg-card shadow-sm">
+        <Card className="w-full max-w-3xl rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
           {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: Form needs keyboard navigation for stepper UX */}
           <form
             className="flex min-h-[34rem] flex-col"
@@ -204,15 +217,15 @@ export function EditResponseStepper({
               >
                 <div className="flex items-start gap-3 border-b pb-5">
                   <div
-                    className={`flex size-9 shrink-0 items-center justify-center rounded-md ${step.bgColor}`}
+                    className={`flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/70 ${step.bgColor}`}
                   >
                     <step.icon className={`size-5 ${step.color}`} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h2 className="font-semibold text-2xl tracking-tight md:text-3xl">
+                    <h2 className="font-bold text-2xl tracking-tight md:text-3xl">
                       {step.title}
                     </h2>
-                    <p className="mt-2 text-muted-foreground text-sm">
+                    <p className="mt-1.5 text-muted-foreground text-sm leading-relaxed">
                       {step.description}
                     </p>
                   </div>
@@ -231,18 +244,18 @@ export function EditResponseStepper({
                               aria-invalid={fieldState.invalid}
                               autoComplete="off"
                               autoFocus
-                              className="h-16 rounded-md border bg-background px-4 font-mono text-2xl shadow-xs focus-visible:ring-2 aria-invalid:border-destructive md:text-3xl"
+                              className="h-12 rounded-xl border bg-background px-4 font-mono text-lg shadow-xs focus-visible:ring-2 aria-invalid:border-destructive"
                               id="edit-response-name"
                               placeholder="e.g., success_response, error_response"
                             />
-                            <div className="mt-4 flex flex-wrap gap-2">
+                            <div className="mt-3 flex flex-wrap gap-2">
                               {[
                                 "success_response",
                                 "validation_error",
                                 "timeout_fallback",
                               ].map((example) => (
                                 <button
-                                  className="rounded-md border bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+                                  className="rounded-lg border border-border/60 bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
                                   key={example}
                                   onClick={() => {
                                     field.onChange(example);
@@ -254,7 +267,7 @@ export function EditResponseStepper({
                                 </button>
                               ))}
                             </div>
-                            <FieldDescription className="mt-4">
+                            <FieldDescription className="mt-3">
                               Choose a descriptive name that helps identify this
                               response
                             </FieldDescription>
@@ -277,7 +290,11 @@ export function EditResponseStepper({
                             <div className="mb-4 grid gap-2 sm:grid-cols-5">
                               {COMMON_STATUS_CODES.map((status) => (
                                 <Button
-                                  className="h-auto min-h-16 flex-col gap-1 px-3 py-3"
+                                  className={`h-auto min-h-14 flex-col gap-1 rounded-xl transition-all duration-150 ${
+                                    field.value === status.code
+                                      ? "border-2 border-primary/50 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs"
+                                      : "border border-border/80 bg-card font-medium text-foreground hover:bg-accent/50"
+                                  }`}
                                   key={status.code}
                                   onClick={() => {
                                     field.onChange(status.code);
@@ -286,16 +303,12 @@ export function EditResponseStepper({
                                       .catch(() => undefined);
                                   }}
                                   type="button"
-                                  variant={
-                                    field.value === status.code
-                                      ? "default"
-                                      : "outline"
-                                  }
+                                  variant="ghost"
                                 >
-                                  <span className="font-mono text-base">
+                                  <span className="font-bold font-mono text-base">
                                     {status.code}
                                   </span>
-                                  <span className="max-w-full truncate text-xs">
+                                  <span className="max-w-full truncate text-xs opacity-80">
                                     {status.label}
                                   </span>
                                 </Button>
@@ -325,20 +338,23 @@ export function EditResponseStepper({
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                           <FieldContent>
-                            <JsonEditor
-                              aria-invalid={fieldState.invalid}
-                              autoFocus
-                              height="280px"
-                              id="edit-response-json"
-                              onBlur={field.onBlur}
-                              onChange={field.onChange}
-                              placeholder='{\n  "name": "Novian Andika",\n  "age": 17,\n  "gender": true,\n  "jobs": ["fishing", "running"]\n}'
-                              value={field.value}
-                            />
-                            <div className="mt-4 flex flex-wrap gap-2">
+                            <div className="overflow-hidden rounded-xl border bg-background shadow-xs">
+                              <JsonEditor
+                                aria-invalid={fieldState.invalid}
+                                autoFocus
+                                className="[&>div:first-child]:rounded-none [&>div:first-child]:border-0"
+                                height="280px"
+                                id="edit-response-json"
+                                onBlur={field.onBlur}
+                                onChange={field.onChange}
+                                placeholder='{\n  "name": "Novian Andika",\n  "age": 17,\n  "gender": true,\n  "jobs": ["fishing", "running"]\n}'
+                                value={field.value}
+                              />
+                            </div>
+                            <div className="mt-3 flex flex-wrap gap-2">
                               {JSON_PRESETS.map((preset) => (
                                 <button
-                                  className="rounded-md border bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+                                  className="rounded-lg border border-border/60 bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
                                   key={preset.name}
                                   onClick={() => {
                                     field.onChange(preset.value);
@@ -377,6 +393,7 @@ export function EditResponseStepper({
           <div />
 
           <Button
+            className="rounded-xl border-2 border-primary/40 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/95 active:translate-y-1 active:border-b-2"
             disabled={!canSubmit}
             onClick={handleSubmit}
             size="lg"
@@ -392,7 +409,7 @@ export function EditResponseStepper({
                 <HugeiconsIcon
                   className="mr-2 h-4 w-4"
                   icon={Tick02Icon}
-                  strokeWidth={2}
+                  strokeWidth={2.5}
                 />
                 Save Changes
               </>

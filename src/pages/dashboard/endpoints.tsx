@@ -801,7 +801,7 @@ export function EndpointsPage() {
                 <section className="space-y-4" key={group.billerSlug}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-semibold text-lg">
+                      <h2 className="font-bold text-lg tracking-tight">
                         {group.billerName}
                       </h2>
                       <ProtectedAction ability="canAddEndpoint">
@@ -809,7 +809,7 @@ export function EndpointsPage() {
                           <TooltipTrigger asChild>
                             <Button
                               aria-label={`Add endpoint for ${group.billerName}`}
-                              className="border-border/70 bg-background/70 text-muted-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
+                              className="rounded-lg border-2 border-border/80 border-b-[3px] bg-background/70 text-muted-foreground transition-all duration-150 hover:border-border hover:bg-accent hover:text-accent-foreground active:translate-y-0.5 active:border-b-2"
                               onClick={() =>
                                 handleCreateEndpoint(group.billerSlug)
                               }
@@ -820,7 +820,7 @@ export function EndpointsPage() {
                               <HugeiconsIcon
                                 className="size-3.5"
                                 icon={Add01Icon}
-                                strokeWidth={2}
+                                strokeWidth={2.5}
                               />
                             </Button>
                           </TooltipTrigger>
@@ -834,7 +834,7 @@ export function EndpointsPage() {
                           <TooltipTrigger asChild>
                             <Button
                               aria-label={`Edit biller ${group.billerName}`}
-                              className="border-border/70 bg-background/70 text-muted-foreground hover:border-border hover:bg-accent hover:text-accent-foreground"
+                              className="rounded-lg border-2 border-border/80 border-b-[3px] bg-background/70 text-muted-foreground transition-all duration-150 hover:border-border hover:bg-accent hover:text-accent-foreground active:translate-y-0.5 active:border-b-2"
                               onClick={() => {
                                 const biller = billers.find(
                                   (candidate) =>
@@ -854,7 +854,7 @@ export function EndpointsPage() {
                               <HugeiconsIcon
                                 className="size-3.5"
                                 icon={Pen01Icon}
-                                strokeWidth={2}
+                                strokeWidth={2.5}
                               />
                             </Button>
                           </TooltipTrigger>
@@ -864,7 +864,7 @@ export function EndpointsPage() {
                         </Tooltip>
                       </ProtectedAction>
                     </div>
-                    <span className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-muted/35 px-2.5 py-1 font-medium text-muted-foreground text-xs">
+                    <span className="inline-flex select-none items-center gap-1.5 rounded-xl border-2 border-border/80 border-b-[3px] bg-muted/40 px-2.5 py-1 font-bold text-muted-foreground text-xs">
                       <Layers3 className="h-3.5 w-3.5" />
                       {group.endpoints.length} endpoint
                       {group.endpoints.length === 1 ? "" : "s"}

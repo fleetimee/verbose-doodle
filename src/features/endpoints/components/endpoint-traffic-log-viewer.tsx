@@ -529,19 +529,19 @@ export function EndpointTrafficLogViewer({
         <div className="relative grid gap-3 border-b bg-slate-100 px-5 py-4 text-slate-950 md:grid-cols-[minmax(0,1fr)_auto] dark:border-[#2b2f37] dark:bg-[#10141b] dark:text-slate-100">
           <div className="min-w-0">
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="rounded bg-sky-500/15 px-2 py-1 font-mono text-sky-700 text-xs dark:bg-sky-400/15 dark:text-sky-200">
+              <span className="inline-flex select-none items-center rounded-lg border border-sky-500/40 bg-sky-500/15 px-2 py-0.5 font-bold font-mono text-sky-700 text-xs dark:bg-sky-400/15 dark:text-sky-200">
                 {selectedLogDetail.method}
               </span>
-              <span className="rounded bg-slate-900/8 px-2 py-1 font-mono text-xs dark:bg-white/8">
+              <span className="inline-flex select-none items-center rounded-lg border border-slate-300 bg-slate-900/10 px-2 py-0.5 font-mono text-xs dark:border-[#344156] dark:bg-white/10">
                 {selectedLogDetail.hitStatus}
               </span>
               {selectedLogDetail.simulateTimeout && (
-                <span className="rounded bg-amber-500/15 px-2 py-1 font-mono text-amber-700 text-xs dark:bg-amber-400/15 dark:text-amber-200">
+                <span className="inline-flex select-none items-center rounded-lg border border-amber-500/40 bg-amber-500/15 px-2 py-0.5 font-mono text-amber-700 text-xs dark:bg-amber-400/15 dark:text-amber-200">
                   {messages.endpoints.trafficLogTimeoutSimulationLabel}
                 </span>
               )}
             </div>
-            <h3 className="truncate font-mono font-semibold text-base">
+            <h3 className="truncate font-bold font-mono text-base">
               {selectedLogDetail.path}
             </h3>
             <p className="truncate text-slate-600 text-xs dark:text-slate-400">
@@ -550,7 +550,7 @@ export function EndpointTrafficLogViewer({
             </p>
           </div>
           <div className="grid min-w-0 gap-2 pr-12 text-right text-xs">
-            <span className="font-mono text-slate-500 dark:text-slate-400">
+            <span className="font-mono font-semibold text-slate-500 dark:text-slate-400">
               {messages.endpoints.trafficLogUserAgentLabel}
             </span>
             <UserAgentClientBadge
@@ -564,7 +564,7 @@ export function EndpointTrafficLogViewer({
           <DialogClose asChild>
             <button
               aria-label={messages.endpoints.trafficLogDetailCloseAriaLabel}
-              className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md border border-slate-300 bg-white/80 text-slate-600 shadow-xs transition-colors hover:bg-white hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-[#344156] dark:bg-[#0b1020]/80 dark:text-slate-300 dark:hover:bg-[#111827] dark:hover:text-white"
+              className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 shadow-xs transition-colors hover:bg-slate-50 dark:border-[#344156] dark:bg-[#0b1020] dark:text-slate-200 dark:hover:bg-[#111827]"
               type="button"
             >
               <HugeiconsIcon
@@ -578,7 +578,7 @@ export function EndpointTrafficLogViewer({
 
         <div className="min-h-0 flex-1 px-5 pb-5">
           <ResizablePanelGroup
-            className="min-h-[620px] overflow-hidden rounded-md border bg-white dark:border-[#2b2f37] dark:bg-[#0d1117]"
+            className="min-h-[620px] overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-[#2b2f37] dark:bg-[#0d1117]"
             direction="horizontal"
           >
             <ResizablePanel defaultSize={50} minSize={28}>
@@ -626,20 +626,20 @@ export function EndpointTrafficLogViewer({
 
   return (
     <section className="flex min-w-0 flex-col gap-3" id={tourId}>
-      <div className="flex flex-col gap-4 rounded-lg border bg-card p-4">
+      <div className="flex flex-col gap-4 rounded-2xl border-2 border-border/80 border-b-4 bg-card p-4 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-md border bg-background text-primary shadow-xs">
+              <div className="flex size-10 items-center justify-center rounded-xl border-2 border-border/80 border-b-[3px] bg-background text-primary shadow-xs">
                 <HugeiconsIcon
                   aria-hidden="true"
                   className="size-5"
                   icon={ActivityIcon}
-                  strokeWidth={2}
+                  strokeWidth={2.5}
                 />
               </div>
               <div>
-                <h2 className="font-semibold text-lg">
+                <h2 className="font-bold text-lg">
                   {messages.endpoints.trafficLogsTitle}
                 </h2>
                 <p className="text-muted-foreground text-sm">
@@ -649,7 +649,7 @@ export function EndpointTrafficLogViewer({
             </div>
           </div>
           <Button
-            className="transition-transform duration-150 ease-out active:scale-[0.97]"
+            className="rounded-xl border-2 border-border/80 border-b-[3px] bg-background font-bold transition-all duration-150 hover:bg-accent active:translate-y-0.5 active:border-b-2"
             disabled={isFetching}
             onClick={() => refetchLogs()}
             size="sm"
@@ -659,7 +659,7 @@ export function EndpointTrafficLogViewer({
             <HugeiconsIcon
               data-icon="inline-start"
               icon={RepeatIcon}
-              strokeWidth={2}
+              strokeWidth={2.5}
             />
             {messages.endpoints.trafficLogsRefreshButton}
           </Button>
@@ -818,7 +818,7 @@ export function EndpointTrafficLogViewer({
 
               <div className="flex flex-wrap gap-2">
                 <Button
-                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
+                  className="rounded-lg border border-border/70 bg-background font-medium hover:bg-accent"
                   onClick={() =>
                     copyText(
                       visibleLines.join("\n"),
@@ -827,7 +827,7 @@ export function EndpointTrafficLogViewer({
                   }
                   size="sm"
                   type="button"
-                  variant="secondary"
+                  variant="outline"
                 >
                   <HugeiconsIcon
                     data-icon="inline-start"
@@ -837,7 +837,7 @@ export function EndpointTrafficLogViewer({
                   {messages.endpoints.trafficLogsCopyButton}
                 </Button>
                 <Button
-                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
+                  className="rounded-lg border border-border/70 bg-background font-medium hover:bg-accent"
                   disabled={selectedIds.size === 0}
                   onClick={() =>
                     copyText(
@@ -847,18 +847,18 @@ export function EndpointTrafficLogViewer({
                   }
                   size="sm"
                   type="button"
-                  variant="secondary"
+                  variant="outline"
                 >
                   <Clipboard data-icon="inline-start" />
                   {messages.endpoints.trafficLogsCopySelectedButton}
                 </Button>
                 <Button
-                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
+                  className="rounded-lg border border-border/70 bg-background font-medium hover:bg-accent"
                   disabled={selectedIds.size === 0}
                   onClick={handleClearSelection}
                   size="sm"
                   type="button"
-                  variant="secondary"
+                  variant="outline"
                 >
                   <HugeiconsIcon
                     data-icon="inline-start"
@@ -868,7 +868,7 @@ export function EndpointTrafficLogViewer({
                   {messages.endpoints.trafficLogsUnselectButton}
                 </Button>
                 <Button
-                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
+                  className="rounded-lg border border-border/70 bg-background font-medium hover:bg-accent"
                   onClick={() => handleDownload("text")}
                   size="sm"
                   type="button"
@@ -882,7 +882,7 @@ export function EndpointTrafficLogViewer({
                   {messages.endpoints.trafficLogsDownloadButton}
                 </Button>
                 <Button
-                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
+                  className="rounded-lg border border-border/70 bg-background font-medium hover:bg-accent"
                   onClick={() => handleDownload("csv")}
                   size="sm"
                   type="button"
@@ -891,12 +891,12 @@ export function EndpointTrafficLogViewer({
                   {messages.endpoints.trafficLogsCsvButton}
                 </Button>
                 <Button
-                  className="transition-transform duration-150 ease-out active:scale-[0.97]"
+                  className="rounded-lg border border-destructive/40 bg-destructive/10 font-medium text-destructive hover:bg-destructive/20"
                   disabled={logs.length === 0 || isClearingTrafficLogs}
                   onClick={() => setShowClearLogsDialog(true)}
                   size="sm"
                   type="button"
-                  variant="destructive"
+                  variant="outline"
                 >
                   <HugeiconsIcon
                     data-icon="inline-start"
@@ -911,7 +911,7 @@ export function EndpointTrafficLogViewer({
         </div>
       </div>
 
-      <div className="min-h-[420px] min-w-0 overflow-hidden rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner">
+      <div className="min-h-[420px] min-w-0 overflow-hidden rounded-2xl border-2 border-[#2f2f2f] border-b-4 bg-[#151515] shadow-inner">
         {logContent}
       </div>
 
@@ -1000,13 +1000,15 @@ function TrafficMetric({
   readonly value: string;
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-md border bg-background px-3 py-2 shadow-xs">
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+    <div className="flex min-w-0 items-center gap-2.5 rounded-2xl border-2 border-border/80 border-b-[3px] bg-card/90 px-3 py-2 shadow-xs">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border-2 border-border/70 border-b-[3px] bg-muted/60 text-muted-foreground">
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="text-[11px] text-muted-foreground uppercase">{label}</p>
-        <p className="truncate font-mono font-semibold text-sm">{value}</p>
+        <p className="font-bold text-[10px] text-muted-foreground uppercase tracking-wider">
+          {label}
+        </p>
+        <p className="truncate font-bold font-mono text-sm">{value}</p>
       </div>
     </div>
   );

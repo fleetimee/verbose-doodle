@@ -3,35 +3,33 @@ import {
   ItemActions,
   ItemContent,
   ItemDescription,
-  ItemMedia,
-  ItemTitle,
 } from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function EndpointListSkeleton() {
   return (
     <Item
-      className="w-full rounded-lg border border-border/40"
+      className="w-full rounded-2xl border-2 border-border/80 border-b-4 bg-card/85 p-0"
       size="default"
       variant="default"
     >
-      <ItemMedia variant="default">
-        <Skeleton className="h-7 w-[52px] rounded-md" />
-      </ItemMedia>
-      <ItemContent>
-        <ItemTitle>
-          <Skeleton className="h-5 w-[220px]" />
-        </ItemTitle>
-        <ItemDescription className="text-left">
-          <div className="flex flex-col gap-0.5">
-            <Skeleton className="h-3.5 w-[85px]" />
-            <Skeleton className="h-4 w-[75px]" />
+      <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-3 pr-4 pl-5">
+        <ItemContent className="min-w-0 gap-2">
+          <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+            <Skeleton className="h-6 w-14 rounded-xl" />
+            <Skeleton className="h-5 w-[200px] rounded-lg" />
           </div>
-        </ItemDescription>
-      </ItemContent>
-      <ItemActions className="ml-auto">
-        <Skeleton className="h-5 w-5" />
-      </ItemActions>
+          <ItemDescription className="text-left">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-28 rounded-xl" />
+              <Skeleton className="h-5 w-20 rounded-xl" />
+            </div>
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
+          <Skeleton className="size-9 rounded-xl" />
+        </ItemActions>
+      </div>
     </Item>
   );
 }
