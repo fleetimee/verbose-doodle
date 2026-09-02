@@ -168,13 +168,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               render={<Link to="/dashboard/overview" />}
               size="lg"
             >
-              <div className="flex aspect-square size-9 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground shadow-sm group-data-[collapsible=icon]:size-8">
-                <Logo
-                  className="size-6 group-data-[collapsible=icon]:size-5"
-                  size="sm"
-                  variant="icon"
-                />
-              </div>
+              <Logo
+                className="size-9 shrink-0 group-data-[collapsible=icon]:size-8"
+                size="sm"
+                variant="icon"
+              />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">BPDDIY DevTools</span>
                 <span className="truncate text-sidebar-foreground/65 text-xs">
