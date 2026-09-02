@@ -98,6 +98,7 @@ type DashboardBreadcrumbItem = {
 export function DashboardLayout() {
   const location = useLocation();
   const params = useParams();
+  const isOverview = location.pathname === "/dashboard/overview";
   const { theme, setTheme } = useTheme();
   const isEndpointDetail = location.pathname.match(ENDPOINT_DETAIL_REGEX);
   const routeEndpointSlug = isEndpointDetail ? params.slug : undefined;
@@ -241,9 +242,20 @@ export function DashboardLayout() {
         <SocketBridgeProvider>
           <SidebarProvider>
             <AppSidebar />
-            <SidebarInset className="h-svh min-h-0 overflow-hidden border border-border/70 bg-card shadow-sm md:h-[calc(100svh-1rem)]">
+            <SidebarInset
+              className={cn(
+                "h-svh min-h-0 overflow-hidden border border-border/70 bg-card shadow-sm md:h-[calc(100svh-1rem)]",
+                isOverview && "dashboard-overview-shell"
+              )}
+            >
               <ScrollArea
-                className="[&>[data-slot=scroll-area-viewport]>[role=presentation]]:!min-w-0 h-full min-h-0 w-full"
+                className={cn(
+                  "[&>[data-slot=scroll-area-viewport]>[role=presentation]]:!min-w-0 h-full min-h-0 w-full",
+                  isOverview && "dashboard-overview-scroll"
+                )}
+                contentClassName={
+                  isOverview ? "dashboard-overview-scroll-content" : undefined
+                }
                 viewportRef={scrollViewportRef}
               >
                 <header
@@ -301,7 +313,12 @@ export function DashboardLayout() {
                     />
                   </div>
                 </header>
-                <main className="flex min-h-full min-w-0 flex-col gap-4 bg-background/70 p-4 md:p-6">
+                <main
+                  className={cn(
+                    "flex min-h-full min-w-0 flex-col gap-4 bg-background/70 p-4 md:p-6",
+                    isOverview && "dashboard-overview-main"
+                  )}
+                >
                   <Suspense fallback={<DashboardPageFallback />}>
                     <Outlet />
                   </Suspense>
