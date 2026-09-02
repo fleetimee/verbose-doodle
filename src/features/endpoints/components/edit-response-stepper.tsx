@@ -23,7 +23,7 @@ import {
   JSON_PRESETS,
 } from "@/features/endpoints/constants/stepper-steps";
 import type { EndpointResponse } from "@/features/endpoints/types";
-import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
+import { MOTION_DURATION } from "@/lib/motion";
 
 type EditType = "name" | "statusCode" | "json";
 
@@ -193,7 +193,7 @@ export function EditResponseStepper({
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 items-center justify-center overflow-auto bg-muted/20 px-4 py-8 md:px-8 md:pb-8">
+      <div className="flex flex-1 items-center justify-center overflow-y-scroll bg-muted/20 px-4 py-8 [scrollbar-gutter:stable] md:px-8 md:pb-8">
         <Card className="w-full max-w-3xl rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
           {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: Form needs keyboard navigation for stepper UX */}
           <form
@@ -201,7 +201,7 @@ export function EditResponseStepper({
             onKeyDown={handleKeyDown}
             onSubmit={handleSubmit}
           >
-            <AnimatePresence initial={false}>
+            <AnimatePresence initial={false} mode="wait">
               <motion.div
                 animate={{ opacity: 1, x: 0 }}
                 className="flex flex-1 flex-col gap-8 p-5 md:p-8"
@@ -209,10 +209,8 @@ export function EditResponseStepper({
                 initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 8 }}
                 key={editType}
                 transition={{
-                  duration: shouldReduceMotion
-                    ? MOTION_DURATION.fast
-                    : MOTION_DURATION.step,
-                  ease: MOTION_EASE.out,
+                  duration: shouldReduceMotion ? MOTION_DURATION.fast : 0.16,
+                  ease: "easeOut",
                 }}
               >
                 <div className="flex items-start gap-3 border-b pb-5">

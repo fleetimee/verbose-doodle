@@ -60,13 +60,16 @@ export const JsonEditor = forwardRef<HTMLDivElement, JsonEditorProps>(
     },
     ref
   ) => {
-    const [theme, setTheme] = useState<"light" | "dark">("light");
+    const [theme, setTheme] = useState<"light" | "dark">(() => {
+      if (typeof document !== "undefined") {
+        return document.documentElement.classList.contains("dark")
+          ? "dark"
+          : "light";
+      }
+      return "light";
+    });
 
     useEffect(() => {
-      // Detect theme
-      const isDark = document.documentElement.classList.contains("dark");
-      setTheme(isDark ? "dark" : "light");
-
       // Watch for theme changes
       const observer = new MutationObserver(() => {
         const isDarkMode = document.documentElement.classList.contains("dark");
@@ -112,7 +115,11 @@ export const JsonEditor = forwardRef<HTMLDivElement, JsonEditorProps>(
     const canFormat = value.trim().length > 0 && isValidJson();
 
     const extensions = useMemo(() => {
-      const exts: Extension[] = [json(), jsonEditorScrollTheme];
+      const exts: Extension[] = [
+        json(),
+        EditorView.lineWrapping,
+        jsonEditorScrollTheme,
+      ];
       if (placeholder) {
         exts.push(placeholderExtension(placeholder));
       }

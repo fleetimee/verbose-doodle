@@ -17,6 +17,25 @@ if (!document.getAnimations) {
   document.getAnimations = () => [];
 }
 
+Element.prototype.animate = () =>
+  ({
+    addEventListener: () => {},
+    cancel: () => {},
+    currentTime: 0,
+    finish: () => {},
+    finished: Promise.resolve(),
+    oncancel: null,
+    onfinish: null,
+    pause: () => {},
+    play: () => {},
+    playbackRate: 1,
+    playState: "finished",
+    ready: Promise.resolve(),
+    removeEventListener: () => {},
+    reverse: () => {},
+    startTime: 0,
+  }) as unknown as Animation;
+
 afterEach(() => {
   cleanup();
   if (document.body) {

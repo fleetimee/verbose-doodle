@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { JsonEditor } from "@/features/endpoints/components/json-editor";
+import { ResponseReviewStep } from "@/features/endpoints/components/response-review-step";
 import { ResponseStepperFooter } from "@/features/endpoints/components/response-stepper-footer";
 import { ResponseStepperHeader } from "@/features/endpoints/components/response-stepper-header";
 import { StatusCodeCombobox } from "@/features/endpoints/components/status-code-combobox";
@@ -24,13 +25,7 @@ import {
   type ResponseFormData,
   responseSchema,
 } from "@/features/endpoints/schemas/response-schema";
-import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
-
-const ResponseReviewStep = lazy(() =>
-  import("@/features/endpoints/components/response-review-step").then(
-    ({ ResponseReviewStep }) => ({ default: ResponseReviewStep })
-  )
-);
+import { MOTION_DURATION } from "@/lib/motion";
 
 const COMMON_STATUS_CODES = [
   { code: 200, label: "OK" },
@@ -77,20 +72,38 @@ type ResponseStepperProps = {
   isSubmitting?: boolean;
 };
 
+const getSlideOffset = (
+  directionValue: number,
+  reduceMotion: boolean | null
+) => {
+  if (reduceMotion) {
+    return 0;
+  }
+  return directionValue >= 0 ? 16 : -16;
+};
+
 export function ResponseStepper({
   onSubmit,
   onCancel,
   onDirtyChange,
   isSubmitting = false,
 }: ResponseStepperProps) {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [defaultName] = useState(() => `response_${Date.now()}`);
+  const [[currentStepIndex, direction], setStep] = useState<[number, number]>([
+    0, 0,
+  ]);
   const shouldReduceMotion = useReducedMotion();
   const currentStep = STEPS[currentStepIndex];
+  const slideOffset = getSlideOffset(direction, shouldReduceMotion);
+
+  const goToStep = (newIndex: number) => {
+    setStep(([prevIndex]) => [newIndex, newIndex > prevIndex ? 1 : -1]);
+  };
 
   const form = useForm<ResponseFormData>({
     defaultValues: {
       json: "{}",
-      name: "",
+      name: defaultName,
       statusCode: 200,
     },
     mode: "onChange",
@@ -133,7 +146,7 @@ export function ResponseStepper({
 
     if (stepId === "review") {
       if (currentStepIndex < STEPS.length - 1) {
-        setCurrentStepIndex(currentStepIndex + 1);
+        goToStep(currentStepIndex + 1);
       }
       return;
     }
@@ -141,7 +154,7 @@ export function ResponseStepper({
     const isValid = await form.trigger(stepId as keyof ResponseFormData);
 
     if (isValid && currentStepIndex < STEPS.length - 1) {
-      setCurrentStepIndex(currentStepIndex + 1);
+      goToStep(currentStepIndex + 1);
       const nextStep = STEPS[currentStepIndex + 1];
       if (nextStep?.id === "review") {
         await form.trigger();
@@ -151,7 +164,36 @@ export function ResponseStepper({
 
   const handlePrevious = () => {
     if (currentStepIndex > 0) {
-      setCurrentStepIndex(currentStepIndex - 1);
+      goToStep(currentStepIndex - 1);
+    }
+  };
+
+  const handleGoToStep = async (targetIndex: number) => {
+    if (
+      targetIndex === currentStepIndex ||
+      targetIndex < 0 ||
+      targetIndex >= STEPS.length
+    ) {
+      return;
+    }
+
+    if (targetIndex < currentStepIndex) {
+      goToStep(targetIndex);
+      return;
+    }
+
+    const stepId = currentStep.id;
+    if (stepId !== "review") {
+      const isValid = await form.trigger(stepId as keyof ResponseFormData);
+      if (!isValid) {
+        return;
+      }
+    }
+
+    goToStep(targetIndex);
+    const nextStep = STEPS[targetIndex];
+    if (nextStep?.id === "review") {
+      await form.trigger();
     }
   };
 
@@ -204,6 +246,12 @@ export function ResponseStepper({
     return false;
   };
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollContainerRef.current?.scrollTo({ behavior: "instant", top: 0 });
+  }, [currentStepIndex]);
+
   return (
     <motion.div
       animate={{ opacity: 1 }}
@@ -217,41 +265,44 @@ export function ResponseStepper({
         isFirstStep={currentStepIndex === 0}
         onBack={handlePrevious}
         onCancel={onCancel}
+        onStepClick={handleGoToStep}
         progress={progress}
       />
 
-      <div className="flex-1 overflow-auto bg-muted/20 px-4 py-6 md:px-8 md:py-8">
-        <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
+      <div
+        className="flex-1 overflow-y-scroll bg-muted/20 px-4 py-6 [scrollbar-gutter:stable] md:px-8 md:py-8"
+        ref={scrollContainerRef}
+      >
+        <div className="mx-auto grid w-full max-w-6xl items-start gap-6 lg:grid-cols-[18rem_1fr]">
           <ResponseBuilderRail
             currentStepIndex={currentStepIndex}
             formValues={formValues}
+            onStepClick={handleGoToStep}
           />
 
           <section className="min-w-0 rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
             {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: Form needs keyboard navigation for stepper UX */}
             <form
-              className="flex min-h-[34rem] flex-col"
+              className="flex min-h-[34rem] min-w-0 flex-col"
               onKeyDown={handleKeyDown}
               onSubmit={handleSubmit}
             >
-              <AnimatePresence initial={false}>
+              <AnimatePresence initial={false} mode="wait">
                 <motion.div
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex flex-1 flex-col gap-8 p-5 md:p-8"
+                  className="flex min-w-0 flex-1 flex-col gap-8 p-5 md:p-8"
                   exit={{
                     opacity: 0,
-                    x: shouldReduceMotion ? 0 : -8,
+                    x: -slideOffset,
                   }}
                   initial={{
                     opacity: 0,
-                    x: shouldReduceMotion ? 0 : 8,
+                    x: slideOffset,
                   }}
                   key={currentStepIndex}
                   transition={{
-                    duration: shouldReduceMotion
-                      ? MOTION_DURATION.fast
-                      : MOTION_DURATION.step,
-                    ease: MOTION_EASE.out,
+                    duration: shouldReduceMotion ? MOTION_DURATION.fast : 0.16,
+                    ease: "easeOut",
                   }}
                 >
                   <div className="flex items-start gap-3 border-b pb-5">
@@ -402,7 +453,7 @@ export function ResponseStepper({
                                 </div>
                                 <JsonEditor
                                   aria-invalid={fieldState.invalid}
-                                  autoFocus
+                                  autoFocus={false}
                                   className="[&>div:first-child]:rounded-none [&>div:first-child]:border-0"
                                   height="280px"
                                   id="response-json"
@@ -443,9 +494,7 @@ export function ResponseStepper({
                     )}
 
                     {currentStep.id === "review" && (
-                      <Suspense fallback={<EditorFallback />}>
-                        <ResponseReviewStep formValues={formValues} />
-                      </Suspense>
+                      <ResponseReviewStep formValues={formValues} />
                     )}
                   </div>
                 </motion.div>
@@ -458,10 +507,13 @@ export function ResponseStepper({
       <ResponseStepperFooter
         canProceed={canProceed()}
         currentStepIndex={currentStepIndex}
+        isFirstStep={currentStepIndex === 0}
         isFormReadyToSubmit={isFormReadyToSubmit()}
         isLastStep={currentStepIndex === STEPS.length - 1}
         isSubmitting={isSubmitting}
+        onBack={handlePrevious}
         onNext={handleNext}
+        onStepClick={handleGoToStep}
         onSubmit={handleSubmit}
       />
     </motion.div>
@@ -471,14 +523,16 @@ export function ResponseStepper({
 type ResponseBuilderRailProps = {
   currentStepIndex: number;
   formValues: ResponseFormData;
+  onStepClick?: (index: number) => void;
 };
 
 function ResponseBuilderRail({
   currentStepIndex,
   formValues,
+  onStepClick,
 }: ResponseBuilderRailProps) {
   return (
-    <aside className="hidden rounded-2xl border-2 border-border/80 border-b-4 bg-card p-4 shadow-sm lg:sticky lg:top-6 lg:block lg:self-start">
+    <aside className="hidden w-72 shrink-0 rounded-2xl border-2 border-border/80 border-b-4 bg-card p-4 shadow-sm lg:sticky lg:top-0 lg:block lg:self-start">
       <div className="flex flex-col gap-5">
         <div>
           <div className="font-bold text-muted-foreground text-xs uppercase tracking-wider">
@@ -497,15 +551,17 @@ function ResponseBuilderRail({
             const isComplete = index < currentStepIndex;
 
             return (
-              <div
-                className={`flex items-center gap-3 rounded-xl border-2 px-3 py-3 transition-colors ${getRailStepClasses(
+              <button
+                className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border px-3 py-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${getRailStepClasses(
                   isActive,
                   isComplete
                 )}`}
                 key={step.id}
+                onClick={() => onStepClick?.(index)}
+                type="button"
               >
                 <div
-                  className={`flex size-8 shrink-0 items-center justify-center rounded-xl shadow-xs ${getRailStepIconClasses(
+                  className={`flex size-8 shrink-0 items-center justify-center rounded-xl shadow-xs transition-colors ${getRailStepIconClasses(
                     isActive,
                     isComplete
                   )}`}
@@ -518,7 +574,7 @@ function ResponseBuilderRail({
                     {getRailStepStatus(isActive, isComplete)}
                   </div>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -549,8 +605,4 @@ function ResponseBuilderRail({
       </div>
     </aside>
   );
-}
-
-function EditorFallback() {
-  return <div className="min-h-[360px] rounded-md border bg-muted/20" />;
 }
