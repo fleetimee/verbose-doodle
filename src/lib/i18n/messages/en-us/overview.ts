@@ -13,7 +13,8 @@ export const overviewMessages = {
     billerCoverageLabel: "Biller coverage",
     billersLabel: "Billers",
     clearChat: "Reset chat",
-    composerHint: "Enter to send · Shift + Enter for a new line",
+    composerHint:
+      "Type / for slash commands · Enter to send · Shift + Enter for a new line",
     composerLabel: "Ask the simulator",
     emptyDescription:
       "Explore billers, endpoints, response templates, and integration signals in plain language.",

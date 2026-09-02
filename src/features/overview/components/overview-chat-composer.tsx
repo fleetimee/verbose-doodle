@@ -3,7 +3,7 @@ import {
   MinimizeScreenIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   type ChangeEvent,
   type FormEvent,
@@ -16,15 +16,29 @@ import {
 } from "react";
 import {
   Activity,
+  Binary,
+  Braces,
+  Building2,
+  CalendarDays,
+  Code2,
+  Compass,
   FileJson,
+  Fingerprint,
   MessageSquareText,
+  Network,
   Plug,
+  RadioReceiver,
   RefreshCw,
   SendHorizontal,
+  ShieldAlert,
+  ShieldCheck,
+  Timer,
+  Users,
 } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { messages } from "@/lib/i18n";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type SlashCommand = {
@@ -43,32 +57,46 @@ type OverviewChatComposerProps = {
 };
 
 const suggestedQuestions = [
-  "Show me a simulator snapshot",
-  "Which endpoints need responses?",
-  "Show recent endpoints",
+  { icon: Activity, question: "Show me a simulator snapshot" },
+  { icon: ShieldAlert, question: "Which endpoints need responses?" },
+  { icon: Plug, question: "Show recent endpoints" },
 ];
 
 const slashCommands: SlashCommand[] = [
   {
     command: "/snapshot",
-    description: "Read the current biller simulator coverage",
+    description: "Read overall simulator health, coverage & counts",
     icon: Activity,
     id: "snapshot",
     label: "Show simulator snapshot",
   },
   {
     command: "/refresh",
-    description: "Fetch the latest overview data",
+    description: "Fetch the latest live data from simulator API",
     icon: RefreshCw,
     id: "refresh",
     label: "Refresh overview",
   },
   {
     command: "/endpoints",
-    description: "Review configured endpoint coverage",
+    description: "Review configured endpoints, HTTP methods & paths",
     icon: Plug,
     id: "endpoints",
     label: "Endpoint catalog",
+  },
+  {
+    command: "/billers",
+    description: "Inspect billers and endpoint coverage distribution",
+    icon: Building2,
+    id: "billers",
+    label: "Biller breakdown",
+  },
+  {
+    command: "/missing",
+    description: "Find endpoints without active response templates",
+    icon: ShieldAlert,
+    id: "missing",
+    label: "Missing responses",
   },
   {
     command: "/tools",
@@ -78,8 +106,92 @@ const slashCommands: SlashCommand[] = [
     label: "Developer tools",
   },
   {
+    command: "/jwt",
+    description: "Decode, inspect and verify JSON Web Tokens",
+    icon: Fingerprint,
+    id: "jwt",
+    label: "JWT inspector",
+  },
+  {
+    command: "/iso8583",
+    description: "Build and inspect ISO 8583 financial messages",
+    icon: Code2,
+    id: "iso8583",
+    label: "ISO 8583 generator",
+  },
+  {
+    command: "/json-yaml",
+    description: "Bidirectional JSON and YAML format conversion",
+    icon: FileJson,
+    id: "json-yaml",
+    label: "JSON ↔ YAML",
+  },
+  {
+    command: "/schema",
+    description: "Validate payloads against JSON Schema specifications",
+    icon: Braces,
+    id: "schema",
+    label: "Schema validator",
+  },
+  {
+    command: "/cron",
+    description: "Parse cron expressions and preview upcoming runs",
+    icon: Timer,
+    id: "cron",
+    label: "Cron parser",
+  },
+  {
+    command: "/base",
+    description: "Convert between binary, octal, decimal, hex, and base64",
+    icon: Binary,
+    id: "base",
+    label: "Number base converter",
+  },
+  {
+    command: "/date",
+    description: "Convert Unix timestamps, ISO 8601, and timezones",
+    icon: CalendarDays,
+    id: "date",
+    label: "Date & timezone",
+  },
+  {
+    command: "/nfc",
+    description: "Inspect and decode raw NFC tag payloads",
+    icon: RadioReceiver,
+    id: "nfc",
+    label: "NFC inspector",
+  },
+  {
+    command: "/sockets",
+    description: "Test TCP client/server and UDP datagram flows",
+    icon: Network,
+    id: "sockets",
+    label: "Socket tester",
+  },
+  {
+    command: "/socks-relay",
+    description: "Inspect SOCKS5 proxy relay for REST and ISO 8583",
+    icon: ShieldCheck,
+    id: "socks-relay",
+    label: "SOCKS relay",
+  },
+  {
+    command: "/users",
+    description: "View user count and administrator activity stats",
+    icon: Users,
+    id: "users",
+    label: "User accounts",
+  },
+  {
+    command: "/help",
+    description: "Browse available questions, commands, and shortcuts",
+    icon: Compass,
+    id: "help",
+    label: "Help & cheat sheet",
+  },
+  {
     command: "/clear",
-    description: "Start a fresh conversation",
+    description: "Start a fresh conversation and reset session",
     icon: MessageSquareText,
     id: "clear",
     label: "Clear chat",
@@ -87,6 +199,12 @@ const slashCommands: SlashCommand[] = [
 ];
 
 const slashCommandQueryPattern = /^\/(\S*)$/i;
+
+const overviewChatEntryTransition = {
+  duration: MOTION_DURATION.chat,
+  ease: MOTION_EASE.apple,
+} as const;
+
 
 function getFilteredSlashCommands(draft: string) {
   const query = slashCommandQueryPattern.exec(draft)?.[1].toLocaleLowerCase();
@@ -159,7 +277,6 @@ export function OverviewChatComposer({
   onClear,
   onQuery,
 }: OverviewChatComposerProps) {
-  const prefersReducedMotion = useReducedMotion();
   const [draft, setDraft] = useState("");
   const [isComposerExpanded, setIsComposerExpanded] = useState(false);
   const [isComposerOverflowing, setIsComposerOverflowing] = useState(false);
@@ -175,13 +292,21 @@ export function OverviewChatComposer({
     setIsComposerOverflowing(textarea.scrollHeight > textarea.clientHeight + 1);
   }, [draft, isComposerExpanded]);
 
+  const submitDraft = useCallback(
+    (value: string) => {
+      setDraft("");
+      setIsComposerExpanded(false);
+      onQuery(value);
+    },
+    [onQuery]
+  );
+
   const handleSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      setDraft("");
-      onQuery(draft);
+      submitDraft(draft);
     },
-    [draft, onQuery]
+    [draft, submitDraft]
   );
 
   const handleDraftChange = useCallback(
@@ -200,14 +325,14 @@ export function OverviewChatComposer({
 
   const handleSlashCommandSelect = useCallback(
     (command: string) => {
-      setDraft("");
-      onQuery(command);
+      submitDraft(command);
     },
-    [onQuery]
+    [submitDraft]
   );
 
   const handleClear = useCallback(() => {
     setDraft("");
+    setIsComposerExpanded(false);
     onClear();
   }, [onClear]);
 
@@ -227,8 +352,7 @@ export function OverviewChatComposer({
 
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
-        setDraft("");
-        onQuery(draft);
+        submitDraft(draft);
       }
     },
     [
@@ -236,115 +360,74 @@ export function OverviewChatComposer({
       filteredSlashCommands,
       handleSlashCommandSelect,
       isSlashCommandPaletteOpen,
-      onQuery,
       selectedSlashIndex,
+      submitDraft,
     ]
   );
 
   return (
-    <motion.div
-      className="overview-chat-composer"
-      layout="position"
-      transition={{
-        duration: prefersReducedMotion ? 0 : 0.18,
-        ease: [0.65, 0, 0.35, 1],
-      }}
-    >
+    <div className="overview-chat-composer">
       <div className="overview-chat-composer-inner">
-        <AnimatePresence initial={false}>
-          {hasConversation || draft.trim() ? null : (
-            <motion.fieldset
-              animate={{ opacity: 1, y: 0 }}
-              className="overview-chat-suggestions"
-              exit={{ opacity: 0, y: 10 }}
-              initial={{ opacity: 0, y: 10 }}
-              key="overview-chat-suggestions"
-              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <legend>{messages.overview.chat.tryAQuestion}</legend>
-              {suggestedQuestions.map((question) => (
+        {isSlashCommandPaletteOpen ? (
+          <motion.div
+            animate={{
+              filter: "blur(0px)",
+              opacity: 1,
+              transform: "translateY(0) scale(1)",
+            }}
+            aria-label={messages.overview.chat.slashCommands}
+            className="overview-chat-slash-menu"
+            id="overview-chat-slash-commands"
+            initial={{
+              filter: "blur(2px)",
+              opacity: 0,
+              transform: "translateY(8px) scale(0.98)",
+            }}
+            key="overview-chat-slash-menu"
+            onMouseDown={(event) => event.preventDefault()}
+            role="listbox"
+            transition={{ duration: 0.18, ease: MOTION_EASE.apple }}
+          >
+            {filteredSlashCommands.map((command, index) => {
+              const Icon = command.icon;
+              const isSelected = index === selectedSlashIndex;
+              return (
                 <Button
-                  className="overview-chat-suggestion"
-                  disabled={isSubmitting}
-                  key={question}
-                  onClick={() => onQuery(question)}
+                  aria-selected={isSelected}
+                  className={cn(
+                    "overview-chat-slash-option",
+                    isSelected && "overview-chat-slash-option-selected"
+                  )}
+                  id={`overview-chat-slash-${command.id}`}
+                  key={command.id}
+                  onClick={() => handleSlashCommandSelect(command.command)}
+                  onMouseEnter={() => setSelectedSlashIndex(index)}
+                  role="option"
+                  size="sm"
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                 >
-                  {question}
-                </Button>
-              ))}
-            </motion.fieldset>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence initial={false}>
-          {isSlashCommandPaletteOpen ? (
-            <motion.div
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              aria-label={messages.overview.chat.slashCommands}
-              className="overview-chat-slash-menu"
-              exit={{ opacity: 0, scale: 0.98, y: 6 }}
-              id="overview-chat-slash-commands"
-              initial={{ opacity: 0, scale: 0.98, y: 6 }}
-              onMouseDown={(event) => event.preventDefault()}
-              role="listbox"
-              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {filteredSlashCommands.map((command, index) => {
-                const Icon = command.icon;
-                const isSelected = index === selectedSlashIndex;
-                return (
-                  <Button
-                    aria-selected={isSelected}
-                    className={cn(
-                      "overview-chat-slash-option",
-                      isSelected && "overview-chat-slash-option-selected"
-                    )}
-                    id={`overview-chat-slash-${command.id}`}
-                    key={command.id}
-                    onClick={() => handleSlashCommandSelect(command.command)}
-                    onMouseEnter={() => setSelectedSlashIndex(index)}
-                    role="option"
-                    type="button"
-                    variant="ghost"
+                  <span
+                    aria-hidden="true"
+                    className="overview-chat-slash-icon"
                   >
-                    <span
-                      aria-hidden="true"
-                      className="overview-chat-slash-icon"
-                    >
-                      <Icon />
-                    </span>
-                    <span className="overview-chat-slash-copy">
-                      <strong>{command.label}</strong>
-                      <span>{command.description}</span>
-                    </span>
-                    <kbd>{command.command}</kbd>
-                  </Button>
-                );
-              })}
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+                    <Icon />
+                  </span>
+                  <span className="overview-chat-slash-copy">
+                    <strong>{command.label}</strong>
+                    <span>{command.description}</span>
+                  </span>
+                  <kbd>{command.command}</kbd>
+                </Button>
+              );
+            })}
+          </motion.div>
+        ) : null}
 
         <form onSubmit={handleSubmit}>
-          <div className="overview-chat-composer-meta">
-            <label htmlFor="overview-chat-input">
-              {messages.overview.chat.composerLabel}
-            </label>
-            <span>{messages.overview.chat.composerHint}</span>
-            {hasConversation ? (
-              <Button
-                className="overview-chat-reset"
-                onClick={handleClear}
-                size="sm"
-                type="button"
-                variant="ghost"
-              >
-                {messages.overview.chat.clearChat}
-              </Button>
-            ) : null}
-          </div>
+          <label className="sr-only" htmlFor="overview-chat-input">
+            {messages.overview.chat.composerLabel}
+          </label>
           <div
             className="overview-chat-input-shell"
             data-expanded={isComposerExpanded || undefined}
@@ -399,7 +482,7 @@ export function OverviewChatComposer({
               aria-label="Send"
               className="overview-chat-submit"
               disabled={!draft.trim() || isSubmitting}
-              size="icon"
+              size="icon-sm"
               type="submit"
             >
               {isSubmitting ? (
@@ -409,8 +492,72 @@ export function OverviewChatComposer({
               )}
             </Button>
           </div>
+          <div className="overview-chat-composer-footer">
+            <span className="overview-chat-composer-hint">
+              {messages.overview.chat.composerHint}
+            </span>
+            {hasConversation ? (
+              <Button
+                className="overview-chat-reset"
+                onClick={handleClear}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                {messages.overview.chat.clearChat}
+              </Button>
+            ) : null}
+          </div>
         </form>
+
+        <AnimatePresence initial={false}>
+          {hasConversation ? null : (
+            <motion.fieldset
+              animate={{
+                filter: "blur(0px)",
+                opacity: 1,
+                transform: "translateY(0) scale(1)",
+              }}
+              className="overview-chat-suggestions"
+              exit={{
+                filter: "blur(4px)",
+                opacity: 0,
+                transform: "translateY(-6px) scale(0.98)",
+              }}
+              initial={{
+                filter: "blur(4px)",
+                opacity: 0,
+                transform: "translateY(6px) scale(0.98)",
+              }}
+              key="overview-chat-suggestions"
+              transition={overviewChatEntryTransition}
+            >
+              <legend>{messages.overview.chat.tryAQuestion}</legend>
+              <div className="overview-chat-suggestions-list">
+                {suggestedQuestions.map(({ icon: Icon, question }) => (
+                  <Button
+                    className="overview-chat-suggestion"
+                    disabled={isSubmitting}
+                    key={question}
+                    onClick={() => onQuery(question)}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="overview-chat-suggestion-icon"
+                    >
+                      <Icon />
+                    </span>
+                    <span>{question}</span>
+                  </Button>
+                ))}
+              </div>
+            </motion.fieldset>
+          )}
+        </AnimatePresence>
       </div>
-    </motion.div>
+    </div>
   );
 }

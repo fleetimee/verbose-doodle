@@ -62,11 +62,9 @@ export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
               <Link
                 className="group relative -mx-3 flex items-center justify-between gap-3 rounded-md border border-transparent px-3 py-4 outline-none transition-[color,background-color,border-color,box-shadow] duration-200 ease-[var(--ease-out)] first:-mt-2 last:-mb-2 hover:border-border/70 hover:bg-accent/50 hover:shadow-[0_16px_40px_-28px_var(--foreground)] focus-visible:border-border/70 focus-visible:bg-accent/50 focus-visible:ring-2 focus-visible:ring-primary/25 motion-reduce:transition-none"
                 key={endpoint.endpointId}
-                onFocus={() => prefetchEndpoint(String(endpoint.endpointId))}
-                onMouseEnter={() =>
-                  prefetchEndpoint(String(endpoint.endpointId))
-                }
-                to={`/dashboard/endpoints/${endpoint.endpointId}`}
+                onFocus={() => prefetchEndpoint(endpoint.endpointSlug)}
+                onMouseEnter={() => prefetchEndpoint(endpoint.endpointSlug)}
+                to={`/dashboard/endpoints/${endpoint.endpointSlug}`}
               >
                 <span className="absolute inset-y-3 left-0 w-0.5 rounded-full bg-primary opacity-0 transition-opacity duration-200 group-hover:opacity-80 group-focus-visible:opacity-80" />
                 <div className="min-w-0 flex-1">

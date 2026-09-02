@@ -17,6 +17,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TokenExpirationDialog } from "@/components/token-expiration-dialog";
 import { Toaster } from "@/components/ui/sonner";
+import { MotionConfig } from "motion/react";
 import { AuthProvider } from "@/features/auth/context";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
 import { DeveloperToolRoute } from "@/features/developer-tools/components/developer-tool-route";
@@ -185,7 +186,9 @@ createRoot(rootElement).render(
         <BrowserRouter>
           <AuthProvider>
             <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-              <AppContent />
+              <MotionConfig reducedMotion="never">
+                <AppContent />
+              </MotionConfig>
             </ThemeProvider>
           </AuthProvider>
         </BrowserRouter>

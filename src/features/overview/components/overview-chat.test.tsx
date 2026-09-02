@@ -20,6 +20,7 @@ const overviewData: OverviewData = {
     {
       billerName: "PLN",
       endpointId: 12,
+      endpointSlug: "pln-inquiry-post-a1b2c3",
       method: "POST",
       responseCount: 2,
       url: "/api/inquiry",
@@ -113,7 +114,23 @@ describe("Overview chat", () => {
 
     renderOverview();
 
-    expect(screen.getByText("Saved snapshot reply")).toBeTruthy();
+    const savedReply = screen.getByText("Saved snapshot reply");
+    const savedBubble = savedReply.closest('[data-slot="bubble"]');
+    expect(savedBubble).toBeTruthy();
+    expect(savedBubble?.classList.contains("overview-chat-bubble")).toBe(false);
+    expect(savedReply.classList.contains("overview-chat-bubble")).toBe(true);
+    expect(savedReply.closest('[data-slot="message"]')).toBeTruthy();
+    expect(savedReply.closest('[data-slot="message-scroller"]')).toBeTruthy();
+    const assistantAvatar = savedReply
+      .closest('[data-slot="message"]')
+      ?.querySelector('[data-slot="message-avatar"]');
+    expect(assistantAvatar?.classList.contains("self-start")).toBe(true);
+    expect(assistantAvatar?.classList.contains("bg-transparent")).toBe(true);
+    expect(assistantAvatar?.classList.contains("overflow-visible")).toBe(true);
+    const userMessage = screen
+      .getByText("Show recent endpoints")
+      .closest('[data-slot="message"]');
+    expect(userMessage?.getAttribute("data-align")).toBe("end");
     expect(screen.getByText("Live simulator snapshot")).toBeTruthy();
     expect(
       screen.getByRole("link", { name: "Open endpoint catalog" })
@@ -128,11 +145,15 @@ describe("Overview chat", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
+    expect(screen.getByRole("status").querySelector(".shimmer")).toBeTruthy();
     expect(await screen.findByText("Live simulator snapshot")).toBeTruthy();
     expect(screen.getByText("4", { selector: "strong" })).toBeTruthy();
     expect(
       screen.getByRole("link", { name: "Open endpoint catalog" })
     ).toBeTruthy();
+    expect(
+      screen.getByText("/api/inquiry").closest("a")?.getAttribute("href")
+    ).toBe("/dashboard/endpoints/pln-inquiry-post-a1b2c3");
     expect(
       screen.getByText("1 endpoint has no response template")
     ).toBeTruthy();
@@ -173,5 +194,32 @@ describe("Overview chat", () => {
     expect(await screen.findByText(refreshReplyPattern)).toBeTruthy();
     expect(getRefetchCalls()).toBe(1);
     expect(screen.getByText("Live simulator snapshot")).toBeTruthy();
+  });
+
+  test("answers tool-specific slash commands with direct destination actions", async () => {
+    const { input } = renderOverview();
+
+    fireEvent.change(input, { target: { value: "/jwt" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+
+    expect(
+      await screen.findByText(/The JWT Inspector allows you to decode/)
+    ).toBeTruthy();
+    expect(
+      screen.getAllByRole("link", { name: /JWT inspector/i }).length
+    ).toBeGreaterThan(0);
+  });
+
+  test("provides cheat sheet and command guide on /help", async () => {
+    const { input } = renderOverview();
+
+    fireEvent.change(input, { target: { value: "/help" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+
+    expect(
+      await screen.findByText(/Here are the available slash commands/)
+    ).toBeTruthy();
+    expect(screen.getByText(/• \/snapshot/)).toBeTruthy();
+    expect(screen.getByText(/• \/jwt, \/iso8583/)).toBeTruthy();
   });
 });

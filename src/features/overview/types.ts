@@ -54,6 +54,7 @@ export type ResponseActivation = {
  */
 export type RecentEndpoint = {
   endpointId: number;
+  endpointSlug: string;
   url: string;
   method: HttpMethod;
   billerName: string;

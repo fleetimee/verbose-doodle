@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -343,87 +344,51 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: color-mix(in oklch, var(--background) 92%, var(--primary) 8%);
+  background: color-mix(in oklch, var(--background) 95%, var(--primary) 5%);
   border: 1px solid color-mix(in oklch, var(--border), var(--primary) 10%);
-  border-radius: 0.9rem;
+  border-radius: 1rem;
   box-shadow: 0 18px 45px -32px
-    color-mix(in oklab, var(--foreground) 55%, transparent);
+    color-mix(in oklab, var(--foreground) 40%, transparent);
 }
 
-.overview-chat-page[data-chat-state="empty"] .overview-chat-panel {
-  align-items: center;
-  justify-content: center;
-  overflow: visible;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
+.overview-chat-viewport-shell {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .overview-chat-welcome {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
-  width: min(100%, 40rem);
-  padding: 1.25rem 1.25rem 0;
+  justify-content: flex-end;
+  width: min(100%, 42rem);
+  margin: auto;
+  padding: 4rem 1.5rem 2.5rem;
   text-align: center;
 }
 
-.overview-chat-welcome-mark {
-  display: grid;
-  place-items: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  color: var(--primary);
-  background: color-mix(in oklch, var(--primary) 11%, var(--card));
-  border: 1px solid color-mix(in oklch, var(--border), var(--primary) 28%);
-  border-radius: 1rem;
-  box-shadow: 0 12px 28px -22px
-    color-mix(in oklab, var(--primary) 75%, transparent);
-}
-
-.overview-chat-welcome-mark svg {
-  width: 1.35rem;
-  height: 1.35rem;
-}
-
 .overview-chat-welcome h2 {
-  max-width: 12ch;
-  margin: 1.25rem 0 0;
+  margin: 0;
   font-family: var(--font-sans);
-  font-size: clamp(2.35rem, 5vw, 4.3rem);
-  font-weight: 700;
-  line-height: 0.98;
-  letter-spacing: -0.055em;
+  font-size: clamp(1.85rem, 3.8vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  color: var(--foreground);
 }
 
 .overview-chat-welcome p {
-  max-width: 52ch;
-  margin: 1rem 0 0;
+  max-width: 44ch;
+  margin: 0.85rem 0 0;
   font-size: 0.95rem;
-  line-height: 1.65;
+  line-height: 1.6;
   color: var(--muted-foreground);
-}
-
-.overview-chat-welcome-status {
-  display: inline-flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-top: 1.25rem;
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  font-weight: 500;
-  color: var(--muted-foreground);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.overview-chat-welcome-status span {
-  width: 0.45rem;
-  height: 0.45rem;
-  background: var(--primary);
-  border-radius: 999px;
-  box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary) 13%, transparent);
 }
 
 .overview-chat-thread {
@@ -431,13 +396,23 @@
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
+}
+
+.overview-chat-transcript-shell {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.overview-chat-viewport {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-color: var(--border) transparent;
   scrollbar-width: thin;
 }
 
-.overview-chat-thread:focus-visible {
+.overview-chat-viewport:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: -3px;
 }
@@ -499,10 +474,12 @@
   min-width: 0;
 }
 
-.overview-chat-message[data-role="user"] .overview-chat-message-body {
-  flex: 0 1 auto;
-  align-items: flex-end;
-  max-width: min(80%, 38rem);
+.overview-chat-message [data-slot="bubble"] {
+  max-width: min(48rem, 88%);
+}
+
+.overview-chat-message[data-align="end"] [data-slot="bubble"] {
+  max-width: min(38rem, 80%);
 }
 
 .overview-chat-message-label {
@@ -581,6 +558,7 @@
   color: var(--muted-foreground);
 }
 
+.overview-chat-snapshot-grid,
 .overview-chat-metric-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -701,10 +679,12 @@
 .overview-chat-biller-meter span,
 .overview-chat-progress span {
   display: block;
+  width: 100%;
   height: 100%;
   background: var(--primary);
   border-radius: inherit;
-  transition: width 280ms var(--ease-out);
+  transform-origin: left center;
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .overview-chat-attention-copy {
@@ -779,7 +759,6 @@
   transition: transform 160ms var(--ease-out);
 }
 
-.overview-chat-inline-link:hover svg,
 .overview-chat-inline-link:focus-visible svg {
   transform: translateX(0.15rem);
 }
@@ -862,7 +841,6 @@
     transform 160ms var(--ease-out);
 }
 
-.overview-chat-recent-row:hover .overview-chat-recent-arrow,
 .overview-chat-recent-row:focus-visible .overview-chat-recent-arrow {
   color: var(--primary);
   transform: translateX(0.15rem);
@@ -884,6 +862,107 @@
   width: 0.8rem;
   height: 0.8rem;
   color: var(--primary);
+}
+
+.overview-chat-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+}
+
+@media (max-width: 640px) {
+  .overview-chat-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.overview-chat-card-tile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  color: var(--foreground);
+  text-decoration: none;
+  outline: none;
+  background: color-mix(in oklch, var(--muted), var(--background) 50%);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  transition:
+    background-color 160ms var(--ease-out),
+    border-color 160ms var(--ease-out),
+    transform 160ms var(--ease-out);
+}
+
+.overview-chat-card-tile:hover,
+.overview-chat-card-tile:focus-visible {
+  color: var(--primary);
+  background: color-mix(in oklch, var(--primary) 8%, var(--background));
+  border-color: color-mix(in oklch, var(--primary) 30%, var(--border));
+  transform: translateY(-1px);
+}
+
+.overview-chat-card-tile-icon {
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  color: var(--primary);
+  background: color-mix(in oklch, var(--primary) 12%, var(--background));
+  border: 1px solid color-mix(in oklch, var(--border), var(--primary) 20%);
+  border-radius: 0.45rem;
+}
+
+.overview-chat-card-tile-icon svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.overview-chat-card-tile-copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.overview-chat-card-tile-copy strong {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overview-chat-card-tile-copy span {
+  font-size: 0.67rem;
+  color: var(--muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overview-chat-methods-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+}
+
+.overview-chat-method-pill {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.25rem 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  border-radius: 999px;
+  border: 1px solid;
+}
+
+.overview-chat-method-pill strong {
+  font-weight: 700;
 }
 
 .overview-chat-actions {
@@ -957,28 +1036,95 @@
   height: 0.85rem;
   color: var(--muted-foreground);
   transition:
-    color 160ms var(--ease-out),
-    transform 160ms var(--ease-out);
+    color 180ms var(--ease-out),
+    transform 180ms var(--ease-out);
 }
 
-.overview-chat-action:hover .overview-chat-action-arrow,
 .overview-chat-action:focus-visible .overview-chat-action-arrow {
   color: var(--primary);
   transform: translateX(0.15rem);
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .overview-chat-inline-link:hover svg {
+    transform: translateX(0.15rem);
+  }
+
+  .overview-chat-recent-row:hover .overview-chat-recent-arrow {
+    color: var(--primary);
+    transform: translateX(0.15rem);
+  }
+
+  .overview-chat-action:hover .overview-chat-action-arrow {
+    color: var(--primary);
+    transform: translateX(0.15rem);
+  }
+
+  .overview-chat-action:hover {
+    transform: translateY(-2px);
+    background: color-mix(in oklch, var(--primary) 7%, var(--card));
+    border-color: color-mix(in oklch, var(--border), var(--primary) 32%);
+    box-shadow: 0 8px 22px -10px
+      color-mix(in oklab, var(--primary) 45%, transparent);
+  }
+}
+
+.overview-chat-action:active {
+  transform: scale(0.98);
+}
+
+@keyframes chat-shimmer-flow {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes chat-pulse-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--foreground) 30%, var(--muted-foreground)) 0%,
+    var(--foreground) 50%,
+    color-mix(in oklch, var(--foreground) 30%, var(--muted-foreground)) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: chat-shimmer-flow 1.8s infinite linear;
+}
+
 .overview-chat-progress-marker {
   display: inline-flex;
-  gap: 0.55rem;
+  gap: 0.6rem;
   align-items: center;
-  padding: 0.45rem 0.7rem;
+  padding: 0.45rem 0.85rem;
   margin-inline-start: 3rem;
   font-family: var(--font-mono);
-  font-size: 0.67rem;
+  font-size: 0.68rem;
+  font-weight: 500;
   color: var(--muted-foreground);
-  background: color-mix(in oklch, var(--card) 82%, transparent);
-  border: 1px solid var(--border);
-  border-radius: 0.65rem;
+  background: color-mix(in oklch, var(--card) 92%, var(--background) 8%);
+  border: 1px solid color-mix(in oklch, var(--border), var(--primary) 18%);
+  border-radius: 999px;
+  box-shadow: 0 4px 18px -8px
+    color-mix(in oklab, var(--primary) 35%, transparent);
+  backdrop-filter: blur(10px);
+  animation: chat-pulse-glow 2.4s ease-in-out infinite;
 }
 
 .overview-chat-progress-marker svg {
@@ -1027,13 +1173,24 @@
   border-radius: 999px;
   box-shadow: 0 12px 28px -18px
     color-mix(in oklab, var(--foreground) 75%, transparent);
+  transition:
+    transform 180ms var(--ease-out),
+    opacity 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out);
+}
+
+.overview-chat-scroll-latest:active {
+  transform: scale(0.95);
 }
 
 .overview-chat-composer {
   flex: none;
-  padding: 1rem clamp(1rem, 4vw, 2.5rem) 1.1rem;
-  background: color-mix(in oklch, var(--background) 82%, var(--card) 18%);
+  padding: 1.5rem clamp(1rem, 3.5vw, 2.5rem) 1.35rem;
+  background: color-mix(in oklch, var(--background) 90%, var(--card) 10%);
   border-top: 1px solid var(--border);
+  transition:
+    padding 240ms var(--ease-out),
+    background-color 240ms var(--ease-out);
 }
 
 .overview-chat-composer-inner {
@@ -1042,72 +1199,68 @@
   margin-inline: auto;
 }
 
-.overview-chat-composer-meta {
+.overview-chat-composer-footer {
   display: flex;
-  gap: 1rem;
-  align-items: baseline;
-  min-width: 0;
-  margin-bottom: 0.45rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
 }
 
-.overview-chat-composer-meta label {
-  font-size: 0.78rem;
-  font-weight: 650;
-  color: var(--foreground);
-}
-
-.overview-chat-composer-meta > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.overview-chat-composer-hint {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   color: var(--muted-foreground);
-  white-space: nowrap;
+  text-align: center;
+  opacity: 0.75;
 }
 
 .overview-chat-reset {
-  min-height: 1.7rem;
+  min-height: 1.35rem;
   padding-inline: 0.45rem;
-  margin-inline-start: auto;
   font-size: 0.68rem;
   color: var(--muted-foreground);
+  transition: color 160ms var(--ease-out);
 }
 
 .overview-chat-input-shell {
   position: relative;
   display: flex;
-  align-items: flex-end;
-  min-height: 4.25rem;
-  padding: 0.45rem 0.55rem 0.45rem 1rem;
+  align-items: center;
+  min-height: 3.25rem;
+  padding: 0.35rem 0.45rem 0.35rem 1.15rem;
   background: var(--card);
   border: 1px solid color-mix(in oklch, var(--border), var(--primary) 14%);
-  border-radius: 2.125rem;
-  box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary) 7%, transparent);
+  border-radius: 1.65rem;
+  box-shadow: 0 4px 16px -8px
+    color-mix(in oklab, var(--foreground) 15%, transparent);
   transition:
-    border-color 160ms var(--ease-out),
-    box-shadow 160ms var(--ease-out);
+    border-color 200ms var(--ease-out),
+    box-shadow 200ms var(--ease-out),
+    transform 200ms var(--ease-out);
 }
 
 .overview-chat-input-shell:focus-within {
   border-color: var(--ring);
-  box-shadow: 0 0 0 4px color-mix(in oklch, var(--ring) 18%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 18%, transparent),
+    0 8px 24px -10px color-mix(in oklab, var(--primary) 25%, transparent);
 }
 
 .overview-chat-input {
   flex: 1 1 auto;
   width: 100%;
   min-width: 0;
-  min-height: 2.8rem;
-  max-height: 7.5rem;
-  padding: 0.7rem 0.25rem;
+  min-height: 2rem;
+  max-height: 7rem;
+  padding: 0.35rem 0.35rem 0.35rem 0;
   color: var(--foreground);
   background: transparent;
   border: 0;
   outline: none;
   resize: none;
   field-sizing: content;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: 0.92rem;
+  line-height: 1.45;
   overflow-y: auto;
   scrollbar-color: var(--border) transparent;
   scrollbar-width: thin;
@@ -1118,127 +1271,242 @@
 }
 
 .overview-chat-input-shell[data-expanded="true"] .overview-chat-input {
-  min-height: min(24rem, 48dvh);
-  max-height: min(24rem, 48dvh);
+  min-height: min(20rem, 40dvh);
+  max-height: min(20rem, 40dvh);
 }
 
 .overview-chat-expand {
   position: absolute;
-  top: 0.7rem;
-  right: 3.25rem;
-  width: 2rem;
-  height: 2rem;
+  top: 0.45rem;
+  right: 3rem;
+  width: 1.75rem;
+  height: 1.75rem;
   color: var(--muted-foreground);
   background: color-mix(in oklch, var(--muted) 55%, transparent);
   border-radius: 999px;
+  transition:
+    transform 160ms var(--ease-out),
+    color 160ms var(--ease-out);
+}
+
+.overview-chat-expand:active {
+  transform: scale(0.92);
 }
 
 .overview-chat-input-shell:has(.overview-chat-expand) .overview-chat-input {
-  padding-inline-end: 2.75rem;
+  padding-inline-end: 2.5rem;
 }
 
 .overview-chat-submit {
   flex: none;
-  width: 2.75rem;
-  height: 2.75rem;
-  min-height: 2.75rem;
+  width: 2.35rem;
+  height: 2.35rem;
+  min-height: 2.35rem;
   padding: 0;
   border-radius: 999px;
-  box-shadow: 0 4px 12px -7px
+  box-shadow: 0 4px 12px -5px
     color-mix(in oklab, var(--primary) 80%, transparent);
+  transition:
+    transform 180ms var(--ease-out),
+    opacity 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out);
 }
 
 .overview-chat-submit svg {
-  width: 1rem;
-  height: 1rem;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.overview-chat-submit:active:not(:disabled) {
+  transform: scale(0.92);
 }
 
 .overview-chat-slash-menu {
   position: absolute;
   right: 0;
-  bottom: calc(100% + 0.7rem);
+  bottom: calc(100% + 0.45rem);
   left: 0;
   z-index: 35;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  max-height: 18rem;
-  padding: 0.35rem;
+  gap: 0.15rem;
+  max-height: 14rem;
+  padding: 0.25rem;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  box-shadow: 0 18px 45px -24px
+  background: color-mix(in oklch, var(--card) 95%, var(--background) 5%);
+  backdrop-filter: blur(14px);
+  border: 1px solid color-mix(in oklch, var(--border), var(--primary) 18%);
+  border-radius: 0.75rem;
+  box-shadow: 0 14px 36px -18px
     color-mix(in oklab, var(--foreground) 75%, transparent);
+  scrollbar-color: var(--border) transparent;
+  scrollbar-width: thin;
 }
 
 .overview-chat-slash-option {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 0.75rem;
+  gap: 0.6rem;
   align-items: center;
   width: 100%;
-  height: auto;
-  min-height: 3.25rem;
-  padding: 0.55rem 0.65rem;
-  text-align: left;
-  border-radius: 0.7rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.6rem;
+  text-align: start;
+  border-radius: 0.55rem;
+  transition: background-color 140ms var(--ease-out);
 }
 
-.overview-chat-slash-option-selected {
-  background: var(--accent);
+.overview-chat-slash-option:active {
+  transform: scale(0.98);
+}
+
+.overview-chat-slash-option-selected,
+.overview-chat-slash-option:hover {
+  background: color-mix(in oklch, var(--primary) 12%, var(--muted));
 }
 
 .overview-chat-slash-icon {
-  width: 2rem;
-  height: 2rem;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--primary);
+  background: color-mix(in oklch, var(--primary) 10%, var(--card));
+  border: 1px solid color-mix(in oklch, var(--border), var(--primary) 18%);
+  border-radius: 0.4rem;
+}
+
+.overview-chat-slash-icon svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.overview-chat-slash-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 0.08rem;
+}
+
+.overview-chat-slash-copy strong {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.overview-chat-slash-copy span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.68rem;
+  line-height: 1.2;
+  color: var(--muted-foreground);
+  white-space: nowrap;
 }
 
 .overview-chat-slash-option kbd {
-  padding: 0.2rem 0.4rem;
+  padding: 0.12rem 0.35rem;
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--muted-foreground);
+  background: color-mix(in oklch, var(--muted) 45%, transparent);
   border: 1px solid var(--border);
-  border-radius: 0.35rem;
-}
-
-.overview-chat-page[data-chat-state="empty"] .overview-chat-composer {
-  width: min(100%, 58rem);
-  padding: 1rem 1.25rem 1.25rem;
-  background: transparent;
-  border-top: 0;
+  border-radius: 0.3rem;
 }
 
 .overview-chat-suggestions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
   padding: 0;
-  margin: 0 0 0.85rem;
+  margin: 1.25rem 0 0;
   border: 0;
 }
 
 .overview-chat-suggestions legend {
-  flex: none;
-  margin-inline-end: 0.15rem;
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  font-weight: 600;
-  color: var(--muted-foreground);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  display: none;
+}
+
+.overview-chat-suggestions-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  width: 100%;
 }
 
 .overview-chat-suggestion {
-  min-height: 2.75rem;
-  border-radius: 999px;
+  display: inline-flex;
+  gap: 0.65rem;
+  align-items: center;
+  justify-content: flex-start;
+  height: auto;
+  min-height: 2.35rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 450;
+  color: var(--muted-foreground);
+  border-radius: 0.75rem;
+  background: transparent;
+  border: 1px solid transparent;
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 160ms var(--ease-out),
+    color 160ms var(--ease-out);
 }
 
-.overview-chat-page[data-chat-state="empty"] .overview-chat-suggestions {
+.overview-chat-suggestion-icon {
+  display: grid;
+  place-items: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--muted-foreground);
+  transition: color 160ms var(--ease-out);
+}
+
+.overview-chat-suggestion-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .overview-chat-suggestion:hover {
+    color: var(--foreground);
+    background: color-mix(in oklch, var(--muted) 55%, transparent);
+    transform: translateX(3px);
+  }
+
+  .overview-chat-suggestion:hover .overview-chat-suggestion-icon {
+    color: var(--primary);
+  }
+}
+
+.overview-chat-suggestion:active {
+  transform: scale(0.98);
+}
+
+.overview-chat-page[data-chat-state="empty"] {
+  --overview-chat-column-width: 44rem;
+}
+
+.overview-chat-page[data-chat-state="empty"] .overview-chat-panel {
   justify-content: center;
+}
+
+.overview-chat-page[data-chat-state="empty"] .overview-chat-viewport-shell {
+  flex: 0 0 auto;
+}
+
+.overview-chat-page[data-chat-state="empty"] .overview-chat-welcome {
+  padding: 2.5rem 1.5rem 1.75rem;
+}
+
+.overview-chat-page[data-chat-state="empty"] .overview-chat-composer {
+  flex: 0 0 auto;
+  padding: 0 1.5rem 4rem;
+  background: transparent;
+  border-top: 0;
 }
 
 /* Keep overview chat in its own vertical viewport; the transcript is the only scroll surface. */
@@ -1328,7 +1596,6 @@
     display: none;
   }
 
-  .overview-chat-message[data-role="user"] .overview-chat-message-body,
   .overview-chat-bubble,
   .overview-chat-snapshot,
   .overview-chat-actions,
