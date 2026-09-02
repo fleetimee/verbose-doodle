@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@source "../node_modules/streamdown/dist/*.js";
+@source "../node_modules/@streamdown/cjk/dist/*.js";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -77,6 +80,65 @@
     }
     to {
       background-position: 0% 0%;
+    }
+  }
+  @keyframes sd-fadeIn {
+  from {
+    opacity: 0;
+    }
+  to {
+    opacity: 1;
+    }
+  }
+  @keyframes sd-blurIn {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    }
+  }
+  @keyframes sd-slideUp {
+  from {
+    opacity: 0;
+    top: 4px;
+    }
+  to {
+    opacity: 1;
+    top: 0;
+    }
+  }
+  @keyframes sd-slideLeft {
+  from {
+    opacity: 0;
+    left: 20px;
+    }
+  to {
+    opacity: 1;
+    left: 0;
+    }
+  }
+  @keyframes sd-foldIn {
+  0% {
+    opacity: 0;
+    filter: brightness(0.55);
+    transform: perspective(700px) rotateX(-92deg);
+    }
+  55% {
+    opacity: 1;
+    filter: brightness(0.85);
+    transform: perspective(700px) rotateX(8deg);
+    }
+  78% {
+    filter: brightness(0.97);
+    transform: perspective(700px) rotateX(-3deg);
+    }
+  100% {
+    opacity: 1;
+    filter: none;
+    transform: perspective(700px) rotateX(0);
     }
   }
 }
@@ -1692,4 +1754,30 @@
   .overview-chat-input-shell {
     transition: none;
   }
+  [data-sd-animate] {
+    animation: none;
+  }
+}
+  [data-sd-animate] {
+    animation: var(--sd-animation, sd-fadeIn) 400ms var(--sd-easing, ease) var(--sd-delay, 0ms) both;
+}
+  [data-slot="streaming"][data-sd-animation="fadeIn"] [data-sd-animate] {
+    animation-name: sd-fadeIn;
+}
+  [data-slot="streaming"][data-sd-animation="blurIn"] [data-sd-animate] {
+    animation-name: sd-blurIn;
+}
+  [data-slot="streaming"][data-sd-animation="slideUp"] [data-sd-animate] {
+    position: relative;
+    animation-name: sd-slideUp;
+}
+  [data-slot="streaming"][data-sd-animation="slideLeft"] [data-sd-animate] {
+    position: relative;
+    animation-name: sd-slideLeft;
+}
+  [data-slot="streaming"][data-sd-animation="foldIn"] [data-sd-animate] {
+    display: inline-block;
+    backface-visibility: hidden;
+    transform-origin: 50% 0%;
+    animation-name: sd-foldIn;
 }

@@ -19,6 +19,7 @@
     "hooks": "@/hooks"
   },
   "registries": {
+    "@vivid-layer": "https://www.vivid-layer.com/r/{name}.json",
     "@acme": "https://acme.com/r/{name}.json",
     "@diceui": "https://diceui.com/r/{name}.json",
     "@kibo-ui": "https://www.kibo-ui.com/r/{name}.json",

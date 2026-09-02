@@ -8,7 +8,17 @@ import type { ApiError } from "@/lib/api";
 
 const conversationStorageKey = "fleetime-labs.overview.conversation";
 const clearChatOptionPattern = /Clear chat/;
-const refreshReplyPattern = /The overview is refreshed\./;
+const jwtInspectorLinkPattern = /JWT inspector/i;
+
+function findStreamingText(text: string) {
+  return screen.findByText(
+    (_content, element) =>
+      element?.getAttribute("data-slot") === "streaming" &&
+      element.textContent?.includes(text) === true,
+    {},
+    { timeout: 2000 }
+  );
+}
 
 const overviewData: OverviewData = {
   endpointsByBiller: [
@@ -121,6 +131,12 @@ describe("Overview chat", () => {
     expect(savedReply.classList.contains("overview-chat-bubble")).toBe(true);
     expect(savedReply.closest('[data-slot="message"]')).toBeTruthy();
     expect(savedReply.closest('[data-slot="message-scroller"]')).toBeTruthy();
+    expect(
+      screen.getByRole("navigation", { name: "Chat minimap" })
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Jump to: Saved snapshot reply" })
+    ).toBeTruthy();
     const assistantAvatar = savedReply
       .closest('[data-slot="message"]')
       ?.querySelector('[data-slot="message-avatar"]');
@@ -191,7 +207,7 @@ describe("Overview chat", () => {
     fireEvent.change(input, { target: { value: "/refresh" } });
     fireEvent.keyDown(input, { key: "Enter" });
 
-    expect(await screen.findByText(refreshReplyPattern)).toBeTruthy();
+    expect(await findStreamingText("The overview is refreshed.")).toBeTruthy();
     expect(getRefetchCalls()).toBe(1);
     expect(screen.getByText("Live simulator snapshot")).toBeTruthy();
   });
@@ -203,10 +219,10 @@ describe("Overview chat", () => {
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
     expect(
-      await screen.findByText(/The JWT Inspector allows you to decode/)
+      await findStreamingText("The JWT Inspector allows you to decode")
     ).toBeTruthy();
     expect(
-      screen.getAllByRole("link", { name: /JWT inspector/i }).length
+      screen.getAllByRole("link", { name: jwtInspectorLinkPattern }).length
     ).toBeGreaterThan(0);
   });
 
@@ -216,10 +232,10 @@ describe("Overview chat", () => {
     fireEvent.change(input, { target: { value: "/help" } });
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
-    expect(
-      await screen.findByText(/Here are the available slash commands/)
-    ).toBeTruthy();
-    expect(screen.getByText(/• \/snapshot/)).toBeTruthy();
-    expect(screen.getByText(/• \/jwt, \/iso8583/)).toBeTruthy();
+    const streamedHelp = await findStreamingText("• /jwt, /iso8583");
+    expect(streamedHelp.textContent).toContain(
+      "Here are the available slash commands"
+    );
+    expect(streamedHelp.textContent).toContain("• /snapshot");
   });
 });

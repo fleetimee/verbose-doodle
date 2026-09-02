@@ -46,6 +46,10 @@ import { Badge } from "@/components/ui/badge";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { buttonVariants } from "@/components/ui/button";
 import {
+  ChatMinimap,
+  ChatMinimapContainer,
+} from "@/components/ui/chat-minimap";
+import {
   Message,
   MessageAvatar,
   MessageContent,
@@ -60,6 +64,7 @@ import {
 } from "@/components/ui/message-scroller";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
+import { Streaming } from "@/components/ui/streaming";
 import {
   DEVELOPER_TOOLS,
   getDeveloperToolHref,
@@ -1708,10 +1713,12 @@ function ChatActions({ actions }: { actions: ChatAction[] }) {
 function AssistantMessage({
   data,
   isAdmin,
+  isStreaming,
   message,
 }: {
   data: OverviewData | undefined;
   isAdmin: boolean;
+  isStreaming: boolean;
   message: ConversationMessage;
 }) {
   const cardType =
@@ -1735,7 +1742,11 @@ function AssistantMessage({
               message.tone === "destructive" && "overview-chat-bubble-error"
             )}
           >
-            {message.text}
+            {isStreaming ? (
+              <StreamingAssistantText text={message.text} />
+            ) : (
+              message.text
+            )}
           </BubbleContent>
         </Bubble>
         {data && cardType === "snapshot" ? (
@@ -1760,6 +1771,27 @@ function AssistantMessage({
         {message.actions ? <ChatActions actions={message.actions} /> : null}
       </MessageContent>
     </Message>
+  );
+}
+
+function StreamingAssistantText({ text }: { text: string }) {
+  const [content, setContent] = useState("");
+  const [isStreaming, setIsStreaming] = useState(true);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setContent(text));
+    const timer = setTimeout(() => setIsStreaming(false), 400);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+    };
+  }, [text]);
+
+  return (
+    <Streaming animation="fadeIn" isStreaming={isStreaming}>
+      {content}
+    </Streaming>
   );
 }
 
@@ -1793,6 +1825,7 @@ function OverviewChatTranscript({
   isLoading,
   isSubmitting,
   messages: conversationMessages,
+  streamingMessageId,
 }: {
   data: OverviewData | undefined;
   error: ApiError | null;
@@ -1800,9 +1833,17 @@ function OverviewChatTranscript({
   isLoading: boolean;
   isSubmitting: boolean;
   messages: ConversationMessage[];
+  streamingMessageId: string | null;
 }) {
   const { scrollToEnd } = useMessageScroller();
   const previousMessageCount = useRef(0);
+  const minimapItems = conversationMessages.map((message) => ({
+    description: message.text,
+    id: message.id,
+    title:
+      message.text.split("\n", 1)[0]?.trim() ||
+      (message.role === "user" ? "Your message" : "Assistant response"),
+  }));
 
   useEffect(() => {
     const hasNewMessage =
@@ -1821,17 +1862,18 @@ function OverviewChatTranscript({
   }, [conversationMessages, isSubmitting, scrollToEnd]);
 
   return (
-    <MessageScroller className="overview-chat-thread" data-follow-latest="true">
-      <MessageScrollerViewport
-        aria-label="Simulator overview conversation"
-        className="overview-chat-viewport"
-      >
-        <MessageScrollerContent
-          aria-busy={isSubmitting || isLoading}
-          className="overview-chat-thread-content"
-          role="log"
+    <ChatMinimapContainer className="size-full">
+      <MessageScroller className="overview-chat-thread" data-follow-latest="true">
+        <MessageScrollerViewport
+          aria-label="Simulator overview conversation"
+          className="overview-chat-viewport"
         >
-          <AnimatePresence initial={false}>
+          <MessageScrollerContent
+            aria-busy={isSubmitting || isLoading}
+            className="overview-chat-thread-content"
+            role="log"
+          >
+            <AnimatePresence initial={false}>
             {isLoading && !data ? (
               <MotionMessageScrollerItem
                 {...overviewChatStatusEntryMotion}
@@ -1874,6 +1916,7 @@ function OverviewChatTranscript({
                   <AssistantMessage
                     data={data}
                     isAdmin={isAdmin}
+                    isStreaming={message.id === streamingMessageId}
                     message={message}
                   />
                 ) : (
@@ -1893,14 +1936,16 @@ function OverviewChatTranscript({
                 />
               </MotionMessageScrollerItem>
             ) : null}
-          </AnimatePresence>
-        </MessageScrollerContent>
-      </MessageScrollerViewport>
-      <MessageScrollerButton
-        aria-label="Scroll to latest response"
-        className="overview-chat-scroll-latest"
-      />
-    </MessageScroller>
+            </AnimatePresence>
+          </MessageScrollerContent>
+        </MessageScrollerViewport>
+        <MessageScrollerButton
+          aria-label="Scroll to latest response"
+          className="overview-chat-scroll-latest"
+        />
+      </MessageScroller>
+      <ChatMinimap className="max-sm:hidden" items={minimapItems} />
+    </ChatMinimapContainer>
   );
 }
 
@@ -1914,6 +1959,9 @@ export function OverviewChat({
   refetch,
 }: OverviewChatProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
+    null
+  );
   const [conversationMessages, setConversationMessages] = useState<
     ConversationMessage[]
   >(loadConversationMessages);
@@ -1939,8 +1987,17 @@ export function OverviewChat({
       const id = `${message.role}-${messageSequence.current}`;
       messageSequence.current += 1;
       setConversationMessages((current) => [...current, { ...message, id }]);
+      return id;
     },
     []
+  );
+
+  const appendAssistantMessage = useCallback(
+    (message: Omit<ConversationMessage, "id" | "role">) => {
+      const id = appendMessage({ ...message, role: "assistant" });
+      setStreamingMessageId(id);
+    },
+    [appendMessage]
   );
 
   const waitForReplyPresentation = useCallback(
@@ -1965,6 +2022,7 @@ export function OverviewChat({
     pendingReplyCancellation.current?.();
     messageSequence.current = 0;
     setIsSubmitting(false);
+    setStreamingMessageId(null);
     setConversationMessages([]);
   }, []);
 
@@ -1980,14 +2038,12 @@ export function OverviewChat({
         }
 
         if (result.data && !result.error) {
-          appendMessage({
-            role: "assistant",
+          appendAssistantMessage({
             showSnapshot: true,
             text: "The overview is refreshed. Here’s the latest simulator read.",
           });
         } else {
-          appendMessage({
-            role: "assistant",
+          appendAssistantMessage({
             text: `I couldn’t refresh the simulator snapshot. ${getErrorMessage(result.error)}`,
             tone: "destructive",
           });
@@ -1998,8 +2054,7 @@ export function OverviewChat({
           return;
         }
 
-        appendMessage({
-          role: "assistant",
+        appendAssistantMessage({
           text: "I couldn’t refresh the simulator snapshot. Try again shortly.",
           tone: "destructive",
         });
@@ -2009,7 +2064,7 @@ export function OverviewChat({
         }
       }
     },
-    [appendMessage, refetch, waitForReplyPresentation]
+    [appendAssistantMessage, refetch, waitForReplyPresentation]
   );
 
   const submitQuery = useCallback(
@@ -2043,13 +2098,13 @@ export function OverviewChat({
         return;
       }
 
-      appendMessage({
-        role: "assistant",
+      appendAssistantMessage({
         ...getAssistantReply(query, data, isAdmin),
       });
       setIsSubmitting(false);
     },
     [
+      appendAssistantMessage,
       appendMessage,
       clearConversation,
       data,
@@ -2142,6 +2197,7 @@ export function OverviewChat({
                         isLoading={isLoading}
                         isSubmitting={isSubmitting}
                         messages={conversationMessages}
+                        streamingMessageId={streamingMessageId}
                       />
                     </MessageScrollerProvider>
                   </motion.div>
