@@ -32,6 +32,14 @@ const editJsonSchema = z.object({
 
 type EditJsonFormData = z.infer<typeof editJsonSchema>;
 
+const formatJson = (value: string): string => {
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2);
+  } catch {
+    return value;
+  }
+};
+
 type EditResponseJsonFormProps = {
   defaultValue: string;
   onSubmit: (data: { json: string }) => void;
@@ -47,7 +55,7 @@ export function EditResponseJsonForm({
 }: EditResponseJsonFormProps) {
   const form = useForm<EditJsonFormData>({
     defaultValues: {
-      json: defaultValue,
+      json: formatJson(defaultValue),
     },
     resolver: zodResolver(editJsonSchema),
   });

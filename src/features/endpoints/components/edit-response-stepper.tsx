@@ -98,6 +98,14 @@ const stepConfig = {
   },
 };
 
+const formatJson = (value: string): string => {
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2);
+  } catch {
+    return value;
+  }
+};
+
 export function EditResponseStepper({
   response,
   editType,
@@ -115,7 +123,7 @@ export function EditResponseStepper({
       return response.statusCode;
     }
     if (editType === "json") {
-      return response.json;
+      return formatJson(response.json);
     }
     return response.name;
   };
