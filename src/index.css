@@ -545,26 +545,26 @@
   align-items: center;
   justify-content: center;
   width: auto;
-  max-width: min(100%, 13rem);
-  height: clamp(9rem, 22dvh, 12rem);
-  margin-bottom: 1.5rem;
+  max-width: min(100%, 15rem);
+  height: clamp(10.5rem, 25dvh, 14rem);
+  margin-bottom: 1.25rem;
   isolation: isolate;
 }
 
 .overview-chat-welcome-art::before {
   position: absolute;
-  right: 18%;
-  bottom: 5%;
-  left: 18%;
+  right: 15%;
+  bottom: 4%;
+  left: 15%;
   z-index: -1;
-  height: 48%;
+  height: 46%;
   content: "";
   background: radial-gradient(
     ellipse,
-    color-mix(in oklch, var(--primary) 20%, transparent),
+    color-mix(in oklch, var(--primary) 22%, transparent),
     transparent 72%
   );
-  filter: blur(1rem);
+  filter: blur(1.25rem);
   pointer-events: none;
 }
 
@@ -577,23 +577,23 @@
   object-fit: contain;
   object-position: center bottom;
   filter: drop-shadow(
-    0 0.9rem 0.8rem color-mix(in oklab, var(--foreground) 16%, transparent)
+    0 1rem 0.9rem color-mix(in oklab, var(--foreground) 18%, transparent)
   );
 }
 
 .overview-chat-welcome h2 {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: clamp(1.85rem, 3.8vw, 2.6rem);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.035em;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
   color: var(--foreground);
 }
 
 .overview-chat-welcome p {
   max-width: 44ch;
-  margin: 0.85rem 0 0;
+  margin: 0.65rem 0 0;
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--muted-foreground);
@@ -1793,13 +1793,13 @@
   .overview-chat-welcome-art {
     align-self: center;
     width: auto;
-    max-width: min(100%, 10.5rem);
-    height: clamp(8rem, 20dvh, 10rem);
-    margin-bottom: 1.25rem;
+    max-width: min(100%, 12rem);
+    height: clamp(8.5rem, 22dvh, 11rem);
+    margin-bottom: 1rem;
   }
 
   .overview-chat-welcome h2 {
-    font-size: clamp(2.35rem, 12vw, 3.5rem);
+    font-size: clamp(1.4rem, 5.5vw, 1.75rem);
   }
 
   .overview-chat-welcome-status {
