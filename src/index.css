@@ -1947,6 +1947,302 @@
     animation: none;
   }
 }
+
+@keyframes macos-password-type {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes macos-glass-break {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(var(--glass-x), var(--glass-y), 0)
+      rotate(var(--glass-rotate));
+  }
+}
+
+@keyframes macos-lock-content-exit {
+  to {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.97);
+  }
+}
+
+@keyframes login-dashboard-old {
+  to {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+}
+
+@keyframes login-dashboard-new {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+html[data-transition="login-dashboard"]::view-transition-group(root) {
+  animation-duration: 360ms;
+  animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+html[data-transition="login-dashboard"]::view-transition-old(root) {
+  animation: login-dashboard-old 360ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+html[data-transition="login-dashboard"]::view-transition-new(root) {
+  mask: none;
+  animation: login-dashboard-new 360ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.macos-lock-screen {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 78% 60%, oklch(0.5 0.2 250), transparent 52%),
+    radial-gradient(ellipse at 18% 18%, oklch(0.74 0.1 225), transparent 52%),
+    linear-gradient(145deg, oklch(0.8 0.06 85), oklch(0.24 0.12 262) 72%);
+}
+
+.macos-lock-screen::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(
+    to bottom,
+    transparent 45%,
+    oklch(0.1 0.04 260 / 0.32)
+  );
+}
+
+.macos-glass-break {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.macos-glass-break span {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklab, white 4%, transparent);
+  backdrop-filter: blur(4px) saturate(1.04);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.macos-glass-break span:nth-child(1) {
+  --glass-x: -18vw;
+  --glass-y: -15vh;
+  --glass-rotate: -5deg;
+  clip-path: polygon(0 0, 38% 0, 28% 42%, 0 50%);
+}
+
+.macos-glass-break span:nth-child(2) {
+  --glass-x: 4vw;
+  --glass-y: -22vh;
+  --glass-rotate: 4deg;
+  clip-path: polygon(38% 0, 68% 0, 62% 38%, 28% 42%);
+}
+
+.macos-glass-break span:nth-child(3) {
+  --glass-x: 20vw;
+  --glass-y: -12vh;
+  --glass-rotate: 6deg;
+  clip-path: polygon(68% 0, 100% 0, 100% 48%, 62% 38%);
+}
+
+.macos-glass-break span:nth-child(4) {
+  --glass-x: -24vw;
+  --glass-y: 2vh;
+  --glass-rotate: -7deg;
+  clip-path: polygon(0 50%, 28% 42%, 42% 68%, 0 78%);
+}
+
+.macos-glass-break span:nth-child(5) {
+  --glass-x: 15vw;
+  --glass-y: 4vh;
+  --glass-rotate: 5deg;
+  clip-path: polygon(28% 42%, 62% 38%, 70% 70%, 42% 68%);
+}
+
+.macos-glass-break span:nth-child(6) {
+  --glass-x: 25vw;
+  --glass-y: 8vh;
+  --glass-rotate: 8deg;
+  clip-path: polygon(62% 38%, 100% 48%, 100% 78%, 70% 70%);
+}
+
+.macos-glass-break span:nth-child(7) {
+  --glass-x: -16vw;
+  --glass-y: 20vh;
+  --glass-rotate: -6deg;
+  clip-path: polygon(0 78%, 42% 68%, 50% 100%, 0 100%);
+}
+
+.macos-glass-break span:nth-child(8) {
+  --glass-x: 18vw;
+  --glass-y: 22vh;
+  --glass-rotate: 7deg;
+  clip-path: polygon(42% 68%, 70% 70%, 100% 78%, 100% 100%, 50% 100%);
+}
+
+.macos-lock-screen[data-state="complete"] .macos-glass-break span {
+  opacity: 1;
+  visibility: visible;
+  animation: macos-glass-break 650ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.macos-lock-screen[data-state="complete"] .macos-lock-clock,
+.macos-lock-screen[data-state="complete"] .macos-lock-account {
+  animation: macos-lock-content-exit 240ms cubic-bezier(0.23, 1, 0.32, 1)
+    100ms forwards;
+}
+
+.macos-lock-mascot {
+  position: absolute;
+  right: -3vw;
+  bottom: -18vh;
+  width: min(38vw, 34rem);
+  opacity: 0.18;
+  filter: saturate(0.72);
+}
+
+.macos-lock-clock {
+  position: absolute;
+  top: 10vh;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: oklch(1 0 0 / 0.9);
+  text-shadow: 0 1px 12px color-mix(in oklab, var(--background) 22%, transparent);
+  transform: translateX(-50%);
+}
+
+.macos-lock-clock p {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.macos-lock-clock time {
+  font-size: clamp(4.5rem, 9vw, 7.5rem);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.macos-lock-account {
+  position: absolute;
+  bottom: 9vh;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  width: min(18rem, calc(100vw - 2rem));
+  text-align: center;
+  text-shadow: 0 1px 10px color-mix(in oklab, var(--background) 30%, transparent);
+  transform: translateX(-50%);
+}
+
+.macos-login-avatar {
+  border: 2px solid oklch(1 0 0 / 0.5);
+  border-radius: 9999px;
+  box-shadow: 0 8px 28px -12px color-mix(in oklab, var(--background) 75%, transparent);
+}
+
+.macos-lock-account h1 {
+  margin-top: 0.125rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.macos-password-status {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  min-height: 1.25rem;
+}
+
+.macos-password-dots {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.macos-password-dot {
+  width: 0.375rem;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0;
+  animation: macos-password-type 220ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) forwards;
+  animation-delay: calc(400ms + var(--password-dot-index) * 160ms);
+}
+
+.macos-login-state {
+  display: grid;
+  width: 1rem;
+  place-items: center;
+}
+
+.macos-lock-status {
+  min-height: 1rem;
+  color: oklch(1 0 0 / 0.72);
+  font-size: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .macos-password-dot {
+    transform: none;
+    animation-duration: 1ms;
+    animation-delay: 0ms;
+  }
+
+  .macos-lock-screen[data-state="complete"] .macos-glass-break span {
+    display: none;
+  }
+
+  .macos-lock-screen[data-state="complete"] .macos-lock-clock,
+  .macos-lock-screen[data-state="complete"] .macos-lock-account {
+    transform: translateX(-50%);
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .macos-lock-mascot {
+    right: -30vw;
+    bottom: -10vh;
+    width: 88vw;
+    opacity: 0.12;
+  }
+}
   [data-sd-animate] {
     animation: var(--sd-animation, sd-fadeIn) 400ms var(--sd-easing, ease) var(--sd-delay, 0ms) both;
 }
