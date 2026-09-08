@@ -248,7 +248,7 @@ export function DashboardLayout() {
             <AppSidebar />
             <SidebarInset
               className={cn(
-                "h-svh min-h-0 overflow-hidden border border-border/70 bg-card shadow-sm md:h-[calc(100svh-1rem)]",
+                "h-svh min-h-0 overflow-hidden bg-card",
                 isOverview && "dashboard-overview-shell"
               )}
             >

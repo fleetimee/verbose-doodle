@@ -176,7 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     });
 
   return (
-    <Sidebar className="relative" collapsible="icon" variant="inset" {...props}>
+    <Sidebar className="relative" collapsible="icon" variant="sidebar" {...props}>
       <SidebarHeader className="relative z-10 p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
         <SidebarMenu>
           <SidebarMenuItem>

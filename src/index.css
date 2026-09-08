@@ -572,9 +572,9 @@
   align-items: center;
   justify-content: center;
   width: auto;
-  max-width: min(100%, 18rem);
-  height: clamp(12rem, 32dvh, 16.5rem);
-  margin-bottom: 1.35rem;
+  max-width: min(100%, 22rem);
+  height: clamp(14.5rem, 38dvh, 20.5rem);
+  margin-bottom: 1.5rem;
   isolation: isolate;
 }
 
@@ -1802,6 +1802,12 @@
   min-height: 0;
 }
 
+.dashboard-overview-main .overview-chat-panel {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 @media (max-width: 48rem) {
   .overview-chat-panel {
     border-inline: 0;
@@ -1843,9 +1849,9 @@
   .overview-chat-welcome-art {
     align-self: center;
     width: auto;
-    max-width: min(100%, 12rem);
-    height: clamp(8.5rem, 22dvh, 11rem);
-    margin-bottom: 1rem;
+    max-width: min(100%, 14rem);
+    height: clamp(10rem, 26dvh, 13rem);
+    margin-bottom: 1.125rem;
   }
 
   .overview-chat-welcome h2 {
