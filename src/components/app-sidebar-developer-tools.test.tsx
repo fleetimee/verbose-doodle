@@ -1,12 +1,21 @@
 import { describe, expect, test } from "bun:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/features/auth/context";
+import { formatOptionShortcut } from "@/lib/keyboard-shortcuts";
+
+function LocationProbe() {
+  return <output data-testid="location">{useLocation().pathname}</output>;
+}
 
 describe("AppSidebar developer tools navigation", () => {
+  test("uses the Option symbol for shortcuts on macOS", () => {
+    expect(formatOptionShortcut("O", "MacIntel")).toBe("⌥O");
+  });
+
   test("links the catalog before the individual tools", async () => {
     const queryClient = new QueryClient();
     render(
@@ -39,5 +48,104 @@ describe("AppSidebar developer tools navigation", () => {
     expect(links.indexOf(catalogLink)).toBeLessThan(
       links.indexOf(validatorLink)
     );
+  });
+
+  test("searches nested modules from the command palette", async () => {
+    const queryClient = new QueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={["/dashboard/overview"]}>
+          <AuthProvider>
+            <SidebarProvider>
+              <AppSidebar />
+            </SidebarProvider>
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
+
+    expect(
+      await screen.findByRole("dialog", { name: "Search modules and menus" })
+    ).toBeTruthy();
+
+    fireEvent.change(
+      screen.getByPlaceholderText("Search modules and menus..."),
+      {
+        target: { value: "validation" },
+      }
+    );
+
+    expect(await screen.findByText("JSON Schema Validator")).toBeTruthy();
+  });
+
+  test("reveals and runs Alt navigation shortcuts", async () => {
+    const queryClient = new QueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={["/dashboard/endpoints"]}>
+          <AuthProvider>
+            <SidebarProvider>
+              <AppSidebar />
+              <LocationProbe />
+            </SidebarProvider>
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    fireEvent.keyDown(document, { altKey: true, key: "Alt" });
+    expect(await screen.findByText("Alt+O")).toBeTruthy();
+
+    fireEvent.keyDown(document, {
+      altKey: true,
+      code: "KeyO",
+      key: "ø",
+    });
+    expect(screen.getByTestId("location").textContent).toBe(
+      "/dashboard/overview"
+    );
+
+    fireEvent.keyDown(document, {
+      altKey: true,
+      code: "KeyS",
+      key: "ß",
+    });
+    expect(screen.getByTestId("location").textContent).toBe(
+      "/dashboard/overview"
+    );
+    expect(
+      await screen.findByRole("link", { name: "TCP Client" })
+    ).toBeTruthy();
+    expect(await screen.findByText("Alt+P")).toBeTruthy();
+
+    fireEvent.keyDown(document, {
+      altKey: true,
+      code: "KeyP",
+      key: "π",
+    });
+    expect(screen.getByTestId("location").textContent).toBe(
+      "/dashboard/socket-test/tcp-client"
+    );
+
+    fireEvent.keyDown(document, {
+      altKey: true,
+      code: "KeyV",
+      key: "√",
+    });
+    expect(await screen.findByText("Alt+J")).toBeTruthy();
+
+    fireEvent.keyDown(document, {
+      altKey: true,
+      code: "KeyJ",
+      key: "∆",
+    });
+    expect(screen.getByTestId("location").textContent).toBe(
+      "/dashboard/developer-tools/json-schema-validator"
+    );
+
+    fireEvent.keyUp(document, { key: "Alt" });
+    expect(screen.queryByText("Alt+O")).toBeNull();
   });
 });
