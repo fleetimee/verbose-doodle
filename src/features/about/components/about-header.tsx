@@ -36,19 +36,19 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
       transition: shouldReduceMotion
         ? { duration: 0 }
         : {
-            delayChildren: 0.05,
-            staggerChildren: 0.12,
+            delayChildren: 0.04,
+            staggerChildren: 0.06,
           },
     },
   };
 
   const itemVariants: Variants = {
-    hidden: shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
+    hidden: shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 },
     visible: {
       opacity: 1,
       transition: shouldReduceMotion
         ? { duration: 0 }
-        : { duration: 0.5, ease: "easeOut" },
+        : { duration: 0.3, ease: "easeOut" },
       y: 0,
     },
   };
@@ -56,14 +56,14 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
   const logoVariants: Variants = {
     hidden: shouldReduceMotion
       ? { opacity: 1, rotate: 0, scale: 1 }
-      : { opacity: 0, rotate: -8, scale: 0.8 },
+      : { opacity: 0, rotate: -6, scale: 0.85 },
     visible: {
       opacity: 1,
       rotate: 0,
       scale: 1,
       transition: shouldReduceMotion
         ? { duration: 0 }
-        : { duration: 0.6, ease: BOUNCE_EASE_CURVE },
+        : { duration: 0.4, ease: BOUNCE_EASE_CURVE },
     },
   };
 
@@ -71,7 +71,7 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
     <motion.header
       animate="visible"
       aria-labelledby="about-page-title"
-      className="flex w-full flex-col items-center gap-8 text-center transition-colors duration-300 ease-in-out"
+      className="flex w-full flex-col items-center gap-2 text-center transition-colors duration-300 ease-in-out sm:gap-2.5"
       initial="hidden"
       variants={headerContainerVariants}
     >
@@ -80,22 +80,22 @@ export function AboutHeader({ onLocaleChange }: AboutHeaderProps) {
       </div>
       <motion.img
         alt={activeMessages.about.logoAlt}
-        className="h-32 w-32 rounded-full transition-transform duration-300 md:h-40 md:w-40"
-        height="200"
+        className="size-12 rounded-xl transition-transform duration-300 sm:size-14"
+        height="56"
         src={APP_ICON_SRC}
         variants={logoVariants}
-        width="200"
+        width="56"
       />
-      <motion.div className="flex flex-col gap-3" variants={itemVariants}>
+      <motion.div className="flex flex-col gap-1" variants={itemVariants}>
         <motion.h1
-          className="font-semibold text-4xl text-foreground tracking-tight transition-colors duration-300 md:text-5xl"
+          className="font-bold text-foreground text-lg tracking-tight transition-colors duration-300 sm:text-xl md:text-2xl"
           id="about-page-title"
           variants={itemVariants}
         >
           {activeMessages.about.headerTitle}
         </motion.h1>
         <motion.p
-          className="text-pretty text-lg text-muted-foreground transition-colors duration-300"
+          className="mx-auto max-w-lg text-pretty text-muted-foreground text-xs leading-relaxed transition-colors duration-300 sm:text-sm"
           variants={itemVariants}
         >
           {activeMessages.about.headerDescription}

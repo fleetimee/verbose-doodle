@@ -18,7 +18,7 @@ import { useState } from "react";
 // ---------------------------------------------------------------------------
 
 function ReactHookFormIcon({
-  size = 32,
+  size = 24,
   className = "",
 }: {
   size?: number;
@@ -46,7 +46,7 @@ function ReactHookFormIcon({
 }
 
 function BaseUiIcon({
-  size = 32,
+  size = 24,
   className = "",
 }: {
   size?: number;
@@ -188,12 +188,12 @@ const tabIndicatorVariants = {
 };
 
 const cardVariants = {
-  exit: { opacity: 0, scale: 0.92, transition: { duration: 0.2 } },
-  hidden: { opacity: 0, scale: 0.95, y: 16 },
+  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.15 } },
+  hidden: { opacity: 0, scale: 0.96, y: 10 },
   visible: (i: number) => ({
     opacity: 1,
     scale: 1,
-    transition: { delay: i * 0.06, duration: 0.35, ease: "easeOut" as const },
+    transition: { delay: i * 0.04, duration: 0.25, ease: "easeOut" as const },
     y: 0,
   }),
 };
@@ -214,53 +214,51 @@ function TechCard({ item, index }: TechCardProps) {
   return (
     <motion.a
       animate="visible"
-      className="relative flex cursor-pointer flex-col gap-3 rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur-sm transition-all duration-300 hover:border-border hover:bg-card hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-card/40 dark:hover:bg-card/80"
+      className="group relative flex cursor-pointer flex-col gap-2 rounded-xl border border-border/60 bg-card/60 p-3 backdrop-blur-sm transition-all duration-200 hover:border-border hover:bg-card hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-card/40 dark:hover:bg-card/80"
       custom={index}
       exit="exit"
       href={item.docsUrl}
       initial="hidden"
+      onBlur={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       rel="noopener noreferrer"
       target="_blank"
       variants={cardVariants}
     >
-      {/* Icon */}
-      <motion.div
-        animate={{ rotate: hovered ? 8 : 0, scale: hovered ? 1.08 : 1 }}
-        className="flex size-8 shrink-0 items-center justify-center"
-        transition={{ damping: 20, stiffness: 300, type: "spring" }}
-      >
-        <IconComponent size={32} />
-      </motion.div>
+      {/* Icon & External Indicator */}
+      <div className="flex items-center justify-between">
+        <div className="flex size-7 shrink-0 items-center justify-center transition-transform duration-200 group-hover:rotate-3 group-hover:scale-105">
+          <IconComponent size={24} />
+        </div>
+        <span
+          aria-hidden="true"
+          className="text-muted-foreground/40 text-xs transition-colors duration-200 group-hover:text-foreground"
+        >
+          ↗
+        </span>
+      </div>
 
       {/* Name */}
-      <p className="font-semibold text-sm leading-snug">{item.name}</p>
+      <p className="font-semibold text-foreground text-xs leading-snug">
+        {item.name}
+      </p>
 
       {/* Tooltip description on hover */}
       <AnimatePresence>
         {hovered && (
           <motion.p
             animate={{ opacity: 1, y: 0 }}
-            className="text-muted-foreground text-xs leading-relaxed"
-            exit={{ opacity: 0, y: 4 }}
-            initial={{ opacity: 0, y: 6 }}
-            transition={{ duration: 0.2 }}
+            className="text-[11px] text-muted-foreground leading-relaxed"
+            exit={{ opacity: 0, y: 2 }}
+            initial={{ opacity: 0, y: 2 }}
+            transition={{ duration: 0.15 }}
           >
             {item.description}
           </motion.p>
         )}
       </AnimatePresence>
-
-      {/* External link hint */}
-      <motion.span
-        animate={{ opacity: hovered ? 1 : 0, x: hovered ? 0 : -4 }}
-        aria-hidden="true"
-        className="absolute top-3 right-3 text-muted-foreground/60 text-xs"
-        transition={{ duration: 0.2 }}
-      >
-        ↗
-      </motion.span>
     </motion.a>
   );
 }
@@ -278,11 +276,11 @@ export function TechStackGrid() {
       : TECH_STACK.filter((t) => t.category === activeCategory);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3.5">
       {/* Category filter tabs */}
       <div
         aria-label="Filter by technology category"
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap gap-1.5"
         role="tablist"
       >
         {CATEGORIES.map((cat) => {
@@ -290,7 +288,7 @@ export function TechStackGrid() {
           return (
             <button
               aria-selected={isActive}
-              className={`relative rounded-full px-4 py-1.5 font-medium text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              className={`relative rounded-full px-3 py-1 font-medium text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -318,13 +316,13 @@ export function TechStackGrid() {
       </div>
 
       {/* Badge grid */}
-      <motion.div className="grid grid-cols-2 gap-3 sm:grid-cols-3" layout>
+      <motion.div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3" layout>
         {filtered.map((item, i) => (
           <TechCard index={i} item={item} key={item.name} />
         ))}
       </motion.div>
 
-      <p className="text-center text-muted-foreground text-xs">
+      <p className="text-center text-[11px] text-muted-foreground">
         Click any badge to open official documentation ↗
       </p>
     </div>

@@ -24,13 +24,13 @@ export function LanguageToggle({ onLocaleChange }: LanguageToggleProps) {
 
   return (
     <Button
-      className="flex items-center gap-2 font-medium text-xs shadow-2xs"
+      className="h-auto gap-1.5 p-1 font-normal text-[11px] text-muted-foreground hover:bg-transparent hover:text-foreground hover:underline hover:underline-offset-4"
       onClick={toggleLocale}
       size="sm"
-      variant="outline"
+      variant="ghost"
     >
       <HugeiconsIcon
-        className="h-3.5 w-3.5 text-primary"
+        className="h-3 w-3 text-muted-foreground/70"
         icon={Globe02Icon}
         strokeWidth={2}
       />

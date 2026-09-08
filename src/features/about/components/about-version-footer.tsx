@@ -39,23 +39,23 @@ export function AboutVersionFooter({
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
-      className="mt-6 flex flex-col gap-4 rounded-xl border border-border/60 bg-card/50 p-5 shadow-xs backdrop-blur-xs transition-colors hover:border-border"
-      initial={{ opacity: 0, y: 20 }}
-      transition={{ delay: 1.3, duration: 0.5 }}
+      className="mt-4 flex flex-col gap-3 rounded-xl border border-border/60 bg-card/50 p-4 shadow-xs backdrop-blur-xs transition-colors hover:border-border"
+      initial={{ opacity: 0, y: 14 }}
+      transition={{ delay: 0.25, duration: 0.35 }}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex items-center gap-2">
-          <LayersIcon className="h-5 w-5 text-primary" />
-          <h3 className="font-medium text-base text-foreground">
+          <LayersIcon className="h-4 w-4 text-primary" />
+          <h3 className="font-semibold text-foreground text-sm">
             System & Release Information
           </h3>
         </div>
         <div className="flex items-center gap-2">
           <Badge
-            className="flex items-center gap-1.5 font-semibold text-xs"
+            className="flex items-center gap-1.5 font-semibold text-[11px]"
             variant={environment === "Production" ? "default" : "secondary"}
           >
-            <ShieldCheckIcon className="h-3.5 w-3.5" />
+            <ShieldCheckIcon className="h-3 w-3" />
             {environment}
           </Badge>
           <a
@@ -74,33 +74,33 @@ export function AboutVersionFooter({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
         {/* Version Badge */}
-        <div className="flex items-center gap-3 rounded-lg border border-border/40 bg-background/60 p-3">
-          <div className="rounded-md bg-primary/10 p-2 text-primary">
-            <TagIcon className="h-4 w-4" />
+        <div className="flex items-center gap-2.5 rounded-lg border border-border/40 bg-background/60 p-2.5">
+          <div className="rounded-md bg-primary/10 p-1.5 text-primary">
+            <TagIcon className="h-3.5 w-3.5" />
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="font-medium text-muted-foreground text-xs">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="font-medium text-[11px] text-muted-foreground">
               Version Tag
             </span>
-            <span className="font-semibold text-foreground text-sm">
+            <span className="font-semibold text-foreground text-xs">
               v{version}
             </span>
           </div>
         </div>
 
         {/* Git Commit SHA */}
-        <div className="flex items-center gap-3 rounded-lg border border-border/40 bg-background/60 p-3">
-          <div className="rounded-md bg-primary/10 p-2 text-primary">
-            <GitCommitIcon className="h-4 w-4" />
+        <div className="flex items-center gap-2.5 rounded-lg border border-border/40 bg-background/60 p-2.5">
+          <div className="rounded-md bg-primary/10 p-1.5 text-primary">
+            <GitCommitIcon className="h-3.5 w-3.5" />
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="font-medium text-muted-foreground text-xs">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="font-medium text-[11px] text-muted-foreground">
               Git Release SHA
             </span>
             <a
-              className="inline-flex items-center gap-1 font-mono font-semibold text-primary text-sm hover:underline"
+              className="inline-flex items-center gap-1 font-mono font-semibold text-primary text-xs hover:underline"
               href={commitUrl}
               rel="noopener noreferrer"
               target="_blank"
@@ -108,7 +108,7 @@ export function AboutVersionFooter({
             >
               {commitSha.slice(0, 7)}
               <HugeiconsIcon
-                className="h-3 w-3 opacity-75"
+                className="h-2.5 w-2.5 opacity-75"
                 icon={LinkSquare02Icon}
                 strokeWidth={2}
               />
@@ -117,19 +117,19 @@ export function AboutVersionFooter({
         </div>
 
         {/* Build Date */}
-        <div className="flex items-center gap-3 rounded-lg border border-border/40 bg-background/60 p-3">
-          <div className="rounded-md bg-primary/10 p-2 text-primary">
+        <div className="flex items-center gap-2.5 rounded-lg border border-border/40 bg-background/60 p-2.5">
+          <div className="rounded-md bg-primary/10 p-1.5 text-primary">
             <HugeiconsIcon
-              className="h-4 w-4"
+              className="h-3.5 w-3.5"
               icon={Calendar03Icon}
               strokeWidth={2}
             />
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="font-medium text-muted-foreground text-xs">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="font-medium text-[11px] text-muted-foreground">
               Build Timestamp
             </span>
-            <span className="truncate font-semibold text-foreground text-sm">
+            <span className="truncate font-semibold text-foreground text-xs">
               {buildTimestamp}
             </span>
           </div>

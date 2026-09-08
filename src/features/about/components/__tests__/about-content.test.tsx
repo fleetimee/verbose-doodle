@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { AboutContent } from "@/features/about/components/about-content";
 
 const featureTitles = [
@@ -28,36 +27,18 @@ describe("AboutContent", () => {
     }
   });
 
-  test("shows a team member tooltip on hover", async () => {
-    const user = userEvent.setup();
+  test("renders core summary and omits useless heavy sections", () => {
     render(<AboutContent locale="en-US" />);
 
-    await user.hover(
-      screen.getByRole("button", {
-        name: "View profile for Nashira Oksani Ardine Santosa",
-      })
-    );
+    expect(screen.getByRole("region", { name: "What is this?" })).toBeDefined();
+    expect(screen.getByRole("region", { name: "Key Features" })).toBeDefined();
 
+    // Ensure useless heavy sections are omitted
     expect(
-      screen.getByText("Technical Writer & Frontend Developer")
-    ).toBeDefined();
-  });
-
-  test("opens the selected team member profile", async () => {
-    const user = userEvent.setup();
-    render(<AboutContent locale="en-US" />);
-
-    await user.click(
-      screen.getByRole("button", {
-        name: "View profile for Novian Andika",
-      })
-    );
-
-    expect(await screen.findByRole("dialog")).toBeDefined();
-    expect(
-      screen.getByText(
-        "Lead Frontend Developer & System Architect driving React 19 architecture, Base UI design systems, and token-optimized developer tools."
-      )
-    ).toBeDefined();
+      screen.queryByRole("region", { name: "System Architecture" })
+    ).toBeNull();
+    expect(screen.queryByRole("region", { name: "Technology" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "Our Team" })).toBeNull();
+    expect(screen.queryByText("Interactive Simulator Preview")).toBeNull();
   });
 });
