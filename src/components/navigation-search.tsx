@@ -5,6 +5,7 @@ import {
   SearchIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useCommandState } from "cmdk";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import type { HugeIcon } from "@/components/hugeicons";
@@ -25,9 +26,11 @@ import {
 import { formatCommandShortcut } from "@/lib/keyboard-shortcuts";
 
 export type SearchNavigationItem = {
+  readonly description?: string;
   readonly groupLabel: string;
   readonly icon: HugeIcon;
   readonly items?: readonly {
+    readonly description: string;
     readonly icon: HugeIcon;
     readonly title: string;
     readonly url: string;
@@ -37,12 +40,35 @@ export type SearchNavigationItem = {
 };
 
 type SearchResult = {
+  readonly description?: string;
   readonly groupLabel: string;
   readonly icon: HugeIcon;
   readonly parentTitle?: string;
   readonly title: string;
   readonly url: string;
 };
+
+function SearchDescription({
+  results,
+}: {
+  readonly results: readonly SearchResult[];
+}) {
+  const selectedValue = useCommandState((state) => state.value);
+  const resultCount = useCommandState((state) => state.filtered.count);
+  const result = results.find((item) => item.url === selectedValue);
+
+  return (
+    <p
+      aria-live="polite"
+      className="navigation-search-description"
+      role="status"
+    >
+      {resultCount > 0
+        ? result?.description
+        : "Try another tool name or category."}
+    </p>
+  );
+}
 
 export function NavigationSearch({
   items,
@@ -58,6 +84,7 @@ export function NavigationSearch({
         const directResult = item.url
           ? [
               {
+                description: item.description,
                 groupLabel: item.groupLabel,
                 icon: item.icon,
                 title: item.title,
@@ -66,6 +93,7 @@ export function NavigationSearch({
             ]
           : [];
         const childResults = (item.items ?? []).map((child) => ({
+          description: child.description,
           groupLabel: item.groupLabel,
           icon: child.icon,
           parentTitle: item.title,
@@ -138,44 +166,47 @@ export function NavigationSearch({
         title="Search modules and menus"
       >
         <CommandInput placeholder="Search modules and menus..." />
-        <CommandList>
-          <CommandEmpty>
-            <HugeiconsIcon aria-hidden="true" icon={SearchIcon} />
-            <p>No module or menu found.</p>
-            <p className="navigation-search-empty-hint">
-              Try a tool name or category, like JSON or Validation.
-            </p>
-          </CommandEmpty>
-          {[...groups.entries()].map(([groupLabel, groupItems]) => (
-            <CommandGroup heading={groupLabel} key={groupLabel}>
-              {groupItems.map((item) => (
-                <CommandItem
-                  key={item.url}
-                  keywords={[item.title, item.parentTitle ?? "", groupLabel]}
-                  onSelect={() => selectResult(item.url)}
-                  value={item.url}
-                >
-                  <item.icon aria-hidden="true" />
-                  <span className="navigation-search-result">
-                    <span className="navigation-search-title">
-                      {item.title}
-                    </span>
-                    {item.parentTitle ? (
-                      <span className="navigation-search-parent">
-                        {item.parentTitle}
+        <div className="navigation-search-results">
+          <CommandList>
+            <CommandEmpty>
+              <HugeiconsIcon aria-hidden="true" icon={SearchIcon} />
+              <p>No module or menu found.</p>
+              <p className="navigation-search-empty-hint">
+                Try a tool name or category, like JSON or Validation.
+              </p>
+            </CommandEmpty>
+            {[...groups.entries()].map(([groupLabel, groupItems]) => (
+              <CommandGroup heading={groupLabel} key={groupLabel}>
+                {groupItems.map((item) => (
+                  <CommandItem
+                    key={item.url}
+                    keywords={[item.title, item.parentTitle ?? "", groupLabel]}
+                    onSelect={() => selectResult(item.url)}
+                    value={item.url}
+                  >
+                    <item.icon aria-hidden="true" />
+                    <span className="navigation-search-result">
+                      <span className="navigation-search-title">
+                        {item.title}
                       </span>
-                    ) : null}
-                  </span>
-                  <HugeiconsIcon
-                    aria-hidden="true"
-                    className="navigation-search-arrow"
-                    icon={ArrowRight01Icon}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          ))}
-        </CommandList>
+                      {item.parentTitle ? (
+                        <span className="navigation-search-parent">
+                          {item.parentTitle}
+                        </span>
+                      ) : null}
+                    </span>
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      className="navigation-search-arrow"
+                      icon={ArrowRight01Icon}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ))}
+          </CommandList>
+        </div>
+        <SearchDescription results={results} />
         <div className="navigation-search-footer">
           <span className="navigation-search-hint">
             <KbdGroup aria-label="Up and down arrow keys">

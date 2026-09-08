@@ -31,6 +31,7 @@ export type DeveloperToolLoader = () => Promise<{
 }>;
 
 export type DeveloperToolDefinition = {
+  readonly searchDescription: string;
   readonly categoryId: DeveloperToolCategoryId;
   readonly description: string;
   readonly document: DeveloperToolDocumentMeta;
@@ -151,6 +152,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     },
     icon: Braces,
     id: "json-schema-validator",
+    searchDescription: "Validate JSON against a schema.",
     limit: messages.developerTools.schemaValidatorLimit,
     load: loadJsonSchemaValidator,
     name: messages.jsonSchemaValidator.title,
@@ -168,6 +170,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     },
     icon: Fingerprint,
     id: "jwt-inspector",
+    searchDescription: "Decode, edit, and verify JSON Web Tokens.",
     limit: messages.developerTools.jwtInspectorLimit,
     load: loadJwtInspector,
     name: messages.jwtInspector.title,
@@ -185,6 +188,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     },
     icon: CalendarDays,
     id: "date-converter",
+    searchDescription: "Convert timestamps and dates across timezones.",
     limit: messages.developerTools.dateConverterLimit,
     load: loadDateConverter,
     name: messages.dateConverter.title,
@@ -202,6 +206,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     },
     icon: Code2,
     id: "iso8583-generator",
+    searchDescription: "Build and pack ISO 8583 messages.",
     limit: messages.developerTools.iso8583GeneratorLimit,
     load: loadIso8583Generator,
     name: messages.iso8583Generator.title,
@@ -219,6 +224,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     },
     icon: FileJson,
     id: "json-yaml-converter",
+    searchDescription: "Convert between JSON and YAML.",
     limit: messages.developerTools.converterLimit,
     load: loadJsonYamlConverter,
     name: messages.jsonYamlConverter.title,
@@ -236,6 +242,8 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     },
     icon: Binary,
     id: "number-base-converter",
+    searchDescription:
+      "Convert binary, octal, decimal, and hexadecimal values.",
     limit: messages.developerTools.numberBaseConverterLimit,
     load: loadNumberBaseConverter,
     name: messages.numberBaseConverter.title,
@@ -253,6 +261,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     },
     icon: Timer,
     id: "cron-parser",
+    searchDescription: "Explain cron expressions and preview upcoming runs.",
     limit: messages.developerTools.cronParserLimit,
     load: loadCronParser,
     name: messages.cronParser.title,
@@ -270,6 +279,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     },
     icon: RadioReceiver,
     id: "nfc-reader-inspector",
+    searchDescription: "Inspect NFC scans and NDEF records.",
     limit: messages.developerTools.nfcReaderLimit,
     load: loadNfcReaderInspector,
     name: messages.developerTools.nfcReaderName,

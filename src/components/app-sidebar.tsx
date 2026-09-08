@@ -43,9 +43,14 @@ import { messages } from "@/lib/i18n";
 
 type AppNavigationItem = NavMainItem & {
   readonly adminOnly?: boolean;
+  readonly description?: string;
+  readonly items?: (NonNullable<NavMainItem["items"]>[number] & {
+    readonly description: string;
+  })[];
 };
 
 type SecondaryNavigationItem = {
+  readonly description: string;
   readonly icon: HugeIcon;
   readonly title: string;
   readonly url: string;
@@ -59,12 +64,14 @@ const data: {
     {
       groupLabel: "Workspace",
       icon: LayoutDashboard,
+      description: "Review endpoint activity and workspace metrics.",
       title: "Overview",
       url: "/dashboard/overview",
     },
     {
       groupLabel: "Workspace",
       icon: Plug,
+      description: "Configure billers, endpoints, and simulated responses.",
       title: "Endpoints",
       url: "/dashboard/endpoints",
     },
@@ -74,20 +81,24 @@ const data: {
       items: [
         {
           icon: MonitorUp,
+          description: "Connect to a TCP server and exchange messages.",
           title: "TCP Client",
           url: "/dashboard/socket-test/tcp-client",
         },
         {
           icon: Server,
+          description: "Listen for TCP connections and exchange messages.",
           title: "TCP Server",
           url: "/dashboard/socket-test/tcp-server",
         },
         {
           icon: Waves,
+          description: "Send and receive UDP datagrams.",
           title: "UDP",
           url: "/dashboard/socket-test/udp",
         },
       ],
+      description: "Test TCP and UDP connections.",
       title: "Socket Tester",
       url: "/dashboard/socket-tester",
     },
@@ -98,15 +109,18 @@ const data: {
       items: [
         {
           icon: Plug,
+          description: "Inspect REST API traffic through the relay.",
           title: "REST API",
           url: "/dashboard/socks-relay/rest-api",
         },
         {
           icon: Binary,
+          description: "Inspect ISO 8583 messages through the relay.",
           title: "ISO 8583",
           url: "/dashboard/socks-relay/iso-8583",
         },
       ],
+      description: "Monitor and inspect relayed network traffic.",
       title: "SOCKS Relay",
       url: "/dashboard/socks-relay",
     },
@@ -115,6 +129,7 @@ const data: {
       exact: true,
       groupLabel: messages.developerTools.navigationGroup,
       icon: LayoutGrid,
+      description: "Browse conversion, validation, and inspection tools.",
       title: messages.developerTools.catalogNavigation,
       url: "/dashboard/developer-tools",
     },
@@ -122,6 +137,7 @@ const data: {
       groupLabel: messages.developerTools.navigationGroup,
       icon: category.icon,
       items: category.tools.map((tool) => ({
+        description: tool.searchDescription,
         icon: tool.icon,
         title: tool.name,
         url: getDeveloperToolHref(tool),
@@ -132,6 +148,7 @@ const data: {
   navSecondary: [
     {
       icon: Info,
+      description: "Learn about Fleetime Labs and its components.",
       title: "About",
       url: "/about",
     },
@@ -176,7 +193,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     });
 
   return (
-    <Sidebar className="relative" collapsible="icon" variant="sidebar" {...props}>
+    <Sidebar
+      className="relative"
+      collapsible="icon"
+      variant="sidebar"
+      {...props}
+    >
       <SidebarHeader className="relative z-10 p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
         <SidebarMenu>
           <SidebarMenuItem>

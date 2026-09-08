@@ -101,6 +101,9 @@ describe("AppSidebar developer tools navigation", () => {
       ).toContain("TCP Client");
     });
 
+    expect(screen.getByRole("status").textContent).toBe(
+      "Connect to a TCP server and exchange messages."
+    );
     fireEvent.change(screen.getByRole("combobox"), {
       target: { value: "validation" },
     });
@@ -109,6 +112,9 @@ describe("AppSidebar developer tools navigation", () => {
         screen.getByRole("option", { selected: true }).textContent
       ).toContain("JSON Schema Validator");
     });
+    expect(screen.getByRole("status").textContent).toBe(
+      "Validate JSON against a schema."
+    );
     fireEvent.keyDown(screen.getByRole("combobox"), { key: "Enter" });
     await waitFor(() => {
       expect(screen.getByTestId("location").textContent).toBe(
