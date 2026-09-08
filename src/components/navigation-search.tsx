@@ -1,7 +1,12 @@
-import { SearchIcon } from "@hugeicons/core-free-icons";
+import {
+  ArrowDown01Icon,
+  ArrowRight01Icon,
+  ArrowUp01Icon,
+  SearchIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import type { HugeIcon } from "@/components/hugeicons";
 import {
   CommandDialog,
@@ -11,7 +16,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Kbd } from "@/components/ui/kbd";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -45,6 +50,7 @@ export function NavigationSearch({
   readonly items: readonly SearchNavigationItem[];
 }) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const results = useMemo(
     () =>
@@ -81,6 +87,12 @@ export function NavigationSearch({
       }, new Map()),
     [results]
   );
+  const currentResult = results
+    .filter(
+      (result) =>
+        pathname === result.url || pathname.startsWith(`${result.url}/`)
+    )
+    .sort((a, b) => b.url.length - a.url.length)[0];
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -105,7 +117,7 @@ export function NavigationSearch({
         <SidebarMenuItem>
           <SidebarMenuButton
             aria-label="Search modules and menus"
-            className="h-9 rounded-lg border border-sidebar-border/70 bg-sidebar-accent/35"
+            className="navigation-search-trigger h-9"
             onClick={() => setOpen(true)}
             tooltip="Search"
           >
@@ -118,6 +130,8 @@ export function NavigationSearch({
         </SidebarMenuItem>
       </SidebarMenu>
       <CommandDialog
+        className="navigation-search-dialog"
+        commandProps={{ defaultValue: currentResult?.url, key: String(open) }}
         description="Search all available modules and menus"
         onOpenChange={setOpen}
         open={open}
@@ -125,27 +139,62 @@ export function NavigationSearch({
       >
         <CommandInput placeholder="Search modules and menus..." />
         <CommandList>
-          <CommandEmpty>No module or menu found.</CommandEmpty>
+          <CommandEmpty>
+            <HugeiconsIcon aria-hidden="true" icon={SearchIcon} />
+            <p>No module or menu found.</p>
+            <p className="navigation-search-empty-hint">
+              Try a tool name or category, like JSON or Validation.
+            </p>
+          </CommandEmpty>
           {[...groups.entries()].map(([groupLabel, groupItems]) => (
             <CommandGroup heading={groupLabel} key={groupLabel}>
               {groupItems.map((item) => (
                 <CommandItem
                   key={item.url}
+                  keywords={[item.title, item.parentTitle ?? "", groupLabel]}
                   onSelect={() => selectResult(item.url)}
-                  value={`${item.title} ${item.parentTitle ?? ""} ${groupLabel}`}
+                  value={item.url}
                 >
-                  <item.icon />
-                  <span>{item.title}</span>
-                  {item.parentTitle ? (
-                    <span className="ml-auto text-muted-foreground text-xs">
-                      {item.parentTitle}
+                  <item.icon aria-hidden="true" />
+                  <span className="navigation-search-result">
+                    <span className="navigation-search-title">
+                      {item.title}
                     </span>
-                  ) : null}
+                    {item.parentTitle ? (
+                      <span className="navigation-search-parent">
+                        {item.parentTitle}
+                      </span>
+                    ) : null}
+                  </span>
+                  <HugeiconsIcon
+                    aria-hidden="true"
+                    className="navigation-search-arrow"
+                    icon={ArrowRight01Icon}
+                  />
                 </CommandItem>
               ))}
             </CommandGroup>
           ))}
         </CommandList>
+        <div className="navigation-search-footer">
+          <span className="navigation-search-hint">
+            <KbdGroup aria-label="Up and down arrow keys">
+              <Kbd>
+                <HugeiconsIcon icon={ArrowUp01Icon} />
+              </Kbd>
+              <Kbd>
+                <HugeiconsIcon icon={ArrowDown01Icon} />
+              </Kbd>
+            </KbdGroup>
+            Navigate
+          </span>
+          <span className="navigation-search-hint">
+            <Kbd>Enter</Kbd>Open
+          </span>
+          <span className="navigation-search-hint ml-auto">
+            <Kbd>Esc</Kbd>Close
+          </span>
+        </div>
       </CommandDialog>
     </>
   );

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -78,6 +78,69 @@ describe("AppSidebar developer tools navigation", () => {
     );
 
     expect(await screen.findByText("JSON Schema Validator")).toBeTruthy();
+  });
+
+  test("selects the current page and resets search after navigation", async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={["/dashboard/socket-test/tcp-client"]}>
+          <AuthProvider>
+            <SidebarProvider>
+              <AppSidebar />
+              <LocationProbe />
+            </SidebarProvider>
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("option", { selected: true }).textContent
+      ).toContain("TCP Client");
+    });
+
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "validation" },
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("option", { selected: true }).textContent
+      ).toContain("JSON Schema Validator");
+    });
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "Enter" });
+    await waitFor(() => {
+      expect(screen.getByTestId("location").textContent).toBe(
+        "/dashboard/developer-tools/json-schema-validator"
+      );
+    });
+
+    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
+    await waitFor(() => {
+      expect((screen.getByRole("combobox") as HTMLInputElement).value).toBe("");
+      expect(
+        screen.getByRole("option", { selected: true }).textContent
+      ).toContain("JSON Schema Validator");
+    });
+
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "ArrowDown" });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("option", { selected: true }).textContent
+      ).not.toContain("JSON Schema Validator");
+    });
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "overview" },
+    });
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "Escape" });
+    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
+    await waitFor(() => {
+      expect((screen.getByRole("combobox") as HTMLInputElement).value).toBe("");
+      expect(
+        screen.getByRole("option", { selected: true }).textContent
+      ).toContain("JSON Schema Validator");
+    });
   });
 
   test("reveals and runs Alt navigation shortcuts", async () => {
