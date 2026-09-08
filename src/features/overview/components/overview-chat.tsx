@@ -60,7 +60,6 @@ import {
   MessageScrollerViewport,
 } from "@/components/ui/message-scroller";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
 import { Streaming } from "@/components/ui/streaming";
 import {
   DEVELOPER_TOOLS,
@@ -1806,10 +1805,73 @@ function UserMessage({ message }: { message: ConversationMessage }) {
   );
 }
 
+type OperatorMascotProps = {
+  compact?: boolean;
+  state: "idle" | "thinking";
+};
+
+function OperatorMascot({ compact = false, state }: OperatorMascotProps) {
+  const isThinking = state === "thinking";
+
+  return (
+    <motion.span
+      animate={
+        isThinking
+          ? {
+              transform: [
+                "translateY(0) rotate(0deg) scale(1)",
+                "translateY(-3px) rotate(-1.5deg) scale(1.015)",
+                "translateY(0) rotate(1deg) scale(1)",
+              ],
+            }
+          : {
+              transform: [
+                "translateY(0) rotate(0deg) scale(1)",
+                "translateY(-5px) rotate(-0.75deg) scale(1.01)",
+                "translateY(0) rotate(0deg) scale(1)",
+              ],
+            }
+      }
+      className={cn(
+        "overview-operator-mascot",
+        compact && "overview-operator-mascot-compact"
+      )}
+      data-slot="overview-operator-mascot"
+      data-state={state}
+      transition={
+        isThinking
+          ? {
+              duration: MOTION_DURATION.smooth * 2,
+              ease: MOTION_EASE.inOut,
+              repeat: Number.POSITIVE_INFINITY,
+            }
+          : {
+              duration: MOTION_DURATION.smooth * 8,
+              ease: MOTION_EASE.inOut,
+              repeat: Number.POSITIVE_INFINITY,
+            }
+      }
+    >
+      <img
+        alt={compact ? "" : "Biller operator mascot reading a tablet"}
+        className={cn(
+          compact
+            ? "overview-operator-mascot-compact-image"
+            : "overview-chat-welcome-image"
+        )}
+        decoding="async"
+        height={1536}
+        src="/brand/biller-operator-mascot-chibi.png"
+        width={1024}
+      />
+    </motion.span>
+  );
+}
+
 function StatusCheckingMarker({ label }: { label: string }) {
   return (
     <div className="overview-chat-progress-marker" role="status">
-      <Spinner aria-hidden="true" />
+      <OperatorMascot compact state="thinking" />
       <span className="shimmer">{label}</span>
     </div>
   );
@@ -2132,7 +2194,7 @@ export function OverviewChat({
   );
 
   return (
-    <MotionConfig reducedMotion="never">
+    <MotionConfig reducedMotion="user">
       <div
         className="overview-chat-page"
         data-chat-state={hasConversation ? "active" : "empty"}
@@ -2171,14 +2233,7 @@ export function OverviewChat({
                     }}
                   >
                     <div className="overview-chat-welcome-art">
-                      <img
-                        alt="Biller operator mascot reading a tablet"
-                        className="overview-chat-welcome-image"
-                        decoding="async"
-                        height={1536}
-                        src="/brand/biller-operator-mascot-chibi.png"
-                        width={1024}
-                      />
+                      <OperatorMascot state="idle" />
                     </div>
                     <h2>{messages.overview.chat.emptyTitle}</h2>
                     <p>{messages.overview.chat.emptyDescription}</p>

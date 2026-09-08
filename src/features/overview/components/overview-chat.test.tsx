@@ -180,6 +180,11 @@ describe("Overview chat", () => {
     });
 
     expect(screen.getByRole("status").querySelector(".shimmer")).toBeTruthy();
+    expect(
+      container.querySelector(
+        '[data-slot="overview-operator-mascot"][data-state="thinking"]'
+      )
+    ).toBeTruthy();
     expect(await screen.findByText("Live simulator snapshot")).toBeTruthy();
     expect(screen.getByText("4", { selector: "strong" })).toBeTruthy();
     expect(
