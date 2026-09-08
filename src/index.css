@@ -611,8 +611,6 @@
 .overview-operator-mascot {
   display: block;
   height: 100%;
-  transform-origin: 50% 82%;
-  will-change: transform;
 }
 
 .overview-operator-mascot-compact {
@@ -1799,7 +1797,8 @@
   overflow: hidden;
 }
 
-.dashboard-overview-main > .overview-chat-page {
+.dashboard-overview-main > .dashboard-page-transition,
+.dashboard-overview-main > .dashboard-page-transition > .overview-chat-page {
   min-height: 0;
 }
 
@@ -1986,6 +1985,27 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes macos-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-12px);
+  }
+  30% {
+    transform: translateX(10px);
+  }
+  45% {
+    transform: translateX(-8px);
+  }
+  60% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-2px);
   }
 }
 
@@ -2257,6 +2277,136 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   color: oklch(1 0 0 / 0.72);
   font-size: 0.75rem;
 }
+
+.macos-shake {
+  animation: macos-shake 440ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.macos-password-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 15.5rem;
+  margin-top: 0.25rem;
+}
+
+.macos-input-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: 9999px;
+  background: color-mix(in oklab, white 14%, transparent);
+  backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid color-mix(in oklab, white 24%, transparent);
+  box-shadow: 0 4px 20px -2px color-mix(in oklab, black 30%, transparent),
+              inset 0 1px 1px color-mix(in oklab, white 15%, transparent);
+  transition: border-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
+              box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1),
+              background-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.macos-input-pill:focus-within {
+  border-color: color-mix(in oklab, white 45%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, white 18%, transparent),
+              0 6px 24px -2px color-mix(in oklab, black 35%, transparent);
+  background: color-mix(in oklab, white 18%, transparent);
+}
+
+.macos-input-pill-field {
+  width: 100%;
+  height: 2.25rem;
+  padding: 0 2.25rem 0 0.875rem;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  outline: none;
+}
+
+.macos-input-pill-field::placeholder {
+  color: color-mix(in oklab, white 55%, transparent);
+}
+
+.macos-submit-button {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: none;
+  background: color-mix(in oklab, white 20%, transparent);
+  color: white;
+  cursor: pointer;
+  transition: background-color 140ms ease, transform 100ms ease, opacity 140ms ease;
+}
+
+.macos-submit-button:hover:not(:disabled) {
+  background: color-mix(in oklab, white 35%, transparent);
+}
+
+.macos-submit-button:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.macos-submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.macos-error-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--destructive) 42%, transparent);
+  border: 1px solid color-mix(in oklab, var(--destructive) 65%, transparent);
+  backdrop-filter: blur(14px);
+  color: oklch(0.96 0.04 15);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-shadow: 0 1px 2px color-mix(in oklab, black 60%, transparent);
+  max-width: 18rem;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.macos-lock-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
+.macos-lock-subaction {
+  font-size: 0.75rem;
+  color: color-mix(in oklab, white 65%, transparent);
+  text-decoration: none;
+  transition: color 140ms ease, background-color 140ms ease;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.macos-lock-subaction:hover {
+  color: white;
+  background: color-mix(in oklab, white 12%, transparent);
+}
+
 
 .macos-logged-out-screen .macos-lock-account {
   animation: macos-logged-out-enter 420ms cubic-bezier(0.23, 1, 0.32, 1) both;

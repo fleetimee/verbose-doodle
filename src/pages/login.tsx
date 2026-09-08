@@ -44,6 +44,7 @@ export const Login = () => {
   const [autoLoginProgress, setAutoLoginProgress] = useState(14);
   const [isAutoLoginComplete, setIsAutoLoginComplete] = useState(false);
   const hasAttemptedLogin = useRef(false);
+  const [showClassicForm, setShowClassicForm] = useState(false);
 
   useDocumentMeta({
     description: messages.auth.loginDocumentDescription,
@@ -162,56 +163,68 @@ export const Login = () => {
     };
   }
 
+  if (!showClassicForm) {
+    return (
+      <MacOsLogin
+        error={loginError}
+        isComplete={isAutoLoginComplete}
+        isLoading={isPending}
+        onSubmit={handleLogin}
+        onSwitchToClassic={() => setShowClassicForm(true)}
+        onTransitionComplete={handleLoginTransitionComplete}
+        progress={autoLoginProgress}
+      />
+    );
+  }
+
   return (
     <div className="macos-login-screen relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4">
-      {isError && (
-        <div className="fixed top-4 right-4 z-10">
-          <ThemeSwitcher onChange={setTheme} value={themeSwitcherValue} />
-        </div>
-      )}
+      <div className="fixed top-4 right-4 z-10">
+        <ThemeSwitcher onChange={setTheme} value={themeSwitcherValue} />
+      </div>
 
       <div className="relative z-10 w-full max-w-md">
-        {isError && (
-          <div className="mb-8 text-center">
-            <div className="mb-3 flex justify-center">
-              <Logo size="md" variant="icon" />
-            </div>
-            <div className="mb-2">
-              <SlicedText
-                className="font-bold text-3xl text-foreground tracking-tight"
-                splitSpacing={3}
-                text={messages.common.appName}
-              />
-            </div>
-            <p className="text-muted-foreground text-sm">
-              <Highlighter action="underline" color="#FFA726" isView={true}>
-                {messages.auth.heroCreate}
-              </Highlighter>
-              {messages.auth.heroConnector}
-              {messages.auth.heroManage}
-              <Highlighter action="highlight" color="#42A5F5" isView={true}>
-                <span className="text-white">
-                  {messages.auth.heroBillingScenarios}
-                </span>
-              </Highlighter>
-              {messages.auth.heroSuffix}
-            </p>
+        <div className="mb-8 text-center">
+          <div className="mb-3 flex justify-center">
+            <Logo size="md" variant="icon" />
           </div>
-        )}
+          <div className="mb-2">
+            <SlicedText
+              className="font-bold text-3xl text-foreground tracking-tight"
+              splitSpacing={3}
+              text={messages.common.appName}
+            />
+          </div>
+          <p className="text-muted-foreground text-sm">
+            <Highlighter action="underline" color="#FFA726" isView={true}>
+              {messages.auth.heroCreate}
+            </Highlighter>
+            {messages.auth.heroConnector}
+            {messages.auth.heroManage}
+            <Highlighter action="highlight" color="#42A5F5" isView={true}>
+              <span className="text-white">
+                {messages.auth.heroBillingScenarios}
+              </span>
+            </Highlighter>
+            {messages.auth.heroSuffix}
+          </p>
+        </div>
 
-        {isError ? (
-          <LoginForm
-            error={loginError}
-            isLoading={isPending}
-            onSubmit={handleLogin}
-          />
-        ) : (
-          <MacOsLogin
-            isComplete={isAutoLoginComplete}
-            onTransitionComplete={handleLoginTransitionComplete}
-            progress={autoLoginProgress}
-          />
-        )}
+        <LoginForm
+          error={loginError}
+          isLoading={isPending}
+          onSubmit={handleLogin}
+        />
+
+        <div className="mt-4 text-center">
+          <button
+            className="cursor-pointer text-muted-foreground text-xs transition-colors hover:text-foreground"
+            onClick={() => setShowClassicForm(false)}
+            type="button"
+          >
+            {messages.auth.returnToMacOsLogin}
+          </button>
+        </div>
       </div>
     </div>
   );

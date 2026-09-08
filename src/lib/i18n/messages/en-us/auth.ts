@@ -1,7 +1,10 @@
 export const authMessages = {
+  cancelSwitchUser: "Cancel",
   captchaRequiredError: "Please complete the captcha verification",
+  classicSignIn: "Use standard login",
   creatingSecureSession: "Creating a secure simulator session",
   demoAccess: "Demo access",
+  demoHint: "Demo password: password123",
   demoLoginPaused: "Automatic demo login is paused on this screen.",
   expiredWhileActive:
     "Your session has expired. Please log in again to continue.",
@@ -48,6 +51,7 @@ export const authMessages = {
   refreshFailedDescription: "Unable to refresh session. Please log in again.",
   refreshFailedTitle: "Refresh Failed",
   refreshing: "Refreshing...",
+  returnToMacOsLogin: "Back to lock screen",
   seconds: "seconds",
   sessionClosed: "Session closed",
   sessionClosedConnector: " with ",
@@ -70,6 +74,7 @@ export const authMessages = {
   signInDescription: "Enter your username and password to sign in",
   signingIn: "Signing in...",
   stayLoggedIn: "Stay Logged In",
+  switchUser: "Switch User",
   timeRemaining: "Time remaining: {time}",
   usernameDescription: "Your unique username for the biller simulator.",
   usernameLabel: "Username",
