@@ -7,6 +7,7 @@ import {
   LayoutGroup,
   MotionConfig,
   motion,
+  useReducedMotion,
 } from "motion/react";
 import {
   type ReactNode,
@@ -129,6 +130,40 @@ type ConversationMessage = {
   text: string;
   tone?: "default" | "destructive";
 };
+
+const overviewWelcomeVariants = {
+  exit: {
+    filter: "blur(8px)",
+    opacity: 0,
+    transform: "translateY(-24px) scale(0.95)",
+  },
+  hidden: {
+    filter: "blur(8px)",
+    opacity: 0,
+    transform: "translateY(20px) scale(0.96)",
+  },
+  visible: {
+    filter: "blur(0px)",
+    opacity: 1,
+    transform: "translateY(0) scale(1)",
+    transition: {
+      delayChildren: 0.08,
+      staggerChildren: 0.06,
+    },
+  },
+} as const;
+
+const overviewWelcomeItemVariants = {
+  hidden: { opacity: 0, transform: "translateY(14px)" },
+  visible: {
+    opacity: 1,
+    transform: "translateY(0px)",
+    transition: {
+      duration: MOTION_DURATION.chat,
+      ease: MOTION_EASE.apple,
+    },
+  },
+} as const;
 
 type PersistedConversationMessage = Omit<ConversationMessage, "actions"> & {
   actionIds?: ChatActionId[];
@@ -1352,7 +1387,9 @@ function SocketsSnapshotCard() {
 
 function UserStatsSnapshotCard({ data }: { data: OverviewData }) {
   const { userStats } = data;
-  if (!userStats) return null;
+  if (!userStats) {
+    return null;
+  }
 
   return (
     <motion.section
@@ -1812,59 +1849,71 @@ type OperatorMascotProps = {
 
 function OperatorMascot({ compact = false, state }: OperatorMascotProps) {
   const isThinking = state === "thinking";
+  const shouldReduceMotion = useReducedMotion();
+  const label = compact ? undefined : "Biller operator mascot reading a tablet";
+  const mediaClass = cn(
+    compact
+      ? "overview-operator-mascot-compact-image"
+      : "overview-chat-welcome-image"
+  );
+  const stillSrc = "/brand/biller-operator-mascot-still.webp?v=pointing-swipe";
+  const stem = isThinking
+    ? "biller-operator-mascot-thinking"
+    : "biller-operator-mascot-greeting";
 
   return (
-    <motion.span
-      animate={
-        isThinking
-          ? {
-              transform: [
-                "translateY(0) rotate(0deg) scale(1)",
-                "translateY(-3px) rotate(-1.5deg) scale(1.015)",
-                "translateY(0) rotate(1deg) scale(1)",
-              ],
-            }
-          : {
-              transform: [
-                "translateY(0) rotate(0deg) scale(1)",
-                "translateY(-5px) rotate(-0.75deg) scale(1.01)",
-                "translateY(0) rotate(0deg) scale(1)",
-              ],
-            }
-      }
+    <div
       className={cn(
         "overview-operator-mascot",
         compact && "overview-operator-mascot-compact"
       )}
       data-slot="overview-operator-mascot"
       data-state={state}
-      transition={
-        isThinking
-          ? {
-              duration: MOTION_DURATION.smooth * 2,
-              ease: MOTION_EASE.inOut,
-              repeat: Number.POSITIVE_INFINITY,
-            }
-          : {
-              duration: MOTION_DURATION.smooth * 8,
-              ease: MOTION_EASE.inOut,
-              repeat: Number.POSITIVE_INFINITY,
-            }
-      }
     >
-      <img
-        alt={compact ? "" : "Biller operator mascot reading a tablet"}
-        className={cn(
-          compact
-            ? "overview-operator-mascot-compact-image"
-            : "overview-chat-welcome-image"
-        )}
-        decoding="async"
-        height={1536}
-        src="/brand/biller-operator-mascot-chibi.png"
-        width={1024}
-      />
-    </motion.span>
+      {shouldReduceMotion ? (
+        <img
+          alt={label ?? ""}
+          aria-hidden={compact ? true : undefined}
+          className={mediaClass}
+          decoding="async"
+          height={576}
+          src={stillSrc}
+          width={384}
+        />
+      ) : (
+        <video
+          aria-hidden={compact ? true : undefined}
+          aria-label={label}
+          autoPlay
+          className={mediaClass}
+          height={576}
+          loop
+          muted
+          playsInline
+          poster={stillSrc}
+          role={compact ? undefined : "img"}
+          width={384}
+        >
+          <source
+            src={`/brand/${stem}.mp4?v=pointing-swipe`}
+            type='video/mp4; codecs="hvc1"'
+          />
+          <source
+            src={`/brand/${stem}.webm?v=pointing-swipe`}
+            type="video/webm"
+          />
+          <img
+            alt=""
+            aria-hidden="true"
+            className={mediaClass}
+            decoding="async"
+            height={576}
+            src={stillSrc}
+            width={384}
+          />
+        </video>
+      )}
+    </div>
   );
 }
 
@@ -2194,7 +2243,7 @@ export function OverviewChat({
   );
 
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion="never">
       <div
         className="overview-chat-page"
         data-chat-state={hasConversation ? "active" : "empty"}
@@ -2207,36 +2256,39 @@ export function OverviewChat({
             {hasConversation ? null : <OverviewChatAmbient />}
             <h1 className="sr-only">{messages.overview.pageTitle}</h1>
             <div className="overview-chat-viewport-shell">
-              <AnimatePresence initial={false} mode="sync">
+              <AnimatePresence mode="sync">
                 {hasConversation ? null : (
                   <motion.div
-                    animate={{
-                      filter: "blur(0px)",
-                      opacity: 1,
-                      transform: "translateY(0) scale(1)",
-                    }}
+                    animate="visible"
                     className="overview-chat-welcome"
-                    exit={{
-                      filter: "blur(8px)",
-                      opacity: 0,
-                      transform: "translateY(-24px) scale(0.95)",
-                    }}
-                    initial={{
-                      filter: "blur(8px)",
-                      opacity: 0,
-                      transform: "translateY(20px) scale(0.96)",
-                    }}
+                    exit="exit"
+                    initial="hidden"
                     key="overview-chat-welcome"
                     transition={{
                       duration: MOTION_DURATION.chat,
                       ease: MOTION_EASE.apple,
                     }}
+                    variants={overviewWelcomeVariants}
                   >
-                    <div className="overview-chat-welcome-art">
+                    <motion.div
+                      className="overview-chat-welcome-art"
+                      data-overview-entrance="item"
+                      variants={overviewWelcomeItemVariants}
+                    >
                       <OperatorMascot state="idle" />
-                    </div>
-                    <h2>{messages.overview.chat.emptyTitle}</h2>
-                    <p>{messages.overview.chat.emptyDescription}</p>
+                    </motion.div>
+                    <motion.h2
+                      data-overview-entrance="item"
+                      variants={overviewWelcomeItemVariants}
+                    >
+                      {messages.overview.chat.emptyTitle}
+                    </motion.h2>
+                    <motion.p
+                      data-overview-entrance="item"
+                      variants={overviewWelcomeItemVariants}
+                    >
+                      {messages.overview.chat.emptyDescription}
+                    </motion.p>
                   </motion.div>
                 )}
 

@@ -7,7 +7,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import React, { Suspense, useEffect, useRef, useState } from "react";
-import { Link, Outlet, useLocation, useParams } from "react-router";
+import { Link, useLocation, useOutlet, useParams } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -99,6 +99,9 @@ export function DashboardLayout() {
   const location = useLocation();
   const params = useParams();
   const isOverview = location.pathname === "/dashboard/overview";
+  const hasOwnPageEntrance = location.pathname.startsWith(
+    "/dashboard/socket-test/"
+  );
   const { theme, setTheme } = useTheme();
   const isEndpointDetail = location.pathname.match(ENDPOINT_DETAIL_REGEX);
   const routeEndpointSlug = isEndpointDetail ? params.slug : undefined;
@@ -121,6 +124,7 @@ export function DashboardLayout() {
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion() ?? false;
+  const routedPage = useOutlet();
 
   useEffect(() => {
     const viewport = scrollViewportRef.current;
@@ -320,7 +324,30 @@ export function DashboardLayout() {
                   )}
                 >
                   <Suspense fallback={<DashboardPageFallback />}>
-                    <Outlet />
+                    <motion.div
+                      animate={{
+                        opacity: 1,
+                        transform: "translateY(0px) scale(1)",
+                      }}
+                      className="dashboard-page-transition flex min-h-0 min-w-0 flex-1 flex-col"
+                      data-route={location.pathname}
+                      data-testid="dashboard-page-transition"
+                      initial={
+                        hasOwnPageEntrance
+                          ? false
+                          : {
+                              opacity: 0,
+                              transform: "translateY(18px) scale(0.985)",
+                            }
+                      }
+                      key={location.pathname}
+                      transition={{
+                        duration: MOTION_DURATION.smooth,
+                        ease: MOTION_EASE.out,
+                      }}
+                    >
+                      {routedPage}
+                    </motion.div>
                   </Suspense>
                 </main>
               </ScrollArea>

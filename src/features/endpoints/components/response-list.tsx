@@ -43,10 +43,17 @@ type ResponseSectionHeaderProps = {
 
 type AnimatedResponseListItemProps = Parameters<typeof ResponseListItem>[0];
 
+const RESPONSE_ITEM_STAGGER = 0.05;
+const RESPONSE_ITEM_MAX_DELAY = 0.35;
+
 function AnimatedResponseListItem({
+  index,
   layoutNamespace,
   ...props
-}: AnimatedResponseListItemProps & { readonly layoutNamespace: string }) {
+}: AnimatedResponseListItemProps & {
+  readonly index: number;
+  readonly layoutNamespace: string;
+}) {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const motionState = shouldReduceMotion
     ? {
@@ -55,9 +62,9 @@ function AnimatedResponseListItem({
         initial: { opacity: 0 },
       }
     : {
-        animate: { opacity: 1, scale: 1 },
-        exit: { opacity: 0, scale: 0.97 },
-        initial: { opacity: 0, scale: 0.97 },
+        animate: { opacity: 1, scale: 1, y: 0 },
+        exit: { opacity: 0, scale: 0.97, y: -4 },
+        initial: { opacity: 0, scale: 0.98, y: 10 },
       };
 
   return (
@@ -69,7 +76,12 @@ function AnimatedResponseListItem({
           : `${layoutNamespace}-response-${props.response.id}`
       }
       transition={{
-        duration: MOTION_DURATION.fast,
+        delay: shouldReduceMotion
+          ? MOTION_DURATION.instant
+          : Math.min(index * RESPONSE_ITEM_STAGGER, RESPONSE_ITEM_MAX_DELAY),
+        duration: shouldReduceMotion
+          ? MOTION_DURATION.instant
+          : MOTION_DURATION.standard,
         ease: MOTION_EASE.out,
         layout: {
           duration: MOTION_DURATION.standard,
@@ -160,11 +172,12 @@ export function ResponseList({
               {/* Active Responses Section */}
               {activeResponses.length > 0 && (
                 <div className="space-y-1">
-                  <AnimatePresence initial={false} mode="popLayout">
-                    {activeResponses.map((response) => (
+                  <AnimatePresence mode="popLayout">
+                    {activeResponses.map((response, responseIndex) => (
                       <AnimatedResponseListItem
                         endpointId={endpointId}
                         endpointSlug={endpointSlug}
+                        index={responseIndex}
                         isActivating={isActivating}
                         isDeactivating={isDeactivating}
                         isSelected={selectedResponseId === response.id}
@@ -215,11 +228,12 @@ export function ResponseList({
                     />
                   )}
 
-                  <AnimatePresence initial={false} mode="popLayout">
-                    {inactiveResponses.map((response) => (
+                  <AnimatePresence mode="popLayout">
+                    {inactiveResponses.map((response, responseIndex) => (
                       <AnimatedResponseListItem
                         endpointId={endpointId}
                         endpointSlug={endpointSlug}
+                        index={activeResponses.length + responseIndex}
                         isActivating={isActivating}
                         isDeactivating={isDeactivating}
                         isSelected={selectedResponseId === response.id}

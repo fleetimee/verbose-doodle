@@ -5,7 +5,14 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion, useReducedMotion } from "motion/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "react-router";
 import { Layers3, Plug } from "@/components/hugeicons";
 import { type TourStep, useTour } from "@/components/tour";
@@ -158,13 +165,54 @@ function getEndpointTourId(groupIndex: number, endpointIndex: number) {
     : undefined;
 }
 
+const ENDPOINT_ITEM_STAGGER = 0.045;
+const ENDPOINT_ITEM_MAX_DELAY = 0.45;
+
+function AnimatedEndpointItem({
+  children,
+  index,
+  prefersReducedMotion,
+}: {
+  readonly children: ReactNode;
+  readonly index: number;
+  readonly prefersReducedMotion: boolean;
+}) {
+  return (
+    <motion.div
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      initial={{
+        opacity: prefersReducedMotion ? 1 : 0,
+        scale: prefersReducedMotion ? 1 : 0.98,
+        y: prefersReducedMotion ? 0 : 14,
+      }}
+      layout={!prefersReducedMotion}
+      transition={{
+        delay: prefersReducedMotion
+          ? MOTION_DURATION.instant
+          : Math.min(index * ENDPOINT_ITEM_STAGGER, ENDPOINT_ITEM_MAX_DELAY),
+        duration: prefersReducedMotion
+          ? MOTION_DURATION.instant
+          : MOTION_DURATION.standard,
+        ease: MOTION_EASE.out,
+        layout: {
+          duration: MOTION_DURATION.standard,
+          ease: MOTION_EASE.out,
+        },
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 function GridEndpoints({
   canEditEndpoint,
   group,
   groupIndex,
   onDeleteEndpoint,
   onEditEndpoint,
-}: Omit<AnimatedEndpointGroupProps, "prefersReducedMotion" | "viewMode">) {
+  prefersReducedMotion,
+}: Omit<AnimatedEndpointGroupProps, "viewMode">) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {group.endpoints.map((endpoint, endpointIndex) => (
@@ -176,10 +224,15 @@ function GridEndpoints({
           onEdit={onEditEndpoint}
         >
           <div>
-            <EndpointCard
-              endpoint={endpoint}
-              tourId={getEndpointTourId(groupIndex, endpointIndex)}
-            />
+            <AnimatedEndpointItem
+              index={endpointIndex}
+              prefersReducedMotion={prefersReducedMotion}
+            >
+              <EndpointCard
+                endpoint={endpoint}
+                tourId={getEndpointTourId(groupIndex, endpointIndex)}
+              />
+            </AnimatedEndpointItem>
           </div>
         </EndpointContextMenu>
       ))}
@@ -193,7 +246,8 @@ function ListEndpoints({
   groupIndex,
   onDeleteEndpoint,
   onEditEndpoint,
-}: Omit<AnimatedEndpointGroupProps, "prefersReducedMotion" | "viewMode">) {
+  prefersReducedMotion,
+}: Omit<AnimatedEndpointGroupProps, "viewMode">) {
   return (
     <div className="space-y-3">
       {group.endpoints.map((endpoint, endpointIndex) => (
@@ -205,10 +259,15 @@ function ListEndpoints({
           onEdit={onEditEndpoint}
         >
           <div>
-            <EndpointListItem
-              endpoint={endpoint}
-              tourId={getEndpointTourId(groupIndex, endpointIndex)}
-            />
+            <AnimatedEndpointItem
+              index={endpointIndex}
+              prefersReducedMotion={prefersReducedMotion}
+            >
+              <EndpointListItem
+                endpoint={endpoint}
+                tourId={getEndpointTourId(groupIndex, endpointIndex)}
+              />
+            </AnimatedEndpointItem>
           </div>
         </EndpointContextMenu>
       ))}
@@ -245,6 +304,7 @@ function AnimatedEndpointGroup({
           groupIndex={groupIndex}
           onDeleteEndpoint={onDeleteEndpoint}
           onEditEndpoint={onEditEndpoint}
+          prefersReducedMotion={prefersReducedMotion}
         />
       ) : (
         <ListEndpoints
@@ -253,6 +313,7 @@ function AnimatedEndpointGroup({
           groupIndex={groupIndex}
           onDeleteEndpoint={onDeleteEndpoint}
           onEditEndpoint={onEditEndpoint}
+          prefersReducedMotion={prefersReducedMotion}
         />
       )}
     </motion.div>
@@ -557,12 +618,7 @@ export function EndpointsPage() {
   }, [activeTourId, isActive, setHasSeenEndpointsTour]);
 
   return (
-    <motion.div
-      animate={{ opacity: 1 }}
-      className="space-y-6"
-      initial={{ opacity: 0 }}
-      transition={{ duration: MOTION_DURATION.fast, ease: MOTION_EASE.out }}
-    >
+    <div className="space-y-6">
       <motion.div
         animate={{ opacity: 1 }}
         className="flex items-center justify-between"
@@ -944,6 +1000,6 @@ export function EndpointsPage() {
           </Empty>
         </motion.div>
       )}
-    </motion.div>
+    </div>
   );
 }

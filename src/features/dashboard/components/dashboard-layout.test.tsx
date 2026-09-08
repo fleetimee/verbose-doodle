@@ -315,6 +315,19 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     globalThis.fetch = originalFetch;
   });
 
+  test("wraps routed dashboard content in a page transition", () => {
+    renderDashboard();
+
+    const pageTransition = screen.getByTestId("dashboard-page-transition");
+
+    expect(pageTransition.dataset.route).toBe(
+      `/dashboard/endpoints/${endpointId}`
+    );
+    expect(pageTransition.getAttribute("style")).toContain(
+      "translateY(18px) scale(0.985)"
+    );
+  });
+
   test("shows the endpoint breadcrumb with the current biller selected", async () => {
     renderDashboard();
 

@@ -104,11 +104,13 @@ describe("Overview chat", () => {
     expect(
       screen.getByRole("heading", { name: "What should we look up?" })
     ).toBeTruthy();
-    expect(
-      screen.getByRole("img", {
-        name: "Biller operator mascot reading a tablet",
-      })
-    ).toBeTruthy();
+    const mascot = screen.getByRole("img", {
+      name: "Biller operator mascot reading a tablet",
+    });
+    expect(mascot).toBeTruthy();
+    expect(mascot.tagName).toBe("VIDEO");
+    expect(mascot.querySelector('source[type="video/webm"]')).toBeTruthy();
+    expect(mascot.querySelector('source[type*="hvc1"]')).toBeTruthy();
     expect(
       container.querySelector('[data-slot="overview-chat-ambient"]')
     ).toBeTruthy();
@@ -117,6 +119,19 @@ describe("Overview chat", () => {
       screen.getByRole("button", { name: "Show recent endpoints" })
     ).toBeTruthy();
     expect(screen.queryByText("Live simulator snapshot")).toBeNull();
+  });
+
+  test("staggers the overview items when the welcome state enters", () => {
+    const { container } = renderOverview();
+    const entranceItems = container.querySelectorAll(
+      '[data-overview-entrance="item"]'
+    );
+
+    expect(entranceItems).toHaveLength(7);
+    expect(entranceItems[0]?.getAttribute("style")).toContain("opacity: 0");
+    expect(entranceItems[3]?.getAttribute("style")).toContain(
+      "translateY(14px)"
+    );
   });
 
   test("restores the saved conversation and its destination actions", () => {

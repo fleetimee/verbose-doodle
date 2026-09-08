@@ -205,6 +205,27 @@ const overviewChatEntryTransition = {
   ease: MOTION_EASE.apple,
 } as const;
 
+const MotionButton = motion.create(Button);
+
+const suggestionListVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      delayChildren: 0.32,
+      staggerChildren: 0.06,
+    },
+  },
+} as const;
+
+const suggestionItemVariants = {
+  hidden: { opacity: 0, transform: "translateY(10px)" },
+  visible: {
+    opacity: 1,
+    transform: "translateY(0px)",
+    transition: overviewChatEntryTransition,
+  },
+} as const;
+
 
 function getFilteredSlashCommands(draft: string) {
   const query = slashCommandQueryPattern.exec(draft)?.[1].toLocaleLowerCase();
@@ -383,7 +404,17 @@ export function OverviewChatComposer({
   );
 
   return (
-    <div className="overview-chat-composer">
+    <motion.div
+      animate={{ opacity: 1, transform: "translateY(0px)" }}
+      className="overview-chat-composer"
+      data-overview-entrance="item"
+      initial={{ opacity: 0, transform: "translateY(14px)" }}
+      transition={{
+        delay: 0.24,
+        duration: MOTION_DURATION.chat,
+        ease: MOTION_EASE.apple,
+      }}
+    >
       <div className="overview-chat-composer-inner">
         {isSlashCommandPaletteOpen ? (
           <motion.div
@@ -528,39 +559,33 @@ export function OverviewChatComposer({
           </div>
         </form>
 
-        <AnimatePresence initial={false}>
+        <AnimatePresence>
           {hasConversation ? null : (
             <motion.fieldset
-              animate={{
-                filter: "blur(0px)",
-                opacity: 1,
-                transform: "translateY(0) scale(1)",
-              }}
+              animate="visible"
               className="overview-chat-suggestions"
               exit={{
                 filter: "blur(4px)",
                 opacity: 0,
                 transform: "translateY(-6px) scale(0.98)",
               }}
-              initial={{
-                filter: "blur(4px)",
-                opacity: 0,
-                transform: "translateY(6px) scale(0.98)",
-              }}
+              initial="hidden"
               key="overview-chat-suggestions"
-              transition={overviewChatEntryTransition}
+              variants={suggestionListVariants}
             >
               <legend>{messages.overview.chat.tryAQuestion}</legend>
               <div className="overview-chat-suggestions-list">
                 {suggestedQuestions.map(({ icon: Icon, question }) => (
-                  <Button
+                  <MotionButton
                     className="overview-chat-suggestion"
+                    data-overview-entrance="item"
                     disabled={isSubmitting}
                     key={question}
                     onClick={() => onQuery(question)}
                     size="sm"
                     type="button"
                     variant="ghost"
+                    variants={suggestionItemVariants}
                   >
                     <span
                       aria-hidden="true"
@@ -569,13 +594,13 @@ export function OverviewChatComposer({
                       <Icon />
                     </span>
                     <span>{question}</span>
-                  </Button>
+                  </MotionButton>
                 ))}
               </div>
             </motion.fieldset>
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }
