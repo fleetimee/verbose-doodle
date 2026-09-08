@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -252,7 +253,7 @@ export function ResponseStepper({
     scrollContainerRef.current?.scrollTo({ behavior: "instant", top: 0 });
   }, [currentStepIndex]);
 
-  return (
+  const content = (
     <motion.div
       animate={{ opacity: 1 }}
       className="fixed inset-0 z-50 flex flex-col bg-background"
@@ -518,6 +519,12 @@ export function ResponseStepper({
       />
     </motion.div>
   );
+
+  if (typeof document === "undefined") {
+    return content;
+  }
+
+  return createPortal(content, document.body);
 }
 
 type ResponseBuilderRailProps = {

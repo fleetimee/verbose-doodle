@@ -3,6 +3,7 @@ import { ArrowLeft02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Code2, FileText, Hash } from "@/components/hugeicons";
@@ -156,7 +157,7 @@ export function EditResponseStepper({
     return () => onDirtyChange?.(false);
   }, [form.formState.isDirty, onDirtyChange]);
 
-  return (
+  const content = (
     <motion.div
       animate={{ opacity: 1 }}
       className="fixed inset-0 z-50 flex flex-col bg-background"
@@ -425,4 +426,10 @@ export function EditResponseStepper({
       </div>
     </motion.div>
   );
+
+  if (typeof document === "undefined") {
+    return content;
+  }
+
+  return createPortal(content, document.body);
 }
