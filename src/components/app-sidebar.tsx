@@ -2,6 +2,7 @@ import type React from "react";
 import { Link } from "react-router";
 import {
   Binary,
+  type HugeIcon,
   Info,
   LayoutDashboard,
   LayoutGrid,
@@ -12,9 +13,10 @@ import {
   Server,
   Waves,
 } from "@/components/hugeicons";
-import { NavMain } from "@/components/nav-main";
+import { NavMain, type NavMainItem } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
+import { NavigationSearch } from "@/components/navigation-search";
 import { SessionTimer } from "@/components/session-timer";
 import { Logo } from "@/components/ui/logo";
 import {
@@ -39,7 +41,20 @@ import { usePrefetchOverview } from "@/features/overview/hooks/use-prefetch-over
 import { SocketBridgeStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
 import { messages } from "@/lib/i18n";
 
-const data = {
+type AppNavigationItem = NavMainItem & {
+  readonly adminOnly?: boolean;
+};
+
+type SecondaryNavigationItem = {
+  readonly icon: HugeIcon;
+  readonly title: string;
+  readonly url: string;
+};
+
+const data: {
+  readonly navMain: AppNavigationItem[];
+  readonly navSecondary: SecondaryNavigationItem[];
+} = {
   navMain: [
     {
       groupLabel: "Workspace",
@@ -74,6 +89,7 @@ const data = {
         },
       ],
       title: "Socket Tester",
+      url: "/dashboard/socket-tester",
     },
     {
       adminOnly: true,
@@ -92,6 +108,7 @@ const data = {
         },
       ],
       title: "SOCKS Relay",
+      url: "/dashboard/socks-relay",
     },
     {
       badge: String(DEVELOPER_TOOL_COUNT),
@@ -159,12 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     });
 
   return (
-    <Sidebar
-      className="relative"
-      collapsible="icon"
-      variant="inset"
-      {...props}
-    >
+    <Sidebar className="relative" collapsible="icon" variant="inset" {...props}>
       <SidebarHeader className="relative z-10 p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -187,10 +199,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        <NavigationSearch
+          items={[
+            ...navMain,
+            ...data.navSecondary.map((item) => ({
+              ...item,
+              groupLabel: "General",
+            })),
+          ]}
+        />
       </SidebarHeader>
       <div
         aria-hidden="true"
-        className="sidebar-mascot-backdrop hidden md:block group-data-[collapsible=icon]:hidden"
+        className="sidebar-mascot-backdrop hidden group-data-[collapsible=icon]:hidden md:block"
       >
         <img
           alt=""
