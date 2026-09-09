@@ -8,6 +8,7 @@ import {
   RefreshCw,
   SendHorizontal,
 } from "@/components/hugeicons";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,6 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -28,6 +30,7 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -40,6 +43,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   cloneIso8583Fields,
@@ -189,7 +193,8 @@ function FieldDateTimePicker({
       <PopoverTrigger asChild>
         <Button
           aria-label={`Pick value for bit ${fieldNumber}`}
-          className="h-6 shrink-0 px-2 text-[10px]"
+          className="shrink-0"
+          size="sm"
           type="button"
           variant="ghost"
         >
@@ -283,19 +288,23 @@ function FieldInput({
   const hasDateTimePicker = [7, 12, 13, 14].includes(field.number);
 
   return (
-    <div className={cn("min-w-0 space-y-2", !field.enabled && "opacity-55")}>
-      <div className="flex min-w-0 items-center gap-2">
+    <Field
+      className="min-w-0 gap-2.5"
+      data-disabled={!field.enabled || undefined}
+      data-invalid={invalid || undefined}
+    >
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
         <Checkbox
           aria-label={`Enable bit ${field.number}`}
           checked={field.enabled}
           onCheckedChange={(checked) => onToggle(checked === true)}
         />
         <label
-          className="min-w-0 truncate font-medium text-xs"
+          className="min-w-0 flex-1 font-medium text-sm leading-5"
           htmlFor={`iso-field-${field.number}`}
         >
-          <span className="mr-1.5 rounded-sm bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
-            BIT {field.number}
+          <span className="mr-2 inline-block font-mono text-muted-foreground text-xs tabular-nums">
+            {String(field.number).padStart(2, "0")}
           </span>
           {field.label}
         </label>
@@ -303,7 +312,7 @@ function FieldInput({
           <DialogTrigger asChild>
             <Button
               aria-label={`Explain bit ${field.number}`}
-              className="ml-auto size-6 shrink-0 text-muted-foreground"
+              className="shrink-0"
               size="icon-sm"
               type="button"
               variant="ghost"
@@ -352,8 +361,9 @@ function FieldInput({
         {!hasDateTimePicker && field.helper ? (
           <Button
             aria-label={`${field.helper === "stan" ? copy.autoIncrement : copy.now} Bit ${field.number}`}
-            className="h-6 shrink-0 px-2 text-[10px]"
+            className="shrink-0"
             onClick={onHelper}
+            size="sm"
             type="button"
             variant="ghost"
           >
@@ -365,7 +375,7 @@ function FieldInput({
         aria-invalid={invalid || undefined}
         aria-label={label}
         autoComplete="off"
-        className="h-10 bg-background font-mono text-sm shadow-none"
+        className="h-11 font-mono"
         disabled={!field.enabled}
         id={`iso-field-${field.number}`}
         inputMode={field.kind === "n" ? "numeric" : "text"}
@@ -374,10 +384,10 @@ function FieldInput({
         spellCheck={false}
         value={field.value}
       />
-      <p className="font-mono text-[10px] text-muted-foreground">
+      <p className="font-mono text-muted-foreground text-xs">
         {fieldTypeLabel(field)}
       </p>
-    </div>
+    </Field>
   );
 }
 
@@ -489,82 +499,68 @@ export function Iso8583Generator() {
     .sort((left, right) => left.number - right.number);
 
   return (
-    <div className="mx-auto grid w-full max-w-[1400px] grid-cols-1 gap-8 pb-10 md:grid-cols-[210px_minmax(0,1fr)] md:gap-10 xl:grid-cols-[240px_minmax(0,1fr)] xl:gap-14">
-      <aside className="md:sticky md:top-6 md:self-start">
-        <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.24em]">
-          Developer tools / wire format
-        </p>
-        <h1 className="mt-4 max-w-52 font-semibold text-3xl leading-[0.96] tracking-[-0.04em]">
-          {copy.title}
-        </h1>
-        <p className="mt-5 text-muted-foreground text-sm leading-6">
-          Fill the fields, then generate a raw ISO 8583 message.
-        </p>
-
-        <dl className="mt-8 border-y text-xs">
-          <div className="grid grid-cols-[72px_1fr] gap-3 border-b py-3">
-            <dt className="text-muted-foreground">Messages</dt>
-            <dd className="font-mono">9 presets</dd>
-          </div>
-          <div className="grid grid-cols-[72px_1fr] gap-3 border-b py-3">
-            <dt className="text-muted-foreground">Profile</dt>
-            <dd>BPD DIY ASCII</dd>
-          </div>
-          <div className="grid grid-cols-[72px_1fr] gap-3 py-3">
-            <dt className="text-muted-foreground">Output</dt>
-            <dd>Raw message sheet</dd>
-          </div>
-        </dl>
-      </aside>
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-7 pb-10 sm:gap-8">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <h1 className="font-semibold text-2xl tracking-tight sm:text-3xl">
+            {copy.title}
+          </h1>
+          <p className="text-muted-foreground text-sm leading-6">
+            Fill the fields, then generate a raw ISO 8583 message.
+          </p>
+        </div>
+        <Badge className="shrink-0 self-start sm:self-center" variant="outline">
+          BPD DIY ASCII
+        </Badge>
+      </header>
 
       <main className="min-w-0">
         <div className="mb-6 flex flex-col gap-2 sm:flex-row">
-          <div
-            aria-label={copy.preset}
-            className="grid flex-1 grid-cols-3 gap-1 rounded-lg border bg-muted/25 p-1"
-            role="tablist"
+          <Tabs
+            className="min-w-0 flex-1"
+            onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
+            value={presetId}
           >
-            {ISO8583_PRESETS.filter((item) =>
-              SIMPLE_PRESET_IDS.includes(item.id)
-            ).map((item) => (
-              <button
-                aria-selected={item.id === presetId}
-                className={cn(
-                  "min-h-14 rounded-md px-3 py-2 text-center font-mono text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  item.id === presetId
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-background hover:text-foreground"
-                )}
-                key={item.id}
-                onClick={() => choosePreset(item.id)}
-                role="tab"
-                type="button"
-              >
-                <span className="block font-semibold">{item.mti}</span>
-                <span className="mt-0.5 block truncate font-sans">
-                  {item.label.split("·")[1]?.trim() ?? item.label}
-                </span>
-              </button>
-            ))}
-          </div>
+            <TabsList
+              aria-label={copy.preset}
+              className="grid h-16 w-full grid-cols-3"
+            >
+              {ISO8583_PRESETS.filter((item) =>
+                SIMPLE_PRESET_IDS.includes(item.id)
+              ).map((item) => (
+                <TabsTrigger
+                  className="flex-col gap-0.5"
+                  key={item.id}
+                  value={item.id}
+                >
+                  <span className="font-mono text-xs">{item.mti}</span>
+                  <span className="text-xs sm:text-sm">
+                    {item.label.split("·")[1]?.trim() ?? item.label}
+                  </span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
           <Select
             onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
             value={MORE_PRESET_IDS.includes(presetId) ? presetId : ""}
           >
             <SelectTrigger
               aria-label="More messages"
-              className="h-auto min-h-14 bg-background shadow-none sm:w-48"
+              className="h-11 w-full sm:h-16 sm:w-48"
             >
               <SelectValue placeholder="More messages" />
             </SelectTrigger>
             <SelectContent>
-              {ISO8583_PRESETS.filter((item) =>
-                MORE_PRESET_IDS.includes(item.id)
-              ).map((item) => (
-                <SelectItem key={item.id} value={item.id}>
-                  {item.label}
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                {ISO8583_PRESETS.filter((item) =>
+                  MORE_PRESET_IDS.includes(item.id)
+                ).map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
@@ -572,20 +568,20 @@ export function Iso8583Generator() {
         <div>
           <section
             aria-label={copy.fields}
-            className="flex flex-col overflow-hidden rounded-xl border bg-card md:min-h-[calc(100dvh-16rem)]"
+            className="flex flex-col overflow-hidden rounded-xl border bg-card"
           >
-            <div className="border-b px-5 py-4">
+            <div className="border-b bg-muted/20 px-5 py-5 sm:px-7">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-semibold">
                   {preset.label.split("·")[1]?.trim()}
                 </h2>
-                <span className="rounded-sm bg-primary/10 px-2 py-1 font-mono text-primary text-xs">
+                <Badge className="font-mono" variant="secondary">
                   MTI {preset.mti}
-                </span>
+                </Badge>
               </div>
             </div>
 
-            <div className="grid gap-x-4 gap-y-5 p-5 sm:grid-cols-2">
+            <FieldGroup className="grid gap-x-8 gap-y-7 p-5 sm:grid-cols-2 sm:p-7">
               {visibleFields.map((field) => (
                 <div
                   className={cn(field.length > 40 && "sm:col-span-2")}
@@ -609,7 +605,7 @@ export function Iso8583Generator() {
                   />
                 </div>
               ))}
-            </div>
+            </FieldGroup>
 
             {packedState.error ? (
               <div
@@ -620,9 +616,9 @@ export function Iso8583Generator() {
               </div>
             ) : null}
 
-            <div className="mt-auto border-t p-5">
+            <div className="flex justify-end border-t bg-muted/20 p-5 sm:px-7">
               <Button
-                className="h-11 w-full"
+                className="h-11 w-full sm:w-auto sm:min-w-56"
                 disabled={!packedState.message}
                 onClick={generate}
                 type="button"
@@ -647,14 +643,14 @@ export function Iso8583Generator() {
             </Button>
           </SheetTrigger>
         ) : null}
-        <SheetContent className="gap-0 p-0 sm:max-w-xl" side="right">
-          <SheetHeader className="border-b pr-14">
+        <SheetContent className="w-full gap-0 p-0 sm:max-w-xl" side="right">
+          <SheetHeader className="gap-2 border-b p-6 pr-14">
             <SheetTitle>Raw message</SheetTitle>
             <SheetDescription>
               Generated {preset.mti} message using the current field values.
             </SheetDescription>
           </SheetHeader>
-          <div className="flex items-center justify-end gap-1 border-b bg-muted/20 px-4 py-3">
+          <div className="flex items-center justify-end gap-2 border-b bg-muted/20 px-6 py-4">
             <Button
               aria-label={copied ? copy.copied : copy.copy}
               disabled={!generatedPayload}
@@ -681,16 +677,16 @@ export function Iso8583Generator() {
           <div className="min-h-0 flex-1 overflow-y-auto">
             <Textarea
               aria-label={copy.rawStream}
-              className="min-h-72 resize-none rounded-none border-0 bg-transparent p-5 font-mono text-xs leading-6 shadow-none focus-visible:ring-0"
+              className="min-h-64 resize-none rounded-none border-0 p-6 font-mono text-sm leading-7 shadow-none"
               readOnly
               value={generatedPayload}
             />
             {packedState.message ? (
               <section
                 aria-label="Bitmap inspector"
-                className="border-t px-5 py-4"
+                className="border-t bg-muted/20 px-6 py-5"
               >
-                <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-col gap-3">
                   <h3 className="font-medium text-sm">Bitmap</h3>
                   <code className="break-all font-mono text-xs">
                     {packedState.message.bitmap}
@@ -698,12 +694,9 @@ export function Iso8583Generator() {
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {packedState.message.activeFields.map((number) => (
-                    <span
-                      className="rounded-sm bg-muted px-1.5 py-1 font-mono text-[10px] text-muted-foreground"
-                      key={number}
-                    >
+                    <Badge className="font-mono" key={number} variant="outline">
                       Bit {number}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               </section>

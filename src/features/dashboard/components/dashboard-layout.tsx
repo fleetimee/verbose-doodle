@@ -258,7 +258,9 @@ export function DashboardLayout() {
                   isOverview && "dashboard-overview-scroll"
                 )}
                 contentClassName={
-                  isOverview ? "dashboard-overview-scroll-content" : undefined
+                  isOverview
+                    ? "dashboard-overview-scroll-content"
+                    : "flex min-h-full flex-col"
                 }
                 viewportRef={scrollViewportRef}
               >
@@ -319,7 +321,7 @@ export function DashboardLayout() {
                 </header>
                 <main
                   className={cn(
-                    "flex min-h-full min-w-0 flex-col gap-4 bg-background/70 p-4 md:p-6",
+                    "flex min-h-0 min-w-0 flex-1 flex-col gap-4 bg-background/70 p-4 md:p-6",
                     isOverview && "dashboard-overview-main"
                   )}
                 >
