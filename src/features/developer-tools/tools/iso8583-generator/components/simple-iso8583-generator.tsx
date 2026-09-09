@@ -807,7 +807,7 @@ export function Iso8583Generator() {
                   <CodeBlockItem
                     className="h-full min-h-0 overflow-hidden"
                     key={item.language}
-                    lineNumbers={true}
+                    lineNumbers={item.language === "json"}
                     value={item.language}
                   >
                     <ScrollArea className="h-full min-h-0">

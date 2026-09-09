@@ -122,6 +122,28 @@ describe("Iso8583Generator", () => {
     ).toBe(true);
   });
 
+  test("shows blank fixed-width fields without invisible padding", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+
+    await user.click(screen.getByRole("tab", { name: "0200 Transaction" }));
+
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Bit 41 Card acceptor terminal ID",
+        }) as HTMLInputElement
+      ).value
+    ).toBe("");
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Bit 43 Card acceptor name / location",
+        }) as HTMLInputElement
+      ).value
+    ).toBe("");
+  });
+
   test("uses a field-aware time picker for ISO time values", async () => {
     const user = userEvent.setup();
     renderGenerator();

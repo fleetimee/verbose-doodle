@@ -131,7 +131,7 @@ const ACCOUNT_INQUIRY_FIELDS: readonly Iso8583FieldDefinition[] = [
   field(32, "Acquiring institution ID", "llvar", 11, "112"),
   field(33, "Forwarding institution ID", "llvar", 11, "112"),
   field(37, "Retrieval reference number", "n", 12, "080700000479"),
-  field(41, "Card acceptor terminal ID", "ans", 8, "        "),
+  field(41, "Card acceptor terminal ID", "ans", 8),
   field(42, "Card acceptor ID code", "ans", 15, "000000000000000"),
   field(
     43,
@@ -165,9 +165,9 @@ function commonTransactionFields(): readonly Iso8583FieldDefinition[] {
     field(25, "Point of service condition code", "n", 2, "00"),
     field(32, "Acquiring institution ID", "llvar", 11, "112"),
     field(37, "Retrieval reference number", "n", 12, "000000000001"),
-    field(41, "Card acceptor terminal ID", "ans", 8, "        "),
+    field(41, "Card acceptor terminal ID", "ans", 8),
     field(42, "Card acceptor ID code", "ans", 15, "000000000000000"),
-    field(43, "Card acceptor name / location", "ans", 40, " ".repeat(40)),
+    field(43, "Card acceptor name / location", "ans", 40),
     field(49, "Currency code, transaction", "n", 3, "360"),
     field(
       62,
@@ -348,7 +348,7 @@ function encodeField(fieldDefinition: Iso8583Field): string {
     );
   }
 
-  if (kind === "n" || kind === "ans") {
+  if (kind === "n") {
     if (value.length !== length) {
       throw new Iso8583PackingError(
         "field",
@@ -357,6 +357,17 @@ function encodeField(fieldDefinition: Iso8583Field): string {
       );
     }
     return value;
+  }
+
+  if (kind === "ans") {
+    if (value.length > length) {
+      throw new Iso8583PackingError(
+        "field",
+        `Bit ${number} ${label} cannot exceed ${length} characters.`,
+        number
+      );
+    }
+    return value.padEnd(length, " ");
   }
 
   if (value.length > length) {
