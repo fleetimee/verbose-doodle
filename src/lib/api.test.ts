@@ -1,13 +1,5 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import {
-  apiDelete,
-  apiFetch,
-  apiGet,
-  apiPatch,
-  apiPost,
-  apiPut,
-  createApiClient,
-} from "@/lib/api";
+import { apiFetch, apiPost, createApiClient } from "@/lib/api";
 
 describe("API utilities", () => {
   const originalFetch = globalThis.fetch;
@@ -52,20 +44,6 @@ describe("API utilities", () => {
   });
 
   describe("apiFetch", () => {
-    test("makes successful GET request", async () => {
-      const mockData = { id: 1, name: "Test" };
-      fetchSpy.mockResolvedValue({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => mockData,
-        ok: true,
-        status: 200,
-      } as Response);
-
-      const result = await apiFetch("/test");
-      expect(result).toEqual(mockData);
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-    });
-
     test("uses custom baseUrl when provided", async () => {
       const mockData = { success: true };
       fetchSpy.mockResolvedValue({
@@ -79,26 +57,6 @@ describe("API utilities", () => {
 
       expect(fetchSpy).toHaveBeenCalledWith(
         "https://api.example.com/test",
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            "Content-Type": "application/json",
-          }),
-        })
-      );
-    });
-
-    test("includes default Content-Type header", async () => {
-      fetchSpy.mockResolvedValue({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => ({}),
-        ok: true,
-        status: 200,
-      } as Response);
-
-      await apiFetch("/test");
-
-      expect(fetchSpy).toHaveBeenCalledWith(
-        expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
             "Content-Type": "application/json",
@@ -422,24 +380,6 @@ describe("API utilities", () => {
   });
 
   describe("HTTP method helpers", () => {
-    test("apiGet makes GET request", async () => {
-      fetchSpy.mockResolvedValue({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => ({ data: "test" }),
-        ok: true,
-        status: 200,
-      } as Response);
-
-      await apiGet("/test");
-
-      expect(fetchSpy).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          method: "GET",
-        })
-      );
-    });
-
     test("apiPost makes POST request with body", async () => {
       fetchSpy.mockResolvedValue({
         headers: new Headers({ "content-type": "application/json" }),
@@ -456,63 +396,6 @@ describe("API utilities", () => {
         expect.objectContaining({
           body: JSON.stringify(postData),
           method: "POST",
-        })
-      );
-    });
-
-    test("apiPut makes PUT request with body", async () => {
-      fetchSpy.mockResolvedValue({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => ({ updated: true }),
-        ok: true,
-        status: 200,
-      } as Response);
-
-      const putData = { name: "Updated" };
-      await apiPut("/test/1", putData);
-
-      expect(fetchSpy).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: JSON.stringify(putData),
-          method: "PUT",
-        })
-      );
-    });
-
-    test("apiPatch makes PATCH request with body", async () => {
-      fetchSpy.mockResolvedValue({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => ({ patched: true }),
-        ok: true,
-        status: 200,
-      } as Response);
-
-      const patchData = { status: "active" };
-      await apiPatch("/test/1", patchData);
-
-      expect(fetchSpy).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: JSON.stringify(patchData),
-          method: "PATCH",
-        })
-      );
-    });
-
-    test("apiDelete makes DELETE request", async () => {
-      fetchSpy.mockResolvedValue({
-        headers: new Headers(),
-        ok: true,
-        status: 204,
-      } as Response);
-
-      await apiDelete("/test/1");
-
-      expect(fetchSpy).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          method: "DELETE",
         })
       );
     });

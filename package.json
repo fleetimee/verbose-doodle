@@ -13,8 +13,8 @@
     "nfc-bridge:compile": "bun run nfc-bridge:build",
     "nfc-bridge:smoke": "bun tools/nfc-reader-bridge/release.ts smoke",
     "preview": "vite preview",
-    "test": "bun tools/run-tests.ts",
-    "test:watch": "bun test --watch",
+    "test": "bun test --isolate",
+    "test:watch": "bun test --isolate --watch",
     "type-check": "tsc --noEmit"
   },
   "resolutions": {

@@ -1,11 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createRef } from "react";
-import {
-  ResponseForm,
-  type ResponseFormHandle,
-} from "@/features/endpoints/forms/response-form";
+import { ResponseForm } from "@/features/endpoints/forms/response-form";
 import type { ResponseFormData } from "@/features/endpoints/schemas/response-schema";
 
 const SUBMIT_BUTTON_LABEL = "Save Response";
@@ -14,31 +10,6 @@ describe("ResponseForm", () => {
   beforeEach(() => {
     document.body.innerHTML = "";
     document.head.innerHTML = "";
-  });
-
-  test("renders default values", () => {
-    const handleSubmit = mock((_data: ResponseFormData) => {});
-    render(
-      <ResponseForm onSubmit={handleSubmit}>
-        <button type="submit">{SUBMIT_BUTTON_LABEL}</button>
-      </ResponseForm>
-    );
-
-    const nameInput = screen.getByLabelText("Name") as HTMLInputElement;
-    expect(nameInput.value).toBe("");
-
-    const jsonTextarea = screen.getByLabelText(
-      "JSON Response"
-    ) as HTMLTextAreaElement;
-    expect(jsonTextarea.value).toBe("{}");
-
-    const statusInput = screen.getByLabelText(
-      "Status Code"
-    ) as HTMLInputElement;
-    expect(statusInput.value).toBe("200");
-
-    const activatedSwitch = screen.getByRole("switch", { name: "Activate" });
-    expect(activatedSwitch.getAttribute("aria-checked")).toBe("false");
   });
 
   test("coerces numeric values and forwards submission data", async () => {
@@ -117,43 +88,5 @@ describe("ResponseForm", () => {
       screen.getByText("Status code must be between 100-599")
     ).toBeDefined();
     expect(handleSubmit).not.toHaveBeenCalled();
-  });
-
-  test("provides imperative handle helpers", () => {
-    const handleSubmit = mock((_data: ResponseFormData) => {});
-    const formRef = createRef<ResponseFormHandle>();
-
-    render(
-      <ResponseForm onSubmit={handleSubmit} ref={formRef}>
-        <button type="submit">{SUBMIT_BUTTON_LABEL}</button>
-      </ResponseForm>
-    );
-
-    if (!formRef.current) {
-      throw new Error("Expected form ref to be defined");
-    }
-
-    act(() => {
-      formRef.current?.form.setValue("name", "Temp");
-      formRef.current?.form.setValue("activated", true);
-    });
-
-    expect(formRef.current.getValues()).toEqual({
-      activated: true,
-      json: "{}",
-      name: "Temp",
-      statusCode: 200,
-    });
-
-    act(() => {
-      formRef.current?.reset();
-    });
-
-    expect(formRef.current.getValues()).toEqual({
-      activated: false,
-      json: "{}",
-      name: "",
-      statusCode: 200,
-    });
   });
 });

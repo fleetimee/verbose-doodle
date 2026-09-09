@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TourProvider } from "@/components/tour";
 import { DateConverter } from "@/features/developer-tools/tools/date-converter/components/date-converter";
@@ -83,9 +83,11 @@ describe("DateConverter", () => {
     await user.click(screen.getByRole("button", { name: "Convert" }));
 
     expect(await screen.findByRole("alert")).toBeDefined();
-    expect(
-      screen.queryByRole("region", { name: "ISO 8601 output" })
-    ).toBeNull();
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("region", { name: "ISO 8601 output" }) === null
+      ).toBe(true);
+    });
   });
 
   test("uses the current instant and copies without making a request", async () => {

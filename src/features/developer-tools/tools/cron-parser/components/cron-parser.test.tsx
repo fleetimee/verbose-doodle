@@ -49,8 +49,10 @@ describe("CronParser", () => {
     await user.type(input, "0 0 L * *");
     await user.click(screen.getByRole("button", { name: "Parse" }));
     expect(await screen.findByRole("alert")).toBeDefined();
-    expect(screen.queryByText("Upcoming executions")).toBeNull();
-    expect(container.querySelectorAll("time")).toHaveLength(0);
+    await waitFor(() => {
+      expect(screen.queryByText("Upcoming executions") === null).toBe(true);
+      expect(container.querySelectorAll("time")).toHaveLength(0);
+    });
   });
 
   test("parses with the keyboard shortcut without making a request", () => {

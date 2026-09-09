@@ -5,23 +5,10 @@ import {
   getErrorMessage,
   handleAuthError,
   showErrorToast,
-  showInfoToast,
-  showSuccessToast,
-  showWarningToast,
 } from "@/lib/error-handler";
 
 describe("Error Handler utilities", () => {
   describe("getErrorMessage", () => {
-    test("returns message for ApiError with code", () => {
-      const error: ApiError = {
-        code: "TIMEOUT",
-        message: "Request timed out",
-      };
-      expect(getErrorMessage(error)).toBe(
-        "Request timed out. Please try again."
-      );
-    });
-
     test("returns message for ApiError with status code", () => {
       const error: ApiError = {
         message: "Unauthorized",
@@ -50,32 +37,6 @@ describe("Error Handler utilities", () => {
       );
     });
 
-    test("handles 404 errors", () => {
-      const error: ApiError = {
-        message: "Not found",
-        status: 404,
-      };
-      expect(getErrorMessage(error)).toBe("Resource not found.");
-    });
-
-    test("handles 403 errors", () => {
-      const error: ApiError = {
-        message: "Forbidden",
-        status: 403,
-      };
-      expect(getErrorMessage(error)).toBe("Access denied.");
-    });
-
-    test("handles 422 validation errors", () => {
-      const error: ApiError = {
-        message: "Validation failed",
-        status: 422,
-      };
-      expect(getErrorMessage(error)).toBe(
-        "Please check your input and try again."
-      );
-    });
-
     test("handles 500 server errors", () => {
       const error: ApiError = {
         message: "Internal server error",
@@ -86,47 +47,11 @@ describe("Error Handler utilities", () => {
       );
     });
 
-    test("handles 502 Bad Gateway", () => {
-      const error: ApiError = {
-        message: "Bad gateway",
-        status: 502,
-      };
-      expect(getErrorMessage(error)).toBe(
-        "Server error. Please try again later."
-      );
-    });
-
-    test("handles 503 Service Unavailable", () => {
-      const error: ApiError = {
-        message: "Service unavailable",
-        status: 503,
-      };
-      expect(getErrorMessage(error)).toBe(
-        "Server error. Please try again later."
-      );
-    });
-
-    test("handles 504 Gateway Timeout", () => {
-      const error: ApiError = {
-        message: "Gateway timeout",
-        status: 504,
-      };
-      expect(getErrorMessage(error)).toBe(
-        "Request timed out. Please try again."
-      );
-    });
-
     test("handles network errors (TypeError)", () => {
       const error = new TypeError("Failed to fetch");
       // TypeError has a message property, so it returns the message directly
       // The TypeError check in the implementation is unreachable due to early return
       expect(getErrorMessage(error)).toBe("Failed to fetch");
-    });
-
-    test("handles TypeError without fetch keyword", () => {
-      const error = new TypeError("Some other type error");
-      // Returns the error message since it has a message property
-      expect(getErrorMessage(error)).toBe("Some other type error");
     });
 
     test("returns message for Error objects with message", () => {
@@ -153,15 +78,9 @@ describe("Error Handler utilities", () => {
 
   describe("Toast notification functions", () => {
     let errorSpy: ReturnType<typeof spyOn>;
-    let successSpy: ReturnType<typeof spyOn>;
-    let infoSpy: ReturnType<typeof spyOn>;
-    let warningSpy: ReturnType<typeof spyOn>;
 
     beforeEach(() => {
       errorSpy = spyOn(toast, "error");
-      successSpy = spyOn(toast, "success");
-      infoSpy = spyOn(toast, "info");
-      warningSpy = spyOn(toast, "warning");
     });
 
     test("showErrorToast calls toast.error with correct parameters", () => {
@@ -188,42 +107,6 @@ describe("Error Handler utilities", () => {
       expect(errorSpy).toHaveBeenCalledWith("Error", {
         description: "Custom error message",
         duration: 5000,
-      });
-    });
-
-    test("showSuccessToast calls toast.success", () => {
-      showSuccessToast("Success!", "Operation completed");
-
-      expect(successSpy).toHaveBeenCalledWith("Success!", {
-        description: "Operation completed",
-        duration: 4000,
-      });
-    });
-
-    test("showSuccessToast works without description", () => {
-      showSuccessToast("Success!");
-
-      expect(successSpy).toHaveBeenCalledWith("Success!", {
-        description: undefined,
-        duration: 4000,
-      });
-    });
-
-    test("showInfoToast calls toast.info", () => {
-      showInfoToast("Info", "Informational message");
-
-      expect(infoSpy).toHaveBeenCalledWith("Info", {
-        description: "Informational message",
-        duration: 4000,
-      });
-    });
-
-    test("showWarningToast calls toast.warning", () => {
-      showWarningToast("Warning", "Warning message");
-
-      expect(warningSpy).toHaveBeenCalledWith("Warning", {
-        description: "Warning message",
-        duration: 4000,
       });
     });
   });

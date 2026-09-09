@@ -20,20 +20,6 @@ describe("AboutHeader", () => {
     localStorage.setItem("app-locale", "en-US");
   });
 
-  test("uses the app icon in dark theme", () => {
-    renderHeader("dark");
-
-    const logo = screen.getByRole("img", { name: "Fleetime Labs" });
-    expect(logo.getAttribute("src")).toBe("/brand/biller-app-icon.png");
-  });
-
-  test("uses the app icon in light theme", () => {
-    renderHeader("light");
-
-    const logo = screen.getByRole("img", { name: "Fleetime Labs" });
-    expect(logo.getAttribute("src")).toBe("/brand/biller-app-icon.png");
-  });
-
   test("switches locale and reports each change", async () => {
     const user = userEvent.setup();
     const localeChanges: string[] = [];

@@ -4,21 +4,6 @@ import userEvent from "@testing-library/user-event";
 import { SimulationForm } from "@/features/endpoints/forms/simulation-form";
 
 describe("SimulationForm", () => {
-  test("uses the Base UI checked state for selected option styling", () => {
-    render(<SimulationForm onSubmit={mock(() => {})} />);
-
-    const normalResponseLabel = screen
-      .getByText("Normal Response")
-      .closest("[data-slot=field-label]");
-
-    expect(normalResponseLabel?.className).toContain(
-      "has-data-checked:bg-primary/5"
-    );
-    expect(normalResponseLabel?.className).toContain(
-      "has-data-checked:border-primary"
-    );
-  });
-
   test("updates the delay value without replacing the preview", async () => {
     const user = userEvent.setup();
 

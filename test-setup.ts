@@ -17,8 +17,8 @@ if (!document.getAnimations) {
   document.getAnimations = () => [];
 }
 
-Element.prototype.animate = () =>
-  ({
+Element.prototype.animate = () => {
+  const animation = {
     addEventListener: () => {},
     cancel: () => {},
     currentTime: 0,
@@ -34,7 +34,16 @@ Element.prototype.animate = () =>
     removeEventListener: () => {},
     reverse: () => {},
     startTime: 0,
-  }) as unknown as Animation;
+  } as unknown as Animation;
+
+  queueMicrotask(() => {
+    animation.onfinish?.call(
+      animation,
+      new Event("finish") as AnimationPlaybackEvent
+    );
+  });
+  return animation;
+};
 
 afterEach(() => {
   cleanup();
