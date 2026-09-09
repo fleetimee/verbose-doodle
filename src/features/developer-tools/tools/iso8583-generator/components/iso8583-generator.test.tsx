@@ -1,5 +1,6 @@
-import { describe, expect, test } from "bun:test";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, spyOn, test } from "bun:test";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { toast } from "sonner";
 import userEvent from "@testing-library/user-event";
 import { Iso8583Generator } from "./iso8583-generator";
 
@@ -249,7 +250,11 @@ describe("Iso8583Generator", () => {
     );
   });
 
-  test("adds a situational field from catalog and allows removing it", async () => {
+  test("adds a situational field from catalog and allows removing it with toast notifications and undo", async () => {
+    const successSpy = spyOn(toast, "success");
+    const messageSpy = spyOn(toast, "message");
+    const infoSpy = spyOn(toast, "info");
+
     const user = userEvent.setup();
     renderGenerator();
 
@@ -268,6 +273,11 @@ describe("Iso8583Generator", () => {
     });
     await user.click(addBit60Btn);
 
+    // Verify success toast triggered when bit was added
+    expect(successSpy).toHaveBeenCalledWith(
+      "Bit 60 (Reserved private data) added to message"
+    );
+
     // Close the drawer
     await user.click(screen.getByRole("button", { name: "Close" }));
 
@@ -284,6 +294,79 @@ describe("Iso8583Generator", () => {
     expect(
       screen.queryByRole("textbox", { name: "Bit 60 Reserved private data" })
     ).toBeNull();
+
+    // Verify toast notification on removal with Undo action
+    expect(messageSpy).toHaveBeenCalledWith(
+      "Bit 60 (Reserved private data) removed",
+      expect.objectContaining({
+        action: expect.objectContaining({
+          label: "Undo",
+        }),
+      })
+    );
+
+    // Trigger Undo action and verify Bit 60 is restored
+    const lastToastCall = messageSpy.mock.calls.at(-1);
+    const undoAction = (lastToastCall?.[1] as { action?: { onClick?: () => void } })?.action;
+    expect(undoAction).toBeDefined();
+
+    act(() => {
+      undoAction?.onClick?.();
+    });
+
+    expect(
+      screen.getByRole("textbox", { name: "Bit 60 Reserved private data" })
+    ).toBeDefined();
+    expect(infoSpy).toHaveBeenCalledWith(
+      "Bit 60 (Reserved private data) restored"
+    );
+  });
+
+  test("adds and removes a situational field directly from inside the drawer", async () => {
+    const successSpy = spyOn(toast, "success");
+    const messageSpy = spyOn(toast, "message");
+
+    const user = userEvent.setup();
+    renderGenerator();
+
+    // Switch to 0200 Transaction
+    await user.click(screen.getByRole("tab", { name: "0200 Transaction" }));
+
+    // Open Add Field drawer
+    await user.click(screen.getByRole("button", { name: "Add field" }));
+
+    // Click Add bit 60 to message
+    const addBtn = screen.getByRole("button", { name: "Add bit 60 to message" });
+    await user.click(addBtn);
+
+    expect(successSpy).toHaveBeenCalledWith(
+      "Bit 60 (Reserved private data) added to message"
+    );
+
+    // Verify button in drawer immediately turns into remove button
+    const removeDrawerBtn = screen.getByRole("button", {
+      name: "Remove bit 60 from message",
+    });
+    expect(removeDrawerBtn).toBeDefined();
+
+    // Click remove directly from drawer
+    await user.click(removeDrawerBtn);
+
+    expect(messageSpy).toHaveBeenCalledWith(
+      "Bit 60 (Reserved private data) removed",
+      expect.objectContaining({
+        action: expect.objectContaining({ label: "Undo" }),
+      })
+    );
+
+    // Verify button switches back to add in the drawer
+    expect(
+      screen.getByRole("button", { name: "Add bit 60 to message" })
+    ).toBeDefined();
+
+    // Close drawer and verify it is not in the form
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("textbox", { name: BIT_60_PATTERN })).toBeNull();
   });
 
   test("adds a custom bit with custom specifications via nested drawer", async () => {

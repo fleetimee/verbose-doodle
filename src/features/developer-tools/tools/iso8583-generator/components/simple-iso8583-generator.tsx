@@ -70,6 +70,7 @@ import {
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import {
   getIso8583FieldEnumOptions,
   type Iso8583EnumOption,
@@ -551,17 +552,48 @@ export function Iso8583Generator() {
   const [fields, setFields] = useState(() => presetFields("sign-on"));
   const [addFieldOpen, setAddFieldOpen] = useState(false);
 
-  const handleAddField = (newField: Iso8583Field) => {
+  const handleAddField = (newField: Iso8583Field, showToast = true) => {
     setFields((prev) => {
       const filtered = prev.filter((f) => f.number !== newField.number);
       return [...filtered, newField].sort((a, b) => a.number - b.number);
     });
     setStatus(null);
+    if (showToast) {
+      toast.success(
+        formatMessage(copy.bitAdded, {
+          label: newField.label,
+          number: newField.number,
+        })
+      );
+    }
   };
 
   const handleRemoveField = (fieldNumber: number) => {
+    const target = fields.find((f) => f.number === fieldNumber);
     setFields((prev) => prev.filter((f) => f.number !== fieldNumber));
     setStatus(null);
+    if (target) {
+      toast.message(
+        formatMessage(copy.bitRemoved, {
+          label: target.label,
+          number: target.number,
+        }),
+        {
+          action: {
+            label: copy.undo,
+            onClick: () => {
+              handleAddField(target, false);
+              toast.info(
+                formatMessage(copy.bitRestored, {
+                  label: target.label,
+                  number: target.number,
+                })
+              );
+            },
+          },
+        }
+      );
+    }
   };
   const [generatedPayload, setGeneratedPayload] = useState("");
   const [copied, setCopied] = useState(false);
@@ -836,8 +868,10 @@ export function Iso8583Generator() {
             </div>
             <div className="shrink-0">
               <AddFieldDialog
+                currentFields={fields}
                 existingFieldNumbers={fields.map((f) => f.number)}
                 onAddField={handleAddField}
+                onRemoveField={handleRemoveField}
                 onOpenChange={setAddFieldOpen}
                 open={addFieldOpen}
               />

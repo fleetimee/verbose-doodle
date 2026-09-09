@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Plus } from "@/components/hugeicons";
+import { Check, Plus, Trash2 } from "@/components/hugeicons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +36,7 @@ export interface AddFieldDialogProps {
   readonly currentFields?: readonly Iso8583Field[];
   readonly existingFieldNumbers?: readonly number[];
   readonly onAddField: (field: Iso8583Field) => void;
+  readonly onRemoveField?: (fieldNumber: number) => void;
   readonly onOpenChange?: (open: boolean) => void;
   readonly open?: boolean;
 }
@@ -43,11 +44,15 @@ export interface AddFieldDialogProps {
 function SituationalItemCard({
   item,
   isAdded,
+  isRemovable = true,
   onAdd,
+  onRemove,
 }: {
   readonly item: SituationalCatalogItem;
   readonly isAdded: boolean;
+  readonly isRemovable?: boolean;
   readonly onAdd: () => void;
+  readonly onRemove?: () => void;
 }) {
   return (
     <div
@@ -66,6 +71,14 @@ function SituationalItemCard({
           >
             Bit {item.bit}
           </Badge>
+          {isAdded ? (
+            <Badge
+              className="border-emerald-500/30 bg-emerald-500/10 font-medium text-[10px] text-emerald-600 dark:text-emerald-400"
+              variant="outline"
+            >
+              Added
+            </Badge>
+          ) : null}
           <span className="font-medium text-foreground text-xs leading-none">
             {item.name}
           </span>
@@ -83,38 +96,56 @@ function SituationalItemCard({
           </p>
         ) : null}
       </div>
-      <Button
-        aria-label={
-          isAdded ? `Bit ${item.bit} added` : `Add bit ${item.bit} to message`
-        }
-        className={cn(
-          "mt-0.5 size-8 shrink-0 rounded-lg transition-all",
-          isAdded
-            ? "cursor-default border-transparent bg-primary/10 text-primary hover:bg-primary/10"
-            : "hover:bg-primary hover:text-primary-foreground"
-        )}
-        disabled={isAdded}
-        onClick={onAdd}
-        size="icon"
-        type="button"
-        variant={isAdded ? "ghost" : "outline"}
-      >
-        {isAdded ? (
-          <Check className="size-4 text-emerald-500" />
+      {isAdded ? (
+        isRemovable && onRemove ? (
+          <Button
+            aria-label={`Remove bit ${item.bit} from message`}
+            className="mt-0.5 size-8 shrink-0 rounded-lg border-destructive/25 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all"
+            onClick={onRemove}
+            size="icon"
+            type="button"
+            variant="outline"
+          >
+            <Trash2 className="size-4" />
+          </Button>
         ) : (
+          <Button
+            aria-label={`Bit ${item.bit} is a standard preset field`}
+            className="mt-0.5 size-8 shrink-0 cursor-default border-transparent bg-primary/10 text-primary hover:bg-primary/10"
+            disabled
+            size="icon"
+            type="button"
+            variant="ghost"
+          >
+            <Check className="size-4 text-emerald-500" />
+          </Button>
+        )
+      ) : (
+        <Button
+          aria-label={`Add bit ${item.bit} to message`}
+          className="mt-0.5 size-8 shrink-0 rounded-lg transition-all hover:bg-primary hover:text-primary-foreground"
+          onClick={onAdd}
+          size="icon"
+          type="button"
+          variant="outline"
+        >
           <Plus className="size-4" />
-        )}
-      </Button>
+        </Button>
+      )}
     </div>
   );
 }
 
 function SituationalFieldsList({
+  currentFields,
   existingFieldNumbers,
   onAddCatalogItem,
+  onRemoveCatalogItem,
 }: {
+  readonly currentFields?: readonly Iso8583Field[];
   readonly existingFieldNumbers: readonly number[];
   readonly onAddCatalogItem: (item: SituationalCatalogItem) => void;
+  readonly onRemoveCatalogItem?: (bit: number) => void;
 }) {
   const [search, setSearch] = useState("");
 
@@ -122,6 +153,25 @@ function SituationalFieldsList({
     () => new Set(existingFieldNumbers),
     [existingFieldNumbers]
   );
+
+  const customFields = useMemo(() => {
+    if (!currentFields) return [];
+    return currentFields.filter(
+      (f) => f.isCustom && !SITUATIONAL_CATALOG.some((c) => c.bit === f.number)
+    );
+  }, [currentFields]);
+
+  const filteredCustomFields = useMemo(() => {
+    if (!customFields.length) return [];
+    const q = search.trim().toLowerCase();
+    if (!q) return customFields;
+    return customFields.filter(
+      (f) =>
+        f.number.toString().includes(q) ||
+        f.label.toLowerCase().includes(q) ||
+        f.value?.toLowerCase().includes(q)
+    );
+  }, [customFields, search]);
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -136,6 +186,13 @@ function SituationalFieldsList({
     );
   }, [search]);
 
+  const currentFieldMap = useMemo(() => {
+    if (!currentFields) return new Map<number, Iso8583Field>();
+    return new Map(currentFields.map((f) => [f.number, f]));
+  }, [currentFields]);
+
+  const totalMatching = filteredItems.length + filteredCustomFields.length;
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="shrink-0 px-4 pt-1">
@@ -149,19 +206,83 @@ function SituationalFieldsList({
 
       <ScrollArea className="min-h-0 flex-1 px-4">
         <div className="flex flex-col gap-2 pb-4">
-          {filteredItems.length === 0 ? (
+          {filteredCustomFields.length > 0 ? (
+            <div className="mb-2 flex flex-col gap-2">
+              <div className="px-1 font-semibold text-[11px] text-muted-foreground uppercase tracking-wider">
+                Custom elements ({filteredCustomFields.length})
+              </div>
+              {filteredCustomFields.map((field) => (
+                <div
+                  className="flex items-start justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3.5 transition-colors dark:bg-primary/10"
+                  key={field.number}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge className="font-mono text-xs" variant="default">
+                        Bit {field.number}
+                      </Badge>
+                      <Badge
+                        className="border-primary/30 bg-primary/10 font-medium text-[10px] text-primary"
+                        variant="outline"
+                      >
+                        Custom
+                      </Badge>
+                      <span className="font-medium text-foreground text-xs leading-none">
+                        {field.label}
+                      </span>
+                      <span className="font-mono text-[11px] text-muted-foreground">
+                        {field.kind.toUpperCase()}({field.length})
+                      </span>
+                    </div>
+                    {field.value ? (
+                      <p className="mt-1 font-mono text-[11px] text-muted-foreground/80">
+                        Value: <span className="text-foreground">{field.value}</span>
+                      </p>
+                    ) : null}
+                  </div>
+                  {onRemoveCatalogItem ? (
+                    <Button
+                      aria-label={`Remove bit ${field.number} from message`}
+                      className="mt-0.5 size-8 shrink-0 rounded-lg border-destructive/25 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all"
+                      onClick={() => onRemoveCatalogItem(field.number)}
+                      size="icon"
+                      type="button"
+                      variant="outline"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  ) : null}
+                </div>
+              ))}
+              <div className="my-1.5 h-px bg-border/60" />
+            </div>
+          ) : null}
+
+          {totalMatching === 0 ? (
             <div className="py-8 text-center text-muted-foreground text-xs">
               No matching fields found in catalog.
             </div>
           ) : (
-            filteredItems.map((item) => (
-              <SituationalItemCard
-                isAdded={addedBits.has(item.bit)}
-                item={item}
-                key={item.bit}
-                onAdd={() => onAddCatalogItem(item)}
-              />
-            ))
+            filteredItems.map((item) => {
+              const field = currentFieldMap.get(item.bit);
+              const isAdded = addedBits.has(item.bit);
+              const isRemovable = field ? Boolean(field.isCustom) : true;
+
+              return (
+                <SituationalItemCard
+                  isAdded={isAdded}
+                  isRemovable={isRemovable}
+                  item={item}
+                  key={item.bit}
+                  onAdd={() => onAddCatalogItem(item)}
+                  onRemove={
+                    onRemoveCatalogItem
+                      ? () => onRemoveCatalogItem(item.bit)
+                      : undefined
+                  }
+                />
+              );
+            })
           )}
         </div>
       </ScrollArea>
@@ -355,6 +476,7 @@ export function AddFieldDialog({
   currentFields,
   existingFieldNumbers,
   onAddField,
+  onRemoveField,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: AddFieldDialogProps) {
@@ -494,8 +616,10 @@ export function AddFieldDialog({
 
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <SituationalFieldsList
+            currentFields={currentFields}
             existingFieldNumbers={existingNumbers}
             onAddCatalogItem={handleAddCatalogItem}
+            onRemoveCatalogItem={onRemoveField}
           />
         </div>
 
