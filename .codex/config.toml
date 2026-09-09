@@ -1,0 +1,3 @@
+[mcp_servers.blender]
+command = "/Users/fleetime/.local/bin/uvx"
+args = ["blender-mcp"]

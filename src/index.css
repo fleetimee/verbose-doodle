@@ -61,15 +61,9 @@
   width: 48%;
   pointer-events: none;
   content: "";
-  background: url("/brand/biller-operator-mascot-search.png") right top / contain no-repeat;
+  background: url("/brand/biller-operator-mascot-search-transparent.png") right top / contain no-repeat;
   opacity: 0.1;
-  mix-blend-mode: multiply;
   mask-image: linear-gradient(to bottom, black 65%, transparent);
-}
-
-.dark .navigation-search-results::before {
-  filter: invert(1) grayscale(1);
-  mix-blend-mode: screen;
 }
 
 .navigation-search-results [data-slot="command-list"] {
