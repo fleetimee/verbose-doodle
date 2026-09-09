@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   CalendarClock,
   ClipboardCopy,
@@ -70,7 +71,6 @@ import {
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import {
   getIso8583FieldEnumOptions,
   type Iso8583EnumOption,
@@ -111,7 +111,7 @@ const FIELD_EXPLANATIONS: Readonly<Record<number, string>> = {
   39: "The result code returned by the host. Code meanings belong to the selected host profile.",
   41: "Identifies the terminal or channel that originated the transaction.",
   42: "Identifies the merchant, biller, or accepting organization.",
-  43: "Fixed 40-character card acceptor name and location. Under standard ISO 8583 and ASPI / BPD DIY specifications, this consists of three fixed-width segments: Merchant Name (positions 1–25, space-padded), City (positions 26–38, space-padded), and Country/State Code (positions 39–40, e.g. \x27ID\x27 or \x27DIY IDN\x27). Values shorter than 40 characters are automatically right-padded with spaces on generation.",
+  43: "Fixed 40-character card acceptor name and location. Under standard ISO 8583 and ASPI / BPD DIY specifications, this consists of three fixed-width segments: Merchant Name (positions 1–25, space-padded), City (positions 26–38, space-padded), and Country/State Code (positions 39–40, e.g. 'ID' or 'DIY IDN'). Values shorter than 40 characters are automatically right-padded with spaces on generation.",
   49: "The three-digit numeric currency code for the transaction amount.",
   60: "Host-specific private data. Its internal format must follow the selected profile.",
   62: "Host-specific private data. Its internal format must follow the selected profile.",
@@ -119,6 +119,10 @@ const FIELD_EXPLANATIONS: Readonly<Record<number, string>> = {
   70: "The network-management operation, such as sign-on, sign-off, or echo. Values depend on the host profile.",
   90: "Carries identifying details from the original transaction during a reversal.",
 };
+
+function twoDigits(value: number) {
+  return String(value).padStart(2, "0");
+}
 
 function fieldFormat(field: Iso8583Field) {
   if (field.kind === "llvar") {
@@ -131,18 +135,6 @@ function fieldFormat(field: Iso8583Field) {
   return `Exactly ${field.length} ${content}.`;
 }
 
-function twoDigits(value: number) {
-  return String(value).padStart(2, "0");
-}
-
-function datePart(date: Date) {
-  return `${twoDigits(date.getMonth() + 1)}${twoDigits(date.getDate())}`;
-}
-
-function timePart(date: Date) {
-  return `${twoDigits(date.getHours())}${twoDigits(date.getMinutes())}${twoDigits(date.getSeconds())}`;
-}
-
 function FieldDateTimePicker({
   fieldNumber,
   onChange,
@@ -151,21 +143,28 @@ function FieldDateTimePicker({
   readonly onChange: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const supportsDate = fieldNumber === 7 || fieldNumber === 13;
-  const supportsTime = fieldNumber === 7 || fieldNumber === 12;
+  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
+
+  const supportsDate = [7, 13].includes(fieldNumber);
+  const supportsTime = [7, 12].includes(fieldNumber);
   const supportsMonth = fieldNumber === 14;
 
-  const writeValue = (date: Date) => {
+  const writeValue = (nextDate: Date) => {
     if (fieldNumber === 7) {
-      onChange(`${datePart(date)}${timePart(date)}`);
+      onChange(
+        `${twoDigits(nextDate.getMonth() + 1)}${twoDigits(nextDate.getDate())}${twoDigits(nextDate.getHours())}${twoDigits(nextDate.getMinutes())}${twoDigits(nextDate.getSeconds())}`
+      );
     } else if (fieldNumber === 12) {
-      onChange(timePart(date));
+      onChange(
+        `${twoDigits(nextDate.getHours())}${twoDigits(nextDate.getMinutes())}${twoDigits(nextDate.getSeconds())}`
+      );
     } else if (fieldNumber === 13) {
-      onChange(datePart(date));
+      onChange(
+        `${twoDigits(nextDate.getMonth() + 1)}${twoDigits(nextDate.getDate())}`
+      );
     } else if (fieldNumber === 14) {
       onChange(
-        `${twoDigits(date.getFullYear() % 100)}${twoDigits(date.getMonth() + 1)}`
+        `${String(nextDate.getFullYear()).slice(-2)}${twoDigits(nextDate.getMonth() + 1)}`
       );
     }
   };
@@ -178,24 +177,21 @@ function FieldDateTimePicker({
     next.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
     setSelectedDate(next);
     writeValue(next);
-    if (fieldNumber === 13) {
+    if (!supportsTime) {
       setOpen(false);
     }
   };
 
-  const chooseTime = (value: string) => {
-    const [hours = "0", minutes = "0", seconds = "0"] = value.split(":");
+  const chooseTime = (time: string) => {
+    const [hours, minutes, seconds] = time.split(":").map(Number);
     const next = new Date(selectedDate);
-    next.setHours(Number(hours), Number(minutes), Number(seconds), 0);
+    next.setHours(hours || 0, minutes || 0, seconds || 0, 0);
     setSelectedDate(next);
     writeValue(next);
   };
 
   const chooseMonth = (value: string) => {
     const [year, month] = value.split("-");
-    if (!(year && month)) {
-      return;
-    }
     const next = new Date(selectedDate);
     next.setFullYear(Number(year), Number(month) - 1, 1);
     setSelectedDate(next);
@@ -207,14 +203,14 @@ function FieldDateTimePicker({
     <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>
         <Button
-          aria-label={`Pick value for bit ${fieldNumber}`}
+          aria-label={formatMessage(copy.pickValueAriaLabel, { fieldNumber })}
           className="shrink-0"
           size="sm"
           type="button"
           variant="ghost"
         >
           <CalendarClock />
-          Pick
+          {copy.pickButton}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-auto p-0">
@@ -232,7 +228,7 @@ function FieldDateTimePicker({
               className="font-medium text-xs"
               htmlFor={`iso-time-${fieldNumber}`}
             >
-              Time
+              {copy.timeLabel}
             </label>
             <Input
               className="mt-2 font-mono"
@@ -247,7 +243,7 @@ function FieldDateTimePicker({
         {supportsMonth ? (
           <div className="p-3">
             <label className="font-medium text-xs" htmlFor="iso-expiry-month">
-              Expiration month
+              {copy.expirationMonthLabel}
             </label>
             <Input
               className="mt-2 font-mono"
@@ -271,7 +267,7 @@ function FieldDateTimePicker({
             type="button"
             variant="outline"
           >
-            Use current {supportsTime ? "date and time" : "date"}
+            {supportsTime ? copy.useCurrentDateTime : copy.useCurrentDate}
           </Button>
         </div>
       </PopoverContent>
@@ -302,6 +298,17 @@ function EnumFieldSelect({
   const [customMode, setCustomMode] = useState(false);
   const isCustom = !isKnownEnum || customMode;
 
+  const selectedLabel = useMemo(() => {
+    if (isCustom) {
+      return field.value
+        ? formatMessage(copy.customValueWithParam, { value: field.value })
+        : copy.customValueLabel;
+    }
+    return (
+      enumOptions.find((opt) => opt.value === field.value)?.label ?? field.value
+    );
+  }, [isCustom, field.value, enumOptions]);
+
   return (
     <div className="space-y-2">
       <Select
@@ -322,11 +329,12 @@ function EnumFieldSelect({
           className="h-11 w-full font-mono text-sm shadow-none"
           id={`iso-field-${field.number}`}
         >
-          <SelectValue placeholder={`Select Bit ${field.number} code`}>
-            {isCustom
-              ? `Custom value${field.value ? ` (${field.value})` : ""}`
-              : (enumOptions.find((opt) => opt.value === field.value)?.label ??
-                field.value)}
+          <SelectValue
+            placeholder={formatMessage(copy.selectBitCodePlaceholder, {
+              number: field.number,
+            })}
+          >
+            {selectedLabel}
           </SelectValue>
         </SelectTrigger>
         <SelectContent className="max-h-72">
@@ -342,7 +350,7 @@ function EnumFieldSelect({
           <div className="my-1 border-border border-t" />
           <SelectItem value="__custom__">
             <span className="text-muted-foreground text-xs italic sm:text-sm">
-              Custom value...
+              {copy.customValueOption}
             </span>
           </SelectItem>
         </SelectContent>
@@ -352,7 +360,7 @@ function EnumFieldSelect({
         <div className="flex items-center gap-2">
           <Input
             aria-invalid={invalid || undefined}
-            aria-label={`${label} (Custom value)`}
+            aria-label={formatMessage(copy.customValueAriaLabel, { label })}
             autoComplete="off"
             autoFocus
             className="h-9 min-w-0 flex-1 font-mono text-xs"
@@ -360,7 +368,13 @@ function EnumFieldSelect({
             inputMode={field.kind === "n" ? "numeric" : "text"}
             maxLength={field.length || undefined}
             onChange={(event) => onChange(event.currentTarget.value)}
-            placeholder={`Enter custom ${field.kind === "n" ? `${field.length}-digit ` : ""}value`}
+            placeholder={
+              field.kind === "n"
+                ? formatMessage(copy.enterCustomDigitsPlaceholder, {
+                    length: field.length,
+                  })
+                : copy.enterCustomValuePlaceholder
+            }
             spellCheck={false}
             value={field.value}
           />
@@ -374,7 +388,7 @@ function EnumFieldSelect({
             type="button"
             variant="outline"
           >
-            Reset to preset
+            {copy.resetToPreset}
           </Button>
         </div>
       ) : null}
@@ -387,7 +401,9 @@ function FieldExplainDialog({ field }: { readonly field: Iso8583Field }) {
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          aria-label={`Explain bit ${field.number}`}
+          aria-label={formatMessage(copy.explainBitAriaLabel, {
+            number: field.number,
+          })}
           className="shrink-0"
           size="icon-sm"
           type="button"
@@ -399,31 +415,34 @@ function FieldExplainDialog({ field }: { readonly field: Iso8583Field }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Bit {field.number}: {field.label}
+            {formatMessage(copy.explainBitTitle, {
+              label: field.label,
+              number: field.number,
+            })}
           </DialogTitle>
           <DialogDescription>
-            {FIELD_EXPLANATIONS[field.number] ??
-              "This data element is defined by the selected ISO 8583 host profile."}
+            {FIELD_EXPLANATIONS[field.number] ?? copy.explainBitFallback}
           </DialogDescription>
         </DialogHeader>
         <dl className="grid gap-4 border-t pt-4 text-sm">
           <div>
-            <dt className="font-medium">Accepted format</dt>
+            <dt className="font-medium">{copy.acceptedFormatLabel}</dt>
             <dd className="mt-1 text-muted-foreground">{fieldFormat(field)}</dd>
           </div>
           {field.value ? (
             <div>
-              <dt className="font-medium">Current example</dt>
+              <dt className="font-medium">{copy.currentExampleLabel}</dt>
               <dd className="mt-1 break-all font-mono text-muted-foreground">
-                {field.number === 2 ? "Synthetic test PAN" : field.value}
+                {field.number === 2 ? copy.syntheticTestPan : field.value}
               </dd>
             </div>
           ) : null}
           <div>
-            <dt className="font-medium">Bitmap behavior</dt>
+            <dt className="font-medium">{copy.bitmapBehaviorLabel}</dt>
             <dd className="mt-1 text-muted-foreground">
-              Enable this field to include bit {field.number}. Disable it to
-              remove the bit and its value from the generated message.
+              {formatMessage(copy.bitmapBehaviorDescription, {
+                number: field.number,
+              })}
             </dd>
           </div>
         </dl>
@@ -462,7 +481,9 @@ function FieldInput({
     >
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <Checkbox
-          aria-label={`Enable bit ${field.number}`}
+          aria-label={formatMessage(copy.enableBitAriaLabel, {
+            number: field.number,
+          })}
           checked={field.enabled}
           onCheckedChange={(checked) => onToggle(checked === true)}
         />
@@ -479,14 +500,16 @@ function FieldInput({
               className="h-4 shrink-0 px-1.5 py-0 font-normal text-[10px] text-muted-foreground leading-4"
               variant="outline"
             >
-              Custom
+              {copy.customBadge}
             </Badge>
           ) : null}
         </label>
         <FieldExplainDialog field={field} />
         {onRemove ? (
           <Button
-            aria-label={`Remove bit ${field.number}`}
+            aria-label={formatMessage(copy.removeBitFromFormAriaLabel, {
+              number: field.number,
+            })}
             className="shrink-0 text-muted-foreground hover:text-destructive"
             onClick={onRemove}
             size="icon-sm"
@@ -501,7 +524,10 @@ function FieldInput({
         ) : null}
         {!hasDateTimePicker && field.helper ? (
           <Button
-            aria-label={`${field.helper === "stan" ? copy.autoIncrement : copy.now} Bit ${field.number}`}
+            aria-label={formatMessage(copy.fieldHelperAriaLabel, {
+              helper: field.helper === "stan" ? copy.autoIncrement : copy.now,
+              number: field.number,
+            })}
             className="shrink-0"
             onClick={onHelper}
             size="sm"
@@ -540,7 +566,7 @@ function FieldInput({
       </p>
       {field.number === 43 ? (
         <p className="font-mono text-[11px] text-muted-foreground/80">
-          Standard layout: Name [1–25] · City [26–38] · Country [39–40]
+          {copy.bit43StandardLayout}
         </p>
       ) : null}
     </Field>
@@ -632,7 +658,7 @@ export function Iso8583Generator() {
         error:
           error instanceof Iso8583PackingError
             ? error
-            : new Iso8583PackingError("field", "Could not pack this message."),
+            : new Iso8583PackingError("field", copy.packErrorMessageFallback),
         message: null,
       };
     }
@@ -748,7 +774,7 @@ export function Iso8583Generator() {
             {copy.title}
           </h1>
           <p className="text-muted-foreground text-sm leading-6">
-            Fill the fields, then generate a raw ISO 8583 message.
+            {copy.subtitle}
           </p>
         </div>
         <Badge className="shrink-0 self-start sm:self-center" variant="outline">
@@ -759,7 +785,7 @@ export function Iso8583Generator() {
       <main className="min-w-0">
         <div className="mb-6 flex flex-col gap-2">
           <p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.16em]">
-            Message preset
+            {copy.messagePreset}
           </p>
           <div className="flex flex-col rounded-lg border bg-muted p-1 shadow-xs sm:flex-row">
             <Tabs
@@ -816,14 +842,14 @@ export function Iso8583Generator() {
               value={morePreset ? presetId : ""}
             >
               <SelectTrigger
-                aria-label="More messages"
+                aria-label={copy.moreMessages}
                 className={cn(
                   "w-full border-transparent shadow-none data-[size=default]:h-11 sm:w-52 sm:data-[size=default]:h-14",
                   morePreset && "bg-background shadow-xs"
                 )}
               >
-                <SelectValue placeholder="More messages">
-                  {morePreset ? morePreset.label : "More messages"}
+                <SelectValue placeholder={copy.moreMessages}>
+                  {morePreset ? morePreset.label : copy.moreMessages}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:data-ending-style:transform-none motion-reduce:data-starting-style:transform-none">
@@ -860,7 +886,9 @@ export function Iso8583Generator() {
           <div className="flex flex-col gap-3 border-b bg-muted/20 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
             <div>
               <h2 className="font-semibold">
-                {preset.label.split("·")[1]?.trim()} message
+                {formatMessage(copy.presetMessageHeading, {
+                  preset: preset.label.split("·")[1]?.trim() ?? preset.label,
+                })}
               </h2>
               <p className="mt-1 text-muted-foreground text-sm">
                 {preset.description}
@@ -871,8 +899,8 @@ export function Iso8583Generator() {
                 currentFields={fields}
                 existingFieldNumbers={fields.map((f) => f.number)}
                 onAddField={handleAddField}
-                onRemoveField={handleRemoveField}
                 onOpenChange={setAddFieldOpen}
+                onRemoveField={handleRemoveField}
                 open={addFieldOpen}
               />
             </div>
@@ -924,7 +952,7 @@ export function Iso8583Generator() {
               className="mx-5 mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-destructive text-xs"
               role="alert"
             >
-              {packedState.error.message}
+              {packedState.error.message || copy.packErrorMessageFallback}
             </div>
           ) : null}
 
@@ -936,7 +964,7 @@ export function Iso8583Generator() {
               type="button"
             >
               <RefreshCw data-icon="inline-start" />
-              Generate raw message
+              {copy.generateRawMessage}
             </Button>
           </div>
         </motion.section>
@@ -950,7 +978,7 @@ export function Iso8583Generator() {
               type="button"
             >
               <Code2 />
-              View raw message
+              {copy.viewRawMessage}
             </Button>
           </SheetTrigger>
         ) : null}
@@ -959,9 +987,9 @@ export function Iso8583Generator() {
           side="right"
         >
           <SheetHeader className="shrink-0 gap-1.5 border-b bg-muted/10 p-6 pr-14">
-            <SheetTitle className="text-xl">Raw message</SheetTitle>
+            <SheetTitle className="text-xl">{copy.rawMessageTitle}</SheetTitle>
             <SheetDescription className="text-sm">
-              Generated {preset.mti} message using the current field values.
+              {formatMessage(copy.rawMessageDescription, { mti: preset.mti })}
             </SheetDescription>
           </SheetHeader>
 
@@ -987,13 +1015,13 @@ export function Iso8583Generator() {
                         className="h-6 px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-xs"
                         value="json"
                       >
-                        Formatted (JSON)
+                        {copy.formattedJsonTab}
                       </TabsTrigger>
                       <TabsTrigger
                         className="h-6 px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-xs"
                         value="text"
                       >
-                        Raw Stream
+                        {copy.rawStreamTab}
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>
@@ -1002,7 +1030,7 @@ export function Iso8583Generator() {
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1.5">
                     <span className="text-muted-foreground text-xs">
-                      Theme:
+                      {copy.themeLabel}
                     </span>
                     <CodeBlockThemeSelector
                       mode={resolvedTheme === "dark" ? "dark" : "light"}
@@ -1052,21 +1080,21 @@ export function Iso8583Generator() {
 
             {packedState.message ? (
               <section
-                aria-label="Bitmap inspector"
+                aria-label={copy.bitmapInspectorAriaLabel}
                 className="shrink-0 space-y-3 rounded-lg border bg-muted/20 p-4"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
-                      Bitmap Inspector
+                      {copy.bitmapInspectorTitle}
                     </h3>
                     <Badge
                       className="h-5 font-mono text-[10px]"
                       variant="secondary"
                     >
                       {packedState.message.activeFields.some((b) => b > 64)
-                        ? "128-bit (Extended)"
-                        : "64-bit (Primary)"}
+                        ? copy.bitmap128Bit
+                        : copy.bitmap64Bit}
                     </Badge>
                   </div>
                   <Button
@@ -1077,13 +1105,13 @@ export function Iso8583Generator() {
                     variant="outline"
                   >
                     <ClipboardCopy className="size-3" />
-                    Copy raw string
+                    {copy.copyRawString}
                   </Button>
                 </div>
 
                 <div className="space-y-1">
                   <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider">
-                    Hex Bitmap
+                    {copy.hexBitmap}
                   </span>
                   <div className="select-all break-all rounded border bg-background/80 px-2.5 py-1.5 font-mono text-foreground text-xs shadow-xs">
                     {packedState.message.bitmap}
@@ -1092,7 +1120,9 @@ export function Iso8583Generator() {
 
                 <div className="space-y-1.5">
                   <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider">
-                    Active Fields ({packedState.message.activeFields.length})
+                    {formatMessage(copy.activeFieldsSection, {
+                      count: packedState.message.activeFields.length,
+                    })}
                   </span>
                   <div className="flex flex-wrap gap-1 pt-0.5">
                     {packedState.message.activeFields.map((number) => {
@@ -1103,11 +1133,14 @@ export function Iso8583Generator() {
                           key={number}
                           title={
                             field?.label
-                              ? `Bit ${number}: ${field.label}`
-                              : `Bit ${number}`
+                              ? formatMessage(copy.explainBitTitle, {
+                                  label: field.label,
+                                  number,
+                                })
+                              : formatMessage(copy.bitBadge, { bit: number })
                           }
                         >
-                          Bit {number}
+                          {formatMessage(copy.bitBadge, { bit: number })}
                         </span>
                       );
                     })}

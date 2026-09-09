@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { Iso8583Field, Iso8583FieldKind } from "../pack-iso8583";
 import {
@@ -32,13 +33,76 @@ import {
   type SituationalCatalogItem,
 } from "../situational-catalog";
 
+const copy = messages.iso8583Generator;
+
 export interface AddFieldDialogProps {
   readonly currentFields?: readonly Iso8583Field[];
   readonly existingFieldNumbers?: readonly number[];
   readonly onAddField: (field: Iso8583Field) => void;
-  readonly onRemoveField?: (fieldNumber: number) => void;
   readonly onOpenChange?: (open: boolean) => void;
+  readonly onRemoveField?: (fieldNumber: number) => void;
   readonly open?: boolean;
+}
+
+function ItemActionButton({
+  isAdded,
+  isRemovable,
+  item,
+  onAdd,
+  onRemove,
+}: {
+  readonly isAdded: boolean;
+  readonly isRemovable: boolean;
+  readonly item: SituationalCatalogItem;
+  readonly onAdd: () => void;
+  readonly onRemove?: () => void;
+}) {
+  if (!isAdded) {
+    return (
+      <Button
+        aria-label={formatMessage(copy.addBitAriaLabel, { bit: item.bit })}
+        className="mt-0.5 size-8 shrink-0 rounded-lg transition-all hover:bg-primary hover:text-primary-foreground"
+        onClick={onAdd}
+        size="icon"
+        type="button"
+        variant="outline"
+      >
+        <Plus className="size-4" />
+      </Button>
+    );
+  }
+
+  if (isRemovable && onRemove) {
+    return (
+      <Button
+        aria-label={formatMessage(copy.removeBitAriaLabel, {
+          bit: item.bit,
+        })}
+        className="mt-0.5 size-8 shrink-0 rounded-lg border-destructive/25 bg-destructive/10 text-destructive transition-all hover:bg-destructive hover:text-destructive-foreground"
+        onClick={onRemove}
+        size="icon"
+        type="button"
+        variant="outline"
+      >
+        <Trash2 className="size-4" />
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      aria-label={formatMessage(copy.bitStandardPresetAriaLabel, {
+        bit: item.bit,
+      })}
+      className="mt-0.5 size-8 shrink-0 cursor-default border-transparent bg-primary/10 text-primary hover:bg-primary/10"
+      disabled
+      size="icon"
+      type="button"
+      variant="ghost"
+    >
+      <Check className="size-4 text-emerald-500" />
+    </Button>
+  );
 }
 
 function SituationalItemCard({
@@ -69,14 +133,14 @@ function SituationalItemCard({
             className="font-mono text-xs"
             variant={isAdded ? "default" : "secondary"}
           >
-            Bit {item.bit}
+            {formatMessage(copy.bitBadge, { bit: item.bit })}
           </Badge>
           {isAdded ? (
             <Badge
               className="border-emerald-500/30 bg-emerald-500/10 font-medium text-[10px] text-emerald-600 dark:text-emerald-400"
               variant="outline"
             >
-              Added
+              {copy.bitAddedBadge}
             </Badge>
           ) : null}
           <span className="font-medium text-foreground text-xs leading-none">
@@ -91,47 +155,17 @@ function SituationalItemCard({
         </p>
         {item.defaultValue ? (
           <p className="mt-1 font-mono text-[11px] text-muted-foreground/80">
-            Default:{" "}
-            <span className="text-foreground">{item.defaultValue}</span>
+            {formatMessage(copy.bitDefaultValue, { value: item.defaultValue })}
           </p>
         ) : null}
       </div>
-      {isAdded ? (
-        isRemovable && onRemove ? (
-          <Button
-            aria-label={`Remove bit ${item.bit} from message`}
-            className="mt-0.5 size-8 shrink-0 rounded-lg border-destructive/25 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all"
-            onClick={onRemove}
-            size="icon"
-            type="button"
-            variant="outline"
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        ) : (
-          <Button
-            aria-label={`Bit ${item.bit} is a standard preset field`}
-            className="mt-0.5 size-8 shrink-0 cursor-default border-transparent bg-primary/10 text-primary hover:bg-primary/10"
-            disabled
-            size="icon"
-            type="button"
-            variant="ghost"
-          >
-            <Check className="size-4 text-emerald-500" />
-          </Button>
-        )
-      ) : (
-        <Button
-          aria-label={`Add bit ${item.bit} to message`}
-          className="mt-0.5 size-8 shrink-0 rounded-lg transition-all hover:bg-primary hover:text-primary-foreground"
-          onClick={onAdd}
-          size="icon"
-          type="button"
-          variant="outline"
-        >
-          <Plus className="size-4" />
-        </Button>
-      )}
+      <ItemActionButton
+        isAdded={isAdded}
+        isRemovable={isRemovable}
+        item={item}
+        onAdd={onAdd}
+        onRemove={onRemove}
+      />
     </div>
   );
 }
@@ -155,16 +189,22 @@ function SituationalFieldsList({
   );
 
   const customFields = useMemo(() => {
-    if (!currentFields) return [];
+    if (!currentFields) {
+      return [];
+    }
     return currentFields.filter(
       (f) => f.isCustom && !SITUATIONAL_CATALOG.some((c) => c.bit === f.number)
     );
   }, [currentFields]);
 
   const filteredCustomFields = useMemo(() => {
-    if (!customFields.length) return [];
+    if (!customFields.length) {
+      return [];
+    }
     const q = search.trim().toLowerCase();
-    if (!q) return customFields;
+    if (!q) {
+      return customFields;
+    }
     return customFields.filter(
       (f) =>
         f.number.toString().includes(q) ||
@@ -187,7 +227,9 @@ function SituationalFieldsList({
   }, [search]);
 
   const currentFieldMap = useMemo(() => {
-    if (!currentFields) return new Map<number, Iso8583Field>();
+    if (!currentFields) {
+      return new Map<number, Iso8583Field>();
+    }
     return new Map(currentFields.map((f) => [f.number, f]));
   }, [currentFields]);
 
@@ -199,7 +241,7 @@ function SituationalFieldsList({
         <Input
           className="h-9 text-xs"
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search bits by name, number, or description..."
+          placeholder={copy.searchBitsPlaceholder}
           value={search}
         />
       </div>
@@ -209,7 +251,9 @@ function SituationalFieldsList({
           {filteredCustomFields.length > 0 ? (
             <div className="mb-2 flex flex-col gap-2">
               <div className="px-1 font-semibold text-[11px] text-muted-foreground uppercase tracking-wider">
-                Custom elements ({filteredCustomFields.length})
+                {formatMessage(copy.customElementsHeader, {
+                  count: filteredCustomFields.length,
+                })}
               </div>
               {filteredCustomFields.map((field) => (
                 <div
@@ -219,13 +263,13 @@ function SituationalFieldsList({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge className="font-mono text-xs" variant="default">
-                        Bit {field.number}
+                        {formatMessage(copy.bitBadge, { bit: field.number })}
                       </Badge>
                       <Badge
                         className="border-primary/30 bg-primary/10 font-medium text-[10px] text-primary"
                         variant="outline"
                       >
-                        Custom
+                        {copy.customBadge}
                       </Badge>
                       <span className="font-medium text-foreground text-xs leading-none">
                         {field.label}
@@ -236,14 +280,17 @@ function SituationalFieldsList({
                     </div>
                     {field.value ? (
                       <p className="mt-1 font-mono text-[11px] text-muted-foreground/80">
-                        Value: <span className="text-foreground">{field.value}</span>
+                        Value:{" "}
+                        <span className="text-foreground">{field.value}</span>
                       </p>
                     ) : null}
                   </div>
                   {onRemoveCatalogItem ? (
                     <Button
-                      aria-label={`Remove bit ${field.number} from message`}
-                      className="mt-0.5 size-8 shrink-0 rounded-lg border-destructive/25 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all"
+                      aria-label={formatMessage(copy.removeBitAriaLabel, {
+                        bit: field.number,
+                      })}
+                      className="mt-0.5 size-8 shrink-0 rounded-lg border-destructive/25 bg-destructive/10 text-destructive transition-all hover:bg-destructive hover:text-destructive-foreground"
                       onClick={() => onRemoveCatalogItem(field.number)}
                       size="icon"
                       type="button"
@@ -260,7 +307,7 @@ function SituationalFieldsList({
 
           {totalMatching === 0 ? (
             <div className="py-8 text-center text-muted-foreground text-xs">
-              No matching fields found in catalog.
+              {copy.noBitsFound}
             </div>
           ) : (
             filteredItems.map((item) => {
@@ -314,19 +361,19 @@ function CustomFieldForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (bitNumber < 2 || bitNumber > 128) {
-      setError("Bit number must be between 2 and 128");
+      setError(copy.errorBitNumberRange);
       return;
     }
     if (existingBits.has(bitNumber)) {
-      setError(`Bit ${bitNumber} is already in the message`);
+      setError(formatMessage(copy.errorBitAlreadyExists, { bitNumber }));
       return;
     }
     if (!name.trim()) {
-      setError("Field name is required");
+      setError(copy.errorFieldNameRequired);
       return;
     }
     if (length <= 0) {
-      setError("Field length must be greater than 0");
+      setError(copy.errorFieldLengthPositive);
       return;
     }
 
@@ -357,7 +404,7 @@ function CustomFieldForm({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs" htmlFor="custom-bit-number">
-                Bit Number (2–128)
+                {copy.customBitNumberLabel}
               </Label>
               <Input
                 className="h-9 font-mono text-xs"
@@ -376,7 +423,7 @@ function CustomFieldForm({
 
             <div className="space-y-1.5">
               <Label className="text-xs" htmlFor="custom-bit-kind">
-                Format / Type
+                {copy.customBitFormatLabel}
               </Label>
               <Select
                 onValueChange={(val) => {
@@ -395,11 +442,17 @@ function CustomFieldForm({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="n">n (Numeric fixed)</SelectItem>
-                  <SelectItem value="ans">ans (Alphanumeric fixed)</SelectItem>
-                  <SelectItem value="llvar">llvar (Variable max 99)</SelectItem>
+                  <SelectItem value="n">
+                    {copy.customBitFormatNumeric}
+                  </SelectItem>
+                  <SelectItem value="ans">
+                    {copy.customBitFormatAlpha}
+                  </SelectItem>
+                  <SelectItem value="llvar">
+                    {copy.customBitFormatLlvar}
+                  </SelectItem>
                   <SelectItem value="lllvar">
-                    lllvar (Variable max 999)
+                    {copy.customBitFormatLllvar}
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -408,7 +461,7 @@ function CustomFieldForm({
 
           <div className="space-y-1.5">
             <Label className="text-xs" htmlFor="custom-bit-name">
-              Field Name / Description
+              {copy.customBitNameLabel}
             </Label>
             <Input
               className="h-9 text-xs"
@@ -417,7 +470,7 @@ function CustomFieldForm({
                 setName(e.target.value);
                 setError(null);
               }}
-              placeholder="e.g. Additional Data - Private"
+              placeholder={copy.customBitNamePlaceholder}
               required
               value={name}
             />
@@ -425,7 +478,7 @@ function CustomFieldForm({
 
           <div className="space-y-1.5">
             <Label className="text-xs" htmlFor="custom-bit-length">
-              Maximum Length / Capacity
+              {copy.customBitLengthLabel}
             </Label>
             <Input
               className="h-9 font-mono text-xs"
@@ -440,13 +493,13 @@ function CustomFieldForm({
 
           <div className="space-y-1.5">
             <Label className="text-xs" htmlFor="custom-bit-val">
-              Initial Value (optional)
+              {copy.customBitInitialValueLabel}
             </Label>
             <Input
               className="h-9 font-mono text-xs"
               id="custom-bit-val"
               onChange={(e) => setInitialValue(e.target.value)}
-              placeholder="Enter initial field content..."
+              placeholder={copy.customBitInitialValuePlaceholder}
               value={initialValue}
             />
           </div>
@@ -461,11 +514,11 @@ function CustomFieldForm({
             type="button"
             variant="ghost"
           >
-            Back to Situational Fields
+            {copy.backToSituationalFields}
           </Button>
         ) : null}
         <Button className="h-8 text-xs" type="submit">
-          Add Bit {bitNumber} to Message
+          {formatMessage(copy.submitCustomBit, { bitNumber })}
         </Button>
       </div>
     </form>
@@ -476,9 +529,9 @@ export function AddFieldDialog({
   currentFields,
   existingFieldNumbers,
   onAddField,
+  onOpenChange: setControlledOpen,
   onRemoveField,
   open: controlledOpen,
-  onOpenChange: setControlledOpen,
 }: AddFieldDialogProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [nestedOpen, setNestedOpen] = useState(false);
@@ -533,14 +586,14 @@ export function AddFieldDialog({
     >
       <DrawerTrigger asChild>
         <Button
-          aria-label="Add field"
+          aria-label={copy.addFieldButton}
           className="gap-1.5"
           size="sm"
           type="button"
           variant="outline"
         >
           <Plus className="size-4" />
-          Add field
+          {copy.addFieldButton}
         </Button>
       </DrawerTrigger>
       <DrawerContent
@@ -554,11 +607,10 @@ export function AddFieldDialog({
       >
         <DrawerHeader className="shrink-0 px-4 pt-4 pb-2 text-left">
           <DrawerTitle className="font-semibold text-base tracking-tight">
-            Add ISO 8583 Data Element
+            {copy.addSituationalTitle}
           </DrawerTitle>
           <DrawerDescription className="text-muted-foreground text-xs">
-            Add standard situational fields (Bits 2–128) or configure custom
-            bits.
+            {copy.addSituationalDescription}
           </DrawerDescription>
 
           <div className="mt-3">
@@ -576,10 +628,10 @@ export function AddFieldDialog({
                 >
                   <div className="flex items-center gap-2">
                     <Plus className="size-3.5 text-primary" />
-                    <span>Configure Custom Bit (Bits 2–128)</span>
+                    <span>{copy.configureCustomBit}</span>
                   </div>
                   <span className="font-mono text-[11px] text-muted-foreground">
-                    Open Drawer →
+                    {copy.openDrawer}
                   </span>
                 </Button>
               </DrawerTrigger>
@@ -595,10 +647,10 @@ export function AddFieldDialog({
               >
                 <DrawerHeader className="shrink-0 px-4 pt-4 pb-2 text-left">
                   <DrawerTitle className="font-semibold text-base tracking-tight">
-                    Custom ISO 8583 Field
+                    {copy.customFieldTitle}
                   </DrawerTitle>
                   <DrawerDescription className="text-muted-foreground text-xs">
-                    Specify custom bit definition, type format, and max length.
+                    {copy.customFieldDescription}
                   </DrawerDescription>
                 </DrawerHeader>
 
@@ -626,7 +678,7 @@ export function AddFieldDialog({
         <DrawerFooter className="shrink-0 border-t p-3">
           <DrawerClose asChild>
             <Button className="h-8 w-full rounded-lg text-xs" variant="outline">
-              Close
+              {copy.close}
             </Button>
           </DrawerClose>
         </DrawerFooter>

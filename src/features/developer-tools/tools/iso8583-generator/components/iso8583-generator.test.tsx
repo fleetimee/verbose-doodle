@@ -1,7 +1,7 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { toast } from "sonner";
 import userEvent from "@testing-library/user-event";
+import { toast } from "sonner";
 import { Iso8583Generator } from "./iso8583-generator";
 
 const RAW_STREAM_0800_PATTERN =
@@ -307,7 +307,9 @@ describe("Iso8583Generator", () => {
 
     // Trigger Undo action and verify Bit 60 is restored
     const lastToastCall = messageSpy.mock.calls.at(-1);
-    const undoAction = (lastToastCall?.[1] as { action?: { onClick?: () => void } })?.action;
+    const undoAction = (
+      lastToastCall?.[1] as { action?: { onClick?: () => void } }
+    )?.action;
     expect(undoAction).toBeDefined();
 
     act(() => {
@@ -336,7 +338,9 @@ describe("Iso8583Generator", () => {
     await user.click(screen.getByRole("button", { name: "Add field" }));
 
     // Click Add bit 60 to message
-    const addBtn = screen.getByRole("button", { name: "Add bit 60 to message" });
+    const addBtn = screen.getByRole("button", {
+      name: "Add bit 60 to message",
+    });
     await user.click(addBtn);
 
     expect(successSpy).toHaveBeenCalledWith(
