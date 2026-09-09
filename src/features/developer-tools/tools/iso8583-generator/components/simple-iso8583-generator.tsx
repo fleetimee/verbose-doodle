@@ -6,6 +6,7 @@ import {
   Code2,
   Info,
   RefreshCw,
+  Trash2,
 } from "@/components/hugeicons";
 import {
   CodeBlock,
@@ -69,6 +70,11 @@ import {
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import {
+  getIso8583FieldEnumOptions,
+  type Iso8583EnumOption,
+} from "../iso8583-enums";
+import { AddFieldDialog } from "./add-field-dialog";
 
 const copy = messages.iso8583Generator;
 const SIMPLE_PRESET_IDS: readonly Iso8583PresetId[] = [
@@ -104,7 +110,7 @@ const FIELD_EXPLANATIONS: Readonly<Record<number, string>> = {
   39: "The result code returned by the host. Code meanings belong to the selected host profile.",
   41: "Identifies the terminal or channel that originated the transaction.",
   42: "Identifies the merchant, biller, or accepting organization.",
-  43: "The accepting party name and location in the fixed-width host format.",
+  43: "Fixed 40-character card acceptor name and location. Under standard ISO 8583 and ASPI / BPD DIY specifications, this consists of three fixed-width segments: Merchant Name (positions 1–25, space-padded), City (positions 26–38, space-padded), and Country/State Code (positions 39–40, e.g. \x27ID\x27 or \x27DIY IDN\x27). Values shorter than 40 characters are automatically right-padded with spaces on generation.",
   49: "The three-digit numeric currency code for the transaction amount.",
   60: "Host-specific private data. Its internal format must follow the selected profile.",
   62: "Host-specific private data. Its internal format must follow the selected profile.",
@@ -276,24 +282,176 @@ function presetFields(id: Iso8583PresetId) {
   return cloneIso8583Fields(getIso8583Preset(id).fields);
 }
 
+function EnumFieldSelect({
+  enumOptions,
+  field,
+  invalid,
+  label,
+  onChange,
+}: {
+  readonly enumOptions: readonly Iso8583EnumOption[];
+  readonly field: Iso8583Field;
+  readonly invalid: boolean;
+  readonly label: string;
+  readonly onChange: (value: string) => void;
+}) {
+  const isKnownEnum = Boolean(
+    enumOptions.some((opt) => opt.value === field.value)
+  );
+  const [customMode, setCustomMode] = useState(false);
+  const isCustom = !isKnownEnum || customMode;
+
+  return (
+    <div className="space-y-2">
+      <Select
+        disabled={!field.enabled}
+        onValueChange={(selected) => {
+          if (selected === "__custom__") {
+            setCustomMode(true);
+          } else {
+            setCustomMode(false);
+            onChange(selected);
+          }
+        }}
+        value={isCustom ? "__custom__" : field.value}
+      >
+        <SelectTrigger
+          aria-invalid={invalid || undefined}
+          aria-label={label}
+          className="h-11 w-full font-mono text-sm shadow-none"
+          id={`iso-field-${field.number}`}
+        >
+          <SelectValue placeholder={`Select Bit ${field.number} code`}>
+            {isCustom
+              ? `Custom value${field.value ? ` (${field.value})` : ""}`
+              : (enumOptions.find((opt) => opt.value === field.value)?.label ??
+                field.value)}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent className="max-h-72">
+          <SelectGroup>
+            {enumOptions.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                <span className="font-mono text-xs sm:text-sm">
+                  {opt.label}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectGroup>
+          <div className="my-1 border-border border-t" />
+          <SelectItem value="__custom__">
+            <span className="text-muted-foreground text-xs italic sm:text-sm">
+              Custom value...
+            </span>
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
+      {isCustom ? (
+        <div className="flex items-center gap-2">
+          <Input
+            aria-invalid={invalid || undefined}
+            aria-label={`${label} (Custom value)`}
+            autoComplete="off"
+            autoFocus
+            className="h-9 min-w-0 flex-1 font-mono text-xs"
+            disabled={!field.enabled}
+            inputMode={field.kind === "n" ? "numeric" : "text"}
+            maxLength={field.length || undefined}
+            onChange={(event) => onChange(event.currentTarget.value)}
+            placeholder={`Enter custom ${field.kind === "n" ? `${field.length}-digit ` : ""}value`}
+            spellCheck={false}
+            value={field.value}
+          />
+          <Button
+            className="h-9 shrink-0 px-2.5 text-xs"
+            onClick={() => {
+              setCustomMode(false);
+              onChange(enumOptions[0]?.value ?? "");
+            }}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            Reset to preset
+          </Button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function FieldExplainDialog({ field }: { readonly field: Iso8583Field }) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          aria-label={`Explain bit ${field.number}`}
+          className="shrink-0"
+          size="icon-sm"
+          type="button"
+          variant="ghost"
+        >
+          <Info />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            Bit {field.number}: {field.label}
+          </DialogTitle>
+          <DialogDescription>
+            {FIELD_EXPLANATIONS[field.number] ??
+              "This data element is defined by the selected ISO 8583 host profile."}
+          </DialogDescription>
+        </DialogHeader>
+        <dl className="grid gap-4 border-t pt-4 text-sm">
+          <div>
+            <dt className="font-medium">Accepted format</dt>
+            <dd className="mt-1 text-muted-foreground">{fieldFormat(field)}</dd>
+          </div>
+          {field.value ? (
+            <div>
+              <dt className="font-medium">Current example</dt>
+              <dd className="mt-1 break-all font-mono text-muted-foreground">
+                {field.number === 2 ? "Synthetic test PAN" : field.value}
+              </dd>
+            </div>
+          ) : null}
+          <div>
+            <dt className="font-medium">Bitmap behavior</dt>
+            <dd className="mt-1 text-muted-foreground">
+              Enable this field to include bit {field.number}. Disable it to
+              remove the bit and its value from the generated message.
+            </dd>
+          </div>
+        </dl>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function FieldInput({
   field,
   invalid,
   onChange,
   onHelper,
   onToggle,
+  onRemove,
 }: {
   readonly field: Iso8583Field;
   readonly invalid: boolean;
   readonly onChange: (value: string) => void;
   readonly onHelper: () => void;
   readonly onToggle: (enabled: boolean) => void;
+  readonly onRemove?: () => void;
 }) {
   const label = formatMessage(copy.fieldInput, {
     label: field.label,
     number: field.number,
   });
   const hasDateTimePicker = [7, 12, 13, 14].includes(field.number);
+  const enumOptions = getIso8583FieldEnumOptions(field.number);
 
   return (
     <Field
@@ -308,61 +466,35 @@ function FieldInput({
           onCheckedChange={(checked) => onToggle(checked === true)}
         />
         <label
-          className="min-w-0 flex-1 font-medium text-sm leading-5"
+          className="flex min-w-0 flex-1 items-center gap-1.5 font-medium text-sm leading-5"
           htmlFor={`iso-field-${field.number}`}
         >
-          <span className="mr-2 inline-block font-mono text-muted-foreground text-xs tabular-nums">
+          <span className="mr-1 inline-block font-mono text-muted-foreground text-xs tabular-nums">
             {String(field.number).padStart(2, "0")}
           </span>
-          {field.label}
-        </label>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              aria-label={`Explain bit ${field.number}`}
-              className="shrink-0"
-              size="icon-sm"
-              type="button"
-              variant="ghost"
+          <span className="truncate">{field.label}</span>
+          {field.isCustom ? (
+            <Badge
+              className="h-4 shrink-0 px-1.5 py-0 font-normal text-[10px] text-muted-foreground leading-4"
+              variant="outline"
             >
-              <Info />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                Bit {field.number}: {field.label}
-              </DialogTitle>
-              <DialogDescription>
-                {FIELD_EXPLANATIONS[field.number] ??
-                  "This data element is defined by the selected ISO 8583 host profile."}
-              </DialogDescription>
-            </DialogHeader>
-            <dl className="grid gap-4 border-t pt-4 text-sm">
-              <div>
-                <dt className="font-medium">Accepted format</dt>
-                <dd className="mt-1 text-muted-foreground">
-                  {fieldFormat(field)}
-                </dd>
-              </div>
-              {field.value ? (
-                <div>
-                  <dt className="font-medium">Current example</dt>
-                  <dd className="mt-1 break-all font-mono text-muted-foreground">
-                    {field.number === 2 ? "Synthetic test PAN" : field.value}
-                  </dd>
-                </div>
-              ) : null}
-              <div>
-                <dt className="font-medium">Bitmap behavior</dt>
-                <dd className="mt-1 text-muted-foreground">
-                  Enable this field to include bit {field.number}. Disable it to
-                  remove the bit and its value from the generated message.
-                </dd>
-              </div>
-            </dl>
-          </DialogContent>
-        </Dialog>
+              Custom
+            </Badge>
+          ) : null}
+        </label>
+        <FieldExplainDialog field={field} />
+        {onRemove ? (
+          <Button
+            aria-label={`Remove bit ${field.number}`}
+            className="shrink-0 text-muted-foreground hover:text-destructive"
+            onClick={onRemove}
+            size="icon-sm"
+            type="button"
+            variant="ghost"
+          >
+            <Trash2 />
+          </Button>
+        ) : null}
         {hasDateTimePicker ? (
           <FieldDateTimePicker fieldNumber={field.number} onChange={onChange} />
         ) : null}
@@ -379,22 +511,37 @@ function FieldInput({
           </Button>
         ) : null}
       </div>
-      <Input
-        aria-invalid={invalid || undefined}
-        aria-label={label}
-        autoComplete="off"
-        className="h-11 font-mono"
-        disabled={!field.enabled}
-        id={`iso-field-${field.number}`}
-        inputMode={field.kind === "n" ? "numeric" : "text"}
-        maxLength={field.length || undefined}
-        onChange={(event) => onChange(event.currentTarget.value)}
-        spellCheck={false}
-        value={field.value}
-      />
+      {enumOptions ? (
+        <EnumFieldSelect
+          enumOptions={enumOptions}
+          field={field}
+          invalid={invalid}
+          label={label}
+          onChange={onChange}
+        />
+      ) : (
+        <Input
+          aria-invalid={invalid || undefined}
+          aria-label={label}
+          autoComplete="off"
+          className="h-11 font-mono"
+          disabled={!field.enabled}
+          id={`iso-field-${field.number}`}
+          inputMode={field.kind === "n" ? "numeric" : "text"}
+          maxLength={field.length || undefined}
+          onChange={(event) => onChange(event.currentTarget.value)}
+          spellCheck={false}
+          value={field.value}
+        />
+      )}
       <p className="font-mono text-muted-foreground text-xs">
         {fieldTypeLabel(field)}
       </p>
+      {field.number === 43 ? (
+        <p className="font-mono text-[11px] text-muted-foreground/80">
+          Standard layout: Name [1–25] · City [26–38] · Country [39–40]
+        </p>
+      ) : null}
     </Field>
   );
 }
@@ -402,12 +549,35 @@ function FieldInput({
 export function Iso8583Generator() {
   const [presetId, setPresetId] = useState<Iso8583PresetId>("sign-on");
   const [fields, setFields] = useState(() => presetFields("sign-on"));
+  const [addFieldOpen, setAddFieldOpen] = useState(false);
+
+  const handleAddField = (newField: Iso8583Field) => {
+    setFields((prev) => {
+      const filtered = prev.filter((f) => f.number !== newField.number);
+      return [...filtered, newField].sort((a, b) => a.number - b.number);
+    });
+    setStatus(null);
+  };
+
+  const handleRemoveField = (fieldNumber: number) => {
+    setFields((prev) => prev.filter((f) => f.number !== fieldNumber));
+    setStatus(null);
+  };
   const [generatedPayload, setGeneratedPayload] = useState("");
   const [copied, setCopied] = useState(false);
   const [outputOpen, setOutputOpen] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [payloadView, setPayloadView] = useState<"json" | "text">("json");
-  const { resolvedTheme } = useTheme();
+  const { theme } = useTheme();
+  const resolvedTheme = useMemo(() => {
+    if (theme === "system") {
+      return typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+    return theme;
+  }, [theme]);
   const shouldReduceMotion = useReducedMotion();
 
   const preset = getIso8583Preset(presetId);
@@ -655,13 +825,23 @@ export function Iso8583Generator() {
             ease: [0.23, 1, 0.32, 1],
           }}
         >
-          <div className="border-b bg-muted/20 px-5 py-5 sm:px-7">
-            <h2 className="font-semibold">
-              {preset.label.split("·")[1]?.trim()} message
-            </h2>
-            <p className="mt-1 text-muted-foreground text-sm">
-              {preset.description}
-            </p>
+          <div className="flex flex-col gap-3 border-b bg-muted/20 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+            <div>
+              <h2 className="font-semibold">
+                {preset.label.split("·")[1]?.trim()} message
+              </h2>
+              <p className="mt-1 text-muted-foreground text-sm">
+                {preset.description}
+              </p>
+            </div>
+            <div className="shrink-0">
+              <AddFieldDialog
+                existingFieldNumbers={fields.map((f) => f.number)}
+                onAddField={handleAddField}
+                onOpenChange={setAddFieldOpen}
+                open={addFieldOpen}
+              />
+            </div>
           </div>
 
           <FieldGroup className="grid gap-x-8 gap-y-7 p-5 sm:grid-cols-2 sm:p-7">
@@ -693,6 +873,11 @@ export function Iso8583Generator() {
                           ? incrementStan(field.value)
                           : nowValueForField(field.number),
                     })
+                  }
+                  onRemove={
+                    field.isCustom
+                      ? () => handleRemoveField(field.number)
+                      : undefined
                   }
                   onToggle={(enabled) => updateField(field.number, { enabled })}
                 />

@@ -5,10 +5,24 @@ import { Drawer as DrawerPrimitive } from "vaul"
 
 import { cn } from "@/lib/utils"
 
+type DrawerProps = React.ComponentProps<typeof DrawerPrimitive.Root> & {
+  nested?: boolean
+}
+
 function Drawer({
+  nested = false,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root>) {
+}: DrawerProps) {
+  if (nested) {
+    return <DrawerPrimitive.NestedRoot data-slot="drawer-nested" {...props} />
+  }
   return <DrawerPrimitive.Root data-slot="drawer" {...props} />
+}
+
+function DrawerNestedRoot({
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.NestedRoot>) {
+  return <DrawerPrimitive.NestedRoot data-slot="drawer-nested" {...props} />
 }
 
 function DrawerTrigger({
@@ -48,8 +62,11 @@ function DrawerOverlay({
 function DrawerContent({
   className,
   children,
+  showSwipeHandle = true,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+}: React.ComponentProps<typeof DrawerPrimitive.Content> & {
+  showSwipeHandle?: boolean
+}) {
   return (
     <DrawerPortal data-slot="drawer-portal">
       <DrawerOverlay />
@@ -58,14 +75,20 @@ function DrawerContent({
         className={cn(
           "group/drawer-content bg-background fixed z-50 flex h-auto flex-col",
           "data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-lg data-[vaul-drawer-direction=top]:border-b",
-          "data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[80vh] data-[vaul-drawer-direction=bottom]:rounded-t-lg data-[vaul-drawer-direction=bottom]:border-t",
-          "data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=right]:sm:max-w-sm",
-          "data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=left]:sm:max-w-sm",
+          "data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[80vh] data-[vaul-drawer-direction=bottom]:rounded-t-2xl data-[vaul-drawer-direction=bottom]:border-t",
+          "data-[vaul-drawer-direction=right]:top-2 data-[vaul-drawer-direction=right]:bottom-2 data-[vaul-drawer-direction=right]:right-2 data-[vaul-drawer-direction=right]:h-[calc(100vh-1rem)] data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:border data-[vaul-drawer-direction=right]:rounded-2xl data-[vaul-drawer-direction=right]:shadow-2xl data-[vaul-drawer-direction=right]:sm:max-w-sm",
+          "data-[vaul-drawer-direction=left]:top-2 data-[vaul-drawer-direction=left]:bottom-2 data-[vaul-drawer-direction=left]:left-2 data-[vaul-drawer-direction=left]:h-[calc(100vh-1rem)] data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:border data-[vaul-drawer-direction=left]:rounded-2xl data-[vaul-drawer-direction=left]:shadow-2xl data-[vaul-drawer-direction=left]:sm:max-w-sm",
           className
         )}
         {...props}
       >
-        <div className="bg-muted mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
+        {showSwipeHandle && (
+          <>
+            <div className="bg-muted mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
+            <div className="bg-muted/80 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 hidden h-16 w-1.5 shrink-0 rounded-full group-data-[vaul-drawer-direction=right]/drawer-content:block" />
+            <div className="bg-muted/80 pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 hidden h-16 w-1.5 shrink-0 rounded-full group-data-[vaul-drawer-direction=left]/drawer-content:block" />
+          </>
+        )}
         {children}
       </DrawerPrimitive.Content>
     </DrawerPortal>
@@ -132,4 +155,5 @@ export {
   DrawerFooter,
   DrawerTitle,
   DrawerDescription,
+  DrawerNestedRoot,
 }

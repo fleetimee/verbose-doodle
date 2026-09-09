@@ -45,6 +45,23 @@ Element.prototype.animate = () => {
   return animation;
 };
 
+const originalGetComputedStyle = window.getComputedStyle;
+window.getComputedStyle = (elt: Element) => {
+  const style = originalGetComputedStyle(elt);
+  return new Proxy(style, {
+    get(target, prop) {
+      if (
+        prop === "transform" ||
+        prop === "webkitTransform" ||
+        prop === "mozTransform"
+      ) {
+        return target.transform || "none";
+      }
+      return Reflect.get(target, prop);
+    },
+  });
+};
+
 afterEach(() => {
   cleanup();
   if (document.body) {

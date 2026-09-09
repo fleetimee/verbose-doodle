@@ -1,5 +1,6 @@
 import {
   Activity01Icon,
+  Add01Icon,
   AiNetworkIcon,
   AlertCircleIcon,
   ArrowUpDownIcon,
@@ -26,6 +27,7 @@ import {
   CursorPointer01Icon,
   CursorTextIcon,
   DashboardSquare01Icon,
+  Delete02Icon,
   DoorClosedIcon as DoorClosedDefinition,
   EraserIcon,
   EyeIcon,
@@ -176,6 +178,8 @@ export const Users = createHugeIcon(UserMultipleIcon);
 export const UsersRound = createHugeIcon(UserGroupIcon);
 export const Waves = createHugeIcon(WaveIcon);
 export const Wand2 = createHugeIcon(MagicWand01Icon);
+export const Plus = createHugeIcon(Add01Icon);
+export const Trash2 = createHugeIcon(Delete02Icon);
 
 export const CheckIcon = Check;
 export const CopyIcon = createHugeIcon(ClipboardCopyIcon);

@@ -27,6 +27,7 @@ export type Iso8583Field = {
   readonly number: number;
   readonly value: string;
   readonly enabled: boolean;
+  readonly isCustom?: boolean;
 };
 
 export type Iso8583Preset = {
@@ -152,9 +153,9 @@ const ACCOUNT_INQUIRY_FIELDS: readonly Iso8583FieldDefinition[] = [
 
 function commonTransactionFields(): readonly Iso8583FieldDefinition[] {
   return [
-    field(2, "Primary account number", "llvar", 19),
+    field(2, "Primary account number", "llvar", 19, "6214870000000001"),
     field(3, "Processing code", "n", 6, "000000"),
-    field(4, "Amount, transaction", "n", 12, "000000000000"),
+    field(4, "Amount, transaction", "n", 12, "000000010000"),
     field(7, "Transmission date / time", "n", 10, "0101000000", "now"),
     field(11, "System trace audit number", "n", 6, "000001", "stan"),
     field(12, "Local transaction time", "n", 6, "000000", "now"),
@@ -165,9 +166,15 @@ function commonTransactionFields(): readonly Iso8583FieldDefinition[] {
     field(25, "Point of service condition code", "n", 2, "00"),
     field(32, "Acquiring institution ID", "llvar", 11, "112"),
     field(37, "Retrieval reference number", "n", 12, "000000000001"),
-    field(41, "Card acceptor terminal ID", "ans", 8),
+    field(41, "Card acceptor terminal ID", "ans", 8, "TERM0001"),
     field(42, "Card acceptor ID code", "ans", 15, "000000000000000"),
-    field(43, "Card acceptor name / location", "ans", 40),
+    field(
+      43,
+      "Card acceptor name / location",
+      "ans",
+      40,
+      "MERCHANT TEST 01          YOGYAKARTA IDN"
+    ),
     field(49, "Currency code, transaction", "n", 3, "360"),
     field(
       62,
@@ -223,7 +230,7 @@ const PRESET_DEFINITIONS: readonly {
       ...commonTransactionFields(),
       field(38, "Authorization ID", "ans", 6, "ABCD12"),
       field(39, "Response code", "n", 2, "00"),
-      field(63, "Private / additional data", "lllvar", 999),
+      field(63, "Private / additional data", "lllvar", 999, "00100"),
     ],
     id: "notification",
     label: "0220 · Notification",
@@ -253,7 +260,7 @@ const PRESET_DEFINITIONS: readonly {
       ...commonTransactionFields(),
       field(38, "Authorization ID", "ans", 6, "ABCD12"),
       field(39, "Response code", "n", 2, "00"),
-      field(63, "Private / additional data", "lllvar", 999),
+      field(63, "Private / additional data", "lllvar", 999, "00100"),
     ],
     id: "notification-response",
     label: "0230 · Notification Response",
@@ -263,7 +270,13 @@ const PRESET_DEFINITIONS: readonly {
     description: "Financial reversal request starter fields.",
     fields: [
       ...commonTransactionFields(),
-      field(90, "Original data elements", "ans", 42, ""),
+      field(
+        90,
+        "Original data elements",
+        "ans",
+        42,
+        "020000000101010000000000000011200000000112"
+      ),
     ],
     id: "reversal",
     label: "0400 · Reversal",
@@ -275,7 +288,7 @@ const PRESET_DEFINITIONS: readonly {
       field(3, "Processing code", "n", 6, "920000"),
       field(7, "Transmission date / time", "n", 10, "0101000000", "now"),
       field(11, "System trace audit number", "n", 6, "000001", "stan"),
-      field(41, "Card acceptor terminal ID", "ans", 8, "        "),
+      field(41, "Card acceptor terminal ID", "ans", 8, "TERM0001"),
       field(42, "Card acceptor ID code", "ans", 15, "000000000000000"),
       field(49, "Currency code, transaction", "n", 3, "360"),
       field(60, "Reserved private data", "lllvar", 999, "000"),
