@@ -82,6 +82,7 @@ export function MacOsLogin({
   }).format(now);
   const time = new Intl.DateTimeFormat(undefined, {
     hour: "numeric",
+    hour12: false,
     minute: "2-digit",
   }).format(now);
 
@@ -146,7 +147,7 @@ export function MacOsLogin({
         aria-hidden="true"
         className="macos-lock-mascot"
         height={1536}
-        src="/brand/biller-operator-mascot-lockscreen.webp"
+        src="/brand/biller-operator-mascot-login-seated.webp"
         width={1024}
       />
       <div className="macos-lock-clock">

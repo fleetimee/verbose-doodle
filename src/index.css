@@ -2365,16 +2365,16 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 
 .macos-lock-mascot {
   position: absolute;
-  right: -3vw;
-  bottom: -18vh;
-  width: min(38vw, 34rem);
+  top: 2vh;
+  right: -7vw;
+  width: min(58vw, 54rem);
   opacity: 0.18;
   filter: saturate(0.72);
 }
 
 .macos-lock-clock {
   position: absolute;
-  top: 10vh;
+  top: 7vh;
   left: 50%;
   z-index: 1;
   display: flex;
@@ -2391,7 +2391,7 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 }
 
 .macos-lock-clock time {
-  font-size: clamp(4.5rem, 9vw, 7.5rem);
+  font-size: clamp(5rem, 11vw, 9rem);
   font-weight: 500;
   line-height: 0.95;
   letter-spacing: -0.04em;
@@ -2676,9 +2676,10 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 
 @media (max-width: 640px) {
   .macos-lock-mascot {
-    right: -30vw;
-    bottom: -10vh;
-    width: 88vw;
+    top: auto;
+    right: -47vw;
+    bottom: -18vh;
+    width: 128vw;
     opacity: 0.12;
   }
 }
