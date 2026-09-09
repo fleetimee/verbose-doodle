@@ -46,7 +46,9 @@ describe("Iso8583Generator", () => {
       screen.getByRole("option", { name: "0210 · Transaction Response" })
     );
 
-    expect(screen.getByText("MTI 0210")).toBeDefined();
+    expect(
+      screen.getByRole("heading", { name: "Transaction Response message" })
+    ).toBeDefined();
     expect(
       screen.getByRole("textbox", { name: "Bit 39 Response code" })
     ).toBeDefined();
@@ -153,7 +155,9 @@ describe("Iso8583Generator", () => {
 
     await user.click(screen.getByRole("tab", { name: "0220 Notification" }));
 
-    expect(screen.getByText("MTI 0220")).toBeDefined();
+    expect(
+      screen.getByRole("heading", { name: "Notification message" })
+    ).toBeDefined();
     expect(
       screen.getByRole("textbox", { name: "Bit 39 Response code" })
     ).toBeDefined();
@@ -186,7 +190,27 @@ describe("Iso8583Generator", () => {
     const generatedValue = (
       screen.getByRole("textbox", { name: "Raw stream" }) as HTMLTextAreaElement
     ).value;
+    await user.click(screen.getByRole("tab", { name: "Raw Stream" }));
     await user.click(screen.getByRole("button", { name: "Copy" }));
     expect(writeText).toHaveBeenCalledWith(generatedValue);
+  });
+
+  test("copies the formatted JSON message by default", async () => {
+    const user = userEvent.setup();
+    const writeText = mock(async () => undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    renderGenerator();
+
+    await user.click(
+      screen.getByRole("button", { name: "Generate raw message" })
+    );
+    await user.click(screen.getByRole("button", { name: "Copy" }));
+    expect(writeText).toHaveBeenCalled();
+    const copiedText = (writeText.mock.calls[0] as [string])[0];
+    expect(copiedText).toContain('"mti": "0800"');
+    expect(copiedText).toContain('"bitmap"');
   });
 });

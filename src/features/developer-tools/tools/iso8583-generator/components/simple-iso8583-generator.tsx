@@ -1,12 +1,22 @@
+import { motion, useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
 import {
   CalendarClock,
-  Check,
   ClipboardCopy,
   Code2,
   Info,
   RefreshCw,
 } from "@/components/hugeicons";
+import {
+  CodeBlock,
+  CodeBlockBody,
+  CodeBlockContent,
+  CodeBlockCopyButton,
+  CodeBlockHeader,
+  CodeBlockItem,
+  CodeBlockThemeSelector,
+} from "@/components/kibo-ui/code-block";
+import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -26,6 +36,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -43,7 +54,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import {
   cloneIso8583Fields,
   fieldTypeLabel,
@@ -396,8 +406,12 @@ export function Iso8583Generator() {
   const [copied, setCopied] = useState(false);
   const [outputOpen, setOutputOpen] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const [payloadView, setPayloadView] = useState<"json" | "text">("json");
+  const { resolvedTheme } = useTheme();
+  const shouldReduceMotion = useReducedMotion();
 
   const preset = getIso8583Preset(presetId);
+  const morePreset = MORE_PRESET_IDS.includes(presetId) ? preset : null;
   const packedState = useMemo(() => {
     try {
       return {
@@ -483,6 +497,47 @@ export function Iso8583Generator() {
     .filter((field) => !field.hidden)
     .sort((left, right) => left.number - right.number);
 
+  const formattedJson = useMemo(() => {
+    if (!packedState.message) {
+      return "";
+    }
+    const fieldMap: Record<string, { definition?: string; value: string }> = {};
+    for (const f of fields.filter((f) => f.enabled)) {
+      fieldMap[`bit_${f.number}`] = {
+        definition: f.label,
+        value: f.value,
+      };
+    }
+    return JSON.stringify(
+      {
+        active_bits: packedState.message.activeFields,
+        bitmap: packedState.message.bitmap,
+        fields: fieldMap,
+        mti: preset.mti,
+        preset: preset.label,
+        raw_stream: generatedPayload || packedState.message.displayPayload,
+      },
+      null,
+      2
+    );
+  }, [packedState.message, fields, preset, generatedPayload]);
+
+  const codeBlockData = useMemo(
+    () => [
+      {
+        code: formattedJson,
+        filename: "iso8583-message.json",
+        language: "json",
+      },
+      {
+        code: generatedPayload || packedState.message?.displayPayload || "",
+        filename: "raw-stream.txt",
+        language: "text",
+      },
+    ],
+    [formattedJson, generatedPayload, packedState.message?.displayPayload]
+  );
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-7 pb-10 sm:gap-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -500,120 +555,172 @@ export function Iso8583Generator() {
       </header>
 
       <main className="min-w-0">
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row">
-          <Tabs
-            className="min-w-0 flex-1"
-            onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
-            value={presetId}
-          >
-            <TabsList
-              aria-label={copy.preset}
-              className="grid h-16 w-full grid-cols-3"
+        <div className="mb-6 flex flex-col gap-2">
+          <p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.16em]">
+            Message preset
+          </p>
+          <div className="flex flex-col rounded-lg border bg-muted p-1 shadow-xs sm:flex-row">
+            <Tabs
+              className="min-w-0 flex-1 gap-0"
+              onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
+              value={presetId}
             >
-              {ISO8583_PRESETS.filter((item) =>
-                SIMPLE_PRESET_IDS.includes(item.id)
-              ).map((item) => (
-                <TabsTrigger
-                  className="flex-col gap-0.5"
-                  key={item.id}
-                  value={item.id}
-                >
-                  <span className="font-mono text-xs">{item.mti}</span>
-                  <span className="text-xs sm:text-sm">
-                    {item.label.split("·")[1]?.trim() ?? item.label}
-                  </span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-          <Select
-            onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
-            value={MORE_PRESET_IDS.includes(presetId) ? presetId : ""}
-          >
-            <SelectTrigger
-              aria-label="More messages"
-              className="h-11 w-full sm:h-16 sm:w-48"
-            >
-              <SelectValue placeholder="More messages" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
+              <TabsList
+                aria-label={copy.preset}
+                className="grid h-14 w-full grid-cols-3 rounded-md bg-transparent p-0"
+              >
                 {ISO8583_PRESETS.filter((item) =>
-                  MORE_PRESET_IDS.includes(item.id)
+                  SIMPLE_PRESET_IDS.includes(item.id)
                 ).map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.label}
-                  </SelectItem>
+                  <TabsTrigger
+                    className="relative flex-col gap-0 overflow-hidden rounded-md px-3 data-active:bg-background data-active:shadow-xs"
+                    key={item.id}
+                    value={item.id}
+                  >
+                    <span
+                      className={cn(
+                        "font-mono text-muted-foreground text-xs",
+                        presetId === item.id && "text-primary"
+                      )}
+                    >
+                      {item.mti}
+                    </span>
+                    <span className="text-xs sm:text-sm">
+                      {item.label.split("·")[1]?.trim() ?? item.label}
+                    </span>
+                    {presetId === item.id ? (
+                      <motion.span
+                        className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-primary"
+                        layoutId={
+                          shouldReduceMotion
+                            ? undefined
+                            : "iso8583-active-preset"
+                        }
+                        transition={{
+                          duration: shouldReduceMotion ? 0 : 0.25,
+                          ease: [0.77, 0, 0.175, 1],
+                        }}
+                      />
+                    ) : null}
+                  </TabsTrigger>
                 ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+              </TabsList>
+            </Tabs>
+
+            <div className="mx-1 hidden w-px bg-border sm:block" />
+
+            <Select
+              onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
+              value={morePreset ? presetId : ""}
+            >
+              <SelectTrigger
+                aria-label="More messages"
+                className={cn(
+                  "w-full border-transparent shadow-none data-[size=default]:h-11 sm:w-52 sm:data-[size=default]:h-14",
+                  morePreset && "bg-background shadow-xs"
+                )}
+              >
+                <SelectValue placeholder="More messages">
+                  {morePreset ? morePreset.label : "More messages"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:data-ending-style:transform-none motion-reduce:data-starting-style:transform-none">
+                <SelectGroup>
+                  {ISO8583_PRESETS.filter((item) =>
+                    MORE_PRESET_IDS.includes(item.id)
+                  ).map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <div>
-          <section
-            aria-label={copy.fields}
-            className="flex flex-col overflow-hidden rounded-xl border bg-card"
-          >
-            <div className="border-b bg-muted/20 px-5 py-5 sm:px-7">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-semibold">
-                  {preset.label.split("·")[1]?.trim()}
-                </h2>
-                <Badge className="font-mono" variant="secondary">
-                  MTI {preset.mti}
-                </Badge>
-              </div>
-            </div>
+        <motion.section
+          animate={{ opacity: 1, transform: "translateY(0)" }}
+          aria-label={copy.fields}
+          className="flex flex-col overflow-hidden rounded-xl border bg-card"
+          initial={{
+            opacity: shouldReduceMotion ? 0.7 : 0.45,
+            transform: shouldReduceMotion
+              ? "translateY(0)"
+              : "translateY(14px)",
+          }}
+          key={presetId}
+          transition={{
+            duration: shouldReduceMotion ? 0.12 : 0.22,
+            ease: [0.23, 1, 0.32, 1],
+          }}
+        >
+          <div className="border-b bg-muted/20 px-5 py-5 sm:px-7">
+            <h2 className="font-semibold">
+              {preset.label.split("·")[1]?.trim()} message
+            </h2>
+            <p className="mt-1 text-muted-foreground text-sm">
+              {preset.description}
+            </p>
+          </div>
 
-            <FieldGroup className="grid gap-x-8 gap-y-7 p-5 sm:grid-cols-2 sm:p-7">
-              {visibleFields.map((field) => (
-                <div
-                  className={cn(field.length > 40 && "sm:col-span-2")}
-                  key={field.number}
-                >
-                  <FieldInput
-                    field={field}
-                    invalid={packedState.error?.fieldNumber === field.number}
-                    onChange={(value) => updateField(field.number, { value })}
-                    onHelper={() =>
-                      updateField(field.number, {
-                        value:
-                          field.helper === "stan"
-                            ? incrementStan(field.value)
-                            : nowValueForField(field.number),
-                      })
-                    }
-                    onToggle={(enabled) =>
-                      updateField(field.number, { enabled })
-                    }
-                  />
-                </div>
-              ))}
-            </FieldGroup>
-
-            {packedState.error ? (
-              <div
-                className="mx-5 mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-destructive text-xs"
-                role="alert"
+          <FieldGroup className="grid gap-x-8 gap-y-7 p-5 sm:grid-cols-2 sm:p-7">
+            {visibleFields.map((field, index) => (
+              <motion.div
+                animate={{ opacity: 1, transform: "translateY(0) scale(1)" }}
+                className={cn(field.length > 40 && "sm:col-span-2")}
+                initial={{
+                  opacity: shouldReduceMotion ? 0.7 : 0,
+                  transform: shouldReduceMotion
+                    ? "translateY(0) scale(1)"
+                    : "translateY(14px) scale(0.985)",
+                }}
+                key={field.number}
+                transition={{
+                  delay: shouldReduceMotion ? 0 : Math.min(index, 4) * 0.04,
+                  duration: shouldReduceMotion ? 0.12 : 0.22,
+                  ease: [0.23, 1, 0.32, 1],
+                }}
               >
-                {packedState.error.message}
-              </div>
-            ) : null}
+                <FieldInput
+                  field={field}
+                  invalid={packedState.error?.fieldNumber === field.number}
+                  onChange={(value) => updateField(field.number, { value })}
+                  onHelper={() =>
+                    updateField(field.number, {
+                      value:
+                        field.helper === "stan"
+                          ? incrementStan(field.value)
+                          : nowValueForField(field.number),
+                    })
+                  }
+                  onToggle={(enabled) => updateField(field.number, { enabled })}
+                />
+              </motion.div>
+            ))}
+          </FieldGroup>
 
-            <div className="flex justify-end border-t bg-muted/20 p-5 sm:px-7">
-              <Button
-                className="h-11 w-full sm:w-auto sm:min-w-56"
-                disabled={!packedState.message}
-                onClick={generate}
-                type="button"
-              >
-                <RefreshCw data-icon="inline-start" />
-                Generate raw message
-              </Button>
+          {packedState.error ? (
+            <div
+              className="mx-5 mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-destructive text-xs"
+              role="alert"
+            >
+              {packedState.error.message}
             </div>
-          </section>
-        </div>
+          ) : null}
+
+          <div className="flex justify-end border-t bg-muted/20 p-5 sm:px-7">
+            <Button
+              className="h-11 w-full sm:w-auto sm:min-w-56"
+              disabled={!packedState.message}
+              onClick={generate}
+              type="button"
+            >
+              <RefreshCw data-icon="inline-start" />
+              Generate raw message
+            </Button>
+          </div>
+        </motion.section>
       </main>
 
       <Sheet onOpenChange={setOutputOpen} open={outputOpen}>
@@ -628,56 +735,171 @@ export function Iso8583Generator() {
             </Button>
           </SheetTrigger>
         ) : null}
-        <SheetContent className="w-full gap-0 p-0 sm:max-w-xl" side="right">
-          <SheetHeader className="gap-2 border-b p-6 pr-14">
-            <SheetTitle>Raw message</SheetTitle>
-            <SheetDescription>
+        <SheetContent
+          className="flex h-full w-full flex-col gap-0 p-0 sm:max-w-2xl md:max-w-3xl lg:max-w-4xl"
+          side="right"
+        >
+          <SheetHeader className="shrink-0 gap-1.5 border-b bg-muted/10 p-6 pr-14">
+            <SheetTitle className="text-xl">Raw message</SheetTitle>
+            <SheetDescription className="text-sm">
               Generated {preset.mti} message using the current field values.
             </SheetDescription>
           </SheetHeader>
-          <div className="flex items-center justify-end gap-2 border-b bg-muted/20 px-6 py-4">
-            <Button
-              aria-label={copied ? copy.copied : copy.copy}
-              disabled={!generatedPayload}
-              onClick={copyOutput}
-              size="sm"
-              type="button"
-              variant="outline"
+
+          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-hidden p-6 sm:p-8">
+            <CodeBlock
+              className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border shadow-xs"
+              data={codeBlockData}
+              defaultValue="json"
+              onValueChange={(val) => setPayloadView(val as "json" | "text")}
+              storageKey="response-preview-themes"
+              value={payloadView}
             >
-              {copied ? <Check /> : <ClipboardCopy />}
-              {copied ? copy.copied : copy.copy}
-            </Button>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <Textarea
+              <CodeBlockHeader className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b bg-muted/40 px-4 py-2.5">
+                <div className="flex items-center gap-2">
+                  <Tabs
+                    onValueChange={(val) =>
+                      setPayloadView(val as "json" | "text")
+                    }
+                    value={payloadView}
+                  >
+                    <TabsList className="h-8 bg-muted/80 p-1">
+                      <TabsTrigger
+                        className="h-6 px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-xs"
+                        value="json"
+                      >
+                        Formatted (JSON)
+                      </TabsTrigger>
+                      <TabsTrigger
+                        className="h-6 px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-xs"
+                        value="text"
+                      >
+                        Raw Stream
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-muted-foreground text-xs">
+                      Theme:
+                    </span>
+                    <CodeBlockThemeSelector
+                      mode={resolvedTheme === "dark" ? "dark" : "light"}
+                    />
+                  </div>
+                  <CodeBlockCopyButton
+                    aria-label={copied ? copy.copied : copy.copy}
+                    onCopy={() => {
+                      setCopied(true);
+                      setStatus(copy.copied);
+                    }}
+                    text={
+                      payloadView === "json" ? formattedJson : generatedPayload
+                    }
+                  />
+                </div>
+              </CodeBlockHeader>
+
+              <CodeBlockBody className="min-h-0 flex-1 overflow-hidden">
+                {(item) => (
+                  <CodeBlockItem
+                    className="h-full min-h-0 overflow-hidden"
+                    key={item.language}
+                    lineNumbers={true}
+                    value={item.language}
+                  >
+                    <ScrollArea className="h-full min-h-0">
+                      <CodeBlockContent
+                        className="font-mono text-xs [&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
+                        language={item.language as never}
+                      >
+                        {item.code}
+                      </CodeBlockContent>
+                    </ScrollArea>
+                  </CodeBlockItem>
+                )}
+              </CodeBlockBody>
+            </CodeBlock>
+
+            <textarea
               aria-label={copy.rawStream}
-              className="min-h-64 resize-none rounded-none border-0 p-6 font-mono text-sm leading-7 shadow-none"
+              className="sr-only"
               readOnly
+              tabIndex={-1}
               value={generatedPayload}
             />
+
             {packedState.message ? (
               <section
                 aria-label="Bitmap inspector"
-                className="border-t bg-muted/20 px-6 py-5"
+                className="shrink-0 space-y-3 rounded-lg border bg-muted/20 p-4"
               >
-                <div className="flex flex-col gap-3">
-                  <h3 className="font-medium text-sm">Bitmap</h3>
-                  <code className="break-all font-mono text-xs">
-                    {packedState.message.bitmap}
-                  </code>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {packedState.message.activeFields.map((number) => (
-                    <Badge className="font-mono" key={number} variant="outline">
-                      Bit {number}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+                      Bitmap Inspector
+                    </h3>
+                    <Badge
+                      className="h-5 font-mono text-[10px]"
+                      variant="secondary"
+                    >
+                      {packedState.message.activeFields.some((b) => b > 64)
+                        ? "128-bit (Extended)"
+                        : "64-bit (Primary)"}
                     </Badge>
-                  ))}
+                  </div>
+                  <Button
+                    className="h-7 gap-1.5 px-2.5 text-xs"
+                    onClick={copyOutput}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    <ClipboardCopy className="size-3" />
+                    Copy raw string
+                  </Button>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider">
+                    Hex Bitmap
+                  </span>
+                  <div className="select-all break-all rounded border bg-background/80 px-2.5 py-1.5 font-mono text-foreground text-xs shadow-xs">
+                    {packedState.message.bitmap}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider">
+                    Active Fields ({packedState.message.activeFields.length})
+                  </span>
+                  <div className="flex flex-wrap gap-1 pt-0.5">
+                    {packedState.message.activeFields.map((number) => {
+                      const field = fields.find((f) => f.number === number);
+                      return (
+                        <span
+                          className="inline-flex items-center rounded border bg-background/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                          key={number}
+                          title={
+                            field?.label
+                              ? `Bit ${number}: ${field.label}`
+                              : `Bit ${number}`
+                          }
+                        >
+                          Bit {number}
+                        </span>
+                      );
+                    })}
+                  </div>
                 </div>
               </section>
             ) : null}
+
             {status ? (
               <p
-                className="border-t px-5 py-3 font-mono text-primary text-xs"
+                className="shrink-0 rounded-md border border-primary/20 bg-primary/5 px-4 py-2 font-mono text-primary text-xs"
                 role="status"
               >
                 {status}
