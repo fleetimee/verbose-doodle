@@ -3,22 +3,12 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Iso8583Generator } from "@/features/developer-tools/tools/iso8583-generator/components/iso8583-generator";
 
-const sendTcpClient = mock(() => undefined);
-
-mock.module("@/features/socket-tester/context/socket-bridge-context", () => ({
-  useSocketBridgeContext: () => ({
-    sendTcpClient,
-    tcpClient: { connected: true },
-  }),
-}));
-
 const originalClipboard = Object.getOwnPropertyDescriptor(
   navigator,
   "clipboard"
 );
 
 afterEach(() => {
-  sendTcpClient.mockClear();
   if (originalClipboard) {
     Object.defineProperty(navigator, "clipboard", originalClipboard);
   } else {
@@ -181,7 +171,7 @@ describe("Iso8583Generator", () => {
     expect(screen.getByText("0220000080000000")).toBeDefined();
   });
 
-  test("copies and sends the generated stream", async () => {
+  test("copies the generated stream", async () => {
     const user = userEvent.setup();
     const writeText = mock(async () => undefined);
     Object.defineProperty(navigator, "clipboard", {
@@ -198,8 +188,5 @@ describe("Iso8583Generator", () => {
     ).value;
     await user.click(screen.getByRole("button", { name: "Copy" }));
     expect(writeText).toHaveBeenCalledWith(generatedValue);
-
-    await user.click(screen.getByRole("button", { name: "Send to TCP" }));
-    expect(sendTcpClient).toHaveBeenCalledWith(generatedValue, "ascii", "");
   });
 });

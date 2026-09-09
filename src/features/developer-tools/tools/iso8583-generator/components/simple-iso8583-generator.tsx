@@ -6,7 +6,6 @@ import {
   Code2,
   Info,
   RefreshCw,
-  SendHorizontal,
 } from "@/components/hugeicons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,7 +56,6 @@ import {
   nowValueForField,
   packIso8583,
 } from "@/features/developer-tools/tools/iso8583-generator/pack-iso8583";
-import { useSocketBridgeContext } from "@/features/socket-tester/context/socket-bridge-context";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -392,7 +390,6 @@ function FieldInput({
 }
 
 export function Iso8583Generator() {
-  const bridge = useSocketBridgeContext();
   const [presetId, setPresetId] = useState<Iso8583PresetId>("sign-on");
   const [fields, setFields] = useState(() => presetFields("sign-on"));
   const [generatedPayload, setGeneratedPayload] = useState("");
@@ -480,18 +477,6 @@ export function Iso8583Generator() {
     const didCopy = await copyToClipboard(generatedPayload);
     setCopied(didCopy);
     setStatus(didCopy ? copy.copied : copy.copyFailed);
-  };
-
-  const sendToTcp = () => {
-    if (!(generatedPayload && packedState.message)) {
-      return;
-    }
-    const encoding = packedState.message.isPrintable ? "ascii" : "hex";
-    const value = packedState.message.isPrintable
-      ? packedState.message.payload
-      : packedState.message.hexPayload;
-    bridge.sendTcpClient(value, encoding, "");
-    setStatus(copy.sentToTcp);
   };
 
   const visibleFields = fields
@@ -661,17 +646,6 @@ export function Iso8583Generator() {
             >
               {copied ? <Check /> : <ClipboardCopy />}
               {copied ? copy.copied : copy.copy}
-            </Button>
-            <Button
-              aria-label={copy.sendToTcp}
-              disabled={!generatedPayload}
-              onClick={sendToTcp}
-              size="sm"
-              type="button"
-              variant="outline"
-            >
-              <SendHorizontal />
-              Send to TCP
             </Button>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">

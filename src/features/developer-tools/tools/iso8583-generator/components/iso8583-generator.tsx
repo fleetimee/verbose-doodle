@@ -4,7 +4,6 @@ import {
   ClipboardCopy,
   Code2,
   RefreshCw,
-  SendHorizontal,
   SlidersHorizontal,
 } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,6 @@ import {
   type PackedIso8583Message,
   packIso8583,
 } from "@/features/developer-tools/tools/iso8583-generator/pack-iso8583";
-import { useSocketBridgeContext } from "@/features/socket-tester/context/socket-bridge-context";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -219,7 +217,6 @@ function BitmapInspector({
 }
 
 export function LegacyIso8583Generator() {
-  const bridge = useSocketBridgeContext();
   const [presetId, setPresetId] = useState<Iso8583PresetId>("sign-on");
   const [mti, setMti] = useState(getIso8583Preset("sign-on").mti);
   const [fields, setFields] = useState(() => presetFields("sign-on"));
@@ -356,17 +353,6 @@ export function LegacyIso8583Generator() {
       setCopied(false);
       setStatus(copy.copyFailed);
     }
-  };
-
-  const sendToTcp = () => {
-    if (!packedState.message) {
-      return;
-    }
-    const sendData = packedState.message.isPrintable
-      ? { encoding: "ascii" as const, value: packedState.message.payload }
-      : { encoding: "hex" as const, value: packedState.message.hexPayload };
-    bridge.sendTcpClient(sendData.value, sendData.encoding, "");
-    setStatus(copy.sentToTcp);
   };
 
   const toggleAutoLength = (checked: boolean) => {
@@ -745,17 +731,6 @@ export function LegacyIso8583Generator() {
                 >
                   {copied ? <Check /> : <ClipboardCopy />}
                 </Button>
-                <Button
-                  aria-label={copy.sendToTcp}
-                  className="size-8"
-                  disabled={!packedState.message}
-                  onClick={sendToTcp}
-                  size="icon-sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  <SendHorizontal />
-                </Button>
               </div>
             </div>
             <Textarea
@@ -781,11 +756,6 @@ export function LegacyIso8583Generator() {
                 {status}
               </p>
             ) : null}
-            {bridge.tcpClient.connected ? null : (
-              <p className="mt-3 text-[10px] text-muted-foreground leading-4">
-                {copy.socketDisconnected}
-              </p>
-            )}
           </section>
           {packedState.message ? (
             <BitmapInspector message={packedState.message} />

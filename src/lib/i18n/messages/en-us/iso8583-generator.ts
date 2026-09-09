@@ -16,7 +16,7 @@ export const iso8583GeneratorMessages = {
   copy: "Copy",
   copyFailed: "Could not copy the packed message.",
   description:
-    "Assemble bank-specific ISO 8583 messages, inspect their bitmaps, and send the packed stream to a TCP client.",
+    "Assemble bank-specific ISO 8583 messages, inspect their bitmaps, and copy the packed stream.",
   documentDescription:
     "Build ISO 8583 Sign-On, Account Inquiry, Authorization, Reversal, and Batch messages with live bitmap inspection.",
   documentKeywords: [
@@ -24,7 +24,6 @@ export const iso8583GeneratorMessages = {
     "message generator",
     "bitmap",
     "MTI",
-    "TCP",
     "developer tools",
   ],
   eyebrow: "Developer tools / wire format",
@@ -59,10 +58,7 @@ export const iso8583GeneratorMessages = {
   reset: "Reset fields",
   saveTemplate: "Save template",
   secondaryBitmap: "Secondary bitmap",
-  sendToTcp: "Send to TCP",
-  sentToTcp: "Sent to TCP client",
   signOnDescription: "Network sign-on sample",
-  socketDisconnected: "The TCP bridge can send after a client connects.",
   standardFields: "Standard fields",
   templateSaved: "Template saved in this browser.",
   totalLength: "Total length",
@@ -84,7 +80,7 @@ export const iso8583GeneratorMessages = {
       "Each enabled row contributes a bit and a field value. Fixed fields keep their exact width, while LLVAR and LLLVAR prefixes are calculated for you.",
     fieldsTitle: "Compose the data elements",
     outputDescription:
-      "Copy the packed stream, send it through the TCP bridge, or inspect the active bits before testing a host integration.",
+      "Copy the packed stream or inspect the active bits before testing a host integration.",
     outputTitle: "Read the packed stream",
     startButton: "Start tour",
   },
