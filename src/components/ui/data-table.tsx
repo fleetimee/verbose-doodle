@@ -74,10 +74,10 @@ export function DataTable<TData, TValue>({
 	return (
 		<div className="space-y-4">
 			{/* Filters and Controls */}
-			<div className="flex items-center gap-2">
+			<div className="flex flex-wrap items-center justify-between gap-2">
 				{filterColumn && (
 					<Input
-						className="max-w-sm"
+						className="min-w-[180px] flex-1 sm:max-w-sm"
 						onChange={(event) =>
 							table.getColumn(filterColumn)?.setFilterValue(event.target.value)
 						}
@@ -89,7 +89,7 @@ export function DataTable<TData, TValue>({
 				)}
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button className="ml-auto" variant="outline">
+						<Button className="ml-auto shrink-0" variant="outline">
 							Columns <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
 						</Button>
 					</DropdownMenuTrigger>
@@ -164,12 +164,12 @@ export function DataTable<TData, TValue>({
 			</div>
 
 			{/* Pagination */}
-			<div className="flex items-center justify-end space-x-2">
-				<div className="flex-1 text-muted-foreground text-sm">
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+				<div className="text-muted-foreground text-sm">
 					{table.getFilteredSelectedRowModel().rows.length} of{" "}
 					{table.getFilteredRowModel().rows.length} row(s) selected.
 				</div>
-				<div className="space-x-2">
+				<div className="flex items-center justify-end space-x-2">
 					<Button
 						disabled={!table.getCanPreviousPage()}
 						onClick={() => table.previousPage()}

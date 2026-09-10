@@ -621,7 +621,7 @@ export function EndpointsPage() {
     <div className="space-y-6">
       <motion.div
         animate={{ opacity: 1 }}
-        className="flex items-center justify-between"
+        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
         id={ENDPOINTS_TOUR_TARGETS.header}
         initial={{ opacity: 0 }}
         transition={{ duration: MOTION_DURATION.fast, ease: MOTION_EASE.out }}
@@ -632,7 +632,7 @@ export function EndpointsPage() {
             {messages.endpoints.pageDescription}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             onClick={handleStartTour}
             size="sm"

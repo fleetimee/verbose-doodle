@@ -1024,8 +1024,8 @@ function RelayTable({
               {messages.socksRelay.noRelaysDescription}
             </p>
           </div>
-          <div className="mx-auto grid w-full max-w-md grid-cols-3 overflow-hidden rounded-md border border-border/70 bg-background/85 text-center shadow-xs">
-            <div className="grid gap-1 border-border/70 border-r px-3 py-3">
+          <div className="mx-auto grid w-full max-w-md grid-cols-1 overflow-hidden rounded-md border border-border/70 bg-background/85 text-center shadow-xs sm:grid-cols-3">
+            <div className="grid gap-1 border-border/70 border-b px-3 py-3 sm:border-r sm:border-b-0">
               <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
                 {messages.socksRelay.noRelayDefaultListenLabel}
               </span>
@@ -1033,7 +1033,7 @@ function RelayTable({
                 {RELAY_LISTENING_PORT_MIN}
               </span>
             </div>
-            <div className="grid gap-1 border-border/70 border-r px-3 py-3">
+            <div className="grid gap-1 border-border/70 border-b px-3 py-3 sm:border-r sm:border-b-0">
               <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
                 {messages.socksRelay.noRelayDefaultHostLabel}
               </span>
@@ -1064,96 +1064,104 @@ function RelayTable({
   if (!isLoading && relays.length > 0) {
     relayTableContent = (
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border/70">
-        <Table className="w-full table-fixed">
-          <colgroup>
-            <col className="w-[30%]" />
-            <col className="w-[72px]" />
-            <col className="w-[20%]" />
-            <col className="w-[16%]" />
-            <col className="w-[112px]" />
-            <col className="w-[92px]" />
-          </colgroup>
-          <TableHeader>
-            <TableRow className="bg-muted/30">
-              <TableHead>{messages.socksRelay.relayHeader}</TableHead>
-              <TableHead>{messages.socksRelay.listenHeader}</TableHead>
-              <TableHead>{messages.socksRelay.targetHeader}</TableHead>
-              <TableHead>{messages.socksRelay.optionsHeader}</TableHead>
-              <TableHead>{messages.socksRelay.statusHeader}</TableHead>
-              <TableHead className="text-right">
-                {messages.socksRelay.actionsHeader}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-        </Table>
-        <ScrollArea className="min-h-0 flex-1 border-border/70 border-t pr-3">
-          <Table className="w-full table-fixed">
-            <colgroup>
-              <col className="w-[30%]" />
-              <col className="w-[72px]" />
-              <col className="w-[20%]" />
-              <col className="w-[16%]" />
-              <col className="w-[112px]" />
-              <col className="w-[92px]" />
-            </colgroup>
-            <TableBody>
-              {relays.map((relay) => (
-                <TableRow
-                  data-state={
-                    relay.relayId === selectedRelayId ? "selected" : undefined
-                  }
-                  key={relay.relayId}
-                >
-                  <TableCell className="min-w-0">
-                    <button
-                      aria-label={`Select relay ${relay.relayId}`}
-                      className="block max-w-full whitespace-nowrap font-mono text-foreground text-sm underline-offset-4 hover:underline"
-                      onClick={() => handleSelectRelay(relay)}
-                      title={relay.relayId}
-                      type="button"
-                    >
-                      {truncateMiddle(relay.relayId)}
-                    </button>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {relay.listeningPort}
-                  </TableCell>
-                  <TableCell className="truncate font-mono text-xs">
-                    {relay.hostAddress}:{relay.hostPort}
-                  </TableCell>
-                  <TableCell className="max-w-[320px] truncate text-muted-foreground text-xs">
-                    {summarizeRelayOptions(relay.options)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={relay.running ? "default" : "secondary"}>
-                      {relay.running ? "Running" : "Stopped"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        aria-label={`Stop ${relay.relayId}`}
-                        className="size-8"
-                        disabled={stopRelay.isPending}
-                        onClick={() => stopRelay.mutate(relay.relayId)}
-                        size="icon"
-                        type="button"
-                        variant="destructive"
-                      >
-                        <HugeiconsIcon
-                          className="size-4"
-                          icon={StopCircleIcon}
-                          strokeWidth={2}
-                        />
-                      </Button>
-                    </div>
-                  </TableCell>
+        <div className="flex min-h-0 flex-1 flex-col overflow-x-auto">
+          <div className="flex min-h-0 min-w-[640px] flex-1 flex-col">
+            <Table className="w-full table-fixed">
+              <colgroup>
+                <col className="w-[30%]" />
+                <col className="w-[72px]" />
+                <col className="w-[20%]" />
+                <col className="w-[16%]" />
+                <col className="w-[112px]" />
+                <col className="w-[92px]" />
+              </colgroup>
+              <TableHeader>
+                <TableRow className="bg-muted/30">
+                  <TableHead>{messages.socksRelay.relayHeader}</TableHead>
+                  <TableHead>{messages.socksRelay.listenHeader}</TableHead>
+                  <TableHead>{messages.socksRelay.targetHeader}</TableHead>
+                  <TableHead>{messages.socksRelay.optionsHeader}</TableHead>
+                  <TableHead>{messages.socksRelay.statusHeader}</TableHead>
+                  <TableHead className="text-right">
+                    {messages.socksRelay.actionsHeader}
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <ScrollBar orientation="vertical" />
-        </ScrollArea>
+              </TableHeader>
+            </Table>
+            <ScrollArea className="min-h-0 flex-1 border-border/70 border-t pr-3">
+              <Table className="w-full table-fixed">
+                <colgroup>
+                  <col className="w-[30%]" />
+                  <col className="w-[72px]" />
+                  <col className="w-[20%]" />
+                  <col className="w-[16%]" />
+                  <col className="w-[112px]" />
+                  <col className="w-[92px]" />
+                </colgroup>
+                <TableBody>
+                  {relays.map((relay) => (
+                    <TableRow
+                      data-state={
+                        relay.relayId === selectedRelayId
+                          ? "selected"
+                          : undefined
+                      }
+                      key={relay.relayId}
+                    >
+                      <TableCell className="min-w-0">
+                        <button
+                          aria-label={`Select relay ${relay.relayId}`}
+                          className="block max-w-full whitespace-nowrap font-mono text-foreground text-sm underline-offset-4 hover:underline"
+                          onClick={() => handleSelectRelay(relay)}
+                          title={relay.relayId}
+                          type="button"
+                        >
+                          {truncateMiddle(relay.relayId)}
+                        </button>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {relay.listeningPort}
+                      </TableCell>
+                      <TableCell className="truncate font-mono text-xs">
+                        {relay.hostAddress}:{relay.hostPort}
+                      </TableCell>
+                      <TableCell className="max-w-[320px] truncate text-muted-foreground text-xs">
+                        {summarizeRelayOptions(relay.options)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={relay.running ? "default" : "secondary"}
+                        >
+                          {relay.running ? "Running" : "Stopped"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            aria-label={`Stop ${relay.relayId}`}
+                            className="size-8"
+                            disabled={stopRelay.isPending}
+                            onClick={() => stopRelay.mutate(relay.relayId)}
+                            size="icon"
+                            type="button"
+                            variant="destructive"
+                          >
+                            <HugeiconsIcon
+                              className="size-4"
+                              icon={StopCircleIcon}
+                              strokeWidth={2}
+                            />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <ScrollBar orientation="vertical" />
+            </ScrollArea>
+          </div>
+        </div>
       </div>
     );
   }

@@ -59,7 +59,7 @@ export function UsersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-bold text-3xl tracking-tight">
             {messages.users.pageTitle}
@@ -68,7 +68,11 @@ export function UsersPage() {
             {messages.users.pageDescription}
           </p>
         </div>
-        {!isLoadingUsers && <UserFormDialogTrigger onClick={handleAddUser} />}
+        {!isLoadingUsers && (
+          <div className="flex shrink-0 items-center">
+            <UserFormDialogTrigger onClick={handleAddUser} />
+          </div>
+        )}
       </div>
 
       {/* Loading Skeleton */}

@@ -103,7 +103,7 @@ export function AddEndpointSheet({
           </Button>
         </SheetTrigger>
       )}
-      <SheetContent className="flex w-[400px] flex-col sm:w-[640px]">
+      <SheetContent className="flex w-full max-w-full flex-col sm:max-w-xl md:max-w-2xl">
         <SheetHeader>
           <SheetTitle>{messages.endpoints.addEndpoint}</SheetTitle>
           <SheetDescription>

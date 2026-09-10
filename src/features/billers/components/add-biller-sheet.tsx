@@ -67,7 +67,7 @@ export function AddBillerSheet({
           </Button>
         </SheetTrigger>
       )}
-      <SheetContent className="flex w-[400px] flex-col sm:w-[640px]">
+      <SheetContent className="flex w-full max-w-full flex-col sm:max-w-xl md:max-w-2xl">
         <SheetHeader>
           <SheetTitle>{messages.billers.addBiller}</SheetTitle>
           <SheetDescription>

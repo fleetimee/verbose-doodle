@@ -2056,6 +2056,7 @@
     max-width: 100%;
   }
 
+  .overview-chat-snapshot-grid,
   .overview-chat-metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2681,6 +2682,20 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     bottom: -18vh;
     width: 128vw;
     opacity: 0.12;
+  }
+}
+
+@media (max-width: 640px), (max-height: 680px) {
+  .macos-lock-clock {
+    top: 4vh;
+  }
+
+  .macos-lock-clock time {
+    font-size: clamp(3.25rem, 13vw, 5.5rem);
+  }
+
+  .macos-lock-account {
+    bottom: 4vh;
   }
 }
   [data-sd-animate] {

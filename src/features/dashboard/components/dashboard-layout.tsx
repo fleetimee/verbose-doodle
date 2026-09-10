@@ -266,17 +266,17 @@ export function DashboardLayout() {
               >
                 <header
                   className={cn(
-                    "relative sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b bg-card/95 px-4 backdrop-blur after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-2 after:h-2 after:bg-gradient-to-b after:from-foreground/10 after:to-transparent after:opacity-0 after:transition-opacity after:duration-200 after:ease-[var(--ease-out)] supports-backdrop-filter:bg-card/80 motion-reduce:after:duration-[10ms]",
+                    "relative sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2.5 border-b bg-card/95 px-3 backdrop-blur after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-2 after:h-2 after:bg-gradient-to-b after:from-foreground/10 after:to-transparent after:opacity-0 after:transition-opacity after:duration-200 after:ease-[var(--ease-out)] supports-backdrop-filter:bg-card/80 motion-reduce:after:duration-[10ms] sm:px-4",
                     isHeaderScrolled && "after:opacity-100"
                   )}
                 >
-                  <SidebarTrigger className="-ml-1 rounded-md" />
+                  <SidebarTrigger className="-ml-1 shrink-0 rounded-md" />
                   <Separator
-                    className="mr-2 data-[orientation=vertical]:h-4"
+                    className="mr-1 shrink-0 data-[orientation=vertical]:h-4 sm:mr-2"
                     orientation="vertical"
                   />
-                  <Breadcrumb>
-                    <BreadcrumbList>
+                  <Breadcrumb className="min-w-0 flex-1">
+                    <BreadcrumbList className="flex-nowrap overflow-hidden">
                       {breadcrumbItems.map((item, index) => (
                         <React.Fragment
                           key={`${item.href}-${item.kind ?? "route"}-${index}`}
@@ -284,8 +284,8 @@ export function DashboardLayout() {
                           <BreadcrumbItem
                             className={
                               item.isLast
-                                ? "min-w-0 max-w-full"
-                                : "hidden md:block"
+                                ? "min-w-0 max-w-full truncate"
+                                : "hidden shrink-0 md:inline-flex"
                             }
                           >
                             <DashboardBreadcrumbContent
@@ -295,7 +295,7 @@ export function DashboardLayout() {
                             />
                           </BreadcrumbItem>
                           {!item.isLast && (
-                            <BreadcrumbSeparator className="hidden md:block" />
+                            <BreadcrumbSeparator className="hidden shrink-0 md:inline-flex" />
                           )}
                         </React.Fragment>
                       ))}
@@ -304,7 +304,7 @@ export function DashboardLayout() {
                   {isEndpointDetail && endpointQuery.isFetching && (
                     <span
                       aria-label="Refreshing endpoint"
-                      className="ml-2 inline-flex items-center gap-1.5 text-muted-foreground text-xs"
+                      className="ml-2 inline-flex shrink-0 items-center gap-1.5 text-muted-foreground text-xs"
                       data-testid="endpoint-refresh-indicator"
                       role="status"
                     >
@@ -312,7 +312,7 @@ export function DashboardLayout() {
                       <span className="hidden sm:inline">Refreshing</span>
                     </span>
                   )}
-                  <div className="ml-auto">
+                  <div className="ml-auto shrink-0">
                     <ThemeSwitcher
                       onChange={setTheme}
                       value={themeSwitcherValue}
@@ -321,7 +321,7 @@ export function DashboardLayout() {
                 </header>
                 <main
                   className={cn(
-                    "flex min-h-0 min-w-0 flex-1 flex-col gap-4 bg-background/70 p-4 md:p-6",
+                    "flex min-h-0 min-w-0 flex-1 flex-col gap-4 bg-background/70 p-3 sm:p-4 md:p-6",
                     isOverview && "dashboard-overview-main"
                   )}
                 >
@@ -357,7 +357,7 @@ export function DashboardLayout() {
                 {showScrollToTop && (
                   <motion.div
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    className="pointer-events-none fixed right-4 bottom-24 z-40"
+                    className="pointer-events-none fixed right-4 bottom-[max(6rem,calc(env(safe-area-inset-bottom)+5rem))] z-40"
                     exit={{ opacity: 0, scale: 0.9, y: 8 }}
                     initial={{ opacity: 0, scale: 0.9, y: 8 }}
                     transition={{

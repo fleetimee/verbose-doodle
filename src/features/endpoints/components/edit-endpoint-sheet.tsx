@@ -46,7 +46,7 @@ export function EditEndpointSheet({
   return (
     <Sheet onOpenChange={handleOpenChange} open={open}>
       <SheetContent
-        className="flex w-[400px] flex-col sm:w-[640px]"
+        className="flex w-full max-w-full flex-col sm:max-w-xl md:max-w-2xl"
         keepMounted
       >
         <SheetHeader>
