@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from "motion/react";
-import { useMemo, useState } from "react";
+import { type SetStateAction, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   CalendarClock,
@@ -31,7 +31,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Field, FieldGroup } from "@/components/ui/field";
+import { Field, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -71,11 +71,13 @@ import {
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { formatIso8583FieldValue } from "../format-field-value";
 import {
   getIso8583FieldEnumOptions,
   type Iso8583EnumOption,
 } from "../iso8583-enums";
 import { AddFieldDialog } from "./add-field-dialog";
+import { Iso8583FieldBrowser } from "./field-browser";
 
 const copy = messages.iso8583Generator;
 const SIMPLE_PRESET_IDS: readonly Iso8583PresetId[] = [
@@ -324,6 +326,9 @@ function EnumFieldSelect({
         value={isCustom ? "__custom__" : field.value}
       >
         <SelectTrigger
+          aria-describedby={
+            invalid ? `iso-field-${field.number}-error` : undefined
+          }
           aria-invalid={invalid || undefined}
           aria-label={label}
           className="h-11 w-full font-mono text-sm shadow-none"
@@ -359,6 +364,9 @@ function EnumFieldSelect({
       {isCustom ? (
         <div className="flex items-center gap-2">
           <Input
+            aria-describedby={
+              invalid ? `iso-field-${field.number}-error` : undefined
+            }
             aria-invalid={invalid || undefined}
             aria-label={formatMessage(copy.customValueAriaLabel, { label })}
             autoComplete="off"
@@ -451,21 +459,59 @@ function FieldExplainDialog({ field }: { readonly field: Iso8583Field }) {
   );
 }
 
+function fieldDescriptionId(
+  number: number,
+  error?: string,
+  readableValue?: string
+) {
+  if (error) {
+    return `iso-field-${number}-error`;
+  }
+  if (readableValue) {
+    return `iso-field-${number}-readable`;
+  }
+}
+
+function ReadableFieldValue({
+  value,
+  number,
+  invalid,
+}: {
+  readonly value?: string;
+  readonly number: number;
+  readonly invalid: boolean;
+}) {
+  if (!value || invalid) {
+    return null;
+  }
+  return (
+    <>
+      <span aria-hidden="true">|</span>
+      <span className="italic" id={`iso-field-${number}-readable`}>
+        {value}
+      </span>
+    </>
+  );
+}
+
 function FieldInput({
   field,
-  invalid,
+  error,
+  readableValue,
   onChange,
   onHelper,
   onToggle,
   onRemove,
 }: {
   readonly field: Iso8583Field;
-  readonly invalid: boolean;
+  readonly error?: string;
+  readonly readableValue?: string;
   readonly onChange: (value: string) => void;
   readonly onHelper: () => void;
   readonly onToggle: (enabled: boolean) => void;
   readonly onRemove?: () => void;
 }) {
+  const invalid = Boolean(error);
   const label = formatMessage(copy.fieldInput, {
     label: field.label,
     number: field.number,
@@ -548,6 +594,11 @@ function FieldInput({
         />
       ) : (
         <Input
+          aria-describedby={fieldDescriptionId(
+            field.number,
+            error,
+            readableValue
+          )}
           aria-invalid={invalid || undefined}
           aria-label={label}
           autoComplete="off"
@@ -561,8 +612,22 @@ function FieldInput({
           value={field.value}
         />
       )}
-      <p className="font-mono text-muted-foreground text-xs">
-        {fieldTypeLabel(field)}
+      {error ? (
+        <p
+          className="text-destructive text-xs"
+          id={`iso-field-${field.number}-error`}
+          role="alert"
+        >
+          {error} {fieldFormat(field)}
+        </p>
+      ) : null}
+      <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono text-muted-foreground text-xs">
+        <span>{fieldTypeLabel(field)}</span>
+        <ReadableFieldValue
+          invalid={invalid}
+          number={field.number}
+          value={readableValue}
+        />
       </p>
       {field.number === 43 ? (
         <p className="font-mono text-[11px] text-muted-foreground/80">
@@ -575,7 +640,26 @@ function FieldInput({
 
 export function Iso8583Generator() {
   const [presetId, setPresetId] = useState<Iso8583PresetId>("sign-on");
-  const [fields, setFields] = useState(() => presetFields("sign-on"));
+  const [drafts, setDrafts] = useState<
+    Partial<Record<Iso8583PresetId, Iso8583Field[]>>
+  >(() => ({ "sign-on": presetFields("sign-on") }));
+  const fields = drafts[presetId] as Iso8583Field[];
+  const [refreshTime, setRefreshTime] = useState(true);
+  const [advanceStan, setAdvanceStan] = useState(true);
+  const invalidateOutput = () => {
+    setGeneratedPayload("");
+    setOutputOpen(false);
+    setCopied(false);
+    setStatus(null);
+  };
+  const setFields = (update: SetStateAction<Iso8583Field[]>) => {
+    setDrafts((current) => ({
+      ...current,
+      [presetId]:
+        typeof update === "function" ? update(current[presetId] ?? []) : update,
+    }));
+    invalidateOutput();
+  };
   const [addFieldOpen, setAddFieldOpen] = useState(false);
 
   const handleAddField = (newField: Iso8583Field, showToast = true) => {
@@ -666,7 +750,11 @@ export function Iso8583Generator() {
 
   const choosePreset = (nextPresetId: Iso8583PresetId) => {
     setPresetId(nextPresetId);
-    setFields(presetFields(nextPresetId));
+    setDrafts((current) =>
+      current[nextPresetId]
+        ? current
+        : { ...current, [nextPresetId]: presetFields(nextPresetId) }
+    );
     setGeneratedPayload("");
     setOutputOpen(false);
     setCopied(false);
@@ -689,10 +777,20 @@ export function Iso8583Generator() {
       return;
     }
     const generatedFields = fields.map((field) => {
-      if (field.number === 7 && field.helper === "now") {
+      if (
+        field.enabled &&
+        refreshTime &&
+        field.number === 7 &&
+        field.helper === "now"
+      ) {
         return { ...field, value: nowValueForField(7) };
       }
-      if (field.number === 11 && field.helper === "stan") {
+      if (
+        field.enabled &&
+        advanceStan &&
+        field.number === 11 &&
+        field.helper === "stan"
+      ) {
         return { ...field, value: incrementStan(field.value) };
       }
       return field;
@@ -720,10 +818,6 @@ export function Iso8583Generator() {
     setCopied(didCopy);
     setStatus(didCopy ? copy.copied : copy.copyFailed);
   };
-
-  const visibleFields = fields
-    .filter((field) => !field.hidden)
-    .sort((left, right) => left.number - right.number);
 
   const formattedJson = useMemo(() => {
     if (!packedState.message) {
@@ -906,8 +1000,10 @@ export function Iso8583Generator() {
             </div>
           </div>
 
-          <FieldGroup className="grid gap-x-8 gap-y-7 p-5 sm:grid-cols-2 sm:p-7">
-            {visibleFields.map((field, index) => (
+          <Iso8583FieldBrowser
+            error={packedState.error}
+            fields={fields}
+            renderField={(field, index) => (
               <motion.div
                 animate={{ opacity: 1, transform: "translateY(0) scale(1)" }}
                 className={cn(field.length > 40 && "sm:col-span-2")}
@@ -925,8 +1021,12 @@ export function Iso8583Generator() {
                 }}
               >
                 <FieldInput
+                  error={
+                    packedState.error?.fieldNumber === field.number
+                      ? packedState.error.message
+                      : undefined
+                  }
                   field={field}
-                  invalid={packedState.error?.fieldNumber === field.number}
                   onChange={(value) => updateField(field.number, { value })}
                   onHelper={() =>
                     updateField(field.number, {
@@ -942,30 +1042,69 @@ export function Iso8583Generator() {
                       : undefined
                   }
                   onToggle={(enabled) => updateField(field.number, { enabled })}
+                  readableValue={formatIso8583FieldValue(field, fields)}
                 />
               </motion.div>
-            ))}
-          </FieldGroup>
+            )}
+          />
 
-          {packedState.error ? (
-            <div
-              className="mx-5 mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-destructive text-xs"
-              role="alert"
-            >
-              {packedState.error.message || copy.packErrorMessageFallback}
+          <div className="flex flex-col gap-4 border-t bg-muted/20 p-5 sm:px-7">
+            <FieldSet className="flex flex-row flex-wrap gap-x-6 gap-y-3">
+              <FieldLegend variant="label">{copy.onGenerate}</FieldLegend>
+              <label
+                className="flex items-center gap-2 text-sm"
+                htmlFor="iso-refresh-time"
+              >
+                <Checkbox
+                  checked={refreshTime}
+                  id="iso-refresh-time"
+                  onCheckedChange={(checked) =>
+                    setRefreshTime(checked === true)
+                  }
+                />
+                {copy.refreshTransmissionTime}
+              </label>
+              <label
+                className="flex items-center gap-2 text-sm"
+                htmlFor="iso-advance-stan"
+              >
+                <Checkbox
+                  checked={advanceStan}
+                  id="iso-advance-stan"
+                  onCheckedChange={(checked) =>
+                    setAdvanceStan(checked === true)
+                  }
+                />
+                {copy.incrementTraceNumber}
+              </label>
+            </FieldSet>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <Button
+                onClick={() => {
+                  const previousFields = fields;
+                  setFields(presetFields(presetId));
+                  toast.message(copy.fieldsReset, {
+                    action: {
+                      label: copy.undo,
+                      onClick: () => setFields(previousFields),
+                    },
+                  });
+                }}
+                type="button"
+                variant="outline"
+              >
+                {copy.reset}
+              </Button>
+              <Button
+                className="h-11 w-full sm:w-auto sm:min-w-56"
+                disabled={!packedState.message}
+                onClick={generate}
+                type="button"
+              >
+                <RefreshCw data-icon="inline-start" />
+                {copy.generateRawMessage}
+              </Button>
             </div>
-          ) : null}
-
-          <div className="flex justify-end border-t bg-muted/20 p-5 sm:px-7">
-            <Button
-              className="h-11 w-full sm:w-auto sm:min-w-56"
-              disabled={!packedState.message}
-              onClick={generate}
-              type="button"
-            >
-              <RefreshCw data-icon="inline-start" />
-              {copy.generateRawMessage}
-            </Button>
           </div>
         </motion.section>
       </main>

@@ -135,6 +135,287 @@ describe("Iso8583Generator", () => {
     ).toBeDefined();
   });
 
+  test("preserves exact time and STAN when automatic updates are off", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: "Refresh transmission time (Bit 7)",
+      })
+    );
+    await user.click(
+      screen.getByRole("checkbox", { name: "Increment STAN (Bit 11)" })
+    );
+    const time = screen.getByRole("textbox", {
+      name: "Bit 7 Transmission date / time",
+    });
+    const stan = screen.getByRole("textbox", {
+      name: "Bit 11 System trace audit number",
+    });
+    fireEvent.change(time, { target: { value: "0102030405" } });
+    fireEvent.change(stan, { target: { value: "123456" } });
+    await user.click(
+      screen.getByRole("button", { name: "Generate raw message" })
+    );
+    const first = (
+      screen.getByRole("textbox", { name: "Raw stream" }) as HTMLTextAreaElement
+    ).value;
+    expect(first).toContain("0102030405123456");
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(
+      screen.getByRole("button", { name: "Generate raw message" })
+    );
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Raw stream",
+        }) as HTMLTextAreaElement
+      ).value
+    ).toBe(first);
+  });
+
+  test("restores preset drafts and resets only the current preset", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "Bit 11 System trace audit number" }),
+      { target: { value: "123456" } }
+    );
+    await user.click(screen.getByRole("checkbox", { name: "Enable bit 70" }));
+    await user.click(screen.getByRole("tab", { name: "0200 Transaction" }));
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "Bit 11 System trace audit number" }),
+      { target: { value: "654321" } }
+    );
+    await user.click(screen.getByRole("tab", { name: "0800 Sign-On" }));
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Bit 11 System trace audit number",
+        }) as HTMLInputElement
+      ).value
+    ).toBe("123456");
+    expect(
+      screen
+        .getByRole("checkbox", { name: "Enable bit 70" })
+        .getAttribute("aria-checked")
+    ).toBe("false");
+    await user.click(screen.getByRole("button", { name: "Reset fields" }));
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Bit 11 System trace audit number",
+        }) as HTMLInputElement
+      ).value
+    ).toBe("003645");
+    await user.click(screen.getByRole("tab", { name: "0200 Transaction" }));
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Bit 11 System trace audit number",
+        }) as HTMLInputElement
+      ).value
+    ).toBe("654321");
+  });
+
+  test("associates packing errors with fields and focuses the invalid input", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+    const stan = screen.getByRole("textbox", {
+      name: "Bit 11 System trace audit number",
+    });
+    fireEvent.change(stan, { target: { value: "abc" } });
+    expect(stan.getAttribute("aria-invalid")).toBe("true");
+    expect(
+      document.getElementById(stan.getAttribute("aria-describedby") ?? "")
+        ?.textContent
+    ).toContain("Exactly 6 digits.");
+    expect(
+      (
+        screen.getByRole("button", {
+          name: "Generate raw message",
+        }) as HTMLButtonElement
+      ).disabled
+    ).toBe(true);
+    await user.click(
+      screen.getByRole("button", { name: "Go to invalid field" })
+    );
+    expect(document.activeElement).toBe(stan);
+    fireEvent.change(stan, { target: { value: "123456" } });
+    expect(stan.getAttribute("aria-invalid")).toBeNull();
+    expect(
+      (
+        screen.getByRole("button", {
+          name: "Generate raw message",
+        }) as HTMLButtonElement
+      ).disabled
+    ).toBe(false);
+  });
+
+  test("invalidates generated output after adding, removing, and undoing a field", async () => {
+    const user = userEvent.setup();
+    const messageSpy = spyOn(toast, "message");
+    renderGenerator();
+    const generateAndClose = async () => {
+      await user.click(
+        screen.getByRole("button", { name: "Generate raw message" })
+      );
+      await user.click(screen.getByRole("button", { name: "Close" }));
+      expect(
+        screen.getByRole("button", { name: "View raw message" })
+      ).toBeDefined();
+    };
+    await generateAndClose();
+    await user.click(screen.getByRole("button", { name: "Add field" }));
+    await user.click(
+      screen.getByRole("button", { name: "Add bit 60 to message" })
+    );
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(
+      screen.queryByRole("button", { name: "View raw message" })
+    ).toBeNull();
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "Bit 60 Reserved private data" }),
+      { target: { value: "TEST" } }
+    );
+    await generateAndClose();
+    await user.click(screen.getByRole("button", { name: "Remove bit 60" }));
+    expect(
+      screen.queryByRole("button", { name: "View raw message" })
+    ).toBeNull();
+    const undo = (
+      messageSpy.mock.calls.at(-1)?.[1] as { action?: { onClick?: () => void } }
+    )?.action?.onClick;
+    expect(undo).toBeDefined();
+    await generateAndClose();
+    act(() => undo?.());
+    expect(
+      screen.queryByRole("button", { name: "View raw message" })
+    ).toBeNull();
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Bit 60 Reserved private data",
+        }) as HTMLInputElement
+      ).value
+    ).toBe("TEST");
+  });
+
+  test("updates the readable amount when its value or currency changes", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+    await user.click(screen.getByRole("tab", { name: "0200 Transaction" }));
+    const amount = screen.getByRole("textbox", {
+      name: "Bit 4 Amount, transaction",
+    });
+    fireEvent.change(amount, { target: { value: "000000010000" } });
+    expect(
+      document.getElementById(amount.getAttribute("aria-describedby") ?? "")
+        ?.textContent
+    ).toBe("IDR\u00a010,000");
+    await user.click(
+      screen.getByRole("combobox", {
+        name: "Bit 49 Currency code, transaction",
+      })
+    );
+    await user.click(
+      screen.getByRole("option", { name: "840 · USD (US Dollar)" })
+    );
+    expect(
+      document.getElementById(amount.getAttribute("aria-describedby") ?? "")
+        ?.textContent
+    ).toBe("USD\u00a0100.00");
+    fireEvent.change(amount, { target: { value: "000000012345" } });
+    expect(
+      document.getElementById(amount.getAttribute("aria-describedby") ?? "")
+        ?.textContent
+    ).toBe("USD\u00a0123.45");
+    await user.click(screen.getByRole("checkbox", { name: "Enable bit 49" }));
+    expect(document.getElementById("iso-field-4-readable")).toBeNull();
+  });
+
+  test("filtering and sorting preserve the generated message and field values", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: "Refresh transmission time (Bit 7)",
+      })
+    );
+    await user.click(
+      screen.getByRole("checkbox", { name: "Increment STAN (Bit 11)" })
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Generate raw message" })
+    );
+    const original = (
+      screen.getByRole("textbox", { name: "Raw stream" }) as HTMLTextAreaElement
+    ).value;
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Search fields" }), {
+      target: { value: "trace" },
+    });
+    expect(
+      screen.queryByRole("textbox", { name: "Bit 7 Transmission date / time" })
+    ).toBeNull();
+    expect(
+      screen.getByRole("textbox", { name: "Bit 11 System trace audit number" })
+    ).toBeDefined();
+    await user.click(screen.getByRole("combobox", { name: "Sort by" }));
+    await user.click(screen.getByRole("option", { name: "Name: Z to A" }));
+    await user.click(
+      screen.getByRole("button", { name: "Generate raw message" })
+    );
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Raw stream",
+        }) as HTMLTextAreaElement
+      ).value
+    ).toBe(original);
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Bit 7 Transmission date / time",
+        }) as HTMLInputElement
+      ).value
+    ).toBe("0901080037");
+  });
+
+  test("reveals an invalid field hidden by grouping and filters", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+    await user.click(screen.getByRole("combobox", { name: "Group by" }));
+    await user.click(screen.getByRole("option", { name: "Category" }));
+    const stan = screen.getByRole("textbox", {
+      name: "Bit 11 System trace audit number",
+    });
+    fireEvent.change(stan, { target: { value: "bad" } });
+    await user.click(
+      screen.getByRole("button", {
+        name: "Transaction & references 1 Collapse",
+      })
+    );
+    fireEvent.change(screen.getByRole("textbox", { name: "Search fields" }), {
+      target: { value: "no matching field" },
+    });
+    expect(
+      screen.queryByRole("textbox", {
+        name: "Bit 11 System trace audit number",
+      })
+    ).toBeNull();
+    await user.click(
+      screen.getByRole("button", { name: "Go to invalid field" })
+    );
+    const revealed = screen.getByRole("textbox", {
+      name: "Bit 11 System trace audit number",
+    });
+    expect(document.activeElement).toBe(revealed);
+    expect((revealed as HTMLInputElement).value).toBe("bad");
+  });
+
   test("offers bit 62 as an optional transaction field", async () => {
     const user = userEvent.setup();
     renderGenerator();

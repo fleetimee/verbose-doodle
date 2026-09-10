@@ -3,6 +3,7 @@ import {
   Add01Icon,
   AiNetworkIcon,
   AlertCircleIcon,
+  ArrowDown01Icon,
   ArrowUpDownIcon,
   BarChartIcon,
   BinaryIcon,
@@ -24,6 +25,7 @@ import {
   ComputerArrowDownIcon,
   ComputerArrowUpIcon,
   CpuIcon,
+  CreditCardIcon,
   CursorPointer01Icon,
   CursorTextIcon,
   DashboardSquare01Icon,
@@ -53,6 +55,7 @@ import {
   MagicWand01Icon,
   MailSend01Icon,
   MessageSquareCodeIcon,
+  Money03Icon,
   MoonIcon,
   MoreHorizontalCircle01Icon,
   Pen01Icon,
@@ -94,6 +97,9 @@ const createHugeIcon =
 export const Activity = createHugeIcon(Activity01Icon);
 export const ArrowUpDown = createHugeIcon(ArrowUpDownIcon);
 export const BarChart3 = createHugeIcon(BarChartIcon);
+export const Banknote = createHugeIcon(Money03Icon);
+export const CreditCard = createHugeIcon(CreditCardIcon);
+export const ChevronDown = createHugeIcon(ArrowDown01Icon);
 export const Binary = createHugeIcon(BinaryIcon);
 export const Braces = createHugeIcon(BracesIcon);
 export const Building2 = createHugeIcon(Building01Icon);
