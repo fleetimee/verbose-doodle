@@ -1,5 +1,11 @@
 @/Users/fleetime/.codex/RTK.md
 
+## Code
+
+- Startup: `src/main.tsx`. Global providers: `src/app.tsx`.
+  Route composition: `src/app-routes.tsx`; feature routes: `src/features/*/routes.tsx`.
+  Feature logic: `src/features/`.
+
 ## Tests
 
 Keep the test suite thin. Add or update tests when they protect a meaningful
