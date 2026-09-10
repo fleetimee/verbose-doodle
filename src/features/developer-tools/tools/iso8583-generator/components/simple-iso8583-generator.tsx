@@ -53,9 +53,9 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GeneratorActionBar } from "@/features/developer-tools/tools/iso8583-generator/components/generator-action-bar";
 import {
   cloneIso8583Fields,
   fieldTypeLabel,
@@ -759,7 +759,7 @@ export function Iso8583Generator() {
   const [copied, setCopied] = useState(false);
   const [outputOpen, setOutputOpen] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
-  const [payloadView, setPayloadView] = useState<"json" | "text">("json");
+  const [payloadView, setPayloadView] = useState<"json" | "text">("text");
   const { theme } = useTheme();
   const resolvedTheme = useMemo(() => {
     if (theme === "system") {
@@ -1014,7 +1014,7 @@ export function Iso8583Generator() {
         <motion.section
           animate={{ opacity: 1, transform: "translateY(0)" }}
           aria-label={copy.fields}
-          className="flex flex-col overflow-hidden rounded-xl border bg-card"
+          className="flex flex-col overflow-hidden rounded-t-xl border bg-card"
           initial={{
             opacity: shouldReduceMotion ? 0.7 : 0.45,
             transform: shouldReduceMotion
@@ -1097,82 +1097,81 @@ export function Iso8583Generator() {
               </motion.div>
             )}
           />
+        </motion.section>
 
-          <div className="flex flex-col gap-4 border-t bg-muted/20 p-5 sm:px-7">
-            <FieldSet className="flex flex-row flex-wrap gap-x-6 gap-y-3">
-              <FieldLegend variant="label">{copy.onGenerate}</FieldLegend>
-              <label
-                className="flex items-center gap-2 text-sm"
-                htmlFor="iso-refresh-time"
-              >
-                <Checkbox
-                  checked={refreshTime}
-                  id="iso-refresh-time"
-                  onCheckedChange={(checked) =>
-                    setRefreshTime(checked === true)
-                  }
-                />
-                {copy.refreshTransmissionTime}
-              </label>
-              <label
-                className="flex items-center gap-2 text-sm"
-                htmlFor="iso-advance-stan"
-              >
-                <Checkbox
-                  checked={advanceStan}
-                  id="iso-advance-stan"
-                  onCheckedChange={(checked) =>
-                    setAdvanceStan(checked === true)
-                  }
-                />
-                {copy.incrementTraceNumber}
-              </label>
-            </FieldSet>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <GeneratorActionBar>
+          <FieldSet className="flex flex-row flex-wrap gap-x-6 gap-y-3">
+            <FieldLegend variant="label">{copy.onGenerate}</FieldLegend>
+            <label
+              className="flex items-center gap-2 text-sm"
+              htmlFor="iso-refresh-time"
+            >
+              <Checkbox
+                checked={refreshTime}
+                id="iso-refresh-time"
+                onCheckedChange={(checked) => setRefreshTime(checked === true)}
+              />
+              {copy.refreshTransmissionTime}
+            </label>
+            <label
+              className="flex items-center gap-2 text-sm"
+              htmlFor="iso-advance-stan"
+            >
+              <Checkbox
+                checked={advanceStan}
+                id="iso-advance-stan"
+                onCheckedChange={(checked) => setAdvanceStan(checked === true)}
+              />
+              {copy.incrementTraceNumber}
+            </label>
+          </FieldSet>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <Button
+              className="h-11 sm:mr-auto"
+              onClick={() => {
+                const previousFields = fields;
+                setFields(presetFields(presetId));
+                toast.message(copy.fieldsReset, {
+                  action: {
+                    label: copy.undo,
+                    onClick: () => setFields(previousFields),
+                  },
+                });
+              }}
+              type="button"
+              variant="ghost"
+            >
+              <RefreshCw data-icon="inline-start" />
+              {copy.reset}
+            </Button>
+            {generatedPayload ? (
               <Button
-                onClick={() => {
-                  const previousFields = fields;
-                  setFields(presetFields(presetId));
-                  toast.message(copy.fieldsReset, {
-                    action: {
-                      label: copy.undo,
-                      onClick: () => setFields(previousFields),
-                    },
-                  });
-                }}
+                aria-haspopup="dialog"
+                className="h-11 w-full sm:w-auto"
+                onClick={() => setOutputOpen(true)}
                 type="button"
                 variant="outline"
               >
-                {copy.reset}
+                <Code2 data-icon="inline-start" />
+                {copy.viewRawMessage}
               </Button>
-              <Button
-                className="h-11 w-full sm:w-auto sm:min-w-56"
-                disabled={!packedState.message}
-                onClick={generate}
-                type="button"
-              >
-                <RefreshCw data-icon="inline-start" />
-                {copy.generateRawMessage}
-              </Button>
-            </div>
+            ) : null}
+            <Button
+              className="h-11 w-full sm:w-auto"
+              disabled={!packedState.message}
+              onClick={generate}
+              type="button"
+            >
+              <Code2 data-icon="inline-start" />
+              {copy.generateRawMessage}
+            </Button>
           </div>
-        </motion.section>
+        </GeneratorActionBar>
       </main>
 
       <Sheet onOpenChange={setOutputOpen} open={outputOpen}>
-        {generatedPayload ? (
-          <SheetTrigger asChild>
-            <Button
-              className="fixed right-6 bottom-6 z-40 h-11 shadow-lg"
-              type="button"
-            >
-              <Code2 />
-              {copy.viewRawMessage}
-            </Button>
-          </SheetTrigger>
-        ) : null}
         <SheetContent
-          className="flex h-full w-full flex-col gap-0 p-0 sm:max-w-2xl md:max-w-3xl lg:max-w-4xl"
+          className="flex h-dvh w-full flex-col gap-0 p-0 motion-reduce:transition-none sm:max-w-2xl md:max-w-3xl lg:max-w-4xl"
           side="right"
         >
           <SheetHeader className="shrink-0 gap-1.5 border-b bg-muted/10 p-6 pr-14">
@@ -1182,34 +1181,34 @@ export function Iso8583Generator() {
             </SheetDescription>
           </SheetHeader>
 
-          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-hidden p-6 sm:p-8">
+          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain p-4 sm:p-6">
             <CodeBlock
-              className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border shadow-xs"
+              className="flex min-h-72 flex-1 flex-col overflow-hidden rounded-lg border"
               data={codeBlockData}
-              defaultValue="json"
-              onValueChange={(val) => setPayloadView(val as "json" | "text")}
+              defaultValue="text"
+              onValueChange={(val) => {
+                setPayloadView(val as "json" | "text");
+                setCopied(false);
+                setStatus(null);
+              }}
               storageKey="response-preview-themes"
               value={payloadView}
             >
               <CodeBlockHeader className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b bg-muted/40 px-4 py-2.5">
                 <div className="flex items-center gap-2">
                   <Tabs
-                    onValueChange={(val) =>
-                      setPayloadView(val as "json" | "text")
-                    }
+                    onValueChange={(val) => {
+                      setPayloadView(val as "json" | "text");
+                      setCopied(false);
+                      setStatus(null);
+                    }}
                     value={payloadView}
                   >
-                    <TabsList className="h-8 bg-muted/80 p-1">
-                      <TabsTrigger
-                        className="h-6 px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-xs"
-                        value="json"
-                      >
+                    <TabsList className="h-9 bg-muted/80">
+                      <TabsTrigger className="px-3 text-xs" value="json">
                         {copy.formattedJsonTab}
                       </TabsTrigger>
-                      <TabsTrigger
-                        className="h-6 px-3 text-xs data-[state=active]:bg-background data-[state=active]:shadow-xs"
-                        value="text"
-                      >
+                      <TabsTrigger className="px-3 text-xs" value="text">
                         {copy.rawStreamTab}
                       </TabsTrigger>
                     </TabsList>
@@ -1226,15 +1225,20 @@ export function Iso8583Generator() {
                     />
                   </div>
                   <CodeBlockCopyButton
-                    aria-label={copied ? copy.copied : copy.copy}
+                    aria-label={copy.copy}
                     onCopy={() => {
                       setCopied(true);
                       setStatus(copy.copied);
                     }}
+                    size="sm"
                     text={
                       payloadView === "json" ? formattedJson : generatedPayload
                     }
-                  />
+                    variant="outline"
+                  >
+                    <ClipboardCopy data-icon="inline-start" />
+                    {copy.copy}
+                  </CodeBlockCopyButton>
                 </div>
               </CodeBlockHeader>
 
@@ -1270,7 +1274,7 @@ export function Iso8583Generator() {
             {packedState.message ? (
               <section
                 aria-label={copy.bitmapInspectorAriaLabel}
-                className="shrink-0 space-y-3 rounded-lg border bg-muted/20 p-4"
+                className="shrink-0 space-y-3 border-t pt-5"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -1287,14 +1291,16 @@ export function Iso8583Generator() {
                     </Badge>
                   </div>
                   <Button
-                    className="h-7 gap-1.5 px-2.5 text-xs"
+                    className="h-9"
                     onClick={copyOutput}
                     size="sm"
                     type="button"
                     variant="outline"
                   >
                     <ClipboardCopy className="size-3" />
-                    {copy.copyRawString}
+                    {copied && payloadView === "text"
+                      ? copy.copied
+                      : copy.copyRawString}
                   </Button>
                 </div>
 
