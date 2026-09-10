@@ -77,6 +77,7 @@ import {
   type Iso8583EnumOption,
 } from "../iso8583-enums";
 import { AddFieldDialog } from "./add-field-dialog";
+import { Bit43Input } from "./bit43-input";
 import { Iso8583FieldBrowser } from "./field-browser";
 
 const copy = messages.iso8583Generator;
@@ -113,7 +114,7 @@ const FIELD_EXPLANATIONS: Readonly<Record<number, string>> = {
   39: "The result code returned by the host. Code meanings belong to the selected host profile.",
   41: "Identifies the terminal or channel that originated the transaction.",
   42: "Identifies the merchant, biller, or accepting organization.",
-  43: "Fixed 40-character card acceptor name and location. Under standard ISO 8583 and ASPI / BPD DIY specifications, this consists of three fixed-width segments: Merchant Name (positions 1–25, space-padded), City (positions 26–38, space-padded), and Country/State Code (positions 39–40, e.g. 'ID' or 'DIY IDN'). Values shorter than 40 characters are automatically right-padded with spaces on generation.",
+  43: "Fixed 40-character card acceptor name and location. For the Indonesia / Mastercard-style profile, use Merchant Name (positions 1–22), a space delimiter (23), City (24–36), a space delimiter (37), and the ISO alpha-3 Country Code (38–40, IDN). Values shorter than 40 characters are automatically right-padded with spaces on generation.",
   49: "The three-digit numeric currency code for the transaction amount.",
   60: "Host-specific private data. Its internal format must follow the selected profile.",
   62: "Host-specific private data. Its internal format must follow the selected profile.",
@@ -494,6 +495,76 @@ function ReadableFieldValue({
   );
 }
 
+function FieldValueInput({
+  error,
+  field,
+  invalid,
+  label,
+  onChange,
+  readableValue,
+}: {
+  readonly error?: string;
+  readonly field: Iso8583Field;
+  readonly invalid: boolean;
+  readonly label: string;
+  readonly onChange: (value: string) => void;
+  readonly readableValue?: string;
+}) {
+  const enumOptions = getIso8583FieldEnumOptions(field.number);
+
+  if (enumOptions) {
+    return (
+      <EnumFieldSelect
+        enumOptions={enumOptions}
+        field={field}
+        invalid={invalid}
+        label={label}
+        onChange={onChange}
+      />
+    );
+  }
+
+  if (field.number === 43) {
+    return (
+      <Bit43Input
+        aria-describedby={fieldDescriptionId(
+          field.number,
+          error,
+          readableValue
+        )}
+        aria-invalid={invalid || undefined}
+        aria-label={label}
+        autoComplete="off"
+        className="h-11 font-mono"
+        disabled={!field.enabled}
+        id={`iso-field-${field.number}`}
+        inputMode="text"
+        maxLength={field.length || undefined}
+        onChange={(event) => onChange(event.currentTarget.value)}
+        spellCheck={false}
+        value={field.value}
+      />
+    );
+  }
+
+  return (
+    <Input
+      aria-describedby={fieldDescriptionId(field.number, error, readableValue)}
+      aria-invalid={invalid || undefined}
+      aria-label={label}
+      autoComplete="off"
+      className="h-11 font-mono"
+      disabled={!field.enabled}
+      id={`iso-field-${field.number}`}
+      inputMode={field.kind === "n" ? "numeric" : "text"}
+      maxLength={field.length || undefined}
+      onChange={(event) => onChange(event.currentTarget.value)}
+      spellCheck={false}
+      value={field.value}
+    />
+  );
+}
+
 function FieldInput({
   field,
   error,
@@ -517,7 +588,6 @@ function FieldInput({
     number: field.number,
   });
   const hasDateTimePicker = [7, 12, 13, 14].includes(field.number);
-  const enumOptions = getIso8583FieldEnumOptions(field.number);
 
   return (
     <Field
@@ -584,34 +654,14 @@ function FieldInput({
           </Button>
         ) : null}
       </div>
-      {enumOptions ? (
-        <EnumFieldSelect
-          enumOptions={enumOptions}
-          field={field}
-          invalid={invalid}
-          label={label}
-          onChange={onChange}
-        />
-      ) : (
-        <Input
-          aria-describedby={fieldDescriptionId(
-            field.number,
-            error,
-            readableValue
-          )}
-          aria-invalid={invalid || undefined}
-          aria-label={label}
-          autoComplete="off"
-          className="h-11 font-mono"
-          disabled={!field.enabled}
-          id={`iso-field-${field.number}`}
-          inputMode={field.kind === "n" ? "numeric" : "text"}
-          maxLength={field.length || undefined}
-          onChange={(event) => onChange(event.currentTarget.value)}
-          spellCheck={false}
-          value={field.value}
-        />
-      )}
+      <FieldValueInput
+        error={error}
+        field={field}
+        invalid={invalid}
+        label={label}
+        onChange={onChange}
+        readableValue={readableValue}
+      />
       {error ? (
         <p
           className="text-destructive text-xs"
@@ -1006,7 +1056,7 @@ export function Iso8583Generator() {
             renderField={(field, index) => (
               <motion.div
                 animate={{ opacity: 1, transform: "translateY(0) scale(1)" }}
-                className={cn(field.length > 40 && "sm:col-span-2")}
+                className={cn("min-w-0", field.length >= 40 && "sm:col-span-2")}
                 initial={{
                   opacity: shouldReduceMotion ? 0.7 : 0,
                   transform: shouldReduceMotion

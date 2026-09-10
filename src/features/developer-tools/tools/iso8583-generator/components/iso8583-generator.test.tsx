@@ -458,6 +458,33 @@ describe("Iso8583Generator", () => {
     ).toBe("MERCHANT TEST 01          YOGYAKARTA IDN");
   });
 
+  test("shows the Indonesian Bit 43 delimiter layout", async () => {
+    const user = userEvent.setup();
+    renderGenerator();
+
+    await user.click(screen.getByRole("tab", { name: "0200 Transaction" }));
+
+    const input = screen.getByRole("textbox", {
+      name: "Bit 43 Card acceptor name / location",
+    });
+    const legend = screen.getByRole("list", { name: "Bit 43 segments" });
+    const segmentText = (key: string) =>
+      legend.querySelector(`[data-bit43-segment="${key}"]`)?.textContent;
+
+    expect(input.getAttribute("aria-describedby")).toContain(
+      "iso-field-43-segments"
+    );
+    expect(segmentText("merchant-name")).toContain("Merchant name");
+    expect(segmentText("merchant-name")).toContain("1–22");
+    expect(segmentText("delimiter-1")).toContain("Space delimiter");
+    expect(segmentText("delimiter-1")).toContain("23");
+    expect(segmentText("city")).toContain("City");
+    expect(segmentText("city")).toContain("24–36");
+    expect(segmentText("delimiter-2")).toContain("37");
+    expect(segmentText("country-code")).toContain("Country code");
+    expect(segmentText("country-code")).toContain("38–40");
+  });
+
   test("uses a field-aware time picker for ISO time values", async () => {
     const user = userEvent.setup();
     renderGenerator();

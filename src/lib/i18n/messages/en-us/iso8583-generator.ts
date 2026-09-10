@@ -214,5 +214,10 @@ export const iso8583GeneratorMessages = {
   resetToPreset: "Reset to preset",
   packErrorMessageFallback: "Could not pack this message.",
   bit43StandardLayout:
-    "Standard layout: Name [1–25] · City [26–38] · Country [39–40]",
+    "Indonesia / Mastercard layout: Name [1–22] · Space [23] · City [24–36] · Space [37] · Country [38–40]",
+  bit43SegmentsLabel: "Bit 43 segments",
+  bit43MerchantName: "Merchant name",
+  bit43Delimiter: "Space delimiter",
+  bit43City: "City",
+  bit43CountryCode: "Country code",
 } as const;
