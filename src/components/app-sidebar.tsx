@@ -2,6 +2,7 @@ import type React from "react";
 import { Link } from "react-router";
 import {
   Binary,
+  Code2,
   type HugeIcon,
   Info,
   LayoutDashboard,
@@ -44,8 +45,10 @@ import { messages } from "@/lib/i18n";
 type AppNavigationItem = NavMainItem & {
   readonly adminOnly?: boolean;
   readonly description?: string;
+  readonly keywords?: readonly string[];
   readonly items?: (NonNullable<NavMainItem["items"]>[number] & {
     readonly description: string;
+    readonly keywords?: readonly string[];
   })[];
 };
 
@@ -133,15 +136,71 @@ const data: {
       title: messages.developerTools.catalogNavigation,
       url: "/dashboard/developer-tools",
     },
+    {
+      groupLabel: messages.developerTools.navigationGroup,
+      icon: Binary,
+      description: "Build, pack, parse, and inspect ISO 8583 messages.",
+      title: "ISO 8583",
+      items: [
+        {
+          description: messages.developerTools.iso8583ParserDescription,
+          icon: Binary,
+          keywords: [
+            "ISO",
+            "8583",
+            "ISO 8583",
+            "Parser",
+            "ISO Parser",
+            "Stream Parser",
+            "Inspection",
+            "Bitmaps",
+            "MTI",
+            "Hex",
+            "Data Elements",
+          ],
+          title: "Parser",
+          url: "/dashboard/developer-tools/iso8583-parser",
+        },
+        {
+          description: messages.developerTools.iso8583GeneratorDescription,
+          icon: Code2,
+          keywords: [
+            "ISO",
+            "8583",
+            "ISO 8583",
+            "Generator",
+            "Pack",
+            "Build",
+            "MTI",
+            "Bitmaps",
+            "Conversion",
+          ],
+          title: "Generator",
+          url: "/dashboard/developer-tools/iso8583-generator",
+        },
+      ],
+    },
     ...DEVELOPER_TOOL_CATEGORIES.map((category) => ({
       groupLabel: messages.developerTools.navigationGroup,
       icon: category.icon,
-      items: category.tools.map((tool) => ({
-        description: tool.searchDescription,
-        icon: tool.icon,
-        title: tool.name,
-        url: getDeveloperToolHref(tool),
-      })),
+      items: category.tools
+        .filter(
+          (tool) =>
+            tool.id !== "iso8583-parser" && tool.id !== "iso8583-generator"
+        )
+        .map((tool) => ({
+          description: tool.searchDescription,
+          icon: tool.icon,
+          keywords: [
+            ...tool.tags,
+            ...tool.document.keywords,
+            tool.name,
+            tool.path,
+          ],
+          onPrefetch: tool.load,
+          title: tool.name,
+          url: getDeveloperToolHref(tool),
+        })),
       title: category.name,
     })),
   ],
@@ -186,8 +245,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         onPrefetch = prefetchEndpoints;
       }
 
+      const items = item.items?.map((subItem) => {
+        let subPrefetch = subItem.onPrefetch;
+        if (subItem.url === "/dashboard/developer-tools/iso8583-parser") {
+          subPrefetch = () => {
+            import("@/pages/dashboard/iso8583-parser");
+          };
+        } else if (
+          subItem.url === "/dashboard/developer-tools/iso8583-generator"
+        ) {
+          subPrefetch = () => {
+            import("@/pages/dashboard/iso8583-generator");
+          };
+        }
+        return {
+          ...subItem,
+          onPrefetch: subPrefetch,
+        };
+      });
+
       return {
         ...item,
+        items,
         onPrefetch,
       };
     });

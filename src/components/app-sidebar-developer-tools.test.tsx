@@ -217,4 +217,75 @@ describe("AppSidebar developer tools navigation", () => {
     fireEvent.keyUp(document, { key: "Alt" });
     expect(screen.queryByText("Alt+O")).toBeNull();
   });
+
+  test("renders dedicated ISO 8583 submenu with Parser and Generator and finds it via nav search", async () => {
+    const queryClient = new QueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={["/dashboard/overview"]}>
+          <AuthProvider>
+            <SidebarProvider>
+              <AppSidebar />
+              <LocationProbe />
+            </SidebarProvider>
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    // Expand ISO 8583 submenu
+    const iso8583Button = await screen.findByRole("button", {
+      name: "ISO 8583",
+    });
+    fireEvent.click(iso8583Button);
+
+    const parserLink = await screen.findByRole("link", {
+      name: "Parser",
+    });
+    expect(parserLink.getAttribute("href")).toBe(
+      "/dashboard/developer-tools/iso8583-parser"
+    );
+
+    const generatorLink = await screen.findByRole("link", {
+      name: "Generator",
+    });
+    expect(generatorLink.getAttribute("href")).toBe(
+      "/dashboard/developer-tools/iso8583-generator"
+    );
+
+    // Open nav search via Cmd+K
+    fireEvent.keyDown(document, { key: "k", ctrlKey: true });
+
+    expect(
+      await screen.findByRole("dialog", { name: "Search modules and menus" })
+    ).toBeTruthy();
+
+    const searchInput = screen.getByPlaceholderText(
+      "Search modules and menus..."
+    );
+
+    // Search by "iso parser"
+    fireEvent.change(searchInput, {
+      target: { value: "iso parser" },
+    });
+
+    await waitFor(() => {
+      const selected = screen.getByRole("option", { selected: true });
+      expect(selected.textContent).toContain("Parser");
+      expect(selected.textContent).toContain("ISO 8583");
+    });
+
+    expect(screen.getByRole("status").textContent).toBe(
+      "Parse raw ISO 8583 streams or hex dumps into structured data elements with decoded semantics."
+    );
+
+    // Press Enter to navigate
+    fireEvent.keyDown(searchInput, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("location").textContent).toBe(
+        "/dashboard/developer-tools/iso8583-parser"
+      );
+    });
+  });
 });

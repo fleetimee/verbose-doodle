@@ -30,11 +30,13 @@ export type SearchNavigationItem = {
   readonly groupLabel: string;
   readonly icon: HugeIcon;
   readonly items?: readonly {
-    readonly description: string;
+    readonly description?: string;
     readonly icon: HugeIcon;
+    readonly keywords?: readonly string[];
     readonly title: string;
     readonly url: string;
   }[];
+  readonly keywords?: readonly string[];
   readonly title: string;
   readonly url?: string;
 };
@@ -43,6 +45,7 @@ type SearchResult = {
   readonly description?: string;
   readonly groupLabel: string;
   readonly icon: HugeIcon;
+  readonly keywords?: readonly string[];
   readonly parentTitle?: string;
   readonly title: string;
   readonly url: string;
@@ -78,33 +81,52 @@ export function NavigationSearch({
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
-  const results = useMemo(
-    () =>
-      items.flatMap<SearchResult>((item) => {
-        const directResult = item.url
-          ? [
-              {
-                description: item.description,
-                groupLabel: item.groupLabel,
-                icon: item.icon,
-                title: item.title,
-                url: item.url,
-              },
-            ]
-          : [];
-        const childResults = (item.items ?? []).map((child) => ({
-          description: child.description,
-          groupLabel: item.groupLabel,
-          icon: child.icon,
-          parentTitle: item.title,
-          title: child.title,
-          url: child.url,
-        }));
+  const results = useMemo(() => {
+    const rawResults = items.flatMap<SearchResult>((item) => {
+      const directResult = item.url
+        ? [
+            {
+              description: item.description,
+              groupLabel: item.groupLabel,
+              icon: item.icon,
+              keywords: item.keywords,
+              title: item.title,
+              url: item.url,
+            },
+          ]
+        : [];
+      const childResults = (item.items ?? []).map((child) => ({
+        description: child.description,
+        groupLabel: item.groupLabel,
+        icon: child.icon,
+        keywords: child.keywords,
+        parentTitle: item.title,
+        title: child.title,
+        url: child.url,
+      }));
 
-        return [...directResult, ...childResults];
-      }),
-    [items]
-  );
+      return [...directResult, ...childResults];
+    });
+
+    const deduplicated = new Map<string, SearchResult>();
+    for (const result of rawResults) {
+      const existing = deduplicated.get(result.url);
+      if (existing) {
+        const combinedKeywords = Array.from(
+          new Set([...(existing.keywords ?? []), ...(result.keywords ?? [])])
+        );
+        deduplicated.set(result.url, {
+          ...existing,
+          description: existing.description ?? result.description,
+          keywords: combinedKeywords,
+          parentTitle: existing.parentTitle ?? result.parentTitle,
+        });
+      } else {
+        deduplicated.set(result.url, result);
+      }
+    }
+    return Array.from(deduplicated.values());
+  }, [items]);
   const groups = useMemo(
     () =>
       results.reduce<Map<string, SearchResult[]>>((accumulator, result) => {
@@ -180,7 +202,12 @@ export function NavigationSearch({
                 {groupItems.map((item) => (
                   <CommandItem
                     key={item.url}
-                    keywords={[item.title, item.parentTitle ?? "", groupLabel]}
+                    keywords={[
+                      item.title,
+                      item.parentTitle ?? "",
+                      groupLabel,
+                      ...(item.keywords ?? []),
+                    ]}
                     onSelect={() => selectResult(item.url)}
                     value={item.url}
                   >
