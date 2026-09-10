@@ -3,7 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { Link } from "react-router";
 import { Grid2X2 } from "@/components/hugeicons";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DEVELOPER_TOOL_CATEGORIES,
   DEVELOPER_TOOL_COUNT,
@@ -31,14 +31,14 @@ const catalogEntries: readonly CatalogEntry[] =
 
 const parentVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.05 } },
 };
 
 const childVariants = {
-  hidden: { opacity: 0, y: 12 },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
-    transition: { bounce: 0.08, duration: 0.32, type: "spring" as const },
+    transition: { bounce: 0.06, duration: 0.28, type: "spring" as const },
     y: 0,
   },
 };
@@ -47,16 +47,16 @@ const gridContainerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.04,
+      staggerChildren: 0.03,
     },
   },
 };
 
 const cardEntranceVariants = {
-  hidden: { opacity: 0, y: 10 },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
-    transition: { bounce: 0.08, duration: 0.32, type: "spring" as const },
+    transition: { bounce: 0.06, duration: 0.28, type: "spring" as const },
     y: 0,
   },
 };
@@ -71,79 +71,120 @@ function ToolCard({
   const isGrid = view === "grid";
   const shouldReduceMotion = useReducedMotion();
 
-  return (
-    <motion.article
-      className={cn(
-        "group min-w-0 gap-5 bg-background transition-colors hover:bg-muted/20",
-        isGrid
-          ? "flex h-full flex-col border p-5"
-          : "grid border-y px-4 py-5 sm:px-5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-7"
-      )}
-      transition={{ damping: 30, stiffness: 400, type: "spring" }}
-      variants={cardEntranceVariants}
-      whileHover={shouldReduceMotion ? {} : { scale: 1.012, y: -2 }}
-      whileTap={shouldReduceMotion ? {} : { scale: 0.985 }}
-    >
-      <div
-        className={cn(
-          "flex items-center",
-          isGrid ? "justify-between" : "gap-3 lg:flex-col lg:items-start"
-        )}
+  if (!isGrid) {
+    return (
+      <motion.article
+        className="group relative flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-card/60 px-4 py-3 transition-all duration-200 hover:border-primary/40 hover:bg-card hover:shadow-xs"
+        transition={{ damping: 30, stiffness: 400, type: "spring" }}
+        variants={cardEntranceVariants}
+        whileHover={shouldReduceMotion ? {} : { x: 2 }}
       >
-        <div className="flex size-11 items-center justify-center rounded-md border bg-muted/30 text-foreground transition-transform duration-200 group-hover:-translate-y-0.5">
-          <Icon className="size-5" />
+        <div className="flex min-w-0 items-center gap-3.5">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-muted/40 text-foreground transition-colors duration-200 group-hover:border-primary/30 group-hover:bg-primary/10 group-hover:text-primary">
+            <Icon className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="truncate font-semibold text-foreground text-sm tracking-tight transition-colors group-hover:text-primary">
+                {tool.name}
+              </h3>
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border/40 bg-muted/30 px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+                <CategoryIcon className="size-2.5" />
+                {category.name}
+              </span>
+            </div>
+            <p className="max-w-[75ch] truncate text-muted-foreground text-xs">
+              {tool.searchDescription}
+            </p>
+          </div>
         </div>
-        <span className="inline-flex items-center gap-1.5 font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
-          <CategoryIcon className="size-3" />
-          {category.name}
-        </span>
-      </div>
 
-      <div className={cn("min-w-0", isGrid && "flex-1")}>
-        <h3 className="font-semibold text-lg tracking-[-0.02em]">
-          {tool.name}
-        </h3>
-        <p className="mt-2 max-w-[68ch] text-muted-foreground text-sm leading-6">
-          {tool.description}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {tool.tags.map((tag) => (
-            <span
-              className="border px-2 py-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider"
-              key={tag}
-            >
-              {tag}
-            </span>
-          ))}
+        <div className="flex shrink-0 items-center gap-4">
+          <div className="hidden font-mono text-[10px] text-muted-foreground/70 uppercase tracking-wider sm:block">
+            {tool.runtime}
+          </div>
+          <div className="flex size-7 items-center justify-center rounded-md border border-transparent text-muted-foreground transition-all duration-200 group-hover:border-border/60 group-hover:bg-muted/50 group-hover:text-foreground">
+            <HugeiconsIcon
+              className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              icon={ArrowUpRightIcon}
+              strokeWidth={2}
+            />
+          </div>
         </div>
-      </div>
 
-      <div
-        className={cn(
-          "flex items-center justify-between gap-5 border-t pt-4",
-          !isGrid &&
-            "lg:min-w-44 lg:flex-col lg:items-end lg:border-t-0 lg:pt-0"
-        )}
-      >
-        <div className="grid gap-1 text-right font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-          <div>{tool.runtime}</div>
-          <div>{tool.limit}</div>
-        </div>
         <Link
           aria-label={formatMessage(messages.developerTools.openTool, {
             tool: tool.name,
           })}
-          className={buttonVariants({ size: "sm", variant: "outline" })}
+          className="absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           to={getDeveloperToolHref(tool)}
         >
-          {messages.developerTools.openAction}
-          <HugeiconsIcon
-            data-icon="inline-end"
-            icon={ArrowUpRightIcon}
-            strokeWidth={2}
-          />
+          <span className="sr-only">
+            {formatMessage(messages.developerTools.openTool, {
+              tool: tool.name,
+            })}
+          </span>
         </Link>
+      </motion.article>
+    );
+  }
+
+  return (
+    <motion.article
+      className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 transition-all duration-200 hover:border-primary/40 hover:bg-card hover:shadow-md"
+      transition={{ damping: 30, stiffness: 400, type: "spring" }}
+      variants={cardEntranceVariants}
+      whileHover={shouldReduceMotion ? {} : { scale: 1.012, y: -2 }}
+      whileTap={shouldReduceMotion ? {} : { scale: 0.99 }}
+    >
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex size-10 items-center justify-center rounded-lg border border-border/60 bg-muted/40 text-foreground transition-colors duration-200 group-hover:border-primary/30 group-hover:bg-primary/10 group-hover:text-primary">
+            <Icon className="size-5" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 rounded-md border border-border/40 bg-muted/30 px-2 py-0.5 font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+              <CategoryIcon className="size-2.5" />
+              {category.name}
+            </span>
+            <div className="flex size-7 items-center justify-center rounded-md border border-transparent text-muted-foreground/60 transition-all duration-200 group-hover:border-border/60 group-hover:bg-muted/50 group-hover:text-foreground">
+              <HugeiconsIcon
+                className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                icon={ArrowUpRightIcon}
+                strokeWidth={2}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3.5">
+          <h3 className="line-clamp-1 font-semibold text-[15px] text-foreground tracking-tight transition-colors group-hover:text-primary">
+            {tool.name}
+          </h3>
+          <p className="mt-1 line-clamp-2 text-muted-foreground text-xs leading-relaxed">
+            {tool.searchDescription}
+          </p>
+        </div>
       </div>
+
+      <div className="mt-4 flex items-center justify-between border-border/40 border-t pt-2.5 font-mono text-[10px] text-muted-foreground/70 uppercase tracking-wider">
+        <span>{tool.runtime}</span>
+        <span className="opacity-75">{tool.limit}</span>
+      </div>
+
+      <Link
+        aria-label={formatMessage(messages.developerTools.openTool, {
+          tool: tool.name,
+        })}
+        className="absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        to={getDeveloperToolHref(tool)}
+      >
+        <span className="sr-only">
+          {formatMessage(messages.developerTools.openTool, {
+            tool: tool.name,
+          })}
+        </span>
+      </Link>
     </motion.article>
   );
 }
@@ -175,58 +216,36 @@ export function DeveloperToolsCatalog() {
   return (
     <motion.div
       animate="visible"
-      className="mx-auto flex w-full max-w-[1400px] flex-col gap-10 pb-10"
+      className="mx-auto flex w-full max-w-[1400px] flex-col gap-6 pb-8"
       initial={shouldReduceMotion ? "visible" : "hidden"}
       variants={parentVariants}
     >
       <motion.header
-        className="grid gap-6 border-border/70 border-b pb-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"
+        className="flex flex-col gap-1.5 border-border/60 border-b pb-5"
         variants={childVariants}
       >
-        <div>
-          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.24em]">
-            {formatPluralMessage(
-              messages.developerTools.eyebrow,
-              DEVELOPER_TOOL_COUNT
-            )}
-          </p>
-          <h1 className="mt-4 font-semibold text-4xl tracking-[-0.045em] md:text-5xl">
-            {messages.developerTools.pageTitle}
-          </h1>
-          <p className="mt-4 max-w-[62ch] text-muted-foreground text-sm leading-6 md:text-base">
-            {messages.developerTools.description}
-          </p>
-        </div>
-
-        <dl className="grid min-w-64 grid-cols-2 border-y text-xs">
-          <div className="border-r py-3 pr-4">
-            <dt className="text-muted-foreground">
-              {messages.developerTools.accessLabel}
-            </dt>
-            <dd className="mt-1 font-mono">
-              {messages.developerTools.accessValue}
-            </dd>
-          </div>
-          <div className="py-3 pl-4">
-            <dt className="text-muted-foreground">
-              {messages.developerTools.filesLabel}
-            </dt>
-            <dd className="mt-1 font-mono">
-              {messages.developerTools.filesValue}
-            </dd>
-          </div>
-        </dl>
+        <h1 className="font-semibold text-2xl tracking-[-0.03em] md:text-3xl">
+          {messages.developerTools.pageTitle}
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          {messages.developerTools.description}
+        </p>
       </motion.header>
 
       <motion.section
         aria-label={messages.developerTools.catalogControls}
-        className="flex flex-col gap-3 border-y py-3 sm:flex-row sm:items-center sm:justify-between"
+        className="flex flex-col gap-3 rounded-lg border border-border/50 bg-muted/20 p-1.5 sm:flex-row sm:items-center sm:justify-between"
         variants={childVariants}
       >
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap items-center gap-1">
           <Button
             aria-label={messages.developerTools.allTools}
             aria-pressed={activeCategory === ALL_CATEGORIES}
+            className={cn(
+              "h-7 text-xs",
+              activeCategory === ALL_CATEGORIES &&
+                "bg-background text-foreground shadow-xs"
+            )}
             onClick={() => setSelectedCategory(ALL_CATEGORIES)}
             size="sm"
             type="button"
@@ -235,7 +254,7 @@ export function DeveloperToolsCatalog() {
             {messages.developerTools.allTools}
             <span
               aria-hidden="true"
-              className="font-mono text-[10px] opacity-60"
+              className="ml-1 font-mono text-[10px] opacity-60"
             >
               {DEVELOPER_TOOL_COUNT}
             </span>
@@ -244,6 +263,11 @@ export function DeveloperToolsCatalog() {
             <Button
               aria-label={category.name}
               aria-pressed={activeCategory === category.id}
+              className={cn(
+                "h-7 text-xs",
+                activeCategory === category.id &&
+                  "bg-background text-foreground shadow-xs"
+              )}
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
               size="sm"
@@ -253,7 +277,7 @@ export function DeveloperToolsCatalog() {
               {category.name}
               <span
                 aria-hidden="true"
-                className="font-mono text-[10px] opacity-60"
+                className="ml-1 font-mono text-[10px] opacity-60"
               >
                 {category.tools.length}
               </span>
@@ -261,40 +285,59 @@ export function DeveloperToolsCatalog() {
           ))}
         </div>
 
-        <div className="flex items-center justify-between gap-3 sm:justify-end">
+        <div className="flex items-center justify-between gap-3 px-1 sm:justify-end">
           <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
             {formatPluralMessage(
               messages.developerTools.showingCount,
               visibleEntries.length
             )}
           </span>
-          <div className="flex gap-1 border-l pl-3">
+          <div className="flex items-center gap-0.5 border-border/50 border-l pl-2">
             <Button
               aria-label={messages.developerTools.gridView}
               aria-pressed={activeView === "grid"}
+              className={cn(
+                "size-7",
+                activeView === "grid" &&
+                  "bg-background text-foreground shadow-xs"
+              )}
               onClick={() => setView("grid")}
               size="icon-sm"
               type="button"
               variant={activeView === "grid" ? "secondary" : "ghost"}
             >
-              <Grid2X2 />
+              <Grid2X2 className="size-3.5" />
             </Button>
             <Button
               aria-label={messages.developerTools.listView}
               aria-pressed={activeView === "list"}
+              className={cn(
+                "size-7",
+                activeView === "list" &&
+                  "bg-background text-foreground shadow-xs"
+              )}
               onClick={() => setView("list")}
               size="icon-sm"
               type="button"
               variant={activeView === "list" ? "secondary" : "ghost"}
             >
-              <HugeiconsIcon icon={Menu01Icon} strokeWidth={2} />
+              <HugeiconsIcon
+                className="size-3.5"
+                icon={Menu01Icon}
+                strokeWidth={2}
+              />
             </Button>
           </div>
         </div>
       </motion.section>
 
       <motion.div
-        className={cn("grid gap-4", activeView === "grid" && "md:grid-cols-2")}
+        className={cn(
+          "grid gap-3.5",
+          activeView === "grid"
+            ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            : "grid-cols-1"
+        )}
         key={`${activeCategory}-${activeView}`}
         variants={gridContainerVariants}
       >
