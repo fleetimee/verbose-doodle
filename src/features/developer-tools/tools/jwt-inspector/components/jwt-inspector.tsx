@@ -486,6 +486,14 @@ export function JwtInspector() {
     <DeveloperToolLayout
       clearLabel={messages.jwtInspector.clear}
       description={messages.jwtInspector.description}
+      headerExtra={
+        <Badge
+          className="shrink-0 self-start font-mono text-xs sm:self-center"
+          variant="outline"
+        >
+          HS256
+        </Badge>
+      }
       onClear={clearEditors}
       onReset={resetExample}
       resetLabel={messages.jwtInspector.resetExample}
@@ -501,11 +509,11 @@ export function JwtInspector() {
     >
       {/* Controls & Secret Panel */}
       <motion.section
-        className="border-y py-4"
+        className="rounded-xl border border-border/70 bg-card p-4 shadow-2xs sm:p-5"
         id={JWT_TOUR_TARGETS.controls}
         variants={childVariants}
       >
-        <div className="grid gap-4 sm:grid-cols-2 sm:items-end sm:gap-6 md:pr-6">
+        <div className="grid gap-4 sm:grid-cols-2 sm:items-center sm:gap-6">
           <div className="space-y-2">
             <Label className="text-xs" htmlFor="jwt-secret-input">
               {messages.jwtInspector.secretLabel}
@@ -519,7 +527,7 @@ export function JwtInspector() {
               value={secret}
             />
           </div>
-          <div className="flex h-10 items-center justify-between border-l pl-6">
+          <div className="flex h-10 items-center justify-between sm:border-border/70 sm:border-l sm:pl-6">
             <span className="text-muted-foreground text-xs">
               {messages.jwtInspector.signatureStatusLabel}:
             </span>

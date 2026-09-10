@@ -94,7 +94,7 @@ function ActionButtons({
   onReset,
   resetLabel,
   tour,
-  variant = "sidebar",
+  variant = "top-header",
 }: ActionButtonsProps) {
   const hasActions = Boolean(
     tour || (onReset && resetLabel) || (onClear && clearLabel) || extraActions
@@ -285,7 +285,7 @@ export function DeveloperToolLayout({
   resetLabel,
   title,
   tour,
-  variant = "sidebar",
+  variant = "top-header",
 }: DeveloperToolLayoutProps) {
   const shouldReduceMotion = useReducedMotion();
   const actionProps: ActionButtonsProps = {
@@ -297,9 +297,9 @@ export function DeveloperToolLayout({
     tour,
   };
 
-  if (variant === "top-header") {
+  if (variant === "sidebar") {
     return (
-      <TopHeaderLayout
+      <SidebarLayout
         actionProps={actionProps}
         categoryHref={categoryHref}
         categoryLabel={categoryLabel}
@@ -311,12 +311,12 @@ export function DeveloperToolLayout({
         title={title}
       >
         {children}
-      </TopHeaderLayout>
+      </SidebarLayout>
     );
   }
 
   return (
-    <SidebarLayout
+    <TopHeaderLayout
       actionProps={actionProps}
       categoryHref={categoryHref}
       categoryLabel={categoryLabel}
@@ -328,6 +328,6 @@ export function DeveloperToolLayout({
       title={title}
     >
       {children}
-    </SidebarLayout>
+    </TopHeaderLayout>
   );
 }

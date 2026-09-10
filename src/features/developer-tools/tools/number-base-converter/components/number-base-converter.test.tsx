@@ -11,7 +11,7 @@ type MotionTestProps = {
 };
 
 const createMotionElement = (
-  tag: "aside" | "div" | "section" | "span" | "svg"
+  tag: "aside" | "div" | "header" | "section" | "span" | "svg"
 ) =>
   forwardRef<HTMLElement, MotionTestProps>((props, ref) => {
     const {
@@ -33,6 +33,7 @@ mock.module("motion/react", () => ({
   motion: {
     aside: createMotionElement("aside"),
     div: createMotionElement("div"),
+    header: createMotionElement("header"),
     section: createMotionElement("section"),
     span: createMotionElement("span"),
     svg: createMotionElement("svg"),

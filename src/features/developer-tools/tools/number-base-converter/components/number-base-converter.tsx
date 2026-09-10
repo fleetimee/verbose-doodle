@@ -148,7 +148,7 @@ function OutputCard({
   return (
     <section
       aria-label={outputLabel}
-      className="group min-w-0 border-b p-5 odd:border-r"
+      className="group min-w-0 border-b p-5 odd:sm:border-r"
     >
       <div className="flex items-center justify-between gap-3">
         <div>

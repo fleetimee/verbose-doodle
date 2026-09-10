@@ -307,7 +307,7 @@ export function CronParser() {
               <div className="grid border-x sm:grid-cols-2 xl:grid-cols-3">
                 {result.fields.map((field, index) => (
                   <article
-                    className="min-w-0 border-b p-4 sm:border-r"
+                    className="min-w-0 border-b p-4 sm:border-r sm:[&:nth-child(2n)]:border-r-0 xl:[&:nth-child(2n)]:border-r xl:[&:nth-child(3n)]:border-r-0"
                     key={field.key}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -356,7 +356,7 @@ export function CronParser() {
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <time
-                      className="font-mono text-xs sm:text-sm"
+                      className="break-words font-mono text-xs sm:text-sm"
                       dateTime={date.toISOString()}
                     >
                       {formatExecution(date, timeZone)}

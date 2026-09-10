@@ -147,7 +147,6 @@ export function NfcReaderInspector() {
           tourId={NFC_READER_TOUR_ID}
         />
       }
-      variant="top-header"
     >
       <div className="grid gap-4 lg:grid-cols-2">
         <StatusCard

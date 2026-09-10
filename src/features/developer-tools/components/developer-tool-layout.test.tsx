@@ -5,7 +5,7 @@ import { MemoryRouter } from "react-router";
 import { DeveloperToolLayout } from "@/features/developer-tools/components/developer-tool-layout";
 
 describe("DeveloperToolLayout", () => {
-  test("renders sidebar layout with title, description, and actions", async () => {
+  test("renders top-header layout by default with title, description, and actions", async () => {
     const user = userEvent.setup();
     let resetClicked = false;
     let clearClicked = false;
@@ -45,13 +45,13 @@ describe("DeveloperToolLayout", () => {
     expect(clearClicked).toBe(true);
   });
 
-  test("renders top-header layout when variant is top-header", () => {
+  test("renders sidebar layout when variant is sidebar", () => {
     render(
       <MemoryRouter>
         <DeveloperToolLayout
-          description="Top header description"
-          title="Top Header Tool"
-          variant="top-header"
+          description="Sidebar description"
+          title="Sidebar Tool"
+          variant="sidebar"
         >
           <div>Main Canvas</div>
         </DeveloperToolLayout>
@@ -59,9 +59,9 @@ describe("DeveloperToolLayout", () => {
     );
 
     expect(
-      screen.getByRole("heading", { level: 1, name: "Top Header Tool" })
+      screen.getByRole("heading", { level: 1, name: "Sidebar Tool" })
     ).toBeDefined();
-    expect(screen.getByText("Top header description")).toBeDefined();
+    expect(screen.getByText("Sidebar description")).toBeDefined();
     expect(screen.getByText("Main Canvas")).toBeDefined();
   });
 });

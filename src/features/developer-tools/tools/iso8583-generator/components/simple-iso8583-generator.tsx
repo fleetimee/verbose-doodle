@@ -978,7 +978,6 @@ export function Iso8583Generator() {
 
   return (
     <DeveloperToolLayout
-      className="max-w-5xl"
       description={copy.subtitle}
       extraActions={
         <a
@@ -998,7 +997,6 @@ export function Iso8583Generator() {
         </Badge>
       }
       title={copy.title}
-      variant="top-header"
     >
       <div className="mb-6 flex flex-col gap-2">
         <p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.16em]">

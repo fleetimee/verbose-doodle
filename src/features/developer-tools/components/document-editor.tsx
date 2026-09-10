@@ -69,11 +69,11 @@ export function DocumentEditor({
 
   return (
     <section className="min-w-0 border-t bg-background transition-colors focus-within:bg-muted/10">
-      <header className="grid min-h-16 grid-cols-[auto_1fr_auto] items-center gap-3 border-b px-4">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 sm:grid sm:min-h-16 sm:grid-cols-[auto_1fr_auto] sm:gap-3 sm:py-0">
         <span className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">
           {index}
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1 sm:flex-initial">
           <h2 className="font-semibold text-sm">{label}</h2>
           <p className="text-[11px] text-muted-foreground">{description}</p>
         </div>

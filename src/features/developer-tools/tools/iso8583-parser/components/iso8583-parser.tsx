@@ -611,7 +611,6 @@ export function Iso8583Parser() {
         </Badge>
       }
       title={messages.iso8583Parser.title}
-      variant="top-header"
     >
       <div className="space-y-6">
         {/* Stream Input Workbench Card */}
