@@ -11,7 +11,8 @@ five-minute cooldown. The cooldown is configurable with
 `APP_DASHBOARD_VISIT_NOTIFICATION_COOLDOWN`. The browser that created the visit
 suppresses its own notification, while other connected dashboard sessions still
 receive it. A visit by the same account from another IP is a separate pair and
-is broadcast normally.
+is broadcast normally. Loopback traffic is exempt from the cooldown so multiple
+local sessions can be tested from one machine.
 
 All authenticated dashboard users receive visit events through the existing
 ticketed realtime flow:

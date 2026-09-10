@@ -1,6 +1,6 @@
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 import { useAuth } from "@/features/auth/context";
 import {
@@ -17,6 +17,8 @@ import { formatMessage, messages } from "@/lib/i18n";
 
 const DASHBOARD_EVENTS_PATH = "/api/dashboard/events";
 const DASHBOARD_VISIT_BUBBLE_DURATION_MS = 6000;
+const DASHBOARD_VISIT_BUBBLE_EXIT_DURATION_MS = 260;
+const MAX_ACTIVE_VISIT_NOTICES = 4;
 const MAX_SEEN_VISIT_IDS = 1000;
 
 type DashboardVisitNotice = {
@@ -27,7 +29,7 @@ type DashboardVisitNotice = {
 export function DashboardVisitNotifications() {
   const { snapshot } = useAuth();
   const location = useLocation();
-  const [notice, setNotice] = useState<DashboardVisitNotice | null>(null);
+  const [notices, setNotices] = useState<DashboardVisitNotice[]>([]);
   const seenVisitIdsRef = useRef(new Set<string>());
   const visitMessageIndexRef = useRef<number | null>(null);
   const recordedVisitUserIdRef = useRef<string | null>(null);
@@ -73,14 +75,17 @@ export function DashboardVisitNotifications() {
           return;
         }
 
-        setNotice({
+        const nextNotice = {
           copy: formatMessage(message, {
             ip:
               event.payload.ipAddress ??
               messages.dashboardActivity.visitIpFallback,
           }),
           visitId: event.payload.visitId,
-        });
+        };
+        setNotices((currentNotices) =>
+          [...currentNotices, nextNotice].slice(-MAX_ACTIVE_VISIT_NOTICES)
+        );
       },
       path: DASHBOARD_EVENTS_PATH,
     });
@@ -91,18 +96,11 @@ export function DashboardVisitNotifications() {
     location.pathname === "/dashboard" ||
     location.pathname.startsWith("/dashboard/");
   const userId = snapshot.user?.user_id;
-
-  useEffect(() => {
-    if (!notice) {
-      return;
-    }
-
-    const timeoutId = globalThis.setTimeout(
-      () => setNotice(null),
-      DASHBOARD_VISIT_BUBBLE_DURATION_MS
+  const removeNotice = useCallback((visitId: string) => {
+    setNotices((currentNotices) =>
+      currentNotices.filter((notice) => notice.visitId !== visitId)
     );
-    return () => globalThis.clearTimeout(timeoutId);
-  }, [notice]);
+  }, []);
 
   useEffect(() => {
     const hasDashboardSession = snapshot.isAuthenticated && isDashboardRoute;
@@ -146,9 +144,57 @@ export function DashboardVisitNotifications() {
     };
   }, [connection, isDashboardRoute, snapshot.isAuthenticated, userId]);
 
-  if (!notice) {
+  if (notices.length === 0) {
     return null;
   }
+
+  return (
+    <div
+      className="dashboard-visit-bubble-stack"
+      data-slot="dashboard-visit-bubble-stack"
+    >
+      {notices.map((notice) => (
+        <DashboardVisitBubble
+          key={notice.visitId}
+          notice={notice}
+          onRemove={removeNotice}
+        />
+      ))}
+    </div>
+  );
+}
+
+type DashboardVisitBubbleProps = {
+  readonly notice: DashboardVisitNotice;
+  readonly onRemove: (visitId: string) => void;
+};
+
+function DashboardVisitBubble({ notice, onRemove }: DashboardVisitBubbleProps) {
+  const [isDismissing, setIsDismissing] = useState(false);
+
+  useEffect(() => {
+    if (isDismissing) {
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(
+      () => setIsDismissing(true),
+      DASHBOARD_VISIT_BUBBLE_DURATION_MS
+    );
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [isDismissing]);
+
+  useEffect(() => {
+    if (!isDismissing) {
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(
+      () => onRemove(notice.visitId),
+      DASHBOARD_VISIT_BUBBLE_EXIT_DURATION_MS
+    );
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [isDismissing, notice.visitId, onRemove]);
 
   return (
     <div
@@ -156,15 +202,16 @@ export function DashboardVisitNotifications() {
       aria-live="polite"
       className="dashboard-visit-bubble"
       data-slot="dashboard-visit-bubble"
-      key={notice.visitId}
+      data-state={isDismissing ? "exiting" : "visible"}
       role="status"
     >
+      <span aria-hidden="true" className="dashboard-visit-bubble-slash" />
       <span aria-hidden="true" className="dashboard-visit-bubble-burst" />
       <p className="dashboard-visit-bubble-copy">{notice.copy}</p>
       <button
         aria-label={messages.dashboardActivity.visitDismissLabel}
         className="dashboard-visit-bubble-dismiss"
-        onClick={() => setNotice(null)}
+        onClick={() => setIsDismissing(true)}
         type="button"
       >
         <HugeiconsIcon

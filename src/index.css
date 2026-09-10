@@ -2722,52 +2722,77 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     animation-name: sd-foldIn;
 }
 
-.dashboard-visit-bubble {
+.dashboard-visit-bubble-stack {
   position: fixed;
   right: 1.5rem;
   bottom: 1.5rem;
   z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: stretch;
+  width: min(22rem, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+.dashboard-visit-bubble {
+  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.75rem;
   align-items: center;
-  width: min(22rem, calc(100vw - 2rem));
+  width: 100%;
   min-height: 4.5rem;
   padding: 1rem 1rem 1rem 1.125rem;
   color: var(--popover-foreground);
-  background: color-mix(in oklch, var(--popover) 91%, var(--primary) 9%);
-  border: 2px solid var(--foreground);
+  pointer-events: auto;
+  background: color-mix(in oklch, var(--popover) 94%, var(--primary) 6%);
   border-radius:
     calc(var(--radius) + 4px) var(--radius) calc(var(--radius) + 4px) var(--radius) /
     var(--radius) calc(var(--radius) + 4px) var(--radius) calc(var(--radius) + 4px);
-  box-shadow: 0 14px 28px -18px color-mix(in oklab, var(--foreground) 70%, transparent);
+  box-shadow: 0 18px 34px -20px color-mix(in oklab, var(--foreground) 78%, transparent);
   isolation: isolate;
-  transform: rotate(-1deg);
-  animation: dashboard-visit-bubble-in 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  transform: rotate(-1.25deg);
+  animation: dashboard-visit-bubble-in 420ms var(--ease-out) both;
 }
 
 .dashboard-visit-bubble::before {
   position: absolute;
-  right: 2rem;
-  bottom: -0.65rem;
+  right: 1.9rem;
+  bottom: -0.55rem;
   z-index: -1;
   width: 1.2rem;
   height: 1.2rem;
   content: "";
-  background: color-mix(in oklch, var(--popover) 91%, var(--primary) 9%);
-  border-block-end: 2px solid var(--foreground);
-  border-inline-end: 2px solid var(--foreground);
+  background: color-mix(in oklch, var(--popover) 94%, var(--primary) 6%);
   transform: rotate(45deg);
 }
 
-.dashboard-visit-bubble::after {
+.dashboard-visit-bubble-slash {
   position: absolute;
-  inset: 0.35rem;
+  top: 0.9rem;
+  right: 0.75rem;
   z-index: 0;
+  display: block;
+  width: 4.75rem;
+  height: 0.35rem;
   pointer-events: none;
+  background: color-mix(in oklch, var(--primary) 78%, var(--foreground));
+  opacity: 0;
+  clip-path: polygon(0 38%, 100% 0, 92% 72%, 8% 100%);
+  transform: translateX(-1.25rem) rotate(-13deg) scaleX(0.55);
+}
+
+.dashboard-visit-bubble-slash::after {
+  position: absolute;
+  right: 0.7rem;
+  bottom: -0.6rem;
+  width: 3.1rem;
+  height: 0.18rem;
   content: "";
-  border: 1px dashed color-mix(in oklab, var(--primary) 45%, transparent);
-  border-radius: inherit;
+  background: color-mix(in oklch, var(--foreground) 68%, var(--primary));
+  clip-path: polygon(0 45%, 100% 0, 88% 100%, 8% 72%);
+  transform: rotate(-2deg);
 }
 
 .dashboard-visit-bubble-burst {
@@ -2796,6 +2821,27 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     40% 28%
   );
   transform: rotate(10deg);
+}
+
+.dashboard-visit-bubble[data-state="visible"] .dashboard-visit-bubble-burst {
+  animation: dashboard-visit-bubble-burst-in 340ms var(--ease-out) 80ms both;
+}
+
+.dashboard-visit-bubble[data-state="visible"] .dashboard-visit-bubble-slash {
+  animation: dashboard-visit-bubble-slash-in 320ms var(--ease-out) 80ms both;
+}
+
+.dashboard-visit-bubble[data-state="exiting"] {
+  pointer-events: none;
+  animation: dashboard-visit-bubble-out 260ms var(--ease-out) both;
+}
+
+.dashboard-visit-bubble[data-state="exiting"] .dashboard-visit-bubble-burst {
+  animation: dashboard-visit-bubble-burst-out 220ms var(--ease-out) both;
+}
+
+.dashboard-visit-bubble[data-state="exiting"] .dashboard-visit-bubble-slash {
+  animation: dashboard-visit-bubble-slash 230ms var(--ease-out) 10ms both;
 }
 
 .dashboard-visit-bubble-copy {
@@ -2840,20 +2886,121 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 @keyframes dashboard-visit-bubble-in {
   0% {
     opacity: 0;
-    filter: blur(4px);
-    transform: translateY(0.75rem) rotate(-5deg) scale(0.9);
+    filter: blur(6px);
+    clip-path: polygon(100% 0, 100% 100%, 76% 100%, 38% 0);
+    transform: translate3d(2.75rem, 1.5rem, 0) rotate(8deg) scale(0.9);
   }
 
-  65% {
+  26% {
     opacity: 1;
     filter: blur(0);
-    transform: translateY(-0.15rem) rotate(1deg) scale(1.02);
+    clip-path: polygon(100% 0, 100% 100%, 76% 100%, 38% 0);
+    transform: translate3d(-0.2rem, -0.15rem, 0) rotate(-3.5deg) scale(1.04);
+  }
+
+  62% {
+    opacity: 1;
+    filter: blur(0);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transform: translate3d(0.12rem, -0.1rem, 0) rotate(1.5deg) scale(1.02);
   }
 
   100% {
     opacity: 1;
     filter: none;
-    transform: translateY(0) rotate(-1deg) scale(1);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transform: translate3d(0, 0, 0) rotate(-1.25deg) scale(1);
+  }
+}
+
+@keyframes dashboard-visit-bubble-burst-in {
+  0% {
+    opacity: 0;
+    transform: rotate(-18deg) scale(0.55);
+  }
+
+  58% {
+    opacity: 1;
+    transform: rotate(19deg) scale(1.18);
+  }
+
+  100% {
+    opacity: 1;
+    transform: rotate(10deg) scale(1);
+  }
+}
+
+@keyframes dashboard-visit-bubble-out {
+  0% {
+    opacity: 1;
+    filter: none;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transform: translate3d(0, 0, 0) rotate(-1.25deg) scale(1);
+  }
+
+  42% {
+    opacity: 1;
+    filter: none;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transform: translate3d(0.15rem, -0.1rem, 0) rotate(-3deg) scale(1.02);
+  }
+
+  100% {
+    opacity: 0;
+    filter: blur(2px);
+    clip-path: polygon(100% 0, 100% 100%, 75% 100%, 0 0);
+    transform: translate3d(3.25rem, -0.85rem, 0) rotate(8deg) scale(0.88);
+  }
+}
+
+@keyframes dashboard-visit-bubble-burst-out {
+  to {
+    opacity: 0;
+    transform: rotate(32deg) scale(1.55);
+  }
+}
+
+@keyframes dashboard-visit-bubble-slash {
+  0% {
+    opacity: 0;
+    transform: translateX(-1.25rem) rotate(-13deg) scaleX(0.55);
+  }
+
+  35% {
+    opacity: 0.95;
+    transform: translateX(0.2rem) rotate(-13deg) scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(2.5rem) rotate(-13deg) scaleX(0.75);
+  }
+}
+
+@keyframes dashboard-visit-bubble-slash-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-3rem) rotate(-13deg) scaleX(0.4);
+  }
+
+  28% {
+    opacity: 0.9;
+    transform: translateX(-0.1rem) rotate(-13deg) scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(2.5rem) rotate(-13deg) scaleX(0.75);
+  }
+}
+
+@keyframes dashboard-visit-bubble-out-reduced {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
   }
 }
 
@@ -2863,14 +3010,26 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     animation: none;
   }
 
+  .dashboard-visit-bubble[data-state="exiting"] {
+    animation: dashboard-visit-bubble-out-reduced 160ms var(--ease-out) both;
+  }
+
+  .dashboard-visit-bubble[data-state="visible"] .dashboard-visit-bubble-burst,
+  .dashboard-visit-bubble[data-state="visible"] .dashboard-visit-bubble-slash,
+  .dashboard-visit-bubble[data-state="exiting"] .dashboard-visit-bubble-burst,
+  .dashboard-visit-bubble[data-state="exiting"] .dashboard-visit-bubble-slash {
+    animation: none;
+  }
+
   .dashboard-visit-bubble-dismiss {
     transition: none;
   }
 }
 
 @media (max-width: 640px) {
-  .dashboard-visit-bubble {
+  .dashboard-visit-bubble-stack {
     right: 1rem;
     bottom: 1rem;
+    width: calc(100vw - 2rem);
   }
 }

@@ -152,6 +152,12 @@ describe("DashboardVisitNotifications", () => {
     act(() => {
       screen.getByRole("button", { name: "Dismiss dashboard visit" }).click();
     });
+    expect(screen.getByRole("status").getAttribute("data-state")).toBe(
+      "exiting"
+    );
+    await act(async () => {
+      await new Promise((resolve) => globalThis.setTimeout(resolve, 300));
+    });
     expect(screen.queryByRole("status")).toBeNull();
 
     act(() => {
@@ -192,7 +198,7 @@ describe("DashboardVisitNotifications", () => {
     expect(dashboardVisitRequestCount).toBe(1);
   });
 
-  test("shows a visit from the same account on another IP", async () => {
+  test("shows a visit from another local admin session", async () => {
     render(
       <StrictMode>
         <MemoryRouter initialEntries={["/dashboard/overview"]}>
@@ -210,7 +216,7 @@ describe("DashboardVisitNotifications", () => {
         "message",
         JSON.stringify({
           payload: {
-            ip_address: "198.51.100.20",
+            ip_address: "127.0.0.1",
             user_id: "admin-1",
             username: "admin",
             visit_id: "visit-2",
@@ -221,7 +227,71 @@ describe("DashboardVisitNotifications", () => {
       );
     });
 
-    expect(screen.getByRole("status").textContent).toContain("198.51.100.20");
+    expect(screen.getByRole("status").textContent).toContain("127.0.0.1");
+  });
+
+  test("stacks concurrent visitor notices", async () => {
+    render(
+      <StrictMode>
+        <MemoryRouter initialEntries={["/dashboard/overview"]}>
+          <AuthProvider>
+            <DashboardVisitNotifications />
+          </AuthProvider>
+        </MemoryRouter>
+      </StrictMode>
+    );
+
+    await waitFor(() => expect(FakeWebSocket.instances).toHaveLength(1));
+
+    act(() => {
+      const socket = FakeWebSocket.instances[0];
+      socket?.emit(
+        "message",
+        JSON.stringify({
+          payload: {
+            ip_address: "127.0.0.1",
+            user_id: "admin-1",
+            username: "admin",
+            visit_id: "visit-2",
+            visited_at: "2026-09-10T12:30:00Z",
+          },
+          type: "dashboard_visited",
+        })
+      );
+      socket?.emit(
+        "message",
+        JSON.stringify({
+          payload: {
+            ip_address: "203.0.113.15",
+            user_id: "user-42",
+            username: "alice",
+            visit_id: "visit-3",
+            visited_at: "2026-09-10T12:30:01Z",
+          },
+          type: "dashboard_visited",
+        })
+      );
+    });
+
+    const bubbles = screen.getAllByRole("status");
+    expect(bubbles).toHaveLength(2);
+    expect(bubbles[0]?.textContent).toContain("127.0.0.1");
+    expect(bubbles[1]?.textContent).toContain("203.0.113.15");
+
+    act(() => {
+      screen.getAllByRole("button")[0]?.click();
+    });
+    expect(screen.getAllByRole("status")[0]?.getAttribute("data-state")).toBe(
+      "exiting"
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => globalThis.setTimeout(resolve, 300));
+    });
+
+    const remainingBubbles = screen.getAllByRole("status");
+    expect(remainingBubbles).toHaveLength(1);
+    expect(remainingBubbles[0]?.textContent).toContain("203.0.113.15");
   });
 
   test("does not show the current browser's own visit", async () => {
