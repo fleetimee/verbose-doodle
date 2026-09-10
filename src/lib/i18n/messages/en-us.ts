@@ -26,6 +26,18 @@ export const enUsMessages = {
   common: commonMessages,
   cronParser: cronParserMessages,
   dateConverter: dateConverterMessages,
+  dashboardActivity: {
+    visitDismissLabel: "Dismiss dashboard visit",
+    visitIpFallback: "an unknown IP",
+    visitMessages: [
+      "Hi, {ip} is here.",
+      "Psst—{ip} just dropped in.",
+      "Knock knock—{ip} is at the door.",
+      "Plot twist: {ip} joined the dashboard.",
+      "Incoming! {ip} is on the scene.",
+      "The dashboard has company: {ip}.",
+    ],
+  },
   developerTools: developerToolsMessages,
   endpoints: endpointsMessages,
   errors: errorsMessages,

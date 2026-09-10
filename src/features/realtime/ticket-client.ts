@@ -1,6 +1,9 @@
 import { apiPost } from "@/lib/api";
 
-export type RealtimeAudience = "socket-test" | "relay-events";
+export type RealtimeAudience =
+  | "dashboard-visits"
+  | "relay-events"
+  | "socket-test";
 
 type RealtimeTicketApiResponse = {
   readonly data: {

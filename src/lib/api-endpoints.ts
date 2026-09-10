@@ -30,6 +30,9 @@ export const API_ENDPOINTS = {
       list: "/api/biller",
       update: (slug: string) => `/api/biller/${slug}`,
     },
+    dashboard: {
+      visits: "/api/dashboard/visits",
+    },
     endpoints: {
       create: "/api/endpoint",
       delete: (slug: string) => `/api/endpoint/${slug}`,

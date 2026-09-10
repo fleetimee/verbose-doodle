@@ -2721,3 +2721,156 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     transform-origin: 50% 0%;
     animation-name: sd-foldIn;
 }
+
+.dashboard-visit-bubble {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  width: min(22rem, calc(100vw - 2rem));
+  min-height: 4.5rem;
+  padding: 1rem 1rem 1rem 1.125rem;
+  color: var(--popover-foreground);
+  background: color-mix(in oklch, var(--popover) 91%, var(--primary) 9%);
+  border: 2px solid var(--foreground);
+  border-radius:
+    calc(var(--radius) + 4px) var(--radius) calc(var(--radius) + 4px) var(--radius) /
+    var(--radius) calc(var(--radius) + 4px) var(--radius) calc(var(--radius) + 4px);
+  box-shadow: 0 14px 28px -18px color-mix(in oklab, var(--foreground) 70%, transparent);
+  isolation: isolate;
+  transform: rotate(-1deg);
+  animation: dashboard-visit-bubble-in 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.dashboard-visit-bubble::before {
+  position: absolute;
+  right: 2rem;
+  bottom: -0.65rem;
+  z-index: -1;
+  width: 1.2rem;
+  height: 1.2rem;
+  content: "";
+  background: color-mix(in oklch, var(--popover) 91%, var(--primary) 9%);
+  border-block-end: 2px solid var(--foreground);
+  border-inline-end: 2px solid var(--foreground);
+  transform: rotate(45deg);
+}
+
+.dashboard-visit-bubble::after {
+  position: absolute;
+  inset: 0.35rem;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+  border: 1px dashed color-mix(in oklab, var(--primary) 45%, transparent);
+  border-radius: inherit;
+}
+
+.dashboard-visit-bubble-burst {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 1.45rem;
+  height: 1.45rem;
+  background: var(--primary);
+  clip-path: polygon(
+    50% 0%,
+    61% 28%,
+    85% 15%,
+    72% 42%,
+    100% 50%,
+    72% 59%,
+    85% 85%,
+    59% 72%,
+    50% 100%,
+    40% 72%,
+    15% 85%,
+    28% 59%,
+    0% 50%,
+    28% 42%,
+    15% 15%,
+    40% 28%
+  );
+  transform: rotate(10deg);
+}
+
+.dashboard-visit-bubble-copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--popover-foreground);
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-visit-bubble-dismiss {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 9999px;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+
+.dashboard-visit-bubble-dismiss:hover {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--primary) 14%, transparent);
+}
+
+.dashboard-visit-bubble-dismiss:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--primary) 55%, transparent);
+  outline-offset: 2px;
+}
+
+@keyframes dashboard-visit-bubble-in {
+  0% {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(0.75rem) rotate(-5deg) scale(0.9);
+  }
+
+  65% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(-0.15rem) rotate(1deg) scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    filter: none;
+    transform: translateY(0) rotate(-1deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-visit-bubble {
+    transform: none;
+    animation: none;
+  }
+
+  .dashboard-visit-bubble-dismiss {
+    transition: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-visit-bubble {
+    right: 1rem;
+    bottom: 1rem;
+  }
+}

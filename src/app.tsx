@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TokenExpirationDialog } from "@/components/token-expiration-dialog";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/features/auth/context";
+import { DashboardVisitNotifications } from "@/features/dashboard/components/dashboard-visit-notifications";
 import { queryClient } from "@/lib/query-client";
 
 export function App() {
@@ -21,6 +22,7 @@ export function App() {
                 <AppRoutes />
                 <TokenExpirationDialog />
                 <Toaster position="bottom-center" />
+                <DashboardVisitNotifications />
               </MotionConfig>
             </ThemeProvider>
           </AuthProvider>
