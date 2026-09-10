@@ -5,7 +5,7 @@ import {
   HelpCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,10 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  developerToolChildVariants as childVariants,
+  DeveloperToolLayout,
+} from "@/features/developer-tools/components/developer-tool-layout";
+import {
   DeveloperToolTourButton,
   type DeveloperToolTourStep,
 } from "@/features/developer-tools/components/developer-tool-tour-button";
@@ -40,22 +44,6 @@ import {
   verifyHS256,
 } from "@/features/developer-tools/tools/jwt-inspector/utils/jwt";
 import { messages } from "@/lib/i18n";
-
-const parentVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.07 },
-  },
-};
-
-const childVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    transition: { bounce: 0.08, duration: 0.32, type: "spring" as const },
-    y: 0,
-  },
-};
 
 const JWT_TOUR_ID = "jwt-inspector-intro";
 const JWT_TOUR_TARGETS = {
@@ -171,7 +159,6 @@ function parseClaim(key: string, val: unknown): ClaimRow {
 }
 
 export function JwtInspector() {
-  const shouldReduceMotion = useReducedMotion();
   const [encodedToken, setEncodedToken] = useState("");
   const [headerJson, setHeaderJson] = useState("");
   const [payloadJson, setPayloadJson] = useState("");
@@ -496,274 +483,218 @@ export function JwtInspector() {
   const claimsRows = getClaimsRows();
 
   return (
-    <motion.div
-      animate="visible"
-      className="mx-auto grid w-full max-w-[1400px] grid-cols-1 gap-8 pb-10 md:grid-cols-[210px_minmax(0,1fr)] md:gap-10 xl:grid-cols-[240px_minmax(0,1fr)] xl:gap-14"
-      initial={shouldReduceMotion ? "visible" : "hidden"}
-      variants={parentVariants}
+    <DeveloperToolLayout
+      clearLabel={messages.jwtInspector.clear}
+      description={messages.jwtInspector.description}
+      onClear={clearEditors}
+      onReset={resetExample}
+      resetLabel={messages.jwtInspector.resetExample}
+      title={messages.jwtInspector.title}
+      tour={
+        <DeveloperToolTourButton
+          label={messages.jwtInspector.tour.startButton}
+          steps={JWT_TOUR_STEPS}
+          storageKey="jwt-inspector-tour-seen"
+          tourId={JWT_TOUR_ID}
+        />
+      }
     >
-      {/* Sticky Sidebar */}
-      <motion.aside
-        className="md:sticky md:top-6 md:self-start"
+      {/* Controls & Secret Panel */}
+      <motion.section
+        className="border-y py-4"
+        id={JWT_TOUR_TARGETS.controls}
         variants={childVariants}
       >
-        <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.24em]">
-          {messages.jwtInspector.eyebrow}
-        </p>
-        <h1 className="mt-4 max-w-48 font-semibold text-3xl leading-[0.96] tracking-[-0.045em]">
-          {messages.jwtInspector.title}
-        </h1>
-        <p className="mt-5 text-muted-foreground text-sm leading-6">
-          {messages.jwtInspector.description}
-        </p>
-
-        <dl className="mt-8 border-y text-xs">
-          <div className="grid grid-cols-[72px_1fr] gap-3 border-b py-3">
-            <dt className="text-muted-foreground">
-              {messages.jwtInspector.algorithmsLabel}
-            </dt>
-            <dd>{messages.jwtInspector.algorithmsValue}</dd>
+        <div className="grid gap-4 sm:grid-cols-2 sm:items-end sm:gap-6 md:pr-6">
+          <div className="space-y-2">
+            <Label className="text-xs" htmlFor="jwt-secret-input">
+              {messages.jwtInspector.secretLabel}
+            </Label>
+            <Input
+              className="h-10 rounded-md bg-background px-3 font-mono shadow-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0"
+              id="jwt-secret-input"
+              onChange={(e) => handleSecretChange(e.target.value)}
+              placeholder={messages.jwtInspector.secretPlaceholder}
+              type="text"
+              value={secret}
+            />
           </div>
-          <div className="grid grid-cols-[72px_1fr] gap-3 border-b py-3">
-            <dt className="text-muted-foreground">
-              {messages.jwtInspector.limitLabel}
-            </dt>
-            <dd className="font-mono">{messages.jwtInspector.limitValue}</dd>
-          </div>
-          <div className="grid grid-cols-[72px_1fr] gap-3 py-3">
-            <dt className="text-muted-foreground">
-              {messages.jwtInspector.storageLabel}
-            </dt>
-            <dd className="flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
-              {messages.jwtInspector.storageValue}
-            </dd>
-          </div>
-        </dl>
-
-        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 md:flex-col md:items-start">
-          <DeveloperToolTourButton
-            label={messages.jwtInspector.tour.startButton}
-            steps={JWT_TOUR_STEPS}
-            storageKey="jwt-inspector-tour-seen"
-            tourId={JWT_TOUR_ID}
-          />
-          <button
-            className="text-muted-foreground text-xs underline decoration-border underline-offset-4 transition-colors hover:text-foreground active:translate-y-px"
-            onClick={resetExample}
-            type="button"
-          >
-            {messages.jwtInspector.resetExample}
-          </button>
-          <button
-            className="text-muted-foreground text-xs underline decoration-border underline-offset-4 transition-colors hover:text-foreground active:translate-y-px"
-            onClick={clearEditors}
-            type="button"
-          >
-            {messages.jwtInspector.clear}
-          </button>
-        </div>
-      </motion.aside>
-
-      {/* Main Panel Content */}
-      <main className="min-w-0">
-        {/* Controls & Secret Panel */}
-        <motion.section
-          className="border-y py-4"
-          id={JWT_TOUR_TARGETS.controls}
-          variants={childVariants}
-        >
-          <div className="grid gap-4 sm:grid-cols-2 sm:items-end sm:gap-6 md:pr-6">
-            <div className="space-y-2">
-              <Label className="text-xs" htmlFor="jwt-secret-input">
-                {messages.jwtInspector.secretLabel}
-              </Label>
-              <Input
-                className="h-10 rounded-md bg-background px-3 font-mono shadow-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0"
-                id="jwt-secret-input"
-                onChange={(e) => handleSecretChange(e.target.value)}
-                placeholder={messages.jwtInspector.secretPlaceholder}
-                type="text"
-                value={secret}
-              />
-            </div>
-            <div className="flex h-10 items-center justify-between border-l pl-6">
-              <span className="text-muted-foreground text-xs">
-                {messages.jwtInspector.signatureStatusLabel}:
-              </span>
-              {renderSignatureStatus()}
-            </div>
-          </div>
-        </motion.section>
-
-        {/* Editor Workspace */}
-        <div
-          className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2"
-          id={JWT_TOUR_TARGETS.editors}
-        >
-          {/* Encoded JWT Section */}
-          <div className="flex flex-col gap-6">
-            <Card className="flex h-full flex-col border bg-card shadow-sm">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="font-semibold text-sm">
-                    {messages.jwtInspector.inputLabel}
-                  </CardTitle>
-                  <Button
-                    className="h-7 text-xs"
-                    onClick={() =>
-                      copyToClipboard(
-                        encodedToken,
-                        messages.jwtInspector.copySuccess
-                      )
-                    }
-                    size="sm"
-                    variant="outline"
-                  >
-                    <HugeiconsIcon
-                      className="mr-2 h-3.5 w-3.5"
-                      icon={Copy01Icon}
-                      strokeWidth={2}
-                    />
-                    {messages.jwtInspector.copyToken}
-                  </Button>
-                </div>
-                <CardDescription className="text-[11px]">
-                  {messages.jwtInspector.inputDescription}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="relative flex flex-1 flex-col p-6 pt-0">
-                <div className="relative flex flex-1 flex-col">
-                  <Textarea
-                    aria-label={messages.jwtInspector.inputLabel}
-                    className="min-h-[300px] flex-1 resize-none border bg-background font-mono text-[13px] leading-relaxed focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0 lg:min-h-[440px]"
-                    id="encoded-jwt-input"
-                    onChange={(e) => handleEncodedChange(e.target.value)}
-                    placeholder={messages.jwtInspector.inputPlaceholder}
-                    value={encodedToken}
-                  />
-                  {structureError && (
-                    <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 rounded-b-md border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
-                      <HugeiconsIcon
-                        className="h-4.5 w-4.5 shrink-0"
-                        icon={AlertCircleIcon}
-                        strokeWidth={2}
-                      />
-                      <span>{structureError}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Decoded JSON Editors */}
-          <div className="flex min-w-0 flex-col gap-6">
-            {/* Header Editor */}
-            <div className="relative overflow-hidden rounded-lg border shadow-sm">
-              <DocumentEditor
-                byteCountMessage={messages.developerTools.converterLimit}
-                description={messages.jwtInspector.headerDescription}
-                format="json"
-                index="01"
-                label={messages.jwtInspector.headerLabel}
-                lineCountMessage={messages.developerTools.openAction}
-                onChange={handleHeaderChange}
-                value={headerJson}
-              />
-              {headerError && (
-                <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
-                  <HugeiconsIcon
-                    className="h-4 w-4 shrink-0"
-                    icon={AlertCircleIcon}
-                    strokeWidth={2}
-                  />
-                  <span className="font-mono">{headerError}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Payload Editor */}
-            <div className="relative overflow-hidden rounded-lg border shadow-sm">
-              <DocumentEditor
-                byteCountMessage={messages.developerTools.converterLimit}
-                description={messages.jwtInspector.payloadDescription}
-                format="json"
-                index="02"
-                label={messages.jwtInspector.payloadLabel}
-                lineCountMessage={messages.developerTools.openAction}
-                onChange={handlePayloadChange}
-                value={payloadJson}
-              />
-              {payloadError && (
-                <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
-                  <HugeiconsIcon
-                    className="h-4 w-4 shrink-0"
-                    icon={AlertCircleIcon}
-                    strokeWidth={2}
-                  />
-                  <span className="font-mono">{payloadError}</span>
-                </div>
-              )}
-            </div>
+          <div className="flex h-10 items-center justify-between border-l pl-6">
+            <span className="text-muted-foreground text-xs">
+              {messages.jwtInspector.signatureStatusLabel}:
+            </span>
+            {renderSignatureStatus()}
           </div>
         </div>
+      </motion.section>
 
-        {/* Claims Analysis */}
-        {claimsRows.length > 0 && (
-          <Card className="mt-6 border bg-card shadow-sm">
+      {/* Editor Workspace */}
+      <div
+        className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2"
+        id={JWT_TOUR_TARGETS.editors}
+      >
+        {/* Encoded JWT Section */}
+        <div className="flex flex-col gap-6">
+          <Card className="flex h-full flex-col border bg-card shadow-sm">
             <CardHeader className="pb-4">
-              <CardTitle className="font-semibold text-sm">
-                {messages.jwtInspector.claimsTitle}
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="font-semibold text-sm">
+                  {messages.jwtInspector.inputLabel}
+                </CardTitle>
+                <Button
+                  className="h-7 text-xs"
+                  onClick={() =>
+                    copyToClipboard(
+                      encodedToken,
+                      messages.jwtInspector.copySuccess
+                    )
+                  }
+                  size="sm"
+                  variant="outline"
+                >
+                  <HugeiconsIcon
+                    className="mr-2 h-3.5 w-3.5"
+                    icon={Copy01Icon}
+                    strokeWidth={2}
+                  />
+                  {messages.jwtInspector.copyToken}
+                </Button>
+              </div>
               <CardDescription className="text-[11px]">
-                {messages.jwtInspector.claimsDescription}
+                {messages.jwtInspector.inputDescription}
               </CardDescription>
             </CardHeader>
-            <CardContent className="border-t p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-[180px] pl-6 text-xs">
-                      {messages.jwtInspector.claimHeaderName}
-                    </TableHead>
-                    <TableHead className="text-xs">
-                      {messages.jwtInspector.claimHeaderValue}
-                    </TableHead>
-                    <TableHead className="text-xs">
-                      {messages.jwtInspector.claimHeaderDescription}
-                    </TableHead>
-                    <TableHead className="w-[120px] pr-6 text-xs">
-                      {messages.jwtInspector.claimHeaderStatus}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {claimsRows.map((row) => (
-                    <TableRow className="hover:bg-muted/30" key={row.name}>
-                      <TableCell className="pl-6 font-mono text-xs">
-                        {row.name}
-                      </TableCell>
-                      <TableCell
-                        className="max-w-[200px] truncate font-mono text-xs"
-                        title={row.value}
-                      >
-                        {row.value}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">
-                        {row.description}
-                      </TableCell>
-                      <TableCell className="pr-6">
-                        {renderClaimStatus(row.status, row.statusText)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <CardContent className="relative flex flex-1 flex-col p-6 pt-0">
+              <div className="relative flex flex-1 flex-col">
+                <Textarea
+                  aria-label={messages.jwtInspector.inputLabel}
+                  className="min-h-[300px] flex-1 resize-none border bg-background font-mono text-[13px] leading-relaxed focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0 lg:min-h-[440px]"
+                  id="encoded-jwt-input"
+                  onChange={(e) => handleEncodedChange(e.target.value)}
+                  placeholder={messages.jwtInspector.inputPlaceholder}
+                  value={encodedToken}
+                />
+                {structureError && (
+                  <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 rounded-b-md border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
+                    <HugeiconsIcon
+                      className="h-4.5 w-4.5 shrink-0"
+                      icon={AlertCircleIcon}
+                      strokeWidth={2}
+                    />
+                    <span>{structureError}</span>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
-        )}
-      </main>
-    </motion.div>
+        </div>
+
+        {/* Decoded JSON Editors */}
+        <div className="flex min-w-0 flex-col gap-6">
+          {/* Header Editor */}
+          <div className="relative overflow-hidden rounded-lg border shadow-sm">
+            <DocumentEditor
+              byteCountMessage={messages.developerTools.converterLimit}
+              description={messages.jwtInspector.headerDescription}
+              format="json"
+              index="01"
+              label={messages.jwtInspector.headerLabel}
+              lineCountMessage={messages.developerTools.openAction}
+              onChange={handleHeaderChange}
+              value={headerJson}
+            />
+            {headerError && (
+              <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
+                <HugeiconsIcon
+                  className="h-4 w-4 shrink-0"
+                  icon={AlertCircleIcon}
+                  strokeWidth={2}
+                />
+                <span className="font-mono">{headerError}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Payload Editor */}
+          <div className="relative overflow-hidden rounded-lg border shadow-sm">
+            <DocumentEditor
+              byteCountMessage={messages.developerTools.converterLimit}
+              description={messages.jwtInspector.payloadDescription}
+              format="json"
+              index="02"
+              label={messages.jwtInspector.payloadLabel}
+              lineCountMessage={messages.developerTools.openAction}
+              onChange={handlePayloadChange}
+              value={payloadJson}
+            />
+            {payloadError && (
+              <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
+                <HugeiconsIcon
+                  className="h-4 w-4 shrink-0"
+                  icon={AlertCircleIcon}
+                  strokeWidth={2}
+                />
+                <span className="font-mono">{payloadError}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Claims Analysis */}
+      {claimsRows.length > 0 && (
+        <Card className="mt-6 border bg-card shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="font-semibold text-sm">
+              {messages.jwtInspector.claimsTitle}
+            </CardTitle>
+            <CardDescription className="text-[11px]">
+              {messages.jwtInspector.claimsDescription}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="border-t p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[180px] pl-6 text-xs">
+                    {messages.jwtInspector.claimHeaderName}
+                  </TableHead>
+                  <TableHead className="text-xs">
+                    {messages.jwtInspector.claimHeaderValue}
+                  </TableHead>
+                  <TableHead className="text-xs">
+                    {messages.jwtInspector.claimHeaderDescription}
+                  </TableHead>
+                  <TableHead className="w-[120px] pr-6 text-xs">
+                    {messages.jwtInspector.claimHeaderStatus}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {claimsRows.map((row) => (
+                  <TableRow className="hover:bg-muted/30" key={row.name}>
+                    <TableCell className="pl-6 font-mono text-xs">
+                      {row.name}
+                    </TableCell>
+                    <TableCell
+                      className="max-w-[200px] truncate font-mono text-xs"
+                      title={row.value}
+                    >
+                      {row.value}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-xs">
+                      {row.description}
+                    </TableCell>
+                    <TableCell className="pr-6">
+                      {renderClaimStatus(row.status, row.statusText)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+    </DeveloperToolLayout>
   );
 }

@@ -8,6 +8,7 @@ import { developerToolsMessages } from "@/lib/i18n/messages/en-us/developer-tool
 import { endpointsMessages } from "@/lib/i18n/messages/en-us/endpoints";
 import { errorsMessages } from "@/lib/i18n/messages/en-us/errors";
 import { iso8583GeneratorMessages } from "@/lib/i18n/messages/en-us/iso8583-generator";
+import { iso8583ParserMessages } from "@/lib/i18n/messages/en-us/iso8583-parser";
 import { jsonSchemaValidatorMessages } from "@/lib/i18n/messages/en-us/json-schema-validator";
 import { jsonYamlConverterMessages } from "@/lib/i18n/messages/en-us/json-yaml-converter";
 import { jwtInspectorMessages } from "@/lib/i18n/messages/en-us/jwt-inspector";
@@ -29,6 +30,7 @@ export const enUsMessages = {
   endpoints: endpointsMessages,
   errors: errorsMessages,
   iso8583Generator: iso8583GeneratorMessages,
+  iso8583Parser: iso8583ParserMessages,
   jsonSchemaValidator: jsonSchemaValidatorMessages,
   jsonYamlConverter: jsonYamlConverterMessages,
   jwtInspector: jwtInspectorMessages,

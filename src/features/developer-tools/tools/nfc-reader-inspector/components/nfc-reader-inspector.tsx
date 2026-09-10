@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DeveloperToolLayout } from "@/features/developer-tools/components/developer-tool-layout";
 import {
   DeveloperToolTourButton,
   type DeveloperToolTourStep,
@@ -118,44 +119,36 @@ export function NfcReaderInspector() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-6">
-      <header className="grid gap-4 border-border/70 border-b pb-6 md:grid-cols-[minmax(0,1fr)_auto]">
-        <div>
-          <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-[0.18em]">
-            {copy.nfcReaderEyebrow}
-          </p>
-          <h1 className="font-bold text-4xl tracking-tight md:text-5xl">
-            {copy.nfcReaderTitle}
-          </h1>
-          <p className="mt-3 max-w-[68ch] text-muted-foreground text-sm leading-relaxed md:text-base">
-            {copy.nfcReaderDescription}
-          </p>
-        </div>
-        <div className="flex flex-col items-start gap-3 md:items-end">
+    <DeveloperToolLayout
+      description={copy.nfcReaderDescription}
+      extraActions={
+        <>
           <Badge className="h-8 rounded-full px-3" variant="outline">
             {copy.nfcReaderTransport}
           </Badge>
-          <div className="flex flex-wrap gap-2 md:justify-end">
-            <DeveloperToolTourButton
-              label={copy.nfcTour.startButton}
-              steps={NFC_READER_TOUR_STEPS}
-              storageKey="nfc-reader-inspector-tour-seen"
-              tourId={NFC_READER_TOUR_ID}
-            />
-            <a
-              className={buttonVariants({ size: "sm", variant: "outline" })}
-              href={NFC_BRIDGE_RELEASE_URL}
-              id={NFC_READER_TOUR_TARGETS.release}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <MonitorDown data-icon="inline-start" />
-              {copy.nfcDownloadBridge}
-            </a>
-          </div>
-        </div>
-      </header>
-
+          <a
+            className={buttonVariants({ size: "sm", variant: "outline" })}
+            href={NFC_BRIDGE_RELEASE_URL}
+            id={NFC_READER_TOUR_TARGETS.release}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <MonitorDown data-icon="inline-start" />
+            {copy.nfcDownloadBridge}
+          </a>
+        </>
+      }
+      title={copy.nfcReaderTitle}
+      tour={
+        <DeveloperToolTourButton
+          label={copy.nfcTour.startButton}
+          steps={NFC_READER_TOUR_STEPS}
+          storageKey="nfc-reader-inspector-tour-seen"
+          tourId={NFC_READER_TOUR_ID}
+        />
+      }
+      variant="top-header"
+    >
       <div className="grid gap-4 lg:grid-cols-2">
         <StatusCard
           icon={<Activity data-icon="inline-start" />}
@@ -276,7 +269,7 @@ export function NfcReaderInspector() {
           {copy.nfcReaderNextStepDescription}
         </CardContent>
       </Card>
-    </div>
+    </DeveloperToolLayout>
   );
 }
 

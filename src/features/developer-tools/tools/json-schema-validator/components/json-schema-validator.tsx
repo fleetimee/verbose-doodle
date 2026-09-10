@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import {
+  developerToolChildVariants as childVariants,
+  DeveloperToolLayout,
+} from "@/features/developer-tools/components/developer-tool-layout";
 import {
   DeveloperToolTourButton,
   type DeveloperToolTourStep,
@@ -33,22 +37,6 @@ const dialectLabels: Record<JsonSchemaDialect, string> = {
   DRAFT_7: messages.jsonSchemaValidator.dialectDraft7,
   DRAFT_2019_09: messages.jsonSchemaValidator.dialectDraft201909,
   DRAFT_2020_12: messages.jsonSchemaValidator.dialectDraft202012,
-};
-
-const parentVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.07 },
-  },
-};
-
-const childVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    transition: { bounce: 0.08, duration: 0.32, type: "spring" as const },
-    y: 0,
-  },
 };
 
 const JSON_SCHEMA_TOUR_ID = "json-schema-validator-intro";
@@ -91,7 +79,6 @@ function serviceError(error: ApiError | null) {
 }
 
 export function JsonSchemaValidator() {
-  const shouldReduceMotion = useReducedMotion();
   const [schema, setSchema] = useState(EXAMPLE_SCHEMA);
   const [instance, setInstance] = useState(EXAMPLE_INSTANCE);
   const [dialect, setDialect] = useState<JsonSchemaDialect>("AUTO");
@@ -141,226 +128,166 @@ export function JsonSchemaValidator() {
   const error = serviceError(mutation.error);
 
   return (
-    <motion.div
-      animate="visible"
-      className="mx-auto grid w-full max-w-[1400px] grid-cols-1 gap-8 pb-10 md:grid-cols-[210px_minmax(0,1fr)] md:gap-10 xl:grid-cols-[240px_minmax(0,1fr)] xl:gap-14"
-      initial={shouldReduceMotion ? "visible" : "hidden"}
-      variants={parentVariants}
+    <DeveloperToolLayout
+      clearLabel={messages.jsonSchemaValidator.clear}
+      description={messages.jsonSchemaValidator.description}
+      onClear={clearEditors}
+      onReset={resetExample}
+      resetLabel={messages.jsonSchemaValidator.resetExample}
+      title={messages.jsonSchemaValidator.title}
+      tour={
+        <DeveloperToolTourButton
+          label={messages.jsonSchemaValidator.tour.startButton}
+          steps={JSON_SCHEMA_TOUR_STEPS}
+          storageKey="json-schema-validator-tour-seen"
+          tourId={JSON_SCHEMA_TOUR_ID}
+        />
+      }
     >
-      <motion.aside
-        className="md:sticky md:top-6 md:self-start"
+      <motion.section
+        className="grid border-y md:grid-cols-[minmax(0,1fr)_auto]"
+        id={JSON_SCHEMA_TOUR_TARGETS.controls}
         variants={childVariants}
       >
-        <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.24em]">
-          {messages.jsonSchemaValidator.eyebrow}
-        </p>
-        <h1 className="mt-4 max-w-48 font-semibold text-3xl leading-[0.96] tracking-[-0.045em]">
-          {messages.jsonSchemaValidator.title}
-        </h1>
-        <p className="mt-5 text-muted-foreground text-sm leading-6">
-          {messages.jsonSchemaValidator.description}
-        </p>
-
-        <dl className="mt-8 border-y text-xs">
-          <div className="grid grid-cols-[72px_1fr] gap-3 border-b py-3">
-            <dt className="text-muted-foreground">
-              {messages.jsonSchemaValidator.dialectsLabel}
-            </dt>
-            <dd>{messages.jsonSchemaValidator.dialectsValue}</dd>
-          </div>
-          <div className="grid grid-cols-[72px_1fr] gap-3 border-b py-3">
-            <dt className="text-muted-foreground">
-              {messages.jsonSchemaValidator.limitLabel}
-            </dt>
-            <dd className="font-mono">
-              {messages.jsonSchemaValidator.limitValue}
-            </dd>
-          </div>
-          <div className="grid grid-cols-[72px_1fr] gap-3 py-3">
-            <dt className="text-muted-foreground">
-              {messages.jsonSchemaValidator.storageLabel}
-            </dt>
-            <dd className="flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
-              {messages.jsonSchemaValidator.storageValue}
-            </dd>
-          </div>
-        </dl>
-
-        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 md:flex-col md:items-start">
-          <DeveloperToolTourButton
-            label={messages.jsonSchemaValidator.tour.startButton}
-            steps={JSON_SCHEMA_TOUR_STEPS}
-            storageKey="json-schema-validator-tour-seen"
-            tourId={JSON_SCHEMA_TOUR_ID}
-          />
-          <button
-            className="text-muted-foreground text-xs underline decoration-border underline-offset-4 transition-colors hover:text-foreground active:translate-y-px"
-            onClick={resetExample}
-            type="button"
-          >
-            {messages.jsonSchemaValidator.resetExample}
-          </button>
-          <button
-            className="text-muted-foreground text-xs underline decoration-border underline-offset-4 transition-colors hover:text-foreground active:translate-y-px"
-            onClick={clearEditors}
-            type="button"
-          >
-            {messages.jsonSchemaValidator.clear}
-          </button>
-        </div>
-      </motion.aside>
-
-      <main className="min-w-0">
-        <motion.section
-          className="grid border-y md:grid-cols-[minmax(0,1fr)_auto]"
-          id={JSON_SCHEMA_TOUR_TARGETS.controls}
-          variants={childVariants}
-        >
-          <div className="grid gap-4 py-4 sm:grid-cols-2 sm:items-end sm:gap-6 md:pr-6">
-            <div className="space-y-2">
-              <Label className="text-xs" htmlFor="schema-dialect">
-                {messages.jsonSchemaValidator.schemaDraftLabel}
-              </Label>
-              <Select
-                onValueChange={(value) =>
-                  setDialect(value as JsonSchemaDialect)
-                }
-                value={dialect}
+        <div className="grid gap-4 py-4 sm:grid-cols-2 sm:items-end sm:gap-6 md:pr-6">
+          <div className="space-y-2">
+            <Label className="text-xs" htmlFor="schema-dialect">
+              {messages.jsonSchemaValidator.schemaDraftLabel}
+            </Label>
+            <Select
+              onValueChange={(value) => setDialect(value as JsonSchemaDialect)}
+              value={dialect}
+            >
+              <SelectTrigger
+                className="w-full rounded-md bg-background shadow-none"
+                id="schema-dialect"
               >
-                <SelectTrigger
-                  className="w-full rounded-md bg-background shadow-none"
-                  id="schema-dialect"
-                >
-                  <SelectValue>{dialectLabels[dialect]}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(dialectLabels).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex min-h-9 items-center gap-3 pb-0.5">
-              <Switch
-                aria-label={messages.jsonSchemaValidator.assertFormatsLabel}
-                checked={formatAssertions}
-                id="format-assertions"
-                onCheckedChange={setFormatAssertions}
-              />
-              <div>
-                <Label
-                  className="cursor-pointer text-xs"
-                  htmlFor="format-assertions"
-                >
-                  {messages.jsonSchemaValidator.assertFormatsLabel}
-                </Label>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  {messages.jsonSchemaValidator.assertFormatsDescription}
-                </p>
-              </div>
-            </div>
+                <SelectValue>{dialectLabels[dialect]}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(dialectLabels).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-
-          <div className="flex items-center justify-between gap-5 border-t py-4 md:border-t-0 md:border-l md:pl-6">
-            <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-              {messages.jsonSchemaValidator.shortcutLabel}
-            </span>
-            <Button
-              className="min-w-28 rounded-md active:translate-y-px"
-              disabled={isValidating}
-              onClick={validate}
-              type="button"
-            >
-              {isValidating
-                ? messages.jsonSchemaValidator.validating
-                : messages.jsonSchemaValidator.validate}
-            </Button>
-          </div>
-        </motion.section>
-
-        <motion.div
-          className="mt-8 grid min-w-0 grid-cols-1 border-x border-b lg:grid-cols-2 lg:divide-x"
-          id={JSON_SCHEMA_TOUR_TARGETS.editors}
-          variants={childVariants}
-        >
-          <DocumentEditor
-            byteCountMessage={messages.jsonSchemaValidator.editorByteCount}
-            description={messages.jsonSchemaValidator.schemaEditorDescription}
-            format="json"
-            index="01"
-            label={messages.jsonSchemaValidator.schemaEditorLabel}
-            lineCountMessage={messages.jsonSchemaValidator.editorLineCount}
-            onChange={setSchema}
-            value={schema}
-          />
-          <DocumentEditor
-            byteCountMessage={messages.jsonSchemaValidator.editorByteCount}
-            description={messages.jsonSchemaValidator.instanceEditorDescription}
-            format="json"
-            index="02"
-            label={messages.jsonSchemaValidator.instanceEditorLabel}
-            lineCountMessage={messages.jsonSchemaValidator.editorLineCount}
-            onChange={setInstance}
-            value={instance}
-          />
-        </motion.div>
-
-        <AnimatePresence>
-          {isValidating ? (
-            <motion.div
-              animate={{ height: "auto", opacity: 1 }}
-              aria-live="polite"
-              className="mt-8 overflow-hidden border-y py-5"
-              exit={{ height: 0, opacity: 0 }}
-              initial={{ height: 0, opacity: 0 }}
-              role="status"
-              transition={{ bounce: 0.08, duration: 0.32, type: "spring" }}
-            >
-              <div className="mb-3 flex items-center justify-between font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-                <span>{messages.jsonSchemaValidator.validationInProgress}</span>
-                <span>{messages.jsonSchemaValidator.deadlineLabel}</span>
-              </div>
-              <div className="h-1 overflow-hidden bg-muted">
-                <motion.div
-                  animate={{ x: ["-100%", "260%"] }}
-                  className="h-full w-1/3 bg-foreground/60"
-                  transition={{
-                    duration: 1.1,
-                    ease: [0.16, 1, 0.3, 1],
-                    repeat: Number.POSITIVE_INFINITY,
-                  }}
-                />
-              </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {error ? (
-            <motion.section
-              animate={{ opacity: 1, y: 0 }}
-              aria-live="polite"
-              className="mt-8 grid gap-2 border-destructive/30 border-y py-5 sm:grid-cols-[180px_1fr]"
-              exit={{ opacity: 0, y: -6 }}
-              initial={{ opacity: 0, y: 6 }}
-              transition={{ bounce: 0.08, duration: 0.32, type: "spring" }}
-            >
-              <h2 className="font-semibold text-destructive text-sm">
-                {error.title}
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                {error.description}
+          <div className="flex min-h-9 items-center gap-3 pb-0.5">
+            <Switch
+              aria-label={messages.jsonSchemaValidator.assertFormatsLabel}
+              checked={formatAssertions}
+              id="format-assertions"
+              onCheckedChange={setFormatAssertions}
+            />
+            <div>
+              <Label
+                className="cursor-pointer text-xs"
+                htmlFor="format-assertions"
+              >
+                {messages.jsonSchemaValidator.assertFormatsLabel}
+              </Label>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {messages.jsonSchemaValidator.assertFormatsDescription}
               </p>
-            </motion.section>
-          ) : null}
-        </AnimatePresence>
-        <AnimatePresence>
-          {lastResult ? <ValidationResult result={lastResult} /> : null}
-        </AnimatePresence>
-      </main>
-    </motion.div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-5 border-t py-4 md:border-t-0 md:border-l md:pl-6">
+          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+            {messages.jsonSchemaValidator.shortcutLabel}
+          </span>
+          <Button
+            className="min-w-28 rounded-md active:translate-y-px"
+            disabled={isValidating}
+            onClick={validate}
+            type="button"
+          >
+            {isValidating
+              ? messages.jsonSchemaValidator.validating
+              : messages.jsonSchemaValidator.validate}
+          </Button>
+        </div>
+      </motion.section>
+
+      <motion.div
+        className="mt-8 grid min-w-0 grid-cols-1 border-x border-b lg:grid-cols-2 lg:divide-x"
+        id={JSON_SCHEMA_TOUR_TARGETS.editors}
+        variants={childVariants}
+      >
+        <DocumentEditor
+          byteCountMessage={messages.jsonSchemaValidator.editorByteCount}
+          description={messages.jsonSchemaValidator.schemaEditorDescription}
+          format="json"
+          index="01"
+          label={messages.jsonSchemaValidator.schemaEditorLabel}
+          lineCountMessage={messages.jsonSchemaValidator.editorLineCount}
+          onChange={setSchema}
+          value={schema}
+        />
+        <DocumentEditor
+          byteCountMessage={messages.jsonSchemaValidator.editorByteCount}
+          description={messages.jsonSchemaValidator.instanceEditorDescription}
+          format="json"
+          index="02"
+          label={messages.jsonSchemaValidator.instanceEditorLabel}
+          lineCountMessage={messages.jsonSchemaValidator.editorLineCount}
+          onChange={setInstance}
+          value={instance}
+        />
+      </motion.div>
+
+      <AnimatePresence>
+        {isValidating ? (
+          <motion.div
+            animate={{ height: "auto", opacity: 1 }}
+            aria-live="polite"
+            className="mt-8 overflow-hidden border-y py-5"
+            exit={{ height: 0, opacity: 0 }}
+            initial={{ height: 0, opacity: 0 }}
+            role="status"
+            transition={{ bounce: 0.08, duration: 0.32, type: "spring" }}
+          >
+            <div className="mb-3 flex items-center justify-between font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+              <span>{messages.jsonSchemaValidator.validationInProgress}</span>
+              <span>{messages.jsonSchemaValidator.deadlineLabel}</span>
+            </div>
+            <div className="h-1 overflow-hidden bg-muted">
+              <motion.div
+                animate={{ x: ["-100%", "260%"] }}
+                className="h-full w-1/3 bg-foreground/60"
+                transition={{
+                  duration: 1.1,
+                  ease: [0.16, 1, 0.3, 1],
+                  repeat: Number.POSITIVE_INFINITY,
+                }}
+              />
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {error ? (
+          <motion.section
+            animate={{ opacity: 1, y: 0 }}
+            aria-live="polite"
+            className="mt-8 grid gap-2 border-destructive/30 border-y py-5 sm:grid-cols-[180px_1fr]"
+            exit={{ opacity: 0, y: -6 }}
+            initial={{ opacity: 0, y: 6 }}
+            transition={{ bounce: 0.08, duration: 0.32, type: "spring" }}
+          >
+            <h2 className="font-semibold text-destructive text-sm">
+              {error.title}
+            </h2>
+            <p className="text-muted-foreground text-sm">{error.description}</p>
+          </motion.section>
+        ) : null}
+      </AnimatePresence>
+      <AnimatePresence>
+        {lastResult ? <ValidationResult result={lastResult} /> : null}
+      </AnimatePresence>
+    </DeveloperToolLayout>
   );
 }

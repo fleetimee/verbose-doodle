@@ -1,7 +1,8 @@
 import { motion, useReducedMotion } from "motion/react";
-import { type SetStateAction, useMemo, useState } from "react";
+import { type SetStateAction, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
+  Binary,
   CalendarClock,
   ClipboardCopy,
   Code2,
@@ -20,7 +21,7 @@ import {
 } from "@/components/kibo-ui/code-block";
 import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -55,6 +56,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DeveloperToolLayout } from "@/features/developer-tools/components/developer-tool-layout";
 import { GeneratorActionBar } from "@/features/developer-tools/tools/iso8583-generator/components/generator-action-bar";
 import {
   cloneIso8583Fields,
@@ -79,6 +81,7 @@ import {
 import { AddFieldDialog } from "./add-field-dialog";
 import { Bit43Input } from "./bit43-input";
 import { Iso8583FieldBrowser } from "./field-browser";
+import { ImportStreamDialog } from "./import-stream-dialog";
 
 const copy = messages.iso8583Generator;
 const SIMPLE_PRESET_IDS: readonly Iso8583PresetId[] = [
@@ -822,6 +825,69 @@ export function Iso8583Generator() {
     setStatus(null);
   };
 
+  const handleImportParsedFields = (
+    mti: string,
+    importedFields: {
+      number: number;
+      label: string;
+      kind: Iso8583Field["kind"];
+      length: number;
+      cleanValue: string;
+    }[]
+  ) => {
+    const matchingPreset =
+      ISO8583_PRESETS.find((p) => p.mti === mti) ?? getIso8583Preset("sign-on");
+    const baseFields = cloneIso8583Fields(matchingPreset.fields);
+
+    for (const item of importedFields) {
+      const idx = baseFields.findIndex((f) => f.number === item.number);
+      if (idx >= 0) {
+        baseFields[idx] = {
+          ...baseFields[idx],
+          enabled: true,
+          value: item.cleanValue,
+        };
+      } else {
+        baseFields.push({
+          enabled: true,
+          isCustom: true,
+          kind: item.kind,
+          label: item.label,
+          length: item.length,
+          number: item.number,
+          value: item.cleanValue,
+        });
+      }
+    }
+
+    baseFields.sort((a, b) => a.number - b.number);
+    setPresetId(matchingPreset.id);
+    setDrafts((cur) => ({
+      ...cur,
+      [matchingPreset.id]: baseFields,
+    }));
+    invalidateOutput();
+  };
+
+  useEffect(() => {
+    try {
+      const rawDraft = sessionStorage.getItem("iso8583_import_draft");
+      if (!rawDraft) {
+        return;
+      }
+      sessionStorage.removeItem("iso8583_import_draft");
+      const draft = JSON.parse(rawDraft);
+      if (draft && Array.isArray(draft.fields)) {
+        handleImportParsedFields(draft.mti, draft.fields);
+        toast.success(
+          `Imported ${draft.fields.length} data elements from ISO 8583 stream!`
+        );
+      }
+    } catch {
+      // Ignore parse errors from sessionStorage
+    }
+  }, []);
+
   const generate = () => {
     if (!packedState.message) {
       return;
@@ -911,263 +977,266 @@ export function Iso8583Generator() {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-7 pb-10 sm:gap-8">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-2">
-          <h1 className="font-semibold text-2xl tracking-tight sm:text-3xl">
-            {copy.title}
-          </h1>
-          <p className="text-muted-foreground text-sm leading-6">
-            {copy.subtitle}
-          </p>
-        </div>
+    <DeveloperToolLayout
+      className="max-w-5xl"
+      description={copy.subtitle}
+      extraActions={
+        <a
+          className={cn(
+            buttonVariants({ size: "sm", variant: "outline" }),
+            "gap-1.5 text-muted-foreground hover:text-foreground"
+          )}
+          href="/dashboard/developer-tools/iso8583-parser"
+        >
+          <Binary className="size-3.5" />
+          Stream parser
+        </a>
+      }
+      headerExtra={
         <Badge className="shrink-0 self-start sm:self-center" variant="outline">
           BPD DIY ASCII
         </Badge>
-      </header>
-
-      <main className="min-w-0">
-        <div className="mb-6 flex flex-col gap-2">
-          <p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.16em]">
-            {copy.messagePreset}
-          </p>
-          <div className="flex flex-col rounded-lg border bg-muted p-1 shadow-xs sm:flex-row">
-            <Tabs
-              className="min-w-0 flex-1 gap-0"
-              onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
-              value={presetId}
+      }
+      title={copy.title}
+      variant="top-header"
+    >
+      <div className="mb-6 flex flex-col gap-2">
+        <p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.16em]">
+          {copy.messagePreset}
+        </p>
+        <div className="flex flex-col rounded-lg border bg-muted p-1 shadow-xs sm:flex-row">
+          <Tabs
+            className="min-w-0 flex-1 gap-0"
+            onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
+            value={presetId}
+          >
+            <TabsList
+              aria-label={copy.preset}
+              className="grid h-14 w-full grid-cols-3 rounded-md bg-transparent p-0"
             >
-              <TabsList
-                aria-label={copy.preset}
-                className="grid h-14 w-full grid-cols-3 rounded-md bg-transparent p-0"
-              >
-                {ISO8583_PRESETS.filter((item) =>
-                  SIMPLE_PRESET_IDS.includes(item.id)
-                ).map((item) => (
-                  <TabsTrigger
-                    className="relative flex-col gap-0 overflow-hidden rounded-md px-3 data-active:bg-background data-active:shadow-xs"
-                    key={item.id}
-                    value={item.id}
+              {ISO8583_PRESETS.filter((item) =>
+                SIMPLE_PRESET_IDS.includes(item.id)
+              ).map((item) => (
+                <TabsTrigger
+                  className="relative flex-col gap-0 overflow-hidden rounded-md px-3 data-active:bg-background data-active:shadow-xs"
+                  key={item.id}
+                  value={item.id}
+                >
+                  <span
+                    className={cn(
+                      "font-mono text-muted-foreground text-xs",
+                      presetId === item.id && "text-primary"
+                    )}
                   >
-                    <span
-                      className={cn(
-                        "font-mono text-muted-foreground text-xs",
-                        presetId === item.id && "text-primary"
-                      )}
-                    >
-                      {item.mti}
-                    </span>
-                    <span className="text-xs sm:text-sm">
-                      {item.label.split("·")[1]?.trim() ?? item.label}
-                    </span>
-                    {presetId === item.id ? (
-                      <motion.span
-                        className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-primary"
-                        layoutId={
-                          shouldReduceMotion
-                            ? undefined
-                            : "iso8583-active-preset"
-                        }
-                        transition={{
-                          duration: shouldReduceMotion ? 0 : 0.25,
-                          ease: [0.77, 0, 0.175, 1],
-                        }}
-                      />
-                    ) : null}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+                    {item.mti}
+                  </span>
+                  <span className="text-xs sm:text-sm">
+                    {item.label.split("·")[1]?.trim() ?? item.label}
+                  </span>
+                  {presetId === item.id ? (
+                    <motion.span
+                      className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-primary"
+                      layoutId={
+                        shouldReduceMotion ? undefined : "iso8583-active-preset"
+                      }
+                      transition={{
+                        duration: shouldReduceMotion ? 0 : 0.25,
+                        ease: [0.77, 0, 0.175, 1],
+                      }}
+                    />
+                  ) : null}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
 
-            <div className="mx-1 hidden w-px bg-border sm:block" />
+          <div className="mx-1 hidden w-px bg-border sm:block" />
 
-            <Select
-              onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
-              value={morePreset ? presetId : ""}
+          <Select
+            onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
+            value={morePreset ? presetId : ""}
+          >
+            <SelectTrigger
+              aria-label={copy.moreMessages}
+              className={cn(
+                "w-full border-transparent shadow-none data-[size=default]:h-11 sm:w-52 sm:data-[size=default]:h-14",
+                morePreset && "bg-background shadow-xs"
+              )}
             >
-              <SelectTrigger
-                aria-label={copy.moreMessages}
-                className={cn(
-                  "w-full border-transparent shadow-none data-[size=default]:h-11 sm:w-52 sm:data-[size=default]:h-14",
-                  morePreset && "bg-background shadow-xs"
-                )}
-              >
-                <SelectValue placeholder={copy.moreMessages}>
-                  {morePreset ? morePreset.label : copy.moreMessages}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:data-ending-style:transform-none motion-reduce:data-starting-style:transform-none">
-                <SelectGroup>
-                  {ISO8583_PRESETS.filter((item) =>
-                    MORE_PRESET_IDS.includes(item.id)
-                  ).map((item) => (
-                    <SelectItem key={item.id} value={item.id}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+              <SelectValue placeholder={copy.moreMessages}>
+                {morePreset ? morePreset.label : copy.moreMessages}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent className="duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:data-ending-style:transform-none motion-reduce:data-starting-style:transform-none">
+              <SelectGroup>
+                {ISO8583_PRESETS.filter((item) =>
+                  MORE_PRESET_IDS.includes(item.id)
+                ).map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <motion.section
+        animate={{ opacity: 1, transform: "translateY(0)" }}
+        aria-label={copy.fields}
+        className="flex flex-col overflow-hidden rounded-t-xl border bg-card"
+        initial={{
+          opacity: shouldReduceMotion ? 0.7 : 0.45,
+          transform: shouldReduceMotion ? "translateY(0)" : "translateY(14px)",
+        }}
+        key={presetId}
+        transition={{
+          duration: shouldReduceMotion ? 0.12 : 0.22,
+          ease: [0.23, 1, 0.32, 1],
+        }}
+      >
+        <div className="flex flex-col gap-3 border-b bg-muted/20 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+          <div>
+            <h2 className="font-semibold">
+              {formatMessage(copy.presetMessageHeading, {
+                preset: preset.label.split("·")[1]?.trim() ?? preset.label,
+              })}
+            </h2>
+            <p className="mt-1 text-muted-foreground text-sm">
+              {preset.description}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <ImportStreamDialog onImport={handleImportParsedFields} />
+            <AddFieldDialog
+              currentFields={fields}
+              existingFieldNumbers={fields.map((f) => f.number)}
+              onAddField={handleAddField}
+              onOpenChange={setAddFieldOpen}
+              onRemoveField={handleRemoveField}
+              open={addFieldOpen}
+            />
           </div>
         </div>
 
-        <motion.section
-          animate={{ opacity: 1, transform: "translateY(0)" }}
-          aria-label={copy.fields}
-          className="flex flex-col overflow-hidden rounded-t-xl border bg-card"
-          initial={{
-            opacity: shouldReduceMotion ? 0.7 : 0.45,
-            transform: shouldReduceMotion
-              ? "translateY(0)"
-              : "translateY(14px)",
-          }}
-          key={presetId}
-          transition={{
-            duration: shouldReduceMotion ? 0.12 : 0.22,
-            ease: [0.23, 1, 0.32, 1],
-          }}
-        >
-          <div className="flex flex-col gap-3 border-b bg-muted/20 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-            <div>
-              <h2 className="font-semibold">
-                {formatMessage(copy.presetMessageHeading, {
-                  preset: preset.label.split("·")[1]?.trim() ?? preset.label,
-                })}
-              </h2>
-              <p className="mt-1 text-muted-foreground text-sm">
-                {preset.description}
-              </p>
-            </div>
-            <div className="shrink-0">
-              <AddFieldDialog
-                currentFields={fields}
-                existingFieldNumbers={fields.map((f) => f.number)}
-                onAddField={handleAddField}
-                onOpenChange={setAddFieldOpen}
-                onRemoveField={handleRemoveField}
-                open={addFieldOpen}
-              />
-            </div>
-          </div>
-
-          <Iso8583FieldBrowser
-            error={packedState.error}
-            fields={fields}
-            renderField={(field, index) => (
-              <motion.div
-                animate={{ opacity: 1, transform: "translateY(0) scale(1)" }}
-                className={cn("min-w-0", field.length >= 40 && "sm:col-span-2")}
-                initial={{
-                  opacity: shouldReduceMotion ? 0.7 : 0,
-                  transform: shouldReduceMotion
-                    ? "translateY(0) scale(1)"
-                    : "translateY(14px) scale(0.985)",
-                }}
-                key={field.number}
-                transition={{
-                  delay: shouldReduceMotion ? 0 : Math.min(index, 4) * 0.04,
-                  duration: shouldReduceMotion ? 0.12 : 0.22,
-                  ease: [0.23, 1, 0.32, 1],
-                }}
-              >
-                <FieldInput
-                  error={
-                    packedState.error?.fieldNumber === field.number
-                      ? packedState.error.message
-                      : undefined
-                  }
-                  field={field}
-                  onChange={(value) => updateField(field.number, { value })}
-                  onHelper={() =>
-                    updateField(field.number, {
-                      value:
-                        field.helper === "stan"
-                          ? incrementStan(field.value)
-                          : nowValueForField(field.number),
-                    })
-                  }
-                  onRemove={
-                    field.isCustom
-                      ? () => handleRemoveField(field.number)
-                      : undefined
-                  }
-                  onToggle={(enabled) => updateField(field.number, { enabled })}
-                  readableValue={formatIso8583FieldValue(field, fields)}
-                />
-              </motion.div>
-            )}
-          />
-        </motion.section>
-
-        <GeneratorActionBar>
-          <FieldSet className="flex flex-row flex-wrap gap-x-6 gap-y-3">
-            <FieldLegend variant="label">{copy.onGenerate}</FieldLegend>
-            <label
-              className="flex items-center gap-2 text-sm"
-              htmlFor="iso-refresh-time"
-            >
-              <Checkbox
-                checked={refreshTime}
-                id="iso-refresh-time"
-                onCheckedChange={(checked) => setRefreshTime(checked === true)}
-              />
-              {copy.refreshTransmissionTime}
-            </label>
-            <label
-              className="flex items-center gap-2 text-sm"
-              htmlFor="iso-advance-stan"
-            >
-              <Checkbox
-                checked={advanceStan}
-                id="iso-advance-stan"
-                onCheckedChange={(checked) => setAdvanceStan(checked === true)}
-              />
-              {copy.incrementTraceNumber}
-            </label>
-          </FieldSet>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <Button
-              className="h-11 sm:mr-auto"
-              onClick={() => {
-                const previousFields = fields;
-                setFields(presetFields(presetId));
-                toast.message(copy.fieldsReset, {
-                  action: {
-                    label: copy.undo,
-                    onClick: () => setFields(previousFields),
-                  },
-                });
+        <Iso8583FieldBrowser
+          error={packedState.error}
+          fields={fields}
+          renderField={(field, index) => (
+            <motion.div
+              animate={{ opacity: 1, transform: "translateY(0) scale(1)" }}
+              className={cn("min-w-0", field.length >= 40 && "sm:col-span-2")}
+              initial={{
+                opacity: shouldReduceMotion ? 0.7 : 0,
+                transform: shouldReduceMotion
+                  ? "translateY(0) scale(1)"
+                  : "translateY(14px) scale(0.985)",
               }}
-              type="button"
-              variant="ghost"
+              key={field.number}
+              transition={{
+                delay: shouldReduceMotion ? 0 : Math.min(index, 4) * 0.04,
+                duration: shouldReduceMotion ? 0.12 : 0.22,
+                ease: [0.23, 1, 0.32, 1],
+              }}
             >
-              <RefreshCw data-icon="inline-start" />
-              {copy.reset}
-            </Button>
-            {generatedPayload ? (
-              <Button
-                aria-haspopup="dialog"
-                className="h-11 w-full sm:w-auto"
-                onClick={() => setOutputOpen(true)}
-                type="button"
-                variant="outline"
-              >
-                <Code2 data-icon="inline-start" />
-                {copy.viewRawMessage}
-              </Button>
-            ) : null}
+              <FieldInput
+                error={
+                  packedState.error?.fieldNumber === field.number
+                    ? packedState.error.message
+                    : undefined
+                }
+                field={field}
+                onChange={(value) => updateField(field.number, { value })}
+                onHelper={() =>
+                  updateField(field.number, {
+                    value:
+                      field.helper === "stan"
+                        ? incrementStan(field.value)
+                        : nowValueForField(field.number),
+                  })
+                }
+                onRemove={
+                  field.isCustom
+                    ? () => handleRemoveField(field.number)
+                    : undefined
+                }
+                onToggle={(enabled) => updateField(field.number, { enabled })}
+                readableValue={formatIso8583FieldValue(field, fields)}
+              />
+            </motion.div>
+          )}
+        />
+      </motion.section>
+
+      <GeneratorActionBar>
+        <FieldSet className="flex flex-row flex-wrap gap-x-6 gap-y-3">
+          <FieldLegend variant="label">{copy.onGenerate}</FieldLegend>
+          <label
+            className="flex items-center gap-2 text-sm"
+            htmlFor="iso-refresh-time"
+          >
+            <Checkbox
+              checked={refreshTime}
+              id="iso-refresh-time"
+              onCheckedChange={(checked) => setRefreshTime(checked === true)}
+            />
+            {copy.refreshTransmissionTime}
+          </label>
+          <label
+            className="flex items-center gap-2 text-sm"
+            htmlFor="iso-advance-stan"
+          >
+            <Checkbox
+              checked={advanceStan}
+              id="iso-advance-stan"
+              onCheckedChange={(checked) => setAdvanceStan(checked === true)}
+            />
+            {copy.incrementTraceNumber}
+          </label>
+        </FieldSet>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <Button
+            className="h-11 sm:mr-auto"
+            onClick={() => {
+              const previousFields = fields;
+              setFields(presetFields(presetId));
+              toast.message(copy.fieldsReset, {
+                action: {
+                  label: copy.undo,
+                  onClick: () => setFields(previousFields),
+                },
+              });
+            }}
+            type="button"
+            variant="ghost"
+          >
+            <RefreshCw data-icon="inline-start" />
+            {copy.reset}
+          </Button>
+          {generatedPayload ? (
             <Button
+              aria-haspopup="dialog"
               className="h-11 w-full sm:w-auto"
-              disabled={!packedState.message}
-              onClick={generate}
+              onClick={() => setOutputOpen(true)}
               type="button"
+              variant="outline"
             >
               <Code2 data-icon="inline-start" />
-              {copy.generateRawMessage}
+              {copy.viewRawMessage}
             </Button>
-          </div>
-        </GeneratorActionBar>
-      </main>
+          ) : null}
+          <Button
+            className="h-11 w-full sm:w-auto"
+            disabled={!packedState.message}
+            onClick={generate}
+            type="button"
+          >
+            <Code2 data-icon="inline-start" />
+            {copy.generateRawMessage}
+          </Button>
+        </div>
+      </GeneratorActionBar>
 
       <Sheet onOpenChange={setOutputOpen} open={outputOpen}>
         <SheetContent
@@ -1355,6 +1424,6 @@ export function Iso8583Generator() {
           </div>
         </SheetContent>
       </Sheet>
-    </div>
+    </DeveloperToolLayout>
   );
 }

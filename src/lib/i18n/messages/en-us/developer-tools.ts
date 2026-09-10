@@ -38,6 +38,11 @@ export const developerToolsMessages = {
   iso8583GeneratorLimit: "128 data elements",
   iso8583GeneratorRuntime: "Browser only",
   iso8583GeneratorTags: ["ISO 8583", "MTI", "Bitmaps"],
+  iso8583ParserDescription:
+    "Parse raw ISO 8583 streams or hex dumps into structured data elements with decoded semantics.",
+  iso8583ParserLimit: "128 data elements",
+  iso8583ParserRuntime: "Browser only",
+  iso8583ParserTags: ["ISO 8583", "Stream Parser", "Inspection", "Bitmaps"],
   jwtInspectorDescription:
     "Decode, inspect, edit, and verify JSON Web Tokens (JWT) using secure, client-side Web Crypto.",
   jwtInspectorLimit: "Standard JWT structure",

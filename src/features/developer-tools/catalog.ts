@@ -126,6 +126,11 @@ const loadIso8583Generator: DeveloperToolLoader = () =>
     ({ Iso8583GeneratorPage }) => ({ default: Iso8583GeneratorPage })
   );
 
+const loadIso8583Parser: DeveloperToolLoader = () =>
+  import("@/pages/dashboard/iso8583-parser").then(({ Iso8583ParserPage }) => ({
+    default: Iso8583ParserPage,
+  }));
+
 const loadNumberBaseConverter: DeveloperToolLoader = () =>
   import("@/pages/dashboard/number-base-converter").then(
     ({ NumberBaseConverterPage }) => ({ default: NumberBaseConverterPage })
@@ -286,6 +291,24 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     path: "developer-tools/nfc-reader-inspector",
     runtime: messages.developerTools.nfcReaderRuntime,
     tags: messages.developerTools.nfcReaderTags,
+  },
+  {
+    categoryId: "inspection",
+    description: messages.developerTools.iso8583ParserDescription,
+    document: {
+      description: messages.iso8583Parser.documentDescription,
+      keywords: messages.iso8583Parser.documentKeywords,
+      title: messages.iso8583Parser.documentTitle,
+    },
+    icon: Binary,
+    id: "iso8583-parser",
+    limit: messages.developerTools.iso8583ParserLimit,
+    load: loadIso8583Parser,
+    name: messages.iso8583Parser.title,
+    path: "developer-tools/iso8583-parser",
+    runtime: messages.developerTools.iso8583ParserRuntime,
+    searchDescription: "Parse raw ISO 8583 streams and inspect fields.",
+    tags: messages.developerTools.iso8583ParserTags,
   },
 ];
 
