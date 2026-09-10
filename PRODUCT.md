@@ -57,7 +57,7 @@ Existing Fleetime Labs logo and wordmark assets live under `public/`, including 
 ## Evidence on Hand
 
 - A runnable React application implements the authenticated dashboard and product modules.
-- The repository includes working feature flows, automated tests, domain terminology in `CONTEXT.md`, deployment documentation in `DEPLOYMENT.md`, and Fleetime Labs logo assets under `public/`.
+- The repository includes working feature flows, automated tests, domain terminology in `README.md`, deployment documentation in `docs/deployment.md`, and Fleetime Labs logo assets under `public/`.
 - The application includes interactive endpoint management, analytics, protocol tools, relay inspection, and developer utilities that can be demonstrated directly.
 - No approved testimonials, customer claims, performance benchmarks, press coverage, or public product claims have been established. Future work must not fabricate them.
 

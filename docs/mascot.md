@@ -20,9 +20,9 @@ Use polished anime linework, soft cel shading, and clear facial expressions. Pre
 
 **Short description:** A curious horse-girl technical assistant with brown-and-teal hair, a cream utility jacket, and a code tablet.
 
-Reference: [Standard mascot](public/brand/biller-operator-mascot.png).
+Reference: [Standard mascot](../public/brand/biller-operator-mascot.png).
 
-Search pose: [Transparent search mascot](public/brand/biller-operator-mascot-search-transparent.png).
+Search pose: [Transparent search mascot](../public/brand/biller-operator-mascot-search-transparent.png).
 
 ## Chibi illustration
 
@@ -34,9 +34,9 @@ Chibi proportions are a stylization of the same mascot, not a separate character
 
 **Short description:** A pocket-sized chibi version of the horse-girl assistant, with big expressive eyes, brown-and-teal hair, and her signature code tablet.
 
-Reference: [Chibi mascot](public/brand/biller-operator-mascot-chibi.png).
+Reference: [Chibi mascot](../public/brand/biller-operator-mascot-chibi.png).
 
-Existing variants: [Thinking](public/brand/biller-operator-mascot-thinking.webp) and [Greeting](public/brand/biller-operator-mascot-greeting.webp).
+Existing variants: [Thinking](../public/brand/biller-operator-mascot-thinking.webp) and [Greeting](../public/brand/biller-operator-mascot-greeting.webp).
 
 ## Consistency and UI use
 

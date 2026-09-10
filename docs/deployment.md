@@ -23,7 +23,7 @@ The frontend is available at `http://localhost:8080`. Stop it with:
 docker compose -f docker-compose.production.yml down
 ```
 
-The production image uses `VITE_ENDPOINT_URL` when configured. For a custom port, change the port mapping in `docker-compose.production.yml`, for example `9090:80`.
+Docker API traffic uses the backend target in `nginx.conf`, currently `http://biller-simulator-backend:8080`. Ensure that hostname resolves from the frontend container and that both containers share a network. `VITE_ENDPOINT_URL` does not change the nginx target. For a custom port, change the port mapping in `docker-compose.production.yml`, for example `9090:80`.
 
 ## Office Harbor deployment
 
@@ -46,7 +46,7 @@ harbor.local/react-app/biller-simulator-json:latest
 harbor.local/react-app/biller-simulator-json:result
 ```
 
-The base image only needs rebuilding when dependencies change. Build the deployment image for code changes.
+The script builds and pushes both the dependency base image and the deployment image on every run.
 
 ### Deploy on the server
 
@@ -90,7 +90,7 @@ bun add -g vercel
 vercel
 ```
 
-`vercel.json` sends `/api/*` requests to `api/proxy.ts`. Dynamic simulator endpoints at the root, such as `/inquiry` and `/payment`, are served by the backend and are not sent through the proxy.
+`vercel.json` sends `/api/*` requests to `api/proxy.ts`. It also forwards `/simulate/*` through the same proxy with the `/simulate` prefix removed. For example, `/simulate/inquiry` reaches the backend at `/inquiry`. Other frontend paths fall back to `index.html`.
 
 ## Configuration
 
@@ -100,7 +100,7 @@ For local development, copy `.env.example` to `.env` and set:
 VITE_ENDPOINT_URL=http://your-backend-host:port
 ```
 
-The nginx proxy in production must point to the same backend. Update `nginx.conf` if the backend address changes.
+For Docker, configure the backend separately in `nginx.conf` and rebuild the image if its address changes. Both `/api/` and `/simulate/` use that target; `/simulate/` strips its prefix before forwarding.
 
 ## Troubleshooting
 

@@ -1,6 +1,6 @@
-# Biller Simulator frontend
+# Fleetime Labs frontend
 
-React and Vite frontend for configuring and testing simulated biller APIs. It connects to the Biller Simulator backend and provides endpoint, response, user, and developer tools.
+React and Vite frontend for internal integration testing. Fleetime Labs includes Biller Simulator, TCP/UDP socket testing, SOCKS relay inspection, and developer tools. Authenticated workflows connect to a separate Biller Simulator backend.
 
 ## Requirements
 
@@ -23,12 +23,19 @@ Set `VITE_ENDPOINT_URL` in `.env` to the backend URL. The default development se
 bun run build       # Type-check and build for production
 bun run type-check  # Run TypeScript without emitting files
 bun run lint        # Check formatting and lint rules
-bun test             # Run the test suite
+bun run test        # Run the test suite with isolation
 bun run preview     # Serve the production build locally
 ```
 
+## Domain terms
+
+- A **Biller** is a billing service represented in the simulator. A biller owns zero or more endpoints.
+- An **Endpoint** is a simulated API operation that belongs to exactly one biller. Use "endpoint" rather than "route" for this domain concept.
+
 ## Documentation
 
-- [Deployment guide](DEPLOYMENT.md)
-- [Domain terms](CONTEXT.md)
+- [Deployment guide](docs/deployment.md)
+- [Product scope and terminology](PRODUCT.md)
+- [Design system](DESIGN.md)
+- [Mascot references](docs/mascot.md)
 - [NFC reader bridge](tools/nfc-reader-bridge/README.md)
