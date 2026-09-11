@@ -4,9 +4,8 @@ import userEvent from "@testing-library/user-event";
 import { MacOsLogin } from "@/features/login/components/macos-login";
 
 describe("MacOsLogin", () => {
-  test("submits credentials, rejects an empty password, and supports switching login", async () => {
+  test("submits credentials for admin and rejects an empty password", async () => {
     const mockOnSubmit = mock(() => {});
-    const mockOnSwitchToClassic = mock(() => {});
 
     render(
       <MacOsLogin
@@ -16,7 +15,6 @@ describe("MacOsLogin", () => {
         }}
         isComplete={false}
         onSubmit={mockOnSubmit}
-        onSwitchToClassic={mockOnSwitchToClassic}
         onTransitionComplete={() => undefined}
         progress={0}
       />
@@ -43,15 +41,8 @@ describe("MacOsLogin", () => {
       username: "admin",
     });
 
-    // Clicking switch to classic calls callback
-    const classicBtn = screen.getByText("Use standard login");
-    fireEvent.click(classicBtn);
-    expect(mockOnSwitchToClassic).toHaveBeenCalledTimes(1);
-
-    // Clicking switch user reveals username input
-    const switchUserBtn = screen.getByText("Switch User");
-    fireEvent.click(switchUserBtn);
-    expect(screen.getByLabelText("Username")).toBeDefined();
+    // The hardcoded admin account has no account-switch action
+    expect(screen.getAllByRole("button")).toHaveLength(1);
   });
 
   test("shows loading spinner when isLoading is true", () => {

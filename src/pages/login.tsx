@@ -1,14 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { Navigate, useNavigate, useSearchParams } from "react-router";
-import SlicedText from "@/components/kokonutui/sliced-text";
-import { useTheme } from "@/components/theme-provider";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { Highlighter } from "@/components/ui/highlighter";
-import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/features/auth/context";
 import { hasManualLogout } from "@/features/auth/manual-logout";
-import { LoginForm } from "@/features/login/components/login-form";
 import { MacOsLogin } from "@/features/login/components/macos-login";
 import { useLogin } from "@/features/login/hooks/use-login";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
@@ -35,7 +29,6 @@ export const Login = () => {
   const { snapshot } = useAuth();
   const navigate = useNavigate();
   const isManualLogout = hasManualLogout();
-  const { theme, setTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const [expirationMessage, setExpirationMessage] = useState<string | null>(
     null
@@ -44,7 +37,6 @@ export const Login = () => {
   const [autoLoginProgress, setAutoLoginProgress] = useState(14);
   const [isAutoLoginComplete, setIsAutoLoginComplete] = useState(false);
   const hasAttemptedLogin = useRef(false);
-  const [showClassicForm, setShowClassicForm] = useState(false);
 
   useDocumentMeta({
     description: messages.auth.loginDocumentDescription,
@@ -144,10 +136,6 @@ export const Login = () => {
     return <Navigate replace to="/logged-out" />;
   }
 
-  // Filter theme to only pass valid values to ThemeSwitcher (light or dark)
-  const themeSwitcherValue =
-    theme === "light" || theme === "dark" ? theme : undefined;
-
   // Determine error state for login form
   // Only show expiration message if user hasn't attempted to login yet
   let loginError: { message: string; description?: string } | null = null;
@@ -163,69 +151,14 @@ export const Login = () => {
     };
   }
 
-  if (!showClassicForm) {
-    return (
-      <MacOsLogin
-        error={loginError}
-        isComplete={isAutoLoginComplete}
-        isLoading={isPending}
-        onSubmit={handleLogin}
-        onSwitchToClassic={() => setShowClassicForm(true)}
-        onTransitionComplete={handleLoginTransitionComplete}
-        progress={autoLoginProgress}
-      />
-    );
-  }
-
   return (
-    <div className="macos-login-screen relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4">
-      <div className="fixed top-4 right-4 z-10">
-        <ThemeSwitcher onChange={setTheme} value={themeSwitcherValue} />
-      </div>
-
-      <div className="relative z-10 w-full max-w-md">
-        <div className="mb-8 text-center">
-          <div className="mb-3 flex justify-center">
-            <Logo size="md" variant="icon" />
-          </div>
-          <div className="mb-2">
-            <SlicedText
-              className="font-bold text-3xl text-foreground tracking-tight"
-              splitSpacing={3}
-              text={messages.common.appName}
-            />
-          </div>
-          <p className="text-muted-foreground text-sm">
-            <Highlighter action="underline" color="#FFA726" isView={true}>
-              {messages.auth.heroCreate}
-            </Highlighter>
-            {messages.auth.heroConnector}
-            {messages.auth.heroManage}
-            <Highlighter action="highlight" color="#42A5F5" isView={true}>
-              <span className="text-white">
-                {messages.auth.heroBillingScenarios}
-              </span>
-            </Highlighter>
-            {messages.auth.heroSuffix}
-          </p>
-        </div>
-
-        <LoginForm
-          error={loginError}
-          isLoading={isPending}
-          onSubmit={handleLogin}
-        />
-
-        <div className="mt-4 text-center">
-          <button
-            className="cursor-pointer text-muted-foreground text-xs transition-colors hover:text-foreground"
-            onClick={() => setShowClassicForm(false)}
-            type="button"
-          >
-            {messages.auth.returnToMacOsLogin}
-          </button>
-        </div>
-      </div>
-    </div>
+    <MacOsLogin
+      error={loginError}
+      isComplete={isAutoLoginComplete}
+      isLoading={isPending}
+      onSubmit={handleLogin}
+      onTransitionComplete={handleLoginTransitionComplete}
+      progress={autoLoginProgress}
+    />
   );
 };

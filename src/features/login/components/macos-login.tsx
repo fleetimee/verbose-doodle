@@ -23,7 +23,6 @@ const PASSWORD_TYPING_DURATION_MS = 2250;
 const GLASS_TRANSITION_DURATION_MS = 560;
 
 export type MacOsLoginProps = {
-  defaultUsername?: string;
   error?: {
     message: string;
     description?: string;
@@ -31,25 +30,20 @@ export type MacOsLoginProps = {
   isComplete: boolean;
   isLoading?: boolean;
   onSubmit?: (data: LoginFormData) => void;
-  onSwitchToClassic?: () => void;
   onTransitionComplete: () => void;
   progress: number;
 };
 
 export function MacOsLogin({
-  defaultUsername = "admin",
   error = null,
   isComplete,
   isLoading = false,
   onSubmit,
-  onSwitchToClassic,
   onTransitionComplete,
   progress,
 }: MacOsLoginProps) {
   const [isTypingComplete, setIsTypingComplete] = useState(false);
   const [isShaking, setIsShaking] = useState(Boolean(error));
-  const [isSwitchingUser, setIsSwitchingUser] = useState(false);
-  const [username, setUsername] = useState(defaultUsername);
   const [password, setPassword] = useState("");
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const prevErrorRef = useRef(error);
@@ -127,7 +121,7 @@ export function MacOsLogin({
     onSubmit?.({
       captchaVerified: true,
       password,
-      username: username.trim() || "admin",
+      username: "admin",
     });
   };
 
@@ -165,11 +159,7 @@ export function MacOsLogin({
           <div className="macos-login-avatar">
             <Logo size="lg" variant="icon" />
           </div>
-          <h1>
-            {isSwitchingUser
-              ? messages.auth.switchUser
-              : messages.common.appName}
-          </h1>
+          <h1>{messages.common.appName}</h1>
 
           {isInteractive ? (
             <form
@@ -177,21 +167,6 @@ export function MacOsLogin({
               className="macos-password-form"
               onSubmit={handleSubmit}
             >
-              {isSwitchingUser && (
-                <div className="macos-input-pill">
-                  <input
-                    aria-label={messages.auth.usernameLabel}
-                    autoComplete="username"
-                    className="macos-input-pill-field"
-                    id="macos-username-input"
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder={messages.auth.usernamePlaceholder}
-                    type="text"
-                    value={username}
-                  />
-                </div>
-              )}
-
               <div className="macos-input-pill">
                 <input
                   aria-label={messages.auth.passwordLabel}
@@ -234,27 +209,6 @@ export function MacOsLogin({
                   <span>{error.description || error.message}</span>
                 </div>
               )}
-
-              <div className="macos-lock-actions">
-                <button
-                  className="macos-lock-subaction"
-                  onClick={() => setIsSwitchingUser((prev) => !prev)}
-                  type="button"
-                >
-                  {isSwitchingUser
-                    ? messages.auth.cancelSwitchUser
-                    : messages.auth.switchUser}
-                </button>
-                {onSwitchToClassic && (
-                  <button
-                    className="macos-lock-subaction"
-                    onClick={onSwitchToClassic}
-                    type="button"
-                  >
-                    {messages.auth.classicSignIn}
-                  </button>
-                )}
-              </div>
             </form>
           ) : (
             <>
