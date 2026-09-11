@@ -187,7 +187,7 @@ function SymmetricKeyEditor({
           </TabsList>
         </TerminalHeader>
 
-        <TabsContent className="m-0 p-0" value="secret">
+        <TabsContent className="m-0 min-h-[117px] p-0" value="secret">
           <div className="relative p-3">
             <Label className="sr-only" htmlFor="jwt-secret-input">
               {copy.secretLabel}
@@ -223,7 +223,7 @@ function SymmetricKeyEditor({
           </div>
         </TabsContent>
 
-        <TabsContent className="m-0 p-0" value="signature">
+        <TabsContent className="m-0 min-h-[117px] p-0" value="signature">
           <div className="relative p-3">
             <Textarea
               aria-label={copy.signatureLabel}
@@ -448,7 +448,7 @@ function AsymmetricInspectKeyEditor({
           </TabsList>
         </TerminalHeader>
 
-        <TabsContent className="m-0 p-0" value="public">
+        <TabsContent className="m-0 min-h-[142px] p-0" value="public">
           <div className="relative p-3">
             <Textarea
               aria-label={copy.publicKey}
@@ -476,7 +476,7 @@ function AsymmetricInspectKeyEditor({
           </div>
         </TabsContent>
 
-        <TabsContent className="m-0 p-0" value="signature">
+        <TabsContent className="m-0 min-h-[142px] p-0" value="signature">
           <div className="relative p-3">
             <Textarea
               aria-label={copy.signatureLabel}

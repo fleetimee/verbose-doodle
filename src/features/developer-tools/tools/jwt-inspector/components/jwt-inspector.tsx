@@ -561,7 +561,7 @@ export function JwtInspector() {
 
   return (
     <DeveloperToolLayout
-      className="min-h-0 flex-1 gap-4 pb-4"
+      className="jwt-inspector-scrollbars min-h-0 flex-1 gap-4 pb-4"
       clearLabel={copy.clear}
       description={copy.simpleDescription}
       headerExtra={

@@ -569,6 +569,34 @@ html:has(.dashboard-shell) #root {
   border-bottom-color: var(--popover) !important;
 }
 
+.jwt-inspector-scrollbars :where(textarea, .cm-scroller) {
+  scrollbar-color: var(--border) transparent;
+  scrollbar-width: thin;
+}
+
+.jwt-inspector-scrollbars :where(textarea, .cm-scroller)::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.jwt-inspector-scrollbars
+  :where(textarea, .cm-scroller)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.jwt-inspector-scrollbars
+  :where(textarea, .cm-scroller)::-webkit-scrollbar-thumb {
+  background: var(--border);
+  background-clip: padding-box;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+}
+
+.jwt-inspector-scrollbars
+  :where(textarea, .cm-scroller)::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* Custom loading dots animation for waiting states */
 .loading-dots span {
   animation: loading-dots-blink 1.4s infinite both;

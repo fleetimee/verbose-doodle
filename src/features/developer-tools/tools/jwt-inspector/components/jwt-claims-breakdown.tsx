@@ -141,7 +141,7 @@ export function JwtClaimsBreakdown({
       )}
       style={{ height }}
     >
-      <ScrollArea className="w-full flex-1 overflow-auto">
+      <ScrollArea className="min-h-0 w-full flex-1">
         <table className="w-full border-collapse text-left">
           <tbody>
             {parsed.entries.map(([key, value]) => {

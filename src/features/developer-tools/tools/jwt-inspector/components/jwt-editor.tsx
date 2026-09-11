@@ -732,7 +732,7 @@ export function JwtEditor({
       </div>
 
       <Dialog onOpenChange={setExpanded} open={expanded}>
-        <DialogContent className="flex h-[85vh] max-h-[820px] flex-col gap-0 overflow-hidden rounded-xl border p-0 shadow-2xl sm:max-w-4xl lg:max-w-5xl">
+        <DialogContent className="jwt-inspector-scrollbars flex h-[85vh] max-h-[820px] flex-col gap-0 overflow-hidden rounded-xl border p-0 shadow-2xl sm:max-w-4xl lg:max-w-5xl">
           {json ? (
             <JwtDialogJsonView
               byteCount={byteCount}
