@@ -8,6 +8,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Kbd } from "@/components/ui/kbd";
 import {
   SidebarGroup,
@@ -19,6 +28,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   formatOptionShortcut,
@@ -88,12 +98,20 @@ function NavMenuItem({
   shortcutKey: string;
 }) {
   const navigate = useNavigate();
+  const { state, isMobile } = useSidebar();
+  const isCollapsed = state === "collapsed" && !isMobile;
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
   const isChildActive = item.items?.some(
     (subItem) =>
       currentPath === subItem.url || currentPath.startsWith(`${subItem.url}/`)
   );
 
   const [open, setOpen] = useState(Boolean(isChildActive));
+  const submenuOpen = isCollapsed ? flyoutOpen : open;
+
+  useEffect(() => {
+    setFlyoutOpen(false);
+  }, [currentPath, isCollapsed]);
 
   useEffect(() => {
     if (isChildActive) {
@@ -108,12 +126,13 @@ function NavMenuItem({
         childShortcutKeys,
         event,
         item,
-        open,
+        open: submenuOpen,
       });
 
       if (destination) {
         event.preventDefault();
         navigate(destination);
+        setFlyoutOpen(false);
         return;
       }
 
@@ -123,7 +142,11 @@ function NavMenuItem({
 
       event.preventDefault();
       if (submenuItems.length > 0) {
-        setOpen((currentOpen) => !currentOpen);
+        if (isCollapsed) {
+          setFlyoutOpen((currentOpen) => !currentOpen);
+        } else {
+          setOpen((currentOpen) => !currentOpen);
+        }
         return;
       }
       if (item.url) {
@@ -133,7 +156,15 @@ function NavMenuItem({
 
     document.addEventListener("keydown", handleShortcut);
     return () => document.removeEventListener("keydown", handleShortcut);
-  }, [childShortcutKeys, item.items, item.url, navigate, open, shortcutKey]);
+  }, [
+    childShortcutKeys,
+    item.items,
+    item.url,
+    navigate,
+    submenuOpen,
+    isCollapsed,
+    shortcutKey,
+  ]);
 
   if (!item.items || item.items.length === 0) {
     const isActive =
@@ -172,6 +203,78 @@ function NavMenuItem({
     );
   }
 
+  if (isCollapsed) {
+    return (
+      <SidebarMenuItem>
+        <DropdownMenu onOpenChange={setFlyoutOpen} open={flyoutOpen}>
+          <DropdownMenuTrigger
+            render={
+              <SidebarMenuButton
+                aria-keyshortcuts={`Alt+${shortcutKey.toUpperCase()}`}
+                aria-label={item.title}
+                className="relative rounded-lg data-popup-open:bg-sidebar-accent data-[active=true]:shadow-xs"
+                isActive={isChildActive}
+                tooltip={flyoutOpen ? undefined : item.title}
+              />
+            }
+          >
+            <item.icon />
+            <HugeiconsIcon
+              aria-hidden="true"
+              className="absolute right-0.5 bottom-0.5 size-2! text-sidebar-foreground/65"
+              icon={ArrowRight01Icon}
+              strokeWidth={2}
+            />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            className="w-64 max-w-[calc(100vw-2rem)] rounded-xl p-1.5 motion-reduce:transition-none"
+            side="right"
+            sideOffset={10}
+          >
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="px-2 py-2 text-muted-foreground text-xs">
+                {item.title}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {item.items.map((subItem, index) => {
+                const isActive =
+                  currentPath === subItem.url ||
+                  currentPath.startsWith(`${subItem.url}/`);
+                const childKey = childShortcutKeys[index];
+                return (
+                  <DropdownMenuItem
+                    aria-current={isActive ? "page" : undefined}
+                    aria-keyshortcuts={
+                      childKey ? `Alt+${childKey.toUpperCase()}` : undefined
+                    }
+                    className="min-h-9 gap-2.5 rounded-lg aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium aria-[current=page]:text-sidebar-accent-foreground"
+                    key={subItem.url}
+                    render={
+                      <Link
+                        onFocus={subItem.onPrefetch}
+                        onMouseEnter={subItem.onPrefetch}
+                        to={subItem.url}
+                      />
+                    }
+                  >
+                    <subItem.icon />
+                    <span className="flex-1">{subItem.title}</span>
+                    {isAltHeld && childKey ? (
+                      <Kbd aria-hidden="true">
+                        {formatOptionShortcut(childKey.toUpperCase())}
+                      </Kbd>
+                    ) : null}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    );
+  }
+
   return (
     <Collapsible onOpenChange={setOpen} open={open}>
       <SidebarMenuItem>
@@ -180,6 +283,8 @@ function NavMenuItem({
           render={
             <SidebarMenuButton
               aria-keyshortcuts={`Alt+${shortcutKey.toUpperCase()}`}
+              className="h-9 rounded-lg data-[active=true]:shadow-xs"
+              isActive={isChildActive}
               tooltip={item.title}
             >
               <item.icon />

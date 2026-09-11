@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -12,6 +18,47 @@ function LocationProbe() {
 }
 
 describe("AppSidebar developer tools navigation", () => {
+  test("opens collapsed submenus and navigates without expanding the sidebar", async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={["/dashboard/socket-test/tcp-client"]}>
+          <AuthProvider>
+            <SidebarProvider defaultOpen={false}>
+              <AppSidebar />
+              <LocationProbe />
+            </SidebarProvider>
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    const trigger = screen.getByRole("button", { name: "Socket Tester" });
+    expect(screen.queryByRole("menuitem", { name: "UDP" })).toBeNull();
+    await act(() => {
+      fireEvent.click(trigger);
+    });
+    expect(
+      (
+        await screen.findByRole("menuitem", { name: "TCP Client" })
+      ).getAttribute("aria-current")
+    ).toBe("page");
+    await act(() => {
+      fireEvent.click(screen.getByRole("menuitem", { name: "UDP" }));
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("location").textContent).toBe(
+        "/dashboard/socket-test/udp"
+      );
+      expect(screen.queryByRole("menuitem", { name: "UDP" })).toBeNull();
+    });
+    expect(trigger.getAttribute("aria-haspopup")).toBe("menu");
+
+    await act(() => {
+      fireEvent.keyDown(document, { altKey: true, code: "KeyS", key: "s" });
+    });
+    expect(await screen.findByRole("menuitem", { name: "UDP" })).toBeTruthy();
+  });
+
   test("uses the Option symbol for shortcuts on macOS", () => {
     expect(formatOptionShortcut("O", "MacIntel")).toBe("⌥O");
   });
