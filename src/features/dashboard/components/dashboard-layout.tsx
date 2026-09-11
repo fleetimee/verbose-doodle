@@ -42,6 +42,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
+import { LockScreenButton } from "@/features/auth/components/screen-lock";
 import { AddBillerSheet } from "@/features/billers/components/add-biller-sheet";
 import { useCreateBiller } from "@/features/billers/hooks/use-create-biller";
 import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
@@ -312,7 +313,8 @@ export function DashboardLayout() {
                       <span className="hidden sm:inline">Refreshing</span>
                     </span>
                   )}
-                  <div className="ml-auto shrink-0">
+                  <div className="ml-auto flex shrink-0 items-center gap-2">
+                    <LockScreenButton />
                     <ThemeSwitcher
                       onChange={setTheme}
                       value={themeSwitcherValue}

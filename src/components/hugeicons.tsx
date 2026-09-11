@@ -77,6 +77,7 @@ import {
   Timer01Icon,
   TorusIcon,
   TrendingUpDownIcon,
+  Unlock,
   UserCheck01Icon,
   UserGroupIcon,
   UserIcon,
@@ -177,6 +178,7 @@ export const TimerReset = createHugeIcon(HistoryIcon);
 export const Torus = createHugeIcon(TorusIcon);
 export const TrendingUp = createHugeIcon(TrendingUpDownIcon);
 export const Unplug = createHugeIcon(PlugSocketIcon);
+export const UnlockIcon = createHugeIcon(Unlock);
 export const User = createHugeIcon(UserIcon);
 export const UserCheck = createHugeIcon(UserCheck01Icon);
 export const UserCog = createHugeIcon(UserSettings01Icon);

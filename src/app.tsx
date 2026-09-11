@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TokenExpirationDialog } from "@/components/token-expiration-dialog";
 import { Toaster } from "@/components/ui/sonner";
+import { ScreenLockProvider } from "@/features/auth/components/screen-lock";
 import { AuthProvider } from "@/features/auth/context";
 import { DashboardVisitNotifications } from "@/features/dashboard/components/dashboard-visit-notifications";
 import { queryClient } from "@/lib/query-client";
@@ -19,10 +20,12 @@ export function App() {
           <AuthProvider>
             <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
               <MotionConfig reducedMotion="never">
-                <AppRoutes />
-                <TokenExpirationDialog />
-                <Toaster position="bottom-center" />
-                <DashboardVisitNotifications />
+                <ScreenLockProvider>
+                  <AppRoutes />
+                  <TokenExpirationDialog />
+                  <Toaster position="bottom-center" />
+                  <DashboardVisitNotifications />
+                </ScreenLockProvider>
               </MotionConfig>
             </ThemeProvider>
           </AuthProvider>

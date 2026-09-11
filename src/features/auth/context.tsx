@@ -22,6 +22,8 @@ import { apiFetch, setDefaultApiSession } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import { queryClient } from "@/lib/query-client";
 
+export const SCREEN_LOCK_STORAGE_KEY = "workspace-lock-account";
+
 type RefreshTokenResponse = {
   responseCode: string;
   responseDesc: string;
@@ -122,7 +124,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const shouldKeepManualLogout = hasManualLogout();
     session.signOut();
     try {
+      const lockedAccount = sessionStorage.getItem(SCREEN_LOCK_STORAGE_KEY);
       sessionStorage.clear();
+      if (lockedAccount !== null) {
+        sessionStorage.setItem(SCREEN_LOCK_STORAGE_KEY, lockedAccount);
+      }
       if (shouldKeepManualLogout) {
         markManualLogout();
       }

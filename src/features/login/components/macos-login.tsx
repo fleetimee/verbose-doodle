@@ -2,12 +2,13 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   type CSSProperties,
+  type ReactNode,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
-import { CheckCircle2 } from "@/components/hugeicons";
+import { CheckCircle2, UnlockIcon } from "@/components/hugeicons";
 import { Logo } from "@/components/ui/logo";
 import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
@@ -23,6 +24,8 @@ const PASSWORD_TYPING_DURATION_MS = 2250;
 const GLASS_TRANSITION_DURATION_MS = 560;
 
 export type MacOsLoginProps = {
+  username?: string;
+  mode?: "login" | "lock";
   error?: {
     message: string;
     description?: string;
@@ -30,15 +33,19 @@ export type MacOsLoginProps = {
   isComplete: boolean;
   isLoading?: boolean;
   onSubmit?: (data: LoginFormData) => void;
+  onUnlock?: () => void;
   onTransitionComplete: () => void;
   progress: number;
 };
 
 export function MacOsLogin({
+  username = "admin",
+  mode = "login",
   error = null,
   isComplete,
   isLoading = false,
   onSubmit,
+  onUnlock,
   onTransitionComplete,
   progress,
 }: MacOsLoginProps) {
@@ -68,23 +75,14 @@ export function MacOsLogin({
     }
   }, [error, triggerShake]);
 
-  const now = new Date();
-  const date = new Intl.DateTimeFormat(undefined, {
-    day: "numeric",
-    month: "short",
-    weekday: "short",
-  }).format(now);
-  const time = new Intl.DateTimeFormat(undefined, {
-    hour: "numeric",
-    hour12: false,
-    minute: "2-digit",
-  }).format(now);
+  const { date, time } = useMacOsClock();
 
   const isInteractive = Boolean(error);
   const status = isComplete
     ? messages.auth.sessionReadyRedirecting
     : messages.auth.creatingSecureSession;
-  const isTransitionReady = isComplete && (isInteractive || isTypingComplete);
+  const isTransitionReady =
+    isComplete && (mode === "lock" || isInteractive || isTypingComplete);
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -121,7 +119,7 @@ export function MacOsLogin({
     onSubmit?.({
       captchaVerified: true,
       password,
-      username: "admin",
+      username,
     });
   };
 
@@ -130,6 +128,66 @@ export function MacOsLogin({
       setIsShaking(false);
     }
   };
+
+  let accountContent: ReactNode;
+  if (mode === "lock") {
+    accountContent = <LockUnlockButton onUnlock={onUnlock} />;
+  } else if (isInteractive) {
+    accountContent = (
+      <form
+        aria-label={messages.auth.signIn}
+        className="macos-password-form"
+        onSubmit={handleSubmit}
+      >
+        <div className="macos-input-pill">
+          <input
+            aria-label={messages.auth.passwordLabel}
+            autoComplete="current-password"
+            autoFocus
+            className="macos-input-pill-field"
+            id="macos-password-input"
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder={messages.auth.passwordPlaceholder}
+            ref={passwordInputRef}
+            type="password"
+            value={password}
+          />
+          <button
+            aria-label={
+              isLoading ? messages.auth.signingIn : messages.auth.signIn
+            }
+            className="macos-submit-button"
+            disabled={isLoading}
+            type="submit"
+          >
+            {isLoading ? (
+              <Spinner className="size-3.5 text-white" />
+            ) : (
+              <HugeiconsIcon
+                icon={ArrowRight01Icon}
+                size={16}
+                strokeWidth={2.5}
+              />
+            )}
+          </button>
+        </div>
+
+        {error && (
+          <div aria-live="assertive" className="macos-error-badge" role="alert">
+            <span>{error.description || error.message}</span>
+          </div>
+        )}
+      </form>
+    );
+  } else {
+    accountContent = (
+      <DemoProgressStatus
+        isComplete={isComplete}
+        progress={progress}
+        status={status}
+      />
+    );
+  }
 
   return (
     <section
@@ -159,88 +217,14 @@ export function MacOsLogin({
           <div className="macos-login-avatar">
             <Logo size="lg" variant="icon" />
           </div>
-          <h1>{messages.common.appName}</h1>
-
-          {isInteractive ? (
-            <form
-              aria-label={messages.auth.signIn}
-              className="macos-password-form"
-              onSubmit={handleSubmit}
-            >
-              <div className="macos-input-pill">
-                <input
-                  aria-label={messages.auth.passwordLabel}
-                  autoComplete="current-password"
-                  autoFocus
-                  className="macos-input-pill-field"
-                  id="macos-password-input"
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder={messages.auth.passwordPlaceholder}
-                  ref={passwordInputRef}
-                  type="password"
-                  value={password}
-                />
-                <button
-                  aria-label={
-                    isLoading ? messages.auth.signingIn : messages.auth.signIn
-                  }
-                  className="macos-submit-button"
-                  disabled={isLoading}
-                  type="submit"
-                >
-                  {isLoading ? (
-                    <Spinner className="size-3.5 text-white" />
-                  ) : (
-                    <HugeiconsIcon
-                      icon={ArrowRight01Icon}
-                      size={16}
-                      strokeWidth={2.5}
-                    />
-                  )}
-                </button>
-              </div>
-
-              {error && (
-                <div
-                  aria-live="assertive"
-                  className="macos-error-badge"
-                  role="alert"
-                >
-                  <span>{error.description || error.message}</span>
-                </div>
-              )}
-            </form>
-          ) : (
-            <>
-              <div
-                aria-label={messages.auth.validatingDemoCredentials}
-                className="macos-password-status"
-                role="img"
-              >
-                <span aria-hidden="true" className="macos-password-dots">
-                  {PASSWORD_DOTS.map((dot, index) => (
-                    <span
-                      className="macos-password-dot"
-                      key={dot}
-                      style={{ "--password-dot-index": index } as CSSProperties}
-                    />
-                  ))}
-                </span>
-                <span aria-hidden="true" className="macos-login-state">
-                  {isComplete && <CheckCircle2 />}
-                </span>
-              </div>
-
-              <Progress
-                aria-label={messages.auth.preparingDemoSessionAriaLabel}
-                className="sr-only"
-                value={progress}
-              />
-              <p aria-live="polite" className="macos-lock-status">
-                {status}
-              </p>
-            </>
+          <h1>{mode === "lock" ? username : messages.common.appName}</h1>
+          {mode === "lock" && (
+            <p className="macos-lock-status">
+              {messages.auth.unlockDescription}
+            </p>
           )}
+
+          {accountContent}
         </div>
       </div>
 
@@ -251,4 +235,90 @@ export function MacOsLogin({
       </div>
     </section>
   );
+}
+
+function LockUnlockButton({ onUnlock }: { onUnlock?: () => void }) {
+  return (
+    <button
+      aria-label={messages.auth.unlock}
+      autoFocus
+      className="macos-unlock-action"
+      onClick={onUnlock}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          onUnlock?.();
+        }
+      }}
+      type="button"
+    >
+      <UnlockIcon aria-hidden="true" className="size-4" />
+      {messages.auth.unlock}
+    </button>
+  );
+}
+
+function DemoProgressStatus({
+  isComplete,
+  progress,
+  status,
+}: {
+  isComplete: boolean;
+  progress: number;
+  status: string;
+}) {
+  return (
+    <>
+      <div
+        aria-label={messages.auth.validatingDemoCredentials}
+        className="macos-password-status"
+        role="img"
+      >
+        <span aria-hidden="true" className="macos-password-dots">
+          {PASSWORD_DOTS.map((dot, index) => (
+            <span
+              className="macos-password-dot"
+              key={dot}
+              style={{ "--password-dot-index": index } as CSSProperties}
+            />
+          ))}
+        </span>
+        <span aria-hidden="true" className="macos-login-state">
+          {isComplete && <CheckCircle2 />}
+        </span>
+      </div>
+
+      <Progress
+        aria-label={messages.auth.preparingDemoSessionAriaLabel}
+        className="sr-only"
+        value={progress}
+      />
+      <p aria-live="polite" className="macos-lock-status">
+        {status}
+      </p>
+    </>
+  );
+}
+
+function useMacOsClock() {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const date = new Intl.DateTimeFormat(undefined, {
+    day: "numeric",
+    month: "short",
+    weekday: "short",
+  }).format(now);
+
+  const time = new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    hour12: false,
+    minute: "2-digit",
+  }).format(now);
+
+  return { date, time };
 }

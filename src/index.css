@@ -2638,7 +2638,8 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   font-weight: 500;
 }
 
-.macos-logged-out-action {
+.macos-logged-out-action,
+.macos-unlock-action {
   display: inline-flex;
   gap: 0.5rem;
   align-items: center;
@@ -2655,22 +2656,26 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   background: oklch(1 0 0 / 0.14);
   box-shadow: 0 10px 30px -18px oklch(0.08 0.04 260 / 0.8);
   backdrop-filter: blur(18px) saturate(1.2);
+  cursor: pointer;
   transition:
     background-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
     border-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
     transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.macos-logged-out-action:hover {
+.macos-logged-out-action:hover,
+.macos-unlock-action:hover {
   border-color: oklch(1 0 0 / 0.42);
   background: oklch(1 0 0 / 0.22);
 }
 
-.macos-logged-out-action:active {
+.macos-logged-out-action:active,
+.macos-unlock-action:active {
   transform: scale(0.97);
 }
 
-.macos-logged-out-action:focus-visible {
+.macos-logged-out-action:focus-visible,
+.macos-unlock-action:focus-visible {
   outline: 3px solid oklch(1 0 0 / 0.72);
   outline-offset: 3px;
 }
@@ -3063,5 +3068,79 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     right: 1rem;
     bottom: 1rem;
     width: calc(100vw - 2rem);
+  }
+}
+
+.workspace-lock-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  animation: workspace-lock-close 450ms
+    var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
+}
+
+.workspace-lock-dialog::backdrop {
+  background: transparent;
+}
+
+.workspace-lock-dialog[data-state="opening"] {
+  pointer-events: none;
+  animation: workspace-lock-open 450ms
+    var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
+}
+
+@keyframes workspace-lock-close {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes workspace-lock-open {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-lock-dialog {
+    animation-name: workspace-lock-fade-in;
+    animation-duration: 150ms;
+  }
+
+  .workspace-lock-dialog[data-state="opening"] {
+    animation-name: workspace-lock-fade-out;
+    animation-duration: 150ms;
+  }
+}
+
+@keyframes workspace-lock-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes workspace-lock-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }

@@ -272,6 +272,12 @@ The endpoint card is the signature work item. It combines a semantic method stri
 
 Tabs sit inside a muted rounded track. The active tab returns to the workspace surface and gains a small grounding edge. Keep tab transitions limited to color and shadow so switching feels immediate.
 
+### Screen lock
+
+The lock button sits beside the theme switcher in the dashboard header. Locking reuses the macOS lock screen and provides a direct unlock action to resume the workspace. The screen also locks automatically after 2.5 minutes of user inactivity. The lock persists per tab across reloads until unlocked. A full-screen modal keeps keyboard focus and interaction within the lock screen.
+
+The lock screen enters with a 450ms downward transform, like a shutter closing, and exits upward over 450ms upon unlocking. Reduced motion replaces these translations with 150ms fades.
+
 ## Do's and Don'ts
 
 ### Do:

@@ -1,4 +1,8 @@
 export const authMessages = {
+  lockScreen: "Lock screen",
+  unlock: "Unlock",
+  unlockDescription: "Click unlock to resume workspace",
+  unlockFailed: "Could not unlock. Check your password and try again.",
   captchaRequiredError: "Please complete the captcha verification",
   creatingSecureSession: "Creating a secure simulator session",
   demoAccess: "Demo access",

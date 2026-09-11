@@ -61,4 +61,29 @@ describe("MacOsLogin", () => {
     expect((submitBtn as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByLabelText("Loading")).toBeDefined();
   });
+
+  test("renders direct unlock button in lock mode without password input", () => {
+    const mockOnUnlock = mock(() => {});
+
+    render(
+      <MacOsLogin
+        isComplete={false}
+        mode="lock"
+        onTransitionComplete={() => undefined}
+        onUnlock={mockOnUnlock}
+        progress={0}
+        username="operator"
+      />
+    );
+
+    expect(screen.queryByLabelText("Password")).toBeNull();
+    const unlockBtn = screen.getByRole("button", { name: "Unlock" });
+    expect(unlockBtn).toBeDefined();
+
+    fireEvent.click(unlockBtn);
+    expect(mockOnUnlock).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(unlockBtn, { key: "Enter" });
+    expect(mockOnUnlock).toHaveBeenCalledTimes(2);
+  });
 });
