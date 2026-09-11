@@ -1,3 +1,8 @@
+import {
+  AlertCircleIcon,
+  CheckmarkCircle02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -78,29 +83,127 @@ function JwtAlgorithmSelect({
   );
 }
 
+function parseHeaderAlgorithm(headerJson: string): JwtAlgorithm | null {
+  try {
+    const alg = JSON.parse(headerJson)?.alg;
+    return isSupportedAlgorithm(alg) ? (alg as JwtAlgorithm) : null;
+  } catch {
+    return null;
+  }
+}
+
+function buildDefaultClaims(preset: JwtAlgorithm) {
+  const seconds = Math.floor(Date.now() / 1000);
+  const header = JSON.stringify({ alg: preset, typ: "JWT" });
+  const payload = JSON.stringify({
+    sub: "developer",
+    iss: "biller-simulator-backend",
+    iat: seconds,
+    exp: seconds + 3600,
+  });
+  return { header, payload };
+}
+
+function ModeSelector({
+  mode,
+  onModeChange,
+}: {
+  readonly mode: "inspect" | "create";
+  readonly onModeChange: (mode: "inspect" | "create") => void;
+}) {
+  return (
+    <fieldset aria-label={copy.modeLabel} className="mb-4 flex gap-2">
+      {(["inspect", "create"] as const).map((value) => (
+        <Button
+          aria-pressed={mode === value}
+          key={value}
+          onClick={() => onModeChange(value)}
+          size="sm"
+          variant={mode === value ? "secondary" : "ghost"}
+        >
+          {value === "inspect" ? copy.inspect : copy.create}
+        </Button>
+      ))}
+    </fieldset>
+  );
+}
+
 type JwtPaneMotionProps = {
   readonly layout: false | "position";
   readonly layoutDuration: number;
 };
 
+function renderTokenStatus(token: string, tokenError: string) {
+  if (!token) {
+    return <span className="text-muted-foreground">No token provided</span>;
+  }
+  if (tokenError) {
+    return (
+      <span className="inline-flex items-center gap-1.5 font-medium text-destructive">
+        <HugeiconsIcon className="size-4" icon={AlertCircleIcon} />
+        <span>{tokenError}</span>
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+      <HugeiconsIcon className="size-4" icon={CheckmarkCircle02Icon} />
+      <span>Valid JWT</span>
+    </span>
+  );
+}
+
+function renderSignatureStatus(
+  status: string,
+  isValidSig: boolean,
+  isInvalidSig: boolean
+) {
+  if (isValidSig) {
+    return (
+      <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+        <HugeiconsIcon className="size-4" icon={CheckmarkCircle02Icon} />
+        <span>{copy.signatureValid}</span>
+      </span>
+    );
+  }
+  if (isInvalidSig) {
+    return (
+      <span className="inline-flex items-center gap-1.5 font-medium text-destructive">
+        <HugeiconsIcon className="size-4" icon={AlertCircleIcon} />
+        <span>{copy.signatureInvalid}</span>
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+      <span>{status || copy.notChecked}</span>
+    </span>
+  );
+}
+
 function JwtTokenPane({
+  error,
   inspectMode,
   layout,
   layoutDuration,
   onInspect,
-  signature,
+  status,
   token,
   tokenError,
 }: JwtPaneMotionProps & {
+  readonly error?: string;
   readonly inspectMode: boolean;
   readonly onInspect: (value: string) => void;
-  readonly signature: string;
+  readonly status: string;
   readonly token: string;
   readonly tokenError: string;
 }) {
+  const isInvalidSig = status === copy.signatureInvalid;
+  const isValidSig = status === copy.signatureValid;
+
   return (
     <motion.div
-      className="min-w-0 space-y-4"
+      className="flex h-full min-w-0 flex-col"
       data-jwt-pane="token"
       layout={layout}
       transition={{
@@ -108,9 +211,27 @@ function JwtTokenPane({
       }}
     >
       <JwtEditor
+        className="flex h-full min-h-0 flex-1 flex-col"
         colorizeToken
         copyLabel={copy.copyToken}
         description={copy.inputDescription}
+        footer={
+          <div className="shrink-0 space-y-1.5 border-t bg-muted/10 px-4 py-2.5 font-mono text-xs">
+            <div className="flex items-center gap-2">
+              {renderTokenStatus(token, tokenError)}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {renderSignatureStatus(status, isValidSig, isInvalidSig)}
+            </div>
+
+            {error && (
+              <p className="text-destructive text-xs" role="alert">
+                {error}
+              </p>
+            )}
+          </div>
+        }
         label={copy.inputLabel}
         onChange={inspectMode ? onInspect : undefined}
         placeholder={
@@ -118,38 +239,42 @@ function JwtTokenPane({
         }
         value={token}
       />
-      {tokenError && (
-        <p className="text-destructive text-sm" role="alert">
-          {tokenError}
-        </p>
-      )}
-      <JwtEditor
-        description={copy.tokenSignatureLabel}
-        label={copy.signatureLabel}
-        value={signature}
-      />
     </motion.div>
   );
 }
 
 function JwtDecodedPane({
+  changeKeys,
   editable,
+  generating,
   header,
+  keys,
   layout,
   layoutDuration,
+  mode,
+  onGenerate,
   onHeaderChange,
   onPayloadChange,
   payload,
+  signature,
+  symmetric,
 }: JwtPaneMotionProps & {
+  readonly changeKeys: (next: Partial<JwtKeys>) => void;
   readonly editable: boolean;
+  readonly generating: boolean;
   readonly header: string;
+  readonly keys: JwtKeys;
+  readonly mode: "inspect" | "create";
+  readonly onGenerate: () => void;
   readonly onHeaderChange: (value: string) => void;
   readonly onPayloadChange: (value: string) => void;
   readonly payload: string;
+  readonly signature: string;
+  readonly symmetric: boolean;
 }) {
   return (
     <motion.div
-      className="min-w-0 space-y-4"
+      className="flex h-full min-w-0 flex-col justify-between gap-3"
       data-jwt-pane="decoded"
       layout={layout}
       transition={{
@@ -159,6 +284,7 @@ function JwtDecodedPane({
       <JwtEditor
         copyLabel={copy.copyHeader}
         description={copy.headerDescription}
+        height="95px"
         json
         label={copy.headerLabel}
         onChange={editable ? (value) => onHeaderChange(value) : undefined}
@@ -167,10 +293,20 @@ function JwtDecodedPane({
       <JwtEditor
         copyLabel={copy.copyDecoded}
         description={copy.payloadDescription}
+        height="160px"
         json
         label={copy.payloadLabel}
         onChange={editable ? (value) => onPayloadChange(value) : undefined}
         value={payload}
+      />
+      <JwtKeyFields
+        changeKeys={changeKeys}
+        generating={generating}
+        keys={keys}
+        mode={mode}
+        onGenerate={onGenerate}
+        signature={signature}
+        symmetric={symmetric}
       />
     </motion.div>
   );
@@ -288,14 +424,7 @@ export function JwtInspector() {
   const loadExample = async () => {
     invalidate();
     const current = revision.current;
-    const seconds = Math.floor(Date.now() / 1000);
-    const h = JSON.stringify({ alg: preset, typ: "JWT" });
-    const p = JSON.stringify({
-      sub: "developer",
-      iss: "biller-simulator-backend",
-      iat: seconds,
-      exp: seconds + 3600,
-    });
+    const { header: h, payload: p } = buildDefaultClaims(preset);
     setGenerating(true);
     try {
       const exampleKeys = await createJwtKeys(preset);
@@ -349,13 +478,9 @@ export function JwtInspector() {
     setToken("");
     if (field === "header") {
       setHeader(value);
-      try {
-        const alg = JSON.parse(value)?.alg;
-        if (isSupportedAlgorithm(alg)) {
-          setPreset(alg);
-        }
-      } catch {
-        // Keep incomplete JSON editable.
+      const alg = parseHeaderAlgorithm(value);
+      if (alg) {
+        setPreset(alg);
       }
     } else {
       setPayload(value);
@@ -401,26 +526,34 @@ export function JwtInspector() {
     : "position";
   const tokenPane = (
     <JwtTokenPane
+      error={error}
       inspectMode={mode === "inspect"}
       key="token-pane"
       layout={paneLayout}
       layoutDuration={paneDuration}
       onInspect={inspectToken}
-      signature={parsed.isValidStructure ? parsed.signatureHex : ""}
+      status={status}
       token={token}
       tokenError={tokenError}
     />
   );
   const decodedPane = (
     <JwtDecodedPane
+      changeKeys={changeKeys}
       editable={mode === "create"}
+      generating={generating}
       header={header}
       key="decoded-pane"
+      keys={keys}
       layout={paneLayout}
       layoutDuration={paneDuration}
+      mode={mode}
+      onGenerate={generate}
       onHeaderChange={(value) => changeDraft("header", value)}
       onPayloadChange={(value) => changeDraft("payload", value)}
       payload={payload}
+      signature={parsed.isValidStructure ? parsed.signatureHex : ""}
+      symmetric={symmetric}
     />
   );
   const workspacePanes =
@@ -428,6 +561,7 @@ export function JwtInspector() {
 
   return (
     <DeveloperToolLayout
+      className="gap-4 pb-4"
       clearLabel={copy.clear}
       description={copy.simpleDescription}
       headerExtra={
@@ -438,28 +572,19 @@ export function JwtInspector() {
       resetLabel={copy.loadExample}
       title={copy.title}
     >
-      <fieldset aria-label={copy.modeLabel} className="mb-4 flex gap-2">
-        {(["inspect", "create"] as const).map((value) => (
-          <Button
-            aria-pressed={mode === value}
-            key={value}
-            onClick={() => {
-              invalidate();
-              if (value === "inspect") {
-                inspectToken(token);
-              }
-              setMode(value);
-            }}
-            size="sm"
-            variant={mode === value ? "secondary" : "ghost"}
-          >
-            {value === "inspect" ? copy.inspect : copy.create}
-          </Button>
-        ))}
-      </fieldset>
+      <ModeSelector
+        mode={mode}
+        onModeChange={(nextMode) => {
+          invalidate();
+          if (nextMode === "inspect") {
+            inspectToken(token);
+          }
+          setMode(nextMode);
+        }}
+      />
       <LayoutGroup id="jwt-inspector-workspace">
         <motion.div
-          className="grid min-w-0 gap-4 lg:grid-cols-2"
+          className="grid min-w-0 items-stretch gap-4 lg:grid-cols-2"
           data-testid="jwt-editor-workspace"
           layout={!shouldReduceMotion}
           transition={paneTransition}
@@ -467,34 +592,6 @@ export function JwtInspector() {
           {workspacePanes}
         </motion.div>
       </LayoutGroup>
-      <section className="mt-6 space-y-3 border-t pt-4">
-        <h2 className="font-medium text-sm">
-          {mode === "inspect" ? copy.verificationOptional : copy.signing}
-        </h2>
-        <JwtKeyFields
-          changeKeys={changeKeys}
-          keys={keys}
-          mode={mode}
-          symmetric={symmetric}
-        />
-        {mode === "create" && (
-          <Button disabled={generating} onClick={generate} size="sm">
-            {generating ? copy.generating : copy.generate}
-          </Button>
-        )}
-        <p
-          aria-live="polite"
-          className="text-muted-foreground text-sm"
-          role="status"
-        >
-          {generating ? copy.generating : status}
-        </p>
-        {error && (
-          <p className="text-destructive text-sm" role="alert">
-            {error}
-          </p>
-        )}
-      </section>
     </DeveloperToolLayout>
   );
 }

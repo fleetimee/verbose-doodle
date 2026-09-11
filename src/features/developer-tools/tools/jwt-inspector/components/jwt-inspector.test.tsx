@@ -61,6 +61,7 @@ describe("JwtInspector Component", () => {
         name: "Encoded Token",
       }) as HTMLTextAreaElement
     ).value;
+    fireEvent.click(screen.getByRole("tab", { name: "Signature (Base64URL)" }));
     expect(
       (
         screen.getByRole("textbox", {

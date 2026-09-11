@@ -26,15 +26,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { DocumentEditor } from "@/features/developer-tools/components/document-editor";
 import { messages } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import { jwtClaimsExtensions } from "../utils/jwt-claims-extension";
 import { JwtClaimsBreakdown } from "./jwt-claims-breakdown";
 
 interface JwtEditorProps {
+  readonly className?: string;
   readonly colorizeToken?: boolean;
   readonly copyLabel?: string;
   readonly description?: string;
+  readonly footer?: ReactNode;
+  readonly height?: string;
   readonly json?: boolean;
   readonly label: string;
+  readonly minHeight?: string;
   readonly onChange?: (value: string) => void;
   readonly placeholder?: string;
   readonly value: string;
@@ -82,11 +87,13 @@ function TokenHighlight({ value }: { readonly value: string }) {
 
 function InlineTokenInput({
   label,
+  minHeight = "160px",
   onChange,
   placeholder,
   value,
 }: {
   readonly label: string;
+  readonly minHeight?: string;
   readonly onChange?: (value: string) => void;
   readonly placeholder?: string;
   readonly value: string;
@@ -101,7 +108,7 @@ function InlineTokenInput({
   };
 
   return (
-    <div className="relative min-h-0">
+    <div className="relative flex min-h-0 flex-1 flex-col">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 select-none overflow-hidden whitespace-pre-wrap break-all px-3 py-2 font-mono text-sm leading-6"
@@ -111,13 +118,13 @@ function InlineTokenInput({
       </div>
       <Textarea
         aria-label={label}
-        className="!bg-transparent relative z-10 resize-y font-mono text-sm text-transparent leading-6 caret-foreground shadow-none [-webkit-text-fill-color:transparent] selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground"
+        className="!bg-transparent relative z-10 h-full min-h-[320px] w-full flex-1 resize-none overflow-auto font-mono text-sm text-transparent leading-6 caret-foreground shadow-none [-webkit-text-fill-color:transparent] selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground focus-visible:ring-0"
         onChange={(event) => onChange?.(event.target.value)}
         onScroll={syncScroll}
         placeholder={placeholder}
         readOnly={!onChange}
         spellCheck={false}
-        style={{ minHeight: "160px" }}
+        style={minHeight ? { minHeight } : undefined}
         value={value}
       />
     </div>
@@ -510,14 +517,18 @@ function JwtDialogPlainView({
 }
 
 export function JwtEditor({
-  label,
-  value,
-  onChange,
-  json = false,
-  placeholder,
-  copyLabel = messages.jwtInspector.copy,
+  className,
   colorizeToken = false,
+  copyLabel = messages.jwtInspector.copy,
   description,
+  footer,
+  height,
+  json = false,
+  label,
+  minHeight,
+  onChange,
+  placeholder,
+  value,
 }: JwtEditorProps) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -623,7 +634,12 @@ export function JwtEditor({
 
   return (
     <>
-      <div className="min-w-0 overflow-hidden rounded-md border">
+      <div
+        className={cn(
+          "min-w-0 overflow-hidden rounded-md border bg-card text-card-foreground",
+          className
+        )}
+      >
         {json ? (
           <Tabs
             className="w-full gap-0"
@@ -660,7 +676,7 @@ export function JwtEditor({
                 description=""
                 extensions={jwtClaimsExtensions}
                 format="json"
-                height="220px"
+                height={height ?? "220px"}
                 index=""
                 label={label}
                 lineCountMessage=""
@@ -673,21 +689,26 @@ export function JwtEditor({
 
             <TabsContent className="m-0 p-0" value="claims">
               <JwtClaimsBreakdown
-                height="220px"
+                height={height ?? "220px"}
                 jsonValue={value}
                 type={claimType}
               />
             </TabsContent>
           </Tabs>
         ) : (
-          <section>
-            <header className="flex items-center justify-between gap-2 border-b px-4 py-2">
+          <section
+            className={cn(
+              colorizeToken && "flex h-full min-h-0 flex-1 flex-col"
+            )}
+          >
+            <header className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-2">
               <h2 className="font-medium text-sm">{label}</h2>
               {renderInlineActions()}
             </header>
             {colorizeToken ? (
               <InlineTokenInput
                 label={label}
+                minHeight={minHeight}
                 onChange={onChange}
                 placeholder={placeholder}
                 value={value}
@@ -700,11 +721,12 @@ export function JwtEditor({
                 placeholder={placeholder}
                 readOnly={!onChange}
                 spellCheck={false}
-                style={{ minHeight: "160px" }}
+                style={{ minHeight: minHeight ?? "160px" }}
                 value={value}
               />
             )}
             {colorizeToken && <TokenLegend />}
+            {footer}
           </section>
         )}
       </div>

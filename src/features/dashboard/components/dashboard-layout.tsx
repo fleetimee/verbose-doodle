@@ -244,11 +244,11 @@ export function DashboardLayout() {
     <TourProvider closeable>
       <DashboardNavigationProvider>
         <SocketBridgeProvider>
-          <SidebarProvider>
+          <SidebarProvider className="dashboard-shell h-dvh min-h-0 overflow-hidden">
             <AppSidebar />
             <SidebarInset
               className={cn(
-                "h-svh min-h-0 overflow-hidden bg-card",
+                "h-full min-h-0 overflow-hidden bg-card",
                 isOverview && "dashboard-overview-shell"
               )}
             >

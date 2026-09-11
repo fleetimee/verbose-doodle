@@ -451,6 +451,13 @@
   }
 }
 
+html:has(.dashboard-shell),
+html:has(.dashboard-shell) body,
+html:has(.dashboard-shell) #root {
+  height: 100%;
+  overflow: hidden;
+}
+
 /* View Transitions API - Theme Toggle Animation */
 :root {
   --expo-in: linear(
