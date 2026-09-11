@@ -42,30 +42,6 @@ function signatureStatus(
   return secret ? result || copy.verifying : copy.notChecked;
 }
 
-function claimTime(name: string, value: unknown, now: number): string {
-  if (!["exp", "iat", "nbf"].includes(name)) {
-    return "";
-  }
-  if (
-    typeof value !== "number" ||
-    !Number.isFinite(value) ||
-    Number.isNaN(new Date(value * 1000).getTime())
-  ) {
-    return copy.invalidTimestamp;
-  }
-  const date = new Date(value * 1000).toISOString();
-  const seconds = Math.ceil(value - now / 1000);
-  if (name === "exp") {
-    return seconds <= 0
-      ? `${date} · ${copy.statusExpired}`
-      : `${date} · ${copy.expiresIn} ${seconds}s`;
-  }
-  if (name === "nbf" && seconds > 0) {
-    return `${date} · ${copy.statusNotYetActive}`;
-  }
-  return date;
-}
-
 function algorithmDisplayName(algorithm: JwtAlgorithm): string {
   return algorithm === "EdDSA" ? "EdDSA (Ed25519)" : algorithm;
 }
@@ -134,6 +110,7 @@ function JwtTokenPane({
       <JwtEditor
         colorizeToken
         copyLabel={copy.copyToken}
+        description={copy.inputDescription}
         label={copy.inputLabel}
         onChange={inspectMode ? onInspect : undefined}
         placeholder={
@@ -146,7 +123,11 @@ function JwtTokenPane({
           {tokenError}
         </p>
       )}
-      <JwtEditor label={copy.signatureLabel} value={signature} />
+      <JwtEditor
+        description={copy.tokenSignatureLabel}
+        label={copy.signatureLabel}
+        value={signature}
+      />
     </motion.div>
   );
 }
@@ -177,6 +158,7 @@ function JwtDecodedPane({
     >
       <JwtEditor
         copyLabel={copy.copyHeader}
+        description={copy.headerDescription}
         json
         label={copy.headerLabel}
         onChange={editable ? (value) => onHeaderChange(value) : undefined}
@@ -184,6 +166,7 @@ function JwtDecodedPane({
       />
       <JwtEditor
         copyLabel={copy.copyDecoded}
+        description={copy.payloadDescription}
         json
         label={copy.payloadLabel}
         onChange={editable ? (value) => onPayloadChange(value) : undefined}
@@ -212,7 +195,6 @@ export function JwtInspector() {
     status: "",
   });
   const [generating, setGenerating] = useState(false);
-  const [now, setNow] = useState(Date.now);
   const shouldReduceMotion = useReducedMotion() ?? false;
   const revision = useRef(0);
   const parsed = parseJwt(token);
@@ -227,11 +209,6 @@ export function JwtInspector() {
   const hasVerificationKey = algorithm.startsWith("HS")
     ? keys.secret
     : keys.publicKey;
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     if (
@@ -518,41 +495,6 @@ export function JwtInspector() {
           </p>
         )}
       </section>
-      {parsed.isValidStructure && (
-        <section className="mt-6 border-t pt-4">
-          <h2 className="mb-3 font-medium text-sm">{copy.claimsTitle}</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b text-muted-foreground">
-                  <th className="py-2 pr-4 font-normal">
-                    {copy.claimHeaderName}
-                  </th>
-                  <th className="py-2 pr-4 font-normal">
-                    {copy.claimHeaderValue}
-                  </th>
-                  <th className="py-2 font-normal">{copy.timeUtc}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(parsed.payload).map(([name, value]) => (
-                  <tr className="border-b last:border-0" key={name}>
-                    <td className="py-2 pr-4 align-top font-mono">{name}</td>
-                    <td className="max-w-xs break-all py-2 pr-4 align-top font-mono">
-                      {typeof value === "object"
-                        ? JSON.stringify(value)
-                        : String(value)}
-                    </td>
-                    <td className="py-2 align-top text-muted-foreground">
-                      {claimTime(name, value, now)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
     </DeveloperToolLayout>
   );
 }

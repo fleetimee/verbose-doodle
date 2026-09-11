@@ -44,6 +44,8 @@ function renderJwtInspector() {
 }
 
 describe("JwtInspector Component", () => {
+  // @ts-expect-error Base UI test flag
+  globalThis.BASE_UI_ANIMATIONS_DISABLED = true;
   test("copies the Base64URL signature and preserves edits in an expanded editor", async () => {
     const writeText = mock(async (_value: string) => {});
     Object.defineProperty(navigator, "clipboard", {
@@ -273,5 +275,29 @@ describe("JwtInspector Component", () => {
     fireEvent.click(screen.getByRole("button", { name: "Clear" }));
     expect(screen.getByText("Signature not checked.")).toBeDefined();
     expect(input.value).toBe("");
+  });
+
+  test("toggles between JSON editor and Claims Breakdown tabs", async () => {
+    renderJwtInspector();
+    await waitFor(() =>
+      expect(screen.getByText("Signature Verified")).toBeDefined()
+    );
+
+    const breakdownTabs = screen.getAllByRole("tab", {
+      name: "Claims Breakdown",
+    });
+    expect(breakdownTabs.length).toBeGreaterThanOrEqual(2);
+
+    // Switch to Claims Breakdown tab for Payload
+    fireEvent.click(breakdownTabs[1]);
+
+    await waitFor(() => {
+      expect(screen.getByText("sub")).toBeDefined();
+    });
+
+    // Switch back to JSON tab
+    const jsonTabs = screen.getAllByRole("tab", { name: "JSON" });
+    fireEvent.click(jsonTabs[1]);
+    expect(screen.getByRole("textbox", { name: "Payload" })).toBeDefined();
   });
 });
