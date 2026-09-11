@@ -47,7 +47,7 @@ export const developerToolsMessages = {
     "Decode, inspect, edit, and verify JSON Web Tokens (JWT) using secure, client-side Web Crypto.",
   jwtInspectorLimit: "Standard JWT structure",
   jwtInspectorRuntime: "Browser only",
-  jwtInspectorTags: ["JWT", "Base64Url", "HMAC-SHA256", "Web Crypto"],
+  jwtInspectorTags: ["JWT", "Base64URL", "HMAC", "RSA", "ECDSA", "Ed25519"],
   listView: "List view",
   navigationGroup: "Developer Tools",
   nfcBridgeConnectionStates: {

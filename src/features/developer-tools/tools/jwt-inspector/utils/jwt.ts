@@ -5,6 +5,7 @@ const HYPHEN_REGEX = /-/g;
 const UNDERSCORE_REGEX = /_/g;
 
 export interface ParsedJwt {
+  readonly error?: string;
   readonly header: Record<string, unknown>;
   readonly headerStr: string;
   readonly isValidStructure: boolean;
@@ -46,6 +47,7 @@ export function parseJwt(token: string): ParsedJwt {
   if (parts.length !== 3) {
     return {
       header: {},
+      error: "Expected 3 dot-separated parts.",
       headerStr: "",
       isValidStructure: false,
       payload: {},
@@ -60,6 +62,19 @@ export function parseJwt(token: string): ParsedJwt {
     const payloadStr = base64UrlDecode(parts[1]);
     const header = JSON.parse(headerStr) as Record<string, unknown>;
     const payload = JSON.parse(payloadStr) as Record<string, unknown>;
+    if (
+      !header ||
+      typeof header !== "object" ||
+      Array.isArray(header) ||
+      !payload ||
+      typeof payload !== "object" ||
+      Array.isArray(payload)
+    ) {
+      throw new Error("Header and payload must be JSON objects.");
+    }
+    if (typeof header.alg !== "string" || !header.alg) {
+      throw new Error("Header must include an alg value.");
+    }
 
     return {
       header,
@@ -70,8 +85,12 @@ export function parseJwt(token: string): ParsedJwt {
       raw: token,
       signatureHex: parts[2],
     };
-  } catch {
+  } catch (error) {
     return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Invalid JWT encoding or JSON.",
       header: {},
       headerStr: "",
       isValidStructure: false,

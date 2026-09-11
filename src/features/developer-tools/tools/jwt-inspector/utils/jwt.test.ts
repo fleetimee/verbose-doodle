@@ -23,6 +23,18 @@ describe("JWT base64url utilities", () => {
 });
 
 describe("JWT parser utility", () => {
+  test("rejects non-object claims and missing algorithms", () => {
+    for (const [header, payload] of [
+      [null, {}],
+      [[], {}],
+      [{}, {}],
+      [{ alg: "HS256" }, []],
+      [{ alg: "HS256" }, null],
+    ]) {
+      const token = `${base64UrlEncode(JSON.stringify(header))}.${base64UrlEncode(JSON.stringify(payload))}.signature`;
+      expect(parseJwt(token).isValidStructure).toBe(false);
+    }
+  });
   test("parses a valid JWT structure", () => {
     // Header: {"alg":"HS256","typ":"JWT"}
     const h = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";

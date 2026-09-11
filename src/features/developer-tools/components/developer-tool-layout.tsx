@@ -124,6 +124,7 @@ function ActionButtons({
           <span>{resetLabel}</span>
         </Button>
       ) : null}
+      {extraActions}
       {onClear && clearLabel ? (
         <Button
           className={cn(
@@ -139,7 +140,6 @@ function ActionButtons({
           <span>{clearLabel}</span>
         </Button>
       ) : null}
-      {extraActions}
     </>
   );
 }

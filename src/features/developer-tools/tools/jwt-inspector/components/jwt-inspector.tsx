@@ -1,707 +1,557 @@
-import {
-  AlertCircleIcon,
-  CheckmarkCircle02Icon,
-  Copy01Icon,
-  HelpCircleIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { motion } from "motion/react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
+import { LayoutGroup, motion, useReducedMotion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  developerToolChildVariants as childVariants,
-  DeveloperToolLayout,
-} from "@/features/developer-tools/components/developer-tool-layout";
-import {
-  DeveloperToolTourButton,
-  type DeveloperToolTourStep,
-} from "@/features/developer-tools/components/developer-tool-tour-button";
-import { DocumentEditor } from "@/features/developer-tools/components/document-editor";
-import {
-  base64UrlEncode,
-  parseJwt,
-  signHS256,
-  verifyHS256,
-} from "@/features/developer-tools/tools/jwt-inspector/utils/jwt";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DeveloperToolLayout } from "@/features/developer-tools/components/developer-tool-layout";
+import { parseJwt } from "@/features/developer-tools/tools/jwt-inspector/utils/jwt";
 import { messages } from "@/lib/i18n";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
+import {
+  createJwtKeys,
+  isSupportedAlgorithm,
+  JWT_ALGORITHMS,
+  type JwtAlgorithm,
+  type JwtKeys,
+  signJwt,
+  verifyJwt,
+} from "../utils/jwt-crypto";
+import { JwtEditor } from "./jwt-editor";
+import { JwtKeyFields } from "./jwt-key-fields";
 
-const JWT_TOUR_ID = "jwt-inspector-intro";
-const JWT_TOUR_TARGETS = {
-  controls: "jwt-inspector-tour-controls",
-  editors: "jwt-inspector-tour-editors",
-} as const;
+const copy = messages.jwtInspector;
+const BEARER_PREFIX = /^Bearer\s+/i;
 
-const JWT_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
-  {
-    description: messages.jwtInspector.tour.controlsDescription,
-    position: "bottom",
-    selectorId: JWT_TOUR_TARGETS.controls,
-    title: messages.jwtInspector.tour.controlsTitle,
-  },
-  {
-    description: messages.jwtInspector.tour.editorsDescription,
-    position: "top",
-    selectorId: JWT_TOUR_TARGETS.editors,
-    title: messages.jwtInspector.tour.editorsTitle,
-  },
-];
-
-const DEFAULT_SECRET = "bpd-diy-jwt-secret-key-xyz-98765";
-
-interface ClaimRow {
-  readonly description: string;
-  readonly name: string;
-  readonly status: "success" | "warning" | "error" | "info" | "neutral";
-  readonly statusText: string;
-  readonly value: string;
+function signatureStatus(
+  algorithm: string,
+  secret: string,
+  result: string
+): string {
+  if (!algorithm) {
+    return copy.notChecked;
+  }
+  if (!isSupportedAlgorithm(algorithm)) {
+    return copy.signatureUnsupported;
+  }
+  return secret ? result || copy.verifying : copy.notChecked;
 }
 
-function parseClaim(key: string, val: unknown): ClaimRow {
-  const valStr =
-    typeof val === "object" && val !== null ? JSON.stringify(val) : String(val);
-
-  if (key === "exp" && typeof val === "number") {
-    const expMs = val * 1000;
-    const isExpired = expMs < Date.now();
-    return {
-      description: `${new Date(expMs).toLocaleString()} (${new Date(expMs).toUTCString()})`,
-      name: "exp (Expiration Time)",
-      status: isExpired ? "error" : "success",
-      statusText: isExpired
-        ? messages.jwtInspector.statusExpired
-        : messages.jwtInspector.statusActive,
-      value: valStr,
-    };
+function claimTime(name: string, value: unknown, now: number): string {
+  if (!["exp", "iat", "nbf"].includes(name)) {
+    return "";
   }
-
-  if (key === "iat" && typeof val === "number") {
-    const iatMs = val * 1000;
-    return {
-      description: `${new Date(iatMs).toLocaleString()} (${new Date(iatMs).toUTCString()})`,
-      name: "iat (Issued At)",
-      status: "info",
-      statusText: "Issued",
-      value: valStr,
-    };
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    Number.isNaN(new Date(value * 1000).getTime())
+  ) {
+    return copy.invalidTimestamp;
   }
-
-  if (key === "nbf" && typeof val === "number") {
-    const nbfMs = val * 1000;
-    const isNotActive = nbfMs > Date.now();
-    return {
-      description: `${new Date(nbfMs).toLocaleString()} (${new Date(nbfMs).toUTCString()})`,
-      name: "nbf (Not Before)",
-      status: isNotActive ? "warning" : "success",
-      statusText: isNotActive
-        ? messages.jwtInspector.statusNotYetActive
-        : messages.jwtInspector.statusActive,
-      value: valStr,
-    };
+  const date = new Date(value * 1000).toISOString();
+  const seconds = Math.ceil(value - now / 1000);
+  if (name === "exp") {
+    return seconds <= 0
+      ? `${date} · ${copy.statusExpired}`
+      : `${date} · ${copy.expiresIn} ${seconds}s`;
   }
-
-  if (key === "iss") {
-    return {
-      description: messages.jwtInspector.claimIssDescription,
-      name: "iss (Issuer)",
-      status: "neutral",
-      statusText: "Claim",
-      value: valStr,
-    };
+  if (name === "nbf" && seconds > 0) {
+    return `${date} · ${copy.statusNotYetActive}`;
   }
+  return date;
+}
 
-  if (key === "sub") {
-    return {
-      description: messages.jwtInspector.claimSubDescription,
-      name: "sub (Subject)",
-      status: "neutral",
-      statusText: "Claim",
-      value: valStr,
-    };
-  }
+function algorithmDisplayName(algorithm: JwtAlgorithm): string {
+  return algorithm === "EdDSA" ? "EdDSA (Ed25519)" : algorithm;
+}
 
-  if (key === "aud") {
-    return {
-      description: messages.jwtInspector.claimAudDescription,
-      name: "aud (Audience)",
-      status: "neutral",
-      statusText: "Claim",
-      value: valStr,
-    };
-  }
+function JwtAlgorithmSelect({
+  onValueChange,
+  value,
+}: {
+  readonly onValueChange: (value: string) => void;
+  readonly value: JwtAlgorithm;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Label className="text-xs" htmlFor="jwt-algorithm">
+        {copy.algorithm}
+      </Label>
+      <Select onValueChange={onValueChange} value={value}>
+        <SelectTrigger
+          className="w-36 bg-background font-mono text-xs shadow-none"
+          id="jwt-algorithm"
+          size="sm"
+        >
+          <SelectValue>{algorithmDisplayName(value)}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {JWT_ALGORITHMS.map((algorithm) => (
+            <SelectItem className="font-mono" key={algorithm} value={algorithm}>
+              {algorithmDisplayName(algorithm)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
 
-  return {
-    description: "Custom claim",
-    name: key,
-    status: "neutral",
-    statusText: "Claim",
-    value: valStr,
-  };
+type JwtPaneMotionProps = {
+  readonly layout: false | "position";
+  readonly layoutDuration: number;
+};
+
+function JwtTokenPane({
+  inspectMode,
+  layout,
+  layoutDuration,
+  onInspect,
+  signature,
+  token,
+  tokenError,
+}: JwtPaneMotionProps & {
+  readonly inspectMode: boolean;
+  readonly onInspect: (value: string) => void;
+  readonly signature: string;
+  readonly token: string;
+  readonly tokenError: string;
+}) {
+  return (
+    <motion.div
+      className="min-w-0 space-y-4"
+      data-jwt-pane="token"
+      layout={layout}
+      transition={{
+        layout: { duration: layoutDuration, ease: MOTION_EASE.inOut },
+      }}
+    >
+      <JwtEditor
+        colorizeToken
+        copyLabel={copy.copyToken}
+        label={copy.inputLabel}
+        onChange={inspectMode ? onInspect : undefined}
+        placeholder={
+          inspectMode ? copy.inputPlaceholder : copy.generatedPlaceholder
+        }
+        value={token}
+      />
+      {tokenError && (
+        <p className="text-destructive text-sm" role="alert">
+          {tokenError}
+        </p>
+      )}
+      <JwtEditor label={copy.signatureLabel} value={signature} />
+    </motion.div>
+  );
+}
+
+function JwtDecodedPane({
+  editable,
+  header,
+  layout,
+  layoutDuration,
+  onHeaderChange,
+  onPayloadChange,
+  payload,
+}: JwtPaneMotionProps & {
+  readonly editable: boolean;
+  readonly header: string;
+  readonly onHeaderChange: (value: string) => void;
+  readonly onPayloadChange: (value: string) => void;
+  readonly payload: string;
+}) {
+  return (
+    <motion.div
+      className="min-w-0 space-y-4"
+      data-jwt-pane="decoded"
+      layout={layout}
+      transition={{
+        layout: { duration: layoutDuration, ease: MOTION_EASE.inOut },
+      }}
+    >
+      <JwtEditor
+        copyLabel={copy.copyHeader}
+        json
+        label={copy.headerLabel}
+        onChange={editable ? (value) => onHeaderChange(value) : undefined}
+        value={header}
+      />
+      <JwtEditor
+        copyLabel={copy.copyDecoded}
+        json
+        label={copy.payloadLabel}
+        onChange={editable ? (value) => onPayloadChange(value) : undefined}
+        value={payload}
+      />
+    </motion.div>
+  );
 }
 
 export function JwtInspector() {
-  const [encodedToken, setEncodedToken] = useState("");
-  const [headerJson, setHeaderJson] = useState("");
-  const [payloadJson, setPayloadJson] = useState("");
-  const [secret, setSecret] = useState(DEFAULT_SECRET);
+  const [mode, setMode] = useState<"inspect" | "create">("inspect");
+  const [token, setToken] = useState("");
+  const [header, setHeader] = useState("");
+  const [payload, setPayload] = useState("");
+  const [keys, setKeys] = useState<JwtKeys>({
+    secret: "",
+    encoded: false,
+    privateKey: "",
+    publicKey: "",
+  });
+  const [preset, setPreset] = useState<JwtAlgorithm>("HS256");
+  const [error, setError] = useState("");
+  const [verification, setVerification] = useState({
+    token: "",
+    secret: "",
+    status: "",
+  });
+  const [generating, setGenerating] = useState(false);
+  const [now, setNow] = useState(Date.now);
+  const shouldReduceMotion = useReducedMotion() ?? false;
+  const revision = useRef(0);
+  const parsed = parseJwt(token);
+  const algorithm = parsed.isValidStructure ? String(parsed.header.alg) : "";
+  const keyAlgorithm = mode === "create" ? preset : algorithm || preset;
+  const symmetric = keyAlgorithm.startsWith("HS");
+  const verificationKey = JSON.stringify([
+    keys.secret,
+    keys.encoded,
+    keys.publicKey,
+  ]);
+  const hasVerificationKey = algorithm.startsWith("HS")
+    ? keys.secret
+    : keys.publicKey;
 
-  const [headerError, setHeaderError] = useState<string | null>(null);
-  const [payloadError, setPayloadError] = useState<string | null>(null);
-  const [structureError, setStructureError] = useState<string | null>(null);
-
-  const [isSignatureVerified, setIsSignatureVerified] = useState<
-    boolean | null
-  >(null);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [algorithm, setAlgorithm] = useState("HS256");
-
-  // Track editing source to prevent infinite update loops
-  const isSyncing = useRef(false);
-
-  const loadDefaultToken = useCallback(async () => {
-    const nowSeconds = Math.floor(Date.now() / 1000);
-    const h = { alg: "HS256", typ: "JWT" };
-    const p = {
-      aud: "biller-simulator-frontend",
-      exp: nowSeconds + 86_400, // 24 hours
-      iat: nowSeconds,
-      iss: "biller-simulator-backend",
-      name: "BPDDIY Administrator",
-      role: "ADMIN",
-      sub: "admin",
-    };
-
-    const hStr = JSON.stringify(h, null, 2);
-    const pStr = JSON.stringify(p, null, 2);
-    const hEnc = base64UrlEncode(JSON.stringify(h));
-    const pEnc = base64UrlEncode(JSON.stringify(p));
-    const sig = await signHS256(`${hEnc}.${pEnc}`, DEFAULT_SECRET);
-
-    isSyncing.current = true;
-    setEncodedToken(`${hEnc}.${pEnc}.${sig}`);
-    setHeaderJson(hStr);
-    setPayloadJson(pStr);
-    setSecret(DEFAULT_SECRET);
-    setAlgorithm("HS256");
-    setStructureError(null);
-    setHeaderError(null);
-    setPayloadError(null);
-    isSyncing.current = false;
-  }, []);
-
-  // Initialize with dynamic mock token on mount
   useEffect(() => {
-    loadDefaultToken();
-  }, [loadDefaultToken]);
-
-  // Update decoded views when encoded token changes
-  const handleEncodedChange = useCallback((token: string) => {
-    setEncodedToken(token);
-    if (isSyncing.current) {
-      return;
-    }
-
-    const parsed = parseJwt(token);
-    if (!parsed.isValidStructure) {
-      setStructureError(messages.jwtInspector.structureInvalid);
-      return;
-    }
-
-    setStructureError(null);
-    setHeaderError(null);
-    setPayloadError(null);
-
-    isSyncing.current = true;
-    try {
-      setHeaderJson(
-        parsed.headerStr ? JSON.stringify(parsed.header, null, 2) : ""
-      );
-      setPayloadJson(
-        parsed.payloadStr ? JSON.stringify(parsed.payload, null, 2) : ""
-      );
-      setAlgorithm(String(parsed.header.alg || "HS256"));
-    } catch {
-      setStructureError(messages.jwtInspector.structureInvalid);
-    } finally {
-      isSyncing.current = false;
-    }
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
   }, []);
 
-  // Sync JSON editors back to encoded token when edited
-  const syncJsonToToken = useCallback(
-    async (hJson: string, pJson: string, key: string) => {
-      if (isSyncing.current) {
-        return;
-      }
-
-      let parsedHeader: Record<string, unknown>;
-      let parsedPayload: Record<string, unknown>;
-
-      try {
-        parsedHeader = JSON.parse(hJson);
-        setHeaderError(null);
-      } catch (e) {
-        setHeaderError((e as Error).message);
-        return;
-      }
-
-      try {
-        parsedPayload = JSON.parse(pJson);
-        setPayloadError(null);
-      } catch (e) {
-        setPayloadError((e as Error).message);
-        return;
-      }
-
-      const alg = String(parsedHeader.alg || "HS256");
-      setAlgorithm(alg);
-      setStructureError(null);
-
-      isSyncing.current = true;
-      try {
-        const hEnc = base64UrlEncode(JSON.stringify(parsedHeader));
-        const pEnc = base64UrlEncode(JSON.stringify(parsedPayload));
-        const headerAndPayload = `${hEnc}.${pEnc}`;
-
-        if (alg === "HS256") {
-          const sig = await signHS256(headerAndPayload, key);
-          setEncodedToken(`${headerAndPayload}.${sig}`);
-        } else {
-          const parts = encodedToken.split(".");
-          const oldSig =
-            parts.length === 3 ? parts[2] : "signature_placeholder";
-          setEncodedToken(`${headerAndPayload}.${oldSig}`);
+  useEffect(() => {
+    if (
+      !(
+        token &&
+        parsed.isValidStructure &&
+        isSupportedAlgorithm(algorithm) &&
+        hasVerificationKey
+      )
+    ) {
+      return;
+    }
+    let cancelled = false;
+    verifyJwt(token, keys)
+      .then((valid) => {
+        if (!cancelled) {
+          setVerification({
+            token,
+            secret: verificationKey,
+            status: valid ? copy.signatureValid : copy.signatureInvalid,
+          });
         }
-      } catch (e) {
-        setStructureError((e as Error).message);
-      } finally {
-        isSyncing.current = false;
-      }
-    },
-    [encodedToken]
-  );
-
-  const handleHeaderChange = useCallback(
-    (value: string) => {
-      setHeaderJson(value);
-      syncJsonToToken(value, payloadJson, secret);
-    },
-    [payloadJson, secret, syncJsonToToken]
-  );
-
-  const handlePayloadChange = useCallback(
-    (value: string) => {
-      setPayloadJson(value);
-      syncJsonToToken(headerJson, value, secret);
-    },
-    [headerJson, secret, syncJsonToToken]
-  );
-
-  const handleSecretChange = useCallback(
-    (value: string) => {
-      setSecret(value);
-      syncJsonToToken(headerJson, payloadJson, value);
-    },
-    [headerJson, payloadJson, syncJsonToToken]
-  );
-
-  // Async signature verification
-  useEffect(() => {
-    let isMounted = true;
-    const verify = async () => {
-      const parts = encodedToken.split(".");
-      if (parts.length !== 3) {
-        setIsSignatureVerified(false);
-        return;
-      }
-
-      if (algorithm !== "HS256") {
-        setIsSignatureVerified(null);
-        return;
-      }
-
-      setIsVerifying(true);
-      const isOk = await verifyHS256(encodedToken, secret);
-      if (isMounted) {
-        setIsSignatureVerified(isOk);
-        setIsVerifying(false);
-      }
-    };
-    verify();
+      })
+      .catch((failure: unknown) => {
+        if (!cancelled) {
+          setVerification({
+            token,
+            secret: verificationKey,
+            status:
+              failure instanceof Error ? failure.message : copy.cryptoError,
+          });
+        }
+      });
     return () => {
-      isMounted = false;
+      cancelled = true;
     };
-  }, [encodedToken, secret, algorithm]);
+  }, [
+    token,
+    keys,
+    verificationKey,
+    hasVerificationKey,
+    algorithm,
+    parsed.isValidStructure,
+  ]);
 
-  const copyToClipboard = async (text: string, successMsg: string) => {
+  const invalidate = () => {
+    revision.current += 1;
+    setGenerating(false);
+    setError("");
+  };
+
+  const inspectToken = (value: string) => {
+    invalidate();
+    const normalized = value.trim().replace(BEARER_PREFIX, "");
+    setToken(normalized);
+    const result = parseJwt(normalized);
+    if (!result.isValidStructure) {
+      setHeader("");
+      setPayload("");
+      return;
+    }
+    setHeader(JSON.stringify(result.header, null, 2));
+    setPayload(JSON.stringify(result.payload, null, 2));
+    if (isSupportedAlgorithm(String(result.header.alg))) {
+      setPreset(result.header.alg as JwtAlgorithm);
+    }
+  };
+
+  const clear = () => {
+    invalidate();
+    setToken("");
+    setHeader("");
+    setPayload("");
+    setKeys({ secret: "", encoded: false, privateKey: "", publicKey: "" });
+  };
+
+  const loadExample = async () => {
+    invalidate();
+    const current = revision.current;
+    const seconds = Math.floor(Date.now() / 1000);
+    const h = JSON.stringify({ alg: preset, typ: "JWT" });
+    const p = JSON.stringify({
+      sub: "developer",
+      iss: "biller-simulator-backend",
+      iat: seconds,
+      exp: seconds + 3600,
+    });
+    setGenerating(true);
     try {
-      await navigator.clipboard.writeText(text);
-      toast.success(successMsg);
-    } catch {
-      toast.error("Failed to copy to clipboard");
-    }
-  };
-
-  const resetExample = () => {
-    loadDefaultToken();
-  };
-
-  const clearEditors = () => {
-    isSyncing.current = true;
-    setEncodedToken("");
-    setHeaderJson("");
-    setPayloadJson("");
-    setSecret("");
-    setAlgorithm("HS256");
-    setStructureError(null);
-    setHeaderError(null);
-    setPayloadError(null);
-    isSyncing.current = false;
-  };
-
-  const renderSignatureStatus = () => {
-    if (isVerifying) {
-      return (
-        <Badge
-          className="animate-pulse bg-muted text-muted-foreground"
-          variant="outline"
-        >
-          Verifying...
-        </Badge>
-      );
-    }
-    if (isSignatureVerified === true) {
-      return (
-        <Badge className="flex items-center gap-1.5 border-emerald-500/30 bg-emerald-500/15 px-2.5 py-1 font-medium text-emerald-500">
-          <HugeiconsIcon
-            className="h-3.5 w-3.5"
-            icon={CheckmarkCircle02Icon}
-            strokeWidth={2}
-          />
-          {messages.jwtInspector.signatureValid}
-        </Badge>
-      );
-    }
-    if (isSignatureVerified === false) {
-      return (
-        <Badge className="flex items-center gap-1.5 border-destructive/30 bg-destructive/15 px-2.5 py-1 font-medium text-destructive">
-          <HugeiconsIcon
-            className="h-3.5 w-3.5"
-            icon={AlertCircleIcon}
-            strokeWidth={2}
-          />
-          {messages.jwtInspector.signatureInvalid}
-        </Badge>
-      );
-    }
-    return (
-      <Badge className="flex items-center gap-1.5 border-yellow-500/30 bg-yellow-500/15 px-2.5 py-1 font-medium text-yellow-500">
-        <HugeiconsIcon
-          className="h-3.5 w-3.5"
-          icon={HelpCircleIcon}
-          strokeWidth={2}
-        />
-        {messages.jwtInspector.signatureUnsupported}
-      </Badge>
-    );
-  };
-
-  const renderClaimStatus = (status: string, text: string) => {
-    if (status === "success") {
-      return (
-        <Badge className="border-emerald-500/30 bg-emerald-500/15 font-normal text-[10px] text-emerald-500 hover:bg-emerald-500/15">
-          {text}
-        </Badge>
-      );
-    }
-    if (status === "error") {
-      return (
-        <Badge className="border-destructive/30 bg-destructive/15 font-normal text-[10px] text-destructive hover:bg-destructive/15">
-          {text}
-        </Badge>
-      );
-    }
-    if (status === "warning") {
-      return (
-        <Badge className="border-yellow-500/30 bg-yellow-500/15 font-normal text-[10px] text-yellow-500 hover:bg-yellow-500/15">
-          {text}
-        </Badge>
-      );
-    }
-    if (status === "info") {
-      return (
-        <Badge className="border-blue-500/30 bg-blue-500/15 font-normal text-[10px] text-blue-500 hover:bg-blue-500/15">
-          {text}
-        </Badge>
-      );
-    }
-    return (
-      <Badge
-        className="border bg-muted font-normal text-[10px] text-muted-foreground hover:bg-muted"
-        variant="outline"
-      >
-        {text}
-      </Badge>
-    );
-  };
-
-  // Build claims analysis table rows
-  const getClaimsRows = (): readonly ClaimRow[] => {
-    if (!payloadJson) {
-      return [];
-    }
-    try {
-      const payload = JSON.parse(payloadJson);
-      if (typeof payload !== "object" || payload === null) {
-        return [];
+      const exampleKeys = await createJwtKeys(preset);
+      const exampleToken = await signJwt(h, p, exampleKeys);
+      if (current === revision.current) {
+        inspectToken(exampleToken);
+        setKeys(exampleKeys);
       }
-      return Object.entries(payload).map(([key, val]) => parseClaim(key, val));
-    } catch {
-      return [];
+    } catch (failure) {
+      if (current === revision.current) {
+        setError(failure instanceof Error ? failure.message : copy.cryptoError);
+        setGenerating(false);
+      }
     }
   };
 
-  const claimsRows = getClaimsRows();
+  useEffect(() => {
+    loadExample();
+  }, []);
+
+  const generate = async () => {
+    invalidate();
+    const current = revision.current;
+    try {
+      setGenerating(true);
+      const generated = await signJwt(header, payload, keys);
+      if (current === revision.current) {
+        setToken(generated);
+      }
+    } catch (failure) {
+      if (current === revision.current) {
+        setError(failure instanceof Error ? failure.message : copy.cryptoError);
+      }
+    } finally {
+      if (current === revision.current) {
+        setGenerating(false);
+      }
+    }
+  };
+
+  const changeKeys = (next: Partial<JwtKeys>) => {
+    invalidate();
+    setKeys({ ...keys, ...next });
+    if (mode === "create") {
+      setToken("");
+    }
+  };
+
+  const changeDraft = (field: "header" | "payload", value: string) => {
+    invalidate();
+    setToken("");
+    if (field === "header") {
+      setHeader(value);
+      try {
+        const alg = JSON.parse(value)?.alg;
+        if (isSupportedAlgorithm(alg)) {
+          setPreset(alg);
+        }
+      } catch {
+        // Keep incomplete JSON editable.
+      }
+    } else {
+      setPayload(value);
+    }
+  };
+
+  const changeAlgorithm = (value: string) => {
+    const next = value as JwtAlgorithm;
+    invalidate();
+    setPreset(next);
+    if (mode === "create") {
+      setToken("");
+      setHeader(JSON.stringify({ alg: next, typ: "JWT" }, null, 2));
+      setKeys({
+        secret: "",
+        encoded: false,
+        privateKey: "",
+        publicKey: "",
+      });
+    }
+  };
+
+  const status = signatureStatus(
+    algorithm,
+    hasVerificationKey,
+    verification.token === token && verification.secret === verificationKey
+      ? verification.status
+      : ""
+  );
+  const tokenError =
+    token && !parsed.isValidStructure ? (parsed.error ?? "") : "";
+  const paneDuration = shouldReduceMotion
+    ? MOTION_DURATION.instant
+    : MOTION_DURATION.standard;
+  const paneTransition = {
+    layout: {
+      duration: paneDuration,
+      ease: MOTION_EASE.inOut,
+    },
+  };
+  const paneLayout: false | "position" = shouldReduceMotion
+    ? false
+    : "position";
+  const tokenPane = (
+    <JwtTokenPane
+      inspectMode={mode === "inspect"}
+      key="token-pane"
+      layout={paneLayout}
+      layoutDuration={paneDuration}
+      onInspect={inspectToken}
+      signature={parsed.isValidStructure ? parsed.signatureHex : ""}
+      token={token}
+      tokenError={tokenError}
+    />
+  );
+  const decodedPane = (
+    <JwtDecodedPane
+      editable={mode === "create"}
+      header={header}
+      key="decoded-pane"
+      layout={paneLayout}
+      layoutDuration={paneDuration}
+      onHeaderChange={(value) => changeDraft("header", value)}
+      onPayloadChange={(value) => changeDraft("payload", value)}
+      payload={payload}
+    />
+  );
+  const workspacePanes =
+    mode === "create" ? [decodedPane, tokenPane] : [tokenPane, decodedPane];
 
   return (
     <DeveloperToolLayout
-      clearLabel={messages.jwtInspector.clear}
-      description={messages.jwtInspector.description}
+      clearLabel={copy.clear}
+      description={copy.simpleDescription}
       headerExtra={
-        <Badge
-          className="shrink-0 self-start font-mono text-xs sm:self-center"
-          variant="outline"
-        >
-          HS256
-        </Badge>
+        <JwtAlgorithmSelect onValueChange={changeAlgorithm} value={preset} />
       }
-      onClear={clearEditors}
-      onReset={resetExample}
-      resetLabel={messages.jwtInspector.resetExample}
-      title={messages.jwtInspector.title}
-      tour={
-        <DeveloperToolTourButton
-          label={messages.jwtInspector.tour.startButton}
-          steps={JWT_TOUR_STEPS}
-          storageKey="jwt-inspector-tour-seen"
-          tourId={JWT_TOUR_ID}
-        />
-      }
+      onClear={clear}
+      onReset={loadExample}
+      resetLabel={copy.loadExample}
+      title={copy.title}
     >
-      {/* Controls & Secret Panel */}
-      <motion.section
-        className="rounded-xl border border-border/70 bg-card p-4 shadow-2xs sm:p-5"
-        id={JWT_TOUR_TARGETS.controls}
-        variants={childVariants}
-      >
-        <div className="grid gap-4 sm:grid-cols-2 sm:items-center sm:gap-6">
-          <div className="space-y-2">
-            <Label className="text-xs" htmlFor="jwt-secret-input">
-              {messages.jwtInspector.secretLabel}
-            </Label>
-            <Input
-              className="h-10 rounded-md bg-background px-3 font-mono shadow-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0"
-              id="jwt-secret-input"
-              onChange={(e) => handleSecretChange(e.target.value)}
-              placeholder={messages.jwtInspector.secretPlaceholder}
-              type="text"
-              value={secret}
-            />
-          </div>
-          <div className="flex h-10 items-center justify-between sm:border-border/70 sm:border-l sm:pl-6">
-            <span className="text-muted-foreground text-xs">
-              {messages.jwtInspector.signatureStatusLabel}:
-            </span>
-            {renderSignatureStatus()}
-          </div>
-        </div>
-      </motion.section>
-
-      {/* Editor Workspace */}
-      <div
-        className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2"
-        id={JWT_TOUR_TARGETS.editors}
-      >
-        {/* Encoded JWT Section */}
-        <div className="flex flex-col gap-6">
-          <Card className="flex h-full flex-col border bg-card shadow-sm">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="font-semibold text-sm">
-                  {messages.jwtInspector.inputLabel}
-                </CardTitle>
-                <Button
-                  className="h-7 text-xs"
-                  onClick={() =>
-                    copyToClipboard(
-                      encodedToken,
-                      messages.jwtInspector.copySuccess
-                    )
-                  }
-                  size="sm"
-                  variant="outline"
-                >
-                  <HugeiconsIcon
-                    className="mr-2 h-3.5 w-3.5"
-                    icon={Copy01Icon}
-                    strokeWidth={2}
-                  />
-                  {messages.jwtInspector.copyToken}
-                </Button>
-              </div>
-              <CardDescription className="text-[11px]">
-                {messages.jwtInspector.inputDescription}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="relative flex flex-1 flex-col p-6 pt-0">
-              <div className="relative flex flex-1 flex-col">
-                <Textarea
-                  aria-label={messages.jwtInspector.inputLabel}
-                  className="min-h-[300px] flex-1 resize-none border bg-background font-mono text-[13px] leading-relaxed focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0 lg:min-h-[440px]"
-                  id="encoded-jwt-input"
-                  onChange={(e) => handleEncodedChange(e.target.value)}
-                  placeholder={messages.jwtInspector.inputPlaceholder}
-                  value={encodedToken}
-                />
-                {structureError && (
-                  <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 rounded-b-md border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
-                    <HugeiconsIcon
-                      className="h-4.5 w-4.5 shrink-0"
-                      icon={AlertCircleIcon}
-                      strokeWidth={2}
-                    />
-                    <span>{structureError}</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Decoded JSON Editors */}
-        <div className="flex min-w-0 flex-col gap-6">
-          {/* Header Editor */}
-          <div className="relative overflow-hidden rounded-lg border shadow-sm">
-            <DocumentEditor
-              byteCountMessage={messages.developerTools.converterLimit}
-              description={messages.jwtInspector.headerDescription}
-              format="json"
-              index="01"
-              label={messages.jwtInspector.headerLabel}
-              lineCountMessage={messages.developerTools.openAction}
-              onChange={handleHeaderChange}
-              value={headerJson}
-            />
-            {headerError && (
-              <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
-                <HugeiconsIcon
-                  className="h-4 w-4 shrink-0"
-                  icon={AlertCircleIcon}
-                  strokeWidth={2}
-                />
-                <span className="font-mono">{headerError}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Payload Editor */}
-          <div className="relative overflow-hidden rounded-lg border shadow-sm">
-            <DocumentEditor
-              byteCountMessage={messages.developerTools.converterLimit}
-              description={messages.jwtInspector.payloadDescription}
-              format="json"
-              index="02"
-              label={messages.jwtInspector.payloadLabel}
-              lineCountMessage={messages.developerTools.openAction}
-              onChange={handlePayloadChange}
-              value={payloadJson}
-            />
-            {payloadError && (
-              <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 border-destructive border-t bg-destructive/10 px-3 py-2 text-destructive text-xs">
-                <HugeiconsIcon
-                  className="h-4 w-4 shrink-0"
-                  icon={AlertCircleIcon}
-                  strokeWidth={2}
-                />
-                <span className="font-mono">{payloadError}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Claims Analysis */}
-      {claimsRows.length > 0 && (
-        <Card className="mt-6 border bg-card shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="font-semibold text-sm">
-              {messages.jwtInspector.claimsTitle}
-            </CardTitle>
-            <CardDescription className="text-[11px]">
-              {messages.jwtInspector.claimsDescription}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="border-t p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[180px] pl-6 text-xs">
-                    {messages.jwtInspector.claimHeaderName}
-                  </TableHead>
-                  <TableHead className="text-xs">
-                    {messages.jwtInspector.claimHeaderValue}
-                  </TableHead>
-                  <TableHead className="text-xs">
-                    {messages.jwtInspector.claimHeaderDescription}
-                  </TableHead>
-                  <TableHead className="w-[120px] pr-6 text-xs">
-                    {messages.jwtInspector.claimHeaderStatus}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {claimsRows.map((row) => (
-                  <TableRow className="hover:bg-muted/30" key={row.name}>
-                    <TableCell className="pl-6 font-mono text-xs">
-                      {row.name}
-                    </TableCell>
-                    <TableCell
-                      className="max-w-[200px] truncate font-mono text-xs"
-                      title={row.value}
-                    >
-                      {row.value}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-xs">
-                      {row.description}
-                    </TableCell>
-                    <TableCell className="pr-6">
-                      {renderClaimStatus(row.status, row.statusText)}
-                    </TableCell>
-                  </TableRow>
+      <fieldset aria-label={copy.modeLabel} className="mb-4 flex gap-2">
+        {(["inspect", "create"] as const).map((value) => (
+          <Button
+            aria-pressed={mode === value}
+            key={value}
+            onClick={() => {
+              invalidate();
+              if (value === "inspect") {
+                inspectToken(token);
+              }
+              setMode(value);
+            }}
+            size="sm"
+            variant={mode === value ? "secondary" : "ghost"}
+          >
+            {value === "inspect" ? copy.inspect : copy.create}
+          </Button>
+        ))}
+      </fieldset>
+      <LayoutGroup id="jwt-inspector-workspace">
+        <motion.div
+          className="grid min-w-0 gap-4 lg:grid-cols-2"
+          data-testid="jwt-editor-workspace"
+          layout={!shouldReduceMotion}
+          transition={paneTransition}
+        >
+          {workspacePanes}
+        </motion.div>
+      </LayoutGroup>
+      <section className="mt-6 space-y-3 border-t pt-4">
+        <h2 className="font-medium text-sm">
+          {mode === "inspect" ? copy.verificationOptional : copy.signing}
+        </h2>
+        <JwtKeyFields
+          changeKeys={changeKeys}
+          keys={keys}
+          mode={mode}
+          symmetric={symmetric}
+        />
+        {mode === "create" && (
+          <Button disabled={generating} onClick={generate} size="sm">
+            {generating ? copy.generating : copy.generate}
+          </Button>
+        )}
+        <p
+          aria-live="polite"
+          className="text-muted-foreground text-sm"
+          role="status"
+        >
+          {generating ? copy.generating : status}
+        </p>
+        {error && (
+          <p className="text-destructive text-sm" role="alert">
+            {error}
+          </p>
+        )}
+      </section>
+      {parsed.isValidStructure && (
+        <section className="mt-6 border-t pt-4">
+          <h2 className="mb-3 font-medium text-sm">{copy.claimsTitle}</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b text-muted-foreground">
+                  <th className="py-2 pr-4 font-normal">
+                    {copy.claimHeaderName}
+                  </th>
+                  <th className="py-2 pr-4 font-normal">
+                    {copy.claimHeaderValue}
+                  </th>
+                  <th className="py-2 font-normal">{copy.timeUtc}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(parsed.payload).map(([name, value]) => (
+                  <tr className="border-b last:border-0" key={name}>
+                    <td className="py-2 pr-4 align-top font-mono">{name}</td>
+                    <td className="max-w-xs break-all py-2 pr-4 align-top font-mono">
+                      {typeof value === "object"
+                        ? JSON.stringify(value)
+                        : String(value)}
+                    </td>
+                    <td className="py-2 align-top text-muted-foreground">
+                      {claimTime(name, value, now)}
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
     </DeveloperToolLayout>
   );
