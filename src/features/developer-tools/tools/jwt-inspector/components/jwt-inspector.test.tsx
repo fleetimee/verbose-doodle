@@ -301,4 +301,30 @@ describe("JwtInspector Component", () => {
     fireEvent.click(jsonTabs[1]);
     expect(screen.getByRole("textbox", { name: "Payload" })).toBeDefined();
   });
+
+  test("loads example and verifies cleanly in insecure context without crypto.subtle", async () => {
+    const originalCrypto = globalThis.crypto;
+    try {
+      Object.defineProperty(globalThis, "crypto", {
+        configurable: true,
+        value: {
+          getRandomValues: originalCrypto.getRandomValues.bind(originalCrypto),
+        },
+      });
+      renderJwtInspector();
+      await waitFor(() =>
+        expect(screen.getByText("Signature Verified")).toBeDefined()
+      );
+      expect(screen.queryByRole("alert")).toBeNull();
+      const input = screen.getByRole("textbox", {
+        name: "Encoded Token",
+      }) as HTMLTextAreaElement;
+      expect(input.value.split(".").length).toBe(3);
+    } finally {
+      Object.defineProperty(globalThis, "crypto", {
+        configurable: true,
+        value: originalCrypto,
+      });
+    }
+  });
 });

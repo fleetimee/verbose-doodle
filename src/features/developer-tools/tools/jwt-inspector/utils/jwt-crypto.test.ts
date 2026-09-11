@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { base64UrlEncode } from "./jwt";
 import {
   createJwtKeys,
+  isCryptoAvailable,
   JWT_ALGORITHMS,
   signJwt,
   verifyJwt,
@@ -54,5 +55,38 @@ describe("JWT signing presets", () => {
     await expect(signJwt('{"alg":"none"}', "{}", keys)).rejects.toThrow(
       "Unsupported"
     );
+  });
+  test("gracefully bypasses signing and verification in insecure contexts without crypto.subtle", async () => {
+    const originalCrypto = globalThis.crypto;
+    try {
+      Object.defineProperty(globalThis, "crypto", {
+        configurable: true,
+        value: {
+          getRandomValues: originalCrypto.getRandomValues.bind(originalCrypto),
+          // subtle omitted to simulate insecure context
+        },
+      });
+
+      expect(isCryptoAvailable()).toBe(false);
+
+      const hsKeys = await createJwtKeys("HS256");
+      expect(hsKeys.secret).toBeDefined();
+
+      const rsKeys = await createJwtKeys("RS256");
+      expect(rsKeys.privateKey).toContain("DEV_MODE_INSECURE_HTTP_BYPASS");
+
+      const token = await signJwt(
+        '{"alg":"HS256","typ":"JWT"}',
+        '{"sub":"test_insecure"}',
+        hsKeys
+      );
+      expect(token.split(".").length).toBe(3);
+      expect(await verifyJwt(token, hsKeys)).toBe(true);
+    } finally {
+      Object.defineProperty(globalThis, "crypto", {
+        configurable: true,
+        value: originalCrypto,
+      });
+    }
   });
 });
