@@ -561,12 +561,13 @@ export function JwtInspector() {
 
   return (
     <DeveloperToolLayout
-      className="gap-4 pb-4"
+      className="min-h-0 flex-1 gap-4 pb-4"
       clearLabel={copy.clear}
       description={copy.simpleDescription}
       headerExtra={
         <JwtAlgorithmSelect onValueChange={changeAlgorithm} value={preset} />
       }
+      mainClassName="flex min-h-0 flex-1 flex-col"
       onClear={clear}
       onReset={loadExample}
       resetLabel={copy.loadExample}
@@ -584,7 +585,7 @@ export function JwtInspector() {
       />
       <LayoutGroup id="jwt-inspector-workspace">
         <motion.div
-          className="grid min-w-0 items-stretch gap-4 lg:grid-cols-2"
+          className="grid min-w-0 items-stretch gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-2"
           data-testid="jwt-editor-workspace"
           layout={!shouldReduceMotion}
           transition={paneTransition}
