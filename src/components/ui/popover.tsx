@@ -41,14 +41,15 @@ function PopoverContent({
   alignOffset = 0,
   side = "bottom",
   sideOffset = 4,
+  portalContainer,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Popup> &
-  Pick<
+  { portalContainer?: React.ComponentProps<typeof PopoverPrimitive.Portal>["container"] } & Pick<
     PopoverPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
   >) {
   return (
-    <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Portal container={portalContainer}>
       <PopoverPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}

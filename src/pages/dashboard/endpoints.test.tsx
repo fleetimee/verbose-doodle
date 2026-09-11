@@ -307,7 +307,9 @@ describe("EndpointsPage catalog actions", () => {
     await user.click(screen.getByRole("button", { name: "Create Endpoint" }));
     expect(lastCreateBody).toMatchObject({ biller_slug: "pdam" });
     await waitFor(() => {
-      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(
+        screen.queryByRole("dialog")?.getAttribute("data-state") ?? "closed"
+      ).toBe("closed");
     });
   });
 
@@ -446,7 +448,7 @@ describe("EndpointsPage catalog actions", () => {
     await within(billerSelect).findByText("PLN");
     await user.click(billerSelect);
     await user.click(await screen.findByRole("option", { name: "PDAM" }));
-    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     await user.click(
       await screen.findByRole("button", { name: "Add endpoint for PLN" })

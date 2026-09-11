@@ -2,16 +2,17 @@ import { Add01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { type FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { messages } from "@/lib/i18n";
 
@@ -54,9 +55,14 @@ export function AddBillerSheet({
   };
 
   return (
-    <Sheet onOpenChange={handleOpenChange} open={open}>
+    <Drawer
+      direction="right"
+      onOpenChange={handleOpenChange}
+      open={open}
+      shouldScaleBackground={false}
+    >
       {showTrigger && (
-        <SheetTrigger asChild>
+        <DrawerTrigger asChild>
           <Button type="button">
             <HugeiconsIcon
               className="mr-2 h-4 w-4"
@@ -65,17 +71,24 @@ export function AddBillerSheet({
             />
             {messages.billers.addBiller}
           </Button>
-        </SheetTrigger>
+        </DrawerTrigger>
       )}
-      <SheetContent className="flex w-full max-w-full flex-col sm:max-w-xl md:max-w-2xl">
-        <SheetHeader>
-          <SheetTitle>{messages.billers.addBiller}</SheetTitle>
-          <SheetDescription>
+      <DrawerContent
+        className="overflow-hidden data-[vaul-drawer-direction=right]:w-[calc(100%-1rem)] data-[vaul-drawer-direction=right]:sm:max-w-lg"
+        showSwipeHandle={false}
+      >
+        <DrawerHeader className="shrink-0 px-6 pt-6 pb-2 text-left">
+          <DrawerTitle>{messages.billers.addBiller}</DrawerTitle>
+          <DrawerDescription>
             {messages.billers.addBillerDescription}
-          </SheetDescription>
-        </SheetHeader>
-        <form className="flex flex-1 flex-col" onSubmit={handleSubmit}>
-          <div className="flex-1 space-y-2 px-6 py-6">
+          </DrawerDescription>
+        </DrawerHeader>
+        <form
+          className="flex min-h-0 flex-1 flex-col"
+          data-vaul-no-drag
+          onSubmit={handleSubmit}
+        >
+          <div className="flex-1 space-y-2 overflow-y-auto px-6 py-6">
             <label className="font-medium text-sm" htmlFor="biller-name">
               {messages.billers.billerNameLabel}
             </label>
@@ -89,16 +102,21 @@ export function AddBillerSheet({
               value={billerName}
             />
           </div>
-          <SheetFooter className="border-t px-6 pt-4 pb-6">
+          <DrawerFooter className="shrink-0 border-t px-6 pt-4 pb-6">
             <Button disabled={isSubmitting || !billerName.trim()} type="submit">
               {isSubmitting && <Spinner className="mr-2" />}
               {isSubmitting
                 ? messages.billers.creatingBiller
                 : messages.billers.createBiller}
             </Button>
-          </SheetFooter>
+            <DrawerClose asChild>
+              <Button type="button" variant="outline">
+                {messages.common.cancel}
+              </Button>
+            </DrawerClose>
+          </DrawerFooter>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }

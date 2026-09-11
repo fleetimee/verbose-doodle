@@ -5,7 +5,13 @@ import {
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import {
   Controller,
   type ControllerFieldState,
@@ -118,6 +124,7 @@ function MethodCombobox({
   readonly fieldState: ControllerFieldState;
 }) {
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -128,6 +135,7 @@ function MethodCombobox({
           aria-label="Method"
           className="w-full justify-between"
           id="endpoint-method"
+          ref={triggerRef}
           role="combobox"
           type="button"
           variant="outline"
@@ -143,8 +151,13 @@ function MethodCombobox({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[min(22rem,calc(100vw-2rem))] overflow-hidden p-0"
+        className="w-[var(--anchor-width)] overflow-hidden p-0"
         finalFocus={false}
+        portalContainer={
+          triggerRef.current?.closest<HTMLElement>(
+            "[data-slot=drawer-content]"
+          ) ?? undefined
+        }
         sideOffset={0}
       >
         <Command>
@@ -199,6 +212,7 @@ function BillerCombobox({
   readonly onAddBiller?: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const selectedBiller = billers.find((biller) => biller.slug === field.value);
 
   return (
@@ -211,6 +225,7 @@ function BillerCombobox({
           className="w-full justify-between"
           disabled={disabled}
           id="endpoint-biller"
+          ref={triggerRef}
           role="combobox"
           type="button"
           variant="outline"
@@ -230,8 +245,13 @@ function BillerCombobox({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[min(22rem,calc(100vw-2rem))] overflow-hidden p-0"
+        className="w-[var(--anchor-width)] overflow-hidden p-0"
         finalFocus={false}
+        portalContainer={
+          triggerRef.current?.closest<HTMLElement>(
+            "[data-slot=drawer-content]"
+          ) ?? undefined
+        }
         sideOffset={0}
       >
         <Command>

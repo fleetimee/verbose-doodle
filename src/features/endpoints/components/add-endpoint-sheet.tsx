@@ -3,14 +3,15 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Spinner } from "@/components/ui/spinner";
 import { AddBillerDialog } from "@/features/billers/components/add-biller-dialog";
 import { useCreateBiller } from "@/features/billers/hooks/use-create-biller";
@@ -90,9 +91,14 @@ export function AddEndpointSheet({
   };
 
   return (
-    <Sheet onOpenChange={handleOpenChange} open={open}>
+    <Drawer
+      direction="right"
+      onOpenChange={handleOpenChange}
+      open={open}
+      shouldScaleBackground={false}
+    >
       {showTrigger && (
-        <SheetTrigger asChild>
+        <DrawerTrigger asChild>
           <Button onClick={onTriggerClick} type="button">
             <HugeiconsIcon
               className="mr-2 h-4 w-4"
@@ -101,16 +107,22 @@ export function AddEndpointSheet({
             />
             {messages.endpoints.addEndpoint}
           </Button>
-        </SheetTrigger>
+        </DrawerTrigger>
       )}
-      <SheetContent className="flex w-full max-w-full flex-col sm:max-w-xl md:max-w-2xl">
-        <SheetHeader>
-          <SheetTitle>{messages.endpoints.addEndpoint}</SheetTitle>
-          <SheetDescription>
+      <DrawerContent
+        className="overflow-hidden data-[vaul-drawer-direction=right]:w-[calc(100%-1rem)] data-[vaul-drawer-direction=right]:sm:max-w-lg"
+        showSwipeHandle={false}
+      >
+        <DrawerHeader className="shrink-0 px-6 pt-6 pb-2 text-left">
+          <DrawerTitle>{messages.endpoints.addEndpoint}</DrawerTitle>
+          <DrawerDescription>
             {messages.endpoints.addEndpointDescription}
-          </SheetDescription>
-        </SheetHeader>
-        <div className="flex flex-1 flex-col overflow-hidden">
+          </DrawerDescription>
+        </DrawerHeader>
+        <div
+          className="flex min-h-0 flex-1 flex-col overflow-hidden"
+          data-vaul-no-drag
+        >
           <EndpointForm
             billers={availableBillers}
             initialBillerSlug={initialBillerSlug}
@@ -119,23 +131,28 @@ export function AddEndpointSheet({
             onSubmit={handleFormSubmit}
             ref={formRef}
           >
-            <SheetFooter className="border-t px-6 pt-4 pb-6">
+            <DrawerFooter className="shrink-0 border-t px-6 pt-4 pb-6">
               <Button disabled={isSubmitting} type="submit">
                 {isSubmitting && <Spinner className="mr-2" />}
                 {isSubmitting
                   ? messages.endpoints.creating
                   : messages.endpoints.createEndpoint}
               </Button>
-            </SheetFooter>
+              <DrawerClose asChild>
+                <Button type="button" variant="outline">
+                  {messages.common.cancel}
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
           </EndpointForm>
         </div>
-      </SheetContent>
+      </DrawerContent>
       <AddBillerDialog
         isSubmitting={isCreatingBiller}
         onOpenChange={setIsAddBillerOpen}
         onSubmit={handleAddBiller}
         open={isAddBillerOpen}
       />
-    </Sheet>
+    </Drawer>
   );
 }
