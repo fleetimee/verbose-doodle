@@ -30,7 +30,7 @@ export const jsonYamlConverterMessages = {
   outputLabel: "Output {format}",
   pageDescription: "Convert JSON documents to YAML and YAML documents to JSON.",
   pageKeywords: ["json", "yaml", "converter", "developer tools"],
-  pageTitle: "JSON/YAML Converter | BPDDIY DevTools",
+  pageTitle: "JSON/YAML Converter",
   preservationNote:
     "Converted output does not preserve YAML comments, anchors, aliases, or the original formatting.",
   resetExample: "Reset example",

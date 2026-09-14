@@ -5,5 +5,8 @@ export const errorsMessages = {
   invalidResponseStructure: "Invalid response structure from server",
   notFoundDescriptionLine1: "The page you're looking for might have been",
   notFoundDescriptionLine2: "moved or doesn't exist.",
+  notFoundDocumentDescription:
+    "The page you're looking for might have been moved or doesn't exist.",
+  notFoundDocumentTitle: "Page Not Found",
   notFoundTitle: "404",
 } as const;

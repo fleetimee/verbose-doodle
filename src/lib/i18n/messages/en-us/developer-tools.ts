@@ -24,7 +24,7 @@ export const developerToolsMessages = {
     "Small, focused workspaces for checking data and reasoning about schedules.",
   documentDescription:
     "Browse validation, conversion, and scheduling tools for development workflows.",
-  documentTitle: "Developer Tools | BPDDIY DevTools",
+  documentTitle: "Developer Tools",
   eyebrow: {
     one: "Utility index / {count} tool",
     other: "Utility index / {count} tools",
@@ -84,7 +84,7 @@ export const developerToolsMessages = {
     "PC/SC",
     "WebSocket bridge",
   ],
-  nfcReaderDocumentTitle: "NFC Reader Inspector | BPDDIY DevTools",
+  nfcReaderDocumentTitle: "NFC Reader Inspector",
   nfcReaderEyebrow: "Hardware inspection / local bridge",
   nfcReaderLimit: "Loopback WebSocket",
   nfcReaderName: "NFC Reader Inspector",

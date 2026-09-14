@@ -1,11 +1,12 @@
 import { SocketTesterLayout } from "@/features/socket-tester/components/socket-tester-layout";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { messages } from "@/lib/i18n";
 
 export function UdpPage() {
   useDocumentMeta({
-    description: "UDP socket testing powered by the backend WebSocket bridge.",
+    description: messages.socketTester.udpDocumentDescription,
     keywords: ["socket test", "udp", "websocket", "developer tools"],
-    title: "UDP | SocketTest | BPDDIY DevTools",
+    title: messages.socketTester.udpDocumentTitle,
   });
 
   return <SocketTesterLayout mode="udp" />;

@@ -20,7 +20,7 @@ export const cronParserMessages = {
   pageDescription:
     "Explain Unix cron expressions and preview their next executions by timezone.",
   pageKeywords: ["cron", "parser", "scheduler", "developer tools"],
-  pageTitle: "Cron Parser | BPDDIY DevTools",
+  pageTitle: "Cron Parser",
   parse: "Parse",
   resetExample: "Reset example",
   runNumber: "Run {number}",

@@ -17,6 +17,9 @@ export const socketTesterMessages = {
   dataTitle: "Data",
   disconnectButton: "Disconnect",
   disconnectedStatus: "Disconnected",
+  documentDescription:
+    "TCP and UDP socket testing suite powered by the backend WebSocket bridge.",
+  documentTitle: "Socket Tester",
   encodeAsLabel: "Encode as",
   errorsMetric: "Errors",
   formatLabel: "Format",
@@ -75,6 +78,9 @@ export const socketTesterMessages = {
   stopUdpListenerSrLabel: "Stop UDP listener",
   targetHostLabel: "Target host",
   targetPortLabel: "Target port",
+  tcpClientDocumentDescription:
+    "TCP client socket testing powered by the backend WebSocket bridge.",
+  tcpClientDocumentTitle: "TCP Client | Socket Tester",
   tcpClientPortDescription:
     "Destination port: 1–65535. Local port is OS-assigned.",
   tcpClientStatusLabel: "TCP client status",
@@ -84,9 +90,15 @@ export const socketTesterMessages = {
   tcpConnectionRefusedDescription:
     "{host}:{port} refused the connection. {message}",
   tcpConnectionUnableDescription: "Could not connect to {host}:{port}",
+  tcpServerDocumentDescription:
+    "TCP server socket testing powered by the backend WebSocket bridge.",
+  tcpServerDocumentTitle: "TCP Server | Socket Tester",
   tcpServerPortDescription:
     "Default listener range: 18110–18120. Choose any free port in this range.",
   timestampLabel: "Timestamp",
+  udpDocumentDescription:
+    "UDP socket testing powered by the backend WebSocket bridge.",
+  udpDocumentTitle: "UDP | Socket Tester",
   tour: {
     shared: {
       headerDescription:

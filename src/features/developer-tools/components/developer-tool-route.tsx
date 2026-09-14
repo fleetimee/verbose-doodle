@@ -11,7 +11,7 @@ export function DeveloperToolRoute({ Page, tool }: DeveloperToolRouteProps) {
   useDocumentMeta({
     description: tool.document.description,
     keywords: [...tool.document.keywords],
-    title: tool.document.title,
+    title: `${tool.document.title} | Developer Tools`,
   });
 
   return <Page />;

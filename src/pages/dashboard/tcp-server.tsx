@@ -1,12 +1,12 @@
 import { SocketTesterLayout } from "@/features/socket-tester/components/socket-tester-layout";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { messages } from "@/lib/i18n";
 
 export function TcpServerPage() {
   useDocumentMeta({
-    description:
-      "TCP server socket testing powered by the backend WebSocket bridge.",
+    description: messages.socketTester.tcpServerDocumentDescription,
     keywords: ["socket test", "tcp server", "websocket", "developer tools"],
-    title: "TCP Server | SocketTest | BPDDIY DevTools",
+    title: messages.socketTester.tcpServerDocumentTitle,
   });
 
   return <SocketTesterLayout mode="tcp-server" />;

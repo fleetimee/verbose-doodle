@@ -15,7 +15,7 @@ export const iso8583ParserMessages = {
     "Data Elements",
     "Inspector",
   ],
-  documentTitle: "ISO 8583 Parser | BPDDIY DevTools",
+  documentTitle: "ISO 8583 Parser",
   emptyStateDescription:
     "Paste a raw ISO 8583 ASCII stream or hex dump above, or select a sample preset to inspect its MTI, bitmaps, and data elements.",
   emptyStateTitle: "Waiting for stream input",
@@ -39,7 +39,7 @@ export const iso8583ParserMessages = {
     "Bitmaps",
     "Data Elements",
   ],
-  pageTitle: "ISO 8583 Parser | BPDDIY DevTools",
+  pageTitle: "ISO 8583 Parser",
   parseStream: "Parse stream",
   primaryBitmap: "Primary Bitmap",
   rawStreamJson: "Raw Stream & JSON",

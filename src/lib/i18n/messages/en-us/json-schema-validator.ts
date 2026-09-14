@@ -38,7 +38,7 @@ export const jsonSchemaValidatorMessages = {
   navigationGroup: "Developer Tools",
   pageDescription: "Validate JSON documents against JSON Schema drafts.",
   pageKeywords: ["json schema", "validator", "developer tools"],
-  pageTitle: "JSON Schema Validator | BPDDIY DevTools",
+  pageTitle: "JSON Schema Validator",
   parseCode: "PARSE",
   parseDescription: "Fix the editor syntax and run validation again.",
   parseTitle: "JSON could not be parsed",

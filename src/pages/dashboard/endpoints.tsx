@@ -324,7 +324,7 @@ export function EndpointsPage() {
   useDocumentMeta({
     description: messages.endpoints.documentDescription,
     keywords: ["api endpoints", "integrations", "api management", "endpoints"],
-    title: "Endpoint",
+    title: messages.endpoints.documentTitle,
   });
 
   const {

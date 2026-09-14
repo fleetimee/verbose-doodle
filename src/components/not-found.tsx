@@ -10,9 +10,16 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { messages } from "@/lib/i18n";
 
 export function NotFoundPage() {
+  useDocumentMeta({
+    description: messages.errors.notFoundDocumentDescription,
+    robots: "noindex, nofollow",
+    title: messages.errors.notFoundDocumentTitle,
+  });
+
   return (
     <div className="flex w-full items-center justify-center">
       <div className="flex h-screen items-center border-x">

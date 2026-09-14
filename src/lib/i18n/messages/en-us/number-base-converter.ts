@@ -37,7 +37,7 @@ export const numberBaseConverterMessages = {
     "hexadecimal",
     "developer tools",
   ],
-  pageTitle: "Number Base Converter | BPDDIY DevTools",
+  pageTitle: "Number Base Converter",
   patternDescription: "High-order bit first, grouped into four-bit nibbles.",
   patternTitle: "Bit pattern",
   representationLabel: "Interpretation",

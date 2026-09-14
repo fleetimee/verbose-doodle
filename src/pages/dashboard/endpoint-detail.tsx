@@ -209,8 +209,10 @@ export function EndpointDetailPage() {
     deleteEndpointMutation;
 
   useDocumentMeta({
-    description: "View and manage endpoint responses",
-    title: endpoint ? `${endpoint.method} ${endpoint.url}` : "Endpoint Detail",
+    description: messages.endpoints.detailDocumentDescription,
+    title: endpoint
+      ? `${endpoint.method} ${endpoint.url} | ${messages.endpoints.documentTitle}`
+      : messages.endpoints.detailDocumentTitle,
   });
 
   const selectedResponse = useMemo(() => {

@@ -1,11 +1,12 @@
 import { SocksRelayPage } from "@/features/socks-relay/components/socks-relay-page";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { messages } from "@/lib/i18n";
 
 export function SocksRelayIso8583Page() {
   useDocumentMeta({
-    description: "Manage ISO 8583 sock relay instances and live relay logs.",
+    description: messages.socksRelay.iso8583DocumentDescription,
     keywords: ["socks relay", "iso 8583", "relay", "developer tools"],
-    title: "ISO 8583 | Socks Relay | BPDDIY DevTools",
+    title: messages.socksRelay.iso8583DocumentTitle,
   });
 
   return <SocksRelayPage mode="ISO_8583" />;

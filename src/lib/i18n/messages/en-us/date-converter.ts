@@ -36,7 +36,7 @@ export const dateConverterMessages = {
     "timezone",
     "developer tools",
   ],
-  pageTitle: "Date / Unix Timestamp Converter | BPDDIY DevTools",
+  pageTitle: "Date / Unix Timestamp Converter",
   relativeLabel: "Relative to now",
   resetExample: "Reset example",
   resultDescription: "Each value identifies the same exact instant.",

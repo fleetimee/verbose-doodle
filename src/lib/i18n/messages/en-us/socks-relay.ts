@@ -7,6 +7,8 @@ export const socksRelayMessages = {
   clearButton: "Clear",
   clearLiveButton: "Clear live view",
   codeHeader: "Code",
+  documentDescription: "Monitor and inspect relayed network traffic.",
+  documentTitle: "SOCKS Relay",
   dropClientLabel: "Drop client",
   dropHostLabel: "Drop host",
   editRelayOptionsDescription: "{relayId} updates apply to new relay traffic.",
@@ -24,6 +26,9 @@ export const socksRelayMessages = {
   hostAddressLabel: "Host address",
   hostPortDescription: "Destination service port that the relay forwards to.",
   hostPortLabel: "Host port",
+  iso8583DocumentDescription:
+    "Manage ISO 8583 sock relay instances and live relay logs.",
+  iso8583DocumentTitle: "ISO 8583 | SOCKS Relay",
   listenHeader: "Listen",
   listeningPortDescription:
     "Use a published Portainer relay port from 18090 to 18100.",
@@ -65,6 +70,9 @@ export const socksRelayMessages = {
   relayStopped: "Relay stopped",
   relayUpdated: "Relay options updated",
   removeHeadersLabel: "Remove headers",
+  restApiDocumentDescription:
+    "Manage REST API sock relay instances and live relay logs.",
+  restApiDocumentTitle: "REST API | SOCKS Relay",
   savedHistoryDescription: "Stored on the server and restored after refresh.",
   savedHistoryLabel: "Saved history",
   saveOptionsButton: "Save options",

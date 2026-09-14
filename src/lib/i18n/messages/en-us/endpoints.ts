@@ -53,8 +53,11 @@ export const endpointsMessages = {
       "Watch requests that hit this endpoint, filter by status, copy or download logs, and open individual request details.",
     trafficLogsTitle: "Inspect traffic",
   },
+  detailDocumentDescription: "View and manage endpoint responses",
+  detailDocumentTitle: "Endpoint Detail",
   documentDescription:
     "Manage API endpoints and integrations for billing simulation",
+  documentTitle: "Endpoints",
   editEndpoint: "Edit Endpoint",
   editEndpointDescription:
     "Update the method and URL for this endpoint. The biller cannot be changed here.",
