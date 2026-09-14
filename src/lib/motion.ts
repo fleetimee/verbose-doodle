@@ -23,4 +23,3 @@ export const MOTION_SPRING = {
   gentle: { bounce: 0.04, duration: 0.4, type: "spring" as const },
   snappy: { damping: 26, stiffness: 420, type: "spring" as const },
 } as const;
-

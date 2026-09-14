@@ -181,7 +181,8 @@ type OverviewChatProps = {
 
 const allChatActions: Record<ChatActionId, ChatAction> = {
   base: {
-    description: "Convert numbers across binary, octal, decimal, hex, and base64.",
+    description:
+      "Convert numbers across binary, octal, decimal, hex, and base64.",
     icon: Binary,
     id: "base",
     label: "Number base converter",
@@ -195,7 +196,8 @@ const allChatActions: Record<ChatActionId, ChatAction> = {
     to: "/dashboard/developer-tools/cron-parser",
   },
   date: {
-    description: "Convert epoch timestamps, ISO 8601 strings, and timezone offsets.",
+    description:
+      "Convert epoch timestamps, ISO 8601 strings, and timezone offsets.",
     icon: CalendarDays,
     id: "date",
     label: "Date & timezone",
@@ -251,14 +253,16 @@ const allChatActions: Record<ChatActionId, ChatAction> = {
     to: "/dashboard/socket-test/tcp-client",
   },
   "socks-relay": {
-    description: "Monitor and configure SOCKS5 proxy routing for simulated protocols.",
+    description:
+      "Monitor and configure SOCKS5 proxy routing for simulated protocols.",
     icon: ShieldCheck,
     id: "socks-relay",
     label: "SOCKS relay proxy",
     to: "/dashboard/socks-relay/rest-api",
   },
   yaml: {
-    description: "Convert and format documents between JSON and YAML in real time.",
+    description:
+      "Convert and format documents between JSON and YAML in real time.",
     icon: FileJson,
     id: "yaml",
     label: "JSON ↔ YAML converter",
@@ -361,7 +365,6 @@ const overviewChatStatusEntryMotion = {
   },
   transition: { duration: 0.26, ease: MOTION_EASE.apple },
 } as const;
-
 
 function getSessionStorage(): Storage | null {
   if (typeof window === "undefined") {
@@ -513,22 +516,8 @@ function getErrorMessage(error: ApiError | null) {
   );
 }
 
-function getAssistantReply(
-  query: string,
-  data: OverviewData | undefined,
-  isAdmin: boolean
-): ChatReply {
-  if (!data) {
-    return {
-      text: "I can’t read the simulator snapshot yet. Try /refresh once the Overview API is available.",
-      tone: "destructive",
-    };
-  }
-
-  const normalizedQuery = query.toLocaleLowerCase();
-  const { stats } = data;
-
-  if (helpQueryPattern.test(normalizedQuery)) {
+function getToolReply(query: string): ChatReply | undefined {
+  if (helpQueryPattern.test(query)) {
     return {
       actions: [
         allChatActions.endpoints,
@@ -539,7 +528,7 @@ function getAssistantReply(
     };
   }
 
-  if (jwtQueryPattern.test(normalizedQuery)) {
+  if (jwtQueryPattern.test(query)) {
     return {
       actions: [allChatActions.jwt, allChatActions["developer-tools"]],
       cardType: "tool-detail",
@@ -548,7 +537,7 @@ function getAssistantReply(
     };
   }
 
-  if (isoQueryPattern.test(normalizedQuery)) {
+  if (isoQueryPattern.test(query)) {
     return {
       actions: [allChatActions.iso8583, allChatActions["developer-tools"]],
       cardType: "tool-detail",
@@ -557,7 +546,7 @@ function getAssistantReply(
     };
   }
 
-  if (yamlQueryPattern.test(normalizedQuery)) {
+  if (yamlQueryPattern.test(query)) {
     return {
       actions: [allChatActions.yaml, allChatActions["developer-tools"]],
       cardType: "tool-detail",
@@ -566,7 +555,7 @@ function getAssistantReply(
     };
   }
 
-  if (schemaQueryPattern.test(normalizedQuery)) {
+  if (schemaQueryPattern.test(query)) {
     return {
       actions: [allChatActions.schema, allChatActions["developer-tools"]],
       cardType: "tool-detail",
@@ -575,7 +564,7 @@ function getAssistantReply(
     };
   }
 
-  if (cronQueryPattern.test(normalizedQuery)) {
+  if (cronQueryPattern.test(query)) {
     return {
       actions: [allChatActions.cron, allChatActions["developer-tools"]],
       cardType: "tool-detail",
@@ -584,7 +573,7 @@ function getAssistantReply(
     };
   }
 
-  if (baseQueryPattern.test(normalizedQuery)) {
+  if (baseQueryPattern.test(query)) {
     return {
       actions: [allChatActions.base, allChatActions["developer-tools"]],
       cardType: "tool-detail",
@@ -593,7 +582,7 @@ function getAssistantReply(
     };
   }
 
-  if (dateQueryPattern.test(normalizedQuery)) {
+  if (dateQueryPattern.test(query)) {
     return {
       actions: [allChatActions.date, allChatActions["developer-tools"]],
       cardType: "tool-detail",
@@ -602,7 +591,7 @@ function getAssistantReply(
     };
   }
 
-  if (nfcQueryPattern.test(normalizedQuery)) {
+  if (nfcQueryPattern.test(query)) {
     return {
       actions: [allChatActions.nfc, allChatActions["developer-tools"]],
       cardType: "tool-detail",
@@ -611,7 +600,7 @@ function getAssistantReply(
     };
   }
 
-  if (socketsQueryPattern.test(normalizedQuery) || socksRelayQueryPattern.test(normalizedQuery)) {
+  if (socketsQueryPattern.test(query) || socksRelayQueryPattern.test(query)) {
     return {
       actions: [allChatActions["socket-tester"], allChatActions["socks-relay"]],
       cardType: "sockets",
@@ -619,7 +608,7 @@ function getAssistantReply(
     };
   }
 
-  if (toolsQueryPattern.test(normalizedQuery)) {
+  if (toolsQueryPattern.test(query)) {
     return {
       actions: [allChatActions["developer-tools"]],
       cardType: "developer-tools",
@@ -627,7 +616,17 @@ function getAssistantReply(
     };
   }
 
-  if (missingResponseQueryPattern.test(normalizedQuery)) {
+  return undefined;
+}
+
+function getDataReply(
+  query: string,
+  data: OverviewData,
+  isAdmin: boolean
+): ChatReply {
+  const { stats } = data;
+
+  if (missingResponseQueryPattern.test(query)) {
     const count = stats.endpointsWithoutResponses;
     return {
       actions: count > 0 ? [allChatActions.endpoints] : undefined,
@@ -640,7 +639,7 @@ function getAssistantReply(
     };
   }
 
-  if (endpointQueryPattern.test(normalizedQuery)) {
+  if (endpointQueryPattern.test(query)) {
     return {
       actions: [allChatActions.endpoints],
       cardType: "endpoints",
@@ -649,7 +648,7 @@ function getAssistantReply(
     };
   }
 
-  if (billerQueryPattern.test(normalizedQuery)) {
+  if (billerQueryPattern.test(query)) {
     return {
       actions: [allChatActions.endpoints],
       cardType: "billers",
@@ -658,7 +657,7 @@ function getAssistantReply(
     };
   }
 
-  if (responseQueryPattern.test(normalizedQuery)) {
+  if (responseQueryPattern.test(query)) {
     return {
       cardType: "snapshot",
       showSnapshot: true,
@@ -666,7 +665,7 @@ function getAssistantReply(
     };
   }
 
-  if (userQueryPattern.test(normalizedQuery)) {
+  if (userQueryPattern.test(query)) {
     if (!(isAdmin && data.userStats)) {
       return {
         actions: [allChatActions.endpoints],
@@ -681,7 +680,7 @@ function getAssistantReply(
     };
   }
 
-  if (snapshotQueryPattern.test(normalizedQuery)) {
+  if (snapshotQueryPattern.test(query)) {
     return {
       cardType: "snapshot",
       showSnapshot: true,
@@ -693,6 +692,25 @@ function getAssistantReply(
     actions: workspaceActions,
     text: "I can read the current simulator snapshot or take you to Endpoints, Developer Tools, and Socket Tester. Try typing /help to browse all commands.",
   };
+}
+
+function getAssistantReply(
+  query: string,
+  data: OverviewData | undefined,
+  isAdmin: boolean
+): ChatReply {
+  if (!data) {
+    return {
+      text: "I can’t read the simulator snapshot yet. Try /refresh once the Overview API is available.",
+      tone: "destructive",
+    };
+  }
+
+  const normalizedQuery = query.toLocaleLowerCase();
+  return (
+    getToolReply(normalizedQuery) ??
+    getDataReply(normalizedQuery, data, isAdmin)
+  );
 }
 
 function AssistantAvatar() {
@@ -780,9 +798,14 @@ function EndpointsSnapshotCard({ data }: { data: OverviewData }) {
     >
       <header className="overview-chat-snapshot-header">
         <div>
-          <span className="overview-chat-snapshot-kicker">CONFIGURED CATALOG</span>
+          <span className="overview-chat-snapshot-kicker">
+            CONFIGURED CATALOG
+          </span>
           <h3>Live simulator snapshot</h3>
-          <p>Endpoints configured in the simulator with HTTP method routing and response coverage.</p>
+          <p>
+            Endpoints configured in the simulator with HTTP method routing and
+            response coverage.
+          </p>
         </div>
         <Badge variant="secondary">
           {formatCount(stats.totalEndpoints, "endpoint")}
@@ -839,7 +862,8 @@ function EndpointsSnapshotCard({ data }: { data: OverviewData }) {
           </SnapshotSectionHeading>
           <div className="overview-chat-attention-copy">
             <strong>
-              {stats.activeResponses} of {stats.totalResponses} templates active ({stats.activeResponsesPercentage})
+              {stats.activeResponses} of {stats.totalResponses} templates active
+              ({stats.activeResponsesPercentage})
             </strong>
             <p>
               {stats.endpointsWithoutResponses === 0
@@ -873,10 +897,7 @@ function EndpointsSnapshotCard({ data }: { data: OverviewData }) {
           <SnapshotSectionHeading icon={Clock3}>
             RECENT CONFIGURATIONS
           </SnapshotSectionHeading>
-          <Link
-            className="overview-chat-inline-link"
-            to="/dashboard/endpoints"
-          >
+          <Link className="overview-chat-inline-link" to="/dashboard/endpoints">
             <span>Open endpoint catalog</span>
             <HugeiconsIcon
               aria-hidden="true"
@@ -950,9 +971,14 @@ function BillerSnapshotCard({ data }: { data: OverviewData }) {
     >
       <header className="overview-chat-snapshot-header">
         <div>
-          <span className="overview-chat-snapshot-kicker">PROVIDER DIRECTORY</span>
+          <span className="overview-chat-snapshot-kicker">
+            PROVIDER DIRECTORY
+          </span>
           <h3>Live simulator snapshot</h3>
-          <p>Distribution of endpoints and mock response templates across simulated billers.</p>
+          <p>
+            Distribution of endpoints and mock response templates across
+            simulated billers.
+          </p>
         </div>
         <Badge variant="secondary">
           {formatCount(stats.totalBillers, "biller")}
@@ -987,10 +1013,7 @@ function BillerSnapshotCard({ data }: { data: OverviewData }) {
           <SnapshotSectionHeading icon={Building2}>
             ALL BILLER PROVIDERS
           </SnapshotSectionHeading>
-          <Link
-            className="overview-chat-inline-link"
-            to="/dashboard/endpoints"
-          >
+          <Link className="overview-chat-inline-link" to="/dashboard/endpoints">
             <span>Filter in catalog</span>
             <HugeiconsIcon
               aria-hidden="true"
@@ -1003,10 +1026,7 @@ function BillerSnapshotCard({ data }: { data: OverviewData }) {
         {endpointsByBiller.length > 0 ? (
           <div className="overview-chat-biller-list">
             {endpointsByBiller.map((biller) => (
-              <div
-                className="overview-chat-biller-row"
-                key={biller.billerName}
-              >
+              <div className="overview-chat-biller-row" key={biller.billerName}>
                 <div className="overview-chat-biller-name">
                   <span>{biller.billerName}</span>
                   <strong>
@@ -1039,7 +1059,9 @@ function BillerSnapshotCard({ data }: { data: OverviewData }) {
 
       <footer className="overview-chat-snapshot-footer">
         <Info aria-hidden="true" />
-        <span>Endpoints are grouped by provider to identify unbalanced coverage.</span>
+        <span>
+          Endpoints are grouped by provider to identify unbalanced coverage.
+        </span>
       </footer>
     </motion.section>
   );
@@ -1062,7 +1084,10 @@ function MissingResponsesSnapshotCard({ data }: { data: OverviewData }) {
         <div>
           <span className="overview-chat-snapshot-kicker">GAP ANALYSIS</span>
           <h3>Live simulator snapshot</h3>
-          <p>Endpoints lacking active response scenarios or requiring scenario configuration.</p>
+          <p>
+            Endpoints lacking active response scenarios or requiring scenario
+            configuration.
+          </p>
         </div>
         <Badge variant={hasGaps ? "destructive" : "secondary"}>
           {hasGaps ? `${count} need attention` : "100% coverage"}
@@ -1112,10 +1137,7 @@ function MissingResponsesSnapshotCard({ data }: { data: OverviewData }) {
           <SnapshotSectionHeading icon={Clock3}>
             ENDPOINTS IN CATALOG
           </SnapshotSectionHeading>
-          <Link
-            className="overview-chat-inline-link"
-            to="/dashboard/endpoints"
-          >
+          <Link className="overview-chat-inline-link" to="/dashboard/endpoints">
             <span>Open endpoint catalog</span>
             <HugeiconsIcon
               aria-hidden="true"
@@ -1162,7 +1184,10 @@ function MissingResponsesSnapshotCard({ data }: { data: OverviewData }) {
 
       <footer className="overview-chat-snapshot-footer">
         <Info aria-hidden="true" />
-        <span>Every endpoint requires at least one active response template for full simulation.</span>
+        <span>
+          Every endpoint requires at least one active response template for full
+          simulation.
+        </span>
       </footer>
     </motion.section>
   );
@@ -1185,11 +1210,16 @@ function DeveloperToolsSnapshotCard({
         aria-label="Live simulator snapshot"
         className="overview-chat-snapshot"
         initial={{ filter: "blur(3px)", opacity: 0, transform: "scale(0.98)" }}
-        transition={{ duration: MOTION_DURATION.smooth, ease: MOTION_EASE.apple }}
+        transition={{
+          duration: MOTION_DURATION.smooth,
+          ease: MOTION_EASE.apple,
+        }}
       >
         <header className="overview-chat-snapshot-header">
           <div>
-            <span className="overview-chat-snapshot-kicker">INTEGRATION UTILITY</span>
+            <span className="overview-chat-snapshot-kicker">
+              INTEGRATION UTILITY
+            </span>
             <h3>Live simulator snapshot</h3>
             <p>{selectedTool.description}</p>
           </div>
@@ -1243,7 +1273,9 @@ function DeveloperToolsSnapshotCard({
 
         <footer className="overview-chat-snapshot-footer">
           <Info aria-hidden="true" />
-          <span>Runs locally in browser with zero network latency or data leakage.</span>
+          <span>
+            Runs locally in browser with zero network latency or data leakage.
+          </span>
         </footer>
       </motion.section>
     );
@@ -1259,9 +1291,14 @@ function DeveloperToolsSnapshotCard({
     >
       <header className="overview-chat-snapshot-header">
         <div>
-          <span className="overview-chat-snapshot-kicker">INTEGRATION TOOLBOX</span>
+          <span className="overview-chat-snapshot-kicker">
+            INTEGRATION TOOLBOX
+          </span>
           <h3>Live simulator snapshot</h3>
-          <p>8 client-side utilities for payload conversion, validation, parsing, and inspection.</p>
+          <p>
+            8 client-side utilities for payload conversion, validation, parsing,
+            and inspection.
+          </p>
         </div>
         <Badge variant="secondary">8 utilities</Badge>
       </header>
@@ -1295,7 +1332,10 @@ function DeveloperToolsSnapshotCard({
 
       <footer className="overview-chat-snapshot-footer">
         <Info aria-hidden="true" />
-        <span>Developer utilities run locally in your browser for instant payload manipulation.</span>
+        <span>
+          Developer utilities run locally in your browser for instant payload
+          manipulation.
+        </span>
       </footer>
     </motion.section>
   );
@@ -1304,28 +1344,32 @@ function DeveloperToolsSnapshotCard({
 function SocketsSnapshotCard() {
   const socketTools = [
     {
-      description: "Interactive TCP client for sending custom payloads & streaming responses.",
+      description:
+        "Interactive TCP client for sending custom payloads & streaming responses.",
       icon: Network,
       id: "tcp-client",
       name: "TCP Client",
       to: "/dashboard/socket-test/tcp-client" as const,
     },
     {
-      description: "Capture incoming client TCP connections and echo or mock replies.",
+      description:
+        "Capture incoming client TCP connections and echo or mock replies.",
       icon: Activity,
       id: "tcp-server",
       name: "TCP Server",
       to: "/dashboard/socket-test/tcp-client" as const,
     },
     {
-      description: "Send connectionless UDP packets and observe receiver responses.",
+      description:
+        "Send connectionless UDP packets and observe receiver responses.",
       icon: RadioReceiver,
       id: "udp",
       name: "UDP Datagram",
       to: "/dashboard/socket-test/tcp-client" as const,
     },
     {
-      description: "Inspect SOCKS5 proxy routing for REST API and ISO 8583 traffic.",
+      description:
+        "Inspect SOCKS5 proxy routing for REST API and ISO 8583 traffic.",
       icon: ShieldCheck,
       id: "socks-relay",
       name: "SOCKS Relay Proxy",
@@ -1343,9 +1387,14 @@ function SocketsSnapshotCard() {
     >
       <header className="overview-chat-snapshot-header">
         <div>
-          <span className="overview-chat-snapshot-kicker">NETWORK TRANSPORT</span>
+          <span className="overview-chat-snapshot-kicker">
+            NETWORK TRANSPORT
+          </span>
           <h3>Live simulator snapshot</h3>
-          <p>Low-level socket testing utilities and secure SOCKS5 proxy relay workspaces.</p>
+          <p>
+            Low-level socket testing utilities and secure SOCKS5 proxy relay
+            workspaces.
+          </p>
         </div>
         <Badge variant="secondary">TCP / UDP / SOCKS5</Badge>
       </header>
@@ -1379,7 +1428,9 @@ function SocketsSnapshotCard() {
 
       <footer className="overview-chat-snapshot-footer">
         <Info aria-hidden="true" />
-        <span>Socket and proxy utilities enable multi-protocol transport testing.</span>
+        <span>
+          Socket and proxy utilities enable multi-protocol transport testing.
+        </span>
       </footer>
     </motion.section>
   );
@@ -1403,7 +1454,10 @@ function UserStatsSnapshotCard({ data }: { data: OverviewData }) {
         <div>
           <span className="overview-chat-snapshot-kicker">ACCESS CONTROL</span>
           <h3>Live simulator snapshot</h3>
-          <p>Administrator-only view of registered user accounts and system permissions.</p>
+          <p>
+            Administrator-only view of registered user accounts and system
+            permissions.
+          </p>
         </div>
         <Badge variant="secondary">Administrator signal</Badge>
       </header>
@@ -1434,10 +1488,13 @@ function UserStatsSnapshotCard({ data }: { data: OverviewData }) {
       <div className="overview-chat-snapshot-section">
         <div className="overview-chat-attention-copy">
           <strong>
-            {userStats.activeUsers} of {userStats.totalUsers} registered accounts are active
+            {userStats.activeUsers} of {userStats.totalUsers} registered
+            accounts are active
           </strong>
           <p>
-            The simulator maintains {userStats.adminUsers} administrator role(s) with full configuration and user management privileges, and {userStats.regularUsers} standard user(s).
+            The simulator maintains {userStats.adminUsers} administrator role(s)
+            with full configuration and user management privileges, and{" "}
+            {userStats.regularUsers} standard user(s).
           </p>
         </div>
       </div>
@@ -1971,7 +2028,10 @@ function OverviewChatTranscript({
 
   return (
     <ChatMinimapContainer className="size-full">
-      <MessageScroller className="overview-chat-thread" data-follow-latest="true">
+      <MessageScroller
+        className="overview-chat-thread"
+        data-follow-latest="true"
+      >
         <MessageScrollerViewport
           aria-label="Simulator overview conversation"
           className="overview-chat-viewport"
@@ -1982,68 +2042,70 @@ function OverviewChatTranscript({
             role="log"
           >
             <AnimatePresence initial={false}>
-            {isLoading && !data ? (
-              <MotionMessageScrollerItem
-                {...overviewChatStatusEntryMotion}
-                className="overview-chat-entry"
-                key="overview-loading"
-                messageId="overview-loading"
-              >
-                <StatusCheckingMarker
-                  label={messages.overview.chat.loadingSnapshot}
-                />
-                <OverviewSnapshotSkeleton />
-              </MotionMessageScrollerItem>
-            ) : null}
-            {error && !data ? (
-              <MotionMessageScrollerItem
-                {...overviewChatStatusEntryMotion}
-                className="overview-chat-entry"
-                key="overview-error"
-                messageId="overview-error"
-              >
-                <Alert className="overview-chat-error" variant="destructive">
-                  <CircleAlert aria-hidden="true" />
-                  <AlertTitle>{messages.overview.chat.errorTitle}</AlertTitle>
-                  <AlertDescription>{getErrorMessage(error)}</AlertDescription>
-                </Alert>
-              </MotionMessageScrollerItem>
-            ) : null}
-            {conversationMessages.map((message) => (
-              <MotionMessageScrollerItem
-                {...(message.role === "assistant"
-                  ? overviewChatAssistantEntryMotion
-                  : overviewChatUserEntryMotion)}
-                className="overview-chat-entry"
-                data-message-id={message.id}
-                key={message.id}
-                messageId={message.id}
-                scrollAnchor={message.role === "user"}
-              >
-                {message.role === "assistant" ? (
-                  <AssistantMessage
-                    data={data}
-                    isAdmin={isAdmin}
-                    isStreaming={message.id === streamingMessageId}
-                    message={message}
+              {isLoading && !data ? (
+                <MotionMessageScrollerItem
+                  {...overviewChatStatusEntryMotion}
+                  className="overview-chat-entry"
+                  key="overview-loading"
+                  messageId="overview-loading"
+                >
+                  <StatusCheckingMarker
+                    label={messages.overview.chat.loadingSnapshot}
                   />
-                ) : (
-                  <UserMessage message={message} />
-                )}
-              </MotionMessageScrollerItem>
-            ))}
-            {isSubmitting ? (
-              <MotionMessageScrollerItem
-                {...overviewChatStatusEntryMotion}
-                className="overview-chat-entry"
-                key="overview-search-progress"
-                messageId="overview-search-progress"
-              >
-                <StatusCheckingMarker
-                  label={messages.overview.chat.loadingReply}
-                />
-              </MotionMessageScrollerItem>
-            ) : null}
+                  <OverviewSnapshotSkeleton />
+                </MotionMessageScrollerItem>
+              ) : null}
+              {error && !data ? (
+                <MotionMessageScrollerItem
+                  {...overviewChatStatusEntryMotion}
+                  className="overview-chat-entry"
+                  key="overview-error"
+                  messageId="overview-error"
+                >
+                  <Alert className="overview-chat-error" variant="destructive">
+                    <CircleAlert aria-hidden="true" />
+                    <AlertTitle>{messages.overview.chat.errorTitle}</AlertTitle>
+                    <AlertDescription>
+                      {getErrorMessage(error)}
+                    </AlertDescription>
+                  </Alert>
+                </MotionMessageScrollerItem>
+              ) : null}
+              {conversationMessages.map((message) => (
+                <MotionMessageScrollerItem
+                  {...(message.role === "assistant"
+                    ? overviewChatAssistantEntryMotion
+                    : overviewChatUserEntryMotion)}
+                  className="overview-chat-entry"
+                  data-message-id={message.id}
+                  key={message.id}
+                  messageId={message.id}
+                  scrollAnchor={message.role === "user"}
+                >
+                  {message.role === "assistant" ? (
+                    <AssistantMessage
+                      data={data}
+                      isAdmin={isAdmin}
+                      isStreaming={message.id === streamingMessageId}
+                      message={message}
+                    />
+                  ) : (
+                    <UserMessage message={message} />
+                  )}
+                </MotionMessageScrollerItem>
+              ))}
+              {isSubmitting ? (
+                <MotionMessageScrollerItem
+                  {...overviewChatStatusEntryMotion}
+                  className="overview-chat-entry"
+                  key="overview-search-progress"
+                  messageId="overview-search-progress"
+                >
+                  <StatusCheckingMarker
+                    label={messages.overview.chat.loadingReply}
+                  />
+                </MotionMessageScrollerItem>
+              ) : null}
             </AnimatePresence>
           </MessageScrollerContent>
         </MessageScrollerViewport>

@@ -226,7 +226,6 @@ const suggestionItemVariants = {
   },
 } as const;
 
-
 function getFilteredSlashCommands(draft: string) {
   const query = slashCommandQueryPattern.exec(draft)?.[1].toLocaleLowerCase();
   if (query === undefined) {
@@ -456,10 +455,7 @@ export function OverviewChatComposer({
                   type="button"
                   variant="ghost"
                 >
-                  <span
-                    aria-hidden="true"
-                    className="overview-chat-slash-icon"
-                  >
+                  <span aria-hidden="true" className="overview-chat-slash-icon">
                     <Icon />
                   </span>
                   <span className="overview-chat-slash-copy">

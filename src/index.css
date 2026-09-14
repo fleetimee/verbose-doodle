@@ -50,9 +50,9 @@
 
 .navigation-search-results {
   position: relative;
-  isolation: isolate;
   overflow: hidden;
   background: var(--popover);
+  isolation: isolate;
 }
 
 .navigation-search-results::before {
@@ -61,7 +61,9 @@
   width: 48%;
   pointer-events: none;
   content: "";
-  background: url("/brand/biller-operator-mascot-search-transparent.png") right top / contain no-repeat;
+  background:
+    url("/brand/biller-operator-mascot-search-transparent.png") right top /
+    contain no-repeat;
   opacity: 0.1;
   mask-image: linear-gradient(to bottom, black 65%, transparent);
 }
@@ -130,7 +132,7 @@
   padding: 40px 24px;
 }
 
-.navigation-search-dialog [data-slot="command-empty"] > svg {
+:where(.navigation-search-dialog) [data-slot="command-empty"] > svg {
   width: 24px;
   height: 24px;
   margin: 0 auto 16px;
@@ -147,8 +149,8 @@
 
 .navigation-search-description {
   min-height: 56px;
-  margin: 0;
   padding: 12px 16px;
+  margin: 0;
   font-size: 12px;
   line-height: 1.5;
   color: var(--muted-foreground);
@@ -260,62 +262,62 @@
     }
   }
   @keyframes sd-fadeIn {
-  from {
-    opacity: 0;
+    from {
+      opacity: 0;
     }
-  to {
-    opacity: 1;
+    to {
+      opacity: 1;
     }
   }
   @keyframes sd-blurIn {
-  from {
-    opacity: 0;
-    filter: blur(4px);
+    from {
+      opacity: 0;
+      filter: blur(4px);
     }
-  to {
-    opacity: 1;
-    filter: blur(0);
+    to {
+      opacity: 1;
+      filter: blur(0);
     }
   }
   @keyframes sd-slideUp {
-  from {
-    opacity: 0;
-    top: 4px;
+    from {
+      opacity: 0;
+      top: 4px;
     }
-  to {
-    opacity: 1;
-    top: 0;
+    to {
+      opacity: 1;
+      top: 0;
     }
   }
   @keyframes sd-slideLeft {
-  from {
-    opacity: 0;
-    left: 20px;
+    from {
+      opacity: 0;
+      left: 20px;
     }
-  to {
-    opacity: 1;
-    left: 0;
+    to {
+      opacity: 1;
+      left: 0;
     }
   }
   @keyframes sd-foldIn {
-  0% {
-    opacity: 0;
-    filter: brightness(0.55);
-    transform: perspective(700px) rotateX(-92deg);
+    0% {
+      opacity: 0;
+      filter: brightness(0.55);
+      transform: perspective(700px) rotateX(-92deg);
     }
-  55% {
-    opacity: 1;
-    filter: brightness(0.85);
-    transform: perspective(700px) rotateX(8deg);
+    55% {
+      opacity: 1;
+      filter: brightness(0.85);
+      transform: perspective(700px) rotateX(8deg);
     }
-  78% {
-    filter: brightness(0.97);
-    transform: perspective(700px) rotateX(-3deg);
+    78% {
+      filter: brightness(0.97);
+      transform: perspective(700px) rotateX(-3deg);
     }
-  100% {
-    opacity: 1;
-    filter: none;
-    transform: perspective(700px) rotateX(0);
+    100% {
+      opacity: 1;
+      filter: none;
+      transform: perspective(700px) rotateX(0);
     }
   }
 }
@@ -548,12 +550,14 @@ html:has(.dashboard-shell) #root {
 
 /* CodeMirror Tooltip Styling */
 .cm-tooltip {
-  background-color: var(--popover) !important;
+  z-index: 99999 !important;
   color: var(--popover-foreground) !important;
+  background-color: var(--popover) !important;
   border: 1px solid var(--border) !important;
   border-radius: 0.375rem !important;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.35), 0 4px 6px -4px rgb(0 0 0 / 0.2) !important;
-  z-index: 99999 !important;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.35),
+    0 4px 6px -4px rgb(0 0 0 / 0.2) !important;
 }
 
 .cm-tooltip.cm-tooltip-above .cm-tooltip-arrow:before {
@@ -708,8 +712,8 @@ html:has(.dashboard-shell) #root {
 .overview-chat-ambient::before,
 .overview-chat-ambient::after {
   position: absolute;
-  content: "";
   inset: -24% -18%;
+  content: "";
   opacity: 0.8;
   transform-origin: center;
   will-change: transform;
@@ -795,8 +799,8 @@ html:has(.dashboard-shell) #root {
   align-items: center;
   justify-content: flex-end;
   width: min(100%, 42rem);
-  margin: auto;
   padding: 4rem 1.5rem 2.5rem;
+  margin: auto;
   text-align: center;
 }
 
@@ -820,6 +824,7 @@ html:has(.dashboard-shell) #root {
   left: 12%;
   z-index: -1;
   height: 46%;
+  pointer-events: none;
   content: "";
   background: radial-gradient(
     ellipse,
@@ -827,7 +832,6 @@ html:has(.dashboard-shell) #root {
     transparent 72%
   );
   filter: blur(1.5rem);
-  pointer-events: none;
 }
 
 .overview-chat-welcome-image {
@@ -871,8 +875,8 @@ html:has(.dashboard-shell) #root {
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 600;
   line-height: 1.25;
-  letter-spacing: -0.03em;
   color: var(--foreground);
+  letter-spacing: -0.03em;
 }
 
 .overview-chat-welcome p {
@@ -1418,19 +1422,19 @@ html:has(.dashboard-shell) #root {
 }
 
 .overview-chat-card-tile-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 0.78rem;
   font-weight: 600;
   color: inherit;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .overview-chat-card-tile-copy span {
-  font-size: 0.67rem;
-  color: var(--muted-foreground);
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 0.67rem;
+  color: var(--muted-foreground);
   white-space: nowrap;
 }
 
@@ -1449,8 +1453,8 @@ html:has(.dashboard-shell) #root {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 500;
-  border-radius: 999px;
   border: 1px solid;
+  border-radius: 999px;
 }
 
 .overview-chat-method-pill strong {
@@ -1553,11 +1557,11 @@ html:has(.dashboard-shell) #root {
   }
 
   .overview-chat-action:hover {
-    transform: translateY(-2px);
     background: color-mix(in oklch, var(--primary) 7%, var(--card));
     border-color: color-mix(in oklch, var(--border), var(--primary) 32%);
     box-shadow: 0 8px 22px -10px
       color-mix(in oklab, var(--primary) 45%, transparent);
+    transform: translateY(-2px);
   }
 }
 
@@ -1587,16 +1591,16 @@ html:has(.dashboard-shell) #root {
 }
 
 .shimmer {
+  color: transparent;
   background: linear-gradient(
     90deg,
     color-mix(in oklch, var(--foreground) 30%, var(--muted-foreground)) 0%,
     var(--foreground) 50%,
     color-mix(in oklch, var(--foreground) 30%, var(--muted-foreground)) 100%
   );
-  background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
+  background-size: 200% 100%;
   animation: chat-shimmer-flow 1.8s infinite linear;
 }
 
@@ -1695,9 +1699,9 @@ html:has(.dashboard-shell) #root {
 
 .overview-chat-composer-footer {
   display: flex;
+  gap: 0.75rem;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
   margin-top: 0.5rem;
 }
 
@@ -1736,7 +1740,8 @@ html:has(.dashboard-shell) #root {
 
 .overview-chat-input-shell:focus-within {
   border-color: var(--ring);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 18%, transparent),
+  box-shadow:
+    0 0 0 3px color-mix(in oklch, var(--ring) 18%, transparent),
     0 8px 24px -10px color-mix(in oklab, var(--primary) 25%, transparent);
 }
 
@@ -1828,14 +1833,14 @@ html:has(.dashboard-shell) #root {
   padding: 0.25rem;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-color: var(--border) transparent;
+  scrollbar-width: thin;
   background: color-mix(in oklch, var(--card) 95%, var(--background) 5%);
-  backdrop-filter: blur(14px);
   border: 1px solid color-mix(in oklch, var(--border), var(--primary) 18%);
   border-radius: 0.75rem;
   box-shadow: 0 14px 36px -18px
     color-mix(in oklab, var(--foreground) 75%, transparent);
-  scrollbar-color: var(--border) transparent;
-  scrollbar-width: thin;
+  backdrop-filter: blur(14px);
 }
 
 .overview-chat-slash-option {
@@ -1880,8 +1885,8 @@ html:has(.dashboard-shell) #root {
 .overview-chat-slash-copy {
   display: flex;
   flex-direction: column;
-  min-width: 0;
   gap: 0.08rem;
+  min-width: 0;
 }
 
 .overview-chat-slash-copy strong {
@@ -1912,8 +1917,8 @@ html:has(.dashboard-shell) #root {
 .overview-chat-suggestions {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 0.35rem;
+  align-items: flex-start;
   padding: 0;
   margin: 1.25rem 0 0;
   border: 0;
@@ -1926,8 +1931,8 @@ html:has(.dashboard-shell) #root {
 .overview-chat-suggestions-list {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 0.25rem;
+  align-items: flex-start;
   width: 100%;
 }
 
@@ -1942,9 +1947,9 @@ html:has(.dashboard-shell) #root {
   font-size: 0.88rem;
   font-weight: 450;
   color: var(--muted-foreground);
-  border-radius: 0.75rem;
   background: transparent;
   border: 1px solid transparent;
+  border-radius: 0.75rem;
   transition:
     transform 160ms var(--ease-out),
     background-color 160ms var(--ease-out),
@@ -2231,7 +2236,8 @@ html:has(.dashboard-shell) #root {
 }
 
 @keyframes macos-shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
   15% {
@@ -2348,10 +2354,10 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 .macos-glass-break span {
   position: absolute;
   inset: 0;
-  background: color-mix(in oklab, white 4%, transparent);
-  backdrop-filter: blur(4px) saturate(1.04);
-  opacity: 0;
   visibility: hidden;
+  background: color-mix(in oklab, white 4%, transparent);
+  opacity: 0;
+  backdrop-filter: blur(4px) saturate(1.04);
 }
 
 .macos-glass-break span:nth-child(1) {
@@ -2411,15 +2417,15 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 }
 
 .macos-lock-screen[data-state="complete"] .macos-glass-break span {
-  opacity: 1;
   visibility: visible;
+  opacity: 1;
   animation: macos-glass-break 650ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
-.macos-lock-screen[data-state="complete"] .macos-lock-clock,
-.macos-lock-screen[data-state="complete"] .macos-lock-account {
-  animation: macos-lock-content-exit 240ms cubic-bezier(0.23, 1, 0.32, 1)
-    100ms forwards;
+:where(.macos-lock-screen[data-state="complete"]) .macos-lock-clock,
+:where(.macos-lock-screen[data-state="complete"]) .macos-lock-account {
+  animation: macos-lock-content-exit 240ms cubic-bezier(0.23, 1, 0.32, 1) 100ms
+    forwards;
 }
 
 .macos-lock-mascot {
@@ -2440,7 +2446,8 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   flex-direction: column;
   align-items: center;
   color: oklch(1 0 0 / 0.9);
-  text-shadow: 0 1px 12px color-mix(in oklab, var(--background) 22%, transparent);
+  text-shadow: 0 1px 12px
+    color-mix(in oklab, var(--background) 22%, transparent);
   transform: translateX(-50%);
 }
 
@@ -2467,14 +2474,16 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   align-items: center;
   width: min(18rem, calc(100vw - 2rem));
   text-align: center;
-  text-shadow: 0 1px 10px color-mix(in oklab, var(--background) 30%, transparent);
+  text-shadow: 0 1px 10px
+    color-mix(in oklab, var(--background) 30%, transparent);
   transform: translateX(-50%);
 }
 
 .macos-login-avatar {
   border: 2px solid oklch(1 0 0 / 0.5);
   border-radius: 9999px;
-  box-shadow: 0 8px 28px -12px color-mix(in oklab, var(--background) 75%, transparent);
+  box-shadow: 0 8px 28px -12px
+    color-mix(in oklab, var(--background) 75%, transparent);
 }
 
 .macos-lock-account h1 {
@@ -2501,23 +2510,24 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 .macos-password-dot {
   width: 0.375rem;
   aspect-ratio: 1;
-  border-radius: 9999px;
   background: currentColor;
+  border-radius: 9999px;
   opacity: 0;
-  animation: macos-password-type 220ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) forwards;
+  animation: macos-password-type 220ms
+    var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) forwards;
   animation-delay: calc(400ms + var(--password-dot-index) * 160ms);
 }
 
 .macos-login-state {
   display: grid;
-  width: 1rem;
   place-items: center;
+  width: 1rem;
 }
 
 .macos-lock-status {
   min-height: 1rem;
-  color: oklch(1 0 0 / 0.72);
   font-size: 0.75rem;
+  color: oklch(1 0 0 / 0.72);
 }
 
 .macos-shake {
@@ -2527,8 +2537,8 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 .macos-password-form {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 0.5rem;
+  align-items: center;
   width: 100%;
   max-width: 15.5rem;
   margin-top: 0.25rem;
@@ -2539,35 +2549,38 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   display: flex;
   align-items: center;
   width: 100%;
-  border-radius: 9999px;
   background: color-mix(in oklab, white 14%, transparent);
-  backdrop-filter: blur(20px) saturate(1.2);
   border: 1px solid color-mix(in oklab, white 24%, transparent);
-  box-shadow: 0 4px 20px -2px color-mix(in oklab, black 30%, transparent),
-              inset 0 1px 1px color-mix(in oklab, white 15%, transparent);
-  transition: border-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
-              box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1),
-              background-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  border-radius: 9999px;
+  box-shadow:
+    0 4px 20px -2px color-mix(in oklab, black 30%, transparent),
+    inset 0 1px 1px color-mix(in oklab, white 15%, transparent);
+  backdrop-filter: blur(20px) saturate(1.2);
+  transition:
+    border-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .macos-input-pill:focus-within {
-  border-color: color-mix(in oklab, white 45%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in oklab, white 18%, transparent),
-              0 6px 24px -2px color-mix(in oklab, black 35%, transparent);
   background: color-mix(in oklab, white 18%, transparent);
+  border-color: color-mix(in oklab, white 45%, transparent);
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, white 18%, transparent),
+    0 6px 24px -2px color-mix(in oklab, black 35%, transparent);
 }
 
 .macos-input-pill-field {
   width: 100%;
   height: 2.25rem;
   padding: 0 2.25rem 0 0.875rem;
-  background: transparent;
-  border: none;
-  color: white;
   font-size: 0.875rem;
   font-weight: 400;
+  color: white;
   letter-spacing: 0.02em;
   outline: none;
+  background: transparent;
+  border: none;
 }
 
 .macos-input-pill-field::placeholder {
@@ -2576,20 +2589,23 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 
 .macos-submit-button {
   position: absolute;
-  right: 0.25rem;
   top: 50%;
-  transform: translateY(-50%);
+  right: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 1.75rem;
   height: 1.75rem;
-  border-radius: 9999px;
-  border: none;
-  background: color-mix(in oklab, white 20%, transparent);
   color: white;
   cursor: pointer;
-  transition: background-color 140ms ease, transform 100ms ease, opacity 140ms ease;
+  background: color-mix(in oklab, white 20%, transparent);
+  border: none;
+  border-radius: 9999px;
+  transform: translateY(-50%);
+  transition:
+    background-color 140ms ease,
+    transform 100ms ease,
+    opacity 140ms ease;
 }
 
 .macos-submit-button:hover:not(:disabled) {
@@ -2601,27 +2617,27 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 }
 
 .macos-submit-button:disabled {
-  opacity: 0.5;
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .macos-error-badge {
   display: inline-flex;
+  gap: 0.375rem;
   align-items: center;
   justify-content: center;
-  gap: 0.375rem;
+  max-width: 18rem;
   padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  background: color-mix(in oklab, var(--destructive) 42%, transparent);
-  border: 1px solid color-mix(in oklab, var(--destructive) 65%, transparent);
-  backdrop-filter: blur(14px);
-  color: oklch(0.96 0.04 15);
   font-size: 0.75rem;
   font-weight: 500;
-  text-shadow: 0 1px 2px color-mix(in oklab, black 60%, transparent);
-  max-width: 18rem;
-  text-align: center;
   line-height: 1.25;
+  color: oklch(0.96 0.04 15);
+  text-align: center;
+  text-shadow: 0 1px 2px color-mix(in oklab, black 60%, transparent);
+  background: color-mix(in oklab, var(--destructive) 42%, transparent);
+  border: 1px solid color-mix(in oklab, var(--destructive) 65%, transparent);
+  border-radius: 9999px;
+  backdrop-filter: blur(14px);
 }
 
 .macos-logged-out-screen .macos-lock-account {
@@ -2633,9 +2649,9 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 }
 
 .macos-logged-out-message {
-  color: oklch(1 0 0 / 0.9);
   font-size: 0.875rem;
   font-weight: 500;
+  color: oklch(1 0 0 / 0.9);
 }
 
 .macos-logged-out-action,
@@ -2645,18 +2661,18 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   align-items: center;
   justify-content: center;
   min-height: 2.5rem;
-  margin-top: 0.5rem;
   padding: 0.625rem 1rem;
-  border: 1px solid oklch(1 0 0 / 0.28);
-  border-radius: 9999px;
-  color: oklch(1 0 0 / 0.92);
+  margin-top: 0.5rem;
   font-size: 0.8125rem;
   font-weight: 600;
+  color: oklch(1 0 0 / 0.92);
   text-shadow: none;
+  cursor: pointer;
   background: oklch(1 0 0 / 0.14);
+  border: 1px solid oklch(1 0 0 / 0.28);
+  border-radius: 9999px;
   box-shadow: 0 10px 30px -18px oklch(0.08 0.04 260 / 0.8);
   backdrop-filter: blur(18px) saturate(1.2);
-  cursor: pointer;
   transition:
     background-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
     border-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
@@ -2665,8 +2681,8 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 
 .macos-logged-out-action:hover,
 .macos-unlock-action:hover {
-  border-color: oklch(1 0 0 / 0.42);
   background: oklch(1 0 0 / 0.22);
+  border-color: oklch(1 0 0 / 0.42);
 }
 
 .macos-logged-out-action:active,
@@ -2735,28 +2751,29 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     bottom: 4vh;
   }
 }
-  [data-sd-animate] {
-    animation: var(--sd-animation, sd-fadeIn) 400ms var(--sd-easing, ease) var(--sd-delay, 0ms) both;
+[data-sd-animate] {
+  animation: var(--sd-animation, sd-fadeIn) 400ms var(--sd-easing, ease)
+    var(--sd-delay, 0ms) both;
 }
-  [data-slot="streaming"][data-sd-animation="fadeIn"] [data-sd-animate] {
-    animation-name: sd-fadeIn;
+[data-slot="streaming"][data-sd-animation="fadeIn"] [data-sd-animate] {
+  animation-name: sd-fadeIn;
 }
-  [data-slot="streaming"][data-sd-animation="blurIn"] [data-sd-animate] {
-    animation-name: sd-blurIn;
+[data-slot="streaming"][data-sd-animation="blurIn"] [data-sd-animate] {
+  animation-name: sd-blurIn;
 }
-  [data-slot="streaming"][data-sd-animation="slideUp"] [data-sd-animate] {
-    position: relative;
-    animation-name: sd-slideUp;
+[data-slot="streaming"][data-sd-animation="slideUp"] [data-sd-animate] {
+  position: relative;
+  animation-name: sd-slideUp;
 }
-  [data-slot="streaming"][data-sd-animation="slideLeft"] [data-sd-animate] {
-    position: relative;
-    animation-name: sd-slideLeft;
+[data-slot="streaming"][data-sd-animation="slideLeft"] [data-sd-animate] {
+  position: relative;
+  animation-name: sd-slideLeft;
 }
-  [data-slot="streaming"][data-sd-animation="foldIn"] [data-sd-animate] {
-    display: inline-block;
-    backface-visibility: hidden;
-    transform-origin: 50% 0%;
-    animation-name: sd-foldIn;
+[data-slot="streaming"][data-sd-animation="foldIn"] [data-sd-animate] {
+  display: inline-block;
+  transform-origin: 50% 0%;
+  backface-visibility: hidden;
+  animation-name: sd-foldIn;
 }
 
 .dashboard-visit-bubble-stack {
@@ -2785,9 +2802,11 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   pointer-events: auto;
   background: color-mix(in oklch, var(--popover) 94%, var(--primary) 6%);
   border-radius:
-    calc(var(--radius) + 4px) var(--radius) calc(var(--radius) + 4px) var(--radius) /
-    var(--radius) calc(var(--radius) + 4px) var(--radius) calc(var(--radius) + 4px);
-  box-shadow: 0 18px 34px -20px color-mix(in oklab, var(--foreground) 78%, transparent);
+    calc(var(--radius) + 4px) var(--radius) calc(var(--radius) + 4px)
+    var(--radius) / var(--radius) calc(var(--radius) + 4px) var(--radius)
+    calc(var(--radius) + 4px);
+  box-shadow: 0 18px 34px -20px
+    color-mix(in oklab, var(--foreground) 78%, transparent);
   isolation: isolate;
   transform: rotate(-1.25deg);
   animation: dashboard-visit-bubble-in 420ms var(--ease-out) both;
@@ -2907,7 +2926,9 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   background: transparent;
   border: 0;
   border-radius: 9999px;
-  transition: color 160ms ease, background-color 160ms ease;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
 }
 
 .dashboard-visit-bubble-dismiss:hover {
