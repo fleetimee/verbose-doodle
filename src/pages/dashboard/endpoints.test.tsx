@@ -478,11 +478,7 @@ describe("EndpointsPage catalog actions", () => {
       const endpointButton = await screen.findByRole("button", {
         name: endpointButtonName,
       });
-      const closedEditSheet = document.querySelector(
-        '[data-slot="sheet-content"]'
-      );
-      expect(closedEditSheet).toBeDefined();
-      expect(closedEditSheet?.getAttribute("data-closed")).toBe("");
+      expect(document.querySelector('[data-slot="drawer-content"]')).toBeNull();
 
       act(() => {
         fireEvent.contextMenu(endpointButton);
@@ -492,7 +488,7 @@ describe("EndpointsPage catalog actions", () => {
       );
 
       const dialog = await screen.findByRole("dialog");
-      expect(dialog).toBe(closedEditSheet as HTMLElement);
+      expect(dialog.getAttribute("data-slot")).toBe("drawer-content");
       expect(within(dialog).getByDisplayValue("/inquiry")).toBeDefined();
       expect(within(dialog).getByText("PLN")).toBeDefined();
 

@@ -1,15 +1,17 @@
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
+import { httpEndpointAdapter } from "@/features/endpoints/data/http-endpoint-adapter";
 import {
   EndpointForm,
   type EndpointFormHandle,
@@ -44,21 +46,33 @@ export function EditEndpointSheet({
   };
 
   return (
-    <Sheet onOpenChange={handleOpenChange} open={open}>
-      <SheetContent
-        className="flex w-full max-w-full flex-col sm:max-w-xl md:max-w-2xl"
-        keepMounted
+    <Drawer
+      direction="right"
+      onOpenChange={handleOpenChange}
+      open={open}
+      shouldScaleBackground={false}
+    >
+      <DrawerContent
+        className="overflow-hidden data-[vaul-drawer-direction=right]:w-[calc(100%-1rem)] data-[vaul-drawer-direction=right]:sm:max-w-lg"
+        showSwipeHandle={false}
       >
-        <SheetHeader>
-          <SheetTitle>{messages.endpoints.editEndpoint}</SheetTitle>
-          <SheetDescription>
+        <DrawerHeader className="shrink-0 px-6 pt-6 pb-2 text-left">
+          <DrawerTitle>{messages.endpoints.editEndpoint}</DrawerTitle>
+          <DrawerDescription>
             {messages.endpoints.editEndpointDescription}
-          </SheetDescription>
-        </SheetHeader>
+          </DrawerDescription>
+        </DrawerHeader>
         {endpoint && (
-          <div className="flex flex-1 flex-col overflow-hidden">
+          <div
+            className="flex min-h-0 flex-1 flex-col overflow-hidden"
+            data-vaul-no-drag
+          >
             <EndpointForm
+              availabilityExcludeSlug={endpoint.slug}
               billers={billers}
+              checkEndpointAvailability={
+                httpEndpointAdapter.checkEndpointAvailability
+              }
               initialBillerSlug={endpoint.billerSlug}
               initialMethod={endpoint.method}
               initialUrl={endpoint.url}
@@ -67,18 +81,23 @@ export function EditEndpointSheet({
               onSubmit={onSubmit}
               ref={formRef}
             >
-              <SheetFooter className="border-t px-6 pt-4 pb-6">
+              <DrawerFooter className="shrink-0 border-t px-6 pt-4 pb-6">
                 <Button disabled={isSubmitting} type="submit">
                   {isSubmitting && <Spinner className="mr-2" />}
                   {isSubmitting
                     ? messages.endpoints.updating
                     : messages.endpoints.saveEndpoint}
                 </Button>
-              </SheetFooter>
+                <DrawerClose asChild>
+                  <Button type="button" variant="outline">
+                    {messages.common.cancel}
+                  </Button>
+                </DrawerClose>
+              </DrawerFooter>
             </EndpointForm>
           </div>
         )}
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }
