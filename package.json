@@ -14,6 +14,7 @@
     "nfc-bridge:smoke": "bun tools/nfc-reader-bridge/release.ts smoke",
     "preview": "vite preview",
     "test": "bun test --isolate",
+    "test:coverage": "bun test --isolate --coverage",
     "test:watch": "bun test --isolate --watch",
     "type-check": "tsc --noEmit"
   },

@@ -3,3 +3,6 @@
 [test]
 # Preload the test setup file before running tests
 preload = ["./test-setup.ts"]
+coverageReporter = ["text", "lcov"]
+coverageDir = "coverage"
+coverageSkipTestFiles = true

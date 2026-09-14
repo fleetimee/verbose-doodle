@@ -168,7 +168,8 @@ export class PcscReaderAdapter implements ReaderAdapter {
     listener(this.initialStatus);
     try {
       const helperPath = await resolvePcscHelperPath();
-      const process = Bun.spawn(["node", helperPath], {
+      const nodeExecutable = Bun.which("node") ?? "node";
+      const process = Bun.spawn([nodeExecutable, helperPath], {
         stderr: "pipe",
         stdout: "pipe",
       });

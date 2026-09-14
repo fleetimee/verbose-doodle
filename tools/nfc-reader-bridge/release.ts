@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { $ } from "bun";
 import { DEFAULT_NFC_BRIDGE_HOST, DEFAULT_NFC_BRIDGE_VERSION } from "./bridge";
 import { NFC_BRIDGE_PROTOCOL_VERSION } from "./protocol";
 
@@ -78,26 +79,13 @@ export function parseReleaseFlag(
   return index === -1 ? undefined : args[index + 1];
 }
 
-function buildTarget(
+async function buildTarget(
   outputDirectory: string,
   target: NfcBridgeReleaseTarget
 ): Promise<void> {
   const artifactPath = getReleaseArtifactPath(outputDirectory, target);
   process.stdout.write(`Building ${target.platform} -> ${artifactPath}\n`);
-  const result = Bun.spawnSync(
-    [
-      "bun",
-      "build",
-      "--compile",
-      `--target=${target.bunTarget}`,
-      `--outfile=${artifactPath}`,
-      "tools/nfc-reader-bridge/cli.ts",
-    ],
-    { stderr: "inherit", stdout: "inherit" }
-  );
-  if (result.exitCode !== 0) {
-    throw new Error(`Failed to build ${target.platform}.`);
-  }
+  await $`bun build --compile --target=${target.bunTarget} --outfile=${artifactPath} tools/nfc-reader-bridge/cli.ts`;
 }
 
 async function writeManifest(
@@ -129,7 +117,7 @@ async function copyPcscHelper(outputDirectory: string): Promise<void> {
   }
   await Bun.write(
     join(outputDirectory, "pcsc-node-helper.cjs"),
-    await Bun.file(helperPath).arrayBuffer()
+    await Bun.file(helperPath).bytes()
   );
 }
 
@@ -264,9 +252,10 @@ async function smokeWebSocket(
   token: string
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
+    // Bun's WebSocket client supports custom headers during handshake, while DOM types declare string | string[]
     const socket = new WebSocket(
       `ws://${DEFAULT_NFC_BRIDGE_HOST}:${port}/ws?token=${token}`,
-      { headers: { Origin: origin } }
+      { headers: { Origin: origin } } as unknown as string[]
     );
     const timeout = setTimeout(() => {
       socket.close();
