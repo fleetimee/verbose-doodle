@@ -1,6 +1,7 @@
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate } from "react-router";
+import { Badge } from "@/components/ui/badge";
 import {
   Item,
   ItemActions,
@@ -44,7 +45,8 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
     <Item
       className={cn(
         "group/item relative min-h-24 w-full cursor-pointer items-stretch overflow-hidden rounded-2xl border-2 border-border/80 border-b-4 bg-card/95 p-0 shadow-xs transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-border/90 hover:border-b-primary/60 hover:bg-card hover:shadow-md active:translate-y-1 active:border-b-2",
-        "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/45"
+        "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/45",
+        endpoint.enabled === false && "border-dashed bg-muted/35"
       )}
       render={
         <button
@@ -77,6 +79,11 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
             <EndpointPathTitle path={endpoint.url} />
           </ItemTitle>
         </div>
+        {endpoint.enabled === false && (
+          <Badge className="w-fit" variant="secondary">
+            Disabled
+          </Badge>
+        )}
         <ItemDescription className="text-left">
           <EndpointMetaStrip
             billerSlug={endpoint.billerSlug}
