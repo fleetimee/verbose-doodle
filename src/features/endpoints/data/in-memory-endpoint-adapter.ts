@@ -1,6 +1,8 @@
 import type {
   CreateEndpointInput,
   CreateResponseInput,
+  EndpointAvailability,
+  EndpointAvailabilityInput,
   EndpointDataAdapter,
   EndpointDataSeed,
   EndpointHourlyMetricsInput,
@@ -153,6 +155,27 @@ export function createInMemoryEndpointAdapter(
     async clearTrafficLogs(endpointId) {
       await Promise.resolve();
       trafficLogs.set(endpointId, []);
+    },
+    async checkEndpointAvailability(input: EndpointAvailabilityInput) {
+      await Promise.resolve();
+      const conflict = endpoints.find(
+        (endpoint) =>
+          endpoint.enabled !== false &&
+          endpoint.method === input.method &&
+          endpoint.url === input.url &&
+          endpoint.slug !== input.excludeSlug
+      );
+
+      const availability: EndpointAvailability = conflict
+        ? {
+            available: false,
+            billerName: conflict.billerName,
+            billerSlug: conflict.billerSlug,
+            endpointSlug: conflict.slug,
+          }
+        : { available: true };
+
+      return availability;
     },
     async createEndpoint(input: CreateEndpointInput) {
       await Promise.resolve();

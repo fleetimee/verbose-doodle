@@ -52,6 +52,7 @@ describe("Endpoint HTTP data adapter", () => {
       {
         billerName: "PDAM",
         billerSlug: "pdam",
+        enabled: true,
         id: "7",
         method: "POST",
         responses: [
