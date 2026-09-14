@@ -1,5 +1,6 @@
 import type {
   CreateEndpointInput,
+  EndpointAvailability,
   EndpointDataAdapter,
   EndpointDataTransport,
   ResponseCloneInput,
@@ -122,6 +123,7 @@ function mapEndpoint(input: unknown): Endpoint {
     billerName:
       nullableString(value(endpoint, "billerName", "biller_name")) ?? undefined,
     billerSlug: stringValue(value(endpoint, "billerSlug", "biller_slug")),
+    enabled: booleanValue(value(endpoint, "enabled"), true),
     id: stringValue(value(endpoint, "id", "endpoint_id")),
     method: stringValue(value(endpoint, "method")) as Endpoint["method"],
     responses: Array.isArray(responses) ? responses.map(mapResponse) : [],
@@ -138,6 +140,25 @@ function listValue(record: ApiRecord, ...keys: string[]): unknown[] {
 function endpointFromResponse(response: unknown): Endpoint {
   const data = payload(response);
   return mapEndpoint(value(data, "endpoint") ?? data);
+}
+
+function endpointAvailabilityFromResponse(
+  response: unknown
+): EndpointAvailability {
+  const data = payload(response);
+  const availability = objectValue(value(data, "availability") ?? data);
+  return {
+    available: booleanValue(value(availability, "available")),
+    billerName:
+      nullableString(value(availability, "billerName", "biller_name")) ??
+      undefined,
+    billerSlug:
+      nullableString(value(availability, "billerSlug", "biller_slug")) ??
+      undefined,
+    endpointSlug:
+      nullableString(value(availability, "endpointSlug", "endpoint_slug")) ??
+      undefined,
+  };
 }
 
 function responseFromResponse(response: unknown): EndpointResponse {
@@ -308,6 +329,16 @@ export function createHttpEndpointAdapter(
         API_ENDPOINTS.admin.endpoints.trafficLogs.clear(endpointId)
       );
     },
+    async checkEndpointAvailability(input) {
+      const response = await transport.get<unknown>(
+        API_ENDPOINTS.admin.endpoints.availability(
+          input.method,
+          input.url,
+          input.excludeSlug
+        )
+      );
+      return endpointAvailabilityFromResponse(response);
+    },
     async createEndpoint(input) {
       const response = await transport.post<
         unknown,
@@ -441,11 +472,15 @@ export function createHttpEndpointAdapter(
       const response = await transport.patch<
         unknown,
         Partial<{
+          enabled: boolean;
           method: CreateEndpointInput["method"];
           url: string;
           biller_slug: string;
         }>
       >(API_ENDPOINTS.admin.endpoints.update(input.endpointSlug), {
+        ...(input.changes.enabled === undefined
+          ? {}
+          : { enabled: input.changes.enabled }),
         ...(input.changes.method ? { method: input.changes.method } : {}),
         ...(input.changes.url ? { url: input.changes.url } : {}),
         ...(input.changes.billerSlug

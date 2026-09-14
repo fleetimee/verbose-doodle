@@ -17,10 +17,12 @@ import { AddBillerDialog } from "@/features/billers/components/add-biller-dialog
 import { useCreateBiller } from "@/features/billers/hooks/use-create-biller";
 import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
 import type { Biller } from "@/features/billers/types";
+import { httpEndpointAdapter } from "@/features/endpoints/data/http-endpoint-adapter";
 import {
   EndpointForm,
   type EndpointFormHandle,
 } from "@/features/endpoints/forms/endpoint-form";
+import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import { messages } from "@/lib/i18n";
 
@@ -49,6 +51,7 @@ export function AddEndpointSheet({
   const { data: billers = [], isLoading: isLoadingBillers } = useGetBillers();
   const { mutate: createBiller, isPending: isCreatingBiller } =
     useCreateBiller();
+  const { updateEndpoint } = useEndpointCatalog();
   const availableBillers = useMemo(() => {
     if (
       !createdBiller ||
@@ -125,9 +128,18 @@ export function AddEndpointSheet({
         >
           <EndpointForm
             billers={availableBillers}
+            checkEndpointAvailability={
+              httpEndpointAdapter.checkEndpointAvailability
+            }
             initialBillerSlug={initialBillerSlug}
             isLoadingBillers={isLoadingBillers}
             onAddBiller={() => setIsAddBillerOpen(true)}
+            onDisableConflictingEndpoint={(endpointSlug) =>
+              updateEndpoint.mutateAsync({
+                changes: { enabled: false },
+                endpointSlug,
+              })
+            }
             onSubmit={handleFormSubmit}
             ref={formRef}
           >

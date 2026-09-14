@@ -20,6 +20,7 @@ export type EndpointResponse = {
  * Endpoint entity
  */
 export type Endpoint = {
+  enabled?: boolean;
   id: string;
   slug: string;
   method: HttpMethod;

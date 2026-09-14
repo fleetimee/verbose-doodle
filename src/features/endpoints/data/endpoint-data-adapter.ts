@@ -16,11 +16,23 @@ export type CreateEndpointInput = {
   readonly billerSlug: string;
 };
 
+export type EndpointAvailability = {
+  readonly available: boolean;
+  readonly billerName?: string;
+  readonly billerSlug?: string;
+  readonly endpointSlug?: string;
+};
+
+export type EndpointAvailabilityInput = Pick<
+  CreateEndpointInput,
+  "method" | "url"
+> & { readonly excludeSlug?: string };
+
 export type UpdateEndpointInput = {
   readonly endpointSlug: string;
   readonly changes: Partial<
     Pick<CreateEndpointInput, "method" | "url" | "billerSlug">
-  >;
+  > & { readonly enabled?: boolean };
 };
 
 export type CreateResponseInput = {
@@ -72,6 +84,9 @@ export type EndpointDataAdapter = {
   readonly listEndpoints: () => Promise<Endpoint[]>;
   readonly getEndpoint: (endpointSlug: string) => Promise<Endpoint | null>;
   readonly createEndpoint: (input: CreateEndpointInput) => Promise<Endpoint>;
+  readonly checkEndpointAvailability: (
+    input: EndpointAvailabilityInput
+  ) => Promise<EndpointAvailability>;
   readonly updateEndpoint: (input: UpdateEndpointInput) => Promise<Endpoint>;
   readonly deleteEndpoint: (endpointSlug: string) => Promise<void>;
   readonly createResponse: (

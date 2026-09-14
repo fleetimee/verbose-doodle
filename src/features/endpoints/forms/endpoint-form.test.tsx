@@ -30,6 +30,26 @@ describe("EndpointForm", () => {
     ).toBeDefined();
   });
 
+  test("rejects a path without a leading slash while typing", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <EndpointForm onSubmit={() => {}}>
+        <button type="submit">{SUBMIT_BUTTON_LABEL}</button>
+      </EndpointForm>
+    );
+
+    const urlInput = screen.getByLabelText("URL") as HTMLInputElement;
+    await user.clear(urlInput);
+    await user.type(urlInput, "auth");
+
+    expect(screen.getByText("URL must start with /")).toBeDefined();
+    expect(
+      screen.getByText("Enter a valid path to preview the endpoint URL.")
+    ).toBeDefined();
+    expect(screen.queryByText("POST http://localhost:8080/auth")).toBeNull();
+  });
+
   test("submits the selected biller slug", async () => {
     const user = userEvent.setup();
     const handleSubmit = mock((_data: EndpointFormData) => {});
@@ -95,5 +115,59 @@ describe("EndpointForm", () => {
       )
     ).toBeDefined();
     expect(handleSubmit).not.toHaveBeenCalled();
+  });
+
+  test("shows the biller that already owns the method and URL", async () => {
+    const handleSubmit = mock((_data: EndpointFormData) => {});
+
+    render(
+      <EndpointForm
+        checkEndpointAvailability={async () => ({
+          available: false,
+          billerName: "PLN",
+          billerSlug: "pln",
+        })}
+        initialBillerSlug="pln"
+        onSubmit={handleSubmit}
+      >
+        <button type="submit">{SUBMIT_BUTTON_LABEL}</button>
+      </EndpointForm>
+    );
+
+    expect(
+      await screen.findByText("GET /rest is already used by PLN.")
+    ).toBeDefined();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: SUBMIT_BUTTON_LABEL })
+    );
+    expect(handleSubmit).not.toHaveBeenCalled();
+  });
+
+  test("disables the conflicting endpoint after confirmation", async () => {
+    const user = userEvent.setup();
+    const disableEndpoint = mock(async (_endpointSlug: string) => {});
+
+    render(
+      <EndpointForm
+        checkEndpointAvailability={async () => ({
+          available: false,
+          billerName: "PLN",
+          endpointSlug: "pln-get-rest",
+        })}
+        initialBillerSlug="pln"
+        onDisableConflictingEndpoint={disableEndpoint}
+        onSubmit={() => {}}
+      >
+        <button type="submit">{SUBMIT_BUTTON_LABEL}</button>
+      </EndpointForm>
+    );
+
+    await user.click(
+      await screen.findByRole("button", { name: "Disable existing endpoint" })
+    );
+    await user.click(screen.getByRole("button", { name: "Disable endpoint" }));
+
+    expect(disableEndpoint).toHaveBeenCalledWith("pln-get-rest");
   });
 });

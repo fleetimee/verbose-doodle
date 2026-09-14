@@ -21,6 +21,11 @@ export const endpointsMessages = {
   billersLoading: "Loading billers...",
   cancelEndpointEditTooltip: "Cancel endpoint edit",
   clientErrorStatusGroup: "Client Errors (4xx)",
+  conflictTitle: "Endpoint already in use",
+  conflictResolution:
+    "Choose a different path or method, or disable the existing endpoint to use this one.",
+  conflictResolutionReadOnly: "Choose a different path or method to continue.",
+  disableExistingEndpoint: "Disable existing endpoint",
   createEndpoint: "Create Endpoint",
   createFirstButton: "Create First Endpoint",
   creating: "Creating...",
