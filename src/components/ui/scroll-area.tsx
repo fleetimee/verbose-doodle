@@ -3,23 +3,46 @@
 import * as React from "react"
 import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area"
 
+import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+
+const scrollAreaVariants = cva("relative group/scroll-area", {
+  variants: {
+    variant: {
+      default: "",
+      terminal: "rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner",
+      bordered: "rounded-lg border border-border/70",
+      subtle: "border-t border-border/70",
+      split: "border-b bg-muted/10 lg:border-r lg:border-b-0",
+      fit: "[&>[data-slot=scroll-area-viewport]>[role=presentation]]:!min-w-0",
+      visible: "[&>[data-slot=scroll-area-scrollbar]]:opacity-100",
+      overview:
+        "[&>[data-slot=scroll-area-viewport]>[role=presentation]]:!min-w-0 overflow-hidden [&>[data-slot=scroll-area-viewport]]:overflow-hidden",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+})
 
 function ScrollArea({
   className,
+  variant = "default",
   children,
   contentClassName,
   viewportRef,
   ...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.Root> & {
-  contentClassName?: string;
-  viewportRef?: React.ComponentProps<typeof ScrollAreaPrimitive.Viewport>["ref"];
-}) {
+}: React.ComponentProps<typeof ScrollAreaPrimitive.Root> &
+  VariantProps<typeof scrollAreaVariants> & {
+    contentClassName?: string;
+    viewportRef?: React.ComponentProps<typeof ScrollAreaPrimitive.Viewport>["ref"];
+  }) {
   return (
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
+      data-variant={variant}
       data-vaul-no-drag
-      className={cn("relative group/scroll-area", className)}
+      className={cn(scrollAreaVariants({ variant }), className)}
       {...props}
     >
       <ScrollAreaPrimitive.Viewport
@@ -65,4 +88,4 @@ function ScrollBar({
   )
 }
 
-export { ScrollArea, ScrollBar }
+export { ScrollArea, ScrollBar, scrollAreaVariants }

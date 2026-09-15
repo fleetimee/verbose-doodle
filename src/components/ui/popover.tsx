@@ -35,6 +35,23 @@ function PopoverTrigger({
   )
 }
 
+import { cva, type VariantProps } from "class-variance-authority"
+
+const popoverContentVariants = cva(
+  "z-50 w-72 origin-(--transform-origin) rounded-md border bg-popover text-popover-foreground shadow-md outline-hidden transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
+  {
+    variants: {
+      size: {
+        default: "p-4",
+        none: "p-0",
+      },
+    },
+    defaultVariants: {
+      size: "default",
+    },
+  }
+)
+
 function PopoverContent({
   className,
   align = "center",
@@ -42,12 +59,14 @@ function PopoverContent({
   side = "bottom",
   sideOffset = 4,
   portalContainer,
+  size = "default",
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Popup> &
   { portalContainer?: React.ComponentProps<typeof PopoverPrimitive.Portal>["container"] } & Pick<
     PopoverPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
-  >) {
+  > &
+  VariantProps<typeof popoverContentVariants>) {
   return (
     <PopoverPrimitive.Portal container={portalContainer}>
       <PopoverPrimitive.Positioner
@@ -59,10 +78,8 @@ function PopoverContent({
       >
         <PopoverPrimitive.Popup
           data-slot="popover-content"
-          className={cn(
-            "z-50 w-72 origin-(--transform-origin) rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-hidden transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
-            className
-          )}
+          data-size={size}
+          className={cn(popoverContentVariants({ size }), className)}
           {...props}
         />
       </PopoverPrimitive.Positioner>
@@ -88,4 +105,10 @@ function PopoverAnchor({
   })
 }
 
-export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor }
+export {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverAnchor,
+  popoverContentVariants,
+}

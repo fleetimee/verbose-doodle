@@ -1,5 +1,6 @@
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react/alert-dialog"
+import type { VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -118,12 +119,16 @@ function AlertDialogDescription({
 
 function AlertDialogAction({
   className,
+  variant = "default",
+  size = "default",
   ...props
-}: React.ComponentProps<"button">) {
+}: React.ComponentProps<"button"> & VariantProps<typeof buttonVariants>) {
   return (
     <button
       data-slot="alert-dialog-action"
-      className={cn(buttonVariants(), className)}
+      data-variant={variant}
+      data-size={size}
+      className={cn(buttonVariants({ variant, size }), className)}
       type="button"
       {...props}
     />
@@ -142,6 +147,9 @@ function AlertDialogCancel({
     />
   )
 }
+
+export const alertDialogActionVariants = buttonVariants
+export const alertDialogCancelVariants = buttonVariants
 
 export {
   AlertDialog,

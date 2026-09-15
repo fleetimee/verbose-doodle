@@ -3,6 +3,7 @@
 import * as React from "react"
 import { PreviewCard as HoverCardPrimitive } from "@base-ui/react/preview-card"
 
+import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 function HoverCard({
@@ -33,18 +34,35 @@ function HoverCardTrigger({
   )
 }
 
+const hoverCardContentVariants = cva(
+  "z-50 w-64 origin-(--transform-origin) rounded-md border bg-popover text-popover-foreground shadow-md outline-hidden transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
+  {
+    variants: {
+      size: {
+        default: "p-4",
+        none: "p-0",
+      },
+    },
+    defaultVariants: {
+      size: "default",
+    },
+  }
+)
+
 function HoverCardContent({
   className,
   align = "center",
   alignOffset = 0,
   side = "bottom",
   sideOffset = 4,
+  size = "default",
   ...props
 }: React.ComponentProps<typeof HoverCardPrimitive.Popup> &
   Pick<
     HoverCardPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
-  >) {
+  > &
+  VariantProps<typeof hoverCardContentVariants>) {
   return (
     <HoverCardPrimitive.Portal data-slot="hover-card-portal">
       <HoverCardPrimitive.Positioner
@@ -55,10 +73,8 @@ function HoverCardContent({
       >
         <HoverCardPrimitive.Popup
           data-slot="hover-card-content"
-          className={cn(
-            "z-50 w-64 origin-(--transform-origin) rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-hidden transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
-            className
-          )}
+          data-size={size}
+          className={cn(hoverCardContentVariants({ size }), className)}
           {...props}
         />
       </HoverCardPrimitive.Positioner>
@@ -66,4 +82,9 @@ function HoverCardContent({
   )
 }
 
-export { HoverCard, HoverCardTrigger, HoverCardContent }
+export {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent,
+  hoverCardContentVariants,
+}

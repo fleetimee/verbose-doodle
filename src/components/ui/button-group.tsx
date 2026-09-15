@@ -10,6 +10,10 @@ const buttonGroupVariants = cva(
   "flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*]:focus-visible:relative [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-md has-[>[data-slot=button-group]]:gap-2",
   {
     variants: {
+      variant: {
+        default: "",
+        muted: "rounded-md border border-border/70 bg-muted/20",
+      },
       orientation: {
         horizontal:
           "[&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0 [&>*:not(:last-child)]:rounded-r-none",
@@ -18,6 +22,7 @@ const buttonGroupVariants = cva(
       },
     },
     defaultVariants: {
+      variant: "default",
       orientation: "horizontal",
     },
   }
@@ -25,6 +30,7 @@ const buttonGroupVariants = cva(
 
 function ButtonGroup({
   className,
+  variant = "default",
   orientation,
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
@@ -32,8 +38,9 @@ function ButtonGroup({
     <div
       role="group"
       data-slot="button-group"
+      data-variant={variant}
       data-orientation={orientation}
-      className={cn(buttonGroupVariants({ orientation }), className)}
+      className={cn(buttonGroupVariants({ variant, orientation }), className)}
       {...props}
     />
   )

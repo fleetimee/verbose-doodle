@@ -39,10 +39,19 @@ const itemVariants = cva(
         default: "bg-transparent",
         outline: "border-border",
         muted: "bg-muted/50",
+        elevated:
+          "rounded-2xl border-2 border-border/80 border-b-4 bg-card/95 shadow-xs transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-border/90 hover:border-b-primary/60 hover:bg-card hover:shadow-md active:translate-y-1 active:border-b-2",
+        "elevated-subtle":
+          "rounded-2xl border-2 border-border/80 border-b-4 bg-card/85 transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-border/90 hover:border-b-primary/60 hover:bg-accent/40 hover:shadow-sm active:translate-y-1 active:border-b-2",
+        dashed:
+          "rounded-2xl border-2 border-dashed border-border/80 bg-muted/35 shadow-xs transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-border/90 hover:bg-muted/50 hover:shadow-md active:translate-y-1",
+        "dashed-subtle":
+          "rounded-2xl border-2 border-dashed border-border/80 bg-muted/35 transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-border/90 hover:bg-muted/50 active:translate-y-1",
       },
       size: {
-        default: "p-4 gap-4 ",
+        default: "p-4 gap-4",
         sm: "py-3 px-4 gap-2.5",
+        none: "p-0 gap-0",
       },
     },
     defaultVariants: {
@@ -67,7 +76,7 @@ function Item({
         "data-slot": "item",
         "data-variant": variant,
         "data-size": size,
-        className: cn(itemVariants({ variant, size, className })),
+        className: cn(itemVariants({ variant, size }), className),
       } as React.ComponentProps<"div">,
       props
     ),
@@ -106,27 +115,68 @@ function ItemMedia({
   )
 }
 
-function ItemContent({ className, ...props }: React.ComponentProps<"div">) {
+const itemContentVariants = cva(
+  "flex flex-1 flex-col gap-1 [&+[data-slot=item-content]]:flex-none",
+  {
+    variants: {
+      variant: {
+        default: "",
+      },
+      size: {
+        default: "",
+        card: "gap-3 py-4 pr-3 pl-5",
+        list: "gap-2",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+function ItemContent({
+  className,
+  variant = "default",
+  size = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof itemContentVariants>) {
   return (
     <div
       data-slot="item-content"
-      className={cn(
-        "flex flex-1 flex-col gap-1 [&+[data-slot=item-content]]:flex-none",
-        className
-      )}
+      data-variant={variant}
+      data-size={size}
+      className={cn(itemContentVariants({ variant, size }), className)}
       {...props}
     />
   )
 }
 
-function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
+const itemTitleVariants = cva(
+  "flex w-fit items-center gap-2 text-sm leading-snug font-medium",
+  {
+    variants: {
+      variant: {
+        default: "",
+        bold: "font-bold text-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+function ItemTitle({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof itemTitleVariants>) {
   return (
     <div
       data-slot="item-title"
-      className={cn(
-        "flex w-fit items-center gap-2 text-sm leading-snug font-medium",
-        className
-      )}
+      data-variant={variant}
+      className={cn(itemTitleVariants({ variant }), className)}
       {...props}
     />
   )
@@ -146,11 +196,34 @@ function ItemDescription({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function ItemActions({ className, ...props }: React.ComponentProps<"div">) {
+const itemActionsVariants = cva("flex items-center gap-2", {
+  variants: {
+    variant: {
+      default: "",
+    },
+    size: {
+      default: "",
+      card: "pr-4",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+    size: "default",
+  },
+})
+
+function ItemActions({
+  className,
+  variant = "default",
+  size = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof itemActionsVariants>) {
   return (
     <div
       data-slot="item-actions"
-      className={cn("flex items-center gap-2", className)}
+      data-variant={variant}
+      data-size={size}
+      className={cn(itemActionsVariants({ variant, size }), className)}
       {...props}
     />
   )
@@ -193,4 +266,8 @@ export {
   ItemDescription,
   ItemHeader,
   ItemFooter,
+  itemVariants,
+  itemContentVariants,
+  itemTitleVariants,
+  itemActionsVariants,
 }

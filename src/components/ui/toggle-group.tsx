@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Toggle as TogglePrimitive } from "@base-ui/react/toggle"
 import { ToggleGroup as ToggleGroupPrimitive } from "@base-ui/react/toggle-group"
-import { type VariantProps } from "class-variance-authority"
+import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import { toggleVariants } from "@/components/ui/toggle"
@@ -16,17 +16,41 @@ const ToggleGroupContext = React.createContext<
   spacing: 0,
 })
 
+const toggleGroupVariants = cva(
+  "group/toggle-group flex w-fit items-center gap-[--spacing(var(--gap))]",
+  {
+    variants: {
+      variant: {
+        default: "rounded-md data-[spacing=default]:data-[variant=outline]:shadow-xs",
+        outline: "rounded-md border border-input shadow-xs",
+        subtle: "rounded-xl border border-border/80 bg-muted/40 p-1",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function ToggleGroup({
   className,
-  variant,
+  variant = "default",
   size,
   spacing = 0,
   children,
   ...props
 }: ToggleGroupPrimitive.Props &
-  VariantProps<typeof toggleVariants> & {
+  VariantProps<typeof toggleGroupVariants> &
+  Omit<VariantProps<typeof toggleVariants>, "variant"> & {
     spacing?: number
   }) {
+  const itemVariant =
+    variant === "subtle"
+      ? "tab"
+      : variant === "outline"
+        ? "outline"
+        : "default"
+
   return (
     <ToggleGroupPrimitive
       data-slot="toggle-group"
@@ -34,13 +58,12 @@ function ToggleGroup({
       data-size={size}
       data-spacing={spacing}
       style={{ "--gap": spacing } as React.CSSProperties}
-      className={cn(
-        "group/toggle-group flex w-fit items-center gap-[--spacing(var(--gap))] rounded-md data-[spacing=default]:data-[variant=outline]:shadow-xs",
-        className
-      )}
+      className={cn(toggleGroupVariants({ variant }), className)}
       {...props}
     >
-      <ToggleGroupContext.Provider value={{ variant, size, spacing }}>
+      <ToggleGroupContext.Provider
+        value={{ variant: itemVariant, size, spacing }}
+      >
         {children}
       </ToggleGroupContext.Provider>
     </ToggleGroupPrimitive>
@@ -78,4 +101,4 @@ function ToggleGroupItem({
   )
 }
 
-export { ToggleGroup, ToggleGroupItem }
+export { ToggleGroup, ToggleGroupItem, toggleGroupVariants }

@@ -1,5 +1,6 @@
 import * as React from "react"
 import { Menu as DropdownMenuPrimitive } from "@base-ui/react/menu"
+import { cva, type VariantProps } from "class-variance-authority"
 import { CircleIcon } from "@/components/hugeicons"
 
 import { cn } from "@/lib/utils"
@@ -42,14 +43,37 @@ function DropdownMenuTrigger({
   )
 }
 
+const dropdownMenuContentVariants = cva(
+  "z-50 max-h-(--available-height) min-w-[8rem] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md outline-none transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
+  {
+    variants: {
+      variant: {
+        default: "",
+        subtle: "rounded-xl p-1.5",
+      },
+      size: {
+        default: "p-1",
+        compact: "p-1.5",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
 function DropdownMenuContent({
   className,
   align = "center",
   alignOffset = 0,
   side = "bottom",
   sideOffset = 4,
+  variant = "default",
+  size = "default",
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Popup> &
+  VariantProps<typeof dropdownMenuContentVariants> &
   Pick<
     DropdownMenuPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
@@ -65,10 +89,9 @@ function DropdownMenuContent({
       >
         <DropdownMenuPrimitive.Popup
           data-slot="dropdown-menu-content"
-          className={cn(
-            "z-50 max-h-(--available-height) min-w-[8rem] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
-            className
-          )}
+          data-variant={variant}
+          data-size={size}
+          className={cn(dropdownMenuContentVariants({ variant, size }), className)}
           {...props}
         />
       </DropdownMenuPrimitive.Positioner>
@@ -84,24 +107,37 @@ function DropdownMenuGroup({
   )
 }
 
+const dropdownMenuItemVariants = cva(
+  "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 data-highlighted:bg-accent data-highlighted:text-accent-foreground data-[inset]:pl-8 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  {
+    variants: {
+      variant: {
+        default: "",
+        destructive:
+          "text-destructive focus:bg-destructive/10 focus:text-destructive data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive dark:focus:bg-destructive/20 dark:data-[variant=destructive]:focus:bg-destructive/20",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function DropdownMenuItem({
   className,
   inset,
   variant = "default",
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
-  inset?: boolean
-  variant?: "default" | "destructive"
-}) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> &
+  VariantProps<typeof dropdownMenuItemVariants> & {
+    inset?: boolean
+  }) {
   return (
     <DropdownMenuPrimitive.Item
       data-inset={inset}
       data-slot="dropdown-menu-item"
       data-variant={variant}
-      className={cn(
-        "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 data-highlighted:bg-accent data-highlighted:text-accent-foreground data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        className
-      )}
+      className={cn(dropdownMenuItemVariants({ variant }), className)}
       {...props}
     />
   )
@@ -267,9 +303,11 @@ export {
   DropdownMenuPortal,
   DropdownMenuTrigger,
   DropdownMenuContent,
+  dropdownMenuContentVariants,
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuItem,
+  dropdownMenuItemVariants,
   DropdownMenuCheckboxItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,

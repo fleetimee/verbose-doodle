@@ -1,28 +1,45 @@
 import * as React from "react"
 import * as ResizablePrimitive from "react-resizable-panels"
 
+import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react";
 import { DragDropVerticalIcon } from "@hugeicons/core-free-icons";
 
 type ResizablePanelGroupProps = React.ComponentProps<
   typeof ResizablePrimitive.Group
-> & {
-  direction?: React.ComponentProps<typeof ResizablePrimitive.Group>["orientation"]
-}
+> &
+  VariantProps<typeof resizablePanelGroupVariants> & {
+    direction?: React.ComponentProps<typeof ResizablePrimitive.Group>["orientation"]
+  }
+
+const resizablePanelGroupVariants = cva(
+  "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
+  {
+    variants: {
+      variant: {
+        default: "",
+        bordered:
+          "rounded-xl border border-slate-200 bg-white dark:border-[#2b2f37] dark:bg-[#0d1117]",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
 
 function ResizablePanelGroup({
   className,
+  variant = "default",
   direction,
   ...props
 }: ResizablePanelGroupProps) {
   return (
     <ResizablePrimitive.Group
       data-slot="resizable-panel-group"
-      className={cn(
-        "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
-        className
-      )}
+      data-variant={variant}
+      className={cn(resizablePanelGroupVariants({ variant }), className)}
       orientation={direction}
       {...props}
     />
@@ -35,20 +52,36 @@ function ResizablePanel({
   return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />
 }
 
+const resizableHandleVariants = cva(
+  "focus-visible:ring-ring relative flex items-center justify-center after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:outline-hidden data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:translate-x-0 data-[panel-group-direction=vertical]:after:-translate-y-1/2 [&[data-panel-group-direction=vertical]>div]:rotate-90",
+  {
+    variants: {
+      variant: {
+        default: "bg-border w-px",
+        colored:
+          "w-1 bg-slate-300 transition-colors hover:bg-sky-500 dark:bg-[#2b2f37] dark:hover:bg-sky-400",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function ResizableHandle({
   withHandle,
   className,
+  variant = "default",
   ...props
-}: React.ComponentProps<typeof ResizablePrimitive.Separator> & {
-  withHandle?: boolean
-}) {
+}: React.ComponentProps<typeof ResizablePrimitive.Separator> &
+  VariantProps<typeof resizableHandleVariants> & {
+    withHandle?: boolean
+  }) {
   return (
     <ResizablePrimitive.Separator
       data-slot="resizable-handle"
-      className={cn(
-        "bg-border focus-visible:ring-ring relative flex w-px items-center justify-center after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:outline-hidden data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:translate-x-0 data-[panel-group-direction=vertical]:after:-translate-y-1/2 [&[data-panel-group-direction=vertical]>div]:rotate-90",
-        className
-      )}
+      data-variant={variant}
+      className={cn(resizableHandleVariants({ variant }), className)}
       {...props}
     >
       {withHandle && (
@@ -60,4 +93,10 @@ function ResizableHandle({
   )
 }
 
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle }
+export {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+  resizablePanelGroupVariants,
+  resizableHandleVariants,
+}

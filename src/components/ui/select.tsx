@@ -1,5 +1,6 @@
 import * as React from "react"
 import { Select as SelectPrimitive } from "@base-ui/react/select"
+import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tick02Icon, ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons";
@@ -42,22 +43,57 @@ function SelectValue({
   return <SelectPrimitive.Value data-slot="select-value" {...props} />
 }
 
+const selectTriggerVariants = cva(
+  "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] data-disabled:cursor-not-allowed data-disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  {
+    variants: {
+      variant: {
+        default: "",
+        method:
+          "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0",
+        "method-get":
+          "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0 border-sky-500/40 border-b-sky-500/80 bg-sky-500/15 text-sky-600 dark:border-sky-500/50 dark:border-b-sky-400 dark:bg-sky-950/60 dark:text-sky-300",
+        "method-post":
+          "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0 border-emerald-500/40 border-b-emerald-500/80 bg-emerald-500/15 text-emerald-600 dark:border-emerald-500/50 dark:border-b-emerald-400 dark:bg-emerald-950/60 dark:text-emerald-300",
+        "method-put":
+          "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0 border-amber-500/40 border-b-amber-500/80 bg-amber-500/15 text-amber-600 dark:border-amber-500/50 dark:border-b-amber-400 dark:bg-amber-950/60 dark:text-amber-300",
+        "method-delete":
+          "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0 border-rose-500/40 border-b-rose-500/80 bg-rose-500/15 text-rose-600 dark:border-rose-500/50 dark:border-b-rose-400 dark:bg-rose-950/60 dark:text-rose-300",
+        "method-patch":
+          "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0 border-purple-500/40 border-b-purple-500/80 bg-purple-500/15 text-purple-600 dark:border-purple-500/50 dark:border-b-purple-400 dark:bg-purple-950/60 dark:text-purple-300",
+        mono: "font-mono text-sm shadow-none",
+        subtle: "border-transparent shadow-none",
+        "subtle-active": "border-transparent bg-background shadow-xs",
+      },
+      size: {
+        default: "data-[size=default]:h-9",
+        sm: "data-[size=sm]:h-8",
+        md: "data-[size=md]:h-11",
+        lg: "data-[size=lg]:h-14",
+        badge: "h-auto px-2.5 py-0.5 text-xs",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
 function SelectTrigger({
   className,
+  variant = "default",
   size = "default",
   children,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
-  size?: "sm" | "default"
-}) {
+}: React.ComponentProps<typeof SelectPrimitive.Trigger> &
+  VariantProps<typeof selectTriggerVariants>) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
+      data-variant={variant}
       data-size={size}
-      className={cn(
-        "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] data-disabled:cursor-not-allowed data-disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        className
-      )}
+      className={cn(selectTriggerVariants({ variant, size }), className)}
       {...props}
     >
       {children}
@@ -208,4 +244,5 @@ export {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
+  selectTriggerVariants,
 }

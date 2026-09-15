@@ -39,14 +39,37 @@ function FieldLegend({
   )
 }
 
-function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
+const fieldGroupVariants = cva(
+  "group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4",
+  {
+    variants: {
+      variant: {
+        default: "",
+      },
+      size: {
+        default: "",
+        compact: "gap-4",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+function FieldGroup({
+  className,
+  variant = "default",
+  size = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof fieldGroupVariants>) {
   return (
     <div
       data-slot="field-group"
-      className={cn(
-        "group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4",
-        className
-      )}
+      data-variant={variant}
+      data-size={size}
+      className={cn(fieldGroupVariants({ variant, size }), className)}
       {...props}
     />
   )
@@ -92,14 +115,31 @@ function Field({
   )
 }
 
-function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
+const fieldContentVariants = cva(
+  "group/field-content flex flex-1 flex-col gap-1.5 leading-snug",
+  {
+    variants: {
+      variant: {
+        default: "",
+        foreground: "text-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+function FieldContent({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof fieldContentVariants>) {
   return (
     <div
       data-slot="field-content"
-      className={cn(
-        "group/field-content flex flex-1 flex-col gap-1.5 leading-snug",
-        className
-      )}
+      data-variant={variant}
+      className={cn(fieldContentVariants({ variant }), className)}
       {...props}
     />
   )
@@ -243,4 +283,6 @@ export {
   FieldSet,
   FieldContent,
   FieldTitle,
+  fieldGroupVariants,
+  fieldContentVariants,
 }

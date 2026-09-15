@@ -1,7 +1,6 @@
-"use client"
-
 import * as React from "react"
 import { ContextMenu as ContextMenuPrimitive } from "@base-ui/react/context-menu"
+import { cva, type VariantProps } from "class-variance-authority"
 import { CircleIcon } from "@/components/hugeicons"
 
 import { cn } from "@/lib/utils"
@@ -93,11 +92,35 @@ function ContextMenuSubTrigger({
   )
 }
 
+const contextMenuContentVariants = cva(
+  "z-50 max-h-(--available-height) min-w-[8rem] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
+  {
+    variants: {
+      variant: {
+        default: "",
+        subtle:
+          "rounded-lg border-border/70 bg-popover/95 shadow-lg backdrop-blur-xl",
+      },
+      size: {
+        default: "",
+        compact: "p-1",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
 function ContextMenuContent({
   className,
+  variant = "default",
+  size = "default",
   alignOffset = 0,
   ...props
 }: React.ComponentProps<typeof ContextMenuPrimitive.Popup> &
+  VariantProps<typeof contextMenuContentVariants> &
   Pick<ContextMenuPrimitive.Positioner.Props, "alignOffset">) {
   return (
     <ContextMenuPrimitive.Portal>
@@ -107,10 +130,9 @@ function ContextMenuContent({
       >
         <ContextMenuPrimitive.Popup
           data-slot="context-menu-content"
-          className={cn(
-            "z-50 max-h-(--available-height) min-w-[8rem] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
-            className
-          )}
+          data-variant={variant}
+          data-size={size}
+          className={cn(contextMenuContentVariants({ variant, size }), className)}
           {...props}
         />
       </ContextMenuPrimitive.Positioner>
@@ -131,24 +153,44 @@ function ContextMenuSubContent({
   )
 }
 
+const contextMenuItemVariants = cva(
+  "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 data-highlighted:bg-accent data-highlighted:text-accent-foreground data-[inset]:pl-8 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  {
+    variants: {
+      variant: {
+        default: "",
+        destructive:
+          "text-destructive focus:bg-destructive/10 focus:text-destructive data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20",
+      },
+      size: {
+        default: "",
+        compact: "h-7 rounded-md text-xs",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
 function ContextMenuItem({
   className,
   inset,
   variant = "default",
+  size = "default",
   ...props
-}: React.ComponentProps<typeof ContextMenuPrimitive.Item> & {
-  inset?: boolean
-  variant?: "default" | "destructive"
-}) {
+}: React.ComponentProps<typeof ContextMenuPrimitive.Item> &
+  VariantProps<typeof contextMenuItemVariants> & {
+    inset?: boolean
+  }) {
   return (
     <ContextMenuPrimitive.Item
       data-inset={inset}
       data-slot="context-menu-item"
       data-variant={variant}
-      className={cn(
-        "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 data-highlighted:bg-accent data-highlighted:text-accent-foreground data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        className
-      )}
+      data-size={size}
+      className={cn(contextMenuItemVariants({ variant, size }), className)}
       {...props}
     />
   )
@@ -204,21 +246,42 @@ function ContextMenuRadioItem({
   )
 }
 
+const contextMenuLabelVariants = cva(
+  "px-2 py-1.5 text-foreground text-sm font-medium data-[inset]:pl-8",
+  {
+    variants: {
+      variant: {
+        default: "",
+      },
+      size: {
+        default: "",
+        card: "px-2.5 py-2",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
 function ContextMenuLabel({
   className,
   inset,
+  variant = "default",
+  size = "default",
   ...props
-}: React.ComponentProps<typeof ContextMenuPrimitive.GroupLabel> & {
-  inset?: boolean
-}) {
+}: React.ComponentProps<typeof ContextMenuPrimitive.GroupLabel> &
+  VariantProps<typeof contextMenuLabelVariants> & {
+    inset?: boolean
+  }) {
   return (
     <ContextMenuPrimitive.GroupLabel
       data-inset={inset}
       data-slot="context-menu-label"
-      className={cn(
-        "px-2 py-1.5 text-foreground text-sm font-medium data-[inset]:pl-8",
-        className
-      )}
+      data-variant={variant}
+      data-size={size}
+      className={cn(contextMenuLabelVariants({ variant, size }), className)}
       {...props}
     />
   )
@@ -266,4 +329,7 @@ export {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuRadioGroup,
+  contextMenuContentVariants,
+  contextMenuItemVariants,
+  contextMenuLabelVariants,
 }

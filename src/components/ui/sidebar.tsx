@@ -60,6 +60,21 @@ function useSidebar() {
   return context
 }
 
+const sidebarProviderVariants = cva(
+  "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
+  {
+    variants: {
+      variant: {
+        default: "",
+        fixed: "h-dvh min-h-0 overflow-hidden",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
@@ -67,12 +82,14 @@ function SidebarProvider({
   className,
   style,
   children,
+  variant = "default",
   ...props
-}: React.ComponentProps<"div"> & {
-  defaultOpen?: boolean
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-}) {
+}: React.ComponentProps<"div"> &
+  VariantProps<typeof sidebarProviderVariants> & {
+    defaultOpen?: boolean
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+  }) {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
   const [sidebarWidth, setSidebarWidth] = React.useState(SIDEBAR_WIDTH)
@@ -149,6 +166,7 @@ function SidebarProvider({
       <TooltipProvider delayDuration={0}>
         <div
           data-slot="sidebar-wrapper"
+          data-variant={variant}
           style={
             {
               "--sidebar-width": sidebarWidth,
@@ -156,10 +174,7 @@ function SidebarProvider({
               ...style,
             } as React.CSSProperties
           }
-          className={cn(
-            "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
-            className
-          )}
+          className={cn(sidebarProviderVariants({ variant }), className)}
           {...props}
         >
           {children}
@@ -423,15 +438,31 @@ function SidebarRail({
   )
 }
 
-function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
+const sidebarInsetVariants = cva(
+  "bg-background relative flex w-full flex-1 flex-col md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
+  {
+    variants: {
+      variant: {
+        default: "",
+        card: "h-full min-h-0 overflow-hidden bg-card",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+function SidebarInset({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<"main"> & VariantProps<typeof sidebarInsetVariants>) {
   return (
     <main
       data-slot="sidebar-inset"
-      className={cn(
-        "bg-background relative flex w-full flex-1 flex-col",
-        "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
-        className
-      )}
+      data-variant={variant}
+      className={cn(sidebarInsetVariants({ variant }), className)}
       {...props}
     />
   )

@@ -454,8 +454,11 @@
 }
 
 html:has(.dashboard-shell),
+html:has([data-slot="sidebar-wrapper"]),
 html:has(.dashboard-shell) body,
-html:has(.dashboard-shell) #root {
+html:has([data-slot="sidebar-wrapper"]) body,
+html:has(.dashboard-shell) #root,
+html:has([data-slot="sidebar-wrapper"]) #root {
   height: 100%;
   overflow: hidden;
 }

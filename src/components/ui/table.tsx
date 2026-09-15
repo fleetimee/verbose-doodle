@@ -1,4 +1,5 @@
 import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
@@ -50,14 +51,32 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+const tableRowVariants = cva(
+  "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
+  {
+    variants: {
+      variant: {
+        default: "",
+        subtle: "bg-muted/30",
+        muted: "bg-muted/20",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+function TableRow({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<"tr"> & VariantProps<typeof tableRowVariants>) {
   return (
     <tr
       data-slot="table-row"
-      className={cn(
-        "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
-        className
-      )}
+      data-variant={variant}
+      className={cn(tableRowVariants({ variant }), className)}
       {...props}
     />
   )
@@ -76,14 +95,41 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   )
 }
 
-function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+const tableCellVariants = cva(
+  "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+  {
+    variants: {
+      variant: {
+        default: "",
+        mono: "font-mono text-xs text-muted-foreground",
+        truncate: "truncate font-mono text-xs text-muted-foreground",
+        medium: "font-medium text-xs",
+        muted: "text-muted-foreground",
+      },
+      size: {
+        default: "",
+        sm: "text-xs",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+function TableCell({
+  className,
+  variant = "default",
+  size = "default",
+  ...props
+}: React.ComponentProps<"td"> & VariantProps<typeof tableCellVariants>) {
   return (
     <td
       data-slot="table-cell"
-      className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-        className
-      )}
+      data-variant={variant}
+      data-size={size}
+      className={cn(tableCellVariants({ variant, size }), className)}
       {...props}
     />
   )

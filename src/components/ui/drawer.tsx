@@ -1,5 +1,4 @@
-"use client"
-
+import { cva, type VariantProps } from "class-variance-authority"
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
 
@@ -95,50 +94,124 @@ function DrawerContent({
   )
 }
 
-function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
+const drawerHeaderVariants = cva(
+  "flex flex-col gap-0.5 group-data-[vaul-drawer-direction=bottom]/drawer-content:text-center group-data-[vaul-drawer-direction=top]/drawer-content:text-center md:gap-1.5 md:text-left",
+  {
+    variants: {
+      size: {
+        default: "p-4",
+        lg: "px-6 pt-6 pb-2",
+        compact: "px-4 pt-4 pb-2",
+      },
+    },
+    defaultVariants: {
+      size: "default",
+    },
+  }
+)
+
+function DrawerHeader({
+  className,
+  size = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof drawerHeaderVariants>) {
   return (
     <div
       data-slot="drawer-header"
-      className={cn(
-        "flex flex-col gap-0.5 p-4 group-data-[vaul-drawer-direction=bottom]/drawer-content:text-center group-data-[vaul-drawer-direction=top]/drawer-content:text-center md:gap-1.5 md:text-left",
-        className
-      )}
+      data-size={size}
+      className={cn(drawerHeaderVariants({ size }), className)}
       {...props}
     />
   )
 }
 
-function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
+const drawerFooterVariants = cva("mt-auto flex flex-col gap-2", {
+  variants: {
+    variant: {
+      default: "",
+      bordered: "border-t",
+    },
+    size: {
+      default: "p-4",
+      lg: "px-6 pt-4 pb-6",
+      compact: "p-3",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+    size: "default",
+  },
+})
+
+function DrawerFooter({
+  className,
+  variant = "default",
+  size = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof drawerFooterVariants>) {
   return (
     <div
       data-slot="drawer-footer"
-      className={cn("mt-auto flex flex-col gap-2 p-4", className)}
+      data-variant={variant}
+      data-size={size}
+      className={cn(drawerFooterVariants({ variant, size }), className)}
       {...props}
     />
   )
 }
+
+const drawerTitleVariants = cva("text-foreground font-semibold", {
+  variants: {
+    size: {
+      default: "text-lg",
+      sm: "text-base tracking-tight",
+      xl: "text-xl",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+  },
+})
 
 function DrawerTitle({
   className,
+  size = "default",
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Title>) {
+}: React.ComponentProps<typeof DrawerPrimitive.Title> &
+  VariantProps<typeof drawerTitleVariants>) {
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
-      className={cn("text-foreground font-semibold", className)}
+      data-size={size}
+      className={cn(drawerTitleVariants({ size }), className)}
       {...props}
     />
   )
 }
 
+const drawerDescriptionVariants = cva("text-muted-foreground", {
+  variants: {
+    size: {
+      default: "text-sm",
+      xs: "text-xs",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+  },
+})
+
 function DrawerDescription({
   className,
+  size = "default",
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Description>) {
+}: React.ComponentProps<typeof DrawerPrimitive.Description> &
+  VariantProps<typeof drawerDescriptionVariants>) {
   return (
     <DrawerPrimitive.Description
       data-slot="drawer-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      data-size={size}
+      className={cn(drawerDescriptionVariants({ size }), className)}
       {...props}
     />
   )

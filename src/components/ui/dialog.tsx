@@ -1,3 +1,4 @@
+import { cva, type VariantProps } from "class-variance-authority"
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 
@@ -79,23 +80,53 @@ function DialogOverlay({
   )
 }
 
+const dialogContentVariants = cva(
+  "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg transition-[opacity,transform] duration-200 outline-none data-ending-style:translate-x-[-50%] data-ending-style:translate-y-[-50%] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:translate-x-[-50%] data-starting-style:translate-y-[-50%] data-starting-style:scale-95 data-starting-style:opacity-0",
+  {
+    variants: {
+      variant: {
+        default: "",
+        pane: "flex flex-col gap-0 overflow-hidden rounded-xl border p-0 shadow-2xl",
+        "dark-pane":
+          "flex flex-col gap-0 overflow-hidden border border-slate-200 bg-white p-0 text-slate-950 shadow-2xl dark:border-[#2b2f37] dark:bg-[#0b0f14] dark:text-slate-100",
+        elevated:
+          "rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-lg",
+      },
+      size: {
+        default: "sm:max-w-lg",
+        sm: "sm:max-w-sm",
+        md: "sm:max-w-md",
+        lg: "sm:max-w-lg",
+        xl: "sm:max-w-xl",
+        "2xl": "sm:max-w-2xl",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
 function DialogContent({
   className,
   children,
   showCloseButton = true,
+  variant = "default",
+  size = "default",
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Popup> & {
-  showCloseButton?: boolean
-}) {
+}: React.ComponentProps<typeof DialogPrimitive.Popup> &
+  VariantProps<typeof dialogContentVariants> & {
+    showCloseButton?: boolean
+  }) {
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
-        className={cn(
-          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg transition-[opacity,transform] duration-200 outline-none data-ending-style:translate-x-[-50%] data-ending-style:translate-y-[-50%] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:translate-x-[-50%] data-starting-style:translate-y-[-50%] data-starting-style:scale-95 data-starting-style:opacity-0 sm:max-w-lg",
-          className
-        )}
+        data-variant={variant}
+        data-size={size}
+        className={cn(dialogContentVariants({ variant, size }), className)}
         {...props}
       >
         {children}
@@ -113,11 +144,32 @@ function DialogContent({
   )
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+const dialogHeaderVariants = cva(
+  "flex flex-col gap-2 text-center sm:text-left",
+  {
+    variants: {
+      variant: {
+        default: "",
+        banner:
+          "flex-row items-center justify-between gap-3 border-b bg-muted/20 px-6 py-3.5 pr-14 text-left",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+function DialogHeader({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof dialogHeaderVariants>) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      data-variant={variant}
+      className={cn(dialogHeaderVariants({ variant }), className)}
       {...props}
     />
   )
@@ -150,27 +202,65 @@ function DialogFooter({
   )
 }
 
+const dialogTitleVariants = cva("leading-none font-semibold", {
+  variants: {
+    variant: {
+      default: "",
+      bold: "font-bold",
+    },
+    size: {
+      default: "text-lg",
+      sm: "text-base tracking-tight",
+      xl: "text-xl",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+    size: "default",
+  },
+})
+
 function DialogTitle({
   className,
+  variant = "default",
+  size = "default",
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Title>) {
+}: React.ComponentProps<typeof DialogPrimitive.Title> &
+  VariantProps<typeof dialogTitleVariants>) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      data-variant={variant}
+      data-size={size}
+      className={cn(dialogTitleVariants({ variant, size }), className)}
       {...props}
     />
   )
 }
 
+const dialogDescriptionVariants = cva("text-muted-foreground", {
+  variants: {
+    size: {
+      default: "text-sm",
+      xs: "text-xs",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+  },
+})
+
 function DialogDescription({
   className,
+  size = "default",
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Description>) {
+}: React.ComponentProps<typeof DialogPrimitive.Description> &
+  VariantProps<typeof dialogDescriptionVariants>) {
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-sm text-muted-foreground", className)}
+      data-size={size}
+      className={cn(dialogDescriptionVariants({ size }), className)}
       {...props}
     />
   )
@@ -187,4 +277,8 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
+  dialogContentVariants,
+  dialogHeaderVariants,
+  dialogTitleVariants,
+  dialogDescriptionVariants,
 }

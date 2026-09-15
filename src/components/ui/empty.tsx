@@ -2,14 +2,41 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-function Empty({ className, ...props }: React.ComponentProps<"div">) {
+const emptyVariants = cva(
+  "flex min-w-0 flex-1 flex-col items-center justify-center rounded-lg text-center text-balance",
+  {
+    variants: {
+      variant: {
+        default: "border-dashed",
+        bordered: "border",
+        plain: "border-0",
+      },
+      size: {
+        default: "gap-6 p-6 md:p-12",
+        compact: "gap-4 p-4",
+        lg: "gap-8 p-8 md:p-16",
+        none: "gap-0 p-0",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+function Empty({
+  className,
+  variant = "default",
+  size = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof emptyVariants>) {
   return (
     <div
       data-slot="empty"
-      className={cn(
-        "flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg border-dashed p-6 text-center text-balance md:p-12",
-        className
-      )}
+      data-variant={variant}
+      data-size={size}
+      className={cn(emptyVariants({ variant, size }), className)}
       {...props}
     />
   )
@@ -101,4 +128,5 @@ export {
   EmptyDescription,
   EmptyContent,
   EmptyMedia,
+  emptyVariants,
 }

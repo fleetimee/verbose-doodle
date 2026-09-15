@@ -1,6 +1,7 @@
 import * as React from "react"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
+import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { messages } from "@/lib/i18n"
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -23,11 +24,28 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
   )
 }
 
-function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
+const breadcrumbItemVariants = cva("inline-flex items-center gap-1.5", {
+  variants: {
+    variant: {
+      default: "",
+      truncate: "min-w-0 max-w-full truncate",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+})
+
+function BreadcrumbItem({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<"li"> & VariantProps<typeof breadcrumbItemVariants>) {
   return (
     <li
       data-slot="breadcrumb-item"
-      className={cn("inline-flex items-center gap-1.5", className)}
+      data-variant={variant}
+      className={cn(breadcrumbItemVariants({ variant }), className)}
       {...props}
     />
   )
