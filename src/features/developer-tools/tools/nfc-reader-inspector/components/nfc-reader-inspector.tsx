@@ -123,7 +123,7 @@ export function NfcReaderInspector() {
       description={copy.nfcReaderDescription}
       extraActions={
         <>
-          <Badge className="h-8 rounded-full px-3" variant="outline">
+          <Badge size="lg" variant="outline">
             {copy.nfcReaderTransport}
           </Badge>
           <a
@@ -194,12 +194,12 @@ export function NfcReaderInspector() {
         </div>
       )}
 
-      <Card
-        className="border-border/70 shadow-xs"
-        id={NFC_READER_TOUR_TARGETS.scan}
-      >
-        <CardHeader className="gap-4 md:flex-row md:items-center md:justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
+      <Card id={NFC_READER_TOUR_TARGETS.scan} variant="outline">
+        <CardHeader
+          className="md:flex-row md:items-center md:justify-between"
+          size="loose"
+        >
+          <CardTitle size="sm" variant="inline">
             <RadioReceiver data-icon="inline-start" />
             {copy.nfcScanTitle}
           </CardTitle>
@@ -257,14 +257,14 @@ export function NfcReaderInspector() {
         </CardContent>
       </Card>
 
-      <Card className="border-border/70 shadow-xs">
+      <Card variant="outline">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle size="sm" variant="inline">
             <CircleDashed data-icon="inline-start" />
             {copy.nfcReaderNextStepTitle}
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-muted-foreground text-sm leading-relaxed">
+        <CardContent variant="muted">
           {copy.nfcReaderNextStepDescription}
         </CardContent>
       </Card>
@@ -334,7 +334,7 @@ function ScanDetails({
       </ScanField>
       <div className="space-y-3 lg:col-span-2">
         <div className="flex items-center justify-between gap-3">
-          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
+          <p className="font-mono text-muted-foreground text-xs uppercase tracking-widest">
             {copy.nfcScanRecordsLabel}
           </p>
           <Badge variant="secondary">{scan.records.length}</Badge>
@@ -355,22 +355,27 @@ function ScanDetails({
 function RecordDetails({ record }: { readonly record: NfcNdefRecord }) {
   const copy = messages.developerTools;
   return (
-    <Card className="border-border/70 bg-muted/10 shadow-none">
-      <CardHeader className="flex flex-row items-start justify-between gap-4 pb-3">
+    <Card variant="muted-subtle">
+      <CardHeader
+        className="flex flex-row items-start justify-between"
+        size="card"
+      >
         <div>
-          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
+          <p className="font-mono text-muted-foreground text-xs uppercase tracking-widest">
             {copy.nfcScanRecordLabel.replace(
               "{index}",
               String(record.index + 1)
             )}
           </p>
-          <CardTitle className="mt-1 text-base">{record.type}</CardTitle>
+          <CardTitle className="mt-1" size="sm">
+            {record.type}
+          </CardTitle>
         </div>
         <Badge variant="outline">
           {copy.nfcScanRecordTnfLabel} {record.tnf}
         </Badge>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-2">
+      <CardContent size="card">
         <RecordField label={copy.nfcScanRecordTypeLabel} value={record.type} />
         <RecordField
           label={copy.nfcScanRecordTypeHexLabel}
@@ -421,7 +426,7 @@ function RecordField({
   return (
     <div className="min-w-0 space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
+        <p className="font-mono text-muted-foreground text-xs uppercase tracking-widest">
           {label}
         </p>
         {action}
@@ -490,7 +495,7 @@ function ScanField({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
-        <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
+        <p className="font-mono text-muted-foreground text-xs uppercase tracking-widest">
           {label}
         </p>
         {action}
@@ -516,25 +521,27 @@ function StatusCard({
   readonly value: string;
 }) {
   return (
-    <Card className="border-border/70 shadow-xs" id={id}>
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
+    <Card id={id} variant="outline">
+      <CardHeader
+        className="flex flex-row items-start justify-between"
+        size="loose"
+      >
         <div>
-          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
+          <p className="font-mono text-muted-foreground text-xs uppercase tracking-widest">
             {label}
           </p>
-          <CardTitle className="mt-2 flex items-center gap-2 text-xl">
+          <CardTitle className="mt-2" size="xl" variant="inline">
             {icon}
             {value}
           </CardTitle>
         </div>
-        <Badge
-          className={`h-7 rounded-full border px-3 ${tone}`}
-          variant="outline"
+        <span
+          className={`inline-flex h-7 items-center rounded-full border px-3 font-semibold text-xs ${tone}`}
         >
           {value}
-        </Badge>
+        </span>
       </CardHeader>
-      <CardContent className="space-y-4">{children}</CardContent>
+      <CardContent size="spaced">{children}</CardContent>
     </Card>
   );
 }

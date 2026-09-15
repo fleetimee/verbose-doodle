@@ -93,9 +93,10 @@ function SymmetricKeyEditor({
   return (
     <div className="min-w-0 overflow-hidden rounded-md border bg-card text-card-foreground">
       <Tabs
-        className="w-full gap-0"
+        className="w-full"
         onValueChange={(val) => setActiveTab(val as "secret" | "signature")}
         value={activeTab}
+        variant="flush"
       >
         <TerminalHeader
           actions={
@@ -171,23 +172,21 @@ function SymmetricKeyEditor({
             )
           }
         >
-          <TabsList className="h-7 rounded-md bg-muted/60 p-0.5">
-            <TabsTrigger
-              className="h-6 px-2.5 font-medium text-xs data-active:bg-background data-active:shadow-xs"
-              value="secret"
-            >
+          <TabsList size="xs" variant="subtle">
+            <TabsTrigger size="sm" value="secret" variant="compact">
               {copy.secretOutput}
             </TabsTrigger>
-            <TabsTrigger
-              className="h-6 px-2.5 font-medium text-xs data-active:bg-background data-active:shadow-xs"
-              value="signature"
-            >
+            <TabsTrigger size="sm" value="signature" variant="compact">
               {copy.signatureLabel}
             </TabsTrigger>
           </TabsList>
         </TerminalHeader>
 
-        <TabsContent className="m-0 min-h-[117px] p-0" value="secret">
+        <TabsContent
+          className="m-0 min-h-[117px]"
+          value="secret"
+          variant="flush"
+        >
           <div className="relative p-3">
             <Label className="sr-only" htmlFor="jwt-secret-input">
               {copy.secretLabel}
@@ -196,7 +195,7 @@ function SymmetricKeyEditor({
               aria-label={copy.secretLabel}
               autoComplete="off"
               className={cn(
-                "min-h-[60px] resize-none border-0 bg-transparent p-0 font-mono text-sm leading-relaxed shadow-none placeholder:text-muted-foreground focus-visible:ring-0",
+                "min-h-[60px] resize-none",
                 !showSecret && "[-webkit-text-security:disc]"
               )}
               id="jwt-secret-input"
@@ -204,6 +203,7 @@ function SymmetricKeyEditor({
               placeholder={copy.secretPlaceholder}
               spellCheck={false}
               value={keys.secret}
+              variant="ghost-mono"
             />
           </div>
           <div className="flex items-center gap-1.5 border-t bg-muted/5 px-3 py-2 text-xs">
@@ -223,15 +223,20 @@ function SymmetricKeyEditor({
           </div>
         </TabsContent>
 
-        <TabsContent className="m-0 min-h-[117px] p-0" value="signature">
+        <TabsContent
+          className="m-0 min-h-[117px]"
+          value="signature"
+          variant="flush"
+        >
           <div className="relative p-3">
             <Textarea
               aria-label={copy.signatureLabel}
-              className="min-h-[60px] resize-none break-all border-0 bg-transparent p-0 font-mono text-foreground/90 text-sm leading-relaxed shadow-none focus-visible:ring-0"
+              className="min-h-[60px] resize-none break-all"
               placeholder={copy.tokenSignatureLabel}
               readOnly
               spellCheck={false}
               value={signature}
+              variant="ghost-mono"
             />
           </div>
         </TabsContent>
@@ -300,11 +305,13 @@ function AsymmetricCreateKeyEditor({
         <div className="relative p-3">
           <Textarea
             aria-label={copy.publicKey}
-            className="max-h-[140px] min-h-[85px] resize-none overflow-auto border-0 bg-transparent p-0 font-mono text-xs leading-relaxed shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
+            className="max-h-[140px] min-h-[85px] resize-none overflow-auto"
             onChange={(e) => changeKeys({ publicKey: e.target.value })}
             placeholder={copy.publicKeyPlaceholder}
+            size="xs"
             spellCheck={false}
             value={keys.publicKey}
+            variant="ghost-mono"
           />
         </div>
       </div>
@@ -352,11 +359,13 @@ function AsymmetricCreateKeyEditor({
         <div className="relative p-3">
           <Textarea
             aria-label={copy.privateKey}
-            className="max-h-[140px] min-h-[85px] resize-none overflow-auto border-0 bg-transparent p-0 font-mono text-xs leading-relaxed shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
+            className="max-h-[140px] min-h-[85px] resize-none overflow-auto"
             onChange={(e) => changeKeys({ privateKey: e.target.value })}
             placeholder={copy.privateKeyPlaceholder}
+            size="xs"
             spellCheck={false}
             value={keys.privateKey}
+            variant="ghost-mono"
           />
         </div>
       </div>
@@ -444,31 +453,31 @@ function AsymmetricInspectKeyEditor({
             )
           }
         >
-          <TabsList className="h-7 rounded-md bg-muted/60 p-0.5">
-            <TabsTrigger
-              className="h-6 px-2.5 font-medium text-xs data-active:bg-background data-active:shadow-xs"
-              value="public"
-            >
+          <TabsList size="xs" variant="subtle">
+            <TabsTrigger size="sm" value="public" variant="compact">
               {copy.publicKey}
             </TabsTrigger>
-            <TabsTrigger
-              className="h-6 px-2.5 font-medium text-xs data-active:bg-background data-active:shadow-xs"
-              value="signature"
-            >
+            <TabsTrigger size="sm" value="signature" variant="compact">
               {copy.signatureLabel}
             </TabsTrigger>
           </TabsList>
         </TerminalHeader>
 
-        <TabsContent className="m-0 min-h-[142px] p-0" value="public">
+        <TabsContent
+          className="m-0 min-h-[142px]"
+          value="public"
+          variant="flush"
+        >
           <div className="relative p-3">
             <Textarea
               aria-label={copy.publicKey}
-              className="max-h-[140px] min-h-[85px] resize-none overflow-auto border-0 bg-transparent p-0 font-mono text-xs leading-relaxed shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
+              className="max-h-[140px] min-h-[85px] resize-none overflow-auto"
               onChange={(e) => changeKeys({ publicKey: e.target.value })}
               placeholder={copy.publicKeyPlaceholder}
+              size="xs"
               spellCheck={false}
               value={keys.publicKey}
+              variant="ghost-mono"
             />
           </div>
           <div className="flex items-center gap-1.5 border-t bg-muted/5 px-3 py-2 text-xs">
@@ -488,15 +497,21 @@ function AsymmetricInspectKeyEditor({
           </div>
         </TabsContent>
 
-        <TabsContent className="m-0 min-h-[142px] p-0" value="signature">
+        <TabsContent
+          className="m-0 min-h-[142px]"
+          value="signature"
+          variant="flush"
+        >
           <div className="relative p-3">
             <Textarea
               aria-label={copy.signatureLabel}
-              className="max-h-[140px] min-h-[85px] resize-none overflow-auto break-all border-0 bg-transparent p-0 font-mono text-foreground/90 text-xs leading-relaxed shadow-none focus-visible:ring-0"
+              className="max-h-[140px] min-h-[85px] resize-none overflow-auto break-all"
               placeholder={copy.tokenSignatureLabel}
               readOnly
+              size="xs"
               spellCheck={false}
               value={signature}
+              variant="ghost-mono"
             />
           </div>
         </TabsContent>
@@ -583,8 +598,10 @@ export function JwtKeyFields({
         {symmetric && (
           <div className="flex items-center gap-2">
             <Label
-              className="cursor-pointer font-mono text-[11px] text-muted-foreground uppercase tracking-wider"
+              className="cursor-pointer"
               htmlFor="jwt-secret-encoded"
+              size="xs"
+              variant="mono"
             >
               {copy.base64Secret}
             </Label>

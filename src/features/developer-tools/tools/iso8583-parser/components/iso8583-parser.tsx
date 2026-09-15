@@ -91,7 +91,7 @@ function OverviewChips({
           <span className="text-muted-foreground text-xs">
             {messages.iso8583Parser.mtiLabel}
           </span>
-          <Badge className="font-mono" variant="secondary">
+          <Badge mono variant="secondary">
             {parsed.mti.mti}
           </Badge>
         </div>
@@ -109,7 +109,8 @@ function OverviewChips({
             {messages.iso8583Parser.lengthFraming}
           </span>
           <Badge
-            className="font-mono text-[10px]"
+            mono
+            size="sm"
             variant={parsed.lengthHeader ? "outline" : "secondary"}
           >
             {parsed.lengthHeader
@@ -138,10 +139,7 @@ function OverviewChips({
           <span className="text-muted-foreground text-xs">
             {messages.iso8583Parser.dataElements}
           </span>
-          <Badge
-            className="bg-primary/10 text-primary hover:bg-primary/20"
-            variant="outline"
-          >
+          <Badge variant="primary-subtle">
             {formatMessage(messages.iso8583Parser.fieldsActive, {
               count: parsed.fields.length,
             })}
@@ -187,7 +185,7 @@ function OverviewChips({
         </p>
         {parsed.secondaryBitmapHex ? (
           <p
-            className="mt-0.5 truncate font-mono text-[11px] text-muted-foreground"
+            className="mt-0.5 truncate font-mono text-muted-foreground text-xs"
             title={parsed.secondaryBitmapHex}
           >
             {messages.iso8583Parser.secondaryBitmapShortLabel}{" "}
@@ -227,12 +225,7 @@ function BitmapMatrix({
           </p>
         </div>
         {selectedBit ? (
-          <Button
-            className="h-7 text-xs"
-            onClick={() => onSelectBit(null)}
-            size="sm"
-            variant="ghost"
-          >
+          <Button onClick={() => onSelectBit(null)} size="xs" variant="ghost">
             {formatMessage(messages.iso8583Parser.clearBitFilter, {
               bit: selectedBit,
             })}
@@ -249,7 +242,7 @@ function BitmapMatrix({
           return (
             <button
               className={cn(
-                "flex h-7 items-center justify-center rounded-md font-mono text-[11px] transition-all",
+                "flex h-7 items-center justify-center rounded-md font-mono text-xs transition-all",
                 getBitButtonClass(isActive, isSelected)
               )}
               disabled={!isActive}
@@ -291,20 +284,14 @@ function FieldCard({
       <div>
         <div className="mb-2 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Badge
-              className="font-mono font-semibold text-xs"
-              variant="secondary"
-            >
+            <Badge mono variant="secondary">
               BIT {String(field.number).padStart(2, "0")}
             </Badge>
             <span className="font-semibold text-foreground text-sm leading-tight">
               {field.name}
             </span>
           </div>
-          <Badge
-            className="px-1.5 py-0 font-mono text-[10px] text-muted-foreground"
-            variant="outline"
-          >
+          <Badge mono size="sm" variant="outline-muted">
             {getFieldKindLabel(field.kind, field.maxOrFixedLength)}
           </Badge>
         </div>
@@ -342,7 +329,7 @@ function FieldCard({
         ) : null}
       </div>
 
-      <div className="mt-3 flex items-center justify-between border-border/40 border-t pt-2 text-[11px] text-muted-foreground">
+      <div className="mt-3 flex items-center justify-between border-border/40 border-t pt-2 text-muted-foreground text-xs">
         <span>
           {formatMessage(messages.iso8583Parser.streamSlice, {
             end: field.endIndex,
@@ -637,24 +624,18 @@ export function Iso8583Parser() {
       extraActions={
         <div className="flex flex-wrap items-center gap-2">
           {parsed ? (
-            <Button
-              className="gap-1.5 font-medium shadow-sm"
-              onClick={handleAssignToGenerator}
-              size="sm"
-              variant="default"
-            >
+            <Button onClick={handleAssignToGenerator} size="sm">
               <SendHorizontal className="size-3.5" />
               {messages.iso8583Parser.openInGenerator}
             </Button>
           ) : null}
           <Button
-            className="gap-1.5 text-muted-foreground hover:text-foreground"
             onClick={() => {
               setStreamInput("");
               setSelectedBit(null);
             }}
             size="sm"
-            variant="outline"
+            variant="outline-muted"
           >
             <Trash2 className="size-3.5" />
             {messages.iso8583Parser.clear}
@@ -677,10 +658,7 @@ export function Iso8583Parser() {
                 {messages.iso8583Parser.inputLabel}
               </span>
               {parsed ? (
-                <Badge
-                  className="px-1.5 py-0 font-mono text-[10px]"
-                  variant="outline"
-                >
+                <Badge mono size="sm" variant="outline">
                   {parsed.streamFormat === "hex"
                     ? messages.iso8583Parser.formatHex
                     : messages.iso8583Parser.formatAscii}
@@ -694,7 +672,7 @@ export function Iso8583Parser() {
               </span>
               {SAMPLE_STREAMS.map((sample) => (
                 <button
-                  className="rounded-md border border-border/60 bg-muted/40 px-2 py-0.5 text-[11px] text-muted-foreground transition hover:border-primary/40 hover:bg-muted hover:text-foreground"
+                  className="rounded-md border border-border/60 bg-muted/40 px-2 py-0.5 text-muted-foreground text-xs transition hover:border-primary/40 hover:bg-muted hover:text-foreground"
                   key={sample.labelKey}
                   onClick={() => {
                     setStreamInput(sample.stream);
@@ -729,7 +707,7 @@ export function Iso8583Parser() {
                 : ""}
             </span>
             {parsed?.lengthHeader ? (
-              <span className="font-mono text-[11px]">
+              <span className="font-mono text-xs">
                 {formatMessage(messages.iso8583Parser.headerDetail, {
                   raw: parsed.lengthHeader.raw,
                   type: parsed.lengthHeader.type,
@@ -778,23 +756,24 @@ export function Iso8583Parser() {
             <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3 border-border/70 border-b pb-3">
                 <Tabs
-                  onValueChange={(val) =>
-                    setActiveTab(val as "fields" | "json" | "slices")
-                  }
+                  onValueChange={(val) => {
+                    // SAFETY: val is one of the three tab values: "fields", "json", or "slices"
+                    setActiveTab(val as "fields" | "json" | "slices");
+                  }}
                   value={activeTab}
                 >
-                  <TabsList className="h-8">
-                    <TabsTrigger className="gap-1.5 text-xs" value="fields">
+                  <TabsList size="sm">
+                    <TabsTrigger size="sm" value="fields">
                       <Layers3 className="size-3.5" />
                       {formatMessage(messages.iso8583Parser.tabDataElements, {
                         count: filteredFields.length,
                       })}
                     </TabsTrigger>
-                    <TabsTrigger className="gap-1.5 text-xs" value="json">
+                    <TabsTrigger size="sm" value="json">
                       <FileJson className="size-3.5" />
                       {messages.iso8583Parser.tabJsonStructure}
                     </TabsTrigger>
-                    <TabsTrigger className="gap-1.5 text-xs" value="slices">
+                    <TabsTrigger size="sm" value="slices">
                       <Code2 className="size-3.5" />
                       {messages.iso8583Parser.tabStreamSlices}
                     </TabsTrigger>
@@ -803,9 +782,10 @@ export function Iso8583Parser() {
 
                 {activeTab === "fields" ? (
                   <Input
-                    className="h-8 w-48 text-xs sm:w-64"
+                    className="w-48 sm:w-64"
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={messages.iso8583Parser.searchPlaceholder}
+                    size="sm"
                     value={searchQuery}
                   />
                 ) : null}
@@ -848,11 +828,7 @@ export function Iso8583Parser() {
                   )}
                 </p>
               </div>
-              <Button
-                className="gap-2 font-medium shadow-sm"
-                onClick={handleAssignToGenerator}
-                size="default"
-              >
+              <Button onClick={handleAssignToGenerator} size="default">
                 <SendHorizontal className="size-4" />
                 {messages.iso8583Parser.openInGenerator}
               </Button>

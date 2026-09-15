@@ -61,9 +61,9 @@ function ItemActionButton({
     return (
       <Button
         aria-label={formatMessage(copy.addBitAriaLabel, { bit: item.bit })}
-        className="mt-0.5 size-8 shrink-0 rounded-lg transition-all hover:bg-primary hover:text-primary-foreground"
+        className="mt-0.5 shrink-0"
         onClick={onAdd}
-        size="icon"
+        size="icon-sm"
         type="button"
         variant="outline"
       >
@@ -78,11 +78,11 @@ function ItemActionButton({
         aria-label={formatMessage(copy.removeBitAriaLabel, {
           bit: item.bit,
         })}
-        className="mt-0.5 size-8 shrink-0 rounded-lg border-destructive/25 bg-destructive/10 text-destructive transition-all hover:bg-destructive hover:text-destructive-foreground"
+        className="mt-0.5 shrink-0"
         onClick={onRemove}
-        size="icon"
+        size="icon-sm"
         type="button"
-        variant="outline"
+        variant="destructive"
       >
         <Trash2 className="size-4" />
       </Button>
@@ -94,11 +94,11 @@ function ItemActionButton({
       aria-label={formatMessage(copy.bitStandardPresetAriaLabel, {
         bit: item.bit,
       })}
-      className="mt-0.5 size-8 shrink-0 cursor-default border-transparent bg-primary/10 text-primary hover:bg-primary/10"
+      className="mt-0.5 shrink-0 cursor-default"
       disabled
-      size="icon"
+      size="icon-sm"
       type="button"
-      variant="ghost"
+      variant="secondary"
     >
       <Check className="size-4 text-emerald-500" />
     </Button>
@@ -129,17 +129,11 @@ function SituationalItemCard({
     >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge
-            className="font-mono text-xs"
-            variant={isAdded ? "default" : "secondary"}
-          >
+          <Badge mono variant={isAdded ? "default" : "secondary"}>
             {formatMessage(copy.bitBadge, { bit: item.bit })}
           </Badge>
           {isAdded ? (
-            <Badge
-              className="border-emerald-500/30 bg-emerald-500/10 font-medium text-[10px] text-emerald-600 dark:text-emerald-400"
-              variant="outline"
-            >
+            <Badge size="sm" variant="success">
               {copy.bitAddedBadge}
             </Badge>
           ) : null}
@@ -239,15 +233,16 @@ function SituationalFieldsList({
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="shrink-0 px-4 pt-1">
         <Input
-          className="h-9 text-xs"
+          className="h-9"
           onChange={(e) => setSearch(e.target.value)}
           placeholder={copy.searchBitsPlaceholder}
+          size="sm"
           value={search}
         />
       </div>
 
-      <ScrollArea className="min-h-0 flex-1 px-4">
-        <div className="flex flex-col gap-2 pb-4">
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="flex flex-col gap-2 px-4 pb-4">
           {filteredCustomFields.length > 0 ? (
             <div className="mb-2 flex flex-col gap-2">
               <div className="px-1 font-semibold text-[11px] text-muted-foreground uppercase tracking-wider">
@@ -262,13 +257,10 @@ function SituationalFieldsList({
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge className="font-mono text-xs" variant="default">
+                      <Badge mono variant="default">
                         {formatMessage(copy.bitBadge, { bit: field.number })}
                       </Badge>
-                      <Badge
-                        className="border-primary/30 bg-primary/10 font-medium text-[10px] text-primary"
-                        variant="outline"
-                      >
+                      <Badge size="sm" variant="primary-subtle">
                         {copy.customBadge}
                       </Badge>
                       <span className="font-medium text-foreground text-xs leading-none">
@@ -290,11 +282,11 @@ function SituationalFieldsList({
                       aria-label={formatMessage(copy.removeBitAriaLabel, {
                         bit: field.number,
                       })}
-                      className="mt-0.5 size-8 shrink-0 rounded-lg border-destructive/25 bg-destructive/10 text-destructive transition-all hover:bg-destructive hover:text-destructive-foreground"
+                      className="mt-0.5 shrink-0"
                       onClick={() => onRemoveCatalogItem(field.number)}
-                      size="icon"
+                      size="icon-sm"
                       type="button"
-                      variant="outline"
+                      variant="destructive"
                     >
                       <Trash2 className="size-4" />
                     </Button>
@@ -393,8 +385,8 @@ function CustomFieldForm({
 
   return (
     <form className="flex h-full min-h-0 flex-col" onSubmit={handleSubmit}>
-      <ScrollArea className="min-h-0 flex-1 px-4">
-        <div className="flex flex-col gap-4 py-2">
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="flex flex-col gap-4 px-4 py-2">
           {error ? (
             <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-destructive text-xs">
               {error}
@@ -403,11 +395,10 @@ function CustomFieldForm({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs" htmlFor="custom-bit-number">
+              <Label htmlFor="custom-bit-number" size="xs">
                 {copy.customBitNumberLabel}
               </Label>
               <Input
-                className="h-9 font-mono text-xs"
                 id="custom-bit-number"
                 max={128}
                 min={2}
@@ -416,13 +407,15 @@ function CustomFieldForm({
                   setError(null);
                 }}
                 required
+                size="sm"
                 type="number"
                 value={bitNumber}
+                variant="mono"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs" htmlFor="custom-bit-kind">
+              <Label htmlFor="custom-bit-kind" size="xs">
                 {copy.customBitFormatLabel}
               </Label>
               <Select
@@ -438,7 +431,7 @@ function CustomFieldForm({
                 }}
                 value={kind}
               >
-                <SelectTrigger className="h-9 text-xs" id="custom-bit-kind">
+                <SelectTrigger id="custom-bit-kind" size="sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -460,11 +453,10 @@ function CustomFieldForm({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs" htmlFor="custom-bit-name">
+            <Label htmlFor="custom-bit-name" size="xs">
               {copy.customBitNameLabel}
             </Label>
             <Input
-              className="h-9 text-xs"
               id="custom-bit-name"
               onChange={(e) => {
                 setName(e.target.value);
@@ -472,35 +464,38 @@ function CustomFieldForm({
               }}
               placeholder={copy.customBitNamePlaceholder}
               required
+              size="sm"
               value={name}
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs" htmlFor="custom-bit-length">
+            <Label htmlFor="custom-bit-length" size="xs">
               {copy.customBitLengthLabel}
             </Label>
             <Input
-              className="h-9 font-mono text-xs"
               id="custom-bit-length"
               min={1}
               onChange={(e) => setLength(Number(e.target.value))}
               required
+              size="sm"
               type="number"
               value={length}
+              variant="mono"
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs" htmlFor="custom-bit-val">
+            <Label htmlFor="custom-bit-val" size="xs">
               {copy.customBitInitialValueLabel}
             </Label>
             <Input
-              className="h-9 font-mono text-xs"
               id="custom-bit-val"
               onChange={(e) => setInitialValue(e.target.value)}
               placeholder={copy.customBitInitialValuePlaceholder}
+              size="sm"
               value={initialValue}
+              variant="mono"
             />
           </div>
         </div>
@@ -508,16 +503,11 @@ function CustomFieldForm({
 
       <div className="flex shrink-0 items-center justify-end gap-2 border-t px-4 pt-3 pb-1">
         {onCancel ? (
-          <Button
-            className="h-8 text-xs"
-            onClick={onCancel}
-            type="button"
-            variant="ghost"
-          >
+          <Button onClick={onCancel} size="sm" type="button" variant="ghost">
             {copy.backToSituationalFields}
           </Button>
         ) : null}
-        <Button className="h-8 text-xs" type="submit">
+        <Button size="sm" type="submit">
           {formatMessage(copy.submitCustomBit, { bitNumber })}
         </Button>
       </div>
@@ -587,7 +577,6 @@ export function AddFieldDialog({
       <DrawerTrigger asChild>
         <Button
           aria-label={copy.addFieldButton}
-          className="gap-1.5"
           size="sm"
           type="button"
           variant="outline"
@@ -598,18 +587,16 @@ export function AddFieldDialog({
       </DrawerTrigger>
       <DrawerContent
         className={cn(
-          "flex flex-col border shadow-2xl",
+          "flex flex-col",
           isMobile
-            ? "inset-x-0 bottom-0 max-h-[90vh] rounded-t-2xl"
-            : "top-2 right-2 bottom-2 h-[calc(100vh-1rem)] w-full rounded-2xl sm:max-w-lg"
+            ? "inset-x-0 bottom-0 max-h-[90vh]"
+            : "top-2 right-2 bottom-2 h-[calc(100vh-1rem)] w-full sm:max-w-lg"
         )}
         showSwipeHandle={isMobile}
       >
-        <DrawerHeader className="shrink-0 px-4 pt-4 pb-2 text-left">
-          <DrawerTitle className="font-semibold text-base tracking-tight">
-            {copy.addSituationalTitle}
-          </DrawerTitle>
-          <DrawerDescription className="text-muted-foreground text-xs">
+        <DrawerHeader className="shrink-0 text-left" size="compact">
+          <DrawerTitle size="sm">{copy.addSituationalTitle}</DrawerTitle>
+          <DrawerDescription size="xs">
             {copy.addSituationalDescription}
           </DrawerDescription>
 
@@ -622,9 +609,9 @@ export function AddFieldDialog({
             >
               <DrawerTrigger asChild>
                 <Button
-                  className="h-auto w-full justify-between rounded-xl border border-dashed bg-muted/20 px-3.5 py-2.5 font-medium text-xs transition-colors hover:border-primary/50 hover:bg-muted/50"
+                  className="h-auto w-full justify-between"
                   type="button"
-                  variant="outline"
+                  variant="dashed"
                 >
                   <div className="flex items-center gap-2">
                     <Plus className="size-3.5 text-primary" />
@@ -638,18 +625,16 @@ export function AddFieldDialog({
 
               <DrawerContent
                 className={cn(
-                  "flex flex-col border shadow-2xl",
+                  "flex flex-col",
                   isMobile
-                    ? "inset-x-0 bottom-0 max-h-[90vh] rounded-t-2xl"
-                    : "top-2 right-2 bottom-2 h-[calc(100vh-1rem)] w-full rounded-2xl sm:max-w-md"
+                    ? "inset-x-0 bottom-0 max-h-[90vh]"
+                    : "top-2 right-2 bottom-2 h-[calc(100vh-1rem)] w-full sm:max-w-md"
                 )}
                 showSwipeHandle={isMobile}
               >
-                <DrawerHeader className="shrink-0 px-4 pt-4 pb-2 text-left">
-                  <DrawerTitle className="font-semibold text-base tracking-tight">
-                    {copy.customFieldTitle}
-                  </DrawerTitle>
-                  <DrawerDescription className="text-muted-foreground text-xs">
+                <DrawerHeader className="shrink-0 text-left" size="compact">
+                  <DrawerTitle size="sm">{copy.customFieldTitle}</DrawerTitle>
+                  <DrawerDescription size="xs">
                     {copy.customFieldDescription}
                   </DrawerDescription>
                 </DrawerHeader>
@@ -675,9 +660,9 @@ export function AddFieldDialog({
           />
         </div>
 
-        <DrawerFooter className="shrink-0 border-t p-3">
+        <DrawerFooter className="shrink-0" size="compact" variant="bordered">
           <DrawerClose asChild>
-            <Button className="h-8 w-full rounded-lg text-xs" variant="outline">
+            <Button className="w-full" size="sm" variant="outline">
               {copy.close}
             </Button>
           </DrawerClose>

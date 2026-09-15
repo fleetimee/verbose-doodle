@@ -122,9 +122,9 @@ function InlineTokenInput({
       >
         <TokenHighlight value={value} />
       </div>
-      <Textarea
+      <textarea
         aria-label={label}
-        className="!bg-transparent relative z-10 h-full min-h-[320px] w-full flex-1 resize-none overflow-auto font-mono text-sm text-transparent leading-6 caret-foreground shadow-none [-webkit-text-fill-color:transparent] selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground focus-visible:ring-0"
+        className="!bg-transparent relative z-10 h-full min-h-[320px] w-full flex-1 resize-none overflow-auto font-mono text-sm text-transparent leading-6 caret-foreground shadow-none outline-none [-webkit-text-fill-color:transparent] selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground focus-visible:ring-0"
         onChange={(event) => onChange?.(event.target.value)}
         onScroll={syncScroll}
         placeholder={placeholder}
@@ -166,9 +166,9 @@ function ModalTokenInput({
       >
         <TokenHighlight value={value} />
       </div>
-      <Textarea
+      <textarea
         aria-label={label}
-        className="!bg-transparent relative z-10 h-full w-full resize-none overflow-auto rounded-none border-0 p-4 font-mono text-sm text-transparent leading-6 caret-foreground shadow-none [-webkit-text-fill-color:transparent] selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground focus-visible:ring-0"
+        className="!bg-transparent relative z-10 h-full w-full resize-none overflow-auto rounded-none border-0 p-4 font-mono text-sm text-transparent leading-6 caret-foreground shadow-none outline-none [-webkit-text-fill-color:transparent] selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground focus-visible:ring-0"
         onChange={(event) => onChange?.(event.target.value)}
         onScroll={syncScroll}
         placeholder={placeholder}
@@ -289,46 +289,41 @@ function JwtDialogJsonView({
 }) {
   return (
     <Tabs
-      className="flex h-full flex-col gap-0 overflow-hidden"
+      className="flex h-full flex-col overflow-hidden"
       onValueChange={(val) => setModalTab(val as "json" | "claims")}
       value={modalTab}
+      variant="flush"
     >
-      <DialogHeader className="flex flex-row items-center justify-between gap-3 border-b bg-muted/20 px-6 py-3.5 pr-14 text-left">
+      <DialogHeader variant="banner">
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           <div className="min-w-0 space-y-1">
-            <DialogTitle className="font-semibold text-base tracking-tight">
-              {label}
-            </DialogTitle>
-            <DialogDescription className="flex items-center gap-2 text-muted-foreground text-xs">
-              {description && <span>{description}</span>}
-              {description && <span aria-hidden="true">·</span>}
-              <span>
-                {formatMessage(
-                  lineCount === 1
-                    ? messages.jwtInspector.lineCount
-                    : messages.jwtInspector.lineCountPlural,
-                  { count: lineCount }
-                )}
-              </span>
-              <span aria-hidden="true">·</span>
-              <span>
-                {formatMessage(messages.jwtInspector.byteCount, {
-                  count: byteCount.toLocaleString(),
-                })}
+            <DialogTitle size="sm">{label}</DialogTitle>
+            <DialogDescription size="xs">
+              <span className="flex items-center gap-2">
+                {description && <span>{description}</span>}
+                {description && <span aria-hidden="true">·</span>}
+                <span>
+                  {formatMessage(
+                    lineCount === 1
+                      ? messages.jwtInspector.lineCount
+                      : messages.jwtInspector.lineCountPlural,
+                    { count: lineCount }
+                  )}
+                </span>
+                <span aria-hidden="true">·</span>
+                <span>
+                  {formatMessage(messages.jwtInspector.byteCount, {
+                    count: byteCount.toLocaleString(),
+                  })}
+                </span>
               </span>
             </DialogDescription>
           </div>
-          <TabsList className="ml-2 h-7 rounded-md bg-muted/60 p-0.5">
-            <TabsTrigger
-              className="h-6 px-2.5 font-medium text-xs data-active:bg-background data-active:shadow-xs"
-              value="json"
-            >
+          <TabsList className="ml-2 h-7" size="xs" variant="subtle">
+            <TabsTrigger size="sm" value="json" variant="compact">
               JSON
             </TabsTrigger>
-            <TabsTrigger
-              className="h-6 px-2.5 font-medium text-xs data-active:bg-background data-active:shadow-xs"
-              value="claims"
-            >
+            <TabsTrigger size="sm" value="claims" variant="compact">
               {messages.jwtInspector.claimsBreakdown}
             </TabsTrigger>
           </TabsList>
@@ -371,7 +366,7 @@ function JwtDialogJsonView({
       </DialogHeader>
 
       <div className="relative min-h-0 w-full flex-1 overflow-hidden bg-background">
-        <TabsContent className="m-0 h-full w-full p-0" value="json">
+        <TabsContent className="m-0 h-full w-full" value="json" variant="flush">
           <DocumentEditor
             className="h-full border-0"
             extensions={jwtClaimsExtensions}
@@ -384,7 +379,11 @@ function JwtDialogJsonView({
             value={value}
           />
         </TabsContent>
-        <TabsContent className="m-0 h-full w-full p-0" value="claims">
+        <TabsContent
+          className="m-0 h-full w-full"
+          value="claims"
+          variant="flush"
+        >
           <JwtClaimsBreakdown
             className="h-full"
             height="100%"
@@ -402,12 +401,7 @@ function JwtDialogJsonView({
           <span className="hidden font-mono text-[11px] text-muted-foreground/70 sm:inline">
             {messages.jwtInspector.escToClose}
           </span>
-          <Button
-            className="h-7 px-3 text-xs"
-            onClick={onClose}
-            size="sm"
-            variant="ghost"
-          >
+          <Button onClick={onClose} size="xs" variant="ghost">
             {messages.jwtInspector.done}
           </Button>
         </div>
@@ -447,34 +441,33 @@ function JwtDialogPlainView({
 }) {
   return (
     <>
-      <DialogHeader className="flex flex-row items-center justify-between gap-3 border-b bg-muted/20 px-6 py-3.5 pr-14 text-left">
+      <DialogHeader variant="banner">
         <div className="min-w-0 space-y-1">
-          <DialogTitle className="font-semibold text-base tracking-tight">
-            {label}
-          </DialogTitle>
-          <DialogDescription className="flex items-center gap-2 text-muted-foreground text-xs">
-            {description && <span>{description}</span>}
-            {description && <span aria-hidden="true">·</span>}
-            <span>
-              {formatMessage(
-                lineCount === 1
-                  ? messages.jwtInspector.lineCount
-                  : messages.jwtInspector.lineCountPlural,
-                { count: lineCount }
-              )}
-            </span>
-            <span aria-hidden="true">·</span>
-            <span>
-              {formatMessage(messages.jwtInspector.byteCount, {
-                count: byteCount.toLocaleString(),
-              })}
+          <DialogTitle size="sm">{label}</DialogTitle>
+          <DialogDescription size="xs">
+            <span className="flex items-center gap-2">
+              {description && <span>{description}</span>}
+              {description && <span aria-hidden="true">·</span>}
+              <span>
+                {formatMessage(
+                  lineCount === 1
+                    ? messages.jwtInspector.lineCount
+                    : messages.jwtInspector.lineCountPlural,
+                  { count: lineCount }
+                )}
+              </span>
+              <span aria-hidden="true">·</span>
+              <span>
+                {formatMessage(messages.jwtInspector.byteCount, {
+                  count: byteCount.toLocaleString(),
+                })}
+              </span>
             </span>
           </DialogDescription>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <Button
             aria-label={copyAriaLabel}
-            className="size-8"
             disabled={!value}
             onClick={copyValue}
             size="icon-sm"
@@ -503,12 +496,13 @@ function JwtDialogPlainView({
         ) : (
           <Textarea
             aria-label={label}
-            className="h-full w-full resize-none overflow-auto rounded-none border-0 bg-transparent p-4 font-mono text-sm leading-6 shadow-none focus-visible:ring-0"
+            className="h-full w-full resize-none overflow-auto"
             onChange={(event) => onChange?.(event.target.value)}
             placeholder={placeholder}
             readOnly={!onChange}
             spellCheck={false}
             value={value}
+            variant="ghost-mono"
           />
         )}
       </div>
@@ -532,12 +526,7 @@ function JwtDialogPlainView({
           <span className="hidden font-mono text-[11px] text-muted-foreground/70 sm:inline">
             {messages.jwtInspector.escToClose}
           </span>
-          <Button
-            className="h-7 px-3 text-xs"
-            onClick={onClose}
-            size="sm"
-            variant="ghost"
-          >
+          <Button onClick={onClose} size="xs" variant="ghost">
             {messages.jwtInspector.done}
           </Button>
         </div>
@@ -672,26 +661,21 @@ export function JwtEditor({
       >
         {json ? (
           <Tabs
-            className="w-full gap-0"
+            className="w-full"
             onValueChange={(val) => setActiveTab(val as "json" | "claims")}
             value={activeTab}
+            variant="flush"
           >
             <header className="flex items-center justify-between gap-2 border-b bg-muted/10 px-3 py-1.5">
               <div className="flex items-center gap-2.5">
                 <h2 className="font-medium text-foreground text-xs sm:text-sm">
                   {label}
                 </h2>
-                <TabsList className="h-7 rounded-md bg-muted/60 p-0.5">
-                  <TabsTrigger
-                    className="h-6 px-2.5 font-medium text-xs data-active:bg-background data-active:shadow-xs"
-                    value="json"
-                  >
+                <TabsList size="xs" variant="subtle">
+                  <TabsTrigger size="sm" value="json" variant="compact">
                     JSON
                   </TabsTrigger>
-                  <TabsTrigger
-                    className="h-6 px-2.5 font-medium text-xs data-active:bg-background data-active:shadow-xs"
-                    value="claims"
-                  >
+                  <TabsTrigger size="sm" value="claims" variant="compact">
                     {messages.jwtInspector.claimsBreakdown}
                   </TabsTrigger>
                 </TabsList>
@@ -699,7 +683,7 @@ export function JwtEditor({
               {renderInlineActions(activeTab)}
             </header>
 
-            <TabsContent className="m-0 p-0" value="json">
+            <TabsContent className="m-0" value="json" variant="flush">
               <DocumentEditor
                 byteCountMessage=""
                 compact
@@ -717,7 +701,7 @@ export function JwtEditor({
               />
             </TabsContent>
 
-            <TabsContent className="m-0 p-0" value="claims">
+            <TabsContent className="m-0" value="claims" variant="flush">
               <JwtClaimsBreakdown
                 height={height ?? "220px"}
                 jsonValue={value}
@@ -746,13 +730,14 @@ export function JwtEditor({
             ) : (
               <Textarea
                 aria-label={label}
-                className="resize-y break-all rounded-none border-0 font-mono text-sm shadow-none"
+                className="resize-y break-all"
                 onChange={(event) => onChange?.(event.target.value)}
                 placeholder={placeholder}
                 readOnly={!onChange}
                 spellCheck={false}
                 style={{ minHeight: minHeight ?? "160px" }}
                 value={value}
+                variant="ghost-mono"
               />
             )}
             {colorizeToken && <TokenLegend />}
@@ -762,44 +747,49 @@ export function JwtEditor({
       </div>
 
       <Dialog onOpenChange={setExpanded} open={expanded}>
-        <DialogContent className="jwt-inspector-scrollbars flex h-[85vh] max-h-[820px] flex-col gap-0 overflow-hidden rounded-xl border p-0 shadow-2xl sm:max-w-4xl lg:max-w-5xl">
-          {json ? (
-            <JwtDialogJsonView
-              byteCount={byteCount}
-              claimType={claimType}
-              copied={copied}
-              copyAriaLabel={copyAriaLabel}
-              copyLabel={copyLabel}
-              copyValue={copyValue}
-              description={description}
-              formatJson={formatJson}
-              isEditable={isEditable}
-              isValidJson={isValidJson}
-              label={label}
-              lineCount={lineCount}
-              modalTab={modalTab}
-              onChange={onChange}
-              onClose={() => setExpanded(false)}
-              setModalTab={setModalTab}
-              value={value}
-            />
-          ) : (
-            <JwtDialogPlainView
-              byteCount={byteCount}
-              colorizeToken={colorizeToken}
-              copied={copied}
-              copyAriaLabel={copyAriaLabel}
-              copyLabel={copyLabel}
-              copyValue={copyValue}
-              description={description}
-              label={label}
-              lineCount={lineCount}
-              onChange={onChange}
-              onClose={() => setExpanded(false)}
-              placeholder={placeholder}
-              value={value}
-            />
-          )}
+        <DialogContent
+          className="flex h-[85vh] max-h-[820px] sm:max-w-4xl lg:max-w-5xl"
+          variant="pane"
+        >
+          <div className="jwt-inspector-scrollbars flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+            {json ? (
+              <JwtDialogJsonView
+                byteCount={byteCount}
+                claimType={claimType}
+                copied={copied}
+                copyAriaLabel={copyAriaLabel}
+                copyLabel={copyLabel}
+                copyValue={copyValue}
+                description={description}
+                formatJson={formatJson}
+                isEditable={isEditable}
+                isValidJson={isValidJson}
+                label={label}
+                lineCount={lineCount}
+                modalTab={modalTab}
+                onChange={onChange}
+                onClose={() => setExpanded(false)}
+                setModalTab={setModalTab}
+                value={value}
+              />
+            ) : (
+              <JwtDialogPlainView
+                byteCount={byteCount}
+                colorizeToken={colorizeToken}
+                copied={copied}
+                copyAriaLabel={copyAriaLabel}
+                copyLabel={copyLabel}
+                copyValue={copyValue}
+                description={description}
+                label={label}
+                lineCount={lineCount}
+                onChange={onChange}
+                onClose={() => setExpanded(false)}
+                placeholder={placeholder}
+                value={value}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </>

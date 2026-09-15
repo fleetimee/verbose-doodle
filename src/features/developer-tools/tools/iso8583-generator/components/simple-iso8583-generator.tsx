@@ -220,7 +220,7 @@ function FieldDateTimePicker({
           {copy.pickButton}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-auto p-0">
+      <PopoverContent align="end" className="w-auto" size="none">
         {supportsDate ? (
           <Calendar
             captionLayout="dropdown"
@@ -238,12 +238,13 @@ function FieldDateTimePicker({
               {copy.timeLabel}
             </label>
             <Input
-              className="mt-2 font-mono"
+              className="mt-2"
               id={`iso-time-${fieldNumber}`}
               onChange={(event) => chooseTime(event.currentTarget.value)}
               step="1"
               type="time"
               value={`${twoDigits(selectedDate.getHours())}:${twoDigits(selectedDate.getMinutes())}:${twoDigits(selectedDate.getSeconds())}`}
+              variant="mono"
             />
           </div>
         ) : null}
@@ -253,11 +254,12 @@ function FieldDateTimePicker({
               {copy.expirationMonthLabel}
             </label>
             <Input
-              className="mt-2 font-mono"
+              className="mt-2"
               id="iso-expiry-month"
               onChange={(event) => chooseMonth(event.currentTarget.value)}
               type="month"
               value={`${selectedDate.getFullYear()}-${twoDigits(selectedDate.getMonth() + 1)}`}
+              variant="mono"
             />
           </div>
         ) : null}
@@ -336,8 +338,10 @@ function EnumFieldSelect({
           }
           aria-invalid={invalid || undefined}
           aria-label={label}
-          className="h-11 w-full font-mono text-sm shadow-none"
+          className="w-full"
           id={`iso-field-${field.number}`}
+          size="md"
+          variant="mono"
         >
           <SelectValue
             placeholder={formatMessage(copy.selectBitCodePlaceholder, {
@@ -376,7 +380,7 @@ function EnumFieldSelect({
             aria-label={formatMessage(copy.customValueAriaLabel, { label })}
             autoComplete="off"
             autoFocus
-            className="h-9 min-w-0 flex-1 font-mono text-xs"
+            className="min-w-0 flex-1"
             disabled={!field.enabled}
             inputMode={field.kind === "n" ? "numeric" : "text"}
             maxLength={field.length || undefined}
@@ -388,16 +392,18 @@ function EnumFieldSelect({
                   })
                 : copy.enterCustomValuePlaceholder
             }
+            size="compact"
             spellCheck={false}
             value={field.value}
+            variant="mono"
           />
           <Button
-            className="h-9 shrink-0 px-2.5 text-xs"
+            className="shrink-0"
             onClick={() => {
               setCustomMode(false);
               onChange(enumOptions[0]?.value ?? "");
             }}
-            size="sm"
+            size="compact"
             type="button"
             variant="outline"
           >
@@ -539,7 +545,7 @@ function FieldValueInput({
         aria-invalid={invalid || undefined}
         aria-label={label}
         autoComplete="off"
-        className="h-11 font-mono"
+        className="h-11"
         disabled={!field.enabled}
         id={`iso-field-${field.number}`}
         inputMode="text"
@@ -547,6 +553,7 @@ function FieldValueInput({
         onChange={(event) => onChange(event.currentTarget.value)}
         spellCheck={false}
         value={field.value}
+        variant="mono"
       />
     );
   }
@@ -557,14 +564,15 @@ function FieldValueInput({
       aria-invalid={invalid || undefined}
       aria-label={label}
       autoComplete="off"
-      className="h-11 font-mono"
       disabled={!field.enabled}
       id={`iso-field-${field.number}`}
       inputMode={field.kind === "n" ? "numeric" : "text"}
       maxLength={field.length || undefined}
       onChange={(event) => onChange(event.currentTarget.value)}
+      size="md"
       spellCheck={false}
       value={field.value}
+      variant="mono"
     />
   );
 }
@@ -595,7 +603,7 @@ function FieldInput({
 
   return (
     <Field
-      className="min-w-0 gap-2.5"
+      className="min-w-0"
       data-disabled={!field.enabled || undefined}
       data-invalid={invalid || undefined}
     >
@@ -616,10 +624,7 @@ function FieldInput({
           </span>
           <span className="truncate">{field.label}</span>
           {field.isCustom ? (
-            <Badge
-              className="h-4 shrink-0 px-1.5 py-0 font-normal text-[10px] text-muted-foreground leading-4"
-              variant="outline"
-            >
+            <Badge className="shrink-0" size="micro" variant="outline-muted">
               {copy.customBadge}
             </Badge>
           ) : null}
@@ -630,11 +635,11 @@ function FieldInput({
             aria-label={formatMessage(copy.removeBitFromFormAriaLabel, {
               number: field.number,
             })}
-            className="shrink-0 text-muted-foreground hover:text-destructive"
+            className="shrink-0"
             onClick={onRemove}
             size="icon-sm"
             type="button"
-            variant="ghost"
+            variant="ghost-destructive"
           >
             <Trash2 />
           </Button>
@@ -1009,21 +1014,25 @@ export function Iso8583Generator() {
         </p>
         <div className="flex flex-col rounded-lg border bg-muted p-1 shadow-xs sm:flex-row">
           <Tabs
-            className="min-w-0 flex-1 gap-0"
+            className="min-w-0 flex-1"
             onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
             value={presetId}
+            variant="flush"
           >
             <TabsList
               aria-label={copy.preset}
-              className="grid h-14 w-full grid-cols-3 rounded-md bg-transparent p-0"
+              className="grid w-full grid-cols-3"
+              size="lg"
+              variant="transparent"
             >
               {ISO8583_PRESETS.filter((item) =>
                 SIMPLE_PRESET_IDS.includes(item.id)
               ).map((item) => (
                 <TabsTrigger
-                  className="relative flex-col gap-0 overflow-hidden rounded-md px-3 data-active:bg-background data-active:shadow-xs"
+                  className="relative overflow-hidden"
                   key={item.id}
                   value={item.id}
+                  variant="tile"
                 >
                   <span
                     className={cn(
@@ -1061,16 +1070,14 @@ export function Iso8583Generator() {
           >
             <SelectTrigger
               aria-label={copy.moreMessages}
-              className={cn(
-                "w-full border-transparent shadow-none data-[size=default]:h-11 sm:w-52 sm:data-[size=default]:h-14",
-                morePreset && "bg-background shadow-xs"
-              )}
+              className="w-full data-[size=default]:h-11 sm:w-52 sm:data-[size=default]:h-14"
+              variant={morePreset ? "subtle-active" : "subtle"}
             >
               <SelectValue placeholder={copy.moreMessages}>
                 {morePreset ? morePreset.label : copy.moreMessages}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent className="duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:data-ending-style:transform-none motion-reduce:data-starting-style:transform-none">
+            <SelectContent>
               <SelectGroup>
                 {ISO8583_PRESETS.filter((item) =>
                   MORE_PRESET_IDS.includes(item.id)
@@ -1173,30 +1180,32 @@ export function Iso8583Generator() {
       </motion.section>
 
       <GeneratorActionBar>
-        <FieldSet className="flex flex-row flex-wrap gap-x-6 gap-y-3">
+        <FieldSet>
           <FieldLegend variant="label">{copy.onGenerate}</FieldLegend>
-          <label
-            className="flex items-center gap-2 text-sm"
-            htmlFor="iso-refresh-time"
-          >
-            <Checkbox
-              checked={refreshTime}
-              id="iso-refresh-time"
-              onCheckedChange={(checked) => setRefreshTime(checked === true)}
-            />
-            {copy.refreshTransmissionTime}
-          </label>
-          <label
-            className="flex items-center gap-2 text-sm"
-            htmlFor="iso-advance-stan"
-          >
-            <Checkbox
-              checked={advanceStan}
-              id="iso-advance-stan"
-              onCheckedChange={(checked) => setAdvanceStan(checked === true)}
-            />
-            {copy.incrementTraceNumber}
-          </label>
+          <div className="flex flex-row flex-wrap gap-x-6 gap-y-3">
+            <label
+              className="flex items-center gap-2 text-sm"
+              htmlFor="iso-refresh-time"
+            >
+              <Checkbox
+                checked={refreshTime}
+                id="iso-refresh-time"
+                onCheckedChange={(checked) => setRefreshTime(checked === true)}
+              />
+              {copy.refreshTransmissionTime}
+            </label>
+            <label
+              className="flex items-center gap-2 text-sm"
+              htmlFor="iso-advance-stan"
+            >
+              <Checkbox
+                checked={advanceStan}
+                id="iso-advance-stan"
+                onCheckedChange={(checked) => setAdvanceStan(checked === true)}
+              />
+              {copy.incrementTraceNumber}
+            </label>
+          </div>
         </FieldSet>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <Button
@@ -1243,12 +1252,13 @@ export function Iso8583Generator() {
 
       <Sheet onOpenChange={setOutputOpen} open={outputOpen}>
         <SheetContent
-          className="flex h-dvh w-full flex-col gap-0 p-0 motion-reduce:transition-none sm:max-w-2xl md:max-w-3xl lg:max-w-4xl"
+          className="flex h-dvh w-full flex-col sm:max-w-2xl md:max-w-3xl lg:max-w-4xl"
           side="right"
+          size="flush"
         >
-          <SheetHeader className="shrink-0 gap-1.5 border-b bg-muted/10 p-6 pr-14">
-            <SheetTitle className="text-xl">{copy.rawMessageTitle}</SheetTitle>
-            <SheetDescription className="text-sm">
+          <SheetHeader variant="muted-lg">
+            <SheetTitle variant="xl">{copy.rawMessageTitle}</SheetTitle>
+            <SheetDescription>
               {formatMessage(copy.rawMessageDescription, { mti: preset.mti })}
             </SheetDescription>
           </SheetHeader>
@@ -1276,11 +1286,11 @@ export function Iso8583Generator() {
                     }}
                     value={payloadView}
                   >
-                    <TabsList className="h-9 bg-muted/80">
-                      <TabsTrigger className="px-3 text-xs" value="json">
+                    <TabsList variant="solid">
+                      <TabsTrigger size="md" value="json">
                         {copy.formattedJsonTab}
                       </TabsTrigger>
-                      <TabsTrigger className="px-3 text-xs" value="text">
+                      <TabsTrigger size="md" value="text">
                         {copy.rawStreamTab}
                       </TabsTrigger>
                     </TabsList>
@@ -1353,17 +1363,13 @@ export function Iso8583Generator() {
                     <h3 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
                       {copy.bitmapInspectorTitle}
                     </h3>
-                    <Badge
-                      className="h-5 font-mono text-[10px]"
-                      variant="secondary"
-                    >
+                    <Badge mono size="sm" variant="secondary">
                       {packedState.message.activeFields.some((b) => b > 64)
                         ? copy.bitmap128Bit
                         : copy.bitmap64Bit}
                     </Badge>
                   </div>
                   <Button
-                    className="h-9"
                     onClick={copyOutput}
                     size="sm"
                     type="button"

@@ -147,7 +147,7 @@ function FieldRow({
         aria-invalid={invalid || undefined}
         aria-label={fieldLabel}
         autoComplete="off"
-        className="h-10 min-w-0 rounded-md bg-background font-mono text-sm shadow-none"
+        className="min-w-0"
         disabled={!field.enabled && field.length === 0}
         inputMode={field.kind === "n" ? "numeric" : "text"}
         maxLength={field.length}
@@ -155,13 +155,15 @@ function FieldRow({
         placeholder={field.kind === "ans" ? " " : copy.valuePlaceholder}
         spellCheck={false}
         value={field.value}
+        variant="mono"
       />
       <div className="flex min-w-0 items-center justify-start">
         {supportsNow ? (
           <Button
             aria-label={`${copy.now} Bit ${field.number}`}
-            className="h-8 w-full justify-start whitespace-nowrap px-1.5 text-xs"
+            className="w-full justify-start whitespace-nowrap"
             onClick={onNow}
+            size="sm-compact"
             type="button"
             variant="ghost"
           >
@@ -172,8 +174,9 @@ function FieldRow({
         {supportsStan ? (
           <Button
             aria-label={`${copy.autoIncrement} Bit ${field.number}`}
-            className="h-8 w-full justify-start whitespace-nowrap px-1.5 text-xs"
+            className="w-full justify-start whitespace-nowrap"
             onClick={onIncrementStan}
+            size="sm-compact"
             type="button"
             variant="ghost"
           >
@@ -392,20 +395,14 @@ export function LegacyIso8583Generator() {
           </p>
         </div>
         <div className="w-full max-w-xs space-y-2">
-          <Label
-            className="font-mono text-[10px] uppercase tracking-[0.16em]"
-            htmlFor="iso8583-preset"
-          >
+          <Label htmlFor="iso8583-preset" size="xs" variant="mono">
             {copy.preset}
           </Label>
           <Select
             onValueChange={(value) => loadPreset(value as Iso8583PresetId)}
             value={presetId}
           >
-            <SelectTrigger
-              className="h-11 rounded-md bg-background shadow-none"
-              id="iso8583-preset"
-            >
+            <SelectTrigger id="iso8583-preset" size="md" variant="subtle">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -433,14 +430,13 @@ export function LegacyIso8583Generator() {
 
           <div className="mt-5 space-y-4">
             <div className="space-y-2">
-              <Label className="text-xs" htmlFor="iso8583-mti">
+              <Label htmlFor="iso8583-mti" size="sm">
                 {copy.mti}
               </Label>
               <Input
                 aria-describedby="iso8583-mti-description"
                 aria-label={copy.mti}
                 autoComplete="off"
-                className="h-11 bg-background font-mono text-lg tracking-widest"
                 id="iso8583-mti"
                 inputMode="numeric"
                 list="iso8583-mti-options"
@@ -452,8 +448,10 @@ export function LegacyIso8583Generator() {
                   setCopied(false);
                   setStatus(null);
                 }}
+                size="md"
                 spellCheck={false}
                 value={mti}
+                variant="mono-lg"
               />
               <datalist id="iso8583-mti-options">
                 {MTI_OPTIONS.map((option) => (
@@ -469,7 +467,7 @@ export function LegacyIso8583Generator() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs" htmlFor="iso8583-header-type">
+              <Label htmlFor="iso8583-header-type" size="sm">
                 {copy.headerType}
               </Label>
               <Select
@@ -481,8 +479,9 @@ export function LegacyIso8583Generator() {
                 value={headerType}
               >
                 <SelectTrigger
-                  className="w-full bg-background shadow-none"
+                  className="w-full"
                   id="iso8583-header-type"
+                  variant="subtle"
                 >
                   <SelectValue>{HEADER_LABELS[headerType]}</SelectValue>
                 </SelectTrigger>
@@ -535,8 +534,9 @@ export function LegacyIso8583Generator() {
             <div className="space-y-3 border-t pt-5">
               <div className="flex items-center justify-between gap-3">
                 <Label
-                  className="cursor-pointer text-xs"
+                  className="cursor-pointer"
                   htmlFor="iso8583-auto-length"
+                  size="sm"
                 >
                   {copy.autoLength}
                 </Label>
@@ -550,7 +550,6 @@ export function LegacyIso8583Generator() {
               {headerType !== "none" && !autoLengthHeader ? (
                 <Input
                   aria-label={copy.manualLength}
-                  className="bg-background font-mono"
                   inputMode="numeric"
                   onChange={(event) =>
                     setManualLengthHeader(
@@ -563,12 +562,14 @@ export function LegacyIso8583Generator() {
                       : "0"
                   }
                   value={manualLengthHeader}
+                  variant="mono"
                 />
               ) : null}
               <div className="flex items-center justify-between gap-3">
                 <Label
-                  className="cursor-pointer text-xs"
+                  className="cursor-pointer"
                   htmlFor="iso8583-auto-bitmap"
+                  size="sm"
                 >
                   {copy.autoBitmap}
                 </Label>
@@ -582,7 +583,6 @@ export function LegacyIso8583Generator() {
                 <div className="grid gap-2">
                   <Input
                     aria-label={copy.primaryBitmap}
-                    className="bg-background font-mono text-xs uppercase tracking-wider"
                     maxLength={16}
                     onChange={(event) =>
                       setManualPrimaryBitmap(
@@ -591,10 +591,10 @@ export function LegacyIso8583Generator() {
                     }
                     placeholder="F23A400188E08016"
                     value={manualPrimaryBitmap}
+                    variant="mono-xs"
                   />
                   <Input
                     aria-label={copy.secondaryBitmap}
-                    className="bg-background font-mono text-xs uppercase tracking-wider"
                     maxLength={16}
                     onChange={(event) =>
                       setManualSecondaryBitmap(
@@ -603,6 +603,7 @@ export function LegacyIso8583Generator() {
                     }
                     placeholder="0000000000560000"
                     value={manualSecondaryBitmap}
+                    variant="mono-xs"
                   />
                 </div>
               )}
@@ -662,7 +663,8 @@ export function LegacyIso8583Generator() {
                 >
                   <SelectTrigger
                     aria-label={copy.addFieldTitle}
-                    className="bg-background shadow-none sm:flex-1"
+                    className="sm:flex-1"
+                    variant="subtle"
                   >
                     <SelectValue placeholder={copy.addFieldTitle} />
                   </SelectTrigger>
@@ -687,11 +689,11 @@ export function LegacyIso8583Generator() {
               </div>
             ) : (
               <Button
-                className="w-full border-dashed"
+                className="w-full"
                 disabled={addableFields.length === 0}
                 onClick={() => setShowAddField(true)}
                 type="button"
-                variant="outline"
+                variant="dashed"
               >
                 <span
                   aria-hidden="true"
@@ -724,7 +726,6 @@ export function LegacyIso8583Generator() {
               <div className="flex items-center gap-1">
                 <Button
                   aria-label={copied ? copy.copied : copy.copy}
-                  className="size-8"
                   disabled={!packedState.message}
                   onClick={copyOutput}
                   size="icon-sm"
@@ -737,9 +738,10 @@ export function LegacyIso8583Generator() {
             </div>
             <Textarea
               aria-label={copy.rawStream}
-              className="mt-4 min-h-[220px] resize-none overflow-y-auto bg-muted/10 font-mono text-xs leading-6 shadow-none [field-sizing:fixed]"
+              className="mt-4 min-h-[220px] resize-none overflow-y-auto [field-sizing:fixed]"
               readOnly
               value={packedState.message?.displayPayload ?? ""}
+              variant="mono-muted"
             />
             <p className="mt-3 text-[10px] text-muted-foreground leading-4">
               {copy.outputDescription} {copy.hexOutputHint}
