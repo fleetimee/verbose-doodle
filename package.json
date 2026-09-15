@@ -8,6 +8,7 @@
     "dev": "vite",
     "fix": "ultracite fix",
     "lint": "ultracite check",
+    "lint:oxlint": "oxlint",
     "lint:shadcn": "oxlint",
     "nfc-bridge": "bun tools/nfc-reader-bridge/cli.ts",
     "nfc-bridge:build": "bun tools/nfc-reader-bridge/release.ts build",
