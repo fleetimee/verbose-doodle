@@ -481,7 +481,10 @@ export const CodeBlockFilename = ({
 
   return (
     <div
-      className="flex items-center gap-2 bg-secondary px-4 py-1.5 text-muted-foreground text-xs"
+      className={cn(
+        "flex items-center gap-2 bg-secondary px-4 py-1.5 text-muted-foreground text-xs",
+        className
+      )}
       {...props}
     >
       {Icon && <Icon className="h-4 w-4 shrink-0" />}
@@ -560,6 +563,7 @@ export const CodeBlockCopyButton = ({
   timeout = 2000,
   children,
   className,
+  variant = "ghost",
   ...props
 }: CodeBlockCopyButtonProps) => {
   const [isCopied, setIsCopied] = useState(false);
@@ -613,7 +617,7 @@ export const CodeBlockCopyButton = ({
       className={cn("shrink-0", className)}
       onClick={handleCopyToClipboard}
       size="icon"
-      variant="ghost"
+      variant={variant}
       {...props}
     >
       {children ?? <Icon className="text-muted-foreground" size={14} />}
@@ -702,12 +706,12 @@ export const CodeBlockContent = ({
   themes,
   language,
   syntaxHighlighting = true,
-  onDrag,
-  onDragEnd,
-  onDragStart,
-  onAnimationStart,
-  onAnimationEnd,
-  onAnimationIteration,
+  onDrag: _onDrag,
+  onDragEnd: _onDragEnd,
+  onDragStart: _onDragStart,
+  onAnimationStart: _onAnimationStart,
+  onAnimationEnd: _onAnimationEnd,
+  onAnimationIteration: _onAnimationIteration,
   ...props
 }: CodeBlockContentProps) => {
   const [html, setHtml] = useState<string | null>(null);

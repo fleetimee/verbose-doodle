@@ -403,9 +403,9 @@ export function TourProvider({
             >
               <defs>
                 <mask id="tour-mask">
-                  <rect fill="white" height="100%" width="100%" />
+                  <rect className="fill-white" height="100%" width="100%" />
                   <rect
-                    fill="black"
+                    className="fill-black"
                     height={spotlightHeight + spotlightPadding * 2}
                     rx={spotlightBorderRadius}
                     ry={spotlightBorderRadius}
@@ -416,7 +416,7 @@ export function TourProvider({
                 </mask>
               </defs>
               <rect
-                fill="rgba(0,0,0,0.5)"
+                className="fill-black/50"
                 height="100%"
                 mask="url(#tour-mask)"
                 width="100%"
