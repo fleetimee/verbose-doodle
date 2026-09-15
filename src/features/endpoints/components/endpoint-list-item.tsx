@@ -50,11 +50,7 @@ export function EndpointListItem({
 
   return (
     <Item
-      className={cn(
-        "group/item relative w-full cursor-pointer overflow-hidden rounded-2xl border-2 border-border/80 border-b-4 bg-card/85 p-0 transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-border/90 hover:border-b-primary/60 hover:bg-accent/40 hover:shadow-sm active:translate-y-1 active:border-b-2",
-        "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/45",
-        endpoint.enabled === false && "border-dashed bg-muted/35"
-      )}
+      className="relative w-full cursor-pointer overflow-hidden"
       render={
         <button
           className="w-full text-left"
@@ -64,8 +60,8 @@ export function EndpointListItem({
           type="button"
         />
       }
-      size="default"
-      variant="default"
+      size="none"
+      variant={endpoint.enabled === false ? "dashed-subtle" : "elevated-subtle"}
     >
       <span
         aria-hidden="true"
@@ -76,14 +72,14 @@ export function EndpointListItem({
         )}
       />
       <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-3 pr-4 pl-5">
-        <ItemContent className="min-w-0 gap-2">
+        <ItemContent className="min-w-0" size="list">
           <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
             <HttpMethodBadge
               className="min-w-14 justify-center font-mono"
               method={endpoint.method}
               variant="badge"
             />
-            <ItemTitle className="min-w-0 font-bold text-foreground">
+            <ItemTitle className="min-w-0" variant="bold">
               <EndpointPathTitle path={endpoint.url} />
             </ItemTitle>
           </div>

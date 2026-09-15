@@ -46,11 +46,7 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
 
   return (
     <Item
-      className={cn(
-        "group/item relative min-h-24 w-full cursor-pointer items-stretch overflow-hidden rounded-2xl border-2 border-border/80 border-b-4 bg-card/95 p-0 shadow-xs transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-border/90 hover:border-b-primary/60 hover:bg-card hover:shadow-md active:translate-y-1 active:border-b-2",
-        "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/45",
-        endpoint.enabled === false && "border-dashed bg-muted/35"
-      )}
+      className="relative min-h-24 w-full cursor-pointer items-stretch overflow-hidden"
       render={
         <button
           className="w-full text-left"
@@ -60,8 +56,8 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
           type="button"
         />
       }
-      size="default"
-      variant="default"
+      size="none"
+      variant={endpoint.enabled === false ? "dashed" : "elevated"}
     >
       <span
         aria-hidden="true"
@@ -71,14 +67,14 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
           methodColors.border
         )}
       />
-      <ItemContent className="min-w-0 gap-3 py-4 pr-3 pl-5">
+      <ItemContent className="min-w-0" size="card">
         <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
           <HttpMethodBadge
             className="min-w-14 justify-center font-mono"
             method={endpoint.method}
             variant="badge"
           />
-          <ItemTitle className="w-full min-w-0 flex-1 font-bold text-foreground">
+          <ItemTitle className="w-full min-w-0 flex-1" variant="bold">
             <EndpointPathTitle path={endpoint.url} />
           </ItemTitle>
         </div>
@@ -94,7 +90,7 @@ export function EndpointCard({ endpoint, onClick, tourId }: EndpointCardProps) {
           />
         </ItemDescription>
       </ItemContent>
-      <ItemActions className="self-center pr-4">
+      <ItemActions className="self-center" size="card">
         <span className="flex size-9 items-center justify-center rounded-xl border-2 border-border/70 border-b-4 bg-muted/40 text-muted-foreground transition-all duration-150 ease-out group-hover/item:translate-x-0.5 group-hover/item:border-primary/40 group-hover/item:border-b-primary/70 group-hover/item:bg-primary group-hover/item:text-primary-foreground group-active/item:translate-y-0.5 group-active/item:border-b-2">
           <HugeiconsIcon
             className="size-4"

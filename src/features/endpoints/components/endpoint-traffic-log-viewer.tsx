@@ -49,7 +49,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -395,8 +399,9 @@ export function EndpointTrafficLogViewer({
       <div className="flex h-[560px] flex-col gap-2 bg-[#151515] p-4">
         {Array.from({ length: 10 }).map((_, index) => (
           <Skeleton
-            className="h-5 w-full bg-white/10"
+            className="h-5 w-full"
             key={`traffic-log-${index}`}
+            variant="terminal"
           />
         ))}
       </div>
@@ -424,7 +429,8 @@ export function EndpointTrafficLogViewer({
   } else {
     logContent = (
       <ScrollArea
-        className="h-[560px] w-full max-w-full bg-[#151515]"
+        className="h-[560px] w-full max-w-full"
+        variant="terminal"
         viewportRef={trafficLogViewportRef}
       >
         <div
@@ -444,8 +450,9 @@ export function EndpointTrafficLogViewer({
                   { requestId: log.requestId }
                 )}
                 checked={selectedIds.has(log.id)}
-                className="mt-0.5 border-[#5b5b5b] bg-[#1f1f1f] data-[state=checked]:border-[#60a5fa] data-[state=checked]:bg-[#2563eb]"
+                className="mt-0.5"
                 onCheckedChange={() => handleToggleSelected(log.id)}
+                variant="terminal-blue"
               />
               <button
                 className="text-left"
@@ -578,8 +585,9 @@ export function EndpointTrafficLogViewer({
 
         <div className="min-h-0 flex-1 px-5 pb-5">
           <ResizablePanelGroup
-            className="min-h-[620px] overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-[#2b2f37] dark:bg-[#0d1117]"
+            className="min-h-[620px] overflow-hidden"
             direction="horizontal"
+            variant="bordered"
           >
             <ResizablePanel defaultSize={50} minSize={28}>
               <LogExchangePane
@@ -592,10 +600,7 @@ export function EndpointTrafficLogViewer({
                 wrapLines={wrapLines}
               />
             </ResizablePanel>
-            <ResizableHandle
-              className="w-1 bg-slate-300 transition-colors hover:bg-sky-500 dark:bg-[#2b2f37] dark:hover:bg-sky-400"
-              withHandle
-            />
+            <ResizableHandle variant="colored" withHandle />
             <ResizablePanel defaultSize={50} minSize={28}>
               <LogExchangePane
                 body={selectedLogDetail.responseBody}
@@ -649,12 +654,11 @@ export function EndpointTrafficLogViewer({
             </div>
           </div>
           <Button
-            className="rounded-xl border-2 border-border/80 border-b-[3px] bg-background font-bold transition-all duration-150 hover:bg-accent active:translate-y-0.5 active:border-b-2"
             disabled={isFetching}
             onClick={() => refetchLogs()}
             size="sm"
             type="button"
-            variant="outline"
+            variant="panel"
           >
             <HugeiconsIcon
               data-icon="inline-start"
@@ -775,19 +779,20 @@ export function EndpointTrafficLogViewer({
                 </SelectContent>
               </Select>
 
-              <div className="relative">
-                <HugeiconsIcon
-                  className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                  icon={SearchIcon}
-                  strokeWidth={2}
-                />
-                <Input
-                  className="pl-9"
+              <InputGroup>
+                <InputGroupAddon align="inline-start">
+                  <HugeiconsIcon
+                    className="text-muted-foreground"
+                    icon={SearchIcon}
+                    strokeWidth={2}
+                  />
+                </InputGroupAddon>
+                <InputGroupInput
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder={messages.endpoints.trafficLogsSearchPlaceholder}
                   value={search}
                 />
-              </div>
+              </InputGroup>
             </div>
 
             <div className="grid items-center gap-3 sm:grid-cols-[180px_1fr]">
@@ -818,7 +823,6 @@ export function EndpointTrafficLogViewer({
 
               <div className="flex flex-wrap gap-2">
                 <Button
-                  className="rounded-lg border border-border/70 bg-background font-medium hover:bg-accent"
                   onClick={() =>
                     copyText(
                       visibleLines.join("\n"),
@@ -827,7 +831,7 @@ export function EndpointTrafficLogViewer({
                   }
                   size="sm"
                   type="button"
-                  variant="outline"
+                  variant="subtle"
                 >
                   <HugeiconsIcon
                     data-icon="inline-start"
@@ -837,7 +841,6 @@ export function EndpointTrafficLogViewer({
                   {messages.endpoints.trafficLogsCopyButton}
                 </Button>
                 <Button
-                  className="rounded-lg border border-border/70 bg-background font-medium hover:bg-accent"
                   disabled={selectedIds.size === 0}
                   onClick={() =>
                     copyText(
@@ -847,18 +850,17 @@ export function EndpointTrafficLogViewer({
                   }
                   size="sm"
                   type="button"
-                  variant="outline"
+                  variant="subtle"
                 >
                   <Clipboard data-icon="inline-start" />
                   {messages.endpoints.trafficLogsCopySelectedButton}
                 </Button>
                 <Button
-                  className="rounded-lg border border-border/70 bg-background font-medium hover:bg-accent"
                   disabled={selectedIds.size === 0}
                   onClick={handleClearSelection}
                   size="sm"
                   type="button"
-                  variant="outline"
+                  variant="subtle"
                 >
                   <HugeiconsIcon
                     data-icon="inline-start"
@@ -868,11 +870,10 @@ export function EndpointTrafficLogViewer({
                   {messages.endpoints.trafficLogsUnselectButton}
                 </Button>
                 <Button
-                  className="rounded-lg border border-border/70 bg-background font-medium hover:bg-accent"
                   onClick={() => handleDownload("text")}
                   size="sm"
                   type="button"
-                  variant="outline"
+                  variant="subtle"
                 >
                   <HugeiconsIcon
                     data-icon="inline-start"
@@ -882,21 +883,19 @@ export function EndpointTrafficLogViewer({
                   {messages.endpoints.trafficLogsDownloadButton}
                 </Button>
                 <Button
-                  className="rounded-lg border border-border/70 bg-background font-medium hover:bg-accent"
                   onClick={() => handleDownload("csv")}
                   size="sm"
                   type="button"
-                  variant="outline"
+                  variant="subtle"
                 >
                   {messages.endpoints.trafficLogsCsvButton}
                 </Button>
                 <Button
-                  className="rounded-lg border border-destructive/40 bg-destructive/10 font-medium text-destructive hover:bg-destructive/20"
                   disabled={logs.length === 0 || isClearingTrafficLogs}
                   onClick={() => setShowClearLogsDialog(true)}
                   size="sm"
                   type="button"
-                  variant="outline"
+                  variant="destructive-subtle"
                 >
                   <HugeiconsIcon
                     data-icon="inline-start"
@@ -924,8 +923,9 @@ export function EndpointTrafficLogViewer({
         open={!!selectedLogId}
       >
         <DialogContent
-          className="flex h-[90vh] flex-col overflow-hidden bg-white p-0 text-slate-950 sm:max-w-[min(1400px,96vw)] dark:border-[#2b2f37] dark:bg-[#0b0f14] dark:text-slate-100"
+          className="flex h-[90vh] sm:max-w-[min(1400px,96vw)]"
           showCloseButton={false}
+          variant="dark-pane"
         >
           <DialogHeader className="sr-only">
             <DialogTitle>
@@ -1191,7 +1191,7 @@ function ShikiJsonBlock({
             {filename}
           </span>
         </div>
-        <CodeBlockCopyButton className="size-7 text-slate-500 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white" />
+        <CodeBlockCopyButton size="icon-7" variant="ghost-slate" />
         <label
           className="ml-1 inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-2 py-1 font-medium text-[11px] text-slate-700 dark:border-[#344156] dark:bg-[#0b1020] dark:text-slate-200"
           htmlFor={`wrap-lines-${filename}`}

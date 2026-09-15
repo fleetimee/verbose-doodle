@@ -17,6 +17,7 @@ import { useSearchParams } from "react-router";
 import { Layers3, Plug } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { type TourStep, useTour } from "@/components/tour";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -872,13 +873,12 @@ export function EndpointsPage() {
                                 messages.endpoints.addEndpointForBiller,
                                 { billerName: group.billerName }
                               )}
-                              className="rounded-lg border-2 border-border/80 border-b-[3px] bg-background/70 text-muted-foreground transition-all duration-150 hover:border-border hover:bg-accent hover:text-accent-foreground active:translate-y-0.5 active:border-b-2"
                               onClick={() =>
                                 handleCreateEndpoint(group.billerSlug)
                               }
                               size="icon-xs"
                               type="button"
-                              variant="outline"
+                              variant="panel-muted"
                             >
                               <HugeiconsIcon
                                 className="size-3.5"
@@ -903,7 +903,6 @@ export function EndpointsPage() {
                                 messages.endpoints.editBillerTooltip,
                                 { billerName: group.billerName }
                               )}
-                              className="rounded-lg border-2 border-border/80 border-b-[3px] bg-background/70 text-muted-foreground transition-all duration-150 hover:border-border hover:bg-accent hover:text-accent-foreground active:translate-y-0.5 active:border-b-2"
                               onClick={() => {
                                 const biller = billers.find(
                                   (candidate) =>
@@ -918,7 +917,7 @@ export function EndpointsPage() {
                               }}
                               size="icon-xs"
                               type="button"
-                              variant="outline"
+                              variant="panel-muted"
                             >
                               <HugeiconsIcon
                                 className="size-3.5"
@@ -936,12 +935,12 @@ export function EndpointsPage() {
                         </Tooltip>
                       </ProtectedAction>
                     </div>
-                    <span className="inline-flex select-none items-center gap-1.5 rounded-xl border-2 border-border/80 border-b-[3px] bg-muted/40 px-2.5 py-1 font-bold text-muted-foreground text-xs">
+                    <Badge variant="outline-muted">
                       <Layers3 className="h-3.5 w-3.5" />
                       {formatMessage(messages.endpoints.endpointCount, {
                         count: group.endpoints.length,
                       })}
-                    </span>
+                    </Badge>
                   </div>
                   <AnimatedEndpointGroup
                     canEditEndpoint={canEditEndpoint}
@@ -964,7 +963,7 @@ export function EndpointsPage() {
                 ease: MOTION_EASE.out,
               }}
             >
-              <Empty className="border">
+              <Empty variant="bordered">
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
                     <Plug />
@@ -986,7 +985,7 @@ export function EndpointsPage() {
           initial={{ opacity: 0 }}
           transition={{ duration: MOTION_DURATION.fast, ease: MOTION_EASE.out }}
         >
-          <Empty className="min-h-[60vh] border">
+          <Empty className="min-h-[60vh]" variant="bordered">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <Plug />

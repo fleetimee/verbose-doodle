@@ -140,17 +140,16 @@ function MethodCoverage({ summary }: { readonly summary: ExportSummary }) {
         const count = summary.methods[method];
 
         return (
-          <Badge
+          <span
             className={cn(
-              "rounded-md border font-mono shadow-xs",
+              "inline-flex items-center rounded-md border px-2 py-0.5 font-medium font-mono text-xs shadow-xs",
               getMethodBadgeColor(method),
               count === 0 && "opacity-45 saturate-0"
             )}
             key={method}
-            variant="outline"
           >
             {method} {count}
-          </Badge>
+          </span>
         );
       })}
     </div>

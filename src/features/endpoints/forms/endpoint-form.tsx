@@ -60,6 +60,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import type { Biller } from "@/features/billers/types";
+import { HttpMethodBadge } from "@/features/endpoints/components/http-method-badge";
 import type {
   EndpointAvailability,
   EndpointAvailabilityInput,
@@ -144,8 +145,8 @@ function MethodCombobox({
   field,
   fieldState,
 }: {
-  readonly field: ControllerRenderProps<EndpointFormData, "method">;
-  readonly fieldState: ControllerFieldState;
+  field: ControllerRenderProps<EndpointFormData, "method">;
+  fieldState: ControllerFieldState;
 }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -156,17 +157,18 @@ function MethodCombobox({
         <Button
           aria-expanded={open}
           aria-invalid={fieldState.invalid}
-          aria-label={messages.endpoints.methodLabel}
           className="w-full justify-between"
           id="endpoint-method"
           ref={triggerRef}
           role="combobox"
-          type="button"
           variant="outline"
         >
-          <span className={getMethodTextColor(field.value)}>{field.value}</span>
+          {field.value ? (
+            <HttpMethodBadge method={field.value} />
+          ) : (
+            messages.endpoints.methodPlaceholder
+          )}
           <HugeiconsIcon
-            aria-hidden="true"
             className="size-4 shrink-0 opacity-50"
             icon={UnfoldMoreIcon}
             strokeWidth={2}
@@ -175,7 +177,7 @@ function MethodCombobox({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[var(--anchor-width)] overflow-hidden p-0"
+        className="w-[var(--anchor-width)] overflow-hidden"
         finalFocus={false}
         portalContainer={
           triggerRef.current?.closest<HTMLElement>(
@@ -183,6 +185,7 @@ function MethodCombobox({
           ) ?? undefined
         }
         sideOffset={0}
+        size="none"
       >
         <Command>
           <CommandInput
@@ -190,19 +193,19 @@ function MethodCombobox({
             className="h-11"
             placeholder={messages.endpoints.searchMethodsPlaceholder}
           />
-          <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
-            <CommandList className="max-h-none overflow-visible p-1">
+          <ScrollArea className="h-72" variant="visible">
+            <CommandList variant="scrollable">
               <CommandEmpty>{messages.endpoints.noMethodsFound}</CommandEmpty>
-              <CommandGroup className="p-0">
+              <CommandGroup variant="flush">
                 {httpMethods.map((method) => (
                   <CommandItem
-                    className="min-h-10 px-3 py-2 text-[0.95rem]"
                     key={method}
                     onSelect={() => {
                       field.onChange(method);
                       setOpen(false);
                     }}
                     value={method}
+                    variant="nav"
                   >
                     <span className={getMethodTextColor(method)}>{method}</span>
                     <HugeiconsIcon
@@ -269,7 +272,7 @@ function BillerCombobox({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[var(--anchor-width)] overflow-hidden p-0"
+        className="w-[var(--anchor-width)] overflow-hidden"
         finalFocus={false}
         portalContainer={
           triggerRef.current?.closest<HTMLElement>(
@@ -277,6 +280,7 @@ function BillerCombobox({
           ) ?? undefined
         }
         sideOffset={0}
+        size="none"
       >
         <Command>
           <CommandInput
@@ -284,18 +288,18 @@ function BillerCombobox({
             className="h-11"
             placeholder={messages.billers.searchPlaceholder}
           />
-          <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
-            <CommandList className="max-h-none overflow-visible p-1">
+          <ScrollArea className="h-72" variant="visible">
+            <CommandList variant="scrollable">
               <CommandEmpty>{messages.billers.noBillersFound}</CommandEmpty>
-              <CommandGroup className="p-0">
+              <CommandGroup variant="flush">
                 {onAddBiller && (
                   <CommandItem
-                    className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
                     onSelect={() => {
                       setOpen(false);
                       onAddBiller();
                     }}
                     value={messages.billers.addNewBiller}
+                    variant="action"
                   >
                     <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
                     <span>{messages.billers.addNewBiller}</span>
@@ -303,13 +307,13 @@ function BillerCombobox({
                 )}
                 {billers.map((biller) => (
                   <CommandItem
-                    className="min-h-10 px-3 py-2 text-[0.95rem]"
                     key={biller.slug}
                     onSelect={() => {
                       field.onChange(biller.slug);
                       setOpen(false);
                     }}
                     value={`${biller.name} ${biller.slug}`}
+                    variant="nav"
                   >
                     <span className="truncate">{biller.name}</span>
                     <HugeiconsIcon
@@ -482,7 +486,7 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
           onSubmit={form.handleSubmit(handleSubmit)}
         >
           <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
-            <FieldGroup className="space-y-4">
+            <FieldGroup size="compact">
               <Controller
                 control={form.control}
                 name="method"
@@ -512,7 +516,7 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                     <FieldLabel htmlFor="endpoint-url">
                       {messages.endpoints.urlLabel}
                     </FieldLabel>
-                    <FieldContent className="text-foreground">
+                    <FieldContent variant="foreground">
                       <Input
                         {...field}
                         aria-describedby={
@@ -551,7 +555,7 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                         availability.available && (
                           <div
                             aria-live="polite"
-                            className="flex items-start gap-2 text-emerald-700 text-sm dark:text-emerald-400"
+                            className="flex items-start gap-2 text-primary text-sm"
                             role="status"
                           >
                             <HugeiconsIcon
@@ -622,12 +626,12 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                               availability.endpointSlug &&
                               onDisableConflictingEndpoint && (
                                 <Button
-                                  className="h-auto min-h-8 w-fit max-w-full whitespace-normal border-destructive/30 text-destructive shadow-none hover:bg-destructive/10 hover:text-destructive"
+                                  className="h-auto min-h-8 w-fit max-w-full whitespace-normal"
                                   disabled={isDisablingConflict}
                                   onClick={() => setIsDisableConfirmOpen(true)}
                                   size="sm"
                                   type="button"
-                                  variant="outline"
+                                  variant="destructive-subtle"
                                 >
                                   {isDisablingConflict && <Spinner />}
                                   {messages.endpoints.disableExistingEndpoint}
@@ -716,9 +720,9 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 disabled={isDisablingConflict}
                 onClick={handleDisableConflict}
+                variant="destructive"
               >
                 {isDisablingConflict && <Spinner className="mr-2" />}
                 Disable endpoint

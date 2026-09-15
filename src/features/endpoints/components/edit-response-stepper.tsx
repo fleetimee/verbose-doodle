@@ -199,12 +199,7 @@ export function EditResponseStepper({
       <div className="border-b px-4 py-4 md:px-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              className="rounded-xl border border-border/80 bg-background/80 shadow-xs hover:bg-accent"
-              onClick={onCancel}
-              size="icon"
-              variant="ghost"
-            >
+            <Button onClick={onCancel} size="icon" variant="soft">
               <HugeiconsIcon
                 className="h-5 w-5"
                 icon={ArrowLeft02Icon}
@@ -220,12 +215,7 @@ export function EditResponseStepper({
               </div>
             </div>
           </div>
-          <Button
-            className="rounded-xl border border-border/80 bg-background/80 font-medium shadow-xs hover:bg-accent"
-            onClick={onCancel}
-            size="sm"
-            variant="ghost"
-          >
+          <Button onClick={onCancel} size="sm" variant="soft">
             {messages.common.cancel}
           </Button>
         </div>
@@ -233,7 +223,7 @@ export function EditResponseStepper({
 
       {/* Content */}
       <div className="flex flex-1 items-center justify-center overflow-y-scroll bg-muted/20 px-4 py-8 [scrollbar-gutter:stable] md:px-8 md:pb-8">
-        <Card className="w-full max-w-3xl rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
+        <Card className="w-full max-w-3xl" variant="elevated">
           {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: Form needs keyboard navigation for stepper UX */}
           <form
             className="flex min-h-[34rem] flex-col"
@@ -281,11 +271,12 @@ export function EditResponseStepper({
                               aria-invalid={fieldState.invalid}
                               autoComplete="off"
                               autoFocus
-                              className="h-12 rounded-xl border bg-background px-4 font-mono text-lg shadow-xs focus-visible:ring-2 aria-invalid:border-destructive"
                               id="edit-response-name"
                               placeholder={
                                 messages.endpoints.responseNamePlaceholder
                               }
+                              size="xl"
+                              variant="mono-lg"
                             />
                             <div className="mt-3 flex flex-wrap gap-2">
                               {[
@@ -328,11 +319,6 @@ export function EditResponseStepper({
                             <div className="mb-4 grid gap-2 sm:grid-cols-5">
                               {COMMON_STATUS_CODES.map((status) => (
                                 <Button
-                                  className={`h-auto min-h-14 flex-col gap-1 rounded-xl transition-all duration-150 ${
-                                    field.value === status.code
-                                      ? "border-2 border-primary/50 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs"
-                                      : "border border-border/80 bg-card font-medium text-foreground hover:bg-accent/50"
-                                  }`}
                                   key={status.code}
                                   onClick={() => {
                                     field.onChange(status.code);
@@ -340,8 +326,13 @@ export function EditResponseStepper({
                                       .trigger("statusCode")
                                       .catch(() => undefined);
                                   }}
+                                  size="tile"
                                   type="button"
-                                  variant="ghost"
+                                  variant={
+                                    field.value === status.code
+                                      ? "elevated"
+                                      : "card"
+                                  }
                                 >
                                   <span className="font-bold font-mono text-base">
                                     {status.code}
@@ -429,11 +420,11 @@ export function EditResponseStepper({
           <div />
 
           <Button
-            className="rounded-xl border-2 border-primary/40 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/95 active:translate-y-1 active:border-b-2"
             disabled={!canSubmit}
             onClick={handleSubmit}
             size="lg"
             type="button"
+            variant="elevated"
           >
             {isSubmitting ? (
               <>

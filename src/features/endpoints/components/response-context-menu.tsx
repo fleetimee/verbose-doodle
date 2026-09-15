@@ -13,6 +13,7 @@ import {
   TextCursor,
 } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
+import { Badge } from "@/components/ui/badge";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -68,23 +69,22 @@ export function ResponseContextMenu({
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-      <ContextMenuContent className="w-60 rounded-xl border-border/70 bg-popover/95 p-1.5 shadow-black/10 shadow-xl backdrop-blur-md">
+      <ContextMenuContent className="w-60" variant="subtle">
         <ContextMenuGroup>
-          <ContextMenuLabel className="px-2.5 py-2">
+          <ContextMenuLabel size="card">
             <span className="block truncate font-semibold text-foreground text-sm">
               {response.name}
             </span>
-            <span className="mt-1 flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
+            <span className="mt-1 flex items-center gap-2 font-mono text-muted-foreground text-xs">
               <span>{response.statusCode}</span>
               <span aria-hidden="true" className="text-border">
                 /
               </span>
               <span>{messages.endpoints.responseConfiguration}</span>
               {isActive && (
-                <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 font-medium font-sans text-[10px] text-emerald-700 dark:text-emerald-300">
-                  <span className="size-1.5 rounded-full bg-emerald-500" />
+                <Badge className="ml-auto" size="xs" variant="success">
                   {messages.common.active}
-                </span>
+                </Badge>
               )}
             </span>
           </ContextMenuLabel>

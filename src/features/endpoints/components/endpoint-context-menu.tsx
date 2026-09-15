@@ -29,7 +29,6 @@ type EndpointContextMenuProps = {
   onEdit: (endpoint: Endpoint) => void;
 };
 
-const itemClassName = "h-7 gap-2 rounded-md px-2 text-[13px]";
 const TRAILING_SLASHES_PATTERN = /\/+$/;
 
 export function EndpointContextMenu({
@@ -69,19 +68,16 @@ export function EndpointContextMenu({
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-      <ContextMenuContent className="w-52 rounded-lg border-border/70 bg-popover/95 p-1 shadow-lg backdrop-blur-xl">
+      <ContextMenuContent className="w-52" variant="subtle">
         <ContextMenuItem
-          className={itemClassName}
           onClick={() => navigate(`/dashboard/endpoints/${endpoint.slug}`)}
+          size="compact"
         >
           <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
           {messages.endpoints.openEndpoint}
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem
-          className={itemClassName}
-          onClick={handleToggleEnabled}
-        >
+        <ContextMenuItem onClick={handleToggleEnabled} size="compact">
           <HugeiconsIcon
             icon={
               endpoint.enabled === false ? CheckmarkCircle02Icon : Cancel01Icon
@@ -92,14 +88,14 @@ export function EndpointContextMenu({
             ? messages.endpoints.enableEndpoint
             : messages.endpoints.disableEndpoint}
         </ContextMenuItem>
-        <ContextMenuItem className={itemClassName} onClick={handleCopyUrl}>
+        <ContextMenuItem onClick={handleCopyUrl} size="compact">
           <HugeiconsIcon icon={Copy01Icon} strokeWidth={2} />
           {messages.endpoints.copyUrl}
         </ContextMenuItem>
         <ContextMenuItem
           aria-label={messages.endpoints.editEndpointMenuItem}
-          className={itemClassName}
           onClick={() => onEdit(endpoint)}
+          size="compact"
         >
           <Pen />
           {messages.endpoints.editEndpointMenuItem}
@@ -107,8 +103,8 @@ export function EndpointContextMenu({
         <ContextMenuSeparator />
         <ContextMenuItem
           aria-label={messages.endpoints.deleteEndpointMenuItem}
-          className={itemClassName}
           onClick={() => onDelete(endpoint)}
+          size="compact"
           variant="destructive"
         >
           <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />

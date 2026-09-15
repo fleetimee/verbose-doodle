@@ -775,7 +775,7 @@ export function EndpointDetailPage() {
             ease: "easeOut",
           }}
         >
-          <Empty className="min-h-[60vh] border">
+          <Empty className="min-h-[60vh]" variant="bordered">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <HugeiconsIcon icon={CircleDefinition} strokeWidth={2} />
@@ -815,18 +815,16 @@ export function EndpointDetailPage() {
           }}
         >
           <div className="flex items-start gap-3 xl:items-center xl:gap-4">
-            <Skeleton className="h-10 w-10 shrink-0 rounded-md" />
+            <Skeleton className="size-10 shrink-0" />
             <div className="min-w-0 flex-1 space-y-2">
               <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                <Skeleton className="h-6 w-16 shrink-0 rounded-md" />
-                <Skeleton className="h-6 w-48 rounded-md md:h-8 md:w-64" />
+                <Skeleton className="h-6 w-16 shrink-0" />
+                <Skeleton className="h-6 w-48 md:h-8 md:w-64" />
               </div>
-              <Skeleton className="h-4 w-full max-w-sm rounded-md" />
+              <Skeleton className="h-4 w-full max-w-sm" />
             </div>
           </div>
-          {canAddResponse && (
-            <Skeleton className="h-10 w-32 shrink-0 rounded-md" />
-          )}
+          {canAddResponse && <Skeleton className="h-10 w-32 shrink-0" />}
         </motion.div>
 
         <motion.div
@@ -879,7 +877,7 @@ export function EndpointDetailPage() {
             ease: "easeOut",
           }}
         >
-          <Empty className="min-h-[60vh] border">
+          <Empty className="min-h-[60vh]" variant="bordered">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <HugeiconsIcon icon={CircleDefinition} strokeWidth={2} />
@@ -959,9 +957,16 @@ export function EndpointDetailPage() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <SelectTrigger
-                            className={`h-auto w-auto gap-1 rounded-xl border-2 border-b-[3px] px-2.5 py-0.5 font-black font-mono text-xs shadow-none focus:ring-0 focus-visible:ring-0 ${getMethodBadgeColor(
-                              editedMethod
-                            )}`}
+                            className="w-auto"
+                            size="badge"
+                            variant={
+                              `method-${editedMethod.toLowerCase()}` as
+                                | "method-get"
+                                | "method-post"
+                                | "method-put"
+                                | "method-delete"
+                                | "method-patch"
+                            }
                           >
                             <SelectValue>
                               <span
@@ -994,24 +999,24 @@ export function EndpointDetailPage() {
                       </SelectContent>
                     </Select>
                     <Input
-                      className="h-auto min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 py-0 font-bold font-mono text-xl tracking-tight shadow-none focus-visible:ring-0 lg:text-2xl"
+                      className="min-w-0 flex-1"
                       disabled={isUpdatingEndpoint}
                       onChange={(e) => setEditedUrl(e.target.value)}
                       onKeyDown={handleKeyDown}
                       ref={inputRef}
                       value={editedUrl}
+                      variant="ghost-title"
                     />
                     <div className="flex gap-2">
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
                             aria-label={messages.endpoints.saveEndpointTooltip}
-                            className="rounded-lg border border-green-600/40 bg-green-50 text-green-700 shadow-xs hover:bg-green-100 hover:text-green-800 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/50"
                             disabled={isUpdatingEndpoint || !editedUrl.trim()}
                             onClick={handleSaveUrl}
                             size="icon-sm"
                             type="button"
-                            variant="outline"
+                            variant="success"
                           >
                             <HugeiconsIcon
                               className="size-4"
@@ -1030,12 +1035,11 @@ export function EndpointDetailPage() {
                             aria-label={
                               messages.endpoints.cancelEndpointEditTooltip
                             }
-                            className="rounded-lg border border-destructive/40 bg-destructive/10 text-destructive shadow-xs hover:bg-destructive/15 hover:text-destructive"
                             disabled={isUpdatingEndpoint}
                             onClick={handleCancelEdit}
                             size="icon-sm"
                             type="button"
-                            variant="outline"
+                            variant="destructive-subtle"
                           >
                             <HugeiconsIcon
                               className="size-4"
@@ -1137,8 +1141,9 @@ export function EndpointDetailPage() {
             <ProtectedAction ability="canEditEndpoint">
               <ButtonGroup
                 aria-label={messages.endpoints.detailTour.editActionsTitle}
-                className="max-w-full rounded-md border border-border/70 bg-muted/20"
+                className="max-w-full"
                 id={ENDPOINT_DETAIL_TOUR_TARGETS.editActions}
+                variant="muted"
               >
                 <label
                   className="flex min-h-8 cursor-pointer items-center gap-2 border-border/70 border-r px-2.5 text-xs transition-colors focus-within:bg-accent focus-within:ring-2 focus-within:ring-ring/50 active:bg-accent/80 has-[[data-disabled]]:cursor-not-allowed has-[[data-disabled]]:opacity-50 motion-reduce:transition-none [@media(any-hover:hover)]:hover:bg-accent [@media(any-pointer:coarse)]:min-h-11"
@@ -1159,11 +1164,11 @@ export function EndpointDetailPage() {
                 </label>
                 <Button
                   aria-label={messages.endpoints.editEndpointTooltip}
-                  className="min-w-8 text-muted-foreground active:bg-accent/80"
+                  className="min-w-8"
                   onClick={handleEditUrl}
                   size="sm"
                   type="button"
-                  variant="ghost"
+                  variant="ghost-muted"
                 >
                   <HugeiconsIcon icon={Pen01Icon} strokeWidth={2} />
                   <span className="@sm:inline hidden">
@@ -1174,11 +1179,10 @@ export function EndpointDetailPage() {
                   <TooltipTrigger asChild>
                     <Button
                       aria-label={messages.endpoints.deleteEndpointTooltip}
-                      className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive active:bg-destructive/15 dark:hover:bg-destructive/10"
                       onClick={handleDeleteEndpointClick}
                       size="icon-sm"
                       type="button"
-                      variant="ghost"
+                      variant="ghost-destructive"
                     >
                       <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
                     </Button>
@@ -1192,11 +1196,10 @@ export function EndpointDetailPage() {
           )}
           <div className="ml-auto flex min-w-0 flex-wrap items-center gap-1">
             <Button
-              className="text-muted-foreground active:bg-accent/80"
               onClick={() => setIsMetricsOpen(true)}
               size="sm"
               type="button"
-              variant="ghost"
+              variant="ghost-muted"
             >
               <HugeiconsIcon
                 data-icon="inline-start"
@@ -1206,11 +1209,10 @@ export function EndpointDetailPage() {
               {messages.endpoints.metrics.button}
             </Button>
             <Button
-              className="text-muted-foreground active:bg-accent/80"
               onClick={handleStartTour}
               size="sm"
               type="button"
-              variant="ghost"
+              variant="ghost-muted"
             >
               <HugeiconsIcon
                 data-icon="inline-start"
@@ -1221,7 +1223,7 @@ export function EndpointDetailPage() {
             </Button>
             <ProtectedAction ability="canAddResponse">
               <Button
-                className="@sm:ml-1 @sm:w-auto w-full active:bg-primary/80"
+                className="@sm:ml-1 @sm:w-auto w-full"
                 id={ENDPOINT_DETAIL_TOUR_TARGETS.addResponse}
                 onClick={() => setIsStepperOpen(true)}
                 size="sm"
@@ -1360,9 +1362,9 @@ export function EndpointDetailPage() {
               {messages.common.cancel}
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
               disabled={isDeletingEndpoint}
               onClick={handleConfirmDeleteEndpoint}
+              variant="destructive"
             >
               {isDeletingEndpoint
                 ? messages.endpoints.deleting

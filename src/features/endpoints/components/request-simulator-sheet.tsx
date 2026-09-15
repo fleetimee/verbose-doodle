@@ -422,8 +422,11 @@ export function RequestSimulatorSheet({
 
   return (
     <Sheet onOpenChange={onOpenChange} open={open}>
-      <SheetContent className="w-full gap-0 overflow-hidden bg-background p-0 sm:max-w-6xl">
-        <SheetHeader className="border-b bg-muted/20 px-5 py-4">
+      <SheetContent
+        className="w-full overflow-hidden sm:max-w-6xl"
+        size="flush"
+      >
+        <SheetHeader variant="muted">
           <div className="flex flex-wrap items-start gap-3 pr-8">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-background text-primary shadow-xs">
               <HugeiconsIcon
@@ -435,28 +438,25 @@ export function RequestSimulatorSheet({
             </div>
             <div className="min-w-0 flex-1 space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge
+                <span
                   className={cn(
-                    "rounded-md border px-2.5 py-1 font-mono font-semibold",
+                    "inline-flex items-center rounded-md border px-2.5 py-1 font-mono font-semibold text-xs",
                     METHOD_TONE_CLASS_NAMES[method]
                   )}
-                  variant="outline"
                 >
                   {method}
-                </Badge>
-                <SheetTitle className="text-lg">
+                </span>
+                <SheetTitle variant="lg">
                   {SIMULATOR_MESSAGES.requestSimulatorTitle}
                 </SheetTitle>
               </div>
-              <SheetDescription className="break-all font-mono text-xs">
-                {fullUrl}
-              </SheetDescription>
+              <SheetDescription variant="code">{fullUrl}</SheetDescription>
             </div>
           </div>
         </SheetHeader>
 
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-0 overflow-hidden lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-          <ScrollArea className="h-full min-h-0 border-b bg-muted/10 lg:border-r lg:border-b-0">
+          <ScrollArea className="h-full min-h-0" variant="split">
             <div className="flex min-h-0 flex-col gap-4 p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-start gap-3">
@@ -473,16 +473,19 @@ export function RequestSimulatorSheet({
                   </div>
                 </div>
                 <Badge
-                  className="max-w-[45%] rounded-md px-2.5 py-1 font-mono text-[11px]"
+                  className="max-w-[45%]"
+                  mono
+                  shape="rounded"
+                  size="lg"
                   variant="secondary"
                 >
                   <span className="truncate">{simulatorUrl}</span>
                 </Badge>
               </div>
 
-              <FieldGroup className="gap-5">
+              <FieldGroup>
                 <Field data-invalid={headerError ? true : undefined}>
-                  <FieldLabel className="gap-2" htmlFor="request-headers">
+                  <FieldLabel htmlFor="request-headers">
                     <ShieldCheck className="size-3.5 text-muted-foreground" />
                     {SIMULATOR_MESSAGES.headersLabel}
                   </FieldLabel>
@@ -506,7 +509,7 @@ export function RequestSimulatorSheet({
                     className="min-h-0 flex-1"
                     data-invalid={bodyError ? true : undefined}
                   >
-                    <FieldLabel className="gap-2" htmlFor="request-body">
+                    <FieldLabel htmlFor="request-body">
                       <Braces className="size-3.5 text-muted-foreground" />
                       {SIMULATOR_MESSAGES.bodyLabel}
                     </FieldLabel>
@@ -567,7 +570,9 @@ export function RequestSimulatorSheet({
                   >
                     <div className="flex flex-wrap gap-2 rounded-md border bg-muted/25 p-2">
                       <Badge
-                        className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
+                        mono
+                        shape="rounded"
+                        size="metric"
                         variant={
                           result.status < SUCCESS_STATUS_THRESHOLD
                             ? "default"
@@ -583,21 +588,28 @@ export function RequestSimulatorSheet({
                         </span>
                       </Badge>
                       <Badge
-                        className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
+                        mono
+                        shape="rounded"
+                        size="metric"
                         variant="secondary"
                       >
                         <Clock3 data-icon="inline-start" />
                         {result.durationMs} ms
                       </Badge>
                       <Badge
-                        className="h-9 min-w-0 justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
+                        mono
+                        shape="rounded"
+                        size="metric"
                         variant="outline"
                       >
                         <FileJson data-icon="inline-start" />
                         {responseSize}
                       </Badge>
                       <Badge
-                        className="h-9 min-w-0 max-w-full justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono sm:max-w-52"
+                        className="max-w-full sm:max-w-52"
+                        mono
+                        shape="rounded"
+                        size="metric"
                         variant="outline"
                       >
                         <HugeiconsIcon
@@ -612,14 +624,21 @@ export function RequestSimulatorSheet({
                       <HoverCard>
                         <HoverCardTrigger asChild>
                           <Badge
-                            className="h-9 min-w-0 cursor-default justify-start gap-1.5 rounded-md px-2.5 py-1 font-mono"
+                            className="cursor-default"
+                            mono
+                            shape="rounded"
+                            size="metric"
                             variant="outline"
                           >
                             <ShieldCheck data-icon="inline-start" />
                             {responseHeaderCountLabel}
                           </Badge>
                         </HoverCardTrigger>
-                        <HoverCardContent align="end" className="w-96 p-0">
+                        <HoverCardContent
+                          align="end"
+                          className="w-96"
+                          size="none"
+                        >
                           <div className="border-b px-3 py-2">
                             <p className="font-medium text-sm">
                               {SIMULATOR_MESSAGES.responseHeadersTitle}
@@ -710,23 +729,13 @@ export function RequestSimulatorSheet({
           </div>
         </div>
 
-        <SheetFooter className="border-t bg-muted/20">
+        <SheetFooter variant="bordered">
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button
-              className="transition-transform duration-150 ease-out active:scale-[0.97]"
-              onClick={resetRequest}
-              type="button"
-              variant="outline"
-            >
+            <Button onClick={resetRequest} type="button" variant="outline">
               <RotateCcw data-icon="inline-start" />
               {SIMULATOR_MESSAGES.resetButton}
             </Button>
-            <Button
-              className="transition-transform duration-150 ease-out active:scale-[0.97]"
-              disabled={isSending}
-              onClick={sendRequest}
-              type="button"
-            >
+            <Button disabled={isSending} onClick={sendRequest} type="button">
               {isSending ? (
                 <LoaderCircle
                   className="animate-spin"

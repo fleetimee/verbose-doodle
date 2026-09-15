@@ -183,7 +183,7 @@ export function EndpointMetricsSheet({
     );
   } else if (metrics.summary.requests === 0) {
     metricsContent = (
-      <Empty className="min-h-[460px] border">
+      <Empty className="min-h-[460px]" variant="bordered">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <Activity aria-hidden="true" />
@@ -204,17 +204,20 @@ export function EndpointMetricsSheet({
   return (
     <Sheet onOpenChange={onOpenChange} open={open}>
       <SheetContent
-        className="w-[98vw] gap-0 overflow-hidden bg-background p-0 sm:max-w-none md:w-[min(1240px,92vw)]"
+        className="w-[98vw] overflow-hidden sm:max-w-none md:w-[min(1240px,92vw)]"
         side="right"
+        size="flush"
       >
-        <SheetHeader className="border-b bg-background/95 px-5 py-4 pr-12 shadow-[0_20px_40px_-32px_rgba(15,23,42,0.45)]">
+        <SheetHeader variant="bordered">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
-              <SheetTitle className="flex items-center gap-2">
-                <BarChart3 aria-hidden="true" />
-                {messages.endpoints.metrics.title}
+              <SheetTitle>
+                <span className="flex items-center gap-2">
+                  <BarChart3 aria-hidden="true" />
+                  {messages.endpoints.metrics.title}
+                </span>
               </SheetTitle>
-              <SheetDescription className="truncate">
+              <SheetDescription variant="truncate">
                 {formatMessage(messages.endpoints.metrics.description, {
                   endpointLabel,
                 })}
@@ -223,10 +226,10 @@ export function EndpointMetricsSheet({
             <div className="flex flex-wrap items-center gap-2">
               <ToggleGroup
                 aria-label={messages.endpoints.metrics.timeWindowAriaLabel}
-                className="rounded-xl border border-border/80 bg-muted/40 p-1"
                 onValueChange={handleTimeWindowChange}
                 spacing={1}
                 value={[timeWindow]}
+                variant="subtle"
               >
                 {Object.entries(TIME_WINDOW_LABELS).map(([value, label]) => (
                   <ToggleGroupItem
@@ -234,17 +237,16 @@ export function EndpointMetricsSheet({
                       messages.endpoints.metrics.timeWindowItemAriaLabel,
                       { label }
                     )}
-                    className="rounded-lg font-medium text-xs data-pressed:bg-background data-pressed:shadow-xs"
                     key={value}
                     size="sm"
                     value={value}
+                    variant="tab"
                   >
                     {label}
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
               <Button
-                className="rounded-xl border border-border/80 bg-background font-medium hover:bg-accent"
                 disabled={summaryQuery.isFetching || hourlyQuery.isFetching}
                 onClick={async () => {
                   await Promise.all([
@@ -254,7 +256,7 @@ export function EndpointMetricsSheet({
                 }}
                 size="sm"
                 type="button"
-                variant="outline"
+                variant="outline-elevated"
               >
                 {summaryQuery.isFetching || hourlyQuery.isFetching ? (
                   <Spinner data-icon="inline-start" />
@@ -293,8 +295,8 @@ function MetricsContent({
   return (
     <>
       <div className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
-        <Card className="overflow-hidden rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
-          <CardContent className="p-0">
+        <Card className="overflow-hidden" variant="elevated">
+          <CardContent size="none">
             <div className="grid gap-0 md:grid-cols-[1fr_220px]">
               <div className="flex min-h-[220px] flex-col justify-between gap-8 p-6 md:p-8">
                 <div className="flex flex-col gap-3">
@@ -349,9 +351,9 @@ function MetricsContent({
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
+        <Card variant="elevated">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle size="sm" variant="inline">
               <Signal aria-hidden="true" />
               {messages.endpoints.metrics.statusMix.title}
             </CardTitle>
@@ -359,7 +361,7 @@ function MetricsContent({
               {messages.endpoints.metrics.statusMix.description}
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-3">
+          <CardContent className="flex flex-col" size="sm">
             <StatusRow
               label={messages.endpoints.metrics.statusRows.delayed}
               total={summary.requests}
@@ -432,9 +434,9 @@ function MetricsContent({
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <Card className="rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
+        <Card variant="elevated">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle size="sm" variant="inline">
               <HugeiconsIcon
                 aria-hidden="true"
                 icon={Clock01Icon}
@@ -483,9 +485,9 @@ function MetricsContent({
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
+        <Card variant="elevated">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle size="sm" variant="inline">
               <TrendingUp aria-hidden="true" />
               {messages.endpoints.metrics.charts.volumeTitle}
             </CardTitle>
@@ -640,28 +642,26 @@ function MetricCard({
   tone,
   value,
 }: MetricCardProps) {
-  const toneClassName = {
-    danger: "border-destructive/30 bg-destructive/5",
-    default: "border-border/70 bg-card",
-    success: "border-emerald-500/30 bg-emerald-500/5",
-    warning: "border-amber-500/30 bg-amber-500/5",
-  }[tone ?? "default"];
+  const getVariant = () => {
+    if (tone === "danger") {
+      return "metric-danger";
+    }
+    if (tone === "success") {
+      return "metric-success";
+    }
+    if (tone === "warning") {
+      return "metric-warning";
+    }
+    return "metric-default";
+  };
+  const variant = getVariant();
 
   return (
-    <Card
-      className={cn(
-        "overflow-hidden rounded-2xl border shadow-xs transition-transform duration-150 active:scale-[0.99]",
-        toneClassName
-      )}
-    >
-      <CardHeader className="flex flex-row items-start justify-between gap-3 pb-2">
+    <Card variant={variant}>
+      <CardHeader size="metric">
         <div className="min-w-0">
-          <CardDescription className="font-semibold text-xs uppercase tracking-wider">
-            {label}
-          </CardDescription>
-          <CardTitle className="mt-1.5 break-words font-bold font-mono text-xl leading-tight md:text-2xl">
-            {value}
-          </CardTitle>
+          <CardDescription variant="badge">{label}</CardDescription>
+          <CardTitle variant="kpi">{value}</CardTitle>
         </div>
         <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/40 text-muted-foreground shadow-xs">
           <Icon aria-hidden="true" className="size-4" />

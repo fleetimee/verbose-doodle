@@ -25,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -248,27 +249,27 @@ export function ResponseListItem({
                 </span>
                 {isActive && (
                   <div>
-                    <span className="inline-flex select-none items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 font-bold text-emerald-700 text-xs dark:text-emerald-300">
+                    <Badge variant="success">
                       <span className="relative flex h-1.5 w-1.5">
-                        <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" />
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 motion-safe:animate-ping" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
                       </span>
                       {messages.common.active}
-                    </span>
+                    </Badge>
                   </div>
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
-                <span
-                  className={cn(
-                    "inline-flex select-none items-center rounded-lg border px-2 py-0.5 font-bold font-mono text-xs",
+                <Badge
+                  mono
+                  variant={
                     response.statusCode < SUCCESS_STATUS_CODE_THRESHOLD
-                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                      : "border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-300"
-                  )}
+                      ? "success"
+                      : "destructive"
+                  }
                 >
                   {response.statusCode}
-                </span>
+                </Badge>
                 <ResponseSimulationBadge response={response} />
               </div>
             </div>
@@ -279,7 +280,6 @@ export function ResponseListItem({
                     <TooltipTrigger asChild>
                       <Button
                         aria-label={activationButtonTitle}
-                        className="rounded-xl border border-emerald-600/40 bg-emerald-500 font-medium text-white shadow-xs transition-all duration-150 hover:bg-emerald-600 active:translate-y-0.5"
                         disabled={isLoading}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -287,6 +287,7 @@ export function ResponseListItem({
                         }}
                         size="sm"
                         type="button"
+                        variant="elevated"
                       >
                         <HugeiconsIcon
                           icon={CheckmarkCircle02Icon}
@@ -306,14 +307,13 @@ export function ResponseListItem({
                       <TooltipTrigger asChild>
                         <Button
                           aria-label={moreActionsButtonTitle}
-                          className="cursor-pointer rounded-lg border border-border/70 bg-background/80 shadow-xs transition-all duration-150 hover:bg-accent"
                           disabled={!isSelected || isLoading}
                           onClick={(e) => {
                             e.stopPropagation();
                           }}
                           size="icon-sm"
                           type="button"
-                          variant="ghost"
+                          variant="subtle"
                         >
                           <MoreHorizontal />
                         </Button>
@@ -325,8 +325,9 @@ export function ResponseListItem({
                   </Tooltip>
                   <DropdownMenuContent
                     align="end"
-                    className="w-52 rounded-xl p-1.5"
+                    className="w-52"
                     onClick={(e) => e.stopPropagation()}
+                    variant="subtle"
                   >
                     <DropdownMenuItem
                       disabled={!canCloneResponse || isCloning}
@@ -395,15 +396,15 @@ export function ResponseListItem({
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      className="text-red-600 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-950"
                       disabled={!isSelected}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteClick();
                       }}
+                      variant="destructive"
                     >
                       <HugeiconsIcon
-                        className="h-4 w-4 text-red-600"
+                        className="h-4 w-4"
                         icon={Delete02Icon}
                         strokeWidth={2}
                       />
@@ -521,9 +522,9 @@ export function ResponseListItem({
               {messages.common.cancel}
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
               disabled={isDeleting}
               onClick={handleConfirmDelete}
+              variant="destructive"
             >
               {isDeleting ? messages.common.deleting : messages.common.delete}
             </AlertDialogAction>

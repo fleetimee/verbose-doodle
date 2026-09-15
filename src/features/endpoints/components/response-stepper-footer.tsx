@@ -100,11 +100,10 @@ export function ResponseStepperFooter({
         <div className="flex shrink-0 items-center gap-2.5">
           {!isFirstStep && (
             <Button
-              className="rounded-xl border border-border/80 bg-background font-semibold shadow-xs transition-all duration-150 hover:bg-accent active:translate-y-0.5"
               onClick={onBack}
               size="lg"
               type="button"
-              variant="outline"
+              variant="outline-elevated"
             >
               <HugeiconsIcon
                 data-icon="inline-start"
@@ -117,11 +116,11 @@ export function ResponseStepperFooter({
 
           {isLastStep ? (
             <Button
-              className="rounded-xl border-2 border-primary/40 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/95 active:translate-y-0.5 active:border-b-2"
               disabled={!isFormReadyToSubmit}
               onClick={onSubmit}
               size="lg"
               type="button"
+              variant="elevated"
             >
               {isSubmitting ? (
                 <>
@@ -141,11 +140,11 @@ export function ResponseStepperFooter({
             </Button>
           ) : (
             <Button
-              className="rounded-xl border-2 border-primary/40 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/95 active:translate-y-0.5 active:border-b-2"
               disabled={!canProceed}
               onClick={onNext}
               size="lg"
               type="button"
+              variant="elevated"
             >
               {messages.common.next}
               <HugeiconsIcon

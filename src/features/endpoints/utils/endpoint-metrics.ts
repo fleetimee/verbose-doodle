@@ -315,8 +315,9 @@ function isSuccessfulLog(log: EndpointTrafficLog) {
 
 function getDurations(logs: readonly EndpointTrafficLog[]) {
   return logs
-    .map((log) => log.durationMs)
-    .filter((duration): duration is number => typeof duration === "number")
+    .flatMap((log) =>
+      typeof log.durationMs === "number" ? [log.durationMs] : []
+    )
     .sort((a, b) => a - b);
 }
 
