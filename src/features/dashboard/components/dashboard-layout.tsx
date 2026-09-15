@@ -255,24 +255,17 @@ export function DashboardLayout() {
     <TourProvider closeable>
       <DashboardNavigationProvider>
         <SocketBridgeProvider>
-          <SidebarProvider className="dashboard-shell h-dvh min-h-0 overflow-hidden">
+          <SidebarProvider variant="fixed">
             <AppSidebar />
-            <SidebarInset
-              className={cn(
-                "h-full min-h-0 overflow-hidden bg-card",
-                isOverview && "dashboard-overview-shell"
-              )}
-            >
+            <SidebarInset variant="card">
               <ScrollArea
-                className={cn(
-                  "[&>[data-slot=scroll-area-viewport]>[role=presentation]]:!min-w-0 h-full min-h-0 w-full",
-                  isOverview && "dashboard-overview-scroll"
-                )}
+                className="h-full min-h-0 w-full"
                 contentClassName={
                   isOverview
-                    ? "dashboard-overview-scroll-content"
+                    ? "flex h-full min-h-0 flex-col"
                     : "flex min-h-full flex-col"
                 }
+                variant={isOverview ? "overview" : "fit"}
                 viewportRef={scrollViewportRef}
               >
                 <header
@@ -281,7 +274,7 @@ export function DashboardLayout() {
                     isHeaderScrolled && "after:opacity-100"
                   )}
                 >
-                  <SidebarTrigger className="-ml-1 shrink-0 rounded-md" />
+                  <SidebarTrigger className="-ml-1 shrink-0" />
                   <Separator
                     className="mr-1 shrink-0 data-[orientation=vertical]:h-4 sm:mr-2"
                     orientation="vertical"
@@ -295,9 +288,10 @@ export function DashboardLayout() {
                           <BreadcrumbItem
                             className={
                               item.isLast
-                                ? "min-w-0 max-w-full truncate"
+                                ? undefined
                                 : "hidden shrink-0 md:inline-flex"
                             }
+                            variant={item.isLast ? "truncate" : "default"}
                           >
                             <DashboardBreadcrumbContent
                               item={item}
@@ -384,11 +378,11 @@ export function DashboardLayout() {
                   >
                     <Button
                       aria-label={messages.common.scrollToTop}
-                      className="pointer-events-auto size-10 rounded-full border-border/70 bg-background/95 shadow-lg backdrop-blur"
+                      className="pointer-events-auto"
                       onClick={handleScrollToTop}
-                      size="icon"
+                      size="icon-lg"
                       type="button"
-                      variant="outline"
+                      variant="floating"
                     >
                       <HugeiconsIcon
                         aria-hidden="true"
@@ -607,11 +601,12 @@ function BillerBreadcrumbSelector({
         <Button
           aria-expanded={open}
           aria-label={messages.endpoints.billerLabel}
-          className="h-8 max-w-48 justify-between border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+          className="max-w-48"
           disabled={endpointMutationPending}
           role="combobox"
+          size="breadcrumb"
           type="button"
-          variant="ghost"
+          variant="breadcrumb"
         >
           <AnimatedBreadcrumbValue value={currentBiller.name} />
           <HugeiconsIcon
@@ -627,9 +622,10 @@ function BillerBreadcrumbSelector({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[min(22rem,calc(100vw-2rem))] overflow-hidden p-0"
+        className="w-[min(22rem,calc(100vw-2rem))] overflow-hidden"
         finalFocus={false}
         sideOffset={0}
+        size="none"
       >
         <Command>
           <CommandInput
@@ -637,13 +633,12 @@ function BillerBreadcrumbSelector({
             className="h-11"
             placeholder={messages.billers.searchPlaceholder}
           />
-          <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
-            <CommandList className="max-h-none overflow-visible p-1">
+          <ScrollArea className="h-72" variant="visible">
+            <CommandList variant="scrollable">
               <CommandEmpty>{messages.billers.noBillersFound}</CommandEmpty>
-              <CommandGroup className="p-0">
+              <CommandGroup variant="flush">
                 <ProtectedAction ability="canAddBiller">
                   <CommandItem
-                    className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
                     onSelect={() => {
                       setOpen(false);
                       if (pendingAddRef.current !== null) {
@@ -657,6 +652,7 @@ function BillerBreadcrumbSelector({
                       );
                     }}
                     value={messages.billers.addNewBiller}
+                    variant="action"
                   >
                     <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
                     <span>{messages.billers.addNewBiller}</span>
@@ -664,10 +660,10 @@ function BillerBreadcrumbSelector({
                 </ProtectedAction>
                 {billersWithEndpoints.map((biller) => (
                   <CommandItem
-                    className="min-h-10 px-3 py-2 text-[0.95rem]"
                     key={biller.slug}
                     onSelect={() => selectBiller(biller.slug)}
                     value={`${biller.name} ${biller.slug}`}
+                    variant="nav"
                   >
                     <span className="truncate">{biller.name}</span>
                     <HugeiconsIcon
@@ -766,11 +762,12 @@ function EndpointBreadcrumbSelector({
         <Button
           aria-expanded={open}
           aria-label={messages.endpoints.endpointLabel}
-          className="h-8 max-w-[min(32rem,50vw)] justify-between border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
+          className="max-w-[min(32rem,50vw)]"
           disabled={endpointMutationPending}
           role="combobox"
+          size="breadcrumb"
           type="button"
-          variant="ghost"
+          variant="breadcrumb"
         >
           <AnimatedBreadcrumbValue
             value={`${currentEndpoint.slug}:${currentEndpoint.method}:${currentEndpoint.url}`}
@@ -793,9 +790,10 @@ function EndpointBreadcrumbSelector({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[min(32rem,calc(100vw-2rem))] overflow-hidden p-0"
+        className="w-[min(32rem,calc(100vw-2rem))] overflow-hidden"
         finalFocus={false}
         sideOffset={0}
+        size="none"
       >
         <Command>
           <CommandInput
@@ -803,13 +801,12 @@ function EndpointBreadcrumbSelector({
             className="h-11"
             placeholder={messages.endpoints.searchPlaceholder}
           />
-          <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
-            <CommandList className="max-h-none overflow-visible p-1">
+          <ScrollArea className="h-72" variant="visible">
+            <CommandList variant="scrollable">
               <CommandEmpty>{messages.endpoints.noEndpointsFound}</CommandEmpty>
-              <CommandGroup className="p-0">
+              <CommandGroup variant="flush">
                 <ProtectedAction ability="canAddEndpoint">
                   <CommandItem
-                    className="min-h-10 border-border/60 border-b px-3 py-2 text-[0.95rem] text-primary"
                     onSelect={() => {
                       setOpen(false);
                       if (pendingAddRef.current !== null) {
@@ -823,6 +820,7 @@ function EndpointBreadcrumbSelector({
                       );
                     }}
                     value={messages.endpoints.addNewEndpoint}
+                    variant="action"
                   >
                     <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
                     <span>{messages.endpoints.addNewEndpoint}</span>
@@ -830,10 +828,10 @@ function EndpointBreadcrumbSelector({
                 </ProtectedAction>
                 {billerEndpoints.map((endpoint) => (
                   <CommandItem
-                    className="min-h-10 px-3 py-2 text-[0.95rem]"
                     key={endpoint.slug}
                     onSelect={() => selectEndpoint(endpoint.slug)}
                     value={`${endpoint.method} ${endpoint.url}`}
+                    variant="nav"
                   >
                     <HttpMethodBadge
                       className="shrink-0"
