@@ -7,7 +7,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { Binary, FileJson, Hash } from "@/components/hugeicons";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -124,12 +123,11 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                       {messages.socketTester.frameInspectorDescription}
                     </DialogDescription>
                   </div>
-                  <Badge
+                  <span
                     className={cn(
-                      "h-7 gap-1.5 border font-mono uppercase",
+                      "inline-flex h-7 items-center gap-1.5 rounded-md border px-2.5 py-0.5 font-mono font-semibold text-xs uppercase",
                       directionTone[entry.direction]
                     )}
-                    variant="outline"
                   >
                     <HugeiconsIcon
                       data-icon="inline-start"
@@ -137,7 +135,7 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                       strokeWidth={2}
                     />
                     {entry.direction}
-                  </Badge>
+                  </span>
                 </div>
               </DialogHeader>
             </div>
