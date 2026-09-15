@@ -13,6 +13,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { messages } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
 // Custom Fallback Icons for React Hook Form and Base UI
@@ -28,7 +29,7 @@ function ReactHookFormIcon({
   return (
     <svg
       aria-hidden="true"
-      className={className}
+      className={cn("text-pink-500", className)}
       height={size}
       viewBox="0 0 24 24"
       width={size}
@@ -37,7 +38,7 @@ function ReactHookFormIcon({
       <path
         d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
         fill="none"
-        stroke="#EC4899"
+        stroke="currentColor"
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="2"
@@ -56,7 +57,7 @@ function BaseUiIcon({
   return (
     <svg
       aria-hidden="true"
-      className={className}
+      className={cn("text-blue-600", className)}
       height={size}
       viewBox="0 0 24 24"
       width={size}
@@ -64,7 +65,7 @@ function BaseUiIcon({
     >
       <path
         d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.8L18.5 8 12 11.2 5.5 8 12 4.8zM4 9.6l7 3.5v6.9l-7-3.5V9.6zm9 10.4v-6.9l7-3.5v6.9l-7 3.5z"
-        fill="#0066FF"
+        fill="currentColor"
       />
     </svg>
   );

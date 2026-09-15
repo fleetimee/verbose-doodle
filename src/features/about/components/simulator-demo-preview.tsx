@@ -34,21 +34,20 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
   };
 
   return (
-    <Card className="overflow-hidden border-border/80 bg-card/60 shadow-lg backdrop-blur-md">
-      <CardHeader className="border-border/40 border-b bg-muted/20 pb-4">
+    <Card variant="glass">
+      <CardHeader variant="preview">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2 font-semibold text-xl">
+            <CardTitle size="xl" variant="inline">
               <Cpu className="h-5 w-5 text-primary" />
               {activeMessages.about.interactiveDemoTitle}
             </CardTitle>
-            <CardDescription className="text-muted-foreground text-xs">
+            <CardDescription size="xs">
               {activeMessages.about.interactiveDemoDescription}
             </CardDescription>
           </div>
           <div className="flex items-center gap-1.5 rounded-lg border border-border/50 bg-background/80 p-1">
             <Button
-              className="gap-1.5 text-xs"
               onClick={() => setActiveTab("endpoints")}
               size="sm"
               variant={activeTab === "endpoints" ? "default" : "ghost"}
@@ -57,7 +56,6 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
               {activeMessages.about.demo.apiEndpoints}
             </Button>
             <Button
-              className="gap-1.5 text-xs"
               onClick={() => setActiveTab("sockets")}
               size="sm"
               variant={activeTab === "sockets" ? "default" : "ghost"}
@@ -70,7 +68,6 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
               {activeMessages.about.demo.socketBridge}
             </Button>
             <Button
-              className="gap-1.5 text-xs"
               onClick={() => setActiveTab("devtools")}
               size="sm"
               variant={activeTab === "devtools" ? "default" : "ghost"}
@@ -81,7 +78,7 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent size="padded">
         <AnimatePresence mode="wait">
           {activeTab === "endpoints" && (
             <motion.div
@@ -95,12 +92,7 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
               <div className="flex flex-col gap-2 rounded-lg border border-border/50 bg-background/50 p-4 font-mono text-xs">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Badge
-                      className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                      variant="outline"
-                    >
-                      POST
-                    </Badge>
+                    <Badge variant="success">POST</Badge>
                     <span className="font-semibold text-foreground">
                       /api/v1/biller/inquiry
                     </span>
@@ -123,7 +115,7 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
                 <span className="text-muted-foreground text-xs">
                   {activeMessages.about.demo.matchedRules}
                 </span>
-                <Button className="gap-1.5" onClick={handleSimulate} size="sm">
+                <Button onClick={handleSimulate} size="sm">
                   <Play
                     className={`h-3.5 w-3.5 ${simulating ? "animate-spin" : ""}`}
                   />
@@ -144,33 +136,33 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
               key="sockets"
               transition={{ duration: 0.2 }}
             >
-              <div className="flex flex-col gap-2 rounded-lg border border-border/50 bg-slate-950 p-4 font-mono text-slate-100 text-xs">
-                <div className="flex items-center justify-between border-slate-800 border-b pb-2">
+              <div className="flex flex-col gap-2 rounded-lg border border-sidebar-border bg-sidebar p-4 font-mono text-sidebar-foreground text-xs">
+                <div className="flex items-center justify-between border-sidebar-border border-b pb-2">
                   <div className="flex items-center gap-2">
                     <HugeiconsIcon
-                      className="h-4 w-4 text-cyan-400"
+                      className="h-4 w-4 text-primary"
                       icon={ComputerTerminal01Icon}
                       strokeWidth={2}
                     />
-                    <span className="text-slate-300">
+                    <span className="text-sidebar-foreground">
                       SocketBridgeEngine [TCP: 8080]
                     </span>
                   </div>
-                  <Badge className="border-cyan-500/30 bg-cyan-500/20 text-cyan-400">
+                  <Badge variant="primary-subtle">
                     {activeMessages.about.demo.connected}
                   </Badge>
                 </div>
-                <div className="flex flex-col gap-1.5 py-2 text-slate-400">
+                <div className="flex flex-col gap-1.5 py-2 text-muted-foreground">
                   <div>
-                    [15:37:01] <span className="text-emerald-400">INFO</span>{" "}
+                    [15:37:01] <span className="text-primary">INFO</span>{" "}
                     {activeMessages.about.demo.handshake}
                   </div>
                   <div>
-                    [15:37:02] <span className="text-emerald-400">INFO</span>{" "}
+                    [15:37:02] <span className="text-primary">INFO</span>{" "}
                     {activeMessages.about.demo.ack}
                   </div>
                   <div>
-                    [15:37:03] <span className="text-cyan-400">EVENT</span>{" "}
+                    [15:37:03] <span className="text-primary">EVENT</span>{" "}
                     {activeMessages.about.demo.event}
                   </div>
                 </div>
@@ -197,7 +189,7 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
             >
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="flex flex-col gap-1 rounded-lg border border-border/50 bg-background/50 p-3 font-mono text-xs">
-                  <span className="font-sans font-semibold text-[11px] text-muted-foreground">
+                  <span className="font-sans font-semibold text-muted-foreground text-xs">
                     {activeMessages.about.demo.jsonInput}
                   </span>
                   <pre className="overflow-x-auto text-foreground">
@@ -208,10 +200,10 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
                   </pre>
                 </div>
                 <div className="flex flex-col gap-1 rounded-lg border border-border/50 bg-background/50 p-3 font-mono text-xs">
-                  <span className="font-sans font-semibold text-[11px] text-muted-foreground">
+                  <span className="font-sans font-semibold text-muted-foreground text-xs">
                     {activeMessages.about.demo.yamlOutput}
                   </span>
-                  <pre className="overflow-x-auto text-emerald-600 dark:text-emerald-400">
+                  <pre className="overflow-x-auto text-primary">
                     {`service: biller
 active: true`}
                   </pre>
