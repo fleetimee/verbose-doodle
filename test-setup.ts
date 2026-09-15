@@ -57,7 +57,7 @@ window.getComputedStyle = (elt: Element) => {
       ) {
         return target.transform || "none";
       }
-      return Reflect.get(target, prop);
+      return target[prop as keyof CSSStyleDeclaration];
     },
   });
 };
