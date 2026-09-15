@@ -4,6 +4,7 @@ import { overviewQueryKeys } from "@/features/overview/query-keys";
 import { userQueryKeys } from "@/features/users/query-key";
 import { type ApiError, apiDelete } from "@/lib/api";
 import { getUserDeleteUrl } from "@/lib/api-endpoints";
+import { messages } from "@/lib/i18n";
 import { createMutationHook } from "@/lib/query-hooks";
 
 type DeleteUserRequest = {
@@ -35,7 +36,7 @@ async function deleteUser({
     if (!apiResponse.responseCode) {
       throw {
         code: "INVALID_RESPONSE",
-        message: "Invalid response structure from server",
+        message: messages.errors.invalidResponseStructure,
         status: 500,
       } as ApiError;
     }
@@ -61,12 +62,12 @@ export function useDeleteUser() {
     ApiError
   >(deleteUser, {
     onError: (error) => {
-      toast.error("Failed to delete user", {
-        description: error.message || "An unexpected error occurred",
+      toast.error(messages.users.deleteFailed, {
+        description: error.message || messages.common.unexpectedError,
       });
     },
     onSuccess: () => {
-      toast.success("User deleted successfully");
+      toast.success(messages.users.deleteSuccess);
 
       queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
       // Invalidate overview to update user count statistics

@@ -1,4 +1,5 @@
 import type React from "react";
+import { useMemo } from "react";
 import { Link } from "react-router";
 import {
   Binary,
@@ -14,6 +15,7 @@ import {
   Server,
   Waves,
 } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import { NavMain, type NavMainItem } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -40,7 +42,6 @@ import {
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import { usePrefetchOverview } from "@/features/overview/hooks/use-prefetch-overview";
 import { SocketBridgeStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
-import { messages } from "@/lib/i18n";
 
 type AppNavigationItem = NavMainItem & {
   readonly adminOnly?: boolean;
@@ -59,163 +60,167 @@ type SecondaryNavigationItem = {
   readonly url: string;
 };
 
-const data: {
+function getSidebarData(messages: import("@/lib/i18n").Messages): {
   readonly navMain: AppNavigationItem[];
   readonly navSecondary: SecondaryNavigationItem[];
-} = {
-  navMain: [
-    {
-      groupLabel: "Workspace",
-      icon: LayoutDashboard,
-      description: "Review endpoint activity and workspace metrics.",
-      title: "Overview",
-      url: "/dashboard/overview",
-    },
-    {
-      groupLabel: "Workspace",
-      icon: Plug,
-      description: "Configure billers, endpoints, and simulated responses.",
-      title: "Endpoints",
-      url: "/dashboard/endpoints",
-    },
-    {
-      groupLabel: "Network Tools",
-      icon: RadioTower,
-      items: [
-        {
-          icon: MonitorUp,
-          description: "Connect to a TCP server and exchange messages.",
-          title: "TCP Client",
-          url: "/dashboard/socket-test/tcp-client",
-        },
-        {
-          icon: Server,
-          description: "Listen for TCP connections and exchange messages.",
-          title: "TCP Server",
-          url: "/dashboard/socket-test/tcp-server",
-        },
-        {
-          icon: Waves,
-          description: "Send and receive UDP datagrams.",
-          title: "UDP",
-          url: "/dashboard/socket-test/udp",
-        },
-      ],
-      description: "Test TCP and UDP connections.",
-      title: "Socket Tester",
-      url: "/dashboard/socket-tester",
-    },
-    {
-      adminOnly: true,
-      groupLabel: "Network Tools",
-      icon: Route,
-      items: [
-        {
-          icon: Plug,
-          description: "Inspect REST API traffic through the relay.",
-          title: "REST API",
-          url: "/dashboard/socks-relay/rest-api",
-        },
-        {
-          icon: Binary,
-          description: "Inspect ISO 8583 messages through the relay.",
-          title: "ISO 8583",
-          url: "/dashboard/socks-relay/iso-8583",
-        },
-      ],
-      description: "Monitor and inspect relayed network traffic.",
-      title: "SOCKS Relay",
-      url: "/dashboard/socks-relay",
-    },
-    {
-      badge: String(DEVELOPER_TOOL_COUNT),
-      exact: true,
-      groupLabel: messages.developerTools.navigationGroup,
-      icon: LayoutGrid,
-      description: "Browse conversion, validation, and inspection tools.",
-      title: messages.developerTools.catalogNavigation,
-      url: "/dashboard/developer-tools",
-    },
-    {
-      groupLabel: messages.developerTools.navigationGroup,
-      icon: Binary,
-      description: "Build, pack, parse, and inspect ISO 8583 messages.",
-      title: "ISO 8583",
-      items: [
-        {
-          description: messages.developerTools.iso8583ParserDescription,
-          icon: Binary,
-          keywords: [
-            "ISO",
-            "8583",
-            "ISO 8583",
-            "Parser",
-            "ISO Parser",
-            "Stream Parser",
-            "Inspection",
-            "Bitmaps",
-            "MTI",
-            "Hex",
-            "Data Elements",
-          ],
-          title: "Parser",
-          url: "/dashboard/developer-tools/iso8583-parser",
-        },
-        {
-          description: messages.developerTools.iso8583GeneratorDescription,
-          icon: Code2,
-          keywords: [
-            "ISO",
-            "8583",
-            "ISO 8583",
-            "Generator",
-            "Pack",
-            "Build",
-            "MTI",
-            "Bitmaps",
-            "Conversion",
-          ],
-          title: "Generator",
-          url: "/dashboard/developer-tools/iso8583-generator",
-        },
-      ],
-    },
-    ...DEVELOPER_TOOL_CATEGORIES.map((category) => ({
-      groupLabel: messages.developerTools.navigationGroup,
-      icon: category.icon,
-      items: category.tools
-        .filter(
-          (tool) =>
-            tool.id !== "iso8583-parser" && tool.id !== "iso8583-generator"
-        )
-        .map((tool) => ({
-          description: tool.searchDescription,
-          icon: tool.icon,
-          keywords: [
-            ...tool.tags,
-            ...tool.document.keywords,
-            tool.name,
-            tool.path,
-          ],
-          onPrefetch: tool.load,
-          title: tool.name,
-          url: getDeveloperToolHref(tool),
-        })),
-      title: category.name,
-    })),
-  ],
-  navSecondary: [
-    {
-      icon: Info,
-      description: "Learn about Fleetime Labs and its components.",
-      title: "About",
-      url: "/about",
-    },
-  ],
-};
+} {
+  return {
+    navMain: [
+      {
+        groupLabel: messages.common.navWorkspace,
+        icon: LayoutDashboard,
+        description: messages.common.navOverviewDesc,
+        title: messages.common.navOverview,
+        url: "/dashboard/overview",
+      },
+      {
+        groupLabel: messages.common.navWorkspace,
+        icon: Plug,
+        description: messages.common.navEndpointsDesc,
+        title: messages.common.navEndpoints,
+        url: "/dashboard/endpoints",
+      },
+      {
+        groupLabel: messages.common.navNetworkTools,
+        icon: RadioTower,
+        items: [
+          {
+            icon: MonitorUp,
+            description: messages.common.navTcpClientDesc,
+            title: messages.common.navTcpClient,
+            url: "/dashboard/socket-test/tcp-client",
+          },
+          {
+            icon: Server,
+            description: messages.common.navTcpServerDesc,
+            title: messages.common.navTcpServer,
+            url: "/dashboard/socket-test/tcp-server",
+          },
+          {
+            icon: Waves,
+            description: messages.common.navUdpDesc,
+            title: messages.common.navUdp,
+            url: "/dashboard/socket-test/udp",
+          },
+        ],
+        description: messages.common.navSocketTesterDesc,
+        title: messages.common.navSocketTester,
+        url: "/dashboard/socket-tester",
+      },
+      {
+        adminOnly: true,
+        groupLabel: messages.common.navNetworkTools,
+        icon: Route,
+        items: [
+          {
+            icon: Plug,
+            description: messages.common.navRestApiDesc,
+            title: messages.common.navRestApi,
+            url: "/dashboard/socks-relay/rest-api",
+          },
+          {
+            icon: Binary,
+            description: messages.common.navIso8583Desc,
+            title: messages.common.navIso8583,
+            url: "/dashboard/socks-relay/iso-8583",
+          },
+        ],
+        description: messages.common.navSocksRelayDesc,
+        title: messages.common.navSocksRelay,
+        url: "/dashboard/socks-relay",
+      },
+      {
+        badge: String(DEVELOPER_TOOL_COUNT),
+        exact: true,
+        groupLabel: messages.developerTools.navigationGroup,
+        icon: LayoutGrid,
+        description: messages.developerTools.description,
+        title: messages.developerTools.catalogNavigation,
+        url: "/dashboard/developer-tools",
+      },
+      {
+        groupLabel: messages.developerTools.navigationGroup,
+        icon: Binary,
+        description: messages.developerTools.iso8583NavigationDescription,
+        title: messages.common.navIso8583,
+        items: [
+          {
+            description: messages.developerTools.iso8583ParserDescription,
+            icon: Binary,
+            keywords: [
+              "ISO",
+              "8583",
+              "ISO 8583",
+              "Parser",
+              "ISO Parser",
+              "Stream Parser",
+              "Inspection",
+              "Bitmaps",
+              "MTI",
+              "Hex",
+              "Data Elements",
+            ],
+            title: messages.developerTools.iso8583ParserLabel,
+            url: "/dashboard/developer-tools/iso8583-parser",
+          },
+          {
+            description: messages.developerTools.iso8583GeneratorDescription,
+            icon: Code2,
+            keywords: [
+              "ISO",
+              "8583",
+              "ISO 8583",
+              "Generator",
+              "Pack",
+              "Build",
+              "MTI",
+              "Bitmaps",
+              "Conversion",
+            ],
+            title: messages.developerTools.iso8583GeneratorLabel,
+            url: "/dashboard/developer-tools/iso8583-generator",
+          },
+        ],
+      },
+      ...DEVELOPER_TOOL_CATEGORIES.map((category) => ({
+        groupLabel: messages.developerTools.navigationGroup,
+        icon: category.icon,
+        items: category.tools
+          .filter(
+            (tool) =>
+              tool.id !== "iso8583-parser" && tool.id !== "iso8583-generator"
+          )
+          .map((tool) => ({
+            description: tool.searchDescription,
+            icon: tool.icon,
+            keywords: [
+              ...tool.tags,
+              ...tool.document.keywords,
+              tool.name,
+              tool.path,
+            ],
+            onPrefetch: tool.load,
+            title: tool.name,
+            url: getDeveloperToolHref(tool),
+          })),
+        title: category.name,
+      })),
+    ],
+    navSecondary: [
+      {
+        icon: Info,
+        description: messages.common.navAboutDesc,
+        title: messages.common.navAbout,
+        url: "/about",
+      },
+    ],
+  };
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { snapshot } = useAuth();
+  const { messages } = useI18n();
+  const data = useMemo(() => getSidebarData(messages), [messages]);
 
   // Prefetch hooks for hover behavior
   const { prefetchOverview } = usePrefetchOverview();
@@ -231,7 +236,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     : {
         avatar: "",
         email: "guest@fleetime-labs.local",
-        name: "Guest",
+        name: messages.common.guest,
       };
 
   const isAdmin = snapshot.user?.role === "ADMIN";
@@ -305,7 +310,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             ...navMain,
             ...data.navSecondary.map((item) => ({
               ...item,
-              groupLabel: "General",
+              groupLabel: messages.common.navGeneral,
             })),
           ]}
         />

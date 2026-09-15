@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -26,14 +27,40 @@ import {
   type ResponseFormData,
   responseSchema,
 } from "@/features/endpoints/schemas/response-schema";
+import { formatMessage, messages } from "@/lib/i18n";
 import { MOTION_DURATION } from "@/lib/motion";
 
 const COMMON_STATUS_CODES = [
-  { code: 200, label: "OK" },
-  { code: 201, label: "Created" },
-  { code: 400, label: "Bad Request" },
-  { code: 404, label: "Not Found" },
-  { code: 500, label: "Server Error" },
+  {
+    code: 200,
+    get label() {
+      return messages.endpoints.commonStatusLabels.ok;
+    },
+  },
+  {
+    code: 201,
+    get label() {
+      return messages.endpoints.commonStatusLabels.created;
+    },
+  },
+  {
+    code: 400,
+    get label() {
+      return messages.endpoints.commonStatusLabels.badRequest;
+    },
+  },
+  {
+    code: 404,
+    get label() {
+      return messages.endpoints.commonStatusLabels.notFound;
+    },
+  },
+  {
+    code: 500,
+    get label() {
+      return messages.endpoints.commonStatusLabels.serverError;
+    },
+  },
 ] as const;
 
 const getRailStepClasses = (isActive: boolean, isComplete: boolean) => {
@@ -58,12 +85,12 @@ const getRailStepIconClasses = (isActive: boolean, isComplete: boolean) => {
 
 const getRailStepStatus = (isActive: boolean, isComplete: boolean) => {
   if (isComplete) {
-    return "Complete";
+    return messages.common.complete;
   }
   if (isActive) {
-    return "Editing";
+    return messages.common.editing;
   }
-  return "Next";
+  return messages.common.next;
 };
 
 type ResponseStepperProps = {
@@ -89,6 +116,7 @@ export function ResponseStepper({
   onDirtyChange,
   isSubmitting = false,
 }: ResponseStepperProps) {
+  useI18n();
   const [defaultName] = useState(() => `response_${Date.now()}`);
   const [[currentStepIndex, direction], setStep] = useState<[number, number]>([
     0, 0,
@@ -316,7 +344,9 @@ export function ResponseStepper({
                     </div>
                     <div className="min-w-0 flex-1">
                       <span className="mb-2 inline-flex select-none items-center rounded-lg border border-border/70 bg-muted/50 px-2.5 py-0.5 font-medium text-muted-foreground text-xs">
-                        Step {currentStepIndex + 1}
+                        {formatMessage(messages.common.stepOf, {
+                          current: currentStepIndex + 1,
+                        })}
                       </span>
                       <h2 className="font-bold text-2xl tracking-tight md:text-3xl">
                         {currentStep.title}
@@ -342,7 +372,10 @@ export function ResponseStepper({
                                 autoFocus
                                 className="h-12 rounded-xl border bg-background px-4 font-mono text-lg shadow-xs focus-visible:ring-2 aria-invalid:border-destructive"
                                 id="response-name"
-                                placeholder="success_response"
+                                placeholder={
+                                  messages.endpoints
+                                    .createResponseNamePlaceholder
+                                }
                               />
                               <div className="mt-3 flex flex-wrap gap-2">
                                 {[
@@ -366,8 +399,7 @@ export function ResponseStepper({
                                 ))}
                               </div>
                               <FieldDescription className="mt-3">
-                                Choose a stable name your team can recognize in
-                                tests and traffic logs.
+                                {messages.endpoints.stepperStepNameDescription}
                               </FieldDescription>
                             </FieldContent>
                             {fieldState.invalid && (
@@ -419,8 +451,10 @@ export function ResponseStepper({
                                 onSelect={handleNext}
                               />
                               <FieldDescription className="mt-4">
-                                Pick a common status or search the complete HTTP
-                                status catalog.
+                                {
+                                  messages.endpoints
+                                    .stepperStepStatusDescription
+                                }
                               </FieldDescription>
                             </FieldContent>
                             {fieldState.invalid && (
@@ -482,8 +516,7 @@ export function ResponseStepper({
                                 ))}
                               </div>
                               <FieldDescription className="mt-4">
-                                Use valid JSON. The formatter button is
-                                available when the payload can be parsed.
+                                {messages.endpoints.stepperStepJsonDescription}
                               </FieldDescription>
                             </FieldContent>
                             {fieldState.invalid && (
@@ -538,16 +571,20 @@ function ResponseBuilderRail({
   formValues,
   onStepClick,
 }: ResponseBuilderRailProps) {
+  useI18n();
+
   return (
     <aside className="hidden w-72 shrink-0 rounded-2xl border-2 border-border/80 border-b-4 bg-card p-4 shadow-sm lg:sticky lg:top-0 lg:block lg:self-start">
       <div className="flex flex-col gap-5">
         <div>
           <div className="font-bold text-muted-foreground text-xs uppercase tracking-wider">
-            Builder
+            {messages.endpoints.stepperBuilder}
           </div>
-          <div className="mt-1 font-bold text-lg">Response contract</div>
+          <div className="mt-1 font-bold text-lg">
+            {messages.endpoints.stepperResponseContract}
+          </div>
           <p className="mt-1 text-muted-foreground text-sm">
-            Define the mock response returned by this endpoint.
+            {messages.endpoints.stepperResponseContractDescription}
           </p>
         </div>
 
@@ -588,23 +625,27 @@ function ResponseBuilderRail({
 
         <div className="rounded-xl border border-border/70 bg-muted/30 p-3.5">
           <div className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
-            Draft
+            {messages.common.draft}
           </div>
           <dl className="mt-3 flex flex-col gap-2 text-sm">
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-muted-foreground">Name</dt>
+              <dt className="text-muted-foreground">{messages.common.name}</dt>
               <dd className="truncate font-medium font-mono">
-                {formValues.name || "Not set"}
+                {formValues.name || messages.common.notSet}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-muted-foreground">Status</dt>
+              <dt className="text-muted-foreground">
+                {messages.common.status}
+              </dt>
               <dd className="font-medium font-mono">{formValues.statusCode}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-muted-foreground">Payload</dt>
+              <dt className="text-muted-foreground">
+                {messages.common.payload}
+              </dt>
               <dd className="font-medium font-mono">
-                {formValues.json?.trim() ? "JSON" : "Empty"}
+                {formValues.json?.trim() ? "JSON" : messages.common.empty}
               </dd>
             </div>
           </dl>

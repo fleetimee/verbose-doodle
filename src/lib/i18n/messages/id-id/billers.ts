@@ -1,0 +1,22 @@
+export const billersMessages = {
+  addBiller: "Tambah Biller",
+  addBillerDescription: "Buat biller yang dapat memiliki endpoint simulasi.",
+  addNewBiller: "Tambah Biller Baru",
+  billerNameLabel: "Nama Biller",
+  billerNamePlaceholder: "mis. PLN Pascabayar",
+  billerSlugLabel: "Slug Biller",
+  createBiller: "Buat Biller",
+  creatingBiller: "Membuat...",
+  editBiller: "Edit Biller",
+  editBillerDescription:
+    "Perbarui nama tampilan. Slug biller tetap tidak berubah.",
+  saveBiller: "Simpan Perubahan",
+  savingBiller: "Menyimpan...",
+  searchAria: "Cari biller",
+  searchPlaceholder: "Cari biller...",
+  noBillersFound: "Biller tidak ditemukan.",
+  createFailed: "Gagal membuat biller",
+  createSuccess: "Biller berhasil dibuat",
+  updateFailed: "Gagal memperbarui biller",
+  updateSuccess: "Biller berhasil diperbarui",
+} as const;

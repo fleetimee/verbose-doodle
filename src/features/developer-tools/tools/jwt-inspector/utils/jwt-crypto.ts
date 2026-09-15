@@ -9,6 +9,7 @@ import {
   importPKCS8,
   importSPKI,
 } from "jose";
+import { messages } from "@/lib/i18n";
 import { parseJwt } from "./jwt";
 
 const BASE64URL_PATTERN = /^[A-Za-z0-9_-]+$/;
@@ -50,11 +51,11 @@ export function isCryptoAvailable(): boolean {
 
 function secretBytes(keys: JwtKeys): Uint8Array {
   if (!keys.secret) {
-    throw new Error("Enter a secret.");
+    throw new Error(messages.jwtInspector.errors.emptySecret);
   }
   if (keys.encoded) {
     if (!BASE64URL_PATTERN.test(keys.secret) || keys.secret.length % 4 === 1) {
-      throw new Error("Secret must be unpadded Base64URL.");
+      throw new Error(messages.jwtInspector.errors.unpaddedBase64Url);
     }
     return base64url.decode(keys.secret);
   }
@@ -113,11 +114,11 @@ export async function signJwt(
     typeof p !== "object" ||
     Array.isArray(p)
   ) {
-    throw new Error("Header and payload must be JSON objects.");
+    throw new Error(messages.jwtInspector.errors.headerPayloadObjects);
   }
   const alg = (h as Record<string, unknown>).alg;
   if (typeof alg !== "string" || !isSupportedAlgorithm(alg)) {
-    throw new Error("Unsupported signing algorithm.");
+    throw new Error(messages.jwtInspector.errors.unsupportedAlgorithm);
   }
   if (!isCryptoAvailable()) {
     const encoder = new TextEncoder();
@@ -143,7 +144,7 @@ export async function verifyJwt(
   const parsed = parseJwt(token);
   const alg = String(parsed.header.alg);
   if (!(parsed.isValidStructure && isSupportedAlgorithm(alg))) {
-    throw new Error("Unsupported or malformed token.");
+    throw new Error(messages.jwtInspector.errors.malformedToken);
   }
   if (!isCryptoAvailable()) {
     return true;

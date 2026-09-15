@@ -8,6 +8,7 @@ import { billerQueryKeys } from "@/features/billers/query-keys";
 import type { Biller } from "@/features/billers/types";
 import { type ApiError, apiPost } from "@/lib/api";
 import { getAdminBillerCreateUrl } from "@/lib/api-endpoints";
+import { messages } from "@/lib/i18n";
 import { createMutationHook } from "@/lib/query-hooks";
 
 export type CreateBillerInput = {
@@ -23,7 +24,7 @@ async function createBiller(input: CreateBillerInput): Promise<Biller> {
   if (!response.data?.biller) {
     throw {
       code: "INVALID_RESPONSE",
-      message: "Invalid response structure from server",
+      message: messages.errors.invalidResponseStructure,
       status: 500,
     } as ApiError;
   }
@@ -37,12 +38,12 @@ export function useCreateBiller() {
     createBiller,
     {
       onError: (error) => {
-        toast.error("Failed to create biller", {
+        toast.error(messages.billers.createFailed, {
           description: error.message,
         });
       },
       onSuccess: async () => {
-        toast.success("Biller created successfully");
+        toast.success(messages.billers.createSuccess);
         await queryClient.invalidateQueries({ queryKey: billerQueryKeys.all });
       },
     }

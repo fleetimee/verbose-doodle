@@ -4,6 +4,7 @@ import { overviewQueryKeys } from "@/features/overview/query-keys";
 import { userQueryKeys } from "@/features/users/query-key";
 import { type ApiError, apiPost } from "@/lib/api";
 import { getUserCreateUrl } from "@/lib/api-endpoints";
+import { formatMessage, messages } from "@/lib/i18n";
 import { createMutationHook } from "@/lib/query-hooks";
 
 export type CreateUserRequest = {
@@ -52,7 +53,7 @@ async function createUser(
     if (!apiResponse.data) {
       throw {
         code: "INVALID_RESPONSE",
-        message: "Invalid response structure from server",
+        message: messages.errors.invalidResponseStructure,
         status: 500,
       } as ApiError;
     }
@@ -76,14 +77,16 @@ export function useCreateUser() {
   >(createUser, {
     onError: (error) => {
       // Handle errors with toast notification
-      toast.error("Failed to create user", {
-        description: error.message || "An unexpected error occurred",
+      toast.error(messages.users.createFailed, {
+        description: error.message || messages.common.unexpectedError,
       });
     },
     onSuccess: (data) => {
       // Show success message
-      toast.success("User created successfully", {
-        description: `Created user: ${data.user_id}`,
+      toast.success(messages.users.createSuccess, {
+        description: formatMessage(messages.users.createSuccessDescription, {
+          userId: data.user_id,
+        }),
       });
 
       // Invalidate and refetch queries to get fresh data from server

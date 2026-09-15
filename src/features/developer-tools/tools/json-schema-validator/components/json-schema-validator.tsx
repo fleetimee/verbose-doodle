@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -33,10 +34,18 @@ import type { ApiError } from "@/lib/api";
 import { messages } from "@/lib/i18n";
 
 const dialectLabels: Record<JsonSchemaDialect, string> = {
-  AUTO: messages.jsonSchemaValidator.dialectAuto,
-  DRAFT_7: messages.jsonSchemaValidator.dialectDraft7,
-  DRAFT_2019_09: messages.jsonSchemaValidator.dialectDraft201909,
-  DRAFT_2020_12: messages.jsonSchemaValidator.dialectDraft202012,
+  get AUTO() {
+    return messages.jsonSchemaValidator.dialectAuto;
+  },
+  get DRAFT_7() {
+    return messages.jsonSchemaValidator.dialectDraft7;
+  },
+  get DRAFT_2019_09() {
+    return messages.jsonSchemaValidator.dialectDraft201909;
+  },
+  get DRAFT_2020_12() {
+    return messages.jsonSchemaValidator.dialectDraft202012;
+  },
 };
 
 const JSON_SCHEMA_TOUR_ID = "json-schema-validator-intro";
@@ -44,7 +53,7 @@ const JSON_SCHEMA_TOUR_TARGETS = {
   controls: "json-schema-validator-tour-controls",
   editors: "json-schema-validator-tour-editors",
 } as const;
-const JSON_SCHEMA_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
+const getJsonSchemaTourSteps = (): readonly DeveloperToolTourStep[] => [
   {
     description: messages.jsonSchemaValidator.tour.controlsDescription,
     position: "bottom",
@@ -79,6 +88,8 @@ function serviceError(error: ApiError | null) {
 }
 
 export function JsonSchemaValidator() {
+  const { locale } = useI18n();
+  const tourSteps = useMemo(() => getJsonSchemaTourSteps(), [locale]);
   const [schema, setSchema] = useState(EXAMPLE_SCHEMA);
   const [instance, setInstance] = useState(EXAMPLE_INSTANCE);
   const [dialect, setDialect] = useState<JsonSchemaDialect>("AUTO");
@@ -138,7 +149,7 @@ export function JsonSchemaValidator() {
       tour={
         <DeveloperToolTourButton
           label={messages.jsonSchemaValidator.tour.startButton}
-          steps={JSON_SCHEMA_TOUR_STEPS}
+          steps={tourSteps}
           storageKey="json-schema-validator-tour-seen"
           tourId={JSON_SCHEMA_TOUR_ID}
         />

@@ -149,22 +149,30 @@ const HOLD_DROP_CONTROLS: {
 }[] = [
   {
     key: "holdClient",
-    label: messages.socksRelay.holdClientLabel,
+    get label() {
+      return messages.socksRelay.holdClientLabel;
+    },
     shortLabel: "HC",
   },
   {
     key: "holdHost",
-    label: messages.socksRelay.holdHostLabel,
+    get label() {
+      return messages.socksRelay.holdHostLabel;
+    },
     shortLabel: "HH",
   },
   {
     key: "dropClient",
-    label: messages.socksRelay.dropClientLabel,
+    get label() {
+      return messages.socksRelay.dropClientLabel;
+    },
     shortLabel: "DC",
   },
   {
     key: "dropHost",
-    label: messages.socksRelay.dropHostLabel,
+    get label() {
+      return messages.socksRelay.dropHostLabel;
+    },
     shortLabel: "DH",
   },
 ];
@@ -172,52 +180,86 @@ const HOLD_DROP_CONTROLS: {
 const RELAY_FLOW_LEGEND = [
   {
     code: "RC",
-    meaning: "Diterima dari Client",
-    note: "Relay menerima request/message dari pemanggil.",
+    get meaning() {
+      return messages.socksRelay.flowLegend.rcMeaning;
+    },
+    get note() {
+      return messages.socksRelay.flowLegend.rcNote;
+    },
   },
   {
     code: "SH",
-    meaning: "Dikirim ke Host",
-    note: "Relay meneruskan message client ke host tujuan.",
+    get meaning() {
+      return messages.socksRelay.flowLegend.shMeaning;
+    },
+    get note() {
+      return messages.socksRelay.flowLegend.shNote;
+    },
   },
   {
     code: "RH",
-    meaning: "Diterima dari Host",
-    note: "Relay menerima response/message dari host tujuan.",
+    get meaning() {
+      return messages.socksRelay.flowLegend.rhMeaning;
+    },
+    get note() {
+      return messages.socksRelay.flowLegend.rhNote;
+    },
   },
   {
     code: "SC",
-    meaning: "Dikirim ke Client",
-    note: "Relay mengirim response dari host kembali ke pemanggil.",
+    get meaning() {
+      return messages.socksRelay.flowLegend.scMeaning;
+    },
+    get note() {
+      return messages.socksRelay.flowLegend.scNote;
+    },
   },
   {
     code: "HC",
-    meaning: "Hold di Client",
-    note: "Message ditahan saat diterima relay dari sisi client.",
+    get meaning() {
+      return messages.socksRelay.flowLegend.hcMeaning;
+    },
+    get note() {
+      return messages.socksRelay.flowLegend.hcNote;
+    },
   },
   {
     code: "HH",
-    meaning: "Hold di Host",
-    note: "Message ditahan setelah response dari sisi host diterima.",
+    get meaning() {
+      return messages.socksRelay.flowLegend.hhMeaning;
+    },
+    get note() {
+      return messages.socksRelay.flowLegend.hhNote;
+    },
   },
   {
     code: "DC",
-    meaning: "Drop di Client",
-    note: "Message dari sisi client didrop dan tidak diteruskan.",
+    get meaning() {
+      return messages.socksRelay.flowLegend.dcMeaning;
+    },
+    get note() {
+      return messages.socksRelay.flowLegend.dcNote;
+    },
   },
   {
     code: "DH",
-    meaning: "Drop di Host",
-    note: "Message dari sisi host didrop dan tidak dikirim kembali.",
+    get meaning() {
+      return messages.socksRelay.flowLegend.dhMeaning;
+    },
+    get note() {
+      return messages.socksRelay.flowLegend.dhNote;
+    },
   },
 ] as const;
 
-const RELAY_BEHAVIOR_NOTES = [
-  "Hold: message akan dihold sesuai waktu yang ditentukan",
-  "Hold and Drop: message akan didrop",
-  "On Client: message dihold/drop saat diterima oleh aplikasi sock relay",
-  "On Host: message akan dihold/drop setelah diterima oleh host",
-] as const;
+function getRelayBehaviorNotes() {
+  return [
+    messages.socksRelay.behaviorNotes.hold,
+    messages.socksRelay.behaviorNotes.holdAndDrop,
+    messages.socksRelay.behaviorNotes.onClient,
+    messages.socksRelay.behaviorNotes.onHost,
+  ] as const;
+}
 
 const RELAY_FLOW_TONES: Record<RelayFlow, string> = {
   DC: "border-rose-600/50 bg-rose-100 text-rose-800 dark:border-rose-400/45 dark:bg-rose-400/15 dark:text-rose-200",
@@ -468,12 +510,11 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
             <p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-[0.18em]">
-              Socks Relay
+              {messages.socksRelay.pageEyebrow}
             </p>
             <h1 className="font-bold text-3xl tracking-tight">{modeLabel}</h1>
             <p className="mt-3 max-w-[72ch] text-muted-foreground text-sm leading-relaxed md:text-base">
-              Start relay listeners, tune hold/drop behavior, and watch live
-              message flow without leaving the dashboard.
+              {messages.socksRelay.pageDescription}
             </p>
           </div>
           <div className="flex flex-wrap items-end gap-2 lg:justify-end">
@@ -500,27 +541,27 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
           {[
             {
               icon: Network,
-              label: "Active relays",
+              label: messages.socksRelay.metrics.activeRelays,
               value: relays.length,
             },
             {
               icon: Activity,
-              label: "Running",
+              label: messages.socksRelay.metrics.running,
               value: runningRelayCount,
             },
             {
               icon: Radio,
-              label: "Messages",
+              label: messages.socksRelay.metrics.messages,
               value: messageEventCount,
             },
             {
               icon: CircleDashed,
-              label: "Lifecycle",
+              label: messages.socksRelay.metrics.lifecycle,
               value: lifecycleEventCount,
             },
             {
               icon: CircleAlert,
-              label: "Malformed",
+              label: messages.socksRelay.metrics.malformed,
               value: malformedEventCount,
             },
           ].map((metric, index) => (
@@ -714,7 +755,9 @@ function RelayStartForm({
           <div className="overflow-hidden rounded-lg border border-border/70 bg-background/75 shadow-xs">
             <div className="flex items-center gap-2 border-border/70 border-b bg-muted/25 px-3 py-2.5">
               <Route className="size-4 text-primary" />
-              <p className="font-medium text-sm">Relay path</p>
+              <p className="font-medium text-sm">
+                {messages.socksRelay.relayPath}
+              </p>
             </div>
             <div className="grid gap-0 sm:grid-cols-[135px_minmax(0,1fr)_96px]">
               <div className="grid gap-2 p-2.5">
@@ -995,7 +1038,7 @@ function RelayTable({
         relayId: truncateMiddle(relay.relayId, 10, 10),
       }),
       {
-        description: "Live controls and logs now follow this relay.",
+        description: messages.socksRelay.focusedLogScopeDescription,
       }
     );
   };
@@ -1110,7 +1153,12 @@ function RelayTable({
                     >
                       <TableCell className="min-w-0">
                         <button
-                          aria-label={`Select relay ${relay.relayId}`}
+                          aria-label={formatMessage(
+                            messages.socksRelay.selectRelayAria,
+                            {
+                              relayId: relay.relayId,
+                            }
+                          )}
                           className="block max-w-full whitespace-nowrap font-mono text-foreground text-sm underline-offset-4 hover:underline"
                           onClick={() => handleSelectRelay(relay)}
                           title={relay.relayId}
@@ -1132,13 +1180,20 @@ function RelayTable({
                         <Badge
                           variant={relay.running ? "default" : "secondary"}
                         >
-                          {relay.running ? "Running" : "Stopped"}
+                          {relay.running
+                            ? messages.socksRelay.runningStatus
+                            : messages.socksRelay.stoppedStatus}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-end gap-2">
                           <Button
-                            aria-label={`Stop ${relay.relayId}`}
+                            aria-label={formatMessage(
+                              messages.socksRelay.stopRelayAria,
+                              {
+                                relayId: relay.relayId,
+                              }
+                            )}
                             className="size-8"
                             disabled={stopRelay.isPending}
                             onClick={() => stopRelay.mutate(relay.relayId)}
@@ -1289,7 +1344,9 @@ function RelayLiveControls({ relay }: { readonly relay?: RelayInstance }) {
         </SheetHeader>
         <div className="flex flex-wrap items-center gap-2 px-4">
           <Badge variant={relay.running ? "default" : "secondary"}>
-            {relay.running ? "Running" : "Stopped"}
+            {relay.running
+              ? messages.socksRelay.runningStatus
+              : messages.socksRelay.stoppedStatus}
           </Badge>
           <Badge variant="outline">
             {messages.socksRelay.appliesToNewTrafficLabel}
@@ -1572,7 +1629,7 @@ function RelayLegend() {
           {messages.socksRelay.behaviorNotesTitle}
         </h3>
         <ul className="mt-3 grid gap-2 text-muted-foreground text-sm">
-          {RELAY_BEHAVIOR_NOTES.map((note) => (
+          {getRelayBehaviorNotes().map((note) => (
             <li className="flex gap-2" key={note}>
               <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
               <span>{note}</span>

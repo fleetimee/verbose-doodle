@@ -1,6 +1,7 @@
 import { UserGroupIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useI18n } from "@/components/i18n-provider";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
 import {
@@ -18,9 +19,9 @@ import { UserFormDialogTrigger } from "@/features/users/components/user-form-dia
 import { useGetUsers } from "@/features/users/hooks/use-get-users";
 import type { User } from "@/features/users/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
-import { messages } from "@/lib/i18n";
 
 export function UsersPage() {
+  const { locale, messages } = useI18n();
   useDocumentMeta({
     description: messages.users.documentDescription,
     keywords: ["user management", "permissions", "team", "users"],
@@ -51,10 +52,14 @@ export function UsersPage() {
     setConfirmDialogOpen(true);
   };
 
-  const columns = createColumns({
-    onDelete: handleDeleteUser,
-    onEdit: handleEditUser,
-  });
+  const columns = useMemo(
+    () =>
+      createColumns({
+        onDelete: handleDeleteUser,
+        onEdit: handleEditUser,
+      }),
+    [locale]
+  );
 
   return (
     <div className="space-y-6">

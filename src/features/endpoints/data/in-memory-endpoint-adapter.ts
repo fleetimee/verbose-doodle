@@ -22,6 +22,7 @@ import type {
   EndpointTrafficLogDetail,
   EndpointTrafficLogsResult,
 } from "@/features/endpoints/types";
+import { formatMessage, getMessages, messages } from "@/lib/i18n";
 
 const cloneResponse = (response: EndpointResponse): EndpointResponse => ({
   ...response,
@@ -47,7 +48,21 @@ const emptyMetric = (): EndpointMetric => ({
 });
 
 const MAX_RESPONSE_NAME_LENGTH = 64;
-const COPY_SUFFIX = /^(.*) \(Copy(?: (\d+))?\)$/;
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getCopySuffixPattern(): RegExp {
+  const suffixes = [
+    messages.endpoints.copySuffix,
+    getMessages("en-US").endpoints.copySuffix,
+  ];
+  const uniqueSuffixes = [...new Set(suffixes)];
+  return new RegExp(
+    `^(.*) \\((?:${uniqueSuffixes.map(escapeRegExp).join("|")})(?: (\\d+))?\\)$`
+  );
+}
 
 function createResponseId(endpoints: readonly Endpoint[]): string {
   const ids = endpoints.flatMap((endpoint) =>
@@ -61,13 +76,16 @@ function createResponseCloneName(
   sourceName: string,
   responses: readonly EndpointResponse[]
 ): string {
-  const match = COPY_SUFFIX.exec(sourceName);
+  const match = getCopySuffixPattern().exec(sourceName);
   const baseName = match?.[1] ?? sourceName;
   let suffixNumber = match?.[2] ? Number(match[2]) + 1 : 1;
   const existingNames = new Set(responses.map((response) => response.name));
 
   while (true) {
-    const suffix = suffixNumber === 1 ? " (Copy)" : ` (Copy ${suffixNumber})`;
+    const suffix =
+      suffixNumber === 1
+        ? ` (${messages.endpoints.copySuffix})`
+        : ` (${messages.endpoints.copySuffix} ${suffixNumber})`;
     const baseLength = Math.max(0, MAX_RESPONSE_NAME_LENGTH - suffix.length);
     const candidate = `${baseName.slice(0, baseLength)}${suffix}`;
     if (!existingNames.has(candidate)) {
@@ -92,7 +110,11 @@ function findEndpointById(
 ): Endpoint {
   const endpoint = endpoints.find((item) => item.id === endpointId);
   if (!endpoint) {
-    throw new Error(`Endpoint ${endpointId} was not found`);
+    throw new Error(
+      formatMessage(messages.endpoints.endpointRecordNotFound, {
+        id: endpointId,
+      })
+    );
   }
   return endpoint;
 }
@@ -103,7 +125,11 @@ function findEndpointBySlug(
 ): Endpoint {
   const endpoint = endpoints.find((item) => item.slug === endpointSlug);
   if (!endpoint) {
-    throw new Error(`Endpoint ${endpointSlug} was not found`);
+    throw new Error(
+      formatMessage(messages.endpoints.endpointRecordNotFound, {
+        id: endpointSlug,
+      })
+    );
   }
   return endpoint;
 }
@@ -117,7 +143,11 @@ function findResponse(
     (item) => item.id === input.responseId
   );
   if (!response) {
-    throw new Error(`Response ${input.responseId} was not found`);
+    throw new Error(
+      formatMessage(messages.endpoints.responseNotFound, {
+        id: input.responseId,
+      })
+    );
   }
   return response;
 }
@@ -295,7 +325,9 @@ export function createInMemoryEndpointAdapter(
         .get(endpointId)
         ?.find((item) => item.id === logId);
       if (!log) {
-        throw new Error(`Traffic log ${logId} was not found`);
+        throw new Error(
+          formatMessage(messages.endpoints.trafficLogNotFound, { id: logId })
+        );
       }
       return {
         ...cloneLog(log),

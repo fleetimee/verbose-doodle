@@ -1,5 +1,6 @@
 import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
+import { messages } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import {
   Dialog,
@@ -28,8 +29,8 @@ function Command({
 }
 
 function CommandDialog({
-  title = "Command Palette",
-  description = "Search for a command to run...",
+  title = messages.common.commandPaletteTitle,
+  description = messages.common.commandPaletteDescription,
   children,
   className,
   commandProps,

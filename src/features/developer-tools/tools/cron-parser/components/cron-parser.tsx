@@ -6,6 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Clock3 } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,7 +30,7 @@ import {
   parseCronExpression,
 } from "@/features/developer-tools/tools/cron-parser/parse-cron-expression";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { formatMessage, messages } from "@/lib/i18n";
+import { formatMessage, getActiveLocale, messages } from "@/lib/i18n";
 
 const EXAMPLE_EXPRESSION = "*/15 * * * *";
 
@@ -39,7 +40,7 @@ const CRON_PARSER_TOUR_TARGETS = {
   fields: "cron-parser-tour-fields",
   runs: "cron-parser-tour-runs",
 } as const;
-const CRON_PARSER_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
+const getCronParserTourSteps = (): readonly DeveloperToolTourStep[] => [
   {
     description: messages.cronParser.tour.controlsDescription,
     position: "bottom",
@@ -61,23 +62,25 @@ const CRON_PARSER_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
 ];
 
 function formatExecution(date: Date, timeZone: string) {
-  const dateTime = new Intl.DateTimeFormat("en-US", {
+  const locale = getActiveLocale();
+  const dateTime = new Intl.DateTimeFormat(locale, {
     dateStyle: "full",
     hour12: false,
     timeStyle: "medium",
     timeZone,
   }).format(date);
-  const zoneName = getTimeZoneName(date, timeZone, "short");
-  const offset = getTimeZoneName(date, timeZone, "longOffset");
+  const zoneName = getTimeZoneName(date, timeZone, "short", locale);
+  const offset = getTimeZoneName(date, timeZone, "longOffset", locale);
   return `${dateTime} · ${zoneName} · ${offset}`;
 }
 
 function getTimeZoneName(
   date: Date,
   timeZone: string,
-  timeZoneName: "longOffset" | "short"
+  timeZoneName: "longOffset" | "short",
+  locale = getActiveLocale()
 ) {
-  const parts = new Intl.DateTimeFormat("en-US", {
+  const parts = new Intl.DateTimeFormat(locale, {
     timeZone,
     timeZoneName,
   }).formatToParts(date);
@@ -85,6 +88,8 @@ function getTimeZoneName(
 }
 
 export function CronParser() {
+  const { locale } = useI18n();
+  const tourSteps = useMemo(() => getCronParserTourSteps(), [locale]);
   const browserTimeZone = useMemo(getBrowserTimeZone, []);
   const timeZoneOptions = useMemo(
     () => getTimeZoneOptions(browserTimeZone),
@@ -117,7 +122,7 @@ export function CronParser() {
         setError(
           parseError instanceof CronParseError
             ? parseError.message
-            : messages.cronParser.invalidExpression
+            : messages.cronParser.parseFailed
         );
       }
     },
@@ -144,6 +149,7 @@ export function CronParser() {
 
   const resetExample = () => {
     setExpression(EXAMPLE_EXPRESSION);
+    setSavedTimeZone("UTC");
     setResult(null);
     setError(null);
   };
@@ -165,7 +171,7 @@ export function CronParser() {
       tour={
         <DeveloperToolTourButton
           label={messages.cronParser.tour.startButton}
-          steps={CRON_PARSER_TOUR_STEPS}
+          steps={tourSteps}
           storageKey="cron-parser-tour-seen"
           tourId={CRON_PARSER_TOUR_ID}
         />
@@ -301,7 +307,9 @@ export function CronParser() {
                   </p>
                 </div>
                 <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-                  {result.mode === "five-field" ? "5 fields" : "6 fields"}
+                  {result.mode === "five-field"
+                    ? messages.cronParser.fiveFields
+                    : messages.cronParser.sixFields}
                 </span>
               </div>
               <div className="grid border-x sm:grid-cols-2 xl:grid-cols-3">
@@ -318,7 +326,9 @@ export function CronParser() {
                         {field.token}
                       </code>
                     </div>
-                    <h3 className="mt-5 font-medium text-sm">{field.label}</h3>
+                    <h3 className="mt-5 font-medium text-sm">
+                      {messages.cronParser.fieldLabels[field.key]}
+                    </h3>
                     <p className="mt-1 text-[10px] text-muted-foreground">
                       {formatMessage(messages.cronParser.allowedRange, {
                         range: field.range,

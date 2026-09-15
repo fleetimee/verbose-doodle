@@ -8,6 +8,7 @@ import {
   FileJson,
   Layers3,
 } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -44,8 +45,6 @@ type ExportSummary = {
 };
 
 const POSTMAN_EXPORT_MESSAGES = messages.endpoints.postmanExport;
-const DEFAULT_COLLECTION_NAME = POSTMAN_EXPORT_MESSAGES.defaultCollectionName;
-const DEFAULT_ENVIRONMENT_NAME = POSTMAN_EXPORT_MESSAGES.defaultEnvironmentName;
 const HTTP_METHODS: readonly HttpMethod[] = [
   "GET",
   "POST",
@@ -188,11 +187,12 @@ export function ExportEndpointsDialog({
   onOpenChange,
   open,
 }: ExportEndpointsDialogProps) {
+  useI18n();
   const [collectionName, setCollectionName] = useState<string>(
-    DEFAULT_COLLECTION_NAME
+    () => messages.endpoints.postmanExport.defaultCollectionName
   );
   const [environmentName, setEnvironmentName] = useState<string>(
-    DEFAULT_ENVIRONMENT_NAME
+    () => messages.endpoints.postmanExport.defaultEnvironmentName
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBillerSlugs, setSelectedBillerSlugs] = useState<Set<string>>(
@@ -201,8 +201,10 @@ export function ExportEndpointsDialog({
 
   useEffect(() => {
     if (open) {
-      setCollectionName(DEFAULT_COLLECTION_NAME);
-      setEnvironmentName(DEFAULT_ENVIRONMENT_NAME);
+      setCollectionName(messages.endpoints.postmanExport.defaultCollectionName);
+      setEnvironmentName(
+        messages.endpoints.postmanExport.defaultEnvironmentName
+      );
       setSearchTerm("");
       setSelectedBillerSlugs(createBillerSlugSet(groupedEndpoints));
     }

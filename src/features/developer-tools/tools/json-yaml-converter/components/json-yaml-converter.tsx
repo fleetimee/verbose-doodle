@@ -4,7 +4,8 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -38,7 +39,7 @@ const JSON_YAML_TOUR_TARGETS = {
   editors: "json-yaml-converter-tour-editors",
   output: "json-yaml-converter-tour-output",
 } as const;
-const JSON_YAML_TOUR_STEPS: readonly DeveloperToolTourStep[] = [
+const getJsonYamlTourSteps = (): readonly DeveloperToolTourStep[] => [
   {
     description: messages.jsonYamlConverter.tour.controlsDescription,
     position: "bottom",
@@ -70,6 +71,8 @@ function formatLabel(format: DocumentFormat) {
 }
 
 export function JsonYamlConverter() {
+  const { locale } = useI18n();
+  const tourSteps = useMemo(() => getJsonYamlTourSteps(), [locale]);
   const [sourceFormat, setSourceFormat] = useState<DocumentFormat>("json");
   const [source, setSource] = useState(EXAMPLE_JSON);
   const [output, setOutput] = useState("");
@@ -98,7 +101,9 @@ export function JsonYamlConverter() {
       setError(
         conversionError instanceof ConversionError
           ? conversionError
-          : new ConversionError(messages.jsonYamlConverter.errorTitle)
+          : new ConversionError(
+              messages.jsonYamlConverter.conversionFailedDescription
+            )
       );
       setCanSwap(false);
       setCopyState("idle");
@@ -121,8 +126,8 @@ export function JsonYamlConverter() {
     resetResult();
   };
 
-  const swap = () => {
-    if (!canSwap) {
+  const swapFormats = () => {
+    if (!(canSwap && output)) {
       return;
     }
     setSource(output);
@@ -164,7 +169,7 @@ export function JsonYamlConverter() {
       tour={
         <DeveloperToolTourButton
           label={messages.jsonYamlConverter.tour.startButton}
-          steps={JSON_YAML_TOUR_STEPS}
+          steps={tourSteps}
           storageKey="json-yaml-converter-tour-seen"
           tourId={JSON_YAML_TOUR_ID}
         />
@@ -211,7 +216,7 @@ export function JsonYamlConverter() {
               aria-label={messages.jsonYamlConverter.swap}
               className="rounded-md active:translate-y-px"
               disabled={!canSwap}
-              onClick={swap}
+              onClick={swapFormats}
               size="icon"
               type="button"
               variant="outline"

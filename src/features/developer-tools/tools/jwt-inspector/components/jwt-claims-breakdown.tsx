@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { type ClaimDefinition, getClaimInfo } from "../utils/jwt-claims";
 
@@ -37,7 +38,7 @@ function renderFooterNote(
   if (isHoveredTimestamp || (!hoveredKey && hasTimestamp)) {
     return (
       <span>
-        This value must be a{" "}
+        {messages.jwtInspector.numericDateHintPrefix}
         <a
           className="underline hover:text-foreground"
           href="https://datatracker.ietf.org/doc/html/rfc7519#section-2"
@@ -45,8 +46,8 @@ function renderFooterNote(
           target="_blank"
         >
           NumericDate
-        </a>{" "}
-        type, representing seconds.
+        </a>
+        {messages.jwtInspector.numericDateHintSuffix}
       </span>
     );
   }
@@ -55,7 +56,7 @@ function renderFooterNote(
     return <span>{activeClaimInfo.description}</span>;
   }
 
-  return <span>Click or hover over claims for specification details.</span>;
+  return <span>{messages.jwtInspector.claimsHoverHint}</span>;
 }
 
 export function JwtClaimsBreakdown({
@@ -98,7 +99,7 @@ export function JwtClaimsBreakdown({
         )}
         style={{ height }}
       >
-        No claims data available.
+        {messages.jwtInspector.noClaimsData}
       </div>
     );
   }
@@ -112,7 +113,7 @@ export function JwtClaimsBreakdown({
         )}
         style={{ height }}
       >
-        Invalid JSON syntax. Cannot display claims breakdown.
+        {messages.jwtInspector.invalidJsonClaims}
       </div>
     );
   }
@@ -126,7 +127,7 @@ export function JwtClaimsBreakdown({
         )}
         style={{ height }}
       >
-        No claims present in this object.
+        {messages.jwtInspector.noClaimsPresent}
       </div>
     );
   }

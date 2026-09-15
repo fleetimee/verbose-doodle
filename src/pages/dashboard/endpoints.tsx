@@ -15,6 +15,7 @@ import {
 } from "react";
 import { useSearchParams } from "react-router";
 import { Layers3, Plug } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import { type TourStep, useTour } from "@/components/tour";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,7 +58,7 @@ import {
 } from "@/features/endpoints/utils";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { messages } from "@/lib/i18n";
+import { formatMessage, messages } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 // Skeleton loading constants
@@ -321,6 +322,7 @@ function AnimatedEndpointGroup({
 }
 
 export function EndpointsPage() {
+  useI18n();
   useDocumentMeta({
     description: messages.endpoints.documentDescription,
     keywords: ["api endpoints", "integrations", "api management", "endpoints"],
@@ -627,7 +629,9 @@ export function EndpointsPage() {
         transition={{ duration: MOTION_DURATION.fast, ease: MOTION_EASE.out }}
       >
         <div>
-          <h1 className="font-bold text-3xl tracking-tight">Endpoint</h1>
+          <h1 className="font-bold text-3xl tracking-tight">
+            {messages.endpoints.pageTitle}
+          </h1>
           <p className="text-muted-foreground">
             {messages.endpoints.pageDescription}
           </p>
@@ -864,7 +868,10 @@ export function EndpointsPage() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
-                              aria-label={`Add endpoint for ${group.billerName}`}
+                              aria-label={formatMessage(
+                                messages.endpoints.addEndpointForBiller,
+                                { billerName: group.billerName }
+                              )}
                               className="rounded-lg border-2 border-border/80 border-b-[3px] bg-background/70 text-muted-foreground transition-all duration-150 hover:border-border hover:bg-accent hover:text-accent-foreground active:translate-y-0.5 active:border-b-2"
                               onClick={() =>
                                 handleCreateEndpoint(group.billerSlug)
@@ -881,7 +888,10 @@ export function EndpointsPage() {
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            Add endpoint for {group.billerName}
+                            {formatMessage(
+                              messages.endpoints.addEndpointForBiller,
+                              { billerName: group.billerName }
+                            )}
                           </TooltipContent>
                         </Tooltip>
                       </ProtectedAction>
@@ -889,7 +899,10 @@ export function EndpointsPage() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
-                              aria-label={`Edit biller ${group.billerName}`}
+                              aria-label={formatMessage(
+                                messages.endpoints.editBillerTooltip,
+                                { billerName: group.billerName }
+                              )}
                               className="rounded-lg border-2 border-border/80 border-b-[3px] bg-background/70 text-muted-foreground transition-all duration-150 hover:border-border hover:bg-accent hover:text-accent-foreground active:translate-y-0.5 active:border-b-2"
                               onClick={() => {
                                 const biller = billers.find(
@@ -915,15 +928,19 @@ export function EndpointsPage() {
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            Edit biller {group.billerName}
+                            {formatMessage(
+                              messages.endpoints.editBillerTooltip,
+                              { billerName: group.billerName }
+                            )}
                           </TooltipContent>
                         </Tooltip>
                       </ProtectedAction>
                     </div>
                     <span className="inline-flex select-none items-center gap-1.5 rounded-xl border-2 border-border/80 border-b-[3px] bg-muted/40 px-2.5 py-1 font-bold text-muted-foreground text-xs">
                       <Layers3 className="h-3.5 w-3.5" />
-                      {group.endpoints.length} endpoint
-                      {group.endpoints.length === 1 ? "" : "s"}
+                      {formatMessage(messages.endpoints.endpointCount, {
+                        count: group.endpoints.length,
+                      })}
                     </span>
                   </div>
                   <AnimatedEndpointGroup

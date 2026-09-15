@@ -6,6 +6,7 @@ import {
 } from "motion/react";
 import { useId, useMemo } from "react";
 import { ListX } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import {
   Empty,
   EmptyDescription,
@@ -140,6 +141,7 @@ export function ResponseList({
   onDeactivateResponse,
   onEditResponseDirtyChange,
 }: ResponseListProps) {
+  useI18n();
   const layoutNamespace = useId();
   // Group responses by active/inactive status
   const { activeResponses, inactiveResponses } = useMemo(() => {
@@ -151,7 +153,9 @@ export function ResponseList({
   return (
     <div className="flex h-full flex-col">
       <div className="border-b px-4 py-3">
-        <h2 className="font-bold text-sm tracking-tight">Responses</h2>
+        <h2 className="font-bold text-sm tracking-tight">
+          {messages.endpoints.postmanExport.responsesLabel}
+        </h2>
       </div>
       <ScrollArea className="flex-1">
         {responses.length === 0 ? (
@@ -160,9 +164,11 @@ export function ResponseList({
               <EmptyMedia variant="icon">
                 <ListX />
               </EmptyMedia>
-              <EmptyTitle>No responses configured yet</EmptyTitle>
+              <EmptyTitle>
+                {messages.endpoints.noConfiguredResponses}
+              </EmptyTitle>
               <EmptyDescription>
-                Add a response using the button above to get started.
+                {messages.endpoints.addResponseEmptyHint}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>

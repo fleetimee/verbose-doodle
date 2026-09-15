@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Dialog as SheetPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
+import { messages } from "@/lib/i18n"
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
@@ -107,7 +108,7 @@ function SheetContent({
         {children}
         <SheetClose className="ring-offset-background focus:ring-ring data-popup-open:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
           <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-4" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">{messages.common.close}</span>
         </SheetClose>
       </SheetPrimitive.Popup>
     </SheetPortal>

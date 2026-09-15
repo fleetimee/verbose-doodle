@@ -25,4 +25,51 @@ describe("i18n multilingual support", () => {
     setActiveLocale("en-US");
     expect(getActiveLocale()).toBe("en-US");
   });
+
+  test("returns id-ID Indonesian translations for newly supported modules", () => {
+    const idMessages = getMessages("id-ID");
+    expect(idMessages.common.cancel).toBe("Batal");
+    expect(idMessages.common.save).toBe("Simpan");
+    expect(idMessages.theme.lightTheme).toBe("Tema terang");
+    expect(idMessages.theme.darkTheme).toBe("Tema gelap");
+    expect(idMessages.auth.lockScreen).toBe("Kunci layar");
+    expect(idMessages.auth.signIn).toBe("Masuk");
+    expect(idMessages.billers.addBiller).toBe("Tambah Biller");
+    expect(idMessages.users.addUser).toBe("Tambah Pengguna");
+    expect(idMessages.errors.notFoundTitle).toBe("404");
+    expect(idMessages.overview.pageTitle).toBe("Ringkasan");
+    expect(idMessages.overview.coverageTitle).toBe("Cakupan simulator");
+    expect(idMessages.developerTools.pageTitle).toBe("Developer Tools");
+    expect(idMessages.developerTools.navigationGroup).toBe("Developer Tools");
+    expect(idMessages.common.navWorkspace).toBe("Workspace");
+    expect(idMessages.common.navEndpoints).toBe("Endpoints");
+    expect(idMessages.common.navOverview).toBe("Overview");
+    expect(idMessages.endpoints.documentTitle).toBe("Endpoints");
+    expect(idMessages.endpoints.addEndpoint).toBe("Tambah Endpoint");
+    expect(idMessages.socketTester.documentTitle).toBe("Socket Tester");
+    expect(idMessages.socksRelay.documentTitle).toBe("SOCKS Relay");
+    expect(idMessages.jwtInspector.title).toBe("JWT Inspector");
+    expect(idMessages.cronParser.title).toBe("Cron Parser");
+    expect(idMessages.dateConverter.title).toBe("Date Converter");
+    expect(idMessages.numberBaseConverter.title).toBe("Number Base Converter");
+    expect(idMessages.jsonYamlConverter.title).toBe("JSON/YAML Converter");
+    expect(idMessages.jsonSchemaValidator.title).toBe("JSON Schema Validator");
+    expect(idMessages.iso8583Parser.title).toBe("ISO 8583 Parser");
+    expect(idMessages.iso8583Generator.title).toBe("ISO 8583 Generator");
+  });
+
+  test("messages proxy reflects the active locale dynamically including nested properties", () => {
+    const { messages: proxyMessages } = require("./i18n");
+    const copy = proxyMessages.common;
+
+    setActiveLocale("en-US");
+    expect(copy.cancel).toBe("Cancel");
+
+    setActiveLocale("id-ID");
+    expect(copy.cancel).toBe("Batal");
+
+    // Reset back to en-US
+    setActiveLocale("en-US");
+    expect(copy.cancel).toBe("Cancel");
+  });
 });

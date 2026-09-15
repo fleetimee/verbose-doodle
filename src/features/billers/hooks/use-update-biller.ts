@@ -9,6 +9,7 @@ import type { Biller } from "@/features/billers/types";
 import { endpointDataQueryKeys } from "@/features/endpoints/data/endpoint-data-query-keys";
 import { type ApiError, apiPatch } from "@/lib/api";
 import { getAdminBillerUpdateUrl } from "@/lib/api-endpoints";
+import { messages } from "@/lib/i18n";
 import { createMutationHook } from "@/lib/query-hooks";
 
 export type UpdateBillerInput = {
@@ -25,7 +26,7 @@ async function updateBiller(input: UpdateBillerInput): Promise<Biller> {
   if (!response.data?.biller) {
     throw {
       code: "INVALID_RESPONSE",
-      message: "Invalid response structure from server",
+      message: messages.errors.invalidResponseStructure,
       status: 500,
     } as ApiError;
   }
@@ -39,12 +40,12 @@ export function useUpdateBiller() {
     updateBiller,
     {
       onError: (error) => {
-        toast.error("Failed to update biller", {
+        toast.error(messages.billers.updateFailed, {
           description: error.message,
         });
       },
       onSuccess: async () => {
-        toast.success("Biller updated successfully");
+        toast.success(messages.billers.updateSuccess);
         await queryClient.invalidateQueries({ queryKey: billerQueryKeys.all });
         await queryClient.invalidateQueries({
           queryKey: endpointDataQueryKeys.catalog,

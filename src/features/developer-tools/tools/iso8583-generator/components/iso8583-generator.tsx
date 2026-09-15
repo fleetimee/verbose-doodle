@@ -126,7 +126,9 @@ function FieldRow({
       data-field-number={field.number}
     >
       <Checkbox
-        aria-label={`Enable bit ${field.number}`}
+        aria-label={formatMessage(copy.enableBitAriaLabel, {
+          number: field.number,
+        })}
         checked={field.enabled}
         onCheckedChange={(checked) => onToggle(checked === true)}
       />
@@ -150,7 +152,7 @@ function FieldRow({
         inputMode={field.kind === "n" ? "numeric" : "text"}
         maxLength={field.length}
         onChange={(event) => onChange(event.currentTarget.value)}
-        placeholder={field.kind === "ans" ? " " : "Enter value"}
+        placeholder={field.kind === "ans" ? " " : copy.valuePlaceholder}
         spellCheck={false}
         value={field.value}
       />
@@ -190,11 +192,11 @@ function BitmapInspector({
 }) {
   return (
     <section
-      aria-label="Bitmap inspector"
+      aria-label={copy.bitmapInspectorAriaLabel}
       className="border-t px-4 py-4 sm:px-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-medium text-sm">Bitmap</h2>
+        <h2 className="font-medium text-sm">{copy.bitmapInspectorTitle}</h2>
         <code className="font-mono text-xs">{message.primaryBitmap}</code>
       </div>
       {message.secondaryBitmap ? (

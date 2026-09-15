@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useI18n } from "@/components/i18n-provider";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -34,6 +35,7 @@ import {
   generateCode,
   getCodeLanguageForHighlight,
 } from "@/features/endpoints/utils/code-generator";
+import { messages } from "@/lib/i18n";
 
 type CodeGeneratorDialogProps = {
   baseUrl: string;
@@ -68,6 +70,7 @@ export function CodeGeneratorDialog({
   open: controlledOpen,
   onOpenChange,
 }: CodeGeneratorDialogProps) {
+  useI18n();
   const { theme } = useTheme();
   const [selectedLanguage, setSelectedLanguage] =
     useState<CodeLanguage>("curl");
@@ -108,10 +111,9 @@ export function CodeGeneratorDialog({
       <DrawerContent className="h-[96vh] max-h-[96vh]">
         <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col">
           <DrawerHeader className="shrink-0">
-            <DrawerTitle>Generate Request Code</DrawerTitle>
+            <DrawerTitle>{messages.endpoints.codeGeneratorTitle}</DrawerTitle>
             <DrawerDescription>
-              Generate code snippets to test this endpoint in different
-              languages and tools
+              {messages.endpoints.codeGeneratorDescription}
             </DrawerDescription>
           </DrawerHeader>
 
@@ -137,10 +139,10 @@ export function CodeGeneratorDialog({
                   className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   htmlFor="language"
                 >
-                  Language / Tool
+                  {messages.endpoints.codeGeneratorLanguageLabel}
                 </label>
                 <p className="text-muted-foreground text-xs">
-                  Select the code language or tool you want to use
+                  {messages.endpoints.codeGeneratorLanguageDescription}
                 </p>
               </div>
               <Select
@@ -185,7 +187,7 @@ export function CodeGeneratorDialog({
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground text-xs">
-                      Theme:
+                      {messages.endpoints.responseThemeLabel}
                     </span>
                     <CodeBlockThemeSelector
                       mode={resolvedTheme === "dark" ? "dark" : "light"}

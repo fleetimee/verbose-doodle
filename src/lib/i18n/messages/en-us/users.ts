@@ -55,4 +55,11 @@ export const usersMessages = {
   usernamePlaceholder: "Enter username",
   userRole: "User",
   userRoleDescription: "Standard access to view endpoints only",
+  createFailed: "Failed to create user",
+  createSuccess: "User created successfully",
+  createSuccessDescription: "Created user: {userId}",
+  deleteFailed: "Failed to delete user",
+  deleteSuccess: "User deleted successfully",
+  updateFailed: "Failed to update user",
+  updateSuccess: "User updated successfully",
 } as const;

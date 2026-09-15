@@ -70,7 +70,7 @@ import {
   httpMethods,
 } from "@/features/endpoints/schemas/endpoint-schema";
 import { getMethodTextColor } from "@/features/endpoints/utils/http-method-colors";
-import { messages } from "@/lib/i18n";
+import { formatMessage, messages } from "@/lib/i18n";
 
 const TRAILING_SLASHES_PATTERN = /\/+$/;
 const AVAILABILITY_DEBOUNCE_MS = 400;
@@ -156,7 +156,7 @@ function MethodCombobox({
         <Button
           aria-expanded={open}
           aria-invalid={fieldState.invalid}
-          aria-label="Method"
+          aria-label={messages.endpoints.methodLabel}
           className="w-full justify-between"
           id="endpoint-method"
           ref={triggerRef}
@@ -186,13 +186,13 @@ function MethodCombobox({
       >
         <Command>
           <CommandInput
-            aria-label="Search methods"
+            aria-label={messages.endpoints.searchMethodsAria}
             className="h-11"
-            placeholder="Search methods..."
+            placeholder={messages.endpoints.searchMethodsPlaceholder}
           />
           <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
             <CommandList className="max-h-none overflow-visible p-1">
-              <CommandEmpty>No method found.</CommandEmpty>
+              <CommandEmpty>{messages.endpoints.noMethodsFound}</CommandEmpty>
               <CommandGroup className="p-0">
                 {httpMethods.map((method) => (
                   <CommandItem
@@ -245,7 +245,7 @@ function BillerCombobox({
         <Button
           aria-expanded={open}
           aria-invalid={fieldState.invalid}
-          aria-label="Biller"
+          aria-label={messages.endpoints.billerLabel}
           className="w-full justify-between"
           disabled={disabled}
           id="endpoint-biller"
@@ -280,13 +280,13 @@ function BillerCombobox({
       >
         <Command>
           <CommandInput
-            aria-label="Search billers"
+            aria-label={messages.billers.searchAria}
             className="h-11"
-            placeholder="Search billers..."
+            placeholder={messages.billers.searchPlaceholder}
           />
           <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
             <CommandList className="max-h-none overflow-visible p-1">
-              <CommandEmpty>No biller found.</CommandEmpty>
+              <CommandEmpty>{messages.billers.noBillersFound}</CommandEmpty>
               <CommandGroup className="p-0">
                 {onAddBiller && (
                   <CommandItem
@@ -391,7 +391,11 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
         : undefined;
     const conflictMessage =
       availability.status === "complete" && !availability.available
-        ? `${previewMethod} ${previewPath} is already used by ${conflictOwner}.`
+        ? formatMessage(messages.endpoints.endpointConflictUsedBy, {
+            method: previewMethod,
+            owner: conflictOwner ?? "",
+            path: previewPath,
+          })
         : undefined;
 
     useEffect(() => {
@@ -538,7 +542,9 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                             icon={Loading03Icon}
                             strokeWidth={2}
                           />
-                          <span>Checking endpoint availability...</span>
+                          <span>
+                            {messages.endpoints.endpointCheckingAvailability}
+                          </span>
                         </div>
                       )}
                       {availability.status === "complete" &&
@@ -555,7 +561,13 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                               strokeWidth={2}
                             />
                             <span>
-                              {previewMethod} {previewPath} is available.
+                              {formatMessage(
+                                messages.endpoints.endpointAvailable,
+                                {
+                                  method: previewMethod,
+                                  path: previewPath,
+                                }
+                              )}
                             </span>
                           </div>
                         )}
@@ -572,7 +584,7 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                             strokeWidth={2}
                           />
                           <span>
-                            Availability check failed. You can still submit.
+                            {messages.endpoints.endpointAvailabilityFailed}
                           </span>
                         </div>
                       )}
@@ -634,7 +646,7 @@ export const EndpointForm = forwardRef<EndpointFormHandle, EndpointFormProps>(
                         <code className="block break-all font-mono text-foreground text-sm">
                           {hasValidPreviewPath
                             ? `${previewMethod} ${previewUrl}`
-                            : "Enter a valid path to preview the endpoint URL."}
+                            : messages.endpoints.urlPreviewInvalid}
                         </code>
                       </div>
                     </FieldContent>

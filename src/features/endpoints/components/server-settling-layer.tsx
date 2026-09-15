@@ -2,7 +2,9 @@ import { Loading03Icon, ServerStackIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
+import { useI18n } from "@/components/i18n-provider";
 import { Progress } from "@/components/ui/progress";
+import { formatMessage, messages } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 const SETTLING_DURATION_MS = 10_000;
@@ -24,8 +26,9 @@ type ServerSettlingLayerProps = {
  */
 export function ServerSettlingLayer({
   onComplete,
-  message = "Waiting for server to settle...",
+  message,
 }: ServerSettlingLayerProps) {
+  useI18n();
   const [progress, setProgress] = useState(0);
   const shouldReduceMotion = useReducedMotion();
   const [secondsRemaining, setSecondsRemaining] = useState(
@@ -111,7 +114,7 @@ export function ServerSettlingLayer({
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
             transition={{ duration: MOTION_DURATION.standard }}
           >
-            {message}
+            {message ?? messages.endpoints.serverSettlingTitle}
           </motion.h3>
           <motion.p
             animate={{ opacity: 1, y: 0 }}
@@ -119,8 +122,7 @@ export function ServerSettlingLayer({
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
             transition={{ duration: MOTION_DURATION.standard }}
           >
-            Your changes are being applied to the server. Please wait while the
-            configuration settles.
+            {messages.endpoints.serverSettlingDescription}
           </motion.p>
         </div>
 
@@ -137,7 +139,9 @@ export function ServerSettlingLayer({
             strokeWidth={2}
           />
           <span className="font-mono text-2xl tabular-nums">
-            {secondsRemaining}s
+            {formatMessage(messages.endpoints.serverSettlingSeconds, {
+              seconds: secondsRemaining,
+            })}
           </span>
         </motion.div>
 
@@ -150,7 +154,9 @@ export function ServerSettlingLayer({
         >
           <Progress className="h-2" value={progress} />
           <p className="text-center text-muted-foreground text-xs">
-            {Math.round(progress)}% complete
+            {formatMessage(messages.endpoints.serverSettlingProgress, {
+              percent: Math.round(progress),
+            })}
           </p>
         </motion.div>
 
@@ -161,7 +167,7 @@ export function ServerSettlingLayer({
           initial={{ opacity: 0 }}
           transition={{ duration: MOTION_DURATION.standard }}
         >
-          This ensures the API is ready to handle requests with the new behavior
+          {messages.endpoints.serverSettlingHint}
         </motion.p>
       </motion.div>
     </motion.div>

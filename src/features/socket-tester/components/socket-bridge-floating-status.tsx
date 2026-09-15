@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useOptionalSocketBridgeContext } from "@/features/socket-tester/context/socket-bridge-context";
+import { messages } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -38,10 +39,10 @@ export function SocketBridgeStatus() {
   return (
     <div
       className="flex h-9 w-full items-center rounded-md border border-sidebar-border/70 bg-sidebar-accent/35 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent"
-      title={`Socket bridge: ${bridge.bridgeStatus}`}
+      title={`${messages.socketTester.bridgeStatusLabel}: ${bridge.bridgeStatus}`}
     >
       <span
-        aria-label={`Socket bridge ${bridge.bridgeStatus}`}
+        aria-label={`${messages.socketTester.bridgeStatusLabel} ${bridge.bridgeStatus}`}
         className={cn(
           "relative inline-flex h-full min-w-0 flex-1 items-center rounded-r-sm rounded-l-md border font-medium text-[11px] group-data-[collapsible=icon]:hidden",
           bridgeTone[bridge.bridgeStatus]
@@ -79,9 +80,9 @@ export function SocketBridgeStatus() {
       </span>
       <Dialog>
         <DialogTrigger
-          aria-label="What is the socket bridge?"
+          aria-label={messages.socketTester.bridgeHelpAriaLabel}
           className="relative mx-1 inline-flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
-          title="What is the socket bridge?"
+          title={messages.socketTester.bridgeHelpAriaLabel}
         >
           <HugeiconsIcon
             className="size-3.5"
@@ -99,19 +100,20 @@ export function SocketBridgeStatus() {
         </DialogTrigger>
         <DialogContent className="max-w-sm gap-3 p-4">
           <DialogHeader className="gap-1 pr-6">
-            <DialogTitle className="text-base">Socket bridge</DialogTitle>
+            <DialogTitle className="text-base">
+              {messages.socketTester.bridgeTitle}
+            </DialogTitle>
             <DialogDescription>
-              Lets browser tools use TCP and UDP through the backend.
+              {messages.socketTester.bridgeDescription}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2.5 text-sm leading-normal">
-            <p>
-              Used by TCP Client, TCP Server, UDP, and ISO 8583 “Send to TCP.”
-            </p>
+            <p>{messages.socketTester.bridgeUsage}</p>
             <p className="text-muted-foreground">
-              <strong className="text-foreground">Connected</strong> means the
-              bridge is available. It does not mean you are connected to a
-              target TCP server.
+              <strong className="text-foreground">
+                {messages.socketTester.bridgeConnectedLead}
+              </strong>{" "}
+              {messages.socketTester.bridgeConnectedDescription}
             </p>
           </div>
         </DialogContent>

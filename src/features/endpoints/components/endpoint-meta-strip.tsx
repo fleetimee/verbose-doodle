@@ -1,4 +1,6 @@
 import { Hash, MessageSquareText } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
+import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type EndpointMetaStripProps = {
@@ -9,10 +11,12 @@ type EndpointMetaStripProps = {
 
 function getResponseLabel(responseCount: number) {
   if (responseCount === 0) {
-    return "No responses";
+    return messages.endpoints.noResponses;
   }
 
-  return `${responseCount} response${responseCount === 1 ? "" : "s"}`;
+  return formatMessage(messages.endpoints.responseCount, {
+    count: responseCount,
+  });
 }
 
 export function EndpointMetaStrip({
@@ -20,6 +24,8 @@ export function EndpointMetaStrip({
   className,
   responseCount,
 }: EndpointMetaStripProps) {
+  useI18n();
+
   return (
     <div
       className={cn(
@@ -33,7 +39,7 @@ export function EndpointMetaStrip({
       >
         <Hash className="size-3 shrink-0 text-muted-foreground/75" />
         <span className="shrink-0 text-muted-foreground/80 text-xs">
-          Biller
+          {messages.endpoints.billerLabel}
         </span>
         <span className="truncate font-bold font-mono text-foreground">
           {billerSlug}

@@ -1,3 +1,4 @@
+import { messages } from "@/lib/i18n";
 import type { BundledLanguage } from "./index";
 import {
   CodeBlock,
@@ -42,12 +43,16 @@ export function CodeBlockWithThemeSelector() {
 
         {/* Theme Selectors */}
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground text-xs">Light:</span>
+          <span className="text-muted-foreground text-xs">
+            {messages.common.lightThemeLabel}
+          </span>
           <CodeBlockThemeSelector mode="light" />
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground text-xs">Dark:</span>
+          <span className="text-muted-foreground text-xs">
+            {messages.common.darkThemeLabel}
+          </span>
           <CodeBlockThemeSelector mode="dark" />
         </div>
 

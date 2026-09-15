@@ -4,6 +4,7 @@ export const numberBaseConverterMessages = {
   basesValue: "2 / 8 / 10 / 16",
   binary: "Binary",
   bitWidthLabel: "Bit width",
+  bitWidthItemAriaLabel: "{width} bit",
   byteIndex: "Byte {index}",
   bytesDescription:
     "Network byte order, with non-printable bytes shown as a dot.",
@@ -20,6 +21,18 @@ export const numberBaseConverterMessages = {
   emptyBytes: "Byte and ASCII views appear after a successful conversion.",
   emptyResults: "Convert a value to compare each number-base representation.",
   eyebrow: "Developer tools / 04",
+  errors: {
+    emptyInput: "Enter a value.",
+    invalidDigit:
+      "The value contains a digit that base {base} does not accept.",
+    negativeNonDecimal:
+      "Only decimal input accepts a minus sign. Enter non-decimal signed values as fixed-width bit patterns.",
+    negativeUnsigned: "Unsigned values cannot be negative.",
+    signedOutOfRange: "Decimal signed values must be between {min} and {max}.",
+    signedWordOutOfRange:
+      "The value does not fit in a signed {bitWidth}-bit word.",
+    unsignedWordOutOfRange: "The value does not fit in a {bitWidth}-bit word.",
+  },
   hexadecimal: "Hexadecimal",
   inputBaseLabel: "Input base",
   inputHelp:

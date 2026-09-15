@@ -1,5 +1,6 @@
 import { Clock01Icon, Clock03Icon, ZapIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { EndpointResponse } from "@/features/endpoints/types";
 import {
@@ -19,6 +20,7 @@ type ResponseSimulationAlertProps = {
 export function ResponseSimulationAlert({
   response,
 }: ResponseSimulationAlertProps) {
+  const { messages } = useI18n();
   const mode = getSimulationMode(response);
 
   switch (mode) {
@@ -30,12 +32,11 @@ export function ResponseSimulationAlert({
             icon={Clock03Icon}
             strokeWidth={2}
           />
-          <AlertTitle>Timeout Simulation Active</AlertTitle>
+          <AlertTitle>
+            {messages.endpoints.simulationTimeoutAlertTitle}
+          </AlertTitle>
           <AlertDescription>
-            When this endpoint is called, the server will hold the connection
-            indefinitely without sending a response. The client will eventually
-            timeout based on their configured timeout settings. This is useful
-            for testing timeout handling and error recovery logic.
+            {messages.endpoints.simulationTimeoutAlertDescription}
           </AlertDescription>
         </Alert>
       );
@@ -48,15 +49,15 @@ export function ResponseSimulationAlert({
             icon={Clock01Icon}
             strokeWidth={2}
           />
-          <AlertTitle>Latency Simulation Active</AlertTitle>
+          <AlertTitle>
+            {messages.endpoints.simulationDelayAlertTitle}
+          </AlertTitle>
           <AlertDescription>
-            When this endpoint is called, the server will wait for{" "}
+            {messages.endpoints.simulationDelayAlertPrefix}
             <span className="font-semibold">
               {formatDelayValue(response.delayMs ?? 0)}
-            </span>{" "}
-            before sending the response. This simulates slow network conditions
-            and is useful for testing loading states, spinners, and user
-            experience under poor network conditions.
+            </span>
+            {messages.endpoints.simulationDelayAlertSuffix}
           </AlertDescription>
         </Alert>
       );
@@ -65,12 +66,11 @@ export function ResponseSimulationAlert({
       return (
         <Alert>
           <HugeiconsIcon className="h-4 w-4" icon={ZapIcon} strokeWidth={2} />
-          <AlertTitle>Normal Response Mode</AlertTitle>
+          <AlertTitle>
+            {messages.endpoints.simulationNormalAlertTitle}
+          </AlertTitle>
           <AlertDescription>
-            When this endpoint is called, the server will respond immediately
-            with the JSON payload shown below. No delays or timeouts are
-            simulated. This is the standard behavior for testing normal
-            application flows.
+            {messages.endpoints.simulationNormalAlertDescription}
           </AlertDescription>
         </Alert>
       );

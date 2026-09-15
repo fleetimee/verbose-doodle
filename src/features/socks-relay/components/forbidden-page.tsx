@@ -1,5 +1,6 @@
 import { ShieldAlert } from "@/components/hugeicons";
 import { Card, CardContent } from "@/components/ui/card";
+import { messages } from "@/lib/i18n";
 
 export function ForbiddenPage() {
   return (
@@ -10,9 +11,11 @@ export function ForbiddenPage() {
             <ShieldAlert className="size-6" />
           </div>
           <div>
-            <h1 className="font-semibold text-2xl">403 Permission denied</h1>
+            <h1 className="font-semibold text-2xl">
+              {messages.socksRelay.permissionDeniedTitle}
+            </h1>
             <p className="mt-2 text-muted-foreground text-sm">
-              Socks Relay controls are available to ADMIN users only.
+              {messages.socksRelay.permissionDeniedDescription}
             </p>
           </div>
         </CardContent>

@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Code2, FileText, Hash } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -24,6 +25,7 @@ import {
   JSON_PRESETS,
 } from "@/features/endpoints/constants/stepper-steps";
 import type { EndpointResponse } from "@/features/endpoints/types";
+import { messages } from "@/lib/i18n";
 import { MOTION_DURATION } from "@/lib/motion";
 
 type EditType = "name" | "statusCode" | "json";
@@ -42,21 +44,46 @@ type EditResponseStepperProps = {
 };
 
 const COMMON_STATUS_CODES = [
-  { code: 200, label: "OK" },
-  { code: 201, label: "Created" },
-  { code: 400, label: "Bad Request" },
-  { code: 404, label: "Not Found" },
-  { code: 500, label: "Server Error" },
+  {
+    code: 200,
+    get label() {
+      return messages.endpoints.commonStatusLabels.ok;
+    },
+  },
+  {
+    code: 201,
+    get label() {
+      return messages.endpoints.commonStatusLabels.created;
+    },
+  },
+  {
+    code: 400,
+    get label() {
+      return messages.endpoints.commonStatusLabels.badRequest;
+    },
+  },
+  {
+    code: 404,
+    get label() {
+      return messages.endpoints.commonStatusLabels.notFound;
+    },
+  },
+  {
+    code: 500,
+    get label() {
+      return messages.endpoints.commonStatusLabels.serverError;
+    },
+  },
 ] as const;
 
 const MIN_STATUS_CODE = 100;
 const MAX_STATUS_CODE = 599;
 
-const editSchemas = {
+const getEditSchemas = () => ({
   json: z.object({
     json: z
       .string()
-      .min(1, "JSON is required")
+      .min(1, messages.endpoints.jsonRequiredError)
       .refine(
         (val) => {
           try {
@@ -66,38 +93,40 @@ const editSchemas = {
             return false;
           }
         },
-        { message: "Must be valid JSON" }
+        { message: messages.endpoints.invalidJsonError }
       ),
   }),
-  name: z.object({ name: z.string().min(1, "Name is required") }),
+  name: z.object({
+    name: z.string().min(1, messages.endpoints.nameRequiredError),
+  }),
   statusCode: z.object({
     statusCode: z.number().min(MIN_STATUS_CODE).max(MAX_STATUS_CODE),
   }),
-};
+});
 
-const stepConfig = {
+const getStepConfig = () => ({
   json: {
     bgColor: "bg-primary/10 dark:bg-primary/20",
     color: "text-primary",
-    description: "Update the JSON response body",
+    description: messages.endpoints.editJsonDescription,
     icon: Code2,
-    title: "Edit JSON Response",
+    title: messages.endpoints.editJsonTitle,
   },
   name: {
     bgColor: "bg-primary/10 dark:bg-primary/20",
     color: "text-primary",
-    description: "Update the name of this response configuration",
+    description: messages.endpoints.editNameDescription,
     icon: FileText,
-    title: "Edit Response Name",
+    title: messages.endpoints.editNameTitle,
   },
   statusCode: {
     bgColor: "bg-primary/10 dark:bg-primary/20",
     color: "text-primary",
-    description: "Update the HTTP status code for this response",
+    description: messages.endpoints.editStatusDescription,
     icon: Hash,
-    title: "Edit Status Code",
+    title: messages.endpoints.editStatusTitle,
   },
-};
+});
 
 const formatJson = (value: string): string => {
   try {
@@ -115,8 +144,9 @@ export function EditResponseStepper({
   onDirtyChange,
   isSubmitting = false,
 }: EditResponseStepperProps) {
-  const step = stepConfig[editType];
-  const schema = editSchemas[editType];
+  useI18n();
+  const step = getStepConfig()[editType];
+  const schema = getEditSchemas()[editType];
   const shouldReduceMotion = useReducedMotion();
 
   const getDefaultValue = () => {
@@ -183,7 +213,7 @@ export function EditResponseStepper({
             </Button>
             <div>
               <div className="font-semibold text-muted-foreground text-sm">
-                Editing:{" "}
+                {messages.common.editing}:{" "}
                 <span className="font-mono text-foreground">
                   {response.name}
                 </span>
@@ -196,7 +226,7 @@ export function EditResponseStepper({
             size="sm"
             variant="ghost"
           >
-            Cancel
+            {messages.common.cancel}
           </Button>
         </div>
       </div>
@@ -253,7 +283,9 @@ export function EditResponseStepper({
                               autoFocus
                               className="h-12 rounded-xl border bg-background px-4 font-mono text-lg shadow-xs focus-visible:ring-2 aria-invalid:border-destructive"
                               id="edit-response-name"
-                              placeholder="e.g., success_response, error_response"
+                              placeholder={
+                                messages.endpoints.responseNamePlaceholder
+                              }
                             />
                             <div className="mt-3 flex flex-wrap gap-2">
                               {[
@@ -275,8 +307,7 @@ export function EditResponseStepper({
                               ))}
                             </div>
                             <FieldDescription className="mt-3">
-                              Choose a descriptive name that helps identify this
-                              response
+                              {messages.endpoints.editNameFieldDescription}
                             </FieldDescription>
                           </FieldContent>
                           {fieldState.invalid && (
@@ -327,7 +358,7 @@ export function EditResponseStepper({
                               onSelect={handleSubmit}
                             />
                             <FieldDescription className="mt-4">
-                              Search or select the appropriate HTTP status code
+                              {messages.endpoints.editStatusFieldDescription}
                             </FieldDescription>
                           </FieldContent>
                           {fieldState.invalid && (
@@ -374,9 +405,7 @@ export function EditResponseStepper({
                               ))}
                             </div>
                             <FieldDescription className="mt-4">
-                              Full-featured JSON editor with syntax
-                              highlighting, autocomplete, and bracket matching.
-                              Click the wand to format.
+                              {messages.endpoints.editJsonFieldDescription}
                             </FieldDescription>
                           </FieldContent>
                           {fieldState.invalid && (
@@ -409,7 +438,7 @@ export function EditResponseStepper({
             {isSubmitting ? (
               <>
                 <Spinner className="mr-2" />
-                Saving...
+                {messages.common.saving}
               </>
             ) : (
               <>
@@ -418,7 +447,7 @@ export function EditResponseStepper({
                   icon={Tick02Icon}
                   strokeWidth={2.5}
                 />
-                Save Changes
+                {messages.endpoints.saveChanges}
               </>
             )}
           </Button>

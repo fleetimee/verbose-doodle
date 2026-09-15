@@ -12,4 +12,11 @@ export const billersMessages = {
     "Update the display name. The biller slug stays unchanged.",
   saveBiller: "Save Changes",
   savingBiller: "Saving...",
+  searchAria: "Search billers",
+  searchPlaceholder: "Search billers...",
+  noBillersFound: "No biller found.",
+  createFailed: "Failed to create biller",
+  createSuccess: "Biller created successfully",
+  updateFailed: "Failed to update biller",
+  updateSuccess: "Biller updated successfully",
 } as const;

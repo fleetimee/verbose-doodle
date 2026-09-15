@@ -53,9 +53,9 @@ export function EndpointContextMenu({
     );
     try {
       await navigator.clipboard.writeText(`${baseUrl}${endpoint.url}`);
-      toast.success("Endpoint URL copied");
+      toast.success(messages.endpoints.copyUrlSuccess);
     } catch {
-      toast.error("Unable to copy endpoint URL");
+      toast.error(messages.endpoints.copyUrlFailed);
     }
   };
 
@@ -75,7 +75,7 @@ export function EndpointContextMenu({
           onClick={() => navigate(`/dashboard/endpoints/${endpoint.slug}`)}
         >
           <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
-          Open endpoint
+          {messages.endpoints.openEndpoint}
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem
@@ -88,11 +88,13 @@ export function EndpointContextMenu({
             }
             strokeWidth={2}
           />
-          {endpoint.enabled === false ? "Enable endpoint" : "Disable endpoint"}
+          {endpoint.enabled === false
+            ? messages.endpoints.enableEndpoint
+            : messages.endpoints.disableEndpoint}
         </ContextMenuItem>
         <ContextMenuItem className={itemClassName} onClick={handleCopyUrl}>
           <HugeiconsIcon icon={Copy01Icon} strokeWidth={2} />
-          Copy URL
+          {messages.endpoints.copyUrl}
         </ContextMenuItem>
         <ContextMenuItem
           aria-label={messages.endpoints.editEndpointMenuItem}

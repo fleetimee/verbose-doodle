@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useI18n } from "@/components/i18n-provider";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ import {
   type SimulationFormValues,
 } from "@/features/endpoints/schemas/simulation-schema";
 import type { EndpointResponse } from "@/features/endpoints/types";
+import { formatMessage } from "@/lib/i18n";
 
 type SimulateTimeoutDialogProps = {
   endpointId: string;
@@ -30,6 +32,7 @@ export function SimulateTimeoutDialog({
   open,
   onOpenChange,
 }: SimulateTimeoutDialogProps) {
+  const { messages } = useI18n();
   const formRef = useRef<SimulationFormHandle>(null);
   const { updateResponseSimulation } = useEndpointWorkspace(endpointSlug);
   const { mutate: updateSimulation, isPending } = updateResponseSimulation;
@@ -92,9 +95,11 @@ export function SimulateTimeoutDialog({
     <Dialog onOpenChange={handleClose} open={open}>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Simulate Response Behavior</DialogTitle>
+          <DialogTitle>{messages.endpoints.simulationDialogTitle}</DialogTitle>
           <DialogDescription>
-            Configure network simulation for "{response.name}"
+            {formatMessage(messages.endpoints.simulationDialogDescription, {
+              name: response.name,
+            })}
           </DialogDescription>
         </DialogHeader>
 

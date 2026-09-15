@@ -12,6 +12,7 @@ import {
   Hash,
   TextCursor,
 } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -58,6 +59,8 @@ export function ResponseContextMenu({
   onSimulate,
   response,
 }: ResponseContextMenuProps) {
+  const { messages } = useI18n();
+
   if (!enabled) {
     return children;
   }
@@ -76,11 +79,11 @@ export function ResponseContextMenu({
               <span aria-hidden="true" className="text-border">
                 /
               </span>
-              <span>response configuration</span>
+              <span>{messages.endpoints.responseConfiguration}</span>
               {isActive && (
                 <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 font-medium font-sans text-[10px] text-emerald-700 dark:text-emerald-300">
                   <span className="size-1.5 rounded-full bg-emerald-500" />
-                  Active
+                  {messages.common.active}
                 </span>
               )}
             </span>
@@ -92,28 +95,30 @@ export function ResponseContextMenu({
           onClick={onClone}
         >
           <CopyIcon className="size-4" />
-          {isCloning ? "Cloning response..." : "Clone response"}
+          {isCloning
+            ? messages.endpoints.responseCloneLoading
+            : messages.endpoints.responseCloneAction}
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem disabled={!isSelected} onClick={() => onEdit("name")}>
           <TextCursor className="size-4" />
-          Edit Name
+          {messages.endpoints.editName}
         </ContextMenuItem>
         <ContextMenuItem
           disabled={!isSelected}
           onClick={() => onEdit("statusCode")}
         >
           <Hash className="size-4" />
-          Edit Status Code
+          {messages.endpoints.editStatusCode}
         </ContextMenuItem>
         <ContextMenuItem disabled={!isSelected} onClick={() => onEdit("json")}>
           <FileJson className="size-4" />
-          Edit JSON Response
+          {messages.endpoints.editJsonResponse}
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem disabled={!isSelected} onClick={onSimulate}>
           <HugeiconsIcon icon={Clock03Icon} strokeWidth={2} />
-          Simulate timeout
+          {messages.endpoints.simulateTimeout}
         </ContextMenuItem>
         <ContextMenuItem
           disabled={isLoading}
@@ -124,7 +129,9 @@ export function ResponseContextMenu({
           ) : (
             <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} />
           )}
-          {isActive ? "Deactivate response" : "Set active"}
+          {isActive
+            ? messages.endpoints.deactivateResponse
+            : messages.endpoints.setActive}
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem
@@ -133,7 +140,7 @@ export function ResponseContextMenu({
           variant="destructive"
         >
           <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
-          Delete Response
+          {messages.endpoints.deleteResponse}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

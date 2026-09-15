@@ -4,6 +4,8 @@ const EQUAL_SIGN_REGEX = /[=]+$/;
 const HYPHEN_REGEX = /-/g;
 const UNDERSCORE_REGEX = /_/g;
 
+import { messages } from "@/lib/i18n";
+
 export interface ParsedJwt {
   readonly error?: string;
   readonly header: Record<string, unknown>;
@@ -47,7 +49,7 @@ export function parseJwt(token: string): ParsedJwt {
   if (parts.length !== 3) {
     return {
       header: {},
-      error: "Expected 3 dot-separated parts.",
+      error: messages.jwtInspector.errors.expectedParts,
       headerStr: "",
       isValidStructure: false,
       payload: {},
@@ -70,10 +72,10 @@ export function parseJwt(token: string): ParsedJwt {
       typeof payload !== "object" ||
       Array.isArray(payload)
     ) {
-      throw new Error("Header and payload must be JSON objects.");
+      throw new Error(messages.jwtInspector.errors.headerPayloadObjects);
     }
     if (typeof header.alg !== "string" || !header.alg) {
-      throw new Error("Header must include an alg value.");
+      throw new Error(messages.jwtInspector.errors.headerAlgRequired);
     }
 
     return {
@@ -90,7 +92,7 @@ export function parseJwt(token: string): ParsedJwt {
       error:
         error instanceof Error
           ? error.message
-          : "Invalid JWT encoding or JSON.",
+          : messages.jwtInspector.errors.invalidEncoding,
       header: {},
       headerStr: "",
       isValidStructure: false,

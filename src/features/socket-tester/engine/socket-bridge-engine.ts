@@ -336,7 +336,7 @@ export class SocketBridgeEngine {
           "sys",
           "tcp-client",
           "client",
-          "TCP client connected",
+          messages.socketTester.tcpClientConnectedLog,
           "text",
           payload
         )
@@ -370,7 +370,7 @@ export class SocketBridgeEngine {
           "sys",
           "tcp-client",
           "client",
-          "TCP client disconnected",
+          messages.socketTester.tcpClientDisconnectedLog,
           "text",
           payload
         )
@@ -392,7 +392,7 @@ export class SocketBridgeEngine {
           "sys",
           "tcp-server",
           "server",
-          "TCP server listening",
+          messages.socketTester.tcpServerListeningLog,
           "text",
           payload
         )
@@ -414,7 +414,7 @@ export class SocketBridgeEngine {
           "sys",
           "tcp-server",
           "server",
-          "TCP server stopped",
+          messages.socketTester.tcpServerStoppedLog,
           "text",
           payload
         )
@@ -440,7 +440,14 @@ export class SocketBridgeEngine {
           : [...this.tcpServer.clients, client],
       };
       this.appendLog(
-        toLogEntry("sys", "tcp-server", id, "Client connected", "text", payload)
+        toLogEntry(
+          "sys",
+          "tcp-server",
+          id,
+          messages.socketTester.tcpServerClientConnectedLog,
+          "text",
+          payload
+        )
       );
       return true;
     }
@@ -460,7 +467,7 @@ export class SocketBridgeEngine {
           "sys",
           "tcp-server",
           id,
-          "Client disconnected",
+          messages.socketTester.tcpServerClientDisconnectedLog,
           "text",
           payload
         )
@@ -482,7 +489,7 @@ export class SocketBridgeEngine {
           "sys",
           "udp",
           "listener",
-          "UDP listener started",
+          messages.socketTester.udpListenerStartedLog,
           "text",
           payload
         )
@@ -500,7 +507,7 @@ export class SocketBridgeEngine {
           "sys",
           "udp",
           "listener",
-          "UDP listener stopped",
+          messages.socketTester.udpListenerStoppedLog,
           "text",
           payload
         )
@@ -551,7 +558,7 @@ export class SocketBridgeEngine {
         "sys",
         "tcp-client",
         `${host}:${port}`,
-        "Connecting TCP client",
+        messages.socketTester.tcpClientConnectingLog,
         "text"
       )
     );
@@ -599,7 +606,13 @@ export class SocketBridgeEngine {
     const serverId = createId("tcp-server");
     this.tcpServer = { clients: [], listening: false, port, serverId };
     this.appendLog(
-      toLogEntry("sys", "tcp-server", `:${port}`, "Starting TCP server", "text")
+      toLogEntry(
+        "sys",
+        "tcp-server",
+        `:${port}`,
+        messages.socketTester.tcpServerStartingLog,
+        "text"
+      )
     );
     return {
       payload: { port, serverId },
@@ -643,7 +656,13 @@ export class SocketBridgeEngine {
     const serverId = createId("udp-server");
     this.udpServer = { listening: false, port, serverId };
     this.appendLog(
-      toLogEntry("sys", "udp", `:${port}`, "Starting UDP listener", "text")
+      toLogEntry(
+        "sys",
+        "udp",
+        `:${port}`,
+        messages.socketTester.udpListenerStartingLog,
+        "text"
+      )
     );
     return {
       payload: { port, serverId },
@@ -682,7 +701,7 @@ export class SocketBridgeEngine {
       listening: false,
     };
     this.udpServer = { ...this.udpServer, listening: false };
-    this.appendSystemLog("Bridge disconnected");
+    this.appendSystemLog(messages.socketTester.bridgeDisconnectedLog);
     this.notifyStateChange();
   }
 }

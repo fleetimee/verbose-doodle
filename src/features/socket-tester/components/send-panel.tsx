@@ -87,7 +87,9 @@ export function SendPanel({
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>{socketMessages.encodeAsLabel}</SelectLabel>
-                  <SelectItem value="ascii">ASCII</SelectItem>
+                  <SelectItem value="ascii">
+                    {socketMessages.asciiFormatLabel}
+                  </SelectItem>
                   <SelectItem value="hex">
                     {socketMessages.hexFormatLabel}
                   </SelectItem>
@@ -138,8 +140,12 @@ export function SendPanel({
                     <SelectLabel>
                       {socketMessages.appendAfterPayloadLabel}
                     </SelectLabel>
-                    <SelectItem value="crlf">CRLF</SelectItem>
-                    <SelectItem value="lf">LF</SelectItem>
+                    <SelectItem value="crlf">
+                      {socketMessages.crlfDelimiterLabel}
+                    </SelectItem>
+                    <SelectItem value="lf">
+                      {socketMessages.lfDelimiterLabel}
+                    </SelectItem>
                     <SelectItem value="none">
                       {socketMessages.noneDelimiterLabel}
                     </SelectItem>

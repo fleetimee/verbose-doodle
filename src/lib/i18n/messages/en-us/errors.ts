@@ -1,12 +1,23 @@
 export const errorsMessages = {
+  accessDenied: "Access denied.",
+  errorTitle: "Error",
   fallbackDescriptionLine1: "An unexpected error occurred.",
   fallbackDescriptionLine2: "We apologize for the inconvenience.",
   fallbackTitle: "Something went wrong",
   invalidResponseStructure: "Invalid response structure from server",
+  invalidCredentials: "Invalid email or password.",
+  networkError: "Network error. Please check your connection.",
+  notFound: "Resource not found.",
   notFoundDescriptionLine1: "The page you're looking for might have been",
   notFoundDescriptionLine2: "moved or doesn't exist.",
   notFoundDocumentDescription:
     "The page you're looking for might have been moved or doesn't exist.",
   notFoundDocumentTitle: "Page Not Found",
   notFoundTitle: "404",
+  serverError: "Server error. Please try again later.",
+  timeout: "Request timed out. Please try again.",
+  unexpectedError: "An unexpected error occurred. Please try again.",
+  validationError: "Please check your input and try again.",
+  tooManyLoginAttempts: "Too many login attempts. Please try again later.",
+  invalidCredentialsRetry: "Invalid email or password. Please try again.",
 } as const;

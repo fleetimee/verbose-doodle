@@ -57,144 +57,235 @@ type OverviewChatComposerProps = {
 };
 
 const suggestedQuestions = [
-  { icon: Activity, question: "Show me a simulator snapshot" },
-  { icon: ShieldAlert, question: "Which endpoints need responses?" },
-  { icon: Plug, question: "Show recent endpoints" },
+  {
+    icon: Activity,
+    get question() {
+      return messages.overview.chat.suggestions.snapshot;
+    },
+  },
+  {
+    icon: ShieldAlert,
+    get question() {
+      return messages.overview.chat.suggestions.missing;
+    },
+  },
+  {
+    icon: Plug,
+    get question() {
+      return messages.overview.chat.suggestions.recent;
+    },
+  },
 ];
 
 const slashCommands: SlashCommand[] = [
   {
     command: "/snapshot",
-    description: "Read overall simulator health, coverage & counts",
+    get description() {
+      return messages.overview.chat.commands.snapshotDescription;
+    },
     icon: Activity,
     id: "snapshot",
-    label: "Show simulator snapshot",
+    get label() {
+      return messages.overview.chat.commands.snapshotLabel;
+    },
   },
   {
     command: "/refresh",
-    description: "Fetch the latest live data from simulator API",
+    get description() {
+      return messages.overview.chat.commands.refreshDescription;
+    },
     icon: RefreshCw,
     id: "refresh",
-    label: "Refresh overview",
+    get label() {
+      return messages.overview.chat.commands.refreshLabel;
+    },
   },
   {
     command: "/endpoints",
-    description: "Review configured endpoints, HTTP methods & paths",
+    get description() {
+      return messages.overview.chat.commands.endpointsDescription;
+    },
     icon: Plug,
     id: "endpoints",
-    label: "Endpoint catalog",
+    get label() {
+      return messages.overview.chat.commands.endpointsLabel;
+    },
   },
   {
     command: "/billers",
-    description: "Inspect billers and endpoint coverage distribution",
+    get description() {
+      return messages.overview.chat.commands.billersDescription;
+    },
     icon: Building2,
     id: "billers",
-    label: "Biller breakdown",
+    get label() {
+      return messages.overview.chat.commands.billersLabel;
+    },
   },
   {
     command: "/missing",
-    description: "Find endpoints without active response templates",
+    get description() {
+      return messages.overview.chat.commands.missingDescription;
+    },
     icon: ShieldAlert,
     id: "missing",
-    label: "Missing responses",
+    get label() {
+      return messages.overview.chat.commands.missingLabel;
+    },
   },
   {
     command: "/tools",
-    description: "Open the integration developer toolbox",
+    get description() {
+      return messages.overview.chat.commands.toolsDescription;
+    },
     icon: FileJson,
     id: "tools",
-    label: "Developer tools",
+    get label() {
+      return messages.overview.chat.commands.toolsLabel;
+    },
   },
   {
     command: "/jwt",
-    description: "Decode, inspect and verify JSON Web Tokens",
+    get description() {
+      return messages.overview.chat.commands.jwtDescription;
+    },
     icon: Fingerprint,
     id: "jwt",
-    label: "JWT inspector",
+    get label() {
+      return messages.overview.chat.commands.jwtLabel;
+    },
   },
   {
     command: "/iso8583",
-    description: "Build and inspect ISO 8583 financial messages",
+    get description() {
+      return messages.overview.chat.commands.iso8583Description;
+    },
     icon: Code2,
     id: "iso8583",
-    label: "ISO 8583 generator",
+    get label() {
+      return messages.overview.chat.commands.iso8583Label;
+    },
   },
   {
     command: "/json-yaml",
-    description: "Bidirectional JSON and YAML format conversion",
+    get description() {
+      return messages.overview.chat.commands.yamlDescription;
+    },
     icon: FileJson,
     id: "json-yaml",
-    label: "JSON ↔ YAML",
+    get label() {
+      return messages.overview.chat.commands.yamlLabel;
+    },
   },
   {
     command: "/schema",
-    description: "Validate payloads against JSON Schema specifications",
+    get description() {
+      return messages.overview.chat.commands.schemaDescription;
+    },
     icon: Braces,
     id: "schema",
-    label: "Schema validator",
+    get label() {
+      return messages.overview.chat.commands.schemaLabel;
+    },
   },
   {
     command: "/cron",
-    description: "Parse cron expressions and preview upcoming runs",
+    get description() {
+      return messages.overview.chat.commands.cronDescription;
+    },
     icon: Timer,
     id: "cron",
-    label: "Cron parser",
+    get label() {
+      return messages.overview.chat.commands.cronLabel;
+    },
   },
   {
     command: "/base",
-    description: "Convert between binary, octal, decimal, hex, and base64",
+    get description() {
+      return messages.overview.chat.commands.baseDescription;
+    },
     icon: Binary,
     id: "base",
-    label: "Number base converter",
+    get label() {
+      return messages.overview.chat.commands.baseLabel;
+    },
   },
   {
     command: "/date",
-    description: "Convert Unix timestamps, ISO 8601, and timezones",
+    get description() {
+      return messages.overview.chat.commands.dateDescription;
+    },
     icon: CalendarDays,
     id: "date",
-    label: "Date & timezone",
+    get label() {
+      return messages.overview.chat.commands.dateLabel;
+    },
   },
   {
     command: "/nfc",
-    description: "Inspect and decode raw NFC tag payloads",
+    get description() {
+      return messages.overview.chat.commands.nfcDescription;
+    },
     icon: RadioReceiver,
     id: "nfc",
-    label: "NFC inspector",
+    get label() {
+      return messages.overview.chat.commands.nfcLabel;
+    },
   },
   {
     command: "/sockets",
-    description: "Test TCP client/server and UDP datagram flows",
+    get description() {
+      return messages.overview.chat.commands.socketsDescription;
+    },
     icon: Network,
     id: "sockets",
-    label: "Socket tester",
+    get label() {
+      return messages.overview.chat.commands.socketsLabel;
+    },
   },
   {
     command: "/socks-relay",
-    description: "Inspect SOCKS5 proxy relay for REST and ISO 8583",
+    get description() {
+      return messages.overview.chat.commands.socksRelayDescription;
+    },
     icon: ShieldCheck,
     id: "socks-relay",
-    label: "SOCKS relay",
+    get label() {
+      return messages.overview.chat.commands.socksRelayLabel;
+    },
   },
   {
     command: "/users",
-    description: "View user count and administrator activity stats",
+    get description() {
+      return messages.overview.chat.commands.usersDescription;
+    },
     icon: Users,
     id: "users",
-    label: "User accounts",
+    get label() {
+      return messages.overview.chat.commands.usersLabel;
+    },
   },
   {
     command: "/help",
-    description: "Browse available questions, commands, and shortcuts",
+    get description() {
+      return messages.overview.chat.commands.helpDescription;
+    },
     icon: Compass,
     id: "help",
-    label: "Help & cheat sheet",
+    get label() {
+      return messages.overview.chat.commands.helpLabel;
+    },
   },
   {
     command: "/clear",
-    description: "Start a fresh conversation and reset session",
+    get description() {
+      return messages.overview.chat.commands.clearDescription;
+    },
     icon: MessageSquareText,
     id: "clear",
-    label: "Clear chat",
+    get label() {
+      return messages.overview.chat.commands.clearLabel;
+    },
   },
 ];
 
@@ -502,12 +593,18 @@ export function OverviewChatComposer({
             {isComposerOverflowing || isComposerExpanded ? (
               <Button
                 aria-label={
-                  isComposerExpanded ? "Collapse composer" : "Expand composer"
+                  isComposerExpanded
+                    ? messages.overview.chat.collapseComposer
+                    : messages.overview.chat.expandComposer
                 }
                 className="overview-chat-expand"
                 onClick={() => setIsComposerExpanded((current) => !current)}
                 size="icon-sm"
-                title={isComposerExpanded ? "Collapse" : "Expand"}
+                title={
+                  isComposerExpanded
+                    ? messages.overview.chat.collapse
+                    : messages.overview.chat.expand
+                }
                 type="button"
                 variant="ghost"
               >
@@ -524,7 +621,7 @@ export function OverviewChatComposer({
               {messages.overview.chat.inputHint}
             </span>
             <Button
-              aria-label="Send"
+              aria-label={messages.overview.chat.send}
               className="overview-chat-submit"
               disabled={!draft.trim() || isSubmitting}
               size="icon-sm"

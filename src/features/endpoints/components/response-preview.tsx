@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { FileTerminal, Play } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -52,6 +53,7 @@ export function ResponsePreview({
   endpointUrl,
   endpointMethod,
 }: ResponsePreviewProps) {
+  useI18n();
   const { theme } = useTheme();
   const [isCodeDialogOpen, setIsCodeDialogOpen] = useState(false);
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);

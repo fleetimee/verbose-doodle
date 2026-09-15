@@ -10,6 +10,7 @@ import {
   RefreshCw,
   Trash2,
 } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -692,6 +693,7 @@ function FieldInput({
 }
 
 export function Iso8583Generator() {
+  useI18n();
   const [presetId, setPresetId] = useState<Iso8583PresetId>("sign-on");
   const [drafts, setDrafts] = useState<
     Partial<Record<Iso8583PresetId, Iso8583Field[]>>
@@ -880,7 +882,10 @@ export function Iso8583Generator() {
       if (draft && Array.isArray(draft.fields)) {
         handleImportParsedFields(draft.mti, draft.fields);
         toast.success(
-          `Imported ${draft.fields.length} data elements from ISO 8583 stream!`
+          formatMessage(messages.iso8583Generator.importStreamSuccess, {
+            count: draft.fields.length,
+            mti: draft.mti,
+          })
         );
       }
     } catch {

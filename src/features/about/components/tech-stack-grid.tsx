@@ -12,6 +12,7 @@ import {
 } from "developer-icons";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { messages } from "@/lib/i18n";
 
 // ---------------------------------------------------------------------------
 // Custom Fallback Icons for React Hook Form and Base UI
@@ -73,10 +74,10 @@ function BaseUiIcon({
 // Types
 // ---------------------------------------------------------------------------
 
-type Category = "All" | "Core" | "UI & Styling" | "Tooling & State";
+type Category = "all" | "core" | "uiStyling" | "toolingState";
 
 interface TechItem {
-  category: Exclude<Category, "All">;
+  category: Exclude<Category, "all">;
   description: string;
   docsUrl: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
@@ -89,93 +90,98 @@ interface TechItem {
 
 const TECH_STACK: TechItem[] = [
   {
-    category: "Core",
-    description:
-      "UI library with the new compiler for automatic memoization and concurrent rendering.",
+    category: "core",
+    get description() {
+      return messages.about.techStack.descriptions.react;
+    },
     docsUrl: "https://react.dev",
     icon: React,
     name: "React 19",
   },
   {
-    category: "Core",
-    description:
-      "Typed superset of JavaScript that compiles to plain JS; catches bugs at compile time.",
+    category: "core",
+    get description() {
+      return messages.about.techStack.descriptions.typescript;
+    },
     docsUrl: "https://www.typescriptlang.org",
     icon: TypeScript,
     name: "TypeScript",
   },
   {
-    category: "Core",
-    description:
-      "Lightning-fast build tool powered by native ES modules with instant HMR.",
+    category: "core",
+    get description() {
+      return messages.about.techStack.descriptions.vite;
+    },
     docsUrl: "https://vitejs.dev",
     icon: ViteJS,
     name: "Vite",
   },
   {
-    category: "Core",
-    description:
-      "All-in-one JavaScript runtime & toolkit: fast package manager, bundler, and test runner.",
+    category: "core",
+    get description() {
+      return messages.about.techStack.descriptions.bun;
+    },
     docsUrl: "https://bun.sh",
     icon: BunJs,
     name: "Bun",
   },
   {
-    category: "UI & Styling",
-    description:
-      "Utility-first CSS framework with CSS-native configuration and zero-runtime overhead.",
+    category: "uiStyling",
+    get description() {
+      return messages.about.techStack.descriptions.tailwind;
+    },
     docsUrl: "https://tailwindcss.com",
     icon: TailwindCSS,
     name: "Tailwind CSS v4",
   },
   {
-    category: "UI & Styling",
-    description:
-      "Unstyled, accessible UI primitives by MUI for building modern React design systems.",
+    category: "uiStyling",
+    get description() {
+      return messages.about.techStack.descriptions.baseUi;
+    },
     docsUrl: "https://base-ui.com",
     icon: BaseUiIcon,
     name: "Base UI",
   },
   {
-    category: "UI & Styling",
-    description:
-      "Production-ready animation library for React with declarative, physics-based animations.",
+    category: "uiStyling",
+    get description() {
+      return messages.about.techStack.descriptions.motion;
+    },
     docsUrl: "https://motion.dev",
     icon: FramerDark,
     name: "Motion",
   },
   {
-    category: "Tooling & State",
-    description:
-      "Powerful async state management with automatic caching, background refetching, and stale-while-revalidate.",
+    category: "toolingState",
+    get description() {
+      return messages.about.techStack.descriptions.tanstackQuery;
+    },
     docsUrl: "https://tanstack.com/query",
     icon: ReactQuery,
     name: "TanStack Query",
   },
   {
-    category: "Tooling & State",
-    description:
-      "Performant, flexible form management with minimal re-renders and built-in validation.",
+    category: "toolingState",
+    get description() {
+      return messages.about.techStack.descriptions.reactHookForm;
+    },
     docsUrl: "https://react-hook-form.com",
     icon: ReactHookFormIcon,
     name: "React Hook Form",
   },
   {
-    category: "Tooling & State",
-    description:
-      "Declarative client-side routing for React with nested routes and loader patterns.",
+    category: "toolingState",
+    get description() {
+      return messages.about.techStack.descriptions.reactRouter;
+    },
     docsUrl: "https://reactrouter.com",
     icon: ReactRouter,
     name: "React Router v7",
   },
 ];
 
-const CATEGORIES: Category[] = [
-  "All",
-  "Core",
-  "UI & Styling",
-  "Tooling & State",
-];
+const CATEGORIES: Category[] = ["all", "core", "uiStyling", "toolingState"];
 
 // ---------------------------------------------------------------------------
 // Animation variants
@@ -268,10 +274,10 @@ function TechCard({ item, index }: TechCardProps) {
 // ---------------------------------------------------------------------------
 
 export function TechStackGrid() {
-  const [activeCategory, setActiveCategory] = useState<Category>("All");
+  const [activeCategory, setActiveCategory] = useState<Category>("all");
 
   const filtered =
-    activeCategory === "All"
+    activeCategory === "all"
       ? TECH_STACK
       : TECH_STACK.filter((t) => t.category === activeCategory);
 
@@ -279,7 +285,7 @@ export function TechStackGrid() {
     <div className="flex flex-col gap-3.5">
       {/* Category filter tabs */}
       <div
-        aria-label="Filter by technology category"
+        aria-label={messages.about.techStack.filterAria}
         className="flex flex-wrap gap-1.5"
         role="tablist"
       >
@@ -298,7 +304,7 @@ export function TechStackGrid() {
               role="tab"
               type="button"
             >
-              {cat}
+              {messages.about.techStack.categories[cat]}
               {isActive && (
                 <motion.span
                   animate="animate"
@@ -323,7 +329,7 @@ export function TechStackGrid() {
       </motion.div>
 
       <p className="text-center text-[11px] text-muted-foreground">
-        Click any badge to open official documentation ↗
+        {messages.about.techStack.docsHint}
       </p>
     </div>
   );

@@ -25,14 +25,12 @@ describe("AboutHeader", () => {
     const localeChanges: string[] = [];
     renderHeader("light", (locale) => localeChanges.push(locale));
 
-    await user.click(screen.getByRole("button", { name: "English (en-US)" }));
+    await user.click(screen.getByRole("button", { name: "English" }));
     expect(
       screen.getByRole("heading", { name: "Tentang Proyek Ini" })
     ).toBeDefined();
 
-    await user.click(
-      screen.getByRole("button", { name: "Bahasa Indonesia (id-ID)" })
-    );
+    await user.click(screen.getByRole("button", { name: "Bahasa Indonesia" }));
     expect(
       screen.getByRole("heading", { name: "About This Project" })
     ).toBeDefined();

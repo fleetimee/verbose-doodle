@@ -1,6 +1,7 @@
 import { Logout01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
+import { useI18n } from "@/components/i18n-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -28,6 +29,7 @@ export function NavUser({
     avatar: string;
   };
 }) {
+  const { messages } = useI18n();
   const { isMobile } = useSidebar();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
@@ -90,7 +92,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setShowLogoutDialog(true)}>
               <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} />
-              Log out
+              {messages.auth.logOut}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

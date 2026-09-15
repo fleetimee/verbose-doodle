@@ -62,7 +62,11 @@ export function useSocketBridge() {
       acquireTicket: () => createRealtimeTicket("socket-test"),
       configuredUrl: import.meta.env.VITE_SOCKET_TEST_WS_URL,
       onError: (error) => {
-        appendBridgeError(engine, "WebSocket bridge error", error);
+        appendBridgeError(
+          engine,
+          messages.socketTester.websocketBridgeError,
+          error
+        );
         if (!autoConnectRef.current) {
           toast.error(messages.socketTester.bridgeConnectionFailed);
         }
@@ -73,7 +77,7 @@ export function useSocketBridge() {
       onTicketError: (error) => {
         appendBridgeError(
           engine,
-          "Could not authorize WebSocket bridge",
+          messages.socketTester.websocketBridgeAuthorizationFailed,
           error
         );
       },
@@ -119,7 +123,9 @@ export function useSocketBridge() {
       }
       engine.setBridgeStatus(mapConnectionStatus(snapshot));
       if (snapshot.status === "connected") {
-        engine.appendSystemLog("Bridge connected", { url: snapshot.url });
+        engine.appendSystemLog(messages.socketTester.bridgeConnectedLog, {
+          url: snapshot.url,
+        });
       }
       previousStatus = snapshot.status;
     });
@@ -135,7 +141,7 @@ export function useSocketBridge() {
       if (!connection.send(JSON.stringify(command))) {
         toast.error(messages.socketTester.bridgeConnectFirstError);
         engine.appendLog({
-          data: "Command rejected: bridge is offline",
+          data: messages.socketTester.bridgeCommandRejected,
           direction: "err",
           format: "text",
           id: crypto.randomUUID(),
@@ -256,7 +262,11 @@ export function useSocketBridge() {
       (connectionStatus === "idle" || connectionStatus === "disconnected")
     ) {
       connection.connect().catch((error: unknown) => {
-        appendBridgeError(engine, "WebSocket bridge error", error);
+        appendBridgeError(
+          engine,
+          messages.socketTester.websocketBridgeError,
+          error
+        );
       });
     }
   }, [bridgeAutoConnect, connection, engine]);

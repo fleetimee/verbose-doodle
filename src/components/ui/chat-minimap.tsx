@@ -11,6 +11,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
+import { formatMessage, messages } from "@/lib/i18n";
 
 type ChatMinimapItem = {
   id: string;
@@ -93,7 +94,7 @@ function ChatMinimap({
 
   return (
     <nav
-      aria-label="Chat minimap"
+      aria-label={messages.common.chatMinimap}
       className={cn("flex flex-col items-start", className)}
       data-side={side}
       data-slot="chat-minimap"
@@ -111,7 +112,9 @@ function ChatMinimap({
               render={
                 <button
                   aria-current={isCurrent ? "location" : undefined}
-                  aria-label={`Jump to: ${item.title}`}
+                  aria-label={formatMessage(messages.common.jumpTo, {
+                    title: item.title,
+                  })}
                   className={cn(
                     "group flex items-center rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
                     side === "right" && "justify-end"

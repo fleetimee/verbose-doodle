@@ -1,6 +1,7 @@
 import { ArrowLeft02Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
   PERCENT_MULTIPLIER,
@@ -46,6 +47,7 @@ export function ResponseStepperHeader({
   onStepClick,
   isFirstStep,
 }: ResponseStepperHeaderProps) {
+  useI18n();
   const endpointMessages = messages.endpoints;
 
   return (

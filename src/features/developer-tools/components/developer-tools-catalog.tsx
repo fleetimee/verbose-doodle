@@ -3,6 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { Link } from "react-router";
 import { Grid2X2 } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
   DEVELOPER_TOOL_CATEGORIES,
@@ -66,6 +67,7 @@ function ToolCard({
   tool,
   view,
 }: CatalogEntry & { readonly view: CatalogView }) {
+  useI18n();
   const Icon = tool.icon;
   const CategoryIcon = category.icon;
   const isGrid = view === "grid";
@@ -190,6 +192,7 @@ function ToolCard({
 }
 
 export function DeveloperToolsCatalog() {
+  useI18n();
   const shouldReduceMotion = useReducedMotion();
   const [selectedCategory, setSelectedCategory] =
     useLocalStorage<CatalogCategory>(

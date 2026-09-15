@@ -1,6 +1,7 @@
 import { ArrowRight01Icon, Route01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Link } from "react-router";
+import { useI18n } from "@/components/i18n-provider";
 import {
   Card,
   CardContent,
@@ -29,6 +30,7 @@ type RecentEndpointsProps = {
 };
 
 export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
+  const { messages } = useI18n();
   const { prefetchEndpoint } = useEndpointCatalog();
 
   return (
@@ -39,9 +41,11 @@ export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
       )}
     >
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">Recent Endpoints</CardTitle>
+        <CardTitle className="text-base">
+          {messages.overview.recentEndpointsTitle}
+        </CardTitle>
         <CardDescription className="text-xs">
-          Recently configured endpoints in the system
+          {messages.overview.recentEndpointsDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -50,10 +54,11 @@ export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
             <div className="flex size-10 items-center justify-center rounded-md border border-border/70 bg-background text-muted-foreground shadow-xs">
               <HugeiconsIcon aria-hidden icon={Route01Icon} strokeWidth={2} />
             </div>
-            <p className="mt-4 font-semibold text-sm">No endpoints yet</p>
+            <p className="mt-4 font-semibold text-sm">
+              {messages.overview.recentEndpointsEmptyTitle}
+            </p>
             <p className="mt-1 max-w-[38ch] text-muted-foreground text-xs leading-relaxed">
-              Recently configured endpoints will appear here once they are
-              available.
+              {messages.overview.recentEndpointsEmptyDescription}
             </p>
           </div>
         ) : (

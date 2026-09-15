@@ -1,4 +1,5 @@
 import type { Endpoint, GroupedEndpoints } from "@/features/endpoints/types";
+import { formatMessage, messages } from "@/lib/i18n";
 import { generateUUID } from "@/lib/utils";
 
 /**
@@ -125,7 +126,7 @@ function endpointToPostmanItem(endpoint: Endpoint): PostmanItem {
  */
 export function convertToPostmanCollection(
   groupedEndpoints: GroupedEndpoints[],
-  collectionName = "Fleetime Labs API"
+  collectionName = messages.endpoints.postmanExport.defaultCollectionName
 ): PostmanCollection {
   const folders: PostmanFolder[] = groupedEndpoints.map((group) => ({
     item: group.endpoints.map(endpointToPostmanItem),
@@ -135,7 +136,10 @@ export function convertToPostmanCollection(
   return {
     info: {
       _postman_id: generateUUID(),
-      description: `Exported from Fleetime Labs on ${new Date().toISOString()}`,
+      description: formatMessage(
+        messages.endpoints.postmanExport.exportedDescription,
+        { timestamp: new Date().toISOString() }
+      ),
       name: collectionName,
       schema:
         "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -193,7 +197,7 @@ function getBaseUrl(): string {
  * Create Postman environment with baseUrl variable
  */
 export function createPostmanEnvironment(
-  environmentName = "Fleetime Labs"
+  environmentName = messages.endpoints.postmanExport.defaultEnvironmentName
 ): PostmanEnvironment {
   const baseUrl = getBaseUrl();
 
@@ -217,7 +221,7 @@ export function createPostmanEnvironment(
  */
 export function exportToPostman(
   groupedEndpoints: GroupedEndpoints[],
-  collectionName = "Fleetime Labs API"
+  collectionName = messages.endpoints.postmanExport.defaultCollectionName
 ) {
   const collection = convertToPostmanCollection(
     groupedEndpoints,
@@ -232,7 +236,9 @@ export function exportToPostman(
 /**
  * Export Postman environment and download as JSON
  */
-export function exportPostmanEnvironment(environmentName = "Fleetime Labs") {
+export function exportPostmanEnvironment(
+  environmentName = messages.endpoints.postmanExport.defaultEnvironmentName
+) {
   const environment = createPostmanEnvironment(environmentName);
   const timestamp = Math.floor(Date.now() / MS_TO_SECONDS);
   const filename = `${environmentName.toLowerCase().replaceAll(" ", "-")}-${timestamp}.postman_environment.json`;
@@ -250,8 +256,8 @@ const DOWNLOAD_DELAY_MS = 100;
  */
 export function exportPostmanWithEnvironment(
   groupedEndpoints: GroupedEndpoints[],
-  collectionName = "Fleetime Labs API",
-  environmentName = "Fleetime Labs"
+  collectionName = messages.endpoints.postmanExport.defaultCollectionName,
+  environmentName = messages.endpoints.postmanExport.defaultEnvironmentName
 ) {
   // Generate timestamp once for both files
   const timestamp = Math.floor(Date.now() / MS_TO_SECONDS);

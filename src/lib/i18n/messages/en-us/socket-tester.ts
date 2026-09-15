@@ -1,10 +1,23 @@
 export const socketTesterMessages = {
   activeMetric: "Active",
   appendAfterPayloadLabel: "Append after payload",
+  asciiFormatLabel: "ASCII",
   autoScrollLabel: "Auto-scroll",
   base64FormatLabel: "Base64",
   bridgeConnectFirstError: "Connect the WebSocket bridge first",
   bridgeConnectionFailed: "Socket bridge connection failed",
+  bridgeStatusLabel: "Socket bridge",
+  bridgeHelpAriaLabel: "What is the socket bridge?",
+  bridgeTitle: "Socket bridge",
+  bridgeDescription: "Lets browser tools use TCP and UDP through the backend.",
+  bridgeUsage:
+    "Used by TCP Client, TCP Server, UDP, and ISO 8583 “Send to TCP.”",
+  bridgeConnectedLead: "Connected",
+  bridgeConnectedDescription:
+    "means the bridge is available. It does not mean you are connected to a target TCP server.",
+  bridgeConnectedLog: "Bridge connected",
+  bridgeDisconnectedLog: "Bridge disconnected",
+  bridgeCommandRejected: "Command rejected: bridge is offline",
   bytesLabel: "Bytes",
   clearButton: "Clear",
   connectButton: "Connect",
@@ -51,6 +64,7 @@ export const socketTesterMessages = {
   noFramesCapturedDescription:
     "Connect the bridge, start a socket, then send traffic.",
   noFramesCapturedTitle: "No frames captured",
+  waitingForFrames: "Waiting for frames...",
   noneDelimiterLabel: "None",
   outboundMetric: "Outbound",
   payloadCopied: "Payload copied",
@@ -78,12 +92,22 @@ export const socketTesterMessages = {
   stopUdpListenerSrLabel: "Stop UDP listener",
   targetHostLabel: "Target host",
   targetPortLabel: "Target port",
+  udpStatelessDescription:
+    "UDP sends are stateless. Start the listener only when you also need inbound datagrams captured in the console.",
+  crlfDelimiterLabel: "CRLF",
+  lfDelimiterLabel: "LF",
   tcpClientDocumentDescription:
     "TCP client socket testing powered by the backend WebSocket bridge.",
   tcpClientDocumentTitle: "TCP Client | Socket Tester",
+  tcpClientPageDescription:
+    "Connect to a TCP endpoint through the backend bridge, send payloads, and inspect response bytes.",
+  tcpClientPageTitle: "TCP Client",
   tcpClientPortDescription:
     "Destination port: 1–65535. Local port is OS-assigned.",
   tcpClientStatusLabel: "TCP client status",
+  tcpClientConnectingLog: "Connecting TCP client",
+  tcpClientConnectedLog: "TCP client connected",
+  tcpClientDisconnectedLog: "TCP client disconnected",
   tcpConnected: "TCP connected",
   tcpConnectedDescription: "Connected to {host}:{port}",
   tcpConnectionFailed: "TCP connection failed",
@@ -93,12 +117,32 @@ export const socketTesterMessages = {
   tcpServerDocumentDescription:
     "TCP server socket testing powered by the backend WebSocket bridge.",
   tcpServerDocumentTitle: "TCP Server | Socket Tester",
+  tcpServerPageDescription:
+    "Start a local TCP listener through the backend bridge, track connected clients, and send server responses.",
+  tcpServerPageTitle: "TCP Server",
   tcpServerPortDescription:
     "Default listener range: 18110–18120. Choose any free port in this range.",
+  tcpServerStartingLog: "Starting TCP server",
+  tcpServerListeningLog: "TCP server listening",
+  tcpServerStoppedLog: "TCP server stopped",
+  tcpServerClientConnectedLog: "Client connected",
+  tcpServerClientDisconnectedLog: "Client disconnected",
+  startServerButton: "Start server",
+  stopServerButton: "Stop server",
+  tcpServerListeningStatus: "LISTENING :{port}",
+  tcpServerStoppedStatus: "SERVER STOPPED",
+  activeClients: "Active clients",
+  noTcpClients: "No TCP clients connected.",
   timestampLabel: "Timestamp",
   udpDocumentDescription:
     "UDP socket testing powered by the backend WebSocket bridge.",
   udpDocumentTitle: "UDP | Socket Tester",
+  udpListenerStartingLog: "Starting UDP listener",
+  udpListenerStartedLog: "UDP listener started",
+  udpListenerStoppedLog: "UDP listener stopped",
+  udpPageDescription:
+    "Send UDP datagrams and optionally listen for inbound packets with shared packet logs and byte inspection.",
+  udpPageTitle: "UDP",
   tour: {
     shared: {
       headerDescription:
@@ -152,4 +196,6 @@ export const socketTesterMessages = {
   udpListenerOffStatus: "UDP LISTENER OFF",
   udpListeningStatus: "UDP LISTENING :{port}",
   unableToCopy: "Unable to copy",
+  websocketBridgeError: "WebSocket bridge error",
+  websocketBridgeAuthorizationFailed: "Could not authorize WebSocket bridge",
 } as const;

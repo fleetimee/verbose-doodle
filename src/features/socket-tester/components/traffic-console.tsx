@@ -293,7 +293,7 @@ export function TrafficConsole({
                   <span className="absolute inline-flex size-full rounded-full bg-emerald-400/60 opacity-75 motion-safe:animate-ping" />
                   <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
                 </span>
-                <span>Waiting for frames...</span>
+                <span>{socketMessages.waitingForFrames}</span>
               </p>
             </div>
           </div>

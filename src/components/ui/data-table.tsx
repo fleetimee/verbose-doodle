@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/table";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { useI18n } from "@/components/i18n-provider";
+import { formatMessage } from "@/lib/i18n";
 
 type DataTableProps<TData, TValue> = {
 	columns: ColumnDef<TData, TValue>[];
@@ -43,8 +45,9 @@ export function DataTable<TData, TValue>({
 	columns,
 	data,
 	filterColumn,
-	filterPlaceholder = "Filter...",
+	filterPlaceholder,
 }: DataTableProps<TData, TValue>) {
+	const { messages } = useI18n();
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
@@ -90,7 +93,8 @@ export function DataTable<TData, TValue>({
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button className="ml-auto shrink-0" variant="outline">
-							Columns <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
+							{messages.common.columns}{" "}
+							<HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} />
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
@@ -155,7 +159,7 @@ export function DataTable<TData, TValue>({
 									className="h-24 text-center"
 									colSpan={columns.length}
 								>
-									No results.
+									{messages.common.noResults}
 								</TableCell>
 							</TableRow>
 						)}
@@ -166,8 +170,10 @@ export function DataTable<TData, TValue>({
 			{/* Pagination */}
 			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 				<div className="text-muted-foreground text-sm">
-					{table.getFilteredSelectedRowModel().rows.length} of{" "}
-					{table.getFilteredRowModel().rows.length} row(s) selected.
+					{formatMessage(messages.common.rowsSelected, {
+						selected: table.getFilteredSelectedRowModel().rows.length,
+						total: table.getFilteredRowModel().rows.length,
+					})}
 				</div>
 				<div className="flex items-center justify-end space-x-2">
 					<Button
@@ -176,7 +182,7 @@ export function DataTable<TData, TValue>({
 						size="sm"
 						variant="outline"
 					>
-						Previous
+						{messages.common.previous}
 					</Button>
 					<Button
 						disabled={!table.getCanNextPage()}
@@ -184,7 +190,7 @@ export function DataTable<TData, TValue>({
 						size="sm"
 						variant="outline"
 					>
-						Next
+						{messages.common.next}
 					</Button>
 				</div>
 			</div>

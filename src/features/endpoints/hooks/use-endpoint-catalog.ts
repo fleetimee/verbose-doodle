@@ -11,6 +11,7 @@ import { httpEndpointAdapter } from "@/features/endpoints/data/http-endpoint-ada
 import type { Endpoint } from "@/features/endpoints/types";
 import { overviewQueryKeys } from "@/features/overview/query-keys";
 import type { ApiError } from "@/lib/api";
+import { messages } from "@/lib/i18n";
 
 type CatalogAdapter = EndpointDataAdapter;
 
@@ -31,13 +32,13 @@ export function useEndpointCatalog(
     mutationFn: adapter.createEndpoint,
     mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
-      toast.error("Failed to create endpoint", {
+      toast.error(messages.endpoints.createFailed, {
         description: error.message,
       });
     },
     onSuccess: async () => {
-      toast.success("Success", {
-        description: "Endpoint created successfully",
+      toast.success(messages.common.success, {
+        description: messages.endpoints.createSuccess,
       });
       await queryClient.invalidateQueries({
         queryKey: endpointDataQueryKeys.catalog,
@@ -49,13 +50,13 @@ export function useEndpointCatalog(
     mutationFn: adapter.updateEndpoint,
     mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
-      toast.error("Failed to update endpoint", {
+      toast.error(messages.endpoints.updateFailed, {
         description: error.message,
       });
     },
     onSuccess: async (_, input) => {
-      toast.success("Success", {
-        description: "Endpoint updated successfully",
+      toast.success(messages.common.success, {
+        description: messages.endpoints.updateSuccess,
       });
       await queryClient.invalidateQueries({
         queryKey: endpointDataQueryKeys.catalog,
@@ -70,13 +71,13 @@ export function useEndpointCatalog(
     mutationFn: adapter.deleteEndpoint,
     mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
-      toast.error("Failed to delete endpoint", {
+      toast.error(messages.endpoints.deleteFailed, {
         description: error.message,
       });
     },
     onSuccess: async (_, endpointSlug) => {
-      toast.success("Success", {
-        description: "Endpoint deleted successfully",
+      toast.success(messages.common.success, {
+        description: messages.endpoints.deleteSuccess,
       });
       await queryClient.invalidateQueries({
         queryKey: endpointDataQueryKeys.catalog,

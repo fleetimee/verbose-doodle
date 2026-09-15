@@ -6,6 +6,7 @@ import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+import { messages } from "@/lib/i18n"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -215,8 +216,10 @@ function Sidebar({
           side={side}
         >
           <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+            <SheetTitle>{messages.common.sidebar}</SheetTitle>
+            <SheetDescription>
+              {messages.common.mobileSidebarDescription}
+            </SheetDescription>
           </SheetHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
@@ -291,7 +294,7 @@ function SidebarTrigger({
       {...props}
     >
       <HugeiconsIcon icon={SidebarLeftIcon} strokeWidth={2} className="rtl:rotate-180" />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">{messages.common.toggleSidebar}</span>
     </Button>
   )
 }
@@ -300,7 +303,7 @@ function SidebarRail({
   className,
   onClick,
   onPointerDown,
-  title = "Resize or toggle sidebar",
+  title = messages.common.resizeOrToggleSidebar,
   ...props
 }: React.ComponentProps<"button">) {
   const { open, setOpen, setSidebarWidth, sidebarWidth, toggleSidebar } =
@@ -387,7 +390,7 @@ function SidebarRail({
     <button
       data-sidebar="rail"
       data-slot="sidebar-rail"
-      aria-label="Resize or toggle sidebar"
+      aria-label={messages.common.toggleSidebar}
       tabIndex={-1}
       onClick={(event) => {
         onClick?.(event)

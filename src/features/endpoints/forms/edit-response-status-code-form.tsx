@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -31,10 +32,11 @@ type EditResponseStatusCodeFormProps = {
 
 export function EditResponseStatusCodeForm({
   defaultValue,
-  onSubmit,
+  isLoading = false,
   onCancel,
-  isLoading,
+  onSubmit,
 }: EditResponseStatusCodeFormProps) {
+  const { messages } = useI18n();
   const form = useForm<EditStatusCodeFormData>({
     defaultValues: {
       statusCode: defaultValue,
@@ -52,7 +54,7 @@ export function EditResponseStatusCodeForm({
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="edit-response-status-code">
-                  Status Code
+                  {messages.endpoints.statusCodeLabel}
                 </FieldLabel>
                 <FieldContent>
                   <Input
@@ -63,12 +65,12 @@ export function EditResponseStatusCodeForm({
                     id="edit-response-status-code"
                     inputMode="numeric"
                     onChange={(e) => field.onChange(Number(e.target.value))}
-                    placeholder="200"
+                    placeholder={messages.endpoints.statusCodePlaceholder}
                     type="number"
                     value={field.value}
                   />
                   <FieldDescription>
-                    HTTP status code (100-599)
+                    {messages.endpoints.statusCodeDescription}
                   </FieldDescription>
                 </FieldContent>
                 {fieldState.invalid && (
@@ -86,10 +88,10 @@ export function EditResponseStatusCodeForm({
             type="button"
             variant="outline"
           >
-            Cancel
+            {messages.common.cancel}
           </Button>
           <Button disabled={isLoading} type="submit">
-            {isLoading ? "Saving..." : "Save"}
+            {isLoading ? messages.common.saving : messages.common.save}
           </Button>
         </div>
       </form>

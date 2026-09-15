@@ -20,6 +20,7 @@ import {
 } from "@/features/auth/session";
 import { apiFetch, setDefaultApiSession } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
+import { messages } from "@/lib/i18n";
 import { queryClient } from "@/lib/query-client";
 
 export const SCREEN_LOCK_STORAGE_KEY = "workspace-lock-account";
@@ -57,7 +58,9 @@ function createBrowserSession(): AuthenticatedSession {
       );
 
       if (response.responseCode !== "00") {
-        throw new Error(response.responseDesc || "Failed to refresh token");
+        throw new Error(
+          response.responseDesc || messages.auth.refreshTokenFallback
+        );
       }
 
       return response.data;

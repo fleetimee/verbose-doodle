@@ -4,6 +4,7 @@ import { overviewQueryKeys } from "@/features/overview/query-keys";
 import { userQueryKeys } from "@/features/users/query-key";
 import { type ApiError, apiPatch } from "@/lib/api";
 import { getUserUpdateUrl } from "@/lib/api-endpoints";
+import { messages } from "@/lib/i18n";
 import { createMutationHook } from "@/lib/query-hooks";
 
 type UpdateUserRequest = {
@@ -46,7 +47,7 @@ async function updateUser(
     if (!apiResponse.responseCode) {
       throw {
         code: "INVALID_RESPONSE",
-        message: "Invalid response structure from server",
+        message: messages.errors.invalidResponseStructure,
         status: 500,
       } as ApiError;
     }
@@ -72,12 +73,12 @@ export function useUpdateUser() {
     ApiError
   >(updateUser, {
     onError: (error) => {
-      toast.error("Failed to update user", {
-        description: error.message || "An unexpected error occurred",
+      toast.error(messages.users.updateFailed, {
+        description: error.message || messages.common.unexpectedError,
       });
     },
     onSuccess: () => {
-      toast.success("User updated successfully");
+      toast.success(messages.users.updateSuccess);
 
       // Refresh relevant user queries
       queryClient.invalidateQueries({ queryKey: userQueryKeys.all });

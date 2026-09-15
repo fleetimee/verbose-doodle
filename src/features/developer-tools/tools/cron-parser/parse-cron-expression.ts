@@ -1,5 +1,6 @@
 import { CronExpressionParser } from "cron-parser";
 import cronstrue from "cronstrue";
+import { messages } from "@/lib/i18n";
 
 export type CronFieldKey =
   | "second"
@@ -51,25 +52,52 @@ export class CronParseError extends Error {
 const FIELD_DEFINITIONS: Readonly<Record<CronFieldKey, CronFieldResult>> = {
   dayOfMonth: {
     key: "dayOfMonth",
-    label: "Day of month",
+    get label() {
+      return messages.cronParser.fieldLabels.dayOfMonth;
+    },
     range: "1-31",
     token: "",
   },
   dayOfWeek: {
     key: "dayOfWeek",
-    label: "Day of week",
+    get label() {
+      return messages.cronParser.fieldLabels.dayOfWeek;
+    },
     range: "0-7 or SUN-SAT",
     token: "",
   },
-  hour: { key: "hour", label: "Hour", range: "0-23", token: "" },
-  minute: { key: "minute", label: "Minute", range: "0-59", token: "" },
+  hour: {
+    key: "hour",
+    get label() {
+      return messages.cronParser.fieldLabels.hour;
+    },
+    range: "0-23",
+    token: "",
+  },
+  minute: {
+    key: "minute",
+    get label() {
+      return messages.cronParser.fieldLabels.minute;
+    },
+    range: "0-59",
+    token: "",
+  },
   month: {
     key: "month",
-    label: "Month",
+    get label() {
+      return messages.cronParser.fieldLabels.month;
+    },
     range: "1-12 or JAN-DEC",
     token: "",
   },
-  second: { key: "second", label: "Second", range: "0-59", token: "" },
+  second: {
+    key: "second",
+    get label() {
+      return messages.cronParser.fieldLabels.second;
+    },
+    range: "0-59",
+    token: "",
+  },
 };
 
 const FIVE_FIELD_ORDER: readonly CronFieldKey[] = [
@@ -133,7 +161,7 @@ function validateSupportedSyntax(
     if (!(key && BASIC_FIELD_PATTERN.test(removeAliases(token, key)))) {
       throw new CronParseError(
         "unsupported-syntax",
-        "Use numbers, *, lists, ranges, steps, or month and weekday names."
+        messages.cronParser.errors.unsupportedSyntax
       );
     }
   }
@@ -146,7 +174,7 @@ function validateTimeZone(timeZone: string) {
     // biome-ignore lint/style/useErrorCause: CronParseError forwards the cause through its constructor.
     throw new CronParseError(
       "invalid-time-zone",
-      "Choose a supported IANA timezone.",
+      messages.cronParser.errors.invalidTimeZone,
       error
     );
   }
@@ -159,14 +187,17 @@ export function parseCronExpression({
 }: CronParseRequest): CronParseResult {
   const normalizedExpression = expression.trim().replace(/\s+/g, " ");
   if (!normalizedExpression) {
-    throw new CronParseError("empty-expression", "Enter a cron expression.");
+    throw new CronParseError(
+      "empty-expression",
+      messages.cronParser.errors.emptyExpression
+    );
   }
 
   const tokens = normalizedExpression.split(" ");
   if (tokens.length !== 5 && tokens.length !== 6) {
     throw new CronParseError(
       "invalid-field-count",
-      "Use five fields, or six fields with seconds first."
+      messages.cronParser.errors.invalidFieldCount
     );
   }
 
@@ -184,7 +215,7 @@ export function parseCronExpression({
     if (nextRuns.length !== 5) {
       throw new CronParseError(
         "no-occurrences",
-        "No upcoming executions were found."
+        messages.cronParser.errors.noOccurrences
       );
     }
 
@@ -212,7 +243,9 @@ export function parseCronExpression({
     // biome-ignore lint/style/useErrorCause: CronParseError forwards the cause through its constructor.
     throw new CronParseError(
       "invalid-expression",
-      error instanceof Error ? error.message : "The expression is invalid.",
+      error instanceof Error
+        ? error.message
+        : messages.cronParser.errors.invalidExpression,
       error
     );
   }

@@ -5,6 +5,8 @@ export const jsonYamlConverterMessages = {
   copied: "Copied",
   copyError: "Could not copy output.",
   copyOutput: "Copy output",
+  conversionFailedDescription: "The document could not be converted.",
+  conversionFailedTitle: "Conversion failed",
   description:
     "Convert JSON and YAML in your browser. Your input never leaves this page.",
   duplicateYamlKeyError: "YAML contains a duplicate mapping key.",

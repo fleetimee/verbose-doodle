@@ -332,7 +332,7 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     renderDashboard();
 
     const breadcrumb = await screen.findByRole("navigation", {
-      name: "breadcrumb",
+      name: "Breadcrumb",
     });
 
     expect(breadcrumb.textContent).toContain("Endpoints");

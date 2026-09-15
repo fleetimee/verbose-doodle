@@ -1,3 +1,4 @@
+import { formatMessage, messages } from "@/lib/i18n";
 import {
   ISO8583_FIELD_DICTIONARY,
   ISO8583_FIELD_ENUMS,
@@ -354,7 +355,10 @@ function extractBitmaps(
   const primaryBitmapHex = stream.slice(startIndex, startIndex + 16);
   if (!BITMAP_HEX_PATTERN.test(primaryBitmapHex)) {
     throw new Error(
-      `Invalid ISO 8583 stream: Expected 16-hex character Primary Bitmap at position ${startIndex}, but found "${primaryBitmapHex}".`
+      formatMessage(messages.iso8583Parser.parseErrors.invalidPrimaryBitmap, {
+        position: startIndex,
+        value: primaryBitmapHex,
+      })
     );
   }
 
@@ -367,7 +371,13 @@ function extractBitmaps(
     secondaryBitmapHex = stream.slice(index, index + 16);
     if (!BITMAP_HEX_PATTERN.test(secondaryBitmapHex)) {
       throw new Error(
-        `Invalid ISO 8583 stream: Expected 16-hex character Secondary Bitmap at position ${index}, but found "${secondaryBitmapHex}".`
+        formatMessage(
+          messages.iso8583Parser.parseErrors.invalidSecondaryBitmap,
+          {
+            position: index,
+            value: secondaryBitmapHex,
+          }
+        )
       );
     }
     index += 16;
@@ -410,14 +420,25 @@ function unpackField(
   if (index >= stream.length) {
     return {
       nextIndex: index,
-      warning: `Stream ended prematurely: Bit ${bitNumber} (${spec.label}) could not be read.`,
+      warning: formatMessage(
+        messages.iso8583Parser.parseWarnings.fieldUnavailable,
+        { bit: bitNumber, label: spec.label }
+      ),
     };
   }
 
   if (spec.kind === "n" || spec.kind === "ans") {
     const end = index + spec.length;
     if (end > stream.length) {
-      warning = `Bit ${bitNumber} (${spec.label}) expected ${spec.length} chars, only ${stream.length - index} chars available.`;
+      warning = formatMessage(
+        messages.iso8583Parser.parseWarnings.fieldExpected,
+        {
+          available: stream.length - index,
+          bit: bitNumber,
+          expected: spec.length,
+          label: spec.label,
+        }
+      );
       rawValue = stream.slice(index);
       cleanValue = rawValue.trim();
       index = stream.length;
@@ -434,7 +455,10 @@ function unpackField(
     if (Number.isNaN(dataLen)) {
       return {
         nextIndex: index,
-        warning: `Bit ${bitNumber} (${spec.label}) has invalid length prefix "${lenStr}".`,
+        warning: formatMessage(
+          messages.iso8583Parser.parseWarnings.fieldLengthPrefix,
+          { bit: bitNumber, label: spec.label, prefix: lenStr }
+        ),
       };
     }
     rawValue = stream.slice(index, index + dataLen);
@@ -467,7 +491,10 @@ export function parseIso8583Stream(rawInput: string): ParsedIso8583Message {
   const mtiCandidate = stream.slice(index, index + 4);
   if (!MTI_PATTERN.test(mtiCandidate)) {
     throw new Error(
-      `Invalid ISO 8583 stream: Expected 4-digit MTI at position ${index}, but found "${mtiCandidate}".`
+      formatMessage(messages.iso8583Parser.parseErrors.invalidMti, {
+        position: index,
+        value: mtiCandidate,
+      })
     );
   }
   const mti = classifyMti(mtiCandidate);
@@ -498,7 +525,10 @@ export function parseIso8583Stream(rawInput: string): ParsedIso8583Message {
   const remainingStream = stream.slice(index);
   if (remainingStream.length > 0) {
     warnings.push(
-      `${remainingStream.length} unparsed trailing byte(s): "${remainingStream}".`
+      formatMessage(messages.iso8583Parser.parseWarnings.trailingBytes, {
+        count: remainingStream.length,
+        value: remainingStream,
+      })
     );
   }
 

@@ -11,7 +11,7 @@ import type {
   PayloadFormat,
   TcpServerState,
 } from "@/features/socket-tester/types";
-import { messages } from "@/lib/i18n";
+import { formatMessage, messages } from "@/lib/i18n";
 
 type TcpServerPanelProps = {
   readonly bridgeConnected: boolean;
@@ -59,7 +59,7 @@ export function TcpServerPanel({
           <div className="grid gap-1.5">
             <label className="grid gap-1.5" htmlFor="tcp-server-port">
               <span className="font-medium text-muted-foreground text-xs">
-                Listen port
+                {socketMessages.listenPortLabel}
               </span>
               <Input
                 id="tcp-server-port"
@@ -84,7 +84,7 @@ export function TcpServerPanel({
                 icon={StopCircleIcon}
                 strokeWidth={2}
               />
-              Stop server
+              {socketMessages.stopServerButton}
             </Button>
           ) : (
             <Button
@@ -94,7 +94,7 @@ export function TcpServerPanel({
               type="button"
             >
               <RadioTower className="size-4" />
-              Start server
+              {socketMessages.startServerButton}
             </Button>
           )}
         </div>
@@ -109,17 +109,21 @@ export function TcpServerPanel({
           >
             ●
           </span>{" "}
-          {state.listening ? `LISTENING :${state.port}` : "SERVER STOPPED"}
+          {state.listening
+            ? formatMessage(socketMessages.tcpServerListeningStatus, {
+                port: state.port,
+              })
+            : socketMessages.tcpServerStoppedStatus}
         </div>
         <div className="grid gap-2" id={tourIds?.clients}>
           <div className="flex items-center gap-2 text-muted-foreground text-xs">
             <UsersRound className="size-4" />
-            Active clients
+            {socketMessages.activeClients}
           </div>
           <div className="grid max-h-64 gap-2 overflow-auto">
             {state.clients.length === 0 ? (
               <div className="rounded-md border border-dashed p-4 text-center text-muted-foreground text-xs">
-                No TCP clients connected.
+                {socketMessages.noTcpClients}
               </div>
             ) : (
               state.clients.map((client) => (

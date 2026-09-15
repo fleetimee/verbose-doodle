@@ -1,6 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 import type { Ability, Role } from "@/features/auth/types";
 import { ROLE_ABILITIES } from "@/features/auth/types";
+import { messages } from "@/lib/i18n";
 
 const REFRESH_BEFORE_EXPIRY_MS = 180_000;
 
@@ -195,7 +196,7 @@ export function createAuthenticatedSession(
 
     refresh: (): Promise<AuthenticatedSessionSnapshot> => {
       if (disposed || snapshot.refreshToken === null) {
-        return Promise.reject(new Error("No refresh token available"));
+        return Promise.reject(new Error(messages.auth.refreshTokenUnavailable));
       }
       if (refreshOperation) {
         return refreshOperation;
@@ -206,7 +207,7 @@ export function createAuthenticatedSession(
         .refresh(currentRefreshToken)
         .then((tokens) => {
           if (!setSnapshot(tokens)) {
-            throw new Error("Refresh returned an invalid access token");
+            throw new Error(messages.auth.refreshInvalidAccessToken);
           }
           return snapshot;
         })

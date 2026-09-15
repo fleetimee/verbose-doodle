@@ -7,7 +7,9 @@ import {
 import CodeMirror from "@uiw/react-codemirror";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import { Wand2 } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
+import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const jsonEditorScrollTheme = EditorView.theme({
@@ -60,6 +62,7 @@ export const JsonEditor = forwardRef<HTMLDivElement, JsonEditorProps>(
     },
     ref
   ) => {
+    useI18n();
     const [theme, setTheme] = useState<"light" | "dark">(() => {
       if (typeof document !== "undefined") {
         return document.documentElement.classList.contains("dark")
@@ -160,7 +163,7 @@ export const JsonEditor = forwardRef<HTMLDivElement, JsonEditorProps>(
           disabled={!canFormat}
           onClick={handleFormat}
           size="sm"
-          title="Format JSON"
+          title={messages.common.formatJson}
           type="button"
           variant="secondary"
         >

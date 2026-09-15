@@ -1,6 +1,7 @@
 import { CheckmarkCircle02Icon, File01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Code2, Hash } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -17,6 +18,7 @@ type ResponseReviewStepProps = {
 };
 
 export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
+  const { messages } = useI18n();
   const statusLabel =
     HTTP_STATUS_CODES.find((code) => code.value === formValues.statusCode)
       ?.label || String(formValues.statusCode);
@@ -34,10 +36,10 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-base text-emerald-950 dark:text-emerald-100">
-              Ready to create
+              {messages.endpoints.stepperReviewReadyTitle}
             </div>
             <p className="mt-0.5 text-emerald-800/80 text-xs leading-relaxed dark:text-emerald-300/80">
-              Check the response contract before adding it to the endpoint.
+              {messages.endpoints.stepperReviewReadyDescription}
             </p>
           </div>
         </div>
@@ -51,7 +53,7 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
               icon={File01Icon}
               strokeWidth={2}
             />
-            Response Name
+            {messages.endpoints.responseNameLabel}
           </div>
           <div className="mt-2 truncate font-bold font-mono text-lg">
             {formValues.name}
@@ -61,7 +63,7 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
         <div className="rounded-xl border border-border/70 bg-card p-4 shadow-xs">
           <div className="flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
             <Hash className="size-3.5" />
-            Status Code
+            {messages.endpoints.statusCodeLabel}
           </div>
           <div className="mt-2 flex min-w-0 items-center gap-2">
             <span className="inline-flex select-none items-center rounded-lg border border-border/70 bg-muted/60 px-2.5 py-0.5 font-bold font-mono text-xs">
@@ -78,7 +80,7 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
             <Code2 className="size-3.5" />
-            JSON Response
+            {messages.endpoints.jsonResponseLabel}
           </div>
           <span className="inline-flex select-none items-center rounded-xl border-2 border-border/80 border-b-[3px] bg-muted/60 px-2.5 py-0.5 font-bold font-mono text-xs">
             response.json

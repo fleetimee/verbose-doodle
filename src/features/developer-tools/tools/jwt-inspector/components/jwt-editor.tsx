@@ -25,7 +25,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { DocumentEditor } from "@/features/developer-tools/components/document-editor";
-import { messages } from "@/lib/i18n";
+import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { jwtClaimsExtensions } from "../utils/jwt-claims-extension";
 import { JwtClaimsBreakdown } from "./jwt-claims-breakdown";
@@ -49,17 +49,23 @@ const TOKEN_PARTS = [
   {
     color: "color-mix(in oklch, var(--chart-5) 72%, var(--foreground))",
     key: "header",
-    label: messages.jwtInspector.headerLabel,
+    get label() {
+      return messages.jwtInspector.headerLabel;
+    },
   },
   {
     color: "color-mix(in oklch, var(--chart-4) 82%, var(--foreground))",
     key: "payload",
-    label: messages.jwtInspector.payloadLabel,
+    get label() {
+      return messages.jwtInspector.payloadLabel;
+    },
   },
   {
     color: "color-mix(in oklch, var(--chart-2) 82%, var(--foreground))",
     key: "signature",
-    label: messages.jwtInspector.tokenSignatureLabel,
+    get label() {
+      return messages.jwtInspector.tokenSignatureLabel;
+    },
   },
 ] as const;
 
@@ -223,7 +229,9 @@ function JsonStatusBadge({
 }) {
   if (!value.trim()) {
     return (
-      <span className="text-muted-foreground text-xs">Empty document</span>
+      <span className="text-muted-foreground text-xs">
+        {messages.jwtInspector.emptyDocument}
+      </span>
     );
   }
   if (isValid) {
@@ -295,10 +303,19 @@ function JwtDialogJsonView({
               {description && <span>{description}</span>}
               {description && <span aria-hidden="true">·</span>}
               <span>
-                {lineCount} {lineCount === 1 ? "line" : "lines"}
+                {formatMessage(
+                  lineCount === 1
+                    ? messages.jwtInspector.lineCount
+                    : messages.jwtInspector.lineCountPlural,
+                  { count: lineCount }
+                )}
               </span>
               <span aria-hidden="true">·</span>
-              <span>{byteCount.toLocaleString()} bytes</span>
+              <span>
+                {formatMessage(messages.jwtInspector.byteCount, {
+                  count: byteCount.toLocaleString(),
+                })}
+              </span>
             </DialogDescription>
           </div>
           <TabsList className="ml-2 h-7 rounded-md bg-muted/60 p-0.5">
@@ -312,7 +329,7 @@ function JwtDialogJsonView({
               className="h-6 px-2.5 font-medium text-xs data-active:bg-background data-active:shadow-xs"
               value="claims"
             >
-              Claims Breakdown
+              {messages.jwtInspector.claimsBreakdown}
             </TabsTrigger>
           </TabsList>
         </div>
@@ -439,10 +456,19 @@ function JwtDialogPlainView({
             {description && <span>{description}</span>}
             {description && <span aria-hidden="true">·</span>}
             <span>
-              {lineCount} {lineCount === 1 ? "line" : "lines"}
+              {formatMessage(
+                lineCount === 1
+                  ? messages.jwtInspector.lineCount
+                  : messages.jwtInspector.lineCountPlural,
+                { count: lineCount }
+              )}
             </span>
             <span aria-hidden="true">·</span>
-            <span>{byteCount.toLocaleString()} bytes</span>
+            <span>
+              {formatMessage(messages.jwtInspector.byteCount, {
+                count: byteCount.toLocaleString(),
+              })}
+            </span>
           </DialogDescription>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
@@ -493,8 +519,12 @@ function JwtDialogPlainView({
             <ModalTokenLegend />
           ) : (
             <span>
-              {value.length.toLocaleString()}{" "}
-              {value.length === 1 ? "character" : "characters"}
+              {formatMessage(
+                value.length === 1
+                  ? messages.jwtInspector.characterCount
+                  : messages.jwtInspector.characterCountPlural,
+                { count: value.length.toLocaleString() }
+              )}
             </span>
           )}
         </div>
@@ -662,7 +692,7 @@ export function JwtEditor({
                     className="h-6 px-2.5 font-medium text-xs data-active:bg-background data-active:shadow-xs"
                     value="claims"
                   >
-                    Claims Breakdown
+                    {messages.jwtInspector.claimsBreakdown}
                   </TabsTrigger>
                 </TabsList>
               </div>

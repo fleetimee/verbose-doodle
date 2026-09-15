@@ -12,6 +12,7 @@ import {
   SendHorizontal,
   Trash2,
 } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import {
   CodeBlock,
   CodeBlockBody,
@@ -26,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DeveloperToolLayout } from "@/features/developer-tools/components/developer-tool-layout";
 import { copyToClipboard } from "@/lib/clipboard";
-import { messages } from "@/lib/i18n";
+import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
   type ParsedIso8583Field,
@@ -36,25 +37,25 @@ import {
 
 const SAMPLE_STREAMS = [
   {
-    label: "0800 · Sign-On Request",
+    labelKey: "sampleSignOn",
     stream: "0060080082200000800000000400000000000000090108003700364503112001",
   },
   {
-    label: "0200 · Account Inquiry",
+    labelKey: "sampleAccountInquiry",
     stream:
       "03730200F23A400188E0801600000000005600000039200000000000000008070925090004791625090807080760990311203112080700000479        000000000000000KANTOR PUSAT                     DIY IDN3600030000001301000000000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000                         0311219999003200000000000100",
   },
   {
-    label: "0200 · Purchase Transaction",
+    labelKey: "sampleTransaction",
     stream:
       "0200B220000000100000000000000000000016621487000000000100000000000001000001010000000000010000000101251260110120006000112000000000001TERM0001MERCHANT000001MERCHANT TEST 01          YOGYAKARTA IDN360",
   },
   {
-    label: "Hex Dump (Sign-On)",
+    labelKey: "sampleHexSignOn",
     stream:
       "30 30 36 30 30 38 30 30 38 32 32 30 30 30 30 30 38 30 30 30 30 30 30 30 30 34 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 39 30 31 30 38 30 30 33 37 30 30 33 36 34 35 30 33 31 31 32 30 30 31",
   },
-];
+] as const;
 
 function getFieldKindLabel(kind: string, length: number): string {
   if (kind === "llvar") {
@@ -88,7 +89,7 @@ function OverviewChips({
       <div className="rounded-xl border border-border/70 bg-card p-4 shadow-2xs">
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground text-xs">
-            Message Type (MTI)
+            {messages.iso8583Parser.mtiLabel}
           </span>
           <Badge className="font-mono" variant="secondary">
             {parsed.mti.mti}
@@ -104,58 +105,74 @@ function OverviewChips({
 
       <div className="rounded-xl border border-border/70 bg-card p-4 shadow-2xs">
         <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-xs">Length Framing</span>
+          <span className="text-muted-foreground text-xs">
+            {messages.iso8583Parser.lengthFraming}
+          </span>
           <Badge
             className="font-mono text-[10px]"
             variant={parsed.lengthHeader ? "outline" : "secondary"}
           >
-            {parsed.lengthHeader ? parsed.lengthHeader.type : "None"}
+            {parsed.lengthHeader
+              ? parsed.lengthHeader.type
+              : messages.iso8583Parser.noLengthHeaderType}
           </Badge>
         </div>
         <p className="mt-1.5 font-semibold text-foreground text-sm">
           {parsed.lengthHeader
-            ? `${parsed.lengthHeader.value} bytes body`
-            : "No Framing Header"}
+            ? formatMessage(messages.iso8583Parser.bytesBody, {
+                count: parsed.lengthHeader.value,
+              })
+            : messages.iso8583Parser.noFramingHeader}
         </p>
         <p className="mt-0.5 text-muted-foreground text-xs">
           {parsed.lengthHeader
-            ? `Prefix: "${parsed.lengthHeader.raw}"`
-            : "Starts directly at MTI"}
+            ? formatMessage(messages.iso8583Parser.prefixLabel, {
+                prefix: parsed.lengthHeader.raw,
+              })
+            : messages.iso8583Parser.startsAtMti}
         </p>
       </div>
 
       <div className="rounded-xl border border-border/70 bg-card p-4 shadow-2xs">
         <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-xs">Data Elements</span>
+          <span className="text-muted-foreground text-xs">
+            {messages.iso8583Parser.dataElements}
+          </span>
           <Badge
             className="bg-primary/10 text-primary hover:bg-primary/20"
             variant="outline"
           >
-            {parsed.fields.length} active
+            {formatMessage(messages.iso8583Parser.fieldsActive, {
+              count: parsed.fields.length,
+            })}
           </Badge>
         </div>
         <p className="mt-1.5 font-semibold text-foreground text-sm">
-          {parsed.fields.length} Fields Unpacked
+          {formatMessage(messages.iso8583Parser.fieldsUnpacked, {
+            count: parsed.fields.length,
+          })}
         </p>
         <p className="mt-0.5 text-muted-foreground text-xs">
           {parsed.secondaryBitmapHex
-            ? "Primary & Secondary Bitmaps"
-            : "Primary Bitmap only"}
+            ? messages.iso8583Parser.primaryAndSecondaryBitmaps
+            : messages.iso8583Parser.primaryBitmapOnly}
         </p>
       </div>
 
       <div className="rounded-xl border border-border/70 bg-card p-4 shadow-2xs">
         <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-xs">Bitmaps</span>
+          <span className="text-muted-foreground text-xs">
+            {messages.iso8583Parser.bitmaps}
+          </span>
           <button
             className="text-muted-foreground transition hover:text-foreground"
             onClick={() =>
               onCopy(
                 parsed.primaryBitmapHex + (parsed.secondaryBitmapHex ?? ""),
-                "Bitmaps"
+                messages.iso8583Parser.bitmaps
               )
             }
-            title="Copy Bitmaps"
+            title={messages.iso8583Parser.copyBitmaps}
             type="button"
           >
             <ClipboardCopy className="size-3.5" />
@@ -165,17 +182,21 @@ function OverviewChips({
           className="mt-1.5 truncate font-medium font-mono text-foreground text-xs"
           title={parsed.primaryBitmapHex}
         >
-          P: {parsed.primaryBitmapHex}
+          {messages.iso8583Parser.primaryBitmapShortLabel}{" "}
+          {parsed.primaryBitmapHex}
         </p>
         {parsed.secondaryBitmapHex ? (
           <p
             className="mt-0.5 truncate font-mono text-[11px] text-muted-foreground"
             title={parsed.secondaryBitmapHex}
           >
-            S: {parsed.secondaryBitmapHex}
+            {messages.iso8583Parser.secondaryBitmapShortLabel}{" "}
+            {parsed.secondaryBitmapHex}
           </p>
         ) : (
-          <p className="mt-0.5 text-muted-foreground text-xs">64 bits total</p>
+          <p className="mt-0.5 text-muted-foreground text-xs">
+            {formatMessage(messages.iso8583Parser.totalBits, { count: 64 })}
+          </p>
         )}
       </div>
     </div>
@@ -199,11 +220,10 @@ function BitmapMatrix({
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3 className="font-semibold text-foreground text-sm">
-            Interactive Bitmap Matrix
+            {messages.iso8583Parser.bitmapMatrixTitle}
           </h3>
           <p className="text-muted-foreground text-xs">
-            Active bits are highlighted. Click any active bit to isolate that
-            data element below.
+            {messages.iso8583Parser.bitmapMatrixDescription}
           </p>
         </div>
         {selectedBit ? (
@@ -213,7 +233,9 @@ function BitmapMatrix({
             size="sm"
             variant="ghost"
           >
-            Clear bit filter (#{selectedBit})
+            {formatMessage(messages.iso8583Parser.clearBitFilter, {
+              bit: selectedBit,
+            })}
           </Button>
         ) : null}
       </div>
@@ -239,8 +261,12 @@ function BitmapMatrix({
               }}
               title={
                 isActive
-                  ? `Bit ${bitNum} is active. Click to view.`
-                  : `Bit ${bitNum} is not present in message.`
+                  ? formatMessage(messages.iso8583Parser.bitActiveTooltip, {
+                      bit: bitNum,
+                    })
+                  : formatMessage(messages.iso8583Parser.bitInactiveTooltip, {
+                      bit: bitNum,
+                    })
               }
               type="button"
             >
@@ -287,16 +313,21 @@ function FieldCard({
           <div className="select-all break-all">
             {field.cleanValue || (
               <span className="text-muted-foreground italic">
-                [Empty / Zero length]
+                {messages.iso8583Parser.bitEmptyValue}
               </span>
             )}
           </div>
           <button
             className="absolute top-2 right-2 opacity-0 transition hover:text-primary group-hover:opacity-100"
             onClick={() =>
-              onCopy(field.cleanValue, `Bit ${field.number} value`)
+              onCopy(
+                field.cleanValue,
+                formatMessage(messages.iso8583Parser.bitValueLabel, {
+                  bit: field.number,
+                })
+              )
             }
-            title="Copy field value"
+            title={messages.iso8583Parser.copyFieldValue}
             type="button"
           >
             <ClipboardCopy className="size-3.5" />
@@ -313,9 +344,16 @@ function FieldCard({
 
       <div className="mt-3 flex items-center justify-between border-border/40 border-t pt-2 text-[11px] text-muted-foreground">
         <span>
-          Stream slice: [{field.startIndex}..{field.endIndex}]
+          {formatMessage(messages.iso8583Parser.streamSlice, {
+            end: field.endIndex,
+            start: field.startIndex,
+          })}
         </span>
-        <span>{field.rawSlice.length} characters</span>
+        <span>
+          {formatMessage(messages.iso8583Parser.characterCount, {
+            count: field.rawSlice.length,
+          })}
+        </span>
       </div>
     </div>
   );
@@ -328,17 +366,25 @@ function SlicesTable({ parsed }: { readonly parsed: ParsedIso8583Message }) {
         <table className="w-full text-left text-xs">
           <thead className="border-border/60 border-b bg-muted/40 font-medium text-muted-foreground">
             <tr>
-              <th className="px-4 py-2.5">Segment</th>
-              <th className="px-4 py-2.5">Offset</th>
-              <th className="px-4 py-2.5">Length</th>
-              <th className="px-4 py-2.5">Raw Chunk</th>
+              <th className="px-4 py-2.5">
+                {messages.iso8583Parser.segmentHeader}
+              </th>
+              <th className="px-4 py-2.5">
+                {messages.iso8583Parser.offsetHeader}
+              </th>
+              <th className="px-4 py-2.5">
+                {messages.iso8583Parser.lengthHeader}
+              </th>
+              <th className="px-4 py-2.5">
+                {messages.iso8583Parser.rawChunkHeader}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40 font-mono">
             {parsed.lengthHeader ? (
               <tr className="hover:bg-muted/20">
                 <td className="px-4 py-2 font-medium text-foreground">
-                  Length Header
+                  {messages.iso8583Parser.lengthHeaderLabel}
                 </td>
                 <td className="px-4 py-2 text-muted-foreground">
                   [0..{parsed.lengthHeader.type === "ascii-4" ? 4 : 2}]
@@ -352,7 +398,9 @@ function SlicesTable({ parsed }: { readonly parsed: ParsedIso8583Message }) {
               </tr>
             ) : null}
             <tr className="hover:bg-muted/20">
-              <td className="px-4 py-2 font-medium text-foreground">MTI</td>
+              <td className="px-4 py-2 font-medium text-foreground">
+                {messages.iso8583Parser.mtiShortLabel}
+              </td>
               <td className="px-4 py-2 text-muted-foreground">
                 [{parsed.lengthHeader ? 4 : 0}..{parsed.lengthHeader ? 8 : 4}]
               </td>
@@ -363,7 +411,7 @@ function SlicesTable({ parsed }: { readonly parsed: ParsedIso8583Message }) {
             </tr>
             <tr className="hover:bg-muted/20">
               <td className="px-4 py-2 font-medium text-foreground">
-                Primary Bitmap
+                {messages.iso8583Parser.primaryBitmap}
               </td>
               <td className="px-4 py-2 text-muted-foreground">
                 [{parsed.lengthHeader ? 8 : 4}..{parsed.lengthHeader ? 24 : 20}]
@@ -376,7 +424,7 @@ function SlicesTable({ parsed }: { readonly parsed: ParsedIso8583Message }) {
             {parsed.secondaryBitmapHex ? (
               <tr className="hover:bg-muted/20">
                 <td className="px-4 py-2 font-medium text-foreground">
-                  Secondary Bitmap
+                  {messages.iso8583Parser.secondaryBitmap}
                 </td>
                 <td className="px-4 py-2 text-muted-foreground">
                   [{parsed.lengthHeader ? 24 : 20}..
@@ -391,7 +439,10 @@ function SlicesTable({ parsed }: { readonly parsed: ParsedIso8583Message }) {
             {parsed.fields.map((f) => (
               <tr className="hover:bg-muted/20" key={f.number}>
                 <td className="px-4 py-2 text-foreground">
-                  Bit {f.number} ({f.name})
+                  {formatMessage(messages.iso8583Parser.bitNumberLabel, {
+                    bit: f.number,
+                  })}{" "}
+                  ({f.name})
                 </td>
                 <td className="px-4 py-2 text-muted-foreground">
                   [{f.startIndex}..{f.endIndex}]
@@ -484,6 +535,7 @@ function JsonView({ parsed }: { readonly parsed: ParsedIso8583Message }) {
 }
 
 export function Iso8583Parser() {
+  useI18n();
   const navigate = useNavigate();
   const [streamInput, setStreamInput] = useState<string>(
     SAMPLE_STREAMS[0].stream
@@ -509,7 +561,7 @@ export function Iso8583Parser() {
         error:
           err instanceof Error
             ? err.message
-            : "Failed to parse ISO 8583 stream.",
+            : messages.iso8583Parser.parseFailed,
       };
     }
   }, [streamInput]);
@@ -540,7 +592,9 @@ export function Iso8583Parser() {
   const handleCopy = async (text: string, label: string) => {
     const ok = await copyToClipboard(text);
     if (ok) {
-      toast.success(`Copied ${label} to clipboard`);
+      toast.success(
+        formatMessage(messages.iso8583Parser.copiedValue, { label })
+      );
     } else {
       toast.error(messages.iso8583Parser.copyFailed);
     }
@@ -566,18 +620,20 @@ export function Iso8583Parser() {
         })
       );
       toast.success(
-        `Assigned ${parsed.fields.length} data elements to ISO 8583 Generator!`
+        formatMessage(messages.iso8583Parser.assignSuccess, {
+          count: parsed.fields.length,
+        })
       );
       navigate("/dashboard/developer-tools/iso8583-generator");
     } catch {
-      toast.error("Failed to assign message to generator.");
+      toast.error(messages.iso8583Parser.assignFailed);
     }
   };
 
   return (
     <DeveloperToolLayout
-      categoryLabel="Inspection"
-      description="Parse raw streams or hex dumps into structured data elements with decoded semantics, visual bitmap, and generator transfer."
+      categoryLabel={messages.developerTools.inspectionCategory}
+      description={messages.iso8583Parser.pageDescription}
       extraActions={
         <div className="flex flex-wrap items-center gap-2">
           {parsed ? (
@@ -633,18 +689,20 @@ export function Iso8583Parser() {
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-muted-foreground text-xs">Samples:</span>
+              <span className="text-muted-foreground text-xs">
+                {messages.iso8583Parser.samples}
+              </span>
               {SAMPLE_STREAMS.map((sample) => (
                 <button
                   className="rounded-md border border-border/60 bg-muted/40 px-2 py-0.5 text-[11px] text-muted-foreground transition hover:border-primary/40 hover:bg-muted hover:text-foreground"
-                  key={sample.label}
+                  key={sample.labelKey}
                   onClick={() => {
                     setStreamInput(sample.stream);
                     setSelectedBit(null);
                   }}
                   type="button"
                 >
-                  {sample.label}
+                  {messages.iso8583Parser[sample.labelKey]}
                 </button>
               ))}
             </div>
@@ -661,13 +719,22 @@ export function Iso8583Parser() {
 
           <div className="mt-2 flex items-center justify-between text-muted-foreground text-xs">
             <span>
-              {streamInput.length} characters{" "}
-              {parsed ? `· ${parsed.totalParsedBytes} parsed bytes` : ""}
+              {formatMessage(messages.iso8583Parser.characterCount, {
+                count: streamInput.length,
+              })}{" "}
+              {parsed
+                ? `· ${formatMessage(messages.iso8583Parser.parsedBytesCount, {
+                    count: parsed.totalParsedBytes,
+                  })}`
+                : ""}
             </span>
             {parsed?.lengthHeader ? (
               <span className="font-mono text-[11px]">
-                Header: {parsed.lengthHeader.raw} ({parsed.lengthHeader.type} ·{" "}
-                {parsed.lengthHeader.value} bytes body)
+                {formatMessage(messages.iso8583Parser.headerDetail, {
+                  raw: parsed.lengthHeader.raw,
+                  type: parsed.lengthHeader.type,
+                  value: parsed.lengthHeader.value,
+                })}
               </span>
             ) : null}
           </div>
@@ -677,7 +744,9 @@ export function Iso8583Parser() {
           <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
             <div className="space-y-1">
-              <p className="font-medium">Parsing Error</p>
+              <p className="font-medium">
+                {messages.iso8583Parser.parsingError}
+              </p>
               <p className="font-mono text-destructive/90 text-xs">{error}</p>
             </div>
           </div>
@@ -717,15 +786,17 @@ export function Iso8583Parser() {
                   <TabsList className="h-8">
                     <TabsTrigger className="gap-1.5 text-xs" value="fields">
                       <Layers3 className="size-3.5" />
-                      Data Elements ({filteredFields.length})
+                      {formatMessage(messages.iso8583Parser.tabDataElements, {
+                        count: filteredFields.length,
+                      })}
                     </TabsTrigger>
                     <TabsTrigger className="gap-1.5 text-xs" value="json">
                       <FileJson className="size-3.5" />
-                      JSON Structure
+                      {messages.iso8583Parser.tabJsonStructure}
                     </TabsTrigger>
                     <TabsTrigger className="gap-1.5 text-xs" value="slices">
                       <Code2 className="size-3.5" />
-                      Stream Slices
+                      {messages.iso8583Parser.tabStreamSlices}
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
@@ -734,7 +805,7 @@ export function Iso8583Parser() {
                   <Input
                     className="h-8 w-48 text-xs sm:w-64"
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search bit # or name..."
+                    placeholder={messages.iso8583Parser.searchPlaceholder}
                     value={searchQuery}
                   />
                 ) : null}
@@ -744,7 +815,7 @@ export function Iso8583Parser() {
                 <div className="space-y-3">
                   {filteredFields.length === 0 ? (
                     <div className="rounded-xl border border-border border-dashed p-8 text-center text-muted-foreground text-xs">
-                      No data elements match the current filter.
+                      {messages.iso8583Parser.noMatchingElements}
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -768,12 +839,13 @@ export function Iso8583Parser() {
             <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-primary/30 bg-primary/5 p-4 sm:p-5">
               <div>
                 <h4 className="font-semibold text-foreground text-sm">
-                  Ready to test or modify this packet?
+                  {messages.iso8583Parser.readyToTestTitle}
                 </h4>
                 <p className="text-muted-foreground text-xs">
-                  Assign all {parsed.fields.length} unpacked data elements into
-                  the ISO 8583 Generator workbench to adjust field values or
-                  re-pack.
+                  {formatMessage(
+                    messages.iso8583Parser.readyToTestDescription,
+                    { count: parsed.fields.length }
+                  )}
                 </p>
               </div>
               <Button

@@ -9,6 +9,7 @@ import {
   useSpring,
 } from "motion/react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatMessage, messages } from "@/lib/i18n";
 
 export type AnimatedTooltipItem = {
   id: number;
@@ -98,7 +99,9 @@ export const AnimatedTooltip = ({
             onMouseLeave={() => setHoveredIndex(null)}
             role="button"
             tabIndex={0}
-            aria-label={`View profile for ${item.name}`}
+            aria-label={formatMessage(messages.common.viewProfileFor, {
+              name: item.name,
+            })}
             aria-haspopup="dialog"
           >
             <AnimatePresence>

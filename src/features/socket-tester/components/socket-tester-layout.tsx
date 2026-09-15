@@ -39,19 +39,28 @@ const socketTestCopy: Record<
   }
 > = {
   "tcp-client": {
-    description:
-      "Connect to a TCP endpoint through the backend bridge, send payloads, and inspect response bytes.",
-    title: "TCP Client",
+    get description() {
+      return messages.socketTester.tcpClientPageDescription;
+    },
+    get title() {
+      return messages.socketTester.tcpClientPageTitle;
+    },
   },
   "tcp-server": {
-    description:
-      "Start a local TCP listener through the backend bridge, track connected clients, and send server responses.",
-    title: "TCP Server",
+    get description() {
+      return messages.socketTester.tcpServerPageDescription;
+    },
+    get title() {
+      return messages.socketTester.tcpServerPageTitle;
+    },
   },
   udp: {
-    description:
-      "Send UDP datagrams and optionally listen for inbound packets with shared packet logs and byte inspection.",
-    title: "UDP",
+    get description() {
+      return messages.socketTester.udpPageDescription;
+    },
+    get title() {
+      return messages.socketTester.udpPageTitle;
+    },
   },
 };
 

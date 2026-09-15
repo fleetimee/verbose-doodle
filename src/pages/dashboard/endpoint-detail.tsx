@@ -17,6 +17,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
+import { useI18n } from "@/components/i18n-provider";
 import { type TourStep, useTour } from "@/components/tour";
 import {
   AlertDialog,
@@ -80,7 +81,7 @@ import {
 } from "@/features/endpoints/utils/http-method-colors";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { messages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 // Animation constants
@@ -133,6 +134,7 @@ function TourStepContent({
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This page coordinates the endpoint workspace state machine and its guarded overlays.
 export function EndpointDetailPage() {
+  const { messages } = useI18n();
   const { slug: endpointSlug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -336,9 +338,8 @@ export function EndpointDetailPage() {
         .join(",")}`;
       if (reportedMultipleActiveRef.current !== warningKey) {
         reportedMultipleActiveRef.current = warningKey;
-        toast.warning("Multiple active responses detected", {
-          description:
-            "The first active response is selected. Server data was not changed.",
+        toast.warning(messages.endpoints.multipleActiveResponsesTitle, {
+          description: messages.endpoints.multipleActiveResponsesDescription,
         });
       }
     }
@@ -363,7 +364,7 @@ export function EndpointDetailPage() {
     }
 
     reportedRefreshErrorRef.current = errorKey;
-    toast.error("Failed to refresh endpoint", {
+    toast.error(messages.endpoints.refreshFailed, {
       description: endpointError.message,
     });
   }, [endpoint, endpointError, hasEndpointError]);
@@ -389,7 +390,7 @@ export function EndpointDetailPage() {
       forgetEndpoint(routeEndpointSlug);
     }
 
-    toast.error("Endpoint no longer exists");
+    toast.error(messages.endpoints.endpointNoLongerExists);
     navigate("/dashboard/endpoints", { replace: true });
   }, [
     routeEndpointSlug,
@@ -591,7 +592,11 @@ export function EndpointDetailPage() {
       },
       {
         onSuccess: () => {
-          toast.success(`Response "${response.name}" activated`);
+          toast.success(
+            formatMessage(messages.endpoints.responseActivatedToast, {
+              name: response.name,
+            })
+          );
           selectedResponseWasActiveRef.current = true;
           setSelectedResponseId(response.id);
         },
@@ -616,7 +621,11 @@ export function EndpointDetailPage() {
       },
       {
         onSuccess: () => {
-          toast.success(`Response "${response.name}" deactivated`);
+          toast.success(
+            formatMessage(messages.endpoints.responseDeactivatedToast, {
+              name: response.name,
+            })
+          );
           selectedResponseWasActiveRef.current = true;
         },
       }
@@ -754,7 +763,7 @@ export function EndpointDetailPage() {
               icon={ArrowLeft02Icon}
               strokeWidth={2}
             />
-            Back to Endpoints
+            {messages.endpoints.backToEndpoints}
           </Button>
         </motion.div>
         <motion.div
@@ -771,13 +780,15 @@ export function EndpointDetailPage() {
               <EmptyMedia variant="icon">
                 <HugeiconsIcon icon={CircleDefinition} strokeWidth={2} />
               </EmptyMedia>
-              <EmptyTitle>Invalid endpoint slug</EmptyTitle>
+              <EmptyTitle>{messages.endpoints.invalidEndpointSlug}</EmptyTitle>
               <EmptyDescription>
-                The endpoint URL is invalid or has been tampered with.
+                {messages.endpoints.invalidEndpointSlugDescription}
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button onClick={handleBack}>Back to Endpoints</Button>
+              <Button onClick={handleBack}>
+                {messages.endpoints.backToEndpoints}
+              </Button>
             </EmptyContent>
           </Empty>
         </motion.div>
@@ -856,7 +867,7 @@ export function EndpointDetailPage() {
               icon={ArrowLeft02Icon}
               strokeWidth={2}
             />
-            Back to Endpoints
+            {messages.endpoints.backToEndpoints}
           </Button>
         </motion.div>
         <motion.div
@@ -873,14 +884,15 @@ export function EndpointDetailPage() {
               <EmptyMedia variant="icon">
                 <HugeiconsIcon icon={CircleDefinition} strokeWidth={2} />
               </EmptyMedia>
-              <EmptyTitle>Endpoint not found</EmptyTitle>
+              <EmptyTitle>{messages.endpoints.endpointNotFound}</EmptyTitle>
               <EmptyDescription>
-                The endpoint you're looking for doesn't exist or has been
-                removed.
+                {messages.endpoints.endpointNotFoundDescription}
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button onClick={handleBack}>Back to Endpoints</Button>
+              <Button onClick={handleBack}>
+                {messages.endpoints.backToEndpoints}
+              </Button>
             </EmptyContent>
           </Empty>
         </motion.div>
@@ -908,7 +920,7 @@ export function EndpointDetailPage() {
       >
         <div className="flex min-w-0 items-start gap-3">
           <Button
-            aria-label="Back to Endpoints"
+            aria-label={messages.endpoints.backToEndpoints}
             className="shrink-0"
             onClick={handleBack}
             size="icon-sm"
@@ -1095,7 +1107,9 @@ export function EndpointDetailPage() {
                   icon={HashIcon}
                   strokeWidth={2}
                 />
-                <span className="text-muted-foreground/80">Biller</span>
+                <span className="text-muted-foreground/80">
+                  {messages.endpoints.billerLabel}
+                </span>
                 <span className="min-w-0 break-all font-mono text-foreground">
                   {endpoint.billerSlug}
                 </span>
@@ -1110,7 +1124,9 @@ export function EndpointDetailPage() {
                   {endpoint.responses.length}
                 </span>
                 <span>
-                  response{endpoint.responses.length === 1 ? "" : "s"}
+                  {formatMessage(messages.endpoints.responseCount, {
+                    count: endpoint.responses.length,
+                  })}
                 </span>
               </span>
             </motion.div>
@@ -1136,7 +1152,9 @@ export function EndpointDetailPage() {
                     onCheckedChange={handleEndpointEnabledChange}
                   />
                   <span id="endpoint-enabled-label">
-                    {endpoint.enabled === false ? "Disabled" : "Enabled"}
+                    {endpoint.enabled === false
+                      ? messages.common.disabled
+                      : messages.common.enabled}
                   </span>
                 </label>
                 <Button
@@ -1293,17 +1311,19 @@ export function EndpointDetailPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {messages.endpoints.discardUnsavedChangesTitle}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Your endpoint changes will be lost if you switch workspaces now.
+              {messages.endpoints.discardUnsavedChangesDescription}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleKeepEditing}>
-              Keep editing
+              {messages.endpoints.keepEditing}
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleDiscardChanges}>
-              Discard and switch
+              {messages.endpoints.discardAndSwitch}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1315,7 +1335,9 @@ export function EndpointDetailPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Endpoint?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {messages.endpoints.deleteEndpointConfirmTitle}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this endpoint{" "}
               <span className="font-semibold">
@@ -1323,25 +1345,28 @@ export function EndpointDetailPage() {
               </span>
               ? This action cannot be undone and will permanently remove:
               <ul className="mt-2 list-inside list-disc space-y-1">
-                <li>The endpoint configuration</li>
+                <li>{messages.endpoints.deleteEndpointDialogListConfig}</li>
                 <li>
-                  All {endpoint?.responses.length || 0} response
-                  {endpoint?.responses.length === 1 ? "" : "s"} associated with
-                  this endpoint
+                  {formatMessage(
+                    messages.endpoints.deleteEndpointDialogListResponses,
+                    { count: endpoint?.responses.length || 0 }
+                  )}
                 </li>
               </ul>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeletingEndpoint}>
-              Cancel
+              {messages.common.cancel}
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
               disabled={isDeletingEndpoint}
               onClick={handleConfirmDeleteEndpoint}
             >
-              {isDeletingEndpoint ? "Deleting..." : "Delete Endpoint"}
+              {isDeletingEndpoint
+                ? messages.endpoints.deleting
+                : messages.endpoints.deleteEndpointConfirmAction}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

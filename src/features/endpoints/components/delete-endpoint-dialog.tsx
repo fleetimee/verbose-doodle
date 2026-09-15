@@ -1,3 +1,4 @@
+import { useI18n } from "@/components/i18n-provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import type { Endpoint } from "@/features/endpoints/types";
-import { messages } from "@/lib/i18n";
+import { formatMessage, messages } from "@/lib/i18n";
 
 type DeleteEndpointDialogProps = {
   endpoint: Endpoint | null;
@@ -27,14 +28,16 @@ export function DeleteEndpointDialog({
   onOpenChange,
   open,
 }: DeleteEndpointDialogProps) {
+  useI18n();
   if (!endpoint) {
     return null;
   }
 
   const responseCount = endpoint.responses.length;
-  const responseLabel = `${responseCount} configured response${
-    responseCount === 1 ? "" : "s"
-  }`;
+  const responseLabel = formatMessage(
+    messages.endpoints.configuredResponsesCount,
+    { count: responseCount }
+  );
 
   return (
     <AlertDialog onOpenChange={onOpenChange} open={open}>

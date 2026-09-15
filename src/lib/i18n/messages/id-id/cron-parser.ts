@@ -1,0 +1,70 @@
+export const cronParserMessages = {
+  allowedRange: "Diizinkan {range}",
+  clear: "Bersihkan",
+  description:
+    "Baca jadwal Unix sebelum Anda menggunakannya. Penguraian tetap berada di browser ini.",
+  expressionHelp:
+    "Menit, jam, hari dalam bulan, bulan, hari dalam minggu. Tambahkan detik sebagai field pertama bila diperlukan.",
+  expressionLabel: "Ekspresi Cron",
+  expressionPlaceholder: "*/15 * * * *",
+  eyebrow: "Alat pengembang / 03",
+  errors: {
+    emptyExpression: "Masukkan cron expression.",
+    invalidExpression: "Expression tidak valid.",
+    invalidFieldCount:
+      "Gunakan lima field, atau enam field dengan seconds di bagian depan.",
+    invalidTimeZone: "Pilih IANA timezone yang didukung.",
+    noOccurrences: "Tidak ada execution berikutnya yang ditemukan.",
+    unsupportedSyntax:
+      "Gunakan angka, *, list, range, step, atau nama month dan weekday.",
+  },
+  fieldLabels: {
+    dayOfMonth: "Day of month",
+    dayOfWeek: "Day of week",
+    hour: "Hour",
+    minute: "Minute",
+    month: "Month",
+    second: "Second",
+  },
+  fieldBreakdown: "Rincian field",
+  fieldBreakdownDescription: "Parser membaca field ini dari kiri ke kanan.",
+  formatsLabel: "Sintaks",
+  formatsValue: "Unix / 5 atau 6 field",
+  invalidExpression: "Tidak dapat mengurai ekspresi",
+  navigationGroup: "Developer Tools",
+  outputLabel: "Pratinjau",
+  outputValue: "5 eksekusi berikutnya",
+  pageDescription:
+    "Jelaskan ekspresi Unix cron dan pratinjau eksekusi berikutnya berdasarkan zona waktu.",
+  pageKeywords: ["cron", "parser", "scheduler", "alat pengembang"],
+  pageTitle: "Cron Parser",
+  parse: "Urai",
+  parseFailed: "Tidak dapat mengurai ekspresi",
+  resetExample: "Reset contoh",
+  runNumber: "Eksekusi {number}",
+  shortcutLabel: "Ctrl / Cmd + Enter",
+  storageLabel: "Penyimpanan",
+  storageValue: "Hanya zona waktu",
+  timezoneEmpty: "Zona waktu tidak ditemukan.",
+  timezoneLabel: "Zona waktu",
+  timezoneSearch: "Cari zona waktu...",
+  timezoneUse: "Gunakan {timezone}",
+  title: "Cron Parser",
+  tour: {
+    controlsDescription:
+      "Masukkan ekspresi Unix lima field, atau tambahkan detik di bagian depan. Pilih zona waktu sebelum mengurai.",
+    controlsTitle: "Atur konteks jadwal",
+    fieldsDescription:
+      "Rincian mempertahankan token asli di samping nama dan rentang validnya.",
+    fieldsTitle: "Periksa bagaimana setiap field dibaca",
+    runsDescription:
+      "Gunakan lima eksekusi berikutnya untuk memeriksa kesalahan zona waktu dan kalender sebelum penerapan.",
+    runsTitle: "Verifikasi tanggal sebenarnya",
+    startButton: "Mulai tour",
+  },
+  upcomingRuns: "Eksekusi mendatang",
+  upcomingRunsDescription: "Lima eksekusi berikutnya setelah waktu penguraian.",
+  validExpression: "Ekspresi valid",
+  fiveFields: "5 field",
+  sixFields: "6 field",
+} as const;

@@ -105,6 +105,7 @@ export const iso8583GeneratorMessages = {
   undo: "Undo",
   unknownPreset: "Unknown preset",
   useCustomField: "Custom field",
+  valuePlaceholder: "Enter value",
   wireBytes: "wire bytes",
   typeLabels: {
     ans: "ans",
@@ -213,6 +214,65 @@ export const iso8583GeneratorMessages = {
   enterCustomValuePlaceholder: "Enter custom value",
   resetToPreset: "Reset to preset",
   packErrorMessageFallback: "Could not pack this message.",
+  packErrors: {
+    asciiOnly: "{label} must contain ASCII characters only.",
+    digitsOnly: "Bit {number} {label} accepts digits only.",
+    exactLength: "Bit {number} {label} must be exactly {length} characters.",
+    maxLength: "Bit {number} {label} cannot exceed {length} characters.",
+    bitRange: "Bit number {number} must be between 2 and 128.",
+    duplicateBit: "Bit {number} is listed more than once.",
+    bitmapLength:
+      "{label} bitmap must contain exactly 16 hexadecimal characters.",
+    manualBitmapMismatch:
+      "The manual bitmap must match the enabled data elements.",
+    lengthHeaderInteger: "Length header must be a non-negative integer.",
+    asciiHeaderLimit: "A 4-digit ASCII header cannot exceed 9999 bytes.",
+    binaryHeaderLimit: "A 2-byte binary header cannot exceed 65535 bytes.",
+    invalidMti: "MTI must contain exactly four digits.",
+    unknownPreset: "Unknown ISO 8583 preset: {id}",
+  },
+  presets: {
+    signOn: {
+      description: "Network sign-on with the supplied BPD DIY sample values.",
+      label: "0800 · Sign-On",
+    },
+    accountInquiry: {
+      description: "Account inquiry with the supplied BPD DIY sample values.",
+      label: "0200 · Account Inquiry",
+    },
+    authorization: {
+      description: "Card or account authorization request starter fields.",
+      label: "0100 · Authorization",
+    },
+    transaction: {
+      description: "Financial transaction starter fields.",
+      label: "0200 · Transaction",
+    },
+    notification: {
+      description: "Financial notification or advice starter fields.",
+      label: "0220 · Notification",
+    },
+    networkResponse: {
+      description: "Network management response starter fields.",
+      label: "0810 · Network Response",
+    },
+    transactionResponse: {
+      description: "Financial transaction response starter fields.",
+      label: "0210 · Transaction Response",
+    },
+    notificationResponse: {
+      description: "Financial notification response starter fields.",
+      label: "0230 · Notification Response",
+    },
+    reversal: {
+      description: "Financial reversal request starter fields.",
+      label: "0400 · Reversal",
+    },
+    batch: {
+      description: "Batch or settlement request starter fields.",
+      label: "0500 · Batch / Settlement",
+    },
+  },
   bit43StandardLayout:
     "Indonesia / Mastercard layout: Name [1–22] · Space [23] · City [24–36] · Space [37] · Country [38–40]",
   bit43SegmentsLabel: "Bit 43 segments",
@@ -220,4 +280,14 @@ export const iso8583GeneratorMessages = {
   bit43Delimiter: "Space delimiter",
   bit43City: "City",
   bit43CountryCode: "Country code",
+  importStreamButton: "Import stream",
+  importStreamTitle: "Import ISO 8583 Stream",
+  importStreamDescription:
+    "Paste a raw ISO 8583 stream or hex dump to parse and assign its elements directly into this workbench.",
+  importStreamAriaLabel: "ISO 8583 Stream",
+  importStreamEmptyError: "Please enter an ISO 8583 stream.",
+  importStreamParseError: "Failed to parse ISO 8583 stream.",
+  importStreamSuccess: "Imported {count} data elements for MTI {mti}!",
+  importStreamCancel: "Cancel",
+  importStreamSubmit: "Parse & assign",
 } as const;

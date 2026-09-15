@@ -8,6 +8,7 @@ import {
   TagIcon,
 } from "@/components/hugeicons";
 import { Badge } from "@/components/ui/badge";
+import { formatMessage, messages } from "@/lib/i18n";
 
 export type AboutVersionFooterProps = {
   version?: string;
@@ -47,7 +48,7 @@ export function AboutVersionFooter({
         <div className="flex items-center gap-2">
           <LayersIcon className="h-4 w-4 text-primary" />
           <h3 className="font-semibold text-foreground text-sm">
-            System & Release Information
+            {messages.about.versionFooterTitle}
           </h3>
         </div>
         <div className="flex items-center gap-2">
@@ -64,7 +65,7 @@ export function AboutVersionFooter({
             rel="noopener noreferrer"
             target="_blank"
           >
-            Releases
+            {messages.about.versionFooterReleases}
             <HugeiconsIcon
               className="h-3 w-3"
               icon={LinkSquare02Icon}
@@ -82,7 +83,7 @@ export function AboutVersionFooter({
           </div>
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="font-medium text-[11px] text-muted-foreground">
-              Version Tag
+              {messages.about.versionTagLabel}
             </span>
             <span className="font-semibold text-foreground text-xs">
               v{version}
@@ -97,14 +98,16 @@ export function AboutVersionFooter({
           </div>
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="font-medium text-[11px] text-muted-foreground">
-              Git Release SHA
+              {messages.about.gitReleaseShaLabel}
             </span>
             <a
               className="inline-flex items-center gap-1 font-mono font-semibold text-primary text-xs hover:underline"
               href={commitUrl}
               rel="noopener noreferrer"
               target="_blank"
-              title={`View commit ${commitSha} on Gitea`}
+              title={formatMessage(messages.about.viewCommitOnGitea, {
+                sha: commitSha,
+              })}
             >
               {commitSha.slice(0, 7)}
               <HugeiconsIcon
@@ -127,7 +130,7 @@ export function AboutVersionFooter({
           </div>
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="font-medium text-[11px] text-muted-foreground">
-              Build Timestamp
+              {messages.about.buildTimestampLabel}
             </span>
             <span className="truncate font-semibold text-foreground text-xs">
               {buildTimestamp}

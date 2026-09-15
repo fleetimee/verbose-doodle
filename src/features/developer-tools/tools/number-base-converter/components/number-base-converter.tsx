@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Binary,
   Check,
@@ -7,6 +7,7 @@ import {
   Cpu,
   Hash,
 } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,26 +57,46 @@ const EXAMPLE_RESULT = convertNumberBase({
 });
 const BIT_WIDTHS: readonly NumberBitWidth[] = [8, 16, 32, 64];
 const BASE_LABELS: Readonly<Record<NumberBase, string>> = {
-  2: messages.numberBaseConverter.binary,
-  8: messages.numberBaseConverter.octal,
-  10: messages.numberBaseConverter.decimal,
-  16: messages.numberBaseConverter.hexadecimal,
+  get 2() {
+    return messages.numberBaseConverter.binary;
+  },
+  get 8() {
+    return messages.numberBaseConverter.octal;
+  },
+  get 10() {
+    return messages.numberBaseConverter.decimal;
+  },
+  get 16() {
+    return messages.numberBaseConverter.hexadecimal;
+  },
 };
 const OUTPUTS: readonly OutputDefinition[] = [
   {
     key: "binary",
-    label: messages.numberBaseConverter.binary,
+    get label() {
+      return messages.numberBaseConverter.binary;
+    },
     radix: "BASE 02",
   },
-  { key: "octal", label: messages.numberBaseConverter.octal, radix: "BASE 08" },
+  {
+    key: "octal",
+    get label() {
+      return messages.numberBaseConverter.octal;
+    },
+    radix: "BASE 08",
+  },
   {
     key: "decimal",
-    label: messages.numberBaseConverter.decimal,
+    get label() {
+      return messages.numberBaseConverter.decimal;
+    },
     radix: "BASE 10",
   },
   {
     key: "hexadecimal",
-    label: messages.numberBaseConverter.hexadecimal,
+    get label() {
+      return messages.numberBaseConverter.hexadecimal;
+    },
     radix: "BASE 16",
   },
 ];
@@ -86,7 +107,7 @@ const TOUR_TARGETS = {
   controls: "number-base-converter-tour-controls",
   results: "number-base-converter-tour-results",
 } as const;
-const TOUR_STEPS: readonly DeveloperToolTourStep[] = [
+const getTourSteps = (): readonly DeveloperToolTourStep[] => [
   {
     description: messages.numberBaseConverter.tour.controlsDescription,
     position: "bottom",
@@ -203,7 +224,9 @@ function OutputCard({
 }
 
 export function NumberBaseConverter() {
+  const { locale } = useI18n();
   const shouldReduceMotion = useReducedMotion();
+  const tourSteps = useMemo(() => getTourSteps(), [locale]);
   const [input, setInput] = useState(EXAMPLE_VALUE);
   const [inputBase, setInputBase] = useState<NumberBase>(10);
   const [bitWidth, setBitWidth] = useState<NumberBitWidth>(8);
@@ -314,7 +337,7 @@ export function NumberBaseConverter() {
       tour={
         <DeveloperToolTourButton
           label={messages.numberBaseConverter.tour.startButton}
-          steps={TOUR_STEPS}
+          steps={tourSteps}
           storageKey="number-base-converter-tour-seen"
           tourId={TOUR_ID}
         />
@@ -386,7 +409,10 @@ export function NumberBaseConverter() {
             >
               {BIT_WIDTHS.map((width) => (
                 <ToggleGroupItem
-                  aria-label={`${width} bit`}
+                  aria-label={formatMessage(
+                    messages.numberBaseConverter.bitWidthItemAriaLabel,
+                    { width }
+                  )}
                   key={width}
                   value={String(width)}
                 >

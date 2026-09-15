@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { formatMessage, messages } from "@/lib/i18n";
 import { parseIso8583Stream } from "../../iso8583-parser/parse-iso8583";
 import type { Iso8583Field } from "../pack-iso8583";
 
@@ -34,7 +35,7 @@ export function ImportStreamDialog({ onImport }: ImportStreamDialogProps) {
 
   const handleParseAndAssign = () => {
     if (!stream.trim()) {
-      setError("Please enter an ISO 8583 stream.");
+      setError(messages.iso8583Generator.importStreamEmptyError);
       return;
     }
 
@@ -52,13 +53,18 @@ export function ImportStreamDialog({ onImport }: ImportStreamDialogProps) {
         }))
       );
       toast.success(
-        `Imported ${parsed.fields.length} data elements for MTI ${parsed.mti.mti}!`
+        formatMessage(messages.iso8583Generator.importStreamSuccess, {
+          count: parsed.fields.length,
+          mti: parsed.mti.mti,
+        })
       );
       setOpen(false);
       setStream("");
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to parse ISO 8583 stream."
+        err instanceof Error
+          ? err.message
+          : messages.iso8583Generator.importStreamParseError
       );
     }
   };
@@ -68,21 +74,22 @@ export function ImportStreamDialog({ onImport }: ImportStreamDialogProps) {
       <DialogTrigger asChild>
         <Button className="gap-1.5" size="sm" variant="outline">
           <Binary className="size-3.5" />
-          Import stream
+          {messages.iso8583Generator.importStreamButton}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Import ISO 8583 Stream</DialogTitle>
+          <DialogTitle>
+            {messages.iso8583Generator.importStreamTitle}
+          </DialogTitle>
           <DialogDescription>
-            Paste a raw ISO 8583 stream or hex dump to parse and assign its
-            elements directly into this workbench.
+            {messages.iso8583Generator.importStreamDescription}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 py-2">
           <textarea
-            aria-label="ISO 8583 Stream"
+            aria-label={messages.iso8583Generator.importStreamAriaLabel}
             className="h-32 w-full rounded-lg border border-border bg-muted/20 p-3 font-mono text-xs focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
             onChange={(e) => {
               setStream(e.target.value);
@@ -102,10 +109,10 @@ export function ImportStreamDialog({ onImport }: ImportStreamDialogProps) {
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button onClick={() => setOpen(false)} variant="ghost">
-            Cancel
+            {messages.iso8583Generator.importStreamCancel}
           </Button>
           <Button onClick={handleParseAndAssign} variant="default">
-            Parse & assign
+            {messages.iso8583Generator.importStreamSubmit}
           </Button>
         </DialogFooter>
       </DialogContent>

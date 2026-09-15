@@ -54,7 +54,7 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
               variant={activeTab === "endpoints" ? "default" : "ghost"}
             >
               <Network className="h-3.5 w-3.5" />
-              API Endpoints
+              {activeMessages.about.demo.apiEndpoints}
             </Button>
             <Button
               className="gap-1.5 text-xs"
@@ -67,7 +67,7 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
                 icon={ActivityIcon}
                 strokeWidth={2}
               />
-              Socket Bridge
+              {activeMessages.about.demo.socketBridge}
             </Button>
             <Button
               className="gap-1.5 text-xs"
@@ -76,7 +76,7 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
               variant={activeTab === "devtools" ? "default" : "ghost"}
             >
               <Braces className="h-3.5 w-3.5" />
-              Dev Tools
+              {activeMessages.about.demo.devTools}
             </Button>
           </div>
         </div>
@@ -121,13 +121,15 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground text-xs">
-                  Matched via JSON-driven mock rules seam
+                  {activeMessages.about.demo.matchedRules}
                 </span>
                 <Button className="gap-1.5" onClick={handleSimulate} size="sm">
                   <Play
                     className={`h-3.5 w-3.5 ${simulating ? "animate-spin" : ""}`}
                   />
-                  {simulating ? "Simulating..." : "Test Endpoint"}
+                  {simulating
+                    ? activeMessages.about.demo.simulating
+                    : activeMessages.about.demo.testEndpoint}
                 </Button>
               </div>
             </motion.div>
@@ -155,29 +157,31 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
                     </span>
                   </div>
                   <Badge className="border-cyan-500/30 bg-cyan-500/20 text-cyan-400">
-                    CONNECTED
+                    {activeMessages.about.demo.connected}
                   </Badge>
                 </div>
                 <div className="flex flex-col gap-1.5 py-2 text-slate-400">
                   <div>
                     [15:37:01] <span className="text-emerald-400">INFO</span>{" "}
-                    Protocol handshake initiated via ISO-8583 bridge
+                    {activeMessages.about.demo.handshake}
                   </div>
                   <div>
                     [15:37:02] <span className="text-emerald-400">INFO</span>{" "}
-                    ACK frame received (len=128 bytes)
+                    {activeMessages.about.demo.ack}
                   </div>
                   <div>
                     [15:37:03] <span className="text-cyan-400">EVENT</span>{" "}
-                    Realtime ticket broadcast sent to subscribers
+                    {activeMessages.about.demo.event}
                   </div>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground text-xs">
-                  Capped 600-entry ring-buffer log observer
+                  {activeMessages.about.demo.ringBuffer}
                 </span>
-                <Badge variant="outline">TCP / UDP / WS</Badge>
+                <Badge variant="outline">
+                  {activeMessages.about.demo.protocols}
+                </Badge>
               </div>
             </motion.div>
           )}
@@ -194,7 +198,7 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="flex flex-col gap-1 rounded-lg border border-border/50 bg-background/50 p-3 font-mono text-xs">
                   <span className="font-sans font-semibold text-[11px] text-muted-foreground">
-                    JSON Input
+                    {activeMessages.about.demo.jsonInput}
                   </span>
                   <pre className="overflow-x-auto text-foreground">
                     {`{
@@ -205,7 +209,7 @@ export function SimulatorDemoPreview({ locale }: SimulatorDemoPreviewProps) {
                 </div>
                 <div className="flex flex-col gap-1 rounded-lg border border-border/50 bg-background/50 p-3 font-mono text-xs">
                   <span className="font-sans font-semibold text-[11px] text-muted-foreground">
-                    YAML Output
+                    {activeMessages.about.demo.yamlOutput}
                   </span>
                   <pre className="overflow-x-auto text-emerald-600 dark:text-emerald-400">
                     {`service: biller
@@ -215,9 +219,11 @@ active: true`}
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground text-xs">
-                  Standardized ToolProcessor&lt;TInput, TOutput&gt; seam
+                  {activeMessages.about.demo.processorSeam}
                 </span>
-                <Badge variant="outline">Instant Conversion</Badge>
+                <Badge variant="outline">
+                  {activeMessages.about.demo.instantConversion}
+                </Badge>
               </div>
             </motion.div>
           )}

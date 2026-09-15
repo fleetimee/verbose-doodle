@@ -1,6 +1,7 @@
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate } from "react-router";
+import { useI18n } from "@/components/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import {
   Item,
@@ -15,6 +16,7 @@ import { HttpMethodBadge } from "@/features/endpoints/components/http-method-bad
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import type { Endpoint } from "@/features/endpoints/types";
 import { getMethodColor } from "@/features/endpoints/utils/http-method-colors";
+import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type EndpointListItemProps = {
@@ -28,6 +30,7 @@ export function EndpointListItem({
   onClick,
   tourId,
 }: EndpointListItemProps) {
+  useI18n();
   const navigate = useNavigate();
   const { prefetchEndpoint } = useEndpointCatalog();
   const methodColors = getMethodColor(endpoint.method);
@@ -92,7 +95,7 @@ export function EndpointListItem({
           </ItemDescription>
           {endpoint.enabled === false && (
             <Badge className="w-fit" variant="secondary">
-              Disabled
+              {messages.common.disabled}
             </Badge>
           )}
         </ItemContent>

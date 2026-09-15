@@ -1,3 +1,5 @@
+import { formatMessage, messages } from "@/lib/i18n";
+
 export interface ClaimDefinition {
   readonly description: string;
   readonly name: string;
@@ -169,9 +171,9 @@ export function formatClaimTimestamp(
       isValid: false,
       isoDate: "",
       localDate: "",
-      statusLabel: "Invalid timestamp",
+      statusLabel: messages.jwtInspector.invalidTimestamp,
       statusType: "expired",
-      summary: "Invalid timestamp",
+      summary: messages.jwtInspector.invalidTimestamp,
     };
   }
 
@@ -181,9 +183,9 @@ export function formatClaimTimestamp(
       isValid: false,
       isoDate: "",
       localDate: "",
-      statusLabel: "Invalid timestamp",
+      statusLabel: messages.jwtInspector.invalidTimestamp,
       statusType: "expired",
-      summary: "Invalid timestamp",
+      summary: messages.jwtInspector.invalidTimestamp,
     };
   }
 
@@ -194,57 +196,81 @@ export function formatClaimTimestamp(
   if (name === "exp") {
     if (diffSeconds <= 0) {
       const rel = formatTimeRelative(diffSeconds);
+      const statusLabel = formatMessage(messages.jwtInspector.expiredAgo, {
+        duration: rel,
+      });
       return {
         isValid: true,
         isoDate,
         localDate,
-        statusLabel: `Expired ${rel} ago`,
+        statusLabel,
         statusType: "expired",
-        summary: `${isoDate} · Expired (${rel} ago)`,
+        summary: formatMessage(messages.jwtInspector.expiredSummary, {
+          duration: rel,
+          isoDate,
+        }),
       };
     }
     const rel = formatTimeRelative(diffSeconds);
+    const statusLabel = formatMessage(messages.jwtInspector.expiresInRelative, {
+      duration: rel,
+    });
     return {
       isValid: true,
       isoDate,
       localDate,
-      statusLabel: `Expires in ${rel}`,
+      statusLabel,
       statusType: "active",
-      summary: `${isoDate} · Expires in ${rel}`,
+      summary: formatMessage(messages.jwtInspector.expiresSummary, {
+        duration: rel,
+        isoDate,
+      }),
     };
   }
 
   if (name === "nbf") {
     if (diffSeconds > 0) {
       const rel = formatTimeRelative(diffSeconds);
+      const statusLabel = formatMessage(messages.jwtInspector.activeIn, {
+        duration: rel,
+      });
       return {
         isValid: true,
         isoDate,
         localDate,
-        statusLabel: `Active in ${rel}`,
+        statusLabel,
         statusType: "pending",
-        summary: `${isoDate} · Not active yet (starts in ${rel})`,
+        summary: formatMessage(messages.jwtInspector.notActiveYetSummary, {
+          duration: rel,
+          isoDate,
+        }),
       };
     }
     return {
       isValid: true,
       isoDate,
       localDate,
-      statusLabel: "Active / Valid",
+      statusLabel: messages.jwtInspector.activeValid,
       statusType: "active",
-      summary: `${isoDate} · Active`,
+      summary: formatMessage(messages.jwtInspector.activeSummary, { isoDate }),
     };
   }
 
   // iat
   const elapsed = Math.abs(diffSeconds);
   const rel = formatTimeRelative(elapsed);
+  const statusLabel = formatMessage(messages.jwtInspector.issuedAgo, {
+    duration: rel,
+  });
   return {
     isValid: true,
     isoDate,
     localDate,
-    statusLabel: `Issued ${rel} ago`,
+    statusLabel,
     statusType: "info",
-    summary: `${isoDate} · Issued ${rel} ago`,
+    summary: formatMessage(messages.jwtInspector.issuedSummary, {
+      duration: rel,
+      isoDate,
+    }),
   };
 }

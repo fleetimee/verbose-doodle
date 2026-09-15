@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { messages } from "@/lib/i18n";
+import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { JwtKeys } from "../utils/jwt-crypto";
 
@@ -119,7 +119,7 @@ function SymmetricKeyEditor({
                   </span>
                 </Button>
                 <Button
-                  aria-label="Copy secret"
+                  aria-label={`${copy.copy} ${copy.secretOutput}`}
                   className="size-7"
                   disabled={!keys.secret}
                   onClick={copySecret}
@@ -136,7 +136,7 @@ function SymmetricKeyEditor({
                   <span className="sr-only">{copy.copy}</span>
                 </Button>
                 <Button
-                  aria-label="Clear secret"
+                  aria-label={`${copy.clear} ${copy.secretOutput}`}
                   className="size-7"
                   disabled={!keys.secret}
                   onClick={() => changeKeys({ secret: "" })}
@@ -150,7 +150,7 @@ function SymmetricKeyEditor({
               </>
             ) : (
               <Button
-                aria-label="Copy Signature (Base64URL)"
+                aria-label={`${copy.copy} ${copy.signatureLabel}`}
                 className="size-7"
                 disabled={!signature}
                 onClick={copySignatureValue}
@@ -213,7 +213,7 @@ function SymmetricKeyEditor({
                   className="size-3.5"
                   icon={CheckmarkCircle02Icon}
                 />
-                <span>Valid secret</span>
+                <span>{copy.validSecret}</span>
               </span>
             ) : (
               <span className="text-muted-foreground">
@@ -262,7 +262,9 @@ function AsymmetricCreateKeyEditor({
           actions={
             <>
               <Button
-                aria-label={`Copy ${copy.publicKey}`}
+                aria-label={formatMessage(copy.copyTarget, {
+                  target: copy.publicKey,
+                })}
                 className="size-7"
                 disabled={!keys.publicKey}
                 onClick={() => copyKey(keys.publicKey, setCopiedPub)}
@@ -276,7 +278,9 @@ function AsymmetricCreateKeyEditor({
                 />
               </Button>
               <Button
-                aria-label={`Clear ${copy.publicKey}`}
+                aria-label={formatMessage(copy.clearTarget, {
+                  target: copy.publicKey,
+                })}
                 className="size-7"
                 disabled={!keys.publicKey}
                 onClick={() => changeKeys({ publicKey: "" })}
@@ -310,7 +314,9 @@ function AsymmetricCreateKeyEditor({
           actions={
             <>
               <Button
-                aria-label={`Copy ${copy.privateKey}`}
+                aria-label={formatMessage(copy.copyTarget, {
+                  target: copy.privateKey,
+                })}
                 className="size-7"
                 disabled={!keys.privateKey}
                 onClick={() => copyKey(keys.privateKey, setCopiedPriv)}
@@ -324,7 +330,9 @@ function AsymmetricCreateKeyEditor({
                 />
               </Button>
               <Button
-                aria-label={`Clear ${copy.privateKey}`}
+                aria-label={formatMessage(copy.clearTarget, {
+                  target: copy.privateKey,
+                })}
                 className="size-7"
                 disabled={!keys.privateKey}
                 onClick={() => changeKeys({ privateKey: "" })}
@@ -386,7 +394,9 @@ function AsymmetricInspectKeyEditor({
             activeTab === "public" ? (
               <>
                 <Button
-                  aria-label={`Copy ${copy.publicKey}`}
+                  aria-label={formatMessage(copy.copyTarget, {
+                    target: copy.publicKey,
+                  })}
                   className="size-7"
                   disabled={!keys.publicKey}
                   onClick={() => copyKey(keys.publicKey, setCopiedPub)}
@@ -400,7 +410,9 @@ function AsymmetricInspectKeyEditor({
                   />
                 </Button>
                 <Button
-                  aria-label={`Clear ${copy.publicKey}`}
+                  aria-label={formatMessage(copy.clearTarget, {
+                    target: copy.publicKey,
+                  })}
                   className="size-7"
                   disabled={!keys.publicKey}
                   onClick={() => changeKeys({ publicKey: "" })}
@@ -413,7 +425,7 @@ function AsymmetricInspectKeyEditor({
               </>
             ) : (
               <Button
-                aria-label="Copy Signature (Base64URL)"
+                aria-label={`${copy.copy} ${copy.signatureLabel}`}
                 className="size-7"
                 disabled={!signature}
                 onClick={() => copyKey(signature, setCopiedSig)}
@@ -466,7 +478,7 @@ function AsymmetricInspectKeyEditor({
                   className="size-3.5"
                   icon={CheckmarkCircle02Icon}
                 />
-                <span>Valid public key</span>
+                <span>{copy.validPublicKey}</span>
               </span>
             ) : (
               <span className="text-muted-foreground">
@@ -540,12 +552,12 @@ function AsymmetricKeyEditor({
 
 function getSubtitle(symmetric: boolean, mode: "inspect" | "create"): string {
   if (symmetric) {
-    return "Enter the secret used to sign the JWT below:";
+    return copy.subtitleSymmetric;
   }
   if (mode === "inspect") {
-    return "Enter the public key used to verify the signature:";
+    return copy.subtitleInspectAsymmetric;
   }
-  return "Enter the private key to sign the JWT, and public key to verify:";
+  return copy.subtitleCreateAsymmetric;
 }
 
 export function JwtKeyFields({

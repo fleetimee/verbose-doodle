@@ -2,6 +2,7 @@ import { ShieldCheckIcon } from "@/components/hugeicons";
 import * as React from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { messages } from "@/lib/i18n";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CheckmarkCircle02Icon, RepeatIcon } from "@hugeicons/core-free-icons";
 
@@ -154,8 +155,8 @@ export const SliderCaptcha = ({
       setIsVerified(true);
       onVerify(true);
 
-      toast.success("Verification successful!", {
-        description: "You have been verified",
+      toast.success(messages.auth.verificationSuccessful, {
+        description: messages.auth.verificationSuccessfulDescription,
       });
     } else if (!isCloseEnough && isVerified) {
       setIsVerified(false);
@@ -224,8 +225,8 @@ export const SliderCaptcha = ({
 
       if (!isCloseEnough) {
         setIsLocked(true);
-        toast.error("Verification failed", {
-          description: "Please try again",
+        toast.error(messages.auth.verificationFailed, {
+          description: messages.auth.verificationFailedDescription,
         });
 
         setTimeout(() => {
@@ -349,7 +350,9 @@ export const SliderCaptcha = ({
               )}
             />
             <span className="font-medium text-xs">
-              {isVerified ? "Verified" : "Slide to complete the puzzle"}
+              {isVerified
+                ? messages.auth.verified
+                : messages.auth.slideToCompletePuzzle}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -357,7 +360,7 @@ export const SliderCaptcha = ({
               <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} className="size-4 animate-in zoom-in-50 text-green-600 duration-300" />
             )}
             <button
-              aria-label="Generate new puzzle"
+              aria-label={messages.common.generateNewPuzzle}
               className="rounded-md p-0.5 transition-colors hover:bg-muted"
               onClick={handleRefresh}
               type="button"
@@ -373,7 +376,7 @@ export const SliderCaptcha = ({
           style={{ height: `${IMAGE_HEIGHT}px` }}
         >
           <img
-            alt="Captcha background"
+            alt={messages.auth.captchaBackground}
             className="h-full w-full object-cover"
             draggable={false}
             height={IMAGE_HEIGHT}
@@ -385,7 +388,7 @@ export const SliderCaptcha = ({
             <div className="absolute inset-0 bg-black/40" />
 
             <svg
-              aria-label="Puzzle cutout target area"
+              aria-label={messages.auth.puzzleTargetArea}
               className="absolute"
               role="img"
               style={{
@@ -398,7 +401,7 @@ export const SliderCaptcha = ({
                 PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2
               } ${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}`}
             >
-              <title>Puzzle piece target location</title>
+              <title>{messages.common.puzzleTargetLocation}</title>
               <defs>
                 <clipPath id="puzzle-cutout">
                   <path d={puzzlePath} />
@@ -474,7 +477,7 @@ export const SliderCaptcha = ({
             aria-disabled={isVerified || isLocked}
           >
             <svg
-              aria-label="Draggable puzzle piece"
+              aria-label={messages.common.draggablePuzzlePiece}
               height={PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}
               role="img"
               width={PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}
@@ -482,7 +485,7 @@ export const SliderCaptcha = ({
                 PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2
               } ${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}`}
             >
-              <title>Movable puzzle piece</title>
+              <title>{messages.common.movablePuzzlePiece}</title>
               <defs>
                 <clipPath id="puzzle-piece">
                   <path d={puzzlePath} />

@@ -1,6 +1,7 @@
 import { GridIcon, Menu01Icon, SearchIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { ChangeEvent } from "react";
+import { useI18n } from "@/components/i18n-provider";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { messages } from "@/lib/i18n";
@@ -24,6 +25,7 @@ export function EndpointsSearchControls({
   searchId,
   viewModeId,
 }: EndpointsSearchControlsProps) {
+  useI18n();
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSearchChange?.(event.target.value);
   };
@@ -68,7 +70,7 @@ export function EndpointsSearchControls({
               icon={GridIcon}
               strokeWidth={2}
             />
-            Grid
+            {messages.endpoints.gridView}
           </ToggleGroupItem>
           <ToggleGroupItem
             aria-label={messages.endpoints.listViewAriaLabel}
@@ -79,7 +81,7 @@ export function EndpointsSearchControls({
               icon={Menu01Icon}
               strokeWidth={2}
             />
-            List
+            {messages.endpoints.listView}
           </ToggleGroupItem>
         </ToggleGroup>
       ) : null}

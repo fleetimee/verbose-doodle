@@ -3,6 +3,7 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { messages } from "@/lib/i18n"
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
@@ -104,7 +105,7 @@ function DialogContent({
             className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-popup-open:bg-accent data-popup-open:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{messages.common.close}</span>
           </DialogClose>
         )}
       </DialogPrimitive.Popup>
@@ -141,7 +142,9 @@ function DialogFooter({
     >
       {children}
       {showCloseButton && (
-        <DialogClose render={<Button variant="outline" />}>Close</DialogClose>
+        <DialogClose render={<Button variant="outline" />}>
+          {messages.common.close}
+        </DialogClose>
       )}
     </div>
   )

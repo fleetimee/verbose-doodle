@@ -19,10 +19,10 @@ type ResultDetails = {
   readonly rule: string;
 };
 
-const outcomeCopy: Record<
+const getOutcomeCopy = (): Record<
   Exclude<JsonSchemaValidationOutcome, "VALIDATION_RESULT">,
   ResultDetails
-> = {
+> => ({
   PARSE_ERROR: {
     code: messages.jsonSchemaValidator.parseCode,
     description: messages.jsonSchemaValidator.parseDescription,
@@ -44,12 +44,12 @@ const outcomeCopy: Record<
     title: messages.jsonSchemaValidator.timeoutTitle,
     tone: "text-amber-700 dark:text-amber-400",
   },
-} as const;
+});
 
 export function ValidationResult({ result }: ValidationResultProps) {
   let details: ResultDetails;
   if (result.outcome !== "VALIDATION_RESULT") {
-    details = outcomeCopy[result.outcome];
+    details = getOutcomeCopy()[result.outcome];
   } else if (result.valid) {
     details = {
       code: messages.jsonSchemaValidator.validCode,

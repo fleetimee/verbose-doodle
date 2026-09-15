@@ -13,24 +13,7 @@ import {
 import { Form } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 
-const editJsonSchema = z.object({
-  json: z
-    .string()
-    .min(1, "JSON is required")
-    .refine(
-      (val) => {
-        try {
-          JSON.parse(val);
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      { message: "Must be valid JSON" }
-    ),
-});
-
-type EditJsonFormData = z.infer<typeof editJsonSchema>;
+type EditJsonFormData = { json: string };
 
 const formatJson = (value: string): string => {
   try {
@@ -47,12 +30,31 @@ type EditResponseJsonFormProps = {
   isLoading?: boolean;
 };
 
+import { useI18n } from "@/components/i18n-provider";
+
 export function EditResponseJsonForm({
   defaultValue,
-  onSubmit,
+  isLoading = false,
   onCancel,
-  isLoading,
+  onSubmit,
 }: EditResponseJsonFormProps) {
+  const { messages } = useI18n();
+  const editJsonSchema = z.object({
+    json: z
+      .string()
+      .min(1, messages.endpoints.jsonRequiredError)
+      .refine(
+        (val) => {
+          try {
+            JSON.parse(val);
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        { message: messages.endpoints.invalidJsonError }
+      ),
+  });
   const form = useForm<EditJsonFormData>({
     defaultValues: {
       json: formatJson(defaultValue),
@@ -70,7 +72,7 @@ export function EditResponseJsonForm({
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="edit-response-json">
-                  JSON Response
+                  {messages.endpoints.jsonResponseLabel}
                 </FieldLabel>
                 <FieldContent>
                   <Textarea
@@ -79,11 +81,11 @@ export function EditResponseJsonForm({
                     autoFocus
                     className="font-mono text-sm"
                     id="edit-response-json"
-                    placeholder='{"key": "value"}'
+                    placeholder={messages.endpoints.jsonResponsePlaceholder}
                     rows={10}
                   />
                   <FieldDescription>
-                    The JSON response body (must be valid JSON)
+                    {messages.endpoints.jsonResponseDescription}
                   </FieldDescription>
                 </FieldContent>
                 {fieldState.invalid && (
@@ -101,10 +103,10 @@ export function EditResponseJsonForm({
             type="button"
             variant="outline"
           >
-            Cancel
+            {messages.common.cancel}
           </Button>
           <Button disabled={isLoading} type="submit">
-            {isLoading ? "Saving..." : "Save"}
+            {isLoading ? messages.common.saving : messages.common.save}
           </Button>
         </div>
       </form>

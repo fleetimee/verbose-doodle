@@ -2,6 +2,8 @@ export type NumberBase = 2 | 8 | 10 | 16;
 export type NumberBitWidth = 8 | 16 | 32 | 64;
 export type NumberRepresentation = "signed" | "unsigned";
 
+import { formatMessage, messages } from "@/lib/i18n";
+
 export type NumberBaseConversionRequest = {
   readonly bitWidth: NumberBitWidth;
   readonly input: string;
@@ -53,7 +55,10 @@ const BASE_PREFIXES: Partial<Record<NumberBase, string>> = {
 function parseMagnitude(input: string, inputBase: NumberBase) {
   let normalized = input.trim().replaceAll("_", "").replaceAll(" ", "");
   if (!normalized) {
-    throw new NumberBaseConversionError("empty-input", "Enter a value.");
+    throw new NumberBaseConversionError(
+      "empty-input",
+      messages.numberBaseConverter.errors.emptyInput
+    );
   }
 
   const isNegative = normalized.startsWith("-");
@@ -69,7 +74,9 @@ function parseMagnitude(input: string, inputBase: NumberBase) {
   if (!(normalized && DIGIT_PATTERNS[inputBase].test(normalized))) {
     throw new NumberBaseConversionError(
       "invalid-digit",
-      `The value contains a digit that base ${inputBase} does not accept.`
+      formatMessage(messages.numberBaseConverter.errors.invalidDigit, {
+        base: inputBase,
+      })
     );
   }
 
@@ -110,13 +117,13 @@ export function convertNumberBase({
   if (isNegative && inputBase !== 10) {
     throw new NumberBaseConversionError(
       "negative-non-decimal",
-      "Only decimal input accepts a minus sign. Enter non-decimal signed values as fixed-width bit patterns."
+      messages.numberBaseConverter.errors.negativeNonDecimal
     );
   }
   if (isNegative && representation === "unsigned") {
     throw new NumberBaseConversionError(
       "negative-unsigned",
-      "Unsigned values cannot be negative."
+      messages.numberBaseConverter.errors.negativeUnsigned
     );
   }
 
@@ -130,7 +137,9 @@ export function convertNumberBase({
   if (isNegative && mathematicalValue < minSigned) {
     throw new NumberBaseConversionError(
       "out-of-range",
-      `The value does not fit in a signed ${bitWidth}-bit word.`
+      formatMessage(messages.numberBaseConverter.errors.signedWordOutOfRange, {
+        bitWidth,
+      })
     );
   }
 
@@ -142,14 +151,22 @@ export function convertNumberBase({
   ) {
     throw new NumberBaseConversionError(
       "out-of-range",
-      `Decimal signed values must be between ${minSigned} and ${maxSigned}.`
+      formatMessage(messages.numberBaseConverter.errors.signedOutOfRange, {
+        max: maxSigned.toString(),
+        min: minSigned.toString(),
+      })
     );
   }
 
   if (!isNegative && magnitude > maxUnsigned) {
     throw new NumberBaseConversionError(
       "out-of-range",
-      `The value does not fit in a ${bitWidth}-bit word.`
+      formatMessage(
+        messages.numberBaseConverter.errors.unsignedWordOutOfRange,
+        {
+          bitWidth,
+        }
+      )
     );
   }
 

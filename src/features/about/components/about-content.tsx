@@ -90,7 +90,7 @@ export function AboutContent({ locale }: AboutContentProps) {
   return (
     <motion.section
       animate="visible"
-      aria-label="About page content"
+      aria-label={activeMessages.about.contentAriaLabel}
       className="flex flex-col gap-4 text-pretty transition-colors duration-300 ease-in-out sm:gap-5"
       initial="hidden"
       variants={contentContainerVariants}

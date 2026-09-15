@@ -181,91 +181,135 @@ type OverviewChatProps = {
 
 const allChatActions: Record<ChatActionId, ChatAction> = {
   base: {
-    description:
-      "Convert numbers across binary, octal, decimal, hex, and base64.",
+    get description() {
+      return messages.overview.chat.commands.baseDescription;
+    },
     icon: Binary,
     id: "base",
-    label: "Number base converter",
+    get label() {
+      return messages.overview.chat.commands.baseLabel;
+    },
     to: "/dashboard/developer-tools/number-base-converter",
   },
   cron: {
-    description: "Validate cron syntax and calculate next 5 trigger runs.",
+    get description() {
+      return messages.overview.chat.commands.cronDescription;
+    },
     icon: Timer,
     id: "cron",
-    label: "Cron parser",
+    get label() {
+      return messages.overview.chat.commands.cronLabel;
+    },
     to: "/dashboard/developer-tools/cron-parser",
   },
   date: {
-    description:
-      "Convert epoch timestamps, ISO 8601 strings, and timezone offsets.",
+    get description() {
+      return messages.overview.chat.commands.dateDescription;
+    },
     icon: CalendarDays,
     id: "date",
-    label: "Date & timezone",
+    get label() {
+      return messages.overview.chat.commands.dateLabel;
+    },
     to: "/dashboard/developer-tools/date-converter",
   },
   "developer-tools": {
-    description: "Explore all 8 integration utilities and converters.",
+    get description() {
+      return messages.overview.chat.commands.toolsDescription;
+    },
     icon: FileJson,
     id: "developer-tools",
-    label: "Developer tools catalog",
+    get label() {
+      return messages.overview.chat.commands.toolsLabel;
+    },
     to: "/dashboard/developer-tools",
   },
   endpoints: {
-    description: "Browse billers, endpoints, responses, and traffic history.",
+    get description() {
+      return messages.overview.chat.commands.endpointsDescription;
+    },
     icon: Plug,
     id: "endpoints",
-    label: "Open endpoint catalog",
+    get label() {
+      return messages.overview.chat.commands.endpointsLabel;
+    },
     to: "/dashboard/endpoints",
   },
   iso8583: {
-    description: "Generate and inspect ISO 8583 banking message streams.",
+    get description() {
+      return messages.overview.chat.commands.iso8583Description;
+    },
     icon: Code2,
     id: "iso8583",
-    label: "ISO 8583 generator",
+    get label() {
+      return messages.overview.chat.commands.iso8583Label;
+    },
     to: "/dashboard/developer-tools/iso8583-generator",
   },
   jwt: {
-    description: "Decode headers, claims, and verify cryptographic signatures.",
+    get description() {
+      return messages.overview.chat.commands.jwtDescription;
+    },
     icon: Fingerprint,
     id: "jwt",
-    label: "JWT inspector",
+    get label() {
+      return messages.overview.chat.commands.jwtLabel;
+    },
     to: "/dashboard/developer-tools/jwt-inspector",
   },
   nfc: {
-    description: "Parse NDEF text records and raw hex payload dumps.",
+    get description() {
+      return messages.overview.chat.commands.nfcDescription;
+    },
     icon: RadioReceiver,
     id: "nfc",
-    label: "NFC reader inspector",
+    get label() {
+      return messages.overview.chat.commands.nfcLabel;
+    },
     to: "/dashboard/developer-tools/nfc-reader-inspector",
   },
   schema: {
-    description: "Validate JSON payloads against Draft-07 and 2020-12 schemas.",
+    get description() {
+      return messages.overview.chat.commands.schemaDescription;
+    },
     icon: Braces,
     id: "schema",
-    label: "JSON schema validator",
+    get label() {
+      return messages.overview.chat.commands.schemaLabel;
+    },
     to: "/dashboard/developer-tools/json-schema-validator",
   },
   "socket-tester": {
-    description: "Exercise TCP client/server and UDP packet communication.",
+    get description() {
+      return messages.overview.chat.commands.socketsDescription;
+    },
     icon: Network,
     id: "socket-tester",
-    label: "Open socket tester",
+    get label() {
+      return messages.overview.chat.commands.socketsLabel;
+    },
     to: "/dashboard/socket-test/tcp-client",
   },
   "socks-relay": {
-    description:
-      "Monitor and configure SOCKS5 proxy routing for simulated protocols.",
+    get description() {
+      return messages.overview.chat.commands.socksRelayDescription;
+    },
     icon: ShieldCheck,
     id: "socks-relay",
-    label: "SOCKS relay proxy",
+    get label() {
+      return messages.overview.chat.commands.socksRelayLabel;
+    },
     to: "/dashboard/socks-relay/rest-api",
   },
   yaml: {
-    description:
-      "Convert and format documents between JSON and YAML in real time.",
+    get description() {
+      return messages.overview.chat.commands.yamlDescription;
+    },
     icon: FileJson,
     id: "yaml",
-    label: "JSON ↔ YAML converter",
+    get label() {
+      return messages.overview.chat.commands.yamlLabel;
+    },
     to: "/dashboard/developer-tools/json-yaml-converter",
   },
 };
@@ -488,19 +532,6 @@ function formatCount(count: number, singular: string, plural = `${singular}s`) {
   return `${count.toLocaleString()} ${count === 1 ? singular : plural}`;
 }
 
-function formatCountWithVerb(
-  count: number,
-  singular: string,
-  singularVerb: string,
-  pluralVerb: string
-) {
-  return `${formatCount(count, singular)} ${count === 1 ? singularVerb : pluralVerb}`;
-}
-
-function formatThereAre(count: number, singular: string, plural?: string) {
-  return `There ${count === 1 ? "is" : "are"} ${formatCount(count, singular, plural)}`;
-}
-
 function formatResponseGap(count: number) {
   return formatMessage(
     count === 1
@@ -511,9 +542,7 @@ function formatResponseGap(count: number) {
 }
 
 function getErrorMessage(error: ApiError | null) {
-  return (
-    error?.message || "The Overview API did not return a simulator snapshot."
-  );
+  return error?.message || messages.overview.chat.apiSnapshotUnavailable;
 }
 
 function getToolReply(query: string): ChatReply | undefined {
@@ -524,7 +553,7 @@ function getToolReply(query: string): ChatReply | undefined {
         allChatActions["developer-tools"],
         allChatActions["socket-tester"],
       ],
-      text: "Here are the available slash commands and queries you can run:\n\n• /snapshot — View complete simulator coverage and metrics\n• /endpoints — Review configured endpoints and HTTP methods\n• /billers — Breakdown of endpoints grouped by biller\n• /missing — Find endpoints without active response templates\n• /tools — Open the 8 developer integration tools\n• /jwt, /iso8583, /schema, /json-yaml, /cron, /base, /date, /nfc — Jump to specific developer tools\n• /sockets & /socks-relay — Socket and proxy test workspaces\n• /users — Account activity (Admin)\n• /refresh — Fetch latest overview snapshot\n• /clear — Reset chat conversation",
+      text: messages.overview.chat.replies.help,
     };
   }
 
@@ -533,7 +562,7 @@ function getToolReply(query: string): ChatReply | undefined {
       actions: [allChatActions.jwt, allChatActions["developer-tools"]],
       cardType: "tool-detail",
       selectedToolId: "jwt-inspector",
-      text: "The JWT Inspector allows you to decode JSON Web Tokens, inspect Header and Payload claims, and verify HS256/RS256 cryptographic signatures with instant validation.",
+      text: messages.overview.chat.replies.jwt,
     };
   }
 
@@ -542,7 +571,7 @@ function getToolReply(query: string): ChatReply | undefined {
       actions: [allChatActions.iso8583, allChatActions["developer-tools"]],
       cardType: "tool-detail",
       selectedToolId: "iso8583-generator",
-      text: "The ISO 8583 Generator helps you construct and simulate financial transaction messages, configure primary and secondary bitmaps, test MTIs (0100, 0200, 0800), and inspect packed byte streams.",
+      text: messages.overview.chat.replies.iso8583,
     };
   }
 
@@ -551,7 +580,7 @@ function getToolReply(query: string): ChatReply | undefined {
       actions: [allChatActions.yaml, allChatActions["developer-tools"]],
       cardType: "tool-detail",
       selectedToolId: "json-yaml-converter",
-      text: "The JSON ↔ YAML Converter provides bidirectional conversion with real-time error diagnostics, indentation settings, and format swap capabilities.",
+      text: messages.overview.chat.replies.yaml,
     };
   }
 
@@ -560,7 +589,7 @@ function getToolReply(query: string): ChatReply | undefined {
       actions: [allChatActions.schema, allChatActions["developer-tools"]],
       cardType: "tool-detail",
       selectedToolId: "json-schema-validator",
-      text: "The JSON Schema Validator checks JSON documents against Draft-07 and Draft 2020-12 specifications, reporting exact line/path diagnostics on validation errors.",
+      text: messages.overview.chat.replies.schema,
     };
   }
 
@@ -569,7 +598,7 @@ function getToolReply(query: string): ChatReply | undefined {
       actions: [allChatActions.cron, allChatActions["developer-tools"]],
       cardType: "tool-detail",
       selectedToolId: "cron-parser",
-      text: "The Cron Parser breaks down 5-field and 6-field (with seconds) cron expressions into plain language and calculates the next 5 scheduled execution timestamps.",
+      text: messages.overview.chat.replies.cron,
     };
   }
 
@@ -578,7 +607,7 @@ function getToolReply(query: string): ChatReply | undefined {
       actions: [allChatActions.base, allChatActions["developer-tools"]],
       cardType: "tool-detail",
       selectedToolId: "number-base-converter",
-      text: "The Number Base Converter handles real-time conversions across binary, octal, decimal, hexadecimal, and base64 formats with signed 2's complement and unsigned integer support.",
+      text: messages.overview.chat.replies.base,
     };
   }
 
@@ -587,7 +616,7 @@ function getToolReply(query: string): ChatReply | undefined {
       actions: [allChatActions.date, allChatActions["developer-tools"]],
       cardType: "tool-detail",
       selectedToolId: "date-converter",
-      text: "The Date & Timestamp Converter translates between Unix epoch seconds/milliseconds, ISO 8601 strings, and custom timezone offsets.",
+      text: messages.overview.chat.replies.date,
     };
   }
 
@@ -596,7 +625,7 @@ function getToolReply(query: string): ChatReply | undefined {
       actions: [allChatActions.nfc, allChatActions["developer-tools"]],
       cardType: "tool-detail",
       selectedToolId: "nfc-reader-inspector",
-      text: "The NFC Reader Inspector processes contactless scan streams, decoding NDEF text records and displaying raw hex dumps for hardware simulation.",
+      text: messages.overview.chat.replies.nfc,
     };
   }
 
@@ -604,7 +633,7 @@ function getToolReply(query: string): ChatReply | undefined {
     return {
       actions: [allChatActions["socket-tester"], allChatActions["socks-relay"]],
       cardType: "sockets",
-      text: "The Socket & Relay Workspace allows you to interactively test TCP client/server endpoints, UDP datagram flows, and configure SOCKS5 proxy relay tunnels.",
+      text: messages.overview.chat.replies.sockets,
     };
   }
 
@@ -612,7 +641,7 @@ function getToolReply(query: string): ChatReply | undefined {
     return {
       actions: [allChatActions["developer-tools"]],
       cardType: "developer-tools",
-      text: "The developer toolbox includes 8 specialized integration utilities for real-time conversion, validation, parsing, and payload inspection.",
+      text: messages.overview.chat.replies.tools,
     };
   }
 
@@ -634,8 +663,10 @@ function getDataReply(
       showSnapshot: true,
       text:
         count > 0
-          ? `${formatCountWithVerb(count, "endpoint", "still needs", "still need")} a response template. The attention signal and endpoint catalog below can help you close the gap.`
-          : "Every configured endpoint currently has a response template. The snapshot below shows the rest of the simulator coverage.",
+          ? formatMessage(messages.overview.chat.replies.missingWithGaps, {
+              count,
+            })
+          : messages.overview.chat.replies.missingWithoutGaps,
     };
   }
 
@@ -644,7 +675,13 @@ function getDataReply(
       actions: [allChatActions.endpoints],
       cardType: "endpoints",
       showSnapshot: true,
-      text: `The simulator currently has ${formatCount(stats.totalEndpoints, "configured endpoint")}. I’ve included the latest endpoint list and response coverage below.`,
+      text: formatMessage(messages.overview.chat.replies.endpointSummary, {
+        count: formatCount(
+          stats.totalEndpoints,
+          messages.overview.chat.count.configuredEndpoint,
+          messages.overview.chat.count.configuredEndpoints
+        ),
+      }),
     };
   }
 
@@ -653,7 +690,13 @@ function getDataReply(
       actions: [allChatActions.endpoints],
       cardType: "billers",
       showSnapshot: true,
-      text: `${formatThereAre(stats.totalBillers, "biller")} represented in the simulator. The snapshot groups endpoint coverage by biller so you can spot uneven setup quickly.`,
+      text: formatMessage(messages.overview.chat.replies.billerSummary, {
+        count: formatCount(
+          stats.totalBillers,
+          messages.overview.chat.count.biller,
+          messages.overview.chat.count.billers
+        ),
+      }),
     };
   }
 
@@ -661,7 +704,19 @@ function getDataReply(
     return {
       cardType: "snapshot",
       showSnapshot: true,
-      text: `${formatCountWithVerb(stats.totalResponses, "response template", "is", "are")} configured, and ${formatCountWithVerb(stats.activeResponses, "active response template", "is", "are")} active (${stats.activeResponsesPercentage}). The snapshot below separates activation from endpoint coverage.`,
+      text: formatMessage(messages.overview.chat.replies.responseSummary, {
+        active: formatCount(
+          stats.activeResponses,
+          messages.overview.chat.count.activeResponseTemplate,
+          messages.overview.chat.count.activeResponseTemplates
+        ),
+        percentage: stats.activeResponsesPercentage,
+        total: formatCount(
+          stats.totalResponses,
+          messages.overview.chat.count.responseTemplate,
+          messages.overview.chat.count.responseTemplates
+        ),
+      }),
     };
   }
 
@@ -669,14 +724,25 @@ function getDataReply(
     if (!(isAdmin && data.userStats)) {
       return {
         actions: [allChatActions.endpoints],
-        text: "Account activity is only available to administrators. I can still show billers, endpoints, and response coverage from this overview.",
+        text: messages.overview.chat.replies.adminUnavailable,
       };
     }
 
     return {
       cardType: "users",
       showSnapshot: true,
-      text: `${formatThereAre(data.userStats.totalUsers, "registered user")}, with ${formatCount(data.userStats.activeUsers, "active account")}. The administrator-only account signal is included in the snapshot below.`,
+      text: formatMessage(messages.overview.chat.replies.userSummary, {
+        accounts: formatCount(
+          data.userStats.activeUsers,
+          messages.overview.chat.count.activeAccount,
+          messages.overview.chat.count.activeAccounts
+        ),
+        users: formatCount(
+          data.userStats.totalUsers,
+          messages.overview.chat.count.registeredUser,
+          messages.overview.chat.count.registeredUsers
+        ),
+      }),
     };
   }
 
@@ -684,13 +750,13 @@ function getDataReply(
     return {
       cardType: "snapshot",
       showSnapshot: true,
-      text: "Here’s the current simulator read: billers, endpoints, response templates, activation, and the latest configured endpoints in one place.",
+      text: messages.overview.chat.replies.snapshotSummary,
     };
   }
 
   return {
     actions: workspaceActions,
-    text: "I can read the current simulator snapshot or take you to Endpoints, Developer Tools, and Socket Tester. Try typing /help to browse all commands.",
+    text: messages.overview.chat.replies.fallback,
   };
 }
 
@@ -701,7 +767,7 @@ function getAssistantReply(
 ): ChatReply {
   if (!data) {
     return {
-      text: "I can’t read the simulator snapshot yet. Try /refresh once the Overview API is available.",
+      text: messages.overview.chat.replies.unavailable,
       tone: "destructive",
     };
   }
@@ -791,7 +857,7 @@ function EndpointsSnapshotCard({ data }: { data: OverviewData }) {
   return (
     <motion.section
       animate={{ filter: "blur(0px)", opacity: 1, transform: "scale(1)" }}
-      aria-label="Live simulator snapshot"
+      aria-label={messages.overview.chat.liveSnapshotTitle}
       className="overview-chat-snapshot"
       initial={{ filter: "blur(3px)", opacity: 0, transform: "scale(0.98)" }}
       transition={{ duration: MOTION_DURATION.smooth, ease: MOTION_EASE.apple }}
@@ -799,38 +865,39 @@ function EndpointsSnapshotCard({ data }: { data: OverviewData }) {
       <header className="overview-chat-snapshot-header">
         <div>
           <span className="overview-chat-snapshot-kicker">
-            CONFIGURED CATALOG
+            {messages.overview.chat.snapshot.configuredCatalog}
           </span>
-          <h3>Live simulator snapshot</h3>
-          <p>
-            Endpoints configured in the simulator with HTTP method routing and
-            response coverage.
-          </p>
+          <h3>{messages.overview.chat.liveSnapshotTitle}</h3>
+          <p>{messages.overview.chat.snapshot.configuredCatalogDescription}</p>
         </div>
         <Badge variant="secondary">
-          {formatCount(stats.totalEndpoints, "endpoint")}
+          {formatCount(
+            stats.totalEndpoints,
+            messages.overview.chat.count.endpoint,
+            messages.overview.chat.count.endpoints
+          )}
         </Badge>
       </header>
 
       <div className="overview-chat-snapshot-grid">
         <SnapshotMetric
           icon={Plug}
-          label="TOTAL ENDPOINTS"
+          label={messages.overview.chat.endpointsLabel}
           value={stats.totalEndpoints}
         />
         <SnapshotMetric
           icon={CheckCircle}
-          label="ACTIVE RESPONSES"
+          label={messages.overview.chat.activatedLabel}
           value={stats.activeResponses}
         />
         <SnapshotMetric
           icon={Building2}
-          label="BILLERS"
+          label={messages.overview.chat.billersLabel}
           value={stats.totalBillers}
         />
         <SnapshotMetric
           icon={CircleAlert}
-          label="NEED TEMPLATES"
+          label={messages.overview.chat.snapshot.missingResponses}
           value={stats.endpointsWithoutResponses}
         />
       </div>
@@ -838,7 +905,7 @@ function EndpointsSnapshotCard({ data }: { data: OverviewData }) {
       <div className="overview-chat-snapshot-details">
         <div className="overview-chat-snapshot-section">
           <SnapshotSectionHeading icon={ArrowUpDown}>
-            HTTP METHOD BREAKDOWN
+            {messages.overview.chat.snapshot.httpMethodBreakdown}
           </SnapshotSectionHeading>
           <div className="overview-chat-methods-wrap">
             {methods.map((item) => (
@@ -858,21 +925,30 @@ function EndpointsSnapshotCard({ data }: { data: OverviewData }) {
 
         <div className="overview-chat-snapshot-section">
           <SnapshotSectionHeading icon={Activity}>
-            RESPONSE COVERAGE
+            {messages.overview.chat.snapshot.responseCoverage}
           </SnapshotSectionHeading>
           <div className="overview-chat-attention-copy">
             <strong>
-              {stats.activeResponses} of {stats.totalResponses} templates active
-              ({stats.activeResponsesPercentage})
+              {formatMessage(
+                messages.overview.chat.snapshot.activeTemplateSummary,
+                {
+                  active: stats.activeResponses,
+                  percentage: stats.activeResponsesPercentage,
+                  total: stats.totalResponses,
+                }
+              )}
             </strong>
             <p>
               {stats.endpointsWithoutResponses === 0
-                ? "All configured endpoints have active response scenarios."
-                : `${stats.endpointsWithoutResponses} endpoint(s) still need response templates.`}
+                ? messages.overview.chat.snapshot.allConfiguredActiveResponses
+                : formatMessage(
+                    messages.overview.chat.snapshot.missingTemplateSummary,
+                    { count: stats.endpointsWithoutResponses }
+                  )}
             </p>
           </div>
           <div
-            aria-label="Active response coverage"
+            aria-label={messages.overview.chat.snapshot.responseCoverageAria}
             aria-valuemax={stats.totalResponses || 1}
             aria-valuemin={0}
             aria-valuenow={stats.activeResponses}
@@ -895,10 +971,10 @@ function EndpointsSnapshotCard({ data }: { data: OverviewData }) {
       <div className="overview-chat-snapshot-section overview-chat-recent-section">
         <div className="overview-chat-recent-heading">
           <SnapshotSectionHeading icon={Clock3}>
-            RECENT CONFIGURATIONS
+            {messages.overview.chat.snapshot.recentConfigurations}
           </SnapshotSectionHeading>
           <Link className="overview-chat-inline-link" to="/dashboard/endpoints">
-            <span>Open endpoint catalog</span>
+            <span>{messages.overview.chat.openEndpoints}</span>
             <HugeiconsIcon
               aria-hidden="true"
               icon={ArrowRight01Icon}
@@ -927,7 +1003,11 @@ function EndpointsSnapshotCard({ data }: { data: OverviewData }) {
                   <strong>{endpoint.url}</strong>
                   <span>
                     {endpoint.billerName} ·{" "}
-                    {formatCount(endpoint.responseCount, "response")}
+                    {formatCount(
+                      endpoint.responseCount,
+                      messages.overview.chat.count.response,
+                      messages.overview.chat.count.responses
+                    )}
                   </span>
                 </span>
                 <HugeiconsIcon
@@ -948,7 +1028,9 @@ function EndpointsSnapshotCard({ data }: { data: OverviewData }) {
 
       <footer className="overview-chat-snapshot-footer">
         <Info aria-hidden="true" />
-        <span>Configured endpoints are available for scenario generation.</span>
+        <span>
+          {messages.overview.chat.snapshot.configuredEndpointsAvailable}
+        </span>
       </footer>
     </motion.section>
   );
@@ -964,7 +1046,7 @@ function BillerSnapshotCard({ data }: { data: OverviewData }) {
   return (
     <motion.section
       animate={{ filter: "blur(0px)", opacity: 1, transform: "scale(1)" }}
-      aria-label="Live simulator snapshot"
+      aria-label={messages.overview.chat.liveSnapshotTitle}
       className="overview-chat-snapshot"
       initial={{ filter: "blur(3px)", opacity: 0, transform: "scale(0.98)" }}
       transition={{ duration: MOTION_DURATION.smooth, ease: MOTION_EASE.apple }}
@@ -972,38 +1054,39 @@ function BillerSnapshotCard({ data }: { data: OverviewData }) {
       <header className="overview-chat-snapshot-header">
         <div>
           <span className="overview-chat-snapshot-kicker">
-            PROVIDER DIRECTORY
+            {messages.overview.chat.snapshot.providerDirectory}
           </span>
-          <h3>Live simulator snapshot</h3>
-          <p>
-            Distribution of endpoints and mock response templates across
-            simulated billers.
-          </p>
+          <h3>{messages.overview.chat.liveSnapshotTitle}</h3>
+          <p>{messages.overview.chat.snapshot.providerDistribution}</p>
         </div>
         <Badge variant="secondary">
-          {formatCount(stats.totalBillers, "biller")}
+          {formatCount(
+            stats.totalBillers,
+            messages.overview.chat.count.biller,
+            messages.overview.chat.count.billers
+          )}
         </Badge>
       </header>
 
       <div className="overview-chat-snapshot-grid">
         <SnapshotMetric
           icon={Building2}
-          label="BILLERS"
+          label={messages.overview.chat.billersLabel}
           value={stats.totalBillers}
         />
         <SnapshotMetric
           icon={Plug}
-          label="TOTAL ENDPOINTS"
+          label={messages.overview.chat.endpointsLabel}
           value={stats.totalEndpoints}
         />
         <SnapshotMetric
           icon={CheckCircle}
-          label="ACTIVE TEMPLATES"
+          label={messages.overview.chat.responseTemplatesLabel}
           value={stats.activeResponses}
         />
         <SnapshotMetric
           icon={CircleAlert}
-          label="UNCONFIGURED"
+          label={messages.overview.chat.snapshot.missingResponses}
           value={stats.endpointsWithoutResponses}
         />
       </div>
@@ -1011,10 +1094,10 @@ function BillerSnapshotCard({ data }: { data: OverviewData }) {
       <div className="overview-chat-snapshot-section">
         <div className="overview-chat-recent-heading">
           <SnapshotSectionHeading icon={Building2}>
-            ALL BILLER PROVIDERS
+            {messages.overview.chat.snapshot.allBillerProviders}
           </SnapshotSectionHeading>
           <Link className="overview-chat-inline-link" to="/dashboard/endpoints">
-            <span>Filter in catalog</span>
+            <span>{messages.overview.chat.snapshot.filterInCatalog}</span>
             <HugeiconsIcon
               aria-hidden="true"
               icon={ArrowRight01Icon}
@@ -1030,11 +1113,18 @@ function BillerSnapshotCard({ data }: { data: OverviewData }) {
                 <div className="overview-chat-biller-name">
                   <span>{biller.billerName}</span>
                   <strong>
-                    {formatCount(biller.endpointCount, "endpoint")}
+                    {formatCount(
+                      biller.endpointCount,
+                      messages.overview.chat.count.endpoint,
+                      messages.overview.chat.count.endpoints
+                    )}
                   </strong>
                 </div>
                 <div
-                  aria-label={`${biller.billerName} coverage`}
+                  aria-label={formatMessage(
+                    messages.overview.chat.snapshot.billerCoverageAria,
+                    { name: biller.billerName }
+                  )}
                   aria-valuemax={maxEndpoints}
                   aria-valuemin={0}
                   aria-valuenow={biller.endpointCount}
@@ -1053,15 +1143,15 @@ function BillerSnapshotCard({ data }: { data: OverviewData }) {
             ))}
           </div>
         ) : (
-          <p className="overview-chat-empty-copy">No billers registered yet.</p>
+          <p className="overview-chat-empty-copy">
+            {messages.overview.chat.snapshot.noBillersRegistered}
+          </p>
         )}
       </div>
 
       <footer className="overview-chat-snapshot-footer">
         <Info aria-hidden="true" />
-        <span>
-          Endpoints are grouped by provider to identify unbalanced coverage.
-        </span>
+        <span>{messages.overview.chat.snapshot.groupedByProvider}</span>
       </footer>
     </motion.section>
   );
@@ -1075,44 +1165,47 @@ function MissingResponsesSnapshotCard({ data }: { data: OverviewData }) {
   return (
     <motion.section
       animate={{ filter: "blur(0px)", opacity: 1, transform: "scale(1)" }}
-      aria-label="Live simulator snapshot"
+      aria-label={messages.overview.chat.liveSnapshotTitle}
       className="overview-chat-snapshot"
       initial={{ filter: "blur(3px)", opacity: 0, transform: "scale(0.98)" }}
       transition={{ duration: MOTION_DURATION.smooth, ease: MOTION_EASE.apple }}
     >
       <header className="overview-chat-snapshot-header">
         <div>
-          <span className="overview-chat-snapshot-kicker">GAP ANALYSIS</span>
-          <h3>Live simulator snapshot</h3>
-          <p>
-            Endpoints lacking active response scenarios or requiring scenario
-            configuration.
-          </p>
+          <span className="overview-chat-snapshot-kicker">
+            {messages.overview.chat.snapshot.gapAnalysis}
+          </span>
+          <h3>{messages.overview.chat.liveSnapshotTitle}</h3>
+          <p>{messages.overview.chat.snapshot.missingDescription}</p>
         </div>
         <Badge variant={hasGaps ? "destructive" : "secondary"}>
-          {hasGaps ? `${count} need attention` : "100% coverage"}
+          {hasGaps
+            ? formatMessage(messages.overview.chat.snapshot.needAttention, {
+                count,
+              })
+            : messages.overview.chat.snapshot.coverageReady}
         </Badge>
       </header>
 
       <div className="overview-chat-snapshot-grid">
         <SnapshotMetric
           icon={CircleAlert}
-          label="MISSING RESPONSES"
+          label={messages.overview.chat.snapshot.missingResponses}
           value={count}
         />
         <SnapshotMetric
           icon={Plug}
-          label="TOTAL ENDPOINTS"
+          label={messages.overview.chat.endpointsLabel}
           value={stats.totalEndpoints}
         />
         <SnapshotMetric
           icon={CheckCircle}
-          label="CONFIGURED TEMPLATES"
+          label={messages.overview.chat.snapshot.configuredTemplates}
           value={stats.totalResponses}
         />
         <SnapshotMetric
           icon={Activity}
-          label="ACTIVATION RATE"
+          label={messages.overview.chat.snapshot.activationRate}
           value={stats.activeResponsesPercentage}
         />
       </div>
@@ -1121,13 +1214,16 @@ function MissingResponsesSnapshotCard({ data }: { data: OverviewData }) {
         <div className="overview-chat-attention-copy">
           <strong>
             {hasGaps
-              ? `${count} endpoint(s) require scenario templates`
-              : "Every configured endpoint currently has an active response template"}
+              ? formatMessage(
+                  messages.overview.chat.snapshot.requireScenarioTemplates,
+                  { count }
+                )
+              : messages.overview.chat.snapshot.allEndpointsTemplate}
           </strong>
           <p>
             {hasGaps
-              ? "Without a response template, incoming simulator calls to these endpoints will receive default or 404 responses. Open the endpoint catalog to create mock scenarios."
-              : "All simulator endpoints are equipped with active mock responses and ready for test traffic."}
+              ? messages.overview.chat.snapshot.requireScenarioDescription
+              : messages.overview.chat.snapshot.allEndpointsDescription}
           </p>
         </div>
       </div>
@@ -1135,10 +1231,10 @@ function MissingResponsesSnapshotCard({ data }: { data: OverviewData }) {
       <div className="overview-chat-snapshot-section overview-chat-recent-section">
         <div className="overview-chat-recent-heading">
           <SnapshotSectionHeading icon={Clock3}>
-            ENDPOINTS IN CATALOG
+            {messages.overview.chat.snapshot.endpointsInCatalog}
           </SnapshotSectionHeading>
           <Link className="overview-chat-inline-link" to="/dashboard/endpoints">
-            <span>Open endpoint catalog</span>
+            <span>{messages.overview.chat.openEndpoints}</span>
             <HugeiconsIcon
               aria-hidden="true"
               icon={ArrowRight01Icon}
@@ -1167,7 +1263,11 @@ function MissingResponsesSnapshotCard({ data }: { data: OverviewData }) {
                   <strong>{endpoint.url}</strong>
                   <span>
                     {endpoint.billerName} ·{" "}
-                    {formatCount(endpoint.responseCount, "response")}
+                    {formatCount(
+                      endpoint.responseCount,
+                      messages.overview.chat.count.response,
+                      messages.overview.chat.count.responses
+                    )}
                   </span>
                 </span>
                 <HugeiconsIcon
@@ -1184,10 +1284,7 @@ function MissingResponsesSnapshotCard({ data }: { data: OverviewData }) {
 
       <footer className="overview-chat-snapshot-footer">
         <Info aria-hidden="true" />
-        <span>
-          Every endpoint requires at least one active response template for full
-          simulation.
-        </span>
+        <span>{messages.overview.chat.snapshot.requiresActiveTemplate}</span>
       </footer>
     </motion.section>
   );
@@ -1207,7 +1304,7 @@ function DeveloperToolsSnapshotCard({
     return (
       <motion.section
         animate={{ filter: "blur(0px)", opacity: 1, transform: "scale(1)" }}
-        aria-label="Live simulator snapshot"
+        aria-label={messages.overview.chat.liveSnapshotTitle}
         className="overview-chat-snapshot"
         initial={{ filter: "blur(3px)", opacity: 0, transform: "scale(0.98)" }}
         transition={{
@@ -1218,9 +1315,9 @@ function DeveloperToolsSnapshotCard({
         <header className="overview-chat-snapshot-header">
           <div>
             <span className="overview-chat-snapshot-kicker">
-              INTEGRATION UTILITY
+              {messages.overview.chat.snapshot.integrationUtility}
             </span>
-            <h3>Live simulator snapshot</h3>
+            <h3>{messages.overview.chat.liveSnapshotTitle}</h3>
             <p>{selectedTool.description}</p>
           </div>
           <Badge variant="secondary">{selectedTool.categoryId}</Badge>
@@ -1229,36 +1326,40 @@ function DeveloperToolsSnapshotCard({
         <div className="overview-chat-snapshot-grid">
           <SnapshotMetric
             icon={Icon}
-            label="UTILITY"
+            label={messages.overview.chat.snapshot.utility}
             value={selectedTool.name}
           />
           <SnapshotMetric
             icon={Clock3}
-            label="RUNTIME"
+            label={messages.overview.chat.snapshot.runtime}
             value={selectedTool.runtime}
           />
           <SnapshotMetric
             icon={Activity}
-            label="MAX PAYLOAD"
+            label={messages.overview.chat.snapshot.maxPayload}
             value={selectedTool.limit}
           />
           <SnapshotMetric
             icon={ShieldCheck}
-            label="ENVIRONMENT"
-            value="Client-side"
+            label={messages.overview.chat.snapshot.environment}
+            value={messages.overview.chat.snapshot.clientSide}
           />
         </div>
 
         <div className="overview-chat-snapshot-section">
           <div className="overview-chat-recent-heading">
             <SnapshotSectionHeading icon={Icon}>
-              LAUNCH TOOL
+              {messages.overview.chat.snapshot.launchTool}
             </SnapshotSectionHeading>
             <Link
               className="overview-chat-inline-link"
               to={getDeveloperToolHref(selectedTool)}
             >
-              <span>Open {selectedTool.name}</span>
+              <span>
+                {formatMessage(messages.overview.chat.snapshot.openTool, {
+                  name: selectedTool.name,
+                })}
+              </span>
               <HugeiconsIcon
                 aria-hidden="true"
                 icon={ArrowRight01Icon}
@@ -1273,9 +1374,7 @@ function DeveloperToolsSnapshotCard({
 
         <footer className="overview-chat-snapshot-footer">
           <Info aria-hidden="true" />
-          <span>
-            Runs locally in browser with zero network latency or data leakage.
-          </span>
+          <span>{messages.overview.chat.snapshot.localUtilityFooter}</span>
         </footer>
       </motion.section>
     );
@@ -1284,7 +1383,7 @@ function DeveloperToolsSnapshotCard({
   return (
     <motion.section
       animate={{ filter: "blur(0px)", opacity: 1, transform: "scale(1)" }}
-      aria-label="Live simulator snapshot"
+      aria-label={messages.overview.chat.liveSnapshotTitle}
       className="overview-chat-snapshot"
       initial={{ filter: "blur(3px)", opacity: 0, transform: "scale(0.98)" }}
       transition={{ duration: MOTION_DURATION.smooth, ease: MOTION_EASE.apple }}
@@ -1292,15 +1391,16 @@ function DeveloperToolsSnapshotCard({
       <header className="overview-chat-snapshot-header">
         <div>
           <span className="overview-chat-snapshot-kicker">
-            INTEGRATION TOOLBOX
+            {messages.overview.chat.snapshot.integrationToolbox}
           </span>
-          <h3>Live simulator snapshot</h3>
-          <p>
-            8 client-side utilities for payload conversion, validation, parsing,
-            and inspection.
-          </p>
+          <h3>{messages.overview.chat.liveSnapshotTitle}</h3>
+          <p>{messages.overview.chat.snapshot.toolboxDescription}</p>
         </div>
-        <Badge variant="secondary">8 utilities</Badge>
+        <Badge variant="secondary">
+          {formatMessage(messages.overview.chat.snapshot.utilityCount, {
+            count: DEVELOPER_TOOLS.length,
+          })}
+        </Badge>
       </header>
 
       <div className="overview-chat-card-grid">
@@ -1332,10 +1432,7 @@ function DeveloperToolsSnapshotCard({
 
       <footer className="overview-chat-snapshot-footer">
         <Info aria-hidden="true" />
-        <span>
-          Developer utilities run locally in your browser for instant payload
-          manipulation.
-        </span>
+        <span>{messages.overview.chat.snapshot.developerUtilitiesFooter}</span>
       </footer>
     </motion.section>
   );
@@ -1344,35 +1441,47 @@ function DeveloperToolsSnapshotCard({
 function SocketsSnapshotCard() {
   const socketTools = [
     {
-      description:
-        "Interactive TCP client for sending custom payloads & streaming responses.",
+      get description() {
+        return messages.overview.chat.snapshot.tcpClientDescription;
+      },
       icon: Network,
       id: "tcp-client",
-      name: "TCP Client",
+      get name() {
+        return messages.overview.chat.snapshot.tcpClient;
+      },
       to: "/dashboard/socket-test/tcp-client" as const,
     },
     {
-      description:
-        "Capture incoming client TCP connections and echo or mock replies.",
+      get description() {
+        return messages.overview.chat.snapshot.tcpServerDescription;
+      },
       icon: Activity,
       id: "tcp-server",
-      name: "TCP Server",
+      get name() {
+        return messages.overview.chat.snapshot.tcpServer;
+      },
       to: "/dashboard/socket-test/tcp-client" as const,
     },
     {
-      description:
-        "Send connectionless UDP packets and observe receiver responses.",
+      get description() {
+        return messages.overview.chat.snapshot.udpDatagramDescription;
+      },
       icon: RadioReceiver,
       id: "udp",
-      name: "UDP Datagram",
+      get name() {
+        return messages.overview.chat.snapshot.udpDatagram;
+      },
       to: "/dashboard/socket-test/tcp-client" as const,
     },
     {
-      description:
-        "Inspect SOCKS5 proxy routing for REST API and ISO 8583 traffic.",
+      get description() {
+        return messages.overview.chat.snapshot.socksRelayProxyDescription;
+      },
       icon: ShieldCheck,
       id: "socks-relay",
-      name: "SOCKS Relay Proxy",
+      get name() {
+        return messages.overview.chat.snapshot.socksRelayProxy;
+      },
       to: "/dashboard/socks-relay/rest-api" as const,
     },
   ];
@@ -1380,7 +1489,7 @@ function SocketsSnapshotCard() {
   return (
     <motion.section
       animate={{ filter: "blur(0px)", opacity: 1, transform: "scale(1)" }}
-      aria-label="Live simulator snapshot"
+      aria-label={messages.overview.chat.liveSnapshotTitle}
       className="overview-chat-snapshot"
       initial={{ filter: "blur(3px)", opacity: 0, transform: "scale(0.98)" }}
       transition={{ duration: MOTION_DURATION.smooth, ease: MOTION_EASE.apple }}
@@ -1388,15 +1497,14 @@ function SocketsSnapshotCard() {
       <header className="overview-chat-snapshot-header">
         <div>
           <span className="overview-chat-snapshot-kicker">
-            NETWORK TRANSPORT
+            {messages.overview.chat.snapshot.networkTransport}
           </span>
-          <h3>Live simulator snapshot</h3>
-          <p>
-            Low-level socket testing utilities and secure SOCKS5 proxy relay
-            workspaces.
-          </p>
+          <h3>{messages.overview.chat.liveSnapshotTitle}</h3>
+          <p>{messages.overview.chat.snapshot.networkTransportDescription}</p>
         </div>
-        <Badge variant="secondary">TCP / UDP / SOCKS5</Badge>
+        <Badge variant="secondary">
+          {messages.overview.chat.snapshot.networkProtocols}
+        </Badge>
       </header>
 
       <div className="overview-chat-card-grid">
@@ -1428,9 +1536,7 @@ function SocketsSnapshotCard() {
 
       <footer className="overview-chat-snapshot-footer">
         <Info aria-hidden="true" />
-        <span>
-          Socket and proxy utilities enable multi-protocol transport testing.
-        </span>
+        <span>{messages.overview.chat.snapshot.networkTransportFooter}</span>
       </footer>
     </motion.section>
   );
@@ -1445,42 +1551,43 @@ function UserStatsSnapshotCard({ data }: { data: OverviewData }) {
   return (
     <motion.section
       animate={{ filter: "blur(0px)", opacity: 1, transform: "scale(1)" }}
-      aria-label="Live simulator snapshot"
+      aria-label={messages.overview.chat.liveSnapshotTitle}
       className="overview-chat-snapshot"
       initial={{ filter: "blur(3px)", opacity: 0, transform: "scale(0.98)" }}
       transition={{ duration: MOTION_DURATION.smooth, ease: MOTION_EASE.apple }}
     >
       <header className="overview-chat-snapshot-header">
         <div>
-          <span className="overview-chat-snapshot-kicker">ACCESS CONTROL</span>
-          <h3>Live simulator snapshot</h3>
-          <p>
-            Administrator-only view of registered user accounts and system
-            permissions.
-          </p>
+          <span className="overview-chat-snapshot-kicker">
+            {messages.overview.chat.snapshot.accessControl}
+          </span>
+          <h3>{messages.overview.chat.liveSnapshotTitle}</h3>
+          <p>{messages.overview.chat.snapshot.administratorOnlyDescription}</p>
         </div>
-        <Badge variant="secondary">Administrator signal</Badge>
+        <Badge variant="secondary">
+          {messages.overview.chat.snapshot.administratorSignal}
+        </Badge>
       </header>
 
       <div className="overview-chat-snapshot-grid">
         <SnapshotMetric
           icon={Users}
-          label="TOTAL ACCOUNTS"
+          label={messages.overview.chat.snapshot.totalAccounts}
           value={userStats.totalUsers}
         />
         <SnapshotMetric
           icon={CheckCircle}
-          label="ACTIVE USERS"
+          label={messages.overview.chartLabels.activeUsers}
           value={userStats.activeUsers}
         />
         <SnapshotMetric
           icon={CircleAlert}
-          label="INACTIVE USERS"
+          label={messages.overview.chartLabels.inactiveUsers}
           value={userStats.inactiveUsers}
         />
         <SnapshotMetric
           icon={ShieldCheck}
-          label="ADMINISTRATORS"
+          label={messages.overview.chat.snapshot.administrators}
           value={userStats.adminUsers}
         />
       </div>
@@ -1488,20 +1595,29 @@ function UserStatsSnapshotCard({ data }: { data: OverviewData }) {
       <div className="overview-chat-snapshot-section">
         <div className="overview-chat-attention-copy">
           <strong>
-            {userStats.activeUsers} of {userStats.totalUsers} registered
-            accounts are active
+            {formatMessage(
+              messages.overview.chat.snapshot.accountActiveSummary,
+              {
+                active: userStats.activeUsers,
+                total: userStats.totalUsers,
+              }
+            )}
           </strong>
           <p>
-            The simulator maintains {userStats.adminUsers} administrator role(s)
-            with full configuration and user management privileges, and{" "}
-            {userStats.regularUsers} standard user(s).
+            {formatMessage(
+              messages.overview.chat.snapshot.administratorSummary,
+              {
+                administrators: userStats.adminUsers,
+                regular: userStats.regularUsers,
+              }
+            )}
           </p>
         </div>
       </div>
 
       <footer className="overview-chat-snapshot-footer">
         <Info aria-hidden="true" />
-        <span>Account metrics are restricted to administrators.</span>
+        <span>{messages.overview.chat.snapshot.administratorRestricted}</span>
       </footer>
     </motion.section>
   );
@@ -1535,7 +1651,7 @@ function OverviewSnapshotCard({
         opacity: 1,
         transform: "translateY(0) scale(1)",
       }}
-      aria-label="Live simulator snapshot"
+      aria-label={messages.overview.chat.liveSnapshotTitle}
       className="overview-chat-snapshot"
       exit={{
         filter: "blur(4px)",
@@ -1551,14 +1667,18 @@ function OverviewSnapshotCard({
     >
       <header className="overview-chat-snapshot-header">
         <div className="min-w-0">
-          <div className="overview-chat-message-label">Current read</div>
+          <div className="overview-chat-message-label">
+            {messages.overview.chat.snapshot.currentRead}
+          </div>
           <h2>{messages.overview.chat.liveSnapshotTitle}</h2>
           <p>{messages.overview.chat.liveSnapshotDescription}</p>
         </div>
         <Badge variant={hasAttention ? "destructive" : "secondary"}>
           {hasAttention
-            ? `${stats.endpointsWithoutResponses} attention`
-            : "Coverage ready"}
+            ? formatMessage(messages.overview.chat.snapshot.needAttention, {
+                count: stats.endpointsWithoutResponses,
+              })
+            : messages.overview.chat.snapshot.coverageReady}
         </Badge>
       </header>
 
@@ -1607,7 +1727,10 @@ function OverviewSnapshotCard({
                     <strong>{biller.endpointCount}</strong>
                   </div>
                   <div
-                    aria-label={`${biller.billerName} coverage`}
+                    aria-label={formatMessage(
+                      messages.overview.chat.snapshot.billerCoverageAria,
+                      { name: biller.billerName }
+                    )}
                     aria-valuemax={maxBillerEndpointCount}
                     aria-valuemin={0}
                     aria-valuenow={biller.endpointCount}
@@ -1629,7 +1752,7 @@ function OverviewSnapshotCard({
             </div>
           ) : (
             <p className="overview-chat-empty-copy">
-              No biller coverage is available yet.
+              {messages.overview.chat.snapshot.noBillerCoverage}
             </p>
           )}
         </div>
@@ -1645,8 +1768,13 @@ function OverviewSnapshotCard({
                 : messages.overview.chat.healthyCoverage}
             </strong>
             <p>
-              {stats.activeResponses} of {stats.totalResponses} response
-              templates are active.
+              {formatMessage(
+                messages.overview.chat.snapshot.responseTemplatesActive,
+                {
+                  active: stats.activeResponses,
+                  total: stats.totalResponses,
+                }
+              )}
             </p>
           </div>
           <div
@@ -1663,8 +1791,10 @@ function OverviewSnapshotCard({
             <div className="overview-chat-section-heading overview-chat-account-signal">
               <Users aria-hidden="true" />
               <span>
-                {formatCount(data.userStats.activeUsers, "active account")} ·{" "}
-                {formatCount(data.userStats.totalUsers, "registered user")}
+                {formatMessage(messages.overview.chat.snapshot.accountSignal, {
+                  active: data.userStats.activeUsers,
+                  registered: data.userStats.totalUsers,
+                })}
               </span>
             </div>
           ) : null}
@@ -1705,7 +1835,11 @@ function OverviewSnapshotCard({
                   <strong>{endpoint.url}</strong>
                   <span>
                     {endpoint.billerName} ·{" "}
-                    {formatCount(endpoint.responseCount, "response")}
+                    {formatCount(
+                      endpoint.responseCount,
+                      messages.overview.chat.count.response,
+                      messages.overview.chat.count.responses
+                    )}
                   </span>
                 </span>
                 <HugeiconsIcon
@@ -1735,7 +1869,7 @@ function OverviewSnapshotCard({
 function OverviewSnapshotSkeleton() {
   return (
     <div
-      aria-label="Reading simulator coverage"
+      aria-label={messages.overview.chat.loadingSnapshot}
       className="overview-chat-snapshot-skeleton"
       role="status"
     >
@@ -1907,7 +2041,7 @@ type OperatorMascotProps = {
 function OperatorMascot({ compact = false, state }: OperatorMascotProps) {
   const isThinking = state === "thinking";
   const shouldReduceMotion = useReducedMotion();
-  const label = compact ? undefined : "Biller operator mascot reading a tablet";
+  const label = compact ? undefined : messages.overview.chat.operatorMascotAlt;
   const mediaClass = cn(
     compact
       ? "overview-operator-mascot-compact-image"
@@ -2007,7 +2141,9 @@ function OverviewChatTranscript({
     id: message.id,
     title:
       message.text.split("\n", 1)[0]?.trim() ||
-      (message.role === "user" ? "Your message" : "Assistant response"),
+      (message.role === "user"
+        ? messages.overview.chat.yourMessage
+        : messages.overview.chat.assistantResponse),
   }));
 
   useEffect(() => {
@@ -2033,7 +2169,7 @@ function OverviewChatTranscript({
         data-follow-latest="true"
       >
         <MessageScrollerViewport
-          aria-label="Simulator overview conversation"
+          aria-label={messages.overview.chat.conversationLabel}
           className="overview-chat-viewport"
         >
           <MessageScrollerContent
@@ -2110,7 +2246,7 @@ function OverviewChatTranscript({
           </MessageScrollerContent>
         </MessageScrollerViewport>
         <MessageScrollerButton
-          aria-label="Scroll to latest response"
+          aria-label={messages.overview.chat.scrollLatest}
           className="overview-chat-scroll-latest"
         />
       </MessageScroller>
@@ -2220,11 +2356,13 @@ export function OverviewChat({
         if (result.data && !result.error) {
           appendAssistantMessage({
             showSnapshot: true,
-            text: "The overview is refreshed. Here’s the latest simulator read.",
+            text: messages.overview.chat.replies.refreshSuccess,
           });
         } else {
           appendAssistantMessage({
-            text: `I couldn’t refresh the simulator snapshot. ${getErrorMessage(result.error)}`,
+            text: formatMessage(messages.overview.chat.replies.refreshFailed, {
+              error: getErrorMessage(result.error),
+            }),
             tone: "destructive",
           });
         }
@@ -2235,7 +2373,7 @@ export function OverviewChat({
         }
 
         appendAssistantMessage({
-          text: "I couldn’t refresh the simulator snapshot. Try again shortly.",
+          text: messages.overview.chat.replies.refreshFailedTryAgain,
           tone: "destructive",
         });
       } finally {
@@ -2312,7 +2450,7 @@ export function OverviewChat({
       >
         <LayoutGroup id="overview-chat">
           <section
-            aria-label="Simulator overview conversation"
+            aria-label={messages.overview.chat.conversationLabel}
             className="overview-chat-panel"
           >
             {hasConversation ? null : <OverviewChatAmbient />}

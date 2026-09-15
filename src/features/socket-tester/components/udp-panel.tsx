@@ -148,10 +148,7 @@ export function UdpPanel({
               icon={SentIcon}
               strokeWidth={2}
             />
-            <p>
-              UDP sends are stateless. Start the listener only when you also
-              need inbound datagrams captured in the console.
-            </p>
+            <p>{socketMessages.udpStatelessDescription}</p>
           </div>
         </div>
         <SendPanel

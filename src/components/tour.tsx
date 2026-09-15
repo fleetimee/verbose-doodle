@@ -134,6 +134,8 @@ function calculateContentPosition(
   return { left, top };
 }
 
+import { useI18n } from "@/components/i18n-provider";
+
 export function TourProvider({
   isTourCompleted = false,
   closeable = false,
@@ -145,6 +147,7 @@ export function TourProvider({
   onComplete,
   onStepChange,
 }: TourProviderProps) {
+  const { messages } = useI18n();
   const [steps, setSteps] = useState<TourStep[]>([]);
   const [currentStep, setCurrentStep] = useState(-1);
   const [activeTourId, setActiveTourId] = useState<string | null>(null);
@@ -481,7 +484,7 @@ export function TourProvider({
                     type="button"
                   >
                     <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
-                    <span className="sr-only">Close</span>
+                    <span className="sr-only">{messages.common.close}</span>
                   </button>
                 )}
               </div>
@@ -525,7 +528,7 @@ export function TourProvider({
                         onClick={endTour}
                         type="button"
                       >
-                        Skip tour
+                        {messages.common.skipTour}
                       </button>
                     ) : (
                       <div />
@@ -537,11 +540,13 @@ export function TourProvider({
                           size="sm"
                           variant="outline"
                         >
-                          Previous
+                          {messages.common.previous}
                         </Button>
                       )}
                       <Button onClick={nextStep} size="sm">
-                        {currentStep === steps.length - 1 ? "Finish" : "Next"}
+                        {currentStep === steps.length - 1
+                          ? messages.common.finish
+                          : messages.common.next}
                       </Button>
                     </div>
                   </div>
@@ -572,6 +577,7 @@ export function TourAlertDialog({
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }) {
+  const { messages } = useI18n();
   const { startTour, steps, isTourCompleted, currentStep } = useTour();
   const shouldReduceMotion = useReducedMotion();
 
@@ -622,19 +628,18 @@ export function TourAlertDialog({
             </motion.div>
           </div>
           <AlertDialogTitle className="text-center font-medium text-xl">
-            Welcome to the Tour
+            {messages.common.welcomeToTour}
           </AlertDialogTitle>
           <AlertDialogDescription className="mt-2 text-center text-muted-foreground text-sm">
-            Take a quick tour to learn about the key features and functionality
-            of this application.
+            {messages.common.tourWelcomeDescription}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="mt-6 flex flex-col gap-3">
           <Button className="w-full" onClick={() => startTour()}>
-            Start Tour
+            {messages.common.startTour}
           </Button>
           <Button className="w-full" onClick={handleSkip} variant="ghost">
-            Skip Tour
+            {messages.common.skipTour}
           </Button>
         </div>
       </AlertDialogContent>

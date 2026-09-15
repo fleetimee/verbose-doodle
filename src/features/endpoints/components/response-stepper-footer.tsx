@@ -5,6 +5,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -15,6 +16,7 @@ import {
   INACTIVE_INDICATOR_SCALE,
   STEPS,
 } from "@/features/endpoints/constants/stepper-steps";
+import { formatMessage } from "@/lib/i18n";
 
 type ResponseStepperFooterProps = {
   currentStepIndex: number;
@@ -50,6 +52,7 @@ export function ResponseStepperFooter({
   onSubmit,
   onStepClick,
 }: ResponseStepperFooterProps) {
+  const { messages } = useI18n();
   const currentStep = STEPS[currentStepIndex];
 
   return (
@@ -59,7 +62,10 @@ export function ResponseStepperFooter({
           <div className="hidden items-center gap-2 sm:flex">
             {STEPS.map((step, index) => (
               <button
-                aria-label={`Go to step ${index + 1}: ${step.title}`}
+                aria-label={formatMessage(messages.common.goToStep, {
+                  step: index + 1,
+                  title: step.title,
+                })}
                 className="group flex cursor-pointer items-center justify-center p-1 focus-visible:outline-none"
                 key={step.id}
                 onClick={() => onStepClick?.(index)}
@@ -105,7 +111,7 @@ export function ResponseStepperFooter({
                 icon={ArrowLeft02Icon}
                 strokeWidth={2}
               />
-              Back
+              {messages.common.back}
             </Button>
           )}
 
@@ -120,7 +126,7 @@ export function ResponseStepperFooter({
               {isSubmitting ? (
                 <>
                   <Spinner className="mr-2" />
-                  Creating...
+                  {messages.endpoints.creating}
                 </>
               ) : (
                 <>
@@ -129,7 +135,7 @@ export function ResponseStepperFooter({
                     icon={Tick02Icon}
                     strokeWidth={2}
                   />
-                  Create Response
+                  {messages.endpoints.createResponse}
                 </>
               )}
             </Button>
@@ -141,7 +147,7 @@ export function ResponseStepperFooter({
               size="lg"
               type="button"
             >
-              Next
+              {messages.common.next}
               <HugeiconsIcon
                 data-icon="inline-end"
                 icon={ArrowRight01Icon}

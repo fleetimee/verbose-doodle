@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 import { Link, useInRouterContext } from "react-router";
 import { Eraser, RotateCcw } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -287,6 +288,7 @@ export function DeveloperToolLayout({
   tour,
   variant = "top-header",
 }: DeveloperToolLayoutProps) {
+  useI18n();
   const shouldReduceMotion = useReducedMotion();
   const actionProps: ActionButtonsProps = {
     clearLabel,

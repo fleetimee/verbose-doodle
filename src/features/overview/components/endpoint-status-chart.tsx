@@ -13,6 +13,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import type { OverviewData } from "@/features/overview/types";
+import { messages } from "@/lib/i18n";
 
 // Chart color constants
 const CHART_COLOR_VARIANTS = 5;
@@ -47,7 +48,9 @@ export function EndpointStatusChart({
   // Dynamically generate chart config from the data
   const responseStatusConfig = {
     count: {
-      label: "Responses",
+      get label() {
+        return messages.overview.responsesMetricLabel;
+      },
     },
     ...Object.fromEntries(
       chartData.map((item) => [
@@ -66,10 +69,10 @@ export function EndpointStatusChart({
     >
       <CardHeader className="pb-2">
         <CardTitle className="text-base">
-          Response Status Code Distribution
+          {messages.overview.responseStatusChartTitle}
         </CardTitle>
         <CardDescription className="text-xs">
-          Configured responses by HTTP status code
+          {messages.overview.responseStatusChartDescription}
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-0">

@@ -7,11 +7,15 @@ import { messages } from "@/lib/i18n";
 export const endpointUsageConfig = {
   requests: {
     color: "var(--chart-1)",
-    label: messages.overview.chartLabels.totalRequests,
+    get label() {
+      return messages.overview.chartLabels.totalRequests;
+    },
   },
   success: {
     color: "var(--chart-2)",
-    label: messages.overview.chartLabels.successful,
+    get label() {
+      return messages.overview.chartLabels.successful;
+    },
   },
 } satisfies ChartConfig;
 
@@ -47,11 +51,15 @@ export const methodDistributionConfig = {
 export const responseTimeConfig = {
   avgResponseTime: {
     color: "var(--chart-1)",
-    label: messages.overview.chartLabels.avgResponseTime,
+    get label() {
+      return messages.overview.chartLabels.avgResponseTime;
+    },
   },
   p95ResponseTime: {
     color: "var(--chart-2)",
-    label: messages.overview.chartLabels.p95ResponseTime,
+    get label() {
+      return messages.overview.chartLabels.p95ResponseTime;
+    },
   },
 } satisfies ChartConfig;
 
@@ -61,14 +69,20 @@ export const responseTimeConfig = {
 export const endpointStatusConfig = {
   active: {
     color: "var(--chart-2)",
-    label: messages.overview.chartLabels.active,
+    get label() {
+      return messages.overview.chartLabels.active;
+    },
   },
   deprecated: {
     color: "var(--chart-4)",
-    label: messages.overview.chartLabels.deprecated,
+    get label() {
+      return messages.overview.chartLabels.deprecated;
+    },
   },
   inactive: {
     color: "var(--chart-3)",
-    label: messages.overview.chartLabels.inactive,
+    get label() {
+      return messages.overview.chartLabels.inactive;
+    },
   },
 } satisfies ChartConfig;

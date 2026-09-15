@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
+import { messages } from "@/lib/i18n";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -34,57 +35,82 @@ const NODES: ArchNode[] = [
   {
     color: "#3b82f6",
     darkColor: "#60a5fa",
-    description:
-      "Single-page application built with React 19, TypeScript, and TanStack Query. Communicates with the backend via REST API and WebSocket bridge for real-time protocol simulation.",
+    get description() {
+      return messages.about.architecture.nodes.frontend.description;
+    },
     glowColor: "rgba(59,130,246,0.25)",
     id: "frontend",
-    label: "React Frontend",
+    get label() {
+      return messages.about.architecture.nodes.frontend.label;
+    },
     layer: 0,
-    sublabel: "Vite + TanStack Query",
+    get sublabel() {
+      return messages.about.architecture.nodes.frontend.sublabel;
+    },
   },
   {
     color: "#10b981",
     darkColor: "#34d399",
-    description:
-      "Spring Boot application with an embedded Tomcat servlet container. Exposes REST endpoints under /api/** and handles HTTP lifecycle, request routing, and response serialization.",
+    get description() {
+      return messages.about.architecture.nodes.apiGateway.description;
+    },
     glowColor: "rgba(16,185,129,0.25)",
     id: "api-gateway",
-    label: "Spring Boot",
+    get label() {
+      return messages.about.architecture.nodes.apiGateway.label;
+    },
     layer: 1,
-    sublabel: "Embedded Tomcat + REST",
+    get sublabel() {
+      return messages.about.architecture.nodes.apiGateway.sublabel;
+    },
   },
   {
     color: "#f59e0b",
     darkColor: "#fbbf24",
-    description:
-      "A dynamic catch-all Spring MVC controller registered at the lowest Spring bean priority. It intercepts any unmatched /api/** route and resolves it to the correct JSON-driven biller scenario stored in the database.",
+    get description() {
+      return messages.about.architecture.nodes.controller.description;
+    },
     glowColor: "rgba(245,158,11,0.25)",
     id: "controller",
-    label: "Catch-all Controller",
+    get label() {
+      return messages.about.architecture.nodes.controller.label;
+    },
     layer: 2,
-    sublabel: "@Order(LOWEST_PRECEDENCE)",
+    get sublabel() {
+      return messages.about.architecture.nodes.controller.sublabel;
+    },
   },
   {
     color: "#8b5cf6",
     darkColor: "#a78bfa",
-    description:
-      "Stateless JWT authentication via Spring Security filter chain. Every API request carries a signed Bearer token; the filter validates the signature and injects the user principal into the security context.",
+    get description() {
+      return messages.about.architecture.nodes.jwt.description;
+    },
     glowColor: "rgba(139,92,246,0.25)",
     id: "jwt",
-    label: "JWT Security",
+    get label() {
+      return messages.about.architecture.nodes.jwt.label;
+    },
     layer: 2,
-    sublabel: "Spring Security Filter Chain",
+    get sublabel() {
+      return messages.about.architecture.nodes.jwt.sublabel;
+    },
   },
   {
     color: "#06b6d4",
     darkColor: "#22d3ee",
-    description:
-      "PostgreSQL relational database that stores biller endpoint configurations, JSON scenario payloads, user records, and transaction histories. Accessed via Spring Data JPA repositories.",
+    get description() {
+      return messages.about.architecture.nodes.database.description;
+    },
     glowColor: "rgba(6,182,212,0.25)",
     id: "database",
-    label: "PostgreSQL",
+    get label() {
+      return messages.about.architecture.nodes.database.label;
+    },
     layer: 3,
-    sublabel: "JSON Scenario Data Store",
+    get sublabel() {
+      return messages.about.architecture.nodes.database.sublabel;
+    },
   },
 ];
 
@@ -300,7 +326,7 @@ export function ArchitectureDiagram() {
 
   return (
     <section
-      aria-label="Interactive system architecture diagram"
+      aria-label={messages.about.architecture.ariaLabel}
       className="flex flex-col gap-4"
     >
       {/* SVG Diagram */}
@@ -388,10 +414,13 @@ export function ArchitectureDiagram() {
           {/* Layer labels */}
           {(
             [
-              { label: "Client Layer", y: 14 },
-              { label: "Application Layer", y: 104 },
-              { label: "Service Layer", y: 194 },
-              { label: "Data Layer", y: 270 },
+              { label: messages.about.architecture.layers.client, y: 14 },
+              {
+                label: messages.about.architecture.layers.application,
+                y: 104,
+              },
+              { label: messages.about.architecture.layers.service, y: 194 },
+              { label: messages.about.architecture.layers.data, y: 270 },
             ] as const
           ).map(({ y, label }) => (
             <text
@@ -475,9 +504,7 @@ export function ArchitectureDiagram() {
                 shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }
               }
             >
-              Hover or focus a node to explore how the system layers connect —
-              from React client to Spring Boot controller to PostgreSQL data
-              store.
+              {messages.about.architecture.idleDescription}
             </motion.p>
           )}
         </AnimatePresence>
@@ -485,7 +512,7 @@ export function ArchitectureDiagram() {
 
       {/* Legend */}
       <ul
-        aria-label="Node legend"
+        aria-label={messages.about.architecture.legendAriaLabel}
         className="flex flex-wrap items-center gap-x-5 gap-y-2 px-1"
       >
         {NODES.map((node) => (

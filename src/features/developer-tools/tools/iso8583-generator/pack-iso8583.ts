@@ -1,3 +1,5 @@
+import { formatMessage, messages } from "@/lib/i18n";
+
 export type Iso8583PresetId =
   | "sign-on"
   | "account-inquiry"
@@ -190,42 +192,36 @@ function commonTransactionFields(): readonly Iso8583FieldDefinition[] {
 }
 
 const PRESET_DEFINITIONS: readonly {
-  readonly description: string;
   readonly fields: readonly Iso8583FieldDefinition[];
   readonly id: Iso8583PresetId;
-  readonly label: string;
   readonly mti: string;
+  readonly messageKey: keyof typeof messages.iso8583Generator.presets;
 }[] = [
   {
-    description: "Network sign-on with the supplied BPD DIY sample values.",
     fields: SIGN_ON_FIELDS,
     id: "sign-on",
-    label: "0800 · Sign-On",
     mti: "0800",
+    messageKey: "signOn",
   },
   {
-    description: "Account inquiry with the supplied BPD DIY sample values.",
     fields: ACCOUNT_INQUIRY_FIELDS,
     id: "account-inquiry",
-    label: "0200 · Account Inquiry",
     mti: "0200",
+    messageKey: "accountInquiry",
   },
   {
-    description: "Card or account authorization request starter fields.",
     fields: commonTransactionFields(),
     id: "authorization",
-    label: "0100 · Authorization",
     mti: "0100",
+    messageKey: "authorization",
   },
   {
-    description: "Financial transaction starter fields.",
     fields: commonTransactionFields(),
     id: "transaction",
-    label: "0200 · Transaction",
     mti: "0200",
+    messageKey: "transaction",
   },
   {
-    description: "Financial notification or advice starter fields.",
     fields: [
       ...commonTransactionFields(),
       field(38, "Authorization ID", "ans", 6, "ABCD12"),
@@ -233,29 +229,26 @@ const PRESET_DEFINITIONS: readonly {
       field(63, "Private / additional data", "lllvar", 999, "00100"),
     ],
     id: "notification",
-    label: "0220 · Notification",
     mti: "0220",
+    messageKey: "notification",
   },
   {
-    description: "Network management response starter fields.",
     fields: [...SIGN_ON_FIELDS, field(39, "Response code", "n", 2, "00")],
     id: "network-response",
-    label: "0810 · Network Response",
     mti: "0810",
+    messageKey: "networkResponse",
   },
   {
-    description: "Financial transaction response starter fields.",
     fields: [
       ...commonTransactionFields(),
       field(38, "Authorization ID", "ans", 6, "ABCD12"),
       field(39, "Response code", "n", 2, "00"),
     ],
     id: "transaction-response",
-    label: "0210 · Transaction Response",
     mti: "0210",
+    messageKey: "transactionResponse",
   },
   {
-    description: "Financial notification response starter fields.",
     fields: [
       ...commonTransactionFields(),
       field(38, "Authorization ID", "ans", 6, "ABCD12"),
@@ -263,11 +256,10 @@ const PRESET_DEFINITIONS: readonly {
       field(63, "Private / additional data", "lllvar", 999, "00100"),
     ],
     id: "notification-response",
-    label: "0230 · Notification Response",
     mti: "0230",
+    messageKey: "notificationResponse",
   },
   {
-    description: "Financial reversal request starter fields.",
     fields: [
       ...commonTransactionFields(),
       field(
@@ -279,11 +271,10 @@ const PRESET_DEFINITIONS: readonly {
       ),
     ],
     id: "reversal",
-    label: "0400 · Reversal",
     mti: "0400",
+    messageKey: "reversal",
   },
   {
-    description: "Batch or settlement request starter fields.",
     fields: [
       field(3, "Processing code", "n", 6, "920000"),
       field(7, "Transmission date / time", "n", 10, "0101000000", "now"),
@@ -294,22 +285,30 @@ const PRESET_DEFINITIONS: readonly {
       field(60, "Reserved private data", "lllvar", 999, "000"),
     ],
     id: "batch",
-    label: "0500 · Batch / Settlement",
     mti: "0500",
+    messageKey: "batch",
   },
 ];
 
 export const ISO8583_PRESETS: readonly Iso8583Preset[] = PRESET_DEFINITIONS.map(
-  ({ fields, ...definition }) => ({
+  ({ fields, messageKey, ...definition }) => ({
     ...definition,
+    get description() {
+      return messages.iso8583Generator.presets[messageKey].description;
+    },
     fields: fieldsFromDefinitions(fields),
+    get label() {
+      return messages.iso8583Generator.presets[messageKey].label;
+    },
   })
 );
 
 export function getIso8583Preset(id: Iso8583PresetId): Iso8583Preset {
   const preset = ISO8583_PRESETS.find((candidate) => candidate.id === id);
   if (!preset) {
-    throw new Error(`Unknown ISO 8583 preset: ${id}`);
+    throw new Error(
+      formatMessage(messages.iso8583Generator.packErrors.unknownPreset, { id })
+    );
   }
   return preset;
 }
@@ -341,7 +340,9 @@ function assertAscii(value: string, label: string, fieldNumber?: number) {
     if (character.charCodeAt(0) > 0x7f) {
       throw new Iso8583PackingError(
         "format",
-        `${label} must contain ASCII characters only.`,
+        formatMessage(messages.iso8583Generator.packErrors.asciiOnly, {
+          label,
+        }),
         fieldNumber
       );
     }
@@ -356,7 +357,10 @@ function encodeField(fieldDefinition: Iso8583Field): string {
   if (kind === "n" && !DIGITS_PATTERN.test(value)) {
     throw new Iso8583PackingError(
       "format",
-      `Bit ${number} ${label} accepts digits only.`,
+      formatMessage(messages.iso8583Generator.packErrors.digitsOnly, {
+        label,
+        number,
+      }),
       number
     );
   }
@@ -365,7 +369,11 @@ function encodeField(fieldDefinition: Iso8583Field): string {
     if (value.length !== length) {
       throw new Iso8583PackingError(
         "field",
-        `Bit ${number} ${label} must be exactly ${length} characters.`,
+        formatMessage(messages.iso8583Generator.packErrors.exactLength, {
+          label,
+          length,
+          number,
+        }),
         number
       );
     }
@@ -376,7 +384,11 @@ function encodeField(fieldDefinition: Iso8583Field): string {
     if (value.length > length) {
       throw new Iso8583PackingError(
         "field",
-        `Bit ${number} ${label} cannot exceed ${length} characters.`,
+        formatMessage(messages.iso8583Generator.packErrors.maxLength, {
+          label,
+          length,
+          number,
+        }),
         number
       );
     }
@@ -386,7 +398,11 @@ function encodeField(fieldDefinition: Iso8583Field): string {
   if (value.length > length) {
     throw new Iso8583PackingError(
       "field",
-      `Bit ${number} ${label} cannot exceed ${length} characters.`,
+      formatMessage(messages.iso8583Generator.packErrors.maxLength, {
+        label,
+        length,
+        number,
+      }),
       number
     );
   }
@@ -407,13 +423,17 @@ function validateFields(fields: readonly Iso8583Field[]): Iso8583Field[] {
     ) {
       throw new Iso8583PackingError(
         "field",
-        `Bit number ${fieldDefinition.number} must be between 2 and 128.`
+        formatMessage(messages.iso8583Generator.packErrors.bitRange, {
+          number: fieldDefinition.number,
+        })
       );
     }
     if (fieldNumbers.has(fieldDefinition.number)) {
       throw new Iso8583PackingError(
         "field",
-        `Bit ${fieldDefinition.number} is listed more than once.`,
+        formatMessage(messages.iso8583Generator.packErrors.duplicateBit, {
+          number: fieldDefinition.number,
+        }),
         fieldDefinition.number
       );
     }
@@ -447,7 +467,9 @@ function parseBitmapHex(value: string | undefined, label: string): Uint8Array {
   if (!(value && BITMAP_HEX_PATTERN.test(value))) {
     throw new Iso8583PackingError(
       "bitmap",
-      `${label} bitmap must contain exactly 16 hexadecimal characters.`
+      formatMessage(messages.iso8583Generator.packErrors.bitmapLength, {
+        label,
+      })
     );
   }
 
@@ -567,7 +589,7 @@ function resolveBitmaps(
   if (!equalNumbers(activeFields, enabledNumbers)) {
     throw new Iso8583PackingError(
       "bitmap",
-      "The manual bitmap must match the enabled data elements."
+      messages.iso8583Generator.packErrors.manualBitmapMismatch
     );
   }
   return { activeFields, primaryBytes, secondaryBytes };
@@ -587,7 +609,7 @@ function resolveLengthHeader(
   if (!Number.isInteger(length) || length < 0) {
     throw new Iso8583PackingError(
       "length",
-      "Length header must be a non-negative integer."
+      messages.iso8583Generator.packErrors.lengthHeaderInteger
     );
   }
 
@@ -595,7 +617,7 @@ function resolveLengthHeader(
     if (length > 9999) {
       throw new Iso8583PackingError(
         "length",
-        "A 4-digit ASCII header cannot exceed 9999 bytes."
+        messages.iso8583Generator.packErrors.asciiHeaderLimit
       );
     }
     const display = length.toString().padStart(4, "0");
@@ -605,7 +627,7 @@ function resolveLengthHeader(
   if (length > 0xff_ff) {
     throw new Iso8583PackingError(
       "length",
-      "A 2-byte binary header cannot exceed 65535 bytes."
+      messages.iso8583Generator.packErrors.binaryHeaderLimit
     );
   }
   const bytes = new Uint8Array([Math.floor(length / 256), length % 256]);
@@ -616,7 +638,7 @@ export function packIso8583(request: PackIso8583Request): PackedIso8583Message {
   if (!MTI_PATTERN.test(request.mti)) {
     throw new Iso8583PackingError(
       "mti",
-      "MTI must contain exactly four digits."
+      messages.iso8583Generator.packErrors.invalidMti
     );
   }
 

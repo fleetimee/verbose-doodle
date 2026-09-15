@@ -13,11 +13,7 @@ import {
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-const editNameSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-});
-
-type EditNameFormData = z.infer<typeof editNameSchema>;
+type EditNameFormData = { name: string };
 
 type EditResponseNameFormProps = {
   defaultValue: string;
@@ -26,12 +22,18 @@ type EditResponseNameFormProps = {
   isLoading?: boolean;
 };
 
+import { useI18n } from "@/components/i18n-provider";
+
 export function EditResponseNameForm({
   defaultValue,
-  onSubmit,
+  isLoading = false,
   onCancel,
-  isLoading,
+  onSubmit,
 }: EditResponseNameFormProps) {
+  const { messages } = useI18n();
+  const editNameSchema = z.object({
+    name: z.string().min(1, messages.endpoints.nameRequiredError),
+  });
   const form = useForm<EditNameFormData>({
     defaultValues: {
       name: defaultValue,
@@ -49,7 +51,7 @@ export function EditResponseNameForm({
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="edit-response-name">
-                  Response Name
+                  {messages.endpoints.responseNameLabel}
                 </FieldLabel>
                 <FieldContent>
                   <Input
@@ -58,10 +60,10 @@ export function EditResponseNameForm({
                     autoComplete="off"
                     autoFocus
                     id="edit-response-name"
-                    placeholder="e.g., success_response, error_response"
+                    placeholder={messages.endpoints.responseNamePlaceholder}
                   />
                   <FieldDescription>
-                    A descriptive name for this response
+                    {messages.endpoints.responseNameDescription}
                   </FieldDescription>
                 </FieldContent>
                 {fieldState.invalid && (
@@ -79,10 +81,10 @@ export function EditResponseNameForm({
             type="button"
             variant="outline"
           >
-            Cancel
+            {messages.common.cancel}
           </Button>
           <Button disabled={isLoading} type="submit">
-            {isLoading ? "Saving..." : "Save"}
+            {isLoading ? messages.common.saving : messages.common.save}
           </Button>
         </div>
       </form>

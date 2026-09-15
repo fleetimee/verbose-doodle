@@ -35,11 +35,15 @@ export const developerToolsMessages = {
   inspectionCategory: "Inspection",
   iso8583GeneratorDescription:
     "Assemble framed ISO 8583 messages with field-aware inputs and live bitmaps.",
+  iso8583GeneratorLabel: "Generator",
   iso8583GeneratorLimit: "128 data elements",
   iso8583GeneratorRuntime: "Browser only",
   iso8583GeneratorTags: ["ISO 8583", "MTI", "Bitmaps"],
   iso8583ParserDescription:
     "Parse raw ISO 8583 streams or hex dumps into structured data elements with decoded semantics.",
+  iso8583ParserLabel: "Parser",
+  iso8583NavigationDescription:
+    "Build, pack, parse, and inspect ISO 8583 messages.",
   iso8583ParserLimit: "128 data elements",
   iso8583ParserRuntime: "Browser only",
   iso8583ParserTags: ["ISO 8583", "Stream Parser", "Inspection", "Bitmaps"],
@@ -56,6 +60,14 @@ export const developerToolsMessages = {
     disconnected: "Disconnected",
     error: "Connection error",
     reconnecting: "Reconnecting",
+  },
+  nfcBridgeErrors: {
+    eventTypeMissing: "The bridge sent an event without a type.",
+    localBridgeUnavailable:
+      "The local bridge could not be reached. Start the bridge and retry.",
+    malformedJson: "The bridge sent malformed JSON.",
+    protocolUnsupported: "The bridge protocol version is not supported.",
+    unknownEvent: "The bridge sent an unknown event: {type}.",
   },
   nfcBridgeNotConnected:
     "Connect to the local bridge to read its version and capabilities.",
@@ -168,12 +180,26 @@ export const developerToolsMessages = {
   openAction: "Open tool",
   openTool: "Open {tool}",
   pageTitle: "Developer Tools",
+  pageTitleSuffix: "Developer Tools",
   schedulingCategory: "Scheduling",
   schemaValidatorDescription:
     "Validate a JSON document against Draft 7, 2019-09, or 2020-12 schemas with path-based diagnostics.",
   schemaValidatorLimit: "1 MiB per input",
   schemaValidatorRuntime: "Validation service",
   schemaValidatorTags: ["JSON Schema", "Diagnostics", "Format checks"],
+  schemaValidatorSearchDescription: "Validate JSON against a schema.",
+  jwtInspectorSearchDescription: "Decode, edit, and verify JSON Web Tokens.",
+  dateConverterSearchDescription:
+    "Convert timestamps and dates across timezones.",
+  iso8583GeneratorSearchDescription: "Build and pack ISO 8583 messages.",
+  converterSearchDescription: "Convert between JSON and YAML.",
+  numberBaseConverterSearchDescription:
+    "Convert binary, octal, decimal, and hexadecimal values.",
+  cronParserSearchDescription:
+    "Explain cron expressions and preview upcoming runs.",
+  nfcReaderSearchDescription: "Inspect NFC scans and NDEF records.",
+  iso8583ParserSearchDescription:
+    "Parse raw ISO 8583 streams and inspect fields.",
   showingCount: {
     one: "Showing {count} tool",
     other: "Showing {count} tools",

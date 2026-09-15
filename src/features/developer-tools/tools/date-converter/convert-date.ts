@@ -23,6 +23,8 @@ export type DateConversionResult = {
   readonly zonedDateTime: string;
 };
 
+import { formatMessage, messages } from "@/lib/i18n";
+
 export type DateConversionErrorCode =
   | "empty-input"
   | "invalid-input"
@@ -60,21 +62,21 @@ function parseInput(input: string, mode: DetectedDateInputMode) {
     if (!ISO_OFFSET_PATTERN.test(input)) {
       throw new DateConversionError(
         "missing-iso-offset",
-        "ISO 8601 input must include Z or an explicit UTC offset."
+        messages.dateConverter.errors.missingIsoOffset
       );
     }
     const match = ISO_DATE_TIME_PATTERN.exec(input);
     if (!(match && hasValidIsoParts(match))) {
       throw new DateConversionError(
         "invalid-input",
-        "Enter a valid ISO 8601 calendar date and time."
+        messages.dateConverter.errors.invalidIsoCalendar
       );
     }
     const milliseconds = Date.parse(input);
     if (Number.isNaN(milliseconds)) {
       throw new DateConversionError(
         "invalid-input",
-        "Enter a valid ISO 8601 date and time."
+        messages.dateConverter.errors.invalidIsoDateTime
       );
     }
     return milliseconds;
@@ -83,7 +85,7 @@ function parseInput(input: string, mode: DetectedDateInputMode) {
   if (!INTEGER_PATTERN.test(input)) {
     throw new DateConversionError(
       "invalid-input",
-      "Unix timestamps must contain whole numbers only."
+      messages.dateConverter.errors.invalidUnix
     );
   }
 
@@ -95,7 +97,7 @@ function parseInput(input: string, mode: DetectedDateInputMode) {
   ) {
     throw new DateConversionError(
       "out-of-range",
-      "The timestamp falls outside JavaScript's supported date range."
+      messages.dateConverter.errors.outOfRange
     );
   }
   return milliseconds;
@@ -145,7 +147,9 @@ function validateTimeZone(timeZone: string) {
     // biome-ignore lint/style/useErrorCause: DateConversionError forwards the cause through its constructor.
     throw new DateConversionError(
       "invalid-timezone",
-      `Unknown IANA timezone: ${timeZone}`,
+      formatMessage(messages.dateConverter.errors.invalidTimezone, {
+        timeZone,
+      }),
       error
     );
   }
@@ -181,7 +185,7 @@ function formatRelativeTime(milliseconds: number, nowMilliseconds: number) {
   const difference = milliseconds - nowMilliseconds;
   const absoluteDifference = Math.abs(difference);
   if (absoluteDifference < 1000) {
-    return "now";
+    return messages.dateConverter.relativeNow;
   }
 
   const unit =
@@ -189,11 +193,21 @@ function formatRelativeTime(milliseconds: number, nowMilliseconds: number) {
       (candidate) => absoluteDifference >= candidate.milliseconds
     ) ?? RELATIVE_UNITS.at(-1);
   if (!unit) {
-    return "now";
+    return messages.dateConverter.relativeNow;
   }
   const value = Math.round(absoluteDifference / unit.milliseconds);
-  const quantity = `${value} ${unit.name}${value === 1 ? "" : "s"}`;
-  return difference < 0 ? `${quantity} ago` : `in ${quantity}`;
+  const unitKey =
+    `${unit.name}${value === 1 ? "" : "s"}` as keyof typeof messages.dateConverter.relativeUnits;
+  const unitLabel = messages.dateConverter.relativeUnits[unitKey];
+  return difference < 0
+    ? formatMessage(messages.dateConverter.relativeAgo, {
+        unit: unitLabel,
+        value,
+      })
+    : formatMessage(messages.dateConverter.relativeIn, {
+        unit: unitLabel,
+        value,
+      });
 }
 
 export function convertDate({
@@ -204,7 +218,10 @@ export function convertDate({
 }: DateConversionRequest): DateConversionResult {
   const normalizedInput = input.trim();
   if (!normalizedInput) {
-    throw new DateConversionError("empty-input", "Enter a date or timestamp.");
+    throw new DateConversionError(
+      "empty-input",
+      messages.dateConverter.errors.emptyInput
+    );
   }
   validateTimeZone(timeZone);
 

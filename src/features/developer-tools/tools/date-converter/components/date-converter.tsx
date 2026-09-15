@@ -8,6 +8,7 @@ import {
   Globe2,
   TimerReset,
 } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,30 +60,46 @@ const INPUT_MODES: readonly DateInputMode[] = [
   "iso-8601",
 ];
 const INPUT_MODE_LABELS: Readonly<Record<DateInputMode, string>> = {
-  auto: messages.dateConverter.inputModes.auto,
-  "iso-8601": messages.dateConverter.inputModes.iso8601,
-  "unix-milliseconds": messages.dateConverter.inputModes.unixMilliseconds,
-  "unix-seconds": messages.dateConverter.inputModes.unixSeconds,
+  get auto() {
+    return messages.dateConverter.inputModes.auto;
+  },
+  get "iso-8601"() {
+    return messages.dateConverter.inputModes.iso8601;
+  },
+  get "unix-milliseconds"() {
+    return messages.dateConverter.inputModes.unixMilliseconds;
+  },
+  get "unix-seconds"() {
+    return messages.dateConverter.inputModes.unixSeconds;
+  },
 };
 const OUTPUTS: readonly OutputDefinition[] = [
   {
     key: "unixSeconds",
-    label: messages.dateConverter.unixSeconds,
+    get label() {
+      return messages.dateConverter.unixSeconds;
+    },
     marker: "EPOCH / S",
   },
   {
     key: "unixMilliseconds",
-    label: messages.dateConverter.unixMilliseconds,
+    get label() {
+      return messages.dateConverter.unixMilliseconds;
+    },
     marker: "EPOCH / MS",
   },
   {
     key: "iso8601",
-    label: messages.dateConverter.iso8601,
+    get label() {
+      return messages.dateConverter.iso8601;
+    },
     marker: "ISO / UTC",
   },
   {
     key: "rfc2822",
-    label: messages.dateConverter.rfc2822,
+    get label() {
+      return messages.dateConverter.rfc2822;
+    },
     marker: "RFC / UTC",
   },
 ];
@@ -93,7 +110,7 @@ const TOUR_TARGETS = {
   results: "date-converter-tour-results",
   timezone: "date-converter-tour-timezone",
 } as const;
-const TOUR_STEPS: readonly DeveloperToolTourStep[] = [
+const getTourSteps = (): readonly DeveloperToolTourStep[] => [
   {
     description: messages.dateConverter.tour.controlsDescription,
     position: "bottom",
@@ -189,7 +206,9 @@ function OutputCard({
 }
 
 export function DateConverter() {
+  const { locale } = useI18n();
   const shouldReduceMotion = useReducedMotion();
+  const tourSteps = useMemo(() => getTourSteps(), [locale]);
   const browserTimeZone = useMemo(getBrowserTimeZone, []);
   const timeZoneOptions = useMemo(
     () => getTimeZoneOptions(browserTimeZone),
@@ -312,7 +331,7 @@ export function DateConverter() {
       tour={
         <DeveloperToolTourButton
           label={messages.dateConverter.tour.startButton}
-          steps={TOUR_STEPS}
+          steps={tourSteps}
           storageKey="date-converter-tour-seen"
           tourId={TOUR_ID}
         />

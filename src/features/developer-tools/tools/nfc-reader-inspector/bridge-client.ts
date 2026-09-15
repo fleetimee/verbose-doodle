@@ -5,6 +5,7 @@ import {
   type NfcBridgeEvent,
   type NfcBridgeState,
 } from "@/features/developer-tools/tools/nfc-reader-inspector/types";
+import { formatMessage, messages } from "@/lib/i18n";
 
 export type NfcWebSocket = {
   onclose: (() => void) | null;
@@ -34,11 +35,15 @@ export function parseNfcBridgeEvent(
       !("protocolVersion" in value) ||
       value.protocolVersion !== NFC_BRIDGE_PROTOCOL_VERSION
     ) {
-      return { error: "The bridge protocol version is not supported." };
+      return {
+        error: messages.developerTools.nfcBridgeErrors.protocolUnsupported,
+      };
     }
 
     if (!("type" in value)) {
-      return { error: "The bridge sent an event without a type." };
+      return {
+        error: messages.developerTools.nfcBridgeErrors.eventTypeMissing,
+      };
     }
 
     if (
@@ -49,13 +54,18 @@ export function parseNfcBridgeEvent(
       value.type !== "error"
     ) {
       return {
-        error: `The bridge sent an unknown event: ${String(value.type)}.`,
+        error: formatMessage(
+          messages.developerTools.nfcBridgeErrors.unknownEvent,
+          {
+            type: String(value.type),
+          }
+        ),
       };
     }
 
     return { event: value as NfcBridgeEvent };
   } catch {
-    return { error: "The bridge sent malformed JSON." };
+    return { error: messages.developerTools.nfcBridgeErrors.malformedJson };
   }
 }
 
@@ -113,8 +123,7 @@ export class NfcBridgeClient {
     } catch {
       this.updateState({
         connectionStatus: "error",
-        error:
-          "The local bridge could not be reached. Start the bridge and retry.",
+        error: messages.developerTools.nfcBridgeErrors.localBridgeUnavailable,
       });
       this.scheduleReconnect();
       return;
@@ -138,8 +147,7 @@ export class NfcBridgeClient {
     socket.onerror = () => {
       this.updateState({
         connectionStatus: "error",
-        error:
-          "The local bridge could not be reached. Start the bridge and retry.",
+        error: messages.developerTools.nfcBridgeErrors.localBridgeUnavailable,
       });
       socket.close();
     };
@@ -151,7 +159,7 @@ export class NfcBridgeClient {
       if (this.shouldReconnect) {
         this.updateState({
           connectionStatus: "reconnecting",
-          error: "The local bridge connection was interrupted. Reconnecting…",
+          error: messages.developerTools.nfcScanConnectionInterrupted,
         });
         this.scheduleReconnect();
         return;
@@ -298,8 +306,7 @@ export class NfcBridgeClient {
         this.shouldReconnect = false;
         this.updateState({
           connectionStatus: "error",
-          error:
-            "The local bridge did not return. Check the bridge and retry manually.",
+          error: messages.developerTools.nfcScanConnectionUnavailable,
         });
       }
       return;

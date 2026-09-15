@@ -2,11 +2,12 @@ import * as React from "react"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cn } from "@/lib/utils"
+import { messages } from "@/lib/i18n"
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon, MoreHorizontalCircle01Icon } from "@hugeicons/core-free-icons";
 
 function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
-  return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />
+  return <nav aria-label={messages.common.breadcrumb} data-slot="breadcrumb" {...props} />
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
@@ -94,7 +95,7 @@ function BreadcrumbEllipsis({
       {...props}
     >
       <HugeiconsIcon icon={MoreHorizontalCircle01Icon} strokeWidth={2} className="size-4" />
-      <span className="sr-only">More</span>
+      <span className="sr-only">{messages.common.more}</span>
     </span>
   )
 }

@@ -14,6 +14,7 @@ import {
   MoreHorizontal,
   TextCursor,
 } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,7 +45,7 @@ import { ResponseSimulationBadge } from "@/features/endpoints/components/respons
 import { SimulateTimeoutDialog } from "@/features/endpoints/components/simulate-timeout-dialog";
 import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
 import type { EndpointResponse } from "@/features/endpoints/types";
-import { formatMessage, messages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const SUCCESS_STATUS_CODE_THRESHOLD = 300;
@@ -95,6 +96,7 @@ export function ResponseListItem({
   onDeactivate,
   onEditDirtyChange,
 }: ResponseListItemProps) {
+  const { messages } = useI18n();
   const { session } = useAuth();
   const canCloneResponse = session.can("canAddResponse");
   const canActivateResponse = session.can("canActivateResponse");
@@ -206,7 +208,10 @@ export function ResponseListItem({
         name: response.name,
       });
 
-  const moreActionsButtonTitle = `More response actions for ${response.name}`;
+  const moreActionsButtonTitle = formatMessage(
+    messages.endpoints.moreActionsAria,
+    { name: response.name }
+  );
 
   return (
     <>
@@ -248,7 +253,7 @@ export function ResponseListItem({
                         <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" />
                         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                       </span>
-                      Active
+                      {messages.common.active}
                     </span>
                   </div>
                 )}
@@ -287,7 +292,7 @@ export function ResponseListItem({
                           icon={CheckmarkCircle02Icon}
                           strokeWidth={2}
                         />
-                        Set active
+                        {messages.endpoints.setActive}
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent side="top">
@@ -315,7 +320,7 @@ export function ResponseListItem({
                       </TooltipTrigger>
                     </DropdownMenuTrigger>
                     <TooltipContent side="top">
-                      More response actions
+                      {messages.endpoints.moreActionsTooltip}
                     </TooltipContent>
                   </Tooltip>
                   <DropdownMenuContent
@@ -343,7 +348,7 @@ export function ResponseListItem({
                       }}
                     >
                       <TextCursor className="h-4 w-4" />
-                      Edit Name
+                      {messages.endpoints.editName}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       disabled={!isSelected}
@@ -353,7 +358,7 @@ export function ResponseListItem({
                       }}
                     >
                       <Hash className="h-4 w-4" />
-                      Edit Status Code
+                      {messages.endpoints.editStatusCode}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       disabled={!isSelected}
@@ -363,7 +368,7 @@ export function ResponseListItem({
                       }}
                     >
                       <FileJson className="h-4 w-4" />
-                      Edit JSON Response
+                      {messages.endpoints.editJsonResponse}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -374,7 +379,7 @@ export function ResponseListItem({
                       }}
                     >
                       <HugeiconsIcon icon={Clock03Icon} strokeWidth={2} />
-                      Simulate timeout
+                      {messages.endpoints.simulateTimeout}
                     </DropdownMenuItem>
                     {isActive && (
                       <DropdownMenuItem
@@ -385,7 +390,7 @@ export function ResponseListItem({
                         }}
                       >
                         <CircleOff className="h-4 w-4" />
-                        Deactivate response
+                        {messages.endpoints.deactivateResponse}
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
@@ -402,7 +407,7 @@ export function ResponseListItem({
                         icon={Delete02Icon}
                         strokeWidth={2}
                       />
-                      Delete Response
+                      {messages.endpoints.deleteResponse}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -471,29 +476,28 @@ export function ResponseListItem({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {isActive ? "Deactivate Response?" : "Activate Response?"}
+              {isActive
+                ? messages.endpoints.deactivateResponseConfirmTitle
+                : messages.endpoints.activateResponseConfirmTitle}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {isActive ? (
-                <>
-                  Are you sure you want to deactivate{" "}
-                  <span className="font-semibold">"{response.name}"</span>? The
-                  endpoint will return an empty response until you activate
-                  another response.
-                </>
-              ) : (
-                <>
-                  Are you sure you want to activate{" "}
-                  <span className="font-semibold">"{response.name}"</span>? This
-                  will deactivate any currently active response.
-                </>
-              )}
+              {isActive
+                ? formatMessage(
+                    messages.endpoints.deactivateResponseConfirmDescription,
+                    { name: response.name }
+                  )
+                : formatMessage(
+                    messages.endpoints.activateResponseConfirmDescription,
+                    { name: response.name }
+                  )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{messages.common.cancel}</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirm}>
-              {isActive ? "Deactivate" : "Activate"}
+              {isActive
+                ? messages.endpoints.deactivateLabel
+                : messages.endpoints.activateLabel}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -502,22 +506,26 @@ export function ResponseListItem({
       <AlertDialog onOpenChange={setShowDeleteDialog} open={showDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Response?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {messages.endpoints.deleteResponseConfirmTitle}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete{" "}
-              <span className="font-semibold">"{response.name}"</span>? This
-              action cannot be undone and will permanently remove this response
-              configuration.
+              {formatMessage(
+                messages.endpoints.deleteResponseConfirmDescription,
+                { name: response.name }
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>
+              {messages.common.cancel}
+            </AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
               disabled={isDeleting}
               onClick={handleConfirmDelete}
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? messages.common.deleting : messages.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

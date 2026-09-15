@@ -51,11 +51,14 @@ type SearchResult = {
   readonly url: string;
 };
 
+import { useI18n } from "@/components/i18n-provider";
+
 function SearchDescription({
   results,
 }: {
   readonly results: readonly SearchResult[];
 }) {
+  const { messages } = useI18n();
   const selectedValue = useCommandState((state) => state.value);
   const resultCount = useCommandState((state) => state.filtered.count);
   const result = results.find((item) => item.url === selectedValue);
@@ -68,7 +71,7 @@ function SearchDescription({
     >
       {resultCount > 0
         ? result?.description
-        : "Try another tool name or category."}
+        : messages.common.searchTryAnotherHint}
     </p>
   );
 }
@@ -78,6 +81,7 @@ export function NavigationSearch({
 }: {
   readonly items: readonly SearchNavigationItem[];
 }) {
+  const { messages } = useI18n();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
@@ -166,13 +170,13 @@ export function NavigationSearch({
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton
-            aria-label="Search modules and menus"
+            aria-label={messages.common.searchDialogTitle}
             className="navigation-search-trigger h-9"
             onClick={() => setOpen(true)}
-            tooltip="Search"
+            tooltip={messages.common.search}
           >
             <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
-            <span>Search</span>
+            <span>{messages.common.search}</span>
             <Kbd className="ml-auto group-data-[collapsible=icon]:hidden">
               {formatCommandShortcut()}
             </Kbd>
@@ -182,19 +186,19 @@ export function NavigationSearch({
       <CommandDialog
         className="navigation-search-dialog"
         commandProps={{ defaultValue: currentResult?.url, key: String(open) }}
-        description="Search all available modules and menus"
+        description={messages.common.searchDialogDescription}
         onOpenChange={setOpen}
         open={open}
-        title="Search modules and menus"
+        title={messages.common.searchDialogTitle}
       >
-        <CommandInput placeholder="Search modules and menus..." />
+        <CommandInput placeholder={messages.common.searchPlaceholder} />
         <div className="navigation-search-results">
           <CommandList>
             <CommandEmpty>
               <HugeiconsIcon aria-hidden="true" icon={SearchIcon} />
-              <p>No module or menu found.</p>
+              <p>{messages.common.searchNoResults}</p>
               <p className="navigation-search-empty-hint">
-                Try a tool name or category, like JSON or Validation.
+                {messages.common.searchEmptyHint}
               </p>
             </CommandEmpty>
             {[...groups.entries()].map(([groupLabel, groupItems]) => (
@@ -236,7 +240,7 @@ export function NavigationSearch({
         <SearchDescription results={results} />
         <div className="navigation-search-footer">
           <span className="navigation-search-hint">
-            <KbdGroup aria-label="Up and down arrow keys">
+            <KbdGroup aria-label={messages.common.upAndDownArrowKeys}>
               <Kbd>
                 <HugeiconsIcon icon={ArrowUp01Icon} />
               </Kbd>
@@ -244,13 +248,15 @@ export function NavigationSearch({
                 <HugeiconsIcon icon={ArrowDown01Icon} />
               </Kbd>
             </KbdGroup>
-            Navigate
+            {messages.common.searchNavigateHint}
           </span>
           <span className="navigation-search-hint">
-            <Kbd>Enter</Kbd>Open
+            <Kbd>{messages.common.enter}</Kbd>
+            {messages.common.searchOpenHint}
           </span>
           <span className="navigation-search-hint ml-auto">
-            <Kbd>Esc</Kbd>Close
+            <Kbd>{messages.common.escape}</Kbd>
+            {messages.common.searchCloseHint}
           </span>
         </div>
       </CommandDialog>

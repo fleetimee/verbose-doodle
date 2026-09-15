@@ -8,6 +8,23 @@ export const cronParserMessages = {
   expressionLabel: "Cron expression",
   expressionPlaceholder: "*/15 * * * *",
   eyebrow: "Developer tools / 03",
+  errors: {
+    emptyExpression: "Enter a cron expression.",
+    invalidExpression: "The expression is invalid.",
+    invalidFieldCount: "Use five fields, or six fields with seconds first.",
+    invalidTimeZone: "Choose a supported IANA timezone.",
+    noOccurrences: "No upcoming executions were found.",
+    unsupportedSyntax:
+      "Use numbers, *, lists, ranges, steps, or month and weekday names.",
+  },
+  fieldLabels: {
+    dayOfMonth: "Day of month",
+    dayOfWeek: "Day of week",
+    hour: "Hour",
+    minute: "Minute",
+    month: "Month",
+    second: "Second",
+  },
   fieldBreakdown: "Field breakdown",
   fieldBreakdownDescription:
     "The parser reads these fields from left to right.",
@@ -22,6 +39,7 @@ export const cronParserMessages = {
   pageKeywords: ["cron", "parser", "scheduler", "developer tools"],
   pageTitle: "Cron Parser",
   parse: "Parse",
+  parseFailed: "Could not parse expression",
   resetExample: "Reset example",
   runNumber: "Run {number}",
   shortcutLabel: "Ctrl / Cmd + Enter",
@@ -47,4 +65,6 @@ export const cronParserMessages = {
   upcomingRuns: "Upcoming executions",
   upcomingRunsDescription: "The next five runs after the time you parsed it.",
   validExpression: "Valid expression",
+  fiveFields: "5 fields",
+  sixFields: "6 fields",
 } as const;

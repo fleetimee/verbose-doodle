@@ -94,7 +94,7 @@ export function useEndpointTelemetry(
     },
     onSuccess: async (_, clearedEndpointId) => {
       toast.success(messages.endpoints.trafficLogsCleared, {
-        description: "All traffic logs for this endpoint were removed.",
+        description: messages.endpoints.trafficLogsClearedDescription,
       });
       await queryClient.invalidateQueries({
         queryKey: endpointDataTelemetryPrefix(clearedEndpointId),

@@ -4,6 +4,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { forwardRef, useImperativeHandle } from "react";
 import { Controller, type UseFormReturn, useForm } from "react-hook-form";
+import { useI18n } from "@/components/i18n-provider";
 import {
   Choicebox,
   ChoiceboxIndicator,
@@ -51,6 +52,7 @@ export const SimulationForm = forwardRef<
   SimulationFormHandle,
   SimulationFormProps
 >(({ defaultValues, onSubmit, onCancel, isPending = false, children }, ref) => {
+  const { messages } = useI18n();
   const form = useForm<SimulationFormValues>({
     defaultValues: defaultValues ?? { type: SIMULATION_TYPE.NONE },
     resolver: zodResolver(simulationFormSchema),
@@ -75,7 +77,7 @@ export const SimulationForm = forwardRef<
       (!data.delayMs || data.delayMs <= 0)
     ) {
       form.setError("delayMs", {
-        message: "Please enter a valid delay value",
+        message: messages.endpoints.simulationDelayInvalidError,
       });
       return;
     }
@@ -97,10 +99,12 @@ export const SimulationForm = forwardRef<
               name="type"
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel className="sr-only">Simulation Type</FieldLabel>
+                  <FieldLabel className="sr-only">
+                    {messages.endpoints.simulationTypeLabel}
+                  </FieldLabel>
                   <FieldContent>
                     <FieldDescription>
-                      Select how you want to simulate the response behavior
+                      {messages.endpoints.simulationTypeDescription}
                     </FieldDescription>
                     <Choicebox
                       className="gap-4"
@@ -125,14 +129,14 @@ export const SimulationForm = forwardRef<
                         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-sm">
-                              Normal Response
+                              {messages.endpoints.simulationNormalTitle}
                             </span>
-                            <Badge variant="secondary">No simulation</Badge>
+                            <Badge variant="secondary">
+                              {messages.endpoints.simulationNormalBadge}
+                            </Badge>
                           </div>
                           <p className="text-muted-foreground text-sm">
-                            Return the response immediately without any delay or
-                            timeout simulation. Best for normal testing
-                            scenarios.
+                            {messages.endpoints.simulationNormalDescription}
                           </p>
                         </div>
                       </ChoiceboxItem>
@@ -153,16 +157,14 @@ export const SimulationForm = forwardRef<
                         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-sm">
-                              Latency Simulation
+                              {messages.endpoints.simulationDelayTitle}
                             </span>
                             <Badge variant="secondary">
-                              Add response delay
+                              {messages.endpoints.simulationDelayBadge}
                             </Badge>
                           </div>
                           <p className="text-muted-foreground text-sm">
-                            Add a configurable delay before sending the
-                            response. Useful for testing slow network conditions
-                            and loading states.
+                            {messages.endpoints.simulationDelayDescription}
                           </p>
                         </div>
                       </ChoiceboxItem>
@@ -183,14 +185,14 @@ export const SimulationForm = forwardRef<
                         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-sm">
-                              Timeout Simulation
+                              {messages.endpoints.simulationTimeoutTitle}
                             </span>
-                            <Badge variant="secondary">Never respond</Badge>
+                            <Badge variant="secondary">
+                              {messages.endpoints.simulationTimeoutBadge}
+                            </Badge>
                           </div>
                           <p className="text-muted-foreground text-sm">
-                            Hold the connection indefinitely without sending any
-                            response. Client will timeout based on their timeout
-                            settings. Perfect for testing timeout handling.
+                            {messages.endpoints.simulationTimeoutDescription}
                           </p>
                         </div>
                       </ChoiceboxItem>
@@ -221,10 +223,15 @@ export const SimulationForm = forwardRef<
                     name="delayMs"
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel>Delay Duration</FieldLabel>
+                        <FieldLabel>
+                          {messages.endpoints.simulationDelayDuration}
+                        </FieldLabel>
                         <FieldContent>
                           <FieldDescription>
-                            Choose a preset or enter a custom delay value
+                            {
+                              messages.endpoints
+                                .simulationDelayDurationDescription
+                            }
                           </FieldDescription>
 
                           {/* Preset Buttons */}
@@ -252,7 +259,7 @@ export const SimulationForm = forwardRef<
                           <div className="flex items-end gap-2">
                             <div className="flex-1">
                               <FieldLabel htmlFor="custom-delay">
-                                Custom Delay
+                                {messages.endpoints.simulationCustomDelay}
                               </FieldLabel>
                               <Input
                                 id="custom-delay"
@@ -267,7 +274,10 @@ export const SimulationForm = forwardRef<
                                     field.onChange(value);
                                   }
                                 }}
-                                placeholder="Enter delay in ms"
+                                placeholder={
+                                  messages.endpoints
+                                    .simulationCustomDelayPlaceholder
+                                }
                                 type="number"
                                 value={field.value || ""}
                               />
@@ -293,9 +303,11 @@ export const SimulationForm = forwardRef<
                                   ease: MOTION_EASE.out,
                                 }}
                               >
-                                <p className="font-medium text-sm">Preview</p>
+                                <p className="font-medium text-sm">
+                                  {messages.endpoints.simulationPreviewTitle}
+                                </p>
                                 <p className="mt-1 text-muted-foreground text-sm">
-                                  Response will be delayed by{" "}
+                                  {messages.endpoints.simulationPreviewPrefix}{" "}
                                   <span className="font-semibold">
                                     {delayMs >= MS_PER_SECOND
                                       ? `${(delayMs / MS_PER_SECOND).toFixed(
@@ -324,7 +336,7 @@ export const SimulationForm = forwardRef<
         <div className="mt-6 flex justify-end gap-2 border-t pt-4">
           {onCancel && (
             <Button onClick={onCancel} type="button" variant="outline">
-              Cancel
+              {messages.common.cancel}
             </Button>
           )}
           <Button
@@ -336,7 +348,7 @@ export const SimulationForm = forwardRef<
             }
             type="submit"
           >
-            {isPending ? "Applying..." : "Apply"}
+            {isPending ? messages.common.applying : messages.common.apply}
           </Button>
         </div>
 

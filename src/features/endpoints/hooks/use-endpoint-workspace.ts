@@ -131,7 +131,7 @@ export function useEndpointWorkspace(
     mutationFn: adapter.activateResponse,
     mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
-      toast.error("Failed to activate response", {
+      toast.error(messages.endpoints.activateFailed, {
         description: error.message,
       });
     },
@@ -145,7 +145,7 @@ export function useEndpointWorkspace(
     mutationFn: adapter.deactivateResponse,
     mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
-      toast.error("Failed to deactivate response", {
+      toast.error(messages.endpoints.deactivateFailed, {
         description: error.message,
       });
     },
@@ -159,12 +159,12 @@ export function useEndpointWorkspace(
     mutationFn: adapter.updateResponseSimulation,
     mutationKey: ENDPOINT_MUTATION_KEY,
     onError: (error) => {
-      toast.error("Failed to update simulation settings", {
+      toast.error(messages.endpoints.simulationUpdateFailed, {
         description: error.message,
       });
     },
     onSuccess: async () => {
-      toast.success("Simulation settings updated successfully");
+      toast.success(messages.endpoints.simulationUpdateSuccess);
       await invalidateWorkspace();
     },
   });

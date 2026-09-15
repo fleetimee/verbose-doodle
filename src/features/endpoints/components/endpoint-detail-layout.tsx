@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from "motion/react";
 import { lazy, type ReactNode, Suspense } from "react";
+import { useI18n } from "@/components/i18n-provider";
 import { Card } from "@/components/ui/card";
 import {
   ResizableHandle,
@@ -9,6 +10,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponseList } from "@/features/endpoints/components/response-list";
 import type { EndpointResponse, HttpMethod } from "@/features/endpoints/types";
+import { formatMessage } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 const ResponsePreview = lazy(() =>
@@ -54,6 +56,8 @@ export function EndpointDetailLayout({
   previewTourId,
   responsesTourId,
 }: EndpointDetailLayoutProps) {
+  const { messages } = useI18n();
+
   return (
     <>
       {/* Mobile: Tabs layout */}
@@ -62,9 +66,13 @@ export function EndpointDetailLayout({
           <div className="border-b px-4 py-2">
             <TabsList className="w-auto">
               <TabsTrigger value="responses">
-                Responses ({responses.length})
+                {formatMessage(messages.endpoints.tabsResponses, {
+                  count: responses.length,
+                })}
               </TabsTrigger>
-              <TabsTrigger value="preview">Preview</TabsTrigger>
+              <TabsTrigger value="preview">
+                {messages.endpoints.tabsPreview}
+              </TabsTrigger>
             </TabsList>
           </div>
           <TabsContent className="mt-0" value="responses">

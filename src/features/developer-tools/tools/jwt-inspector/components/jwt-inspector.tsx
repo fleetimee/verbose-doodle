@@ -5,6 +5,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -135,7 +136,9 @@ type JwtPaneMotionProps = {
 
 function renderTokenStatus(token: string, tokenError: string) {
   if (!token) {
-    return <span className="text-muted-foreground">No token provided</span>;
+    return (
+      <span className="text-muted-foreground">{copy.noTokenProvided}</span>
+    );
   }
   if (tokenError) {
     return (
@@ -148,7 +151,7 @@ function renderTokenStatus(token: string, tokenError: string) {
   return (
     <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
       <HugeiconsIcon className="size-4" icon={CheckmarkCircle02Icon} />
-      <span>Valid JWT</span>
+      <span>{copy.validJwt}</span>
     </span>
   );
 }
@@ -313,6 +316,7 @@ function JwtDecodedPane({
 }
 
 export function JwtInspector() {
+  useI18n();
   const [mode, setMode] = useState<"inspect" | "create">("inspect");
   const [token, setToken] = useState("");
   const [header, setHeader] = useState("");

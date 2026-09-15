@@ -1,22 +1,48 @@
 import { Globe02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
-import { type AppLocale, getActiveLocale, setActiveLocale } from "@/lib/i18n";
+import {
+  type AppLocale,
+  getActiveLocale,
+  getMessages,
+  setActiveLocale,
+} from "@/lib/i18n";
 
 export type LanguageToggleProps = {
   onLocaleChange?: (locale: AppLocale) => void;
 };
 
 export function LanguageToggle({ onLocaleChange }: LanguageToggleProps) {
-  const [activeLocale, setLocalState] = useState<AppLocale>(() =>
+  let contextLocale: AppLocale | undefined;
+  let contextMessages: ReturnType<typeof getMessages> | undefined;
+  let contextSetLocale: ((locale: AppLocale) => void) | undefined;
+
+  try {
+    const i18n = useI18n();
+    contextLocale = i18n.locale;
+    contextMessages = i18n.messages;
+    contextSetLocale = i18n.setLocale;
+  } catch {
+    // Fallback when rendered outside I18nProvider
+  }
+
+  const [fallbackLocale, setFallbackLocale] = useState<AppLocale>(() =>
     getActiveLocale()
   );
 
+  const activeLocale = contextLocale ?? fallbackLocale;
+  const activeMessages = contextMessages ?? getMessages(activeLocale);
+
   const toggleLocale = () => {
     const nextLocale: AppLocale = activeLocale === "en-US" ? "id-ID" : "en-US";
-    setActiveLocale(nextLocale);
-    setLocalState(nextLocale);
+    if (contextSetLocale) {
+      contextSetLocale(nextLocale);
+    } else {
+      setActiveLocale(nextLocale);
+      setFallbackLocale(nextLocale);
+    }
     if (onLocaleChange) {
       onLocaleChange(nextLocale);
     }
@@ -36,8 +62,8 @@ export function LanguageToggle({ onLocaleChange }: LanguageToggleProps) {
       />
       <span>
         {activeLocale === "en-US"
-          ? "English (en-US)"
-          : "Bahasa Indonesia (id-ID)"}
+          ? activeMessages.common.languageEnglish
+          : activeMessages.common.languageIndonesian}
       </span>
     </Button>
   );

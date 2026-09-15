@@ -78,26 +78,34 @@ export function getDeveloperToolHref(
   return `/dashboard/${tool.path}`;
 }
 
-const CATEGORY_METADATA: readonly Omit<DeveloperToolCategory, "tools">[] = [
+const CATEGORY_METADATA = [
   {
     icon: ShieldCheck,
-    id: "validation",
-    name: messages.developerTools.validationCategory,
+    id: "validation" as const,
+    get name() {
+      return messages.developerTools.validationCategory;
+    },
   },
   {
     icon: RefreshCw,
-    id: "conversion",
-    name: messages.developerTools.conversionCategory,
+    id: "conversion" as const,
+    get name() {
+      return messages.developerTools.conversionCategory;
+    },
   },
   {
     icon: CalendarClock,
-    id: "scheduling",
-    name: messages.developerTools.schedulingCategory,
+    id: "scheduling" as const,
+    get name() {
+      return messages.developerTools.schedulingCategory;
+    },
   },
   {
     icon: RadioReceiver,
-    id: "inspection",
-    name: messages.developerTools.inspectionCategory,
+    id: "inspection" as const,
+    get name() {
+      return messages.developerTools.inspectionCategory;
+    },
   },
 ];
 
@@ -149,166 +157,291 @@ const loadNfcReaderInspector: DeveloperToolLoader = () =>
 export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
   {
     categoryId: "validation",
-    description: messages.developerTools.schemaValidatorDescription,
-    document: {
-      description: messages.jsonSchemaValidator.pageDescription,
-      keywords: messages.jsonSchemaValidator.pageKeywords,
-      title: messages.jsonSchemaValidator.pageTitle,
+    get description() {
+      return messages.developerTools.schemaValidatorDescription;
+    },
+    get document() {
+      return {
+        description: messages.jsonSchemaValidator.pageDescription,
+        keywords: messages.jsonSchemaValidator.pageKeywords,
+        title: messages.jsonSchemaValidator.pageTitle,
+      };
     },
     icon: Braces,
     id: "json-schema-validator",
-    searchDescription: "Validate JSON against a schema.",
-    limit: messages.developerTools.schemaValidatorLimit,
+    get searchDescription() {
+      return messages.developerTools.schemaValidatorSearchDescription;
+    },
+    get limit() {
+      return messages.developerTools.schemaValidatorLimit;
+    },
     load: loadJsonSchemaValidator,
-    name: messages.jsonSchemaValidator.title,
+    get name() {
+      return messages.jsonSchemaValidator.title;
+    },
     path: "developer-tools/json-schema-validator",
-    runtime: messages.developerTools.schemaValidatorRuntime,
-    tags: messages.developerTools.schemaValidatorTags,
+    get runtime() {
+      return messages.developerTools.schemaValidatorRuntime;
+    },
+    get tags() {
+      return messages.developerTools.schemaValidatorTags;
+    },
   },
   {
     categoryId: "validation",
-    description: messages.developerTools.jwtInspectorDescription,
-    document: {
-      description: messages.jwtInspector.pageDescription,
-      keywords: messages.jwtInspector.pageKeywords,
-      title: messages.jwtInspector.pageTitle,
+    get description() {
+      return messages.developerTools.jwtInspectorDescription;
+    },
+    get document() {
+      return {
+        description: messages.jwtInspector.pageDescription,
+        keywords: messages.jwtInspector.pageKeywords,
+        title: messages.jwtInspector.pageTitle,
+      };
     },
     icon: Fingerprint,
     id: "jwt-inspector",
-    searchDescription: "Decode, edit, and verify JSON Web Tokens.",
-    limit: messages.developerTools.jwtInspectorLimit,
+    get searchDescription() {
+      return messages.developerTools.jwtInspectorSearchDescription;
+    },
+    get limit() {
+      return messages.developerTools.jwtInspectorLimit;
+    },
     load: loadJwtInspector,
-    name: messages.jwtInspector.title,
+    get name() {
+      return messages.jwtInspector.title;
+    },
     path: "developer-tools/jwt-inspector",
-    runtime: messages.developerTools.jwtInspectorRuntime,
-    tags: messages.developerTools.jwtInspectorTags,
+    get runtime() {
+      return messages.developerTools.jwtInspectorRuntime;
+    },
+    get tags() {
+      return messages.developerTools.jwtInspectorTags;
+    },
   },
   {
     categoryId: "conversion",
-    description: messages.developerTools.dateConverterDescription,
-    document: {
-      description: messages.dateConverter.pageDescription,
-      keywords: messages.dateConverter.pageKeywords,
-      title: messages.dateConverter.pageTitle,
+    get description() {
+      return messages.developerTools.dateConverterDescription;
+    },
+    get document() {
+      return {
+        description: messages.dateConverter.pageDescription,
+        keywords: messages.dateConverter.pageKeywords,
+        title: messages.dateConverter.pageTitle,
+      };
     },
     icon: CalendarDays,
     id: "date-converter",
-    searchDescription: "Convert timestamps and dates across timezones.",
-    limit: messages.developerTools.dateConverterLimit,
+    get searchDescription() {
+      return messages.developerTools.dateConverterSearchDescription;
+    },
+    get limit() {
+      return messages.developerTools.dateConverterLimit;
+    },
     load: loadDateConverter,
-    name: messages.dateConverter.title,
+    get name() {
+      return messages.dateConverter.title;
+    },
     path: "developer-tools/date-converter",
-    runtime: messages.developerTools.dateConverterRuntime,
-    tags: messages.developerTools.dateConverterTags,
+    get runtime() {
+      return messages.developerTools.dateConverterRuntime;
+    },
+    get tags() {
+      return messages.developerTools.dateConverterTags;
+    },
   },
   {
     categoryId: "conversion",
-    description: messages.developerTools.iso8583GeneratorDescription,
-    document: {
-      description: messages.iso8583Generator.documentDescription,
-      keywords: messages.iso8583Generator.documentKeywords,
-      title: messages.iso8583Generator.title,
+    get description() {
+      return messages.developerTools.iso8583GeneratorDescription;
+    },
+    get document() {
+      return {
+        description: messages.iso8583Generator.documentDescription,
+        keywords: messages.iso8583Generator.documentKeywords,
+        title: messages.iso8583Generator.title,
+      };
     },
     icon: Code2,
     id: "iso8583-generator",
-    searchDescription: "Build and pack ISO 8583 messages.",
-    limit: messages.developerTools.iso8583GeneratorLimit,
+    get searchDescription() {
+      return messages.developerTools.iso8583GeneratorSearchDescription;
+    },
+    get limit() {
+      return messages.developerTools.iso8583GeneratorLimit;
+    },
     load: loadIso8583Generator,
-    name: messages.iso8583Generator.title,
+    get name() {
+      return messages.iso8583Generator.title;
+    },
     path: "developer-tools/iso8583-generator",
-    runtime: messages.developerTools.iso8583GeneratorRuntime,
-    tags: messages.developerTools.iso8583GeneratorTags,
+    get runtime() {
+      return messages.developerTools.iso8583GeneratorRuntime;
+    },
+    get tags() {
+      return messages.developerTools.iso8583GeneratorTags;
+    },
   },
   {
     categoryId: "conversion",
-    description: messages.developerTools.converterDescription,
-    document: {
-      description: messages.jsonYamlConverter.pageDescription,
-      keywords: messages.jsonYamlConverter.pageKeywords,
-      title: messages.jsonYamlConverter.pageTitle,
+    get description() {
+      return messages.developerTools.converterDescription;
+    },
+    get document() {
+      return {
+        description: messages.jsonYamlConverter.pageDescription,
+        keywords: messages.jsonYamlConverter.pageKeywords,
+        title: messages.jsonYamlConverter.pageTitle,
+      };
     },
     icon: FileJson,
     id: "json-yaml-converter",
-    searchDescription: "Convert between JSON and YAML.",
-    limit: messages.developerTools.converterLimit,
+    get searchDescription() {
+      return messages.developerTools.converterSearchDescription;
+    },
+    get limit() {
+      return messages.developerTools.converterLimit;
+    },
     load: loadJsonYamlConverter,
-    name: messages.jsonYamlConverter.title,
+    get name() {
+      return messages.jsonYamlConverter.title;
+    },
     path: "developer-tools/json-yaml-converter",
-    runtime: messages.developerTools.converterRuntime,
-    tags: messages.developerTools.converterTags,
+    get runtime() {
+      return messages.developerTools.converterRuntime;
+    },
+    get tags() {
+      return messages.developerTools.converterTags;
+    },
   },
   {
     categoryId: "conversion",
-    description: messages.developerTools.numberBaseConverterDescription,
-    document: {
-      description: messages.numberBaseConverter.pageDescription,
-      keywords: messages.numberBaseConverter.pageKeywords,
-      title: messages.numberBaseConverter.pageTitle,
+    get description() {
+      return messages.developerTools.numberBaseConverterDescription;
+    },
+    get document() {
+      return {
+        description: messages.numberBaseConverter.pageDescription,
+        keywords: messages.numberBaseConverter.pageKeywords,
+        title: messages.numberBaseConverter.pageTitle,
+      };
     },
     icon: Binary,
     id: "number-base-converter",
-    searchDescription:
-      "Convert binary, octal, decimal, and hexadecimal values.",
-    limit: messages.developerTools.numberBaseConverterLimit,
+    get searchDescription() {
+      return messages.developerTools.numberBaseConverterSearchDescription;
+    },
+    get limit() {
+      return messages.developerTools.numberBaseConverterLimit;
+    },
     load: loadNumberBaseConverter,
-    name: messages.numberBaseConverter.title,
+    get name() {
+      return messages.numberBaseConverter.title;
+    },
     path: "developer-tools/number-base-converter",
-    runtime: messages.developerTools.numberBaseConverterRuntime,
-    tags: messages.developerTools.numberBaseConverterTags,
+    get runtime() {
+      return messages.developerTools.numberBaseConverterRuntime;
+    },
+    get tags() {
+      return messages.developerTools.numberBaseConverterTags;
+    },
   },
   {
     categoryId: "scheduling",
-    description: messages.developerTools.cronParserDescription,
-    document: {
-      description: messages.cronParser.pageDescription,
-      keywords: messages.cronParser.pageKeywords,
-      title: messages.cronParser.pageTitle,
+    get description() {
+      return messages.developerTools.cronParserDescription;
+    },
+    get document() {
+      return {
+        description: messages.cronParser.pageDescription,
+        keywords: messages.cronParser.pageKeywords,
+        title: messages.cronParser.pageTitle,
+      };
     },
     icon: Timer,
     id: "cron-parser",
-    searchDescription: "Explain cron expressions and preview upcoming runs.",
-    limit: messages.developerTools.cronParserLimit,
+    get searchDescription() {
+      return messages.developerTools.cronParserSearchDescription;
+    },
+    get limit() {
+      return messages.developerTools.cronParserLimit;
+    },
     load: loadCronParser,
-    name: messages.cronParser.title,
+    get name() {
+      return messages.cronParser.title;
+    },
     path: "developer-tools/cron-parser",
-    runtime: messages.developerTools.cronParserRuntime,
-    tags: messages.developerTools.cronParserTags,
+    get runtime() {
+      return messages.developerTools.cronParserRuntime;
+    },
+    get tags() {
+      return messages.developerTools.cronParserTags;
+    },
   },
   {
     categoryId: "inspection",
-    description: messages.developerTools.nfcReaderCatalogDescription,
-    document: {
-      description: messages.developerTools.nfcReaderDocumentDescription,
-      keywords: messages.developerTools.nfcReaderDocumentKeywords,
-      title: messages.developerTools.nfcReaderDocumentTitle,
+    get description() {
+      return messages.developerTools.nfcReaderCatalogDescription;
+    },
+    get document() {
+      return {
+        description: messages.developerTools.nfcReaderDocumentDescription,
+        keywords: messages.developerTools.nfcReaderDocumentKeywords,
+        title: messages.developerTools.nfcReaderDocumentTitle,
+      };
     },
     icon: RadioReceiver,
     id: "nfc-reader-inspector",
-    searchDescription: "Inspect NFC scans and NDEF records.",
-    limit: messages.developerTools.nfcReaderLimit,
+    get searchDescription() {
+      return messages.developerTools.nfcReaderSearchDescription;
+    },
+    get limit() {
+      return messages.developerTools.nfcReaderLimit;
+    },
     load: loadNfcReaderInspector,
-    name: messages.developerTools.nfcReaderName,
+    get name() {
+      return messages.developerTools.nfcReaderName;
+    },
     path: "developer-tools/nfc-reader-inspector",
-    runtime: messages.developerTools.nfcReaderRuntime,
-    tags: messages.developerTools.nfcReaderTags,
+    get runtime() {
+      return messages.developerTools.nfcReaderRuntime;
+    },
+    get tags() {
+      return messages.developerTools.nfcReaderTags;
+    },
   },
   {
     categoryId: "inspection",
-    description: messages.developerTools.iso8583ParserDescription,
-    document: {
-      description: messages.iso8583Parser.documentDescription,
-      keywords: messages.iso8583Parser.documentKeywords,
-      title: messages.iso8583Parser.documentTitle,
+    get description() {
+      return messages.developerTools.iso8583ParserDescription;
+    },
+    get document() {
+      return {
+        description: messages.iso8583Parser.documentDescription,
+        keywords: messages.iso8583Parser.documentKeywords,
+        title: messages.iso8583Parser.documentTitle,
+      };
     },
     icon: Binary,
     id: "iso8583-parser",
-    limit: messages.developerTools.iso8583ParserLimit,
+    get limit() {
+      return messages.developerTools.iso8583ParserLimit;
+    },
     load: loadIso8583Parser,
-    name: messages.iso8583Parser.title,
+    get name() {
+      return messages.iso8583Parser.title;
+    },
     path: "developer-tools/iso8583-parser",
-    runtime: messages.developerTools.iso8583ParserRuntime,
-    searchDescription: "Parse raw ISO 8583 streams and inspect fields.",
-    tags: messages.developerTools.iso8583ParserTags,
+    get runtime() {
+      return messages.developerTools.iso8583ParserRuntime;
+    },
+    get searchDescription() {
+      return messages.developerTools.iso8583ParserSearchDescription;
+    },
+    get tags() {
+      return messages.developerTools.iso8583ParserTags;
+    },
   },
 ];
 
@@ -316,7 +449,11 @@ assertDeveloperToolRegistry(DEVELOPER_TOOLS);
 
 export const DEVELOPER_TOOL_CATEGORIES: readonly DeveloperToolCategory[] =
   CATEGORY_METADATA.map((category) => ({
-    ...category,
+    icon: category.icon,
+    id: category.id,
+    get name() {
+      return category.name;
+    },
     tools: DEVELOPER_TOOLS.filter((tool) => tool.categoryId === category.id),
   }));
 

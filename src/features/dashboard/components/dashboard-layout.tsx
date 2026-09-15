@@ -9,6 +9,8 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useOutlet, useParams } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
+import { useI18n } from "@/components/i18n-provider";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { TourProvider } from "@/components/tour";
@@ -58,30 +60,34 @@ import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-sch
 import type { HttpMethod } from "@/features/endpoints/types";
 import { selectEndpointForBiller } from "@/features/endpoints/utils/endpoint-selection";
 import { SocketBridgeProvider } from "@/features/socket-tester/context/socket-bridge-context";
-import { messages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-const routeLabels: Record<string, string> = {
-  "cron-parser": messages.cronParser.title,
-  "date-converter": messages.dateConverter.title,
-  "developer-tools": messages.developerTools.navigationGroup,
-  endpoints: "Endpoints",
-  "iso-8583": "ISO 8583",
-  "json-schema-validator": messages.jsonSchemaValidator.title,
-  "jwt-inspector": messages.jwtInspector.title,
-  "number-base-converter": messages.numberBaseConverter.title,
-  overview: "Overview",
-  "rest-api": "REST API",
-  settings: "Settings",
-  "socket-test": "SocketTest",
-  "socket-tester": "Socket Tester",
-  "socks-relay": "Socks Relay",
-  "tcp-client": "TCP Client",
-  "tcp-server": "TCP Server",
-  udp: "UDP",
-  users: "Users",
-};
+function getRouteLabels(
+  messages: import("@/lib/i18n").Messages
+): Record<string, string> {
+  return {
+    "cron-parser": messages.cronParser.title,
+    "date-converter": messages.dateConverter.title,
+    "developer-tools": messages.developerTools.navigationGroup,
+    endpoints: messages.common.navEndpoints,
+    "iso-8583": messages.common.navIso8583,
+    "json-schema-validator": messages.jsonSchemaValidator.title,
+    "jwt-inspector": messages.jwtInspector.title,
+    "number-base-converter": messages.numberBaseConverter.title,
+    overview: messages.common.navOverview,
+    "rest-api": messages.common.navRestApi,
+    settings: messages.common.navSettings,
+    "socket-test": messages.common.navSocketTester,
+    "socket-tester": messages.common.navSocketTester,
+    "socks-relay": messages.common.navSocksRelay,
+    "tcp-client": messages.common.navTcpClient,
+    "tcp-server": messages.common.navTcpServer,
+    udp: messages.common.navUdp,
+    users: messages.common.navUsers,
+  };
+}
 
 const ENDPOINT_DETAIL_REGEX = /^\/dashboard\/endpoints\/([^/]+)$/;
 type DashboardBreadcrumbItem = {
@@ -97,6 +103,8 @@ type DashboardBreadcrumbItem = {
 };
 
 export function DashboardLayout() {
+  const { locale, messages } = useI18n();
+  const routeLabels = React.useMemo(() => getRouteLabels(messages), [messages]);
   const location = useLocation();
   const params = useParams();
   const isOverview = location.pathname === "/dashboard/overview";
@@ -220,7 +228,7 @@ export function DashboardLayout() {
   );
 
   const endpointBreadcrumbIndex = breadcrumbItems.findIndex(
-    (item) => item.label === "Endpoints"
+    (item) => item.label === messages.common.navEndpoints
   );
 
   if (isEndpointDetail && endpointBreadcrumbIndex !== -1) {
@@ -233,8 +241,10 @@ export function DashboardLayout() {
       label:
         endpoint?.billerName ??
         (endpoint?.billerSlug === undefined
-          ? "Biller"
-          : `Biller ${endpoint.billerSlug}`),
+          ? messages.endpoints.billerLabel
+          : formatMessage(messages.endpoints.billerWithSlug, {
+              slug: endpoint.billerSlug,
+            })),
     });
   }
 
@@ -304,17 +314,20 @@ export function DashboardLayout() {
                   </Breadcrumb>
                   {isEndpointDetail && endpointQuery.isFetching && (
                     <span
-                      aria-label="Refreshing endpoint"
+                      aria-label={messages.endpoints.refreshingEndpoint}
                       className="ml-2 inline-flex shrink-0 items-center gap-1.5 text-muted-foreground text-xs"
                       data-testid="endpoint-refresh-indicator"
                       role="status"
                     >
                       <span className="size-3 animate-spin rounded-full border-2 border-current border-r-transparent" />
-                      <span className="hidden sm:inline">Refreshing</span>
+                      <span className="hidden sm:inline">
+                        {messages.common.refreshing}
+                      </span>
                     </span>
                   )}
                   <div className="ml-auto flex shrink-0 items-center gap-2">
                     <LockScreenButton />
+                    <LanguageSwitcher />
                     <ThemeSwitcher
                       onChange={setTheme}
                       value={themeSwitcherValue}
@@ -344,7 +357,7 @@ export function DashboardLayout() {
                               transform: "translateY(18px) scale(0.985)",
                             }
                       }
-                      key={location.pathname}
+                      key={`${location.pathname}-${locale}`}
                       transition={{
                         duration: MOTION_DURATION.smooth,
                         ease: MOTION_EASE.out,
@@ -370,7 +383,7 @@ export function DashboardLayout() {
                     }}
                   >
                     <Button
-                      aria-label="Scroll to top"
+                      aria-label={messages.common.scrollToTop}
                       className="pointer-events-auto size-10 rounded-full border-border/70 bg-background/95 shadow-lg backdrop-blur"
                       onClick={handleScrollToTop}
                       size="icon"
@@ -382,7 +395,9 @@ export function DashboardLayout() {
                         icon={ArrowUp01Icon}
                         strokeWidth={2}
                       />
-                      <span className="sr-only">Scroll to top</span>
+                      <span className="sr-only">
+                        {messages.common.scrollToTop}
+                      </span>
                     </Button>
                   </motion.div>
                 )}
@@ -584,12 +599,14 @@ function BillerBreadcrumbSelector({
     }
   };
 
+  const { messages } = useI18n();
+
   return (
     <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>
         <Button
           aria-expanded={open}
-          aria-label="Biller"
+          aria-label={messages.endpoints.billerLabel}
           className="h-8 max-w-48 justify-between border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
           disabled={endpointMutationPending}
           role="combobox"
@@ -616,13 +633,13 @@ function BillerBreadcrumbSelector({
       >
         <Command>
           <CommandInput
-            aria-label="Search billers"
+            aria-label={messages.billers.searchAria}
             className="h-11"
-            placeholder="Search billers..."
+            placeholder={messages.billers.searchPlaceholder}
           />
           <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
             <CommandList className="max-h-none overflow-visible p-1">
-              <CommandEmpty>No biller found.</CommandEmpty>
+              <CommandEmpty>{messages.billers.noBillersFound}</CommandEmpty>
               <CommandGroup className="p-0">
                 <ProtectedAction ability="canAddBiller">
                   <CommandItem
@@ -741,12 +758,14 @@ function EndpointBreadcrumbSelector({
     }
   };
 
+  const { messages } = useI18n();
+
   return (
     <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>
         <Button
           aria-expanded={open}
-          aria-label="Endpoint"
+          aria-label={messages.endpoints.endpointLabel}
           className="h-8 max-w-[min(32rem,50vw)] justify-between border-transparent bg-transparent px-1.5 font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground"
           disabled={endpointMutationPending}
           role="combobox"
@@ -780,13 +799,13 @@ function EndpointBreadcrumbSelector({
       >
         <Command>
           <CommandInput
-            aria-label="Search endpoints"
+            aria-label={messages.endpoints.searchEndpointsAria}
             className="h-11"
-            placeholder="Search endpoints..."
+            placeholder={messages.endpoints.searchPlaceholder}
           />
           <ScrollArea className="h-72 [&>[data-slot=scroll-area-scrollbar]]:opacity-100">
             <CommandList className="max-h-none overflow-visible p-1">
-              <CommandEmpty>No endpoint found.</CommandEmpty>
+              <CommandEmpty>{messages.endpoints.noEndpointsFound}</CommandEmpty>
               <CommandGroup className="p-0">
                 <ProtectedAction ability="canAddEndpoint">
                   <CommandItem

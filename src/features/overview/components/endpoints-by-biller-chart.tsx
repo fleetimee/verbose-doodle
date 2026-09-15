@@ -1,4 +1,5 @@
 import { Bar, BarChart, Cell, XAxis, YAxis } from "recharts";
+import { useI18n } from "@/components/i18n-provider";
 import {
   Card,
   CardContent,
@@ -33,6 +34,7 @@ export function EndpointsByBillerChart({
   data,
   className,
 }: EndpointsByBillerChartProps) {
+  const { messages } = useI18n();
   // Default classes for admin layout, can be overridden via className prop
   const defaultClasses = className || "md:col-span-3 lg:col-span-2";
 
@@ -46,7 +48,9 @@ export function EndpointsByBillerChart({
   // Dynamically generate chart config from the data
   const endpointsByBillerConfig = {
     count: {
-      label: "Endpoints",
+      get label() {
+        return messages.overview.endpointsMetricLabel;
+      },
     },
     ...Object.fromEntries(
       data.endpointsByBiller.map((item, index) => [
@@ -64,9 +68,11 @@ export function EndpointsByBillerChart({
       className={`${defaultClasses} border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)]`}
     >
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">Endpoints by Biller</CardTitle>
+        <CardTitle className="text-base">
+          {messages.overview.endpointsByBillerTitle}
+        </CardTitle>
         <CardDescription className="text-xs">
-          Distribution of endpoints across billers
+          {messages.overview.endpointsByBillerDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>

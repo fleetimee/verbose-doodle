@@ -90,6 +90,7 @@ import {
 import type { BundledLanguage, CodeOptionsMultipleThemes } from "shiki";
 import { toast } from "sonner";
 import { CheckIcon, CopyIcon } from "@/components/hugeicons";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -99,6 +100,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { copyToClipboard } from "@/lib/clipboard";
+import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export type { BundledLanguage } from "shiki";
@@ -574,7 +576,7 @@ export const CodeBlockCopyButton = ({
     try {
       const copied = await copyToClipboard(code);
       if (!copied) {
-        toast.error("Unable to copy code");
+        toast.error(messages.common.copyCodeFailed);
         return;
       }
 
@@ -584,12 +586,16 @@ export const CodeBlockCopyButton = ({
 
       setIsCopied(true);
       onCopy?.();
-      toast.success("Code copied to clipboard");
+      toast.success(messages.common.codeCopied);
 
       setTimeout(() => setIsCopied(false), timeout);
     } catch (error) {
-      onError?.(error instanceof Error ? error : new Error("Copy failed"));
-      toast.error("Unable to copy code");
+      onError?.(
+        error instanceof Error
+          ? error
+          : new Error(messages.common.copyCodeFailed)
+      );
+      toast.error(messages.common.copyCodeFailed);
     }
   };
 
@@ -816,6 +822,7 @@ export const CodeBlockThemeSelector = ({
   mode,
   className,
 }: CodeBlockThemeSelectorProps) => {
+  useI18n();
   const { lightTheme, darkTheme, onLightThemeChange, onDarkThemeChange } =
     useContext(CodeBlockContext);
 
@@ -831,7 +838,11 @@ export const CodeBlockThemeSelector = ({
         )}
       >
         <SelectValue
-          placeholder={`${mode === "light" ? "Light" : "Dark"} Theme`}
+          placeholder={
+            mode === "light"
+              ? messages.theme.lightTheme
+              : messages.theme.darkTheme
+          }
         />
       </SelectTrigger>
       <SelectContent>
