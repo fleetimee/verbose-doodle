@@ -216,6 +216,12 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -349,6 +355,12 @@
   --accent: oklch(0.905 0.026 185);
   --accent-foreground: oklch(0.268 0.035 190);
   --destructive: oklch(0.5594 0.19 25.8625);
+  --success: oklch(0.623 0.17 145);
+  --success-foreground: oklch(0.985 0.004 180);
+  --warning: oklch(0.76 0.16 75);
+  --warning-foreground: oklch(0.25 0.05 75);
+  --info: oklch(0.62 0.15 240);
+  --info-foreground: oklch(0.985 0.004 180);
   --border: oklch(0.86 0.008 210);
   --input: oklch(0.93 0.008 205);
   --ring: oklch(0.51 0.08 185);
@@ -409,6 +421,12 @@
   --accent: oklch(0.32 0.03 190);
   --accent-foreground: oklch(0.9 0.008 205);
   --destructive: oklch(0.6591 0.153 22.1703);
+  --success: oklch(0.65 0.16 145);
+  --success-foreground: oklch(0.15 0.02 145);
+  --warning: oklch(0.72 0.15 75);
+  --warning-foreground: oklch(0.18 0.03 75);
+  --info: oklch(0.65 0.15 240);
+  --info-foreground: oklch(0.18 0.02 240);
   --border: oklch(0.34 0.014 235);
   --input: oklch(0.28 0.014 235);
   --ring: oklch(0.67 0.075 185);
@@ -3182,4 +3200,69 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 
 .text-fill-transparent {
   -webkit-text-fill-color: transparent;
+}
+
+.select-method-get {
+  color: #0284c7;
+  background-color: color-mix(in srgb, #0ea5e9 15%, transparent);
+  border-color: color-mix(in srgb, #0ea5e9 40%, transparent);
+  border-bottom-color: color-mix(in srgb, #0ea5e9 80%, transparent);
+}
+.dark .select-method-get {
+  color: #7dd3fc;
+  background-color: color-mix(in srgb, #082f49 60%, transparent);
+  border-color: color-mix(in srgb, #0ea5e9 50%, transparent);
+  border-bottom-color: #38bdf8;
+}
+
+.select-method-post {
+  color: #059669;
+  background-color: color-mix(in srgb, #10b981 15%, transparent);
+  border-color: color-mix(in srgb, #10b981 40%, transparent);
+  border-bottom-color: color-mix(in srgb, #10b981 80%, transparent);
+}
+.dark .select-method-post {
+  color: #6ee7b7;
+  background-color: color-mix(in srgb, #064e3b 60%, transparent);
+  border-color: color-mix(in srgb, #10b981 50%, transparent);
+  border-bottom-color: #34d399;
+}
+
+.select-method-put {
+  color: #d97706;
+  background-color: color-mix(in srgb, #f59e0b 15%, transparent);
+  border-color: color-mix(in srgb, #f59e0b 40%, transparent);
+  border-bottom-color: color-mix(in srgb, #f59e0b 80%, transparent);
+}
+.dark .select-method-put {
+  color: #fcd34d;
+  background-color: color-mix(in srgb, #451a03 60%, transparent);
+  border-color: color-mix(in srgb, #f59e0b 50%, transparent);
+  border-bottom-color: #fbbf24;
+}
+
+.select-method-delete {
+  color: #e11d48;
+  background-color: color-mix(in srgb, #f43f5e 15%, transparent);
+  border-color: color-mix(in srgb, #f43f5e 40%, transparent);
+  border-bottom-color: color-mix(in srgb, #f43f5e 80%, transparent);
+}
+.dark .select-method-delete {
+  color: #fda4af;
+  background-color: color-mix(in srgb, #4c0519 60%, transparent);
+  border-color: color-mix(in srgb, #f43f5e 50%, transparent);
+  border-bottom-color: #fb7185;
+}
+
+.select-method-patch {
+  color: #9333ea;
+  background-color: color-mix(in srgb, #a855f7 15%, transparent);
+  border-color: color-mix(in srgb, #a855f7 40%, transparent);
+  border-bottom-color: color-mix(in srgb, #a855f7 80%, transparent);
+}
+.dark .select-method-patch {
+  color: #d8b4fe;
+  background-color: color-mix(in srgb, #3b0764 60%, transparent);
+  border-color: color-mix(in srgb, #a855f7 50%, transparent);
+  border-bottom-color: #c084fc;
 }

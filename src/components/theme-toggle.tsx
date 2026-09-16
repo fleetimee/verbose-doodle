@@ -42,7 +42,7 @@ export function ThemeToggle() {
               "size-4 transition-all duration-200 ease-out motion-reduce:transition-none",
               isDark
                 ? "scale-90 text-muted-foreground"
-                : "scale-100 text-amber-500"
+                : "scale-100 text-warning"
             )}
             icon={Sun03Icon}
             strokeWidth={2}
@@ -56,9 +56,7 @@ export function ThemeToggle() {
           <HugeiconsIcon
             className={cn(
               "size-4 transition-all duration-200 ease-out motion-reduce:transition-none",
-              isDark
-                ? "scale-100 text-blue-400"
-                : "scale-90 text-muted-foreground"
+              isDark ? "scale-100 text-info" : "scale-90 text-muted-foreground"
             )}
             icon={MoonIcon}
             strokeWidth={2}

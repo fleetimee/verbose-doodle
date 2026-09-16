@@ -19,8 +19,8 @@ const cardVariants = cva(
         "panel-subtle": "rounded-lg border-border/70 bg-[linear-gradient(180deg,hsl(var(--card)),hsl(var(--muted)/0.12))] shadow-sm",
         "metric-default": "overflow-hidden rounded-2xl border border-border/70 bg-card shadow-xs transition-transform duration-150 active:scale-[0.99]",
         "metric-danger": "overflow-hidden rounded-2xl border border-destructive/30 bg-destructive/5 shadow-xs transition-transform duration-150 active:scale-[0.99]",
-        "metric-success": "overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/5 shadow-xs transition-transform duration-150 active:scale-[0.99]",
-        "metric-warning": "overflow-hidden rounded-2xl border border-amber-500/30 bg-amber-500/5 shadow-xs transition-transform duration-150 active:scale-[0.99]",
+        "metric-success": "overflow-hidden rounded-2xl border border-success/30 bg-success/5 shadow-xs transition-transform duration-150 active:scale-[0.99]",
+        "metric-warning": "overflow-hidden rounded-2xl border border-warning/30 bg-warning/5 shadow-xs transition-transform duration-150 active:scale-[0.99]",
         glass: "overflow-hidden rounded-xl border border-border/80 bg-card/60 shadow-lg backdrop-blur-md",
         overview:
           "rounded-xl border border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] transition-[border-color,box-shadow,transform] duration-300 ease-out hover:border-primary/35 hover:shadow-[0_24px_55px_-34px_color-mix(in_oklab,var(--primary)_65%,transparent)] motion-reduce:transition-none",

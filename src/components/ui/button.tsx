@@ -27,7 +27,7 @@ const buttonVariants = cva(
         dashed:
           "rounded-xl border border-dashed bg-muted/20 px-3.5 py-2.5 font-medium text-xs hover:border-primary/50 hover:bg-muted/50",
         success:
-          "border border-green-600/40 bg-green-50 text-green-700 shadow-xs hover:bg-green-100 hover:text-green-800 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/50",
+          "border border-success/40 bg-success/15 text-success shadow-xs hover:bg-success/25 hover:text-success",
         "destructive-subtle":
           "border border-destructive/40 bg-destructive/10 text-destructive shadow-xs hover:bg-destructive/15 hover:text-destructive",
         "ghost-muted":
@@ -35,7 +35,7 @@ const buttonVariants = cva(
         "ghost-destructive":
           "text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive active:bg-destructive/15 dark:hover:bg-destructive/10",
         "ghost-slate":
-          "text-slate-500 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white",
+          "text-muted-foreground hover:text-foreground dark:hover:text-foreground",
         subtle:
           "rounded-lg border border-border/70 bg-background font-medium hover:bg-accent",
         soft:

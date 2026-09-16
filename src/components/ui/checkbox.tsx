@@ -15,7 +15,7 @@ const checkboxVariants = cva(
         default:
           "border-input dark:bg-input/30 data-checked:bg-primary data-checked:text-primary-foreground dark:data-checked:bg-primary data-checked:border-primary data-indeterminate:bg-primary data-indeterminate:text-primary-foreground data-indeterminate:border-primary",
         terminal:
-          "border-[#5b5b5b] bg-[#1f1f1f] data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500 data-[state=checked]:text-black",
+          "border-[#5b5b5b] bg-[#1f1f1f] data-[state=checked]:border-success data-[state=checked]:bg-success data-[state=checked]:text-black",
         "terminal-blue":
           "border-[#5b5b5b] bg-[#1f1f1f] data-[state=checked]:border-[#60a5fa] data-[state=checked]:bg-[#2563eb] data-[state=checked]:text-white",
       },

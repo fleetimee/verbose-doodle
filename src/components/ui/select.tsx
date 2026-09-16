@@ -52,15 +52,15 @@ const selectTriggerVariants = cva(
         method:
           "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0",
         "method-get":
-          "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0 border-sky-500/40 border-b-sky-500/80 bg-sky-500/15 text-sky-600 dark:border-sky-500/50 dark:border-b-sky-400 dark:bg-sky-950/60 dark:text-sky-300",
+          "select-method-get gap-1 rounded-xl border-2 border-b-2 font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0",
         "method-post":
-          "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0 border-emerald-500/40 border-b-emerald-500/80 bg-emerald-500/15 text-emerald-600 dark:border-emerald-500/50 dark:border-b-emerald-400 dark:bg-emerald-950/60 dark:text-emerald-300",
+          "select-method-post gap-1 rounded-xl border-2 border-b-2 font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0",
         "method-put":
-          "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0 border-amber-500/40 border-b-amber-500/80 bg-amber-500/15 text-amber-600 dark:border-amber-500/50 dark:border-b-amber-400 dark:bg-amber-950/60 dark:text-amber-300",
+          "select-method-put gap-1 rounded-xl border-2 border-b-2 font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0",
         "method-delete":
-          "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0 border-rose-500/40 border-b-rose-500/80 bg-rose-500/15 text-rose-600 dark:border-rose-500/50 dark:border-b-rose-400 dark:bg-rose-950/60 dark:text-rose-300",
+          "select-method-delete gap-1 rounded-xl border-2 border-b-2 font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0",
         "method-patch":
-          "gap-1 rounded-xl border-2 border-b-[3px] font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0 border-purple-500/40 border-b-purple-500/80 bg-purple-500/15 text-purple-600 dark:border-purple-500/50 dark:border-b-purple-400 dark:bg-purple-950/60 dark:text-purple-300",
+          "select-method-patch gap-1 rounded-xl border-2 border-b-2 font-black font-mono shadow-none focus:ring-0 focus-visible:ring-0",
         mono: "font-mono text-sm shadow-none",
         subtle: "border-transparent shadow-none",
         "subtle-active": "border-transparent bg-background shadow-xs",

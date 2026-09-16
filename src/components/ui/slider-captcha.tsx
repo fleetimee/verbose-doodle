@@ -346,7 +346,7 @@ export const SliderCaptcha = ({
             <ShieldCheckIcon
               className={cn(
                 "size-4 transition-colors",
-                isVerified ? "text-green-600" : "text-muted-foreground"
+                isVerified ? "text-success" : "text-muted-foreground"
               )}
             />
             <span className="font-medium text-xs">
@@ -357,7 +357,7 @@ export const SliderCaptcha = ({
           </div>
           <div className="flex items-center gap-1.5">
             {isVerified && (
-              <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} className="size-4 animate-in zoom-in-50 text-green-600 duration-300" />
+              <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} className="size-4 animate-in zoom-in-50 text-success duration-300" />
             )}
             <button
               aria-label={messages.common.generateNewPuzzle}
@@ -411,7 +411,7 @@ export const SliderCaptcha = ({
                 <filter id="cutout-inner-shadow">
                   <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
                   <feOffset dx="0" dy="2" result="offsetblur" />
-                  <feFlood floodColor="rgba(0, 0, 0, 0.5)" />
+                  <feFlood floodColor="var(--color-shadow-color)" />
                   <feComposite in2="offsetblur" operator="in" />
                   <feMerge>
                     <feMergeNode />
@@ -437,7 +437,7 @@ export const SliderCaptcha = ({
               </defs>
               <rect
                 clipPath="url(#puzzle-cutout)"
-                fill="white"
+                fill="var(--color-background)"
                 height={PUZZLE_SIZE}
                 width={PUZZLE_SIZE}
                 x={0}
@@ -446,7 +446,7 @@ export const SliderCaptcha = ({
               <path
                 d={puzzlePath}
                 fill="none"
-                stroke="rgba(0, 0, 0, 0.3)"
+                stroke="var(--color-border)"
                 strokeWidth="1"
               />
               <path
@@ -532,8 +532,8 @@ export const SliderCaptcha = ({
                 className={cn(
                   "transition-colors duration-300",
                   isVerified
-                    ? "fill-green-100 dark:fill-green-900/30"
-                    : "fill-white dark:fill-gray-800"
+                    ? "fill-success/20"
+                    : "fill-background dark:fill-card"
                 )}
                 d={puzzlePath}
                 filter="url(#piece-shadow)"
@@ -550,7 +550,7 @@ export const SliderCaptcha = ({
               <path
                 d={puzzlePath}
                 fill="none"
-                stroke="rgba(0, 0, 0, 0.2)"
+                stroke="var(--color-border)"
                 strokeWidth="1"
               />
               <path

@@ -88,7 +88,7 @@ const dialogContentVariants = cva(
         default: "",
         pane: "flex flex-col gap-0 overflow-hidden rounded-xl border p-0 shadow-2xl",
         "dark-pane":
-          "flex flex-col gap-0 overflow-hidden border border-slate-200 bg-white p-0 text-slate-950 shadow-2xl dark:border-[#2b2f37] dark:bg-[#0b0f14] dark:text-slate-100",
+          "flex flex-col gap-0 overflow-hidden border border-border bg-card p-0 text-foreground shadow-2xl dark:border-border dark:bg-card dark:text-foreground",
         elevated:
           "rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-lg",
       },
