@@ -122,7 +122,7 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="h-8 w-8 p-0" variant="ghost">
+            <Button size="icon-sm" variant="ghost">
               <span className="sr-only">{messages.users.openMenu}</span>
               <HugeiconsIcon
                 icon={MoreHorizontalCircle01Icon}
@@ -145,11 +145,12 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
                 {messages.users.editUser}
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="text-red-600 hover:cursor-pointer hover:text-red-600!"
+                className="hover:cursor-pointer"
                 onClick={() => actions.onDelete(user)}
+                variant="destructive"
               >
                 <HugeiconsIcon
-                  className="w-2 text-red-600"
+                  className="w-2"
                   icon={DeleteIcon}
                   strokeWidth={2}
                 />{" "}

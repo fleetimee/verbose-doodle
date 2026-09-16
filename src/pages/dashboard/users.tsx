@@ -85,7 +85,7 @@ export function UsersPage() {
 
       {/* Empty State or Data Table */}
       {!isLoadingUsers && users.length === 0 && (
-        <Empty className="min-h-[60vh] border">
+        <Empty className="min-h-[60vh]" variant="bordered">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} />

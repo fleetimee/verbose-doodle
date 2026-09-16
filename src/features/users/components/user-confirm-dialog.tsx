@@ -66,9 +66,9 @@ export const UserConfirmDialog = ({
             {messages.common.cancel}
           </AlertDialogCancel>
           <AlertDialogAction
-            className="bg-red-500 hover:bg-red-600"
             disabled={isDeleting}
             onClick={handleDelete}
+            variant="destructive"
           >
             {isDeleting ? messages.common.deleting : messages.common.delete}
           </AlertDialogAction>

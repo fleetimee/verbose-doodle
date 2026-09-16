@@ -93,8 +93,8 @@ export const UserFormDialog = ({
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="sm:max-w-[480px]">
-        <DialogHeader className="space-y-2">
-          <DialogTitle className="font-semibold text-xl">
+        <DialogHeader>
+          <DialogTitle size="xl">
             {mode === "edit"
               ? messages.users.editTitle
               : messages.users.addTitle}
@@ -114,7 +114,7 @@ export const UserFormDialog = ({
             ref={formRef}
             showPassword={mode === "add"}
           >
-            <DialogFooter className="mt-5 gap-2">
+            <DialogFooter className="mt-5">
               <Button
                 className="flex-1 sm:flex-initial"
                 disabled={isSubmitting}

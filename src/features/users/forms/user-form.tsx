@@ -107,7 +107,7 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
     return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <FieldGroup className="space-y-4">
+          <FieldGroup size="compact">
             <Controller
               control={form.control}
               name="username"
@@ -119,7 +119,7 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                 >
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel
-                      className="flex items-center gap-2"
+                      className="items-center"
                       htmlFor="user-username"
                     >
                       <HugeiconsIcon
@@ -161,7 +161,7 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                   >
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel
-                        className="flex items-center gap-2"
+                        className="items-center"
                         htmlFor="user-password"
                       >
                         <KeyRound className="h-4 w-4" />
@@ -184,9 +184,8 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                                   ? messages.users.hidePassword
                                   : messages.users.showPassword
                               }
-                              className="rounded-full"
                               onClick={() => setShowPassword((prev) => !prev)}
-                              size="icon-xs"
+                              size="icon-xs-circle"
                               type="button"
                             >
                               {showPassword ? (
@@ -233,10 +232,7 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                   }}
                 >
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel
-                      className="flex items-center gap-2"
-                      htmlFor="user-role"
-                    >
+                    <FieldLabel className="items-center" htmlFor="user-role">
                       <UserCog className="h-4 w-4" />
                       {messages.users.roleLabel}
                     </FieldLabel>
@@ -321,13 +317,13 @@ export const UserForm = forwardRef<UserFormHandle, UserFormProps>(
                   }}
                 >
                   <Field
-                    className="rounded-lg border bg-muted/50 p-4"
                     data-invalid={fieldState.invalid}
                     orientation="horizontal"
+                    variant="card"
                   >
                     <FieldContent>
                       <FieldLabel
-                        className="flex items-center gap-2"
+                        className="items-center"
                         htmlFor="user-active"
                       >
                         <CheckCircle className="h-4 w-4" />
