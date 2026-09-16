@@ -13,8 +13,8 @@ type UserMetricProps = {
 
 function UserMetric({ title, value, detail, icon: Icon }: UserMetricProps) {
   return (
-    <Card className="group border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] transition-[border-color,box-shadow,transform] duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/35 active:translate-y-px motion-reduce:transform-none motion-reduce:transition-none">
-      <CardContent className="flex min-h-36 flex-col justify-between gap-6 p-5 sm:p-6">
+    <Card variant="overview-interactive">
+      <CardContent className="min-h-36 justify-between" size="overview">
         <div className="flex items-start justify-between gap-4">
           <p className="font-semibold text-foreground text-sm">{title}</p>
           <div className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border/70 bg-background text-muted-foreground transition-colors group-hover:border-primary/35 group-hover:bg-primary/5 group-hover:text-primary">

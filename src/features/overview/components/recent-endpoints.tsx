@@ -35,16 +35,14 @@ export function RecentEndpoints({ className, data }: RecentEndpointsProps) {
 
   return (
     <Card
-      className={cn(
-        "border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-3",
-        className
-      )}
+      className={cn("md:col-span-3 lg:col-span-3", className)}
+      variant="overview-card"
     >
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">
+      <CardHeader size="chart">
+        <CardTitle size="sm">
           {messages.overview.recentEndpointsTitle}
         </CardTitle>
-        <CardDescription className="text-xs">
+        <CardDescription size="xs">
           {messages.overview.recentEndpointsDescription}
         </CardDescription>
       </CardHeader>

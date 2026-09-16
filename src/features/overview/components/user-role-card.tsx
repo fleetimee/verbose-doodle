@@ -38,20 +38,19 @@ export function UserRoleCard({ data, className }: UserRoleCardProps) {
 
   return (
     <Card
-      className={cn(
-        "border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-1",
-        className
-      )}
+      className={cn("md:col-span-3 lg:col-span-1", className)}
+      variant="overview-card"
     >
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">
-          {messages.overview.userRolesTitle}
-        </CardTitle>
-        <CardDescription className="text-xs">
+      <CardHeader size="chart">
+        <CardTitle size="sm">{messages.overview.userRolesTitle}</CardTitle>
+        <CardDescription size="xs">
           {messages.overview.userRolesDescription}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex min-h-[260px] flex-col justify-center gap-5">
+      <CardContent
+        className="min-h-[260px] justify-center"
+        size="overview-role"
+      >
         {roles.map((role) => {
           const Icon = role.icon;
           const percentage =

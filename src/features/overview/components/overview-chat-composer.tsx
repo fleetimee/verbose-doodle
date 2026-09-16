@@ -39,7 +39,6 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { messages } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
-import { cn } from "@/lib/utils";
 
 type SlashCommand = {
   command: string;
@@ -533,10 +532,6 @@ export function OverviewChatComposer({
               return (
                 <Button
                   aria-selected={isSelected}
-                  className={cn(
-                    "overview-chat-slash-option",
-                    isSelected && "overview-chat-slash-option-selected"
-                  )}
                   id={`overview-chat-slash-${command.id}`}
                   key={command.id}
                   onClick={() => handleSlashCommandSelect(command.command)}
@@ -544,7 +539,11 @@ export function OverviewChatComposer({
                   role="option"
                   size="sm"
                   type="button"
-                  variant="ghost"
+                  variant={
+                    isSelected
+                      ? "chat-slash-option-selected"
+                      : "chat-slash-option"
+                  }
                 >
                   <span aria-hidden="true" className="overview-chat-slash-icon">
                     <Icon />
@@ -597,7 +596,6 @@ export function OverviewChatComposer({
                     ? messages.overview.chat.collapseComposer
                     : messages.overview.chat.expandComposer
                 }
-                className="overview-chat-expand"
                 onClick={() => setIsComposerExpanded((current) => !current)}
                 size="icon-sm"
                 title={
@@ -606,7 +604,7 @@ export function OverviewChatComposer({
                     : messages.overview.chat.expand
                 }
                 type="button"
-                variant="ghost"
+                variant="chat-expand"
               >
                 <HugeiconsIcon
                   aria-hidden="true"
@@ -622,10 +620,10 @@ export function OverviewChatComposer({
             </span>
             <Button
               aria-label={messages.overview.chat.send}
-              className="overview-chat-submit"
               disabled={!draft.trim() || isSubmitting}
               size="icon-sm"
               type="submit"
+              variant="chat-submit"
             >
               {isSubmitting ? (
                 <Spinner aria-hidden="true" />
@@ -640,11 +638,10 @@ export function OverviewChatComposer({
             </span>
             {hasConversation ? (
               <Button
-                className="overview-chat-reset"
                 onClick={handleClear}
                 size="sm"
                 type="button"
-                variant="ghost"
+                variant="chat-reset"
               >
                 {messages.overview.chat.clearChat}
               </Button>

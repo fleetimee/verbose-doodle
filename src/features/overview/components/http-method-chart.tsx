@@ -37,14 +37,12 @@ export function HttpMethodChart({ data, className }: HttpMethodChartProps) {
   }));
 
   return (
-    <Card
-      className={`${defaultClasses} border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)]`}
-    >
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">
+    <Card className={defaultClasses} variant="overview-card">
+      <CardHeader size="chart">
+        <CardTitle size="sm">
           {messages.overview.httpMethodDistributionTitle}
         </CardTitle>
-        <CardDescription className="text-xs">
+        <CardDescription size="xs">
           {messages.overview.httpMethodDistributionDescription}
         </CardDescription>
       </CardHeader>

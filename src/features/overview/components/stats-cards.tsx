@@ -3,7 +3,6 @@ import { Activity, Building2, FileJson, Globe } from "@/components/hugeicons";
 import { Card, CardContent } from "@/components/ui/card";
 import type { OverviewData } from "@/features/overview/types";
 import { messages } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 
 type MetricCardProps = {
   readonly title: string;
@@ -23,13 +22,8 @@ function MetricCard({
   meta,
 }: MetricCardProps) {
   return (
-    <Card
-      className={cn(
-        "group overflow-hidden border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] transition-[border-color,box-shadow,transform] duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-[0_24px_55px_-34px_color-mix(in_oklab,var(--primary)_65%,transparent)] active:translate-y-px motion-reduce:transform-none motion-reduce:transition-none",
-        className
-      )}
-    >
-      <CardContent className="flex min-h-36 flex-col justify-between gap-6 p-5 sm:p-6">
+    <Card className={className} variant="overview-interactive">
+      <CardContent className="min-h-36 justify-between" size="overview">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="truncate font-semibold text-foreground text-sm">

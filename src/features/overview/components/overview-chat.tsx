@@ -1878,7 +1878,7 @@ function OverviewSnapshotSkeleton() {
           <Skeleton className="h-4 w-44" />
           <Skeleton className="h-3 w-64 max-w-full" />
         </div>
-        <Skeleton className="h-5 w-24 rounded-full" />
+        <Skeleton className="h-5 w-24" variant="full" />
       </div>
       <div className="overview-chat-snapshot-skeleton-grid">
         {Array.from({ length: 4 }, (_, index) => (
@@ -1949,11 +1949,11 @@ function AssistantMessage({
     message.cardType ?? (message.showSnapshot ? "snapshot" : undefined);
 
   return (
-    <Message className="overview-chat-message" data-role="assistant">
-      <MessageAvatar className="overview-chat-message-avatar self-start overflow-visible rounded-none bg-transparent">
+    <Message data-role="assistant" variant="chat">
+      <MessageAvatar variant="chat">
         <AssistantAvatar />
       </MessageAvatar>
-      <MessageContent className="overview-chat-message-body">
+      <MessageContent variant="chat">
         <div className="overview-chat-message-label">
           {messages.overview.chat.assistantName}
         </div>
@@ -1961,10 +1961,7 @@ function AssistantMessage({
           variant={message.tone === "destructive" ? "destructive" : "muted"}
         >
           <BubbleContent
-            className={cn(
-              "overview-chat-bubble",
-              message.tone === "destructive" && "overview-chat-bubble-error"
-            )}
+            variant={message.tone === "destructive" ? "chat-error" : "chat"}
           >
             {isStreaming ? (
               <StreamingAssistantText text={message.text} />
@@ -2021,12 +2018,10 @@ function StreamingAssistantText({ text }: { text: string }) {
 
 function UserMessage({ message }: { message: ConversationMessage }) {
   return (
-    <Message align="end" className="overview-chat-message" data-role="user">
-      <MessageContent className="overview-chat-message-body">
+    <Message align="end" data-role="user" variant="chat">
+      <MessageContent variant="chat">
         <Bubble align="end">
-          <BubbleContent className="overview-chat-bubble">
-            {message.text}
-          </BubbleContent>
+          <BubbleContent variant="chat">{message.text}</BubbleContent>
         </Bubble>
       </MessageContent>
     </Message>
@@ -2164,18 +2159,15 @@ function OverviewChatTranscript({
 
   return (
     <ChatMinimapContainer className="size-full">
-      <MessageScroller
-        className="overview-chat-thread"
-        data-follow-latest="true"
-      >
+      <MessageScroller data-follow-latest="true" variant="chat">
         <MessageScrollerViewport
           aria-label={messages.overview.chat.conversationLabel}
-          className="overview-chat-viewport"
+          variant="chat"
         >
           <MessageScrollerContent
             aria-busy={isSubmitting || isLoading}
-            className="overview-chat-thread-content"
             role="log"
+            variant="chat"
           >
             <AnimatePresence initial={false}>
               {isLoading && !data ? (
@@ -2198,7 +2190,7 @@ function OverviewChatTranscript({
                   key="overview-error"
                   messageId="overview-error"
                 >
-                  <Alert className="overview-chat-error" variant="destructive">
+                  <Alert variant="chat-destructive">
                     <CircleAlert aria-hidden="true" />
                     <AlertTitle>{messages.overview.chat.errorTitle}</AlertTitle>
                     <AlertDescription>
@@ -2247,7 +2239,7 @@ function OverviewChatTranscript({
         </MessageScrollerViewport>
         <MessageScrollerButton
           aria-label={messages.overview.chat.scrollLatest}
-          className="overview-chat-scroll-latest"
+          variant="chat"
         />
       </MessageScroller>
       <ChatMinimap className="max-sm:hidden" items={minimapItems} />

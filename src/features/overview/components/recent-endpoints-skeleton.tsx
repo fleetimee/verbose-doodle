@@ -19,12 +19,10 @@ export function RecentEndpointsSkeleton({
 }: RecentEndpointsSkeletonProps) {
   return (
     <Card
-      className={cn(
-        "border-border/70 bg-card/90 md:col-span-3 lg:col-span-3",
-        className
-      )}
+      className={cn("md:col-span-3 lg:col-span-3", className)}
+      variant="overview-card"
     >
-      <CardHeader className="pb-2">
+      <CardHeader size="chart">
         <CardTitle>
           <Skeleton className="h-5 w-36" />
         </CardTitle>
@@ -43,11 +41,11 @@ export function RecentEndpointsSkeleton({
                 <Skeleton className="h-4 w-full max-w-xs" />
                 <div className="flex flex-wrap items-center gap-2">
                   <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-3 w-3 rounded-full" />
+                  <Skeleton className="h-3 w-3" variant="full" />
                   <Skeleton className="h-3 w-24" />
                 </div>
               </div>
-              <Skeleton className="h-6 w-16 shrink-0 rounded-full" />
+              <Skeleton className="h-6 w-16 shrink-0" variant="full" />
             </div>
           ))}
         </div>

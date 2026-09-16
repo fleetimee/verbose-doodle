@@ -13,8 +13,8 @@ type ChartCardSkeletonProps = {
 
 export function ChartCardSkeleton({ className }: ChartCardSkeletonProps) {
   return (
-    <Card className={`border-border/70 bg-card/90 ${className ?? ""}`}>
-      <CardHeader className="pb-2">
+    <Card className={className} variant="overview-card">
+      <CardHeader size="chart">
         <CardTitle>
           <Skeleton className="h-5 w-48 max-w-full" />
         </CardTitle>
@@ -24,7 +24,7 @@ export function ChartCardSkeleton({ className }: ChartCardSkeletonProps) {
       </CardHeader>
       <CardContent>
         <div className="flex h-[260px] w-full items-center justify-center">
-          <Skeleton className="h-full w-full rounded-lg" />
+          <Skeleton className="h-full w-full" variant="lg" />
         </div>
       </CardContent>
     </Card>

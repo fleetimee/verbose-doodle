@@ -76,20 +76,19 @@ export function UserStatusChart({ data, className }: UserStatusChartProps) {
 
   return (
     <Card
-      className={cn(
-        "border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] md:col-span-3 lg:col-span-1",
-        className
-      )}
+      className={cn("md:col-span-3 lg:col-span-1", className)}
+      variant="overview-card"
     >
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">
-          {messages.overview.activeUsersTitle}
-        </CardTitle>
-        <CardDescription className="text-xs">
+      <CardHeader size="chart">
+        <CardTitle size="sm">{messages.overview.activeUsersTitle}</CardTitle>
+        <CardDescription size="xs">
           {messages.overview.currentActiveAccountsDescription}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex min-h-[260px] items-center justify-center pb-0">
+      <CardContent
+        className="flex min-h-[260px] items-center justify-center"
+        size="chart"
+      >
         <ChartContainer
           className="mx-auto aspect-square max-h-[200px] w-full"
           config={userStatusConfig}
