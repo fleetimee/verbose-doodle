@@ -106,9 +106,6 @@ type SocksRelayPageProps = {
 
 type HoldDropKey = "holdClient" | "holdHost" | "dropClient" | "dropHost";
 
-const pageStyle = { willChange: "opacity, transform" };
-const sectionStyle = { willChange: "opacity, transform" };
-const traceStyle = { originX: 0, willChange: "opacity, transform" };
 const SOCKS_RELAY_TOUR_DELAY_MS = 350;
 
 const SOCKS_RELAY_TOUR_CONFIG = {
@@ -478,18 +475,16 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
   return (
     <motion.div
       animate={pageAnimate}
-      className="mx-auto grid w-full max-w-[1500px] gap-4 md:gap-6"
+      className="mx-auto grid w-full max-w-[1500px] gap-4 will-change-transform md:gap-6"
       initial={pageInitial}
       key={mode}
-      style={pageStyle}
       transition={pageTransition}
     >
       <motion.header
         animate={sectionAnimate}
-        className="relative grid gap-4 border-border/70 border-b pb-5"
+        className="relative grid gap-4 border-border/70 border-b pb-5 will-change-transform"
         id={tourConfig.targets.header}
         initial={sectionInitial}
-        style={sectionStyle}
         transition={{
           ...sectionTransition,
           delay: shouldReduceMotion ? 0 : 0.05,
@@ -498,9 +493,8 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
         <motion.div
           animate={traceAnimate}
           aria-hidden="true"
-          className="absolute -bottom-px left-0 h-px w-full bg-[linear-gradient(90deg,transparent,hsl(var(--primary)),hsl(var(--foreground)/0.7),transparent)]"
+          className="absolute -bottom-px left-0 h-px w-full origin-left bg-[linear-gradient(90deg,transparent,hsl(var(--primary)),hsl(var(--foreground)/0.7),transparent)] will-change-transform"
           initial={traceInitial}
-          style={traceStyle}
           transition={
             shouldReduceMotion
               ? { duration: 0.01 }
@@ -562,9 +556,9 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
           ].map((metric, index) => (
             <motion.div
               animate={metricAnimate}
+              className="will-change-transform"
               initial={metricInitial}
               key={metric.label}
-              style={sectionStyle}
               transition={{
                 damping: 32,
                 delay: shouldReduceMotion ? 0 : 0.12 + index * 0.045,
@@ -584,9 +578,8 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
 
       <motion.div
         animate={sectionAnimate}
-        className="grid gap-4 xl:grid-cols-[420px_minmax(0,1fr)]"
+        className="grid gap-4 will-change-transform xl:grid-cols-[420px_minmax(0,1fr)]"
         initial={sectionInitial}
-        style={sectionStyle}
         transition={{
           ...sectionTransition,
           delay: shouldReduceMotion ? 0 : 0.12,
@@ -611,8 +604,8 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
 
       <motion.div
         animate={sectionAnimate}
+        className="will-change-transform"
         initial={sectionInitial}
-        style={sectionStyle}
         transition={{
           ...sectionTransition,
           delay: shouldReduceMotion ? 0 : 0.18,
