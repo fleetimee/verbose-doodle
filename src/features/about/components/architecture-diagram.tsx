@@ -207,21 +207,31 @@ function DiagramNode({
 
   return (
     <motion.g
-      animate={reducedMotion ? {} : { opacity: nodeOpacity, scale: nodeScale }}
+      animate={
+        reducedMotion
+          ? { opacity: nodeOpacity }
+          : { opacity: nodeOpacity, scale: nodeScale }
+      }
       aria-label={`${node.label}: ${node.sublabel}`}
+      className="cursor-pointer [transform-origin:var(--node-origin)]"
       initial={false}
       onBlur={() => onHover(null)}
       onFocus={() => onHover(node.id)}
       onMouseEnter={() => onHover(node.id)}
       onMouseLeave={() => onHover(null)}
       role="button"
-      style={{
-        cursor: "pointer",
-        opacity: nodeOpacity,
-        transformOrigin: `${pos.x}px ${pos.y}px`,
-      }}
+      // SAFETY: CSS custom property for SVG node transform origin
+      style={
+        {
+          "--node-origin": `${pos.x}px ${pos.y}px`,
+        } as React.CSSProperties
+      }
       tabIndex={0}
-      transition={{ damping: 25, stiffness: 350, type: "spring" }}
+      transition={
+        reducedMotion
+          ? { duration: 0 }
+          : { damping: 25, stiffness: 350, type: "spring" }
+      }
     >
       {/* Glow halo on active */}
       <AnimatePresence>
@@ -240,31 +250,26 @@ function DiagramNode({
 
       {/* Node circle */}
       <circle
+        className={
+          reducedMotion
+            ? "transition-none"
+            : "transition-all duration-200 ease-out"
+        }
         cx={pos.x}
         cy={pos.y}
         fill={isActive ? color : "transparent"}
         r={24}
         stroke={color}
         strokeWidth={isHovered ? 2.5 : 1.8}
-        style={{
-          transition: reducedMotion
-            ? "none"
-            : "fill 0.2s ease, stroke-width 0.15s ease",
-        }}
       />
 
       {/* Icon (foreignObject not reliable in all SVG contexts — use text-based fallback) */}
       <text
+        className="pointer-events-none select-none font-sans transition-colors duration-200"
         dominantBaseline="central"
         fill={isActive ? "white" : color}
         fontSize="11"
         fontWeight="600"
-        style={{
-          fontFamily: "system-ui, sans-serif",
-          pointerEvents: "none",
-          transition: "fill 0.2s ease",
-          userSelect: "none",
-        }}
         textAnchor="middle"
         x={pos.x}
         y={pos.y - 3}
@@ -274,15 +279,11 @@ function DiagramNode({
 
       {/* Label below */}
       <text
+        className="pointer-events-none select-none font-sans"
         dominantBaseline="hanging"
         fill="currentColor"
         fontSize="8.5"
         fontWeight="600"
-        style={{
-          fontFamily: "system-ui, sans-serif",
-          pointerEvents: "none",
-          userSelect: "none",
-        }}
         textAnchor="middle"
         x={pos.x}
         y={pos.y + 28}
@@ -290,15 +291,11 @@ function DiagramNode({
         {node.label}
       </text>
       <text
+        className="pointer-events-none select-none font-sans"
         dominantBaseline="hanging"
         fill="currentColor"
         fontSize="6.5"
         opacity="0.55"
-        style={{
-          fontFamily: "system-ui, sans-serif",
-          pointerEvents: "none",
-          userSelect: "none",
-        }}
         textAnchor="middle"
         x={pos.x}
         y={pos.y + 39}
@@ -357,17 +354,17 @@ export function ArchitectureDiagram() {
 
               return (
                 <line
+                  className={
+                    shouldReduceMotion
+                      ? "transition-none"
+                      : "transition-all duration-200 ease-out"
+                  }
                   key={`${from}-${to}`}
                   opacity={edgeOpacity}
                   stroke={edgeColor}
                   strokeDasharray={strokeDash}
                   strokeLinecap="round"
                   strokeWidth={strokeW}
-                  style={{
-                    transition: shouldReduceMotion
-                      ? "none"
-                      : "opacity 0.2s ease, stroke 0.2s ease, stroke-width 0.15s ease",
-                  }}
                   x1={fp.x}
                   x2={tp.x}
                   y1={fp.y}
@@ -424,19 +421,13 @@ export function ArchitectureDiagram() {
             ] as const
           ).map(({ y, label }) => (
             <text
+              className="pointer-events-none select-none font-sans uppercase tracking-wider"
               dominantBaseline="hanging"
               fill="currentColor"
               fontSize="7"
               fontWeight="500"
               key={label}
               opacity="0.3"
-              style={{
-                fontFamily: "system-ui, sans-serif",
-                letterSpacing: "0.05em",
-                pointerEvents: "none",
-                textTransform: "uppercase",
-                userSelect: "none",
-              }}
               textAnchor="start"
               x="8"
               y={y}
@@ -481,8 +472,13 @@ export function ArchitectureDiagram() {
               }
             >
               <p
-                className="font-semibold text-foreground text-sm"
-                style={{ color: activeNode.color }}
+                className="font-semibold text-(--active-node-color) text-sm"
+                // SAFETY: Dynamic active node color applied via CSS custom property
+                style={
+                  {
+                    "--active-node-color": activeNode.color,
+                  } as React.CSSProperties
+                }
               >
                 {activeNode.label}
                 <span className="ml-2 font-normal text-muted-foreground text-xs">
@@ -529,8 +525,13 @@ export function ArchitectureDiagram() {
             type="button"
           >
             <span
-              className="inline-block size-2 shrink-0 rounded-full"
-              style={{ backgroundColor: node.color }}
+              className="inline-block size-2 shrink-0 rounded-full bg-(--legend-node-color)"
+              // SAFETY: Dynamic legend node color applied via CSS custom property
+              style={
+                {
+                  "--legend-node-color": node.color,
+                } as React.CSSProperties
+              }
             />
             {node.label}
           </button>
