@@ -90,14 +90,21 @@ export function JwtClaimsBreakdown({
     [parsed.entries]
   );
 
+  const heightStyle = height
+    ? // SAFETY: CSS custom property for dynamic container height
+      ({
+        "--height": typeof height === "number" ? `${height}px` : height,
+      } as React.CSSProperties)
+    : undefined;
+
   if (parsed.status === "empty") {
     return (
       <div
         className={cn(
-          "flex items-center justify-center p-6 text-center text-muted-foreground text-xs",
+          "flex h-[var(--height)] items-center justify-center p-6 text-center text-muted-foreground text-xs",
           className
         )}
-        style={{ height }}
+        style={heightStyle}
       >
         {messages.jwtInspector.noClaimsData}
       </div>
@@ -108,10 +115,10 @@ export function JwtClaimsBreakdown({
     return (
       <div
         className={cn(
-          "flex items-center justify-center p-6 text-center text-destructive text-xs",
+          "flex h-[var(--height)] items-center justify-center p-6 text-center text-destructive text-xs",
           className
         )}
-        style={{ height }}
+        style={heightStyle}
       >
         {messages.jwtInspector.invalidJsonClaims}
       </div>
@@ -122,10 +129,10 @@ export function JwtClaimsBreakdown({
     return (
       <div
         className={cn(
-          "flex items-center justify-center p-6 text-center text-muted-foreground text-xs",
+          "flex h-[var(--height)] items-center justify-center p-6 text-center text-muted-foreground text-xs",
           className
         )}
-        style={{ height }}
+        style={heightStyle}
       >
         {messages.jwtInspector.noClaimsPresent}
       </div>
@@ -137,10 +144,10 @@ export function JwtClaimsBreakdown({
   return (
     <div
       className={cn(
-        "flex flex-col justify-between bg-background font-mono text-sm leading-relaxed",
+        "flex h-[var(--height)] flex-col justify-between bg-background font-mono text-sm leading-relaxed",
         className
       )}
-      style={{ height }}
+      style={heightStyle}
     >
       <ScrollArea className="min-h-0 w-full flex-1">
         <table className="w-full border-collapse text-left">

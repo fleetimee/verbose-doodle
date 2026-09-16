@@ -80,8 +80,15 @@ function TokenHighlight({ value }: { readonly value: string }) {
             </span>
           )}
           <span
+            className="text-(--part-color)"
             data-token-part={TOKEN_PARTS[index]?.key ?? "unknown"}
-            style={{ color: TOKEN_PARTS[index]?.color ?? "var(--foreground)" }}
+            // SAFETY: CSS custom property for token part color
+            style={
+              {
+                "--part-color":
+                  TOKEN_PARTS[index]?.color ?? "var(--foreground)",
+              } as React.CSSProperties
+            }
           >
             {part}
           </span>
@@ -124,13 +131,18 @@ function InlineTokenInput({
       </div>
       <textarea
         aria-label={label}
-        className="!bg-transparent relative z-10 h-full min-h-[320px] w-full flex-1 resize-none overflow-auto font-mono text-sm text-transparent leading-6 caret-foreground shadow-none outline-none [-webkit-text-fill-color:transparent] selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground focus-visible:ring-0"
+        className="!bg-transparent relative z-10 h-full min-h-[var(--min-height,320px)] w-full flex-1 resize-none overflow-auto font-mono text-sm text-transparent leading-6 caret-foreground shadow-none outline-none [-webkit-text-fill-color:transparent] selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground focus-visible:ring-0"
         onChange={(event) => onChange?.(event.target.value)}
         onScroll={syncScroll}
         placeholder={placeholder}
         readOnly={!onChange}
         spellCheck={false}
-        style={minHeight ? { minHeight } : undefined}
+        // SAFETY: CSS custom property for dynamic min-height
+        style={
+          minHeight
+            ? ({ "--min-height": minHeight } as React.CSSProperties)
+            : undefined
+        }
         value={value}
       />
     </div>
@@ -190,8 +202,9 @@ function TokenLegend() {
         <span className="inline-flex items-center gap-2" key={part.key}>
           <span
             aria-hidden="true"
-            className="size-2 rounded-full"
-            style={{ backgroundColor: part.color }}
+            className="size-2 rounded-full bg-(--part-color)"
+            // SAFETY: CSS custom property for token part color
+            style={{ "--part-color": part.color } as React.CSSProperties}
           />
           <span className="text-muted-foreground">{part.label}</span>
         </span>
@@ -210,8 +223,9 @@ function ModalTokenLegend() {
         <span className="inline-flex items-center gap-1.5" key={part.key}>
           <span
             aria-hidden="true"
-            className="size-2 rounded-full"
-            style={{ backgroundColor: part.color }}
+            className="size-2 rounded-full bg-(--part-color)"
+            // SAFETY: CSS custom property for token part color
+            style={{ "--part-color": part.color } as React.CSSProperties}
           />
           <span className="text-muted-foreground">{part.label}</span>
         </span>
@@ -730,12 +744,17 @@ export function JwtEditor({
             ) : (
               <Textarea
                 aria-label={label}
-                className="resize-y break-all"
+                className="min-h-[var(--min-height,160px)] resize-y break-all"
                 onChange={(event) => onChange?.(event.target.value)}
                 placeholder={placeholder}
                 readOnly={!onChange}
                 spellCheck={false}
-                style={{ minHeight: minHeight ?? "160px" }}
+                // SAFETY: CSS custom property for dynamic min-height
+                style={
+                  {
+                    "--min-height": minHeight ?? "160px",
+                  } as React.CSSProperties
+                }
                 value={value}
                 variant="ghost-mono"
               />
