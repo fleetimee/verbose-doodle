@@ -118,8 +118,13 @@ export function EndpointStatusChart({
                         <span className="flex items-center gap-2 text-muted-foreground">
                           <span
                             aria-hidden
-                            className="h-2.5 w-2.5 rounded-[2px]"
-                            style={{ backgroundColor: indicatorColor }}
+                            className="h-2.5 w-2.5 rounded-xs bg-(--indicator-color)"
+                            // SAFETY: CSS custom property for dynamic chart indicator color
+                            style={
+                              {
+                                "--indicator-color": indicatorColor,
+                              } as React.CSSProperties
+                            }
                           />
                           {`${payload.statusCode} · ${payload.statusLabel}`}
                         </span>

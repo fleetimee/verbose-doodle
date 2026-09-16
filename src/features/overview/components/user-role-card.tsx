@@ -73,8 +73,11 @@ export function UserRoleCard({ data, className }: UserRoleCardProps) {
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${percentage}%` }}
+                  className="h-full w-[var(--percentage)] rounded-full bg-primary"
+                  // SAFETY: CSS custom property for dynamic progress width
+                  style={
+                    { "--percentage": `${percentage}%` } as React.CSSProperties
+                  }
                 />
               </div>
               <p className="text-muted-foreground text-xs tabular-nums">

@@ -956,13 +956,14 @@ function EndpointsSnapshotCard({ data }: { data: OverviewData }) {
             role="progressbar"
           >
             <span
-              style={{
-                transform: `scaleX(${
-                  stats.totalResponses
+              // SAFETY: CSS custom property for dynamic scaleX progress
+              style={
+                {
+                  "--scale-x": stats.totalResponses
                     ? Math.min(1, stats.activeResponses / stats.totalResponses)
-                    : 0
-                })`,
-              }}
+                    : 0,
+                } as React.CSSProperties
+              }
             />
           </div>
         </div>
@@ -1132,11 +1133,14 @@ function BillerSnapshotCard({ data }: { data: OverviewData }) {
                   role="progressbar"
                 >
                   <span
-                    style={{
-                      transform: `scaleX(${
-                        maxEndpoints ? biller.endpointCount / maxEndpoints : 0
-                      })`,
-                    }}
+                    // SAFETY: CSS custom property for dynamic scaleX meter
+                    style={
+                      {
+                        "--scale-x": maxEndpoints
+                          ? biller.endpointCount / maxEndpoints
+                          : 0,
+                      } as React.CSSProperties
+                    }
                   />
                 </div>
               </div>
@@ -1738,13 +1742,14 @@ function OverviewSnapshotCard({
                     role="progressbar"
                   >
                     <span
-                      style={{
-                        transform: `scaleX(${
-                          maxBillerEndpointCount
+                      // SAFETY: CSS custom property for dynamic scaleX meter
+                      style={
+                        {
+                          "--scale-x": maxBillerEndpointCount
                             ? biller.endpointCount / maxBillerEndpointCount
-                            : 0
-                        })`,
-                      }}
+                            : 0,
+                        } as React.CSSProperties
+                      }
                     />
                   </div>
                 </div>
@@ -1785,7 +1790,14 @@ function OverviewSnapshotCard({
             className="overview-chat-progress"
             role="progressbar"
           >
-            <span style={{ transform: `scaleX(${activePercentage / 100})` }} />
+            <span
+              // SAFETY: CSS custom property for dynamic scaleX progress
+              style={
+                {
+                  "--scale-x": activePercentage / 100,
+                } as React.CSSProperties
+              }
+            />
           </div>
           {isAdmin && data.userStats ? (
             <div className="overview-chat-section-heading overview-chat-account-signal">
