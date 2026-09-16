@@ -208,6 +208,7 @@ const cardContentVariants = cva("", {
       spaced: "px-6 space-y-4",
       card: "grid gap-4 md:grid-cols-2",
       chart: "px-6 pb-0",
+      centered: "flex flex-col items-center gap-3 py-10 text-center px-6",
       overview: "flex flex-col gap-6 p-5 sm:p-6",
       "overview-role": "flex flex-col gap-5 px-6 pb-6",
       none: "p-0",
