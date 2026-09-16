@@ -53,7 +53,7 @@ export function AboutVersionFooter({
         </div>
         <div className="flex items-center gap-2">
           <Badge
-            className="flex items-center gap-1.5 font-semibold text-[11px]"
+            size="status"
             variant={environment === "Production" ? "default" : "secondary"}
           >
             <ShieldCheckIcon className="h-3 w-3" />
