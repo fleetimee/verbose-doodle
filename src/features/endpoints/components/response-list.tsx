@@ -108,14 +108,14 @@ function ResponseSectionHeader({
         className={cn(
           "inline-flex shrink-0 select-none items-center gap-1.5 rounded-xl border-2 border-b-2 px-2.5 py-1 font-bold text-xs uppercase tracking-wider",
           isActive
-            ? "border-emerald-500/30 border-b-emerald-600/60 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+            ? "border-success/30 border-b-success/60 bg-success/10 text-success"
             : "border-border/80 border-b-border/90 bg-muted/50 text-muted-foreground"
         )}
       >
         <span
           className={cn(
             "size-1.5 rounded-full",
-            isActive ? "bg-emerald-500" : "bg-muted-foreground/45"
+            isActive ? "bg-success" : "bg-muted-foreground/45"
           )}
         />
         <span>{label}</span>
@@ -204,19 +204,19 @@ export function ResponseList({
                 <div className="space-y-1">
                   {/* Show label only when no active responses */}
                   {activeResponses.length === 0 && (
-                    <div className="mb-3 rounded-2xl border-2 border-amber-500/30 border-b-4 bg-amber-500/10 p-3.5 text-sm shadow-xs dark:border-amber-500/40">
+                    <div className="mb-3 rounded-2xl border-2 border-warning/30 border-b-4 bg-warning/10 p-3.5 text-sm shadow-xs dark:border-warning/40">
                       <div className="flex gap-3">
-                        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border-2 border-amber-500/40 border-b-2 bg-amber-500/15 text-amber-600 shadow-xs dark:text-amber-400">
+                        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border-2 border-warning/40 border-b-2 bg-warning/15 text-warning shadow-xs">
                           <span className="relative flex h-2 w-2">
-                            <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 motion-safe:animate-ping" />
-                            <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-warning/80 opacity-75 motion-safe:animate-ping" />
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-warning" />
                           </span>
                         </div>
                         <div className="flex flex-col gap-1">
-                          <p className="font-bold text-amber-800 dark:text-amber-200">
+                          <p className="font-bold text-warning">
                             {messages.endpoints.noActiveResponseTitle}
                           </p>
-                          <p className="text-amber-700/85 text-xs leading-relaxed dark:text-amber-300/85">
+                          <p className="text-muted-foreground text-xs leading-relaxed">
                             {messages.endpoints.noActiveResponseDescription}
                           </p>
                         </div>

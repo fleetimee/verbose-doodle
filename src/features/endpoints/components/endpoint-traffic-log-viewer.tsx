@@ -533,17 +533,17 @@ export function EndpointTrafficLogViewer({
 
     detailContent = (
       <div className="flex min-h-0 flex-1 flex-col gap-4">
-        <div className="relative grid gap-3 border-b bg-slate-100 px-5 py-4 text-slate-950 md:grid-cols-[minmax(0,1fr)_auto] dark:border-border dark:bg-card dark:text-slate-100">
+        <div className="relative grid gap-3 border-b bg-muted/60 px-5 py-4 text-foreground md:grid-cols-[minmax(0,1fr)_auto] dark:border-border dark:bg-card">
           <div className="min-w-0">
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="inline-flex select-none items-center rounded-lg border border-sky-500/40 bg-sky-500/15 px-2 py-0.5 font-bold font-mono text-sky-700 text-xs dark:bg-sky-400/15 dark:text-sky-200">
+              <span className="inline-flex select-none items-center rounded-lg border border-info/40 bg-info/15 px-2 py-0.5 font-bold font-mono text-info text-xs dark:bg-info/20">
                 {selectedLogDetail.method}
               </span>
-              <span className="inline-flex select-none items-center rounded-lg border border-slate-300 bg-slate-900/10 px-2 py-0.5 font-mono text-xs dark:border-border dark:bg-white/10">
+              <span className="inline-flex select-none items-center rounded-lg border border-border bg-muted px-2 py-0.5 font-mono text-muted-foreground text-xs">
                 {selectedLogDetail.hitStatus}
               </span>
               {selectedLogDetail.simulateTimeout && (
-                <span className="inline-flex select-none items-center rounded-lg border border-amber-500/40 bg-amber-500/15 px-2 py-0.5 font-mono text-amber-700 text-xs dark:bg-amber-400/15 dark:text-amber-200">
+                <span className="inline-flex select-none items-center rounded-lg border border-warning/40 bg-warning/15 px-2 py-0.5 font-mono text-warning text-xs dark:bg-warning/20">
                   {messages.endpoints.trafficLogTimeoutSimulationLabel}
                 </span>
               )}
@@ -551,27 +551,27 @@ export function EndpointTrafficLogViewer({
             <h3 className="truncate font-bold font-mono text-base">
               {selectedLogDetail.path}
             </h3>
-            <p className="truncate text-slate-600 text-xs dark:text-slate-400">
+            <p className="truncate text-muted-foreground text-xs">
               {selectedLogDetail.requestId} /{" "}
               {formatJakartaTimestamp(selectedLogDetail.occurredAt)}
             </p>
           </div>
           <div className="grid min-w-0 gap-2 pr-12 text-right text-xs">
-            <span className="font-mono font-semibold text-slate-500 dark:text-slate-400">
+            <span className="font-mono font-semibold text-muted-foreground">
               {messages.endpoints.trafficLogUserAgentLabel}
             </span>
             <UserAgentClientBadge
               className="justify-self-end"
               userAgent={selectedLogDetail.userAgent}
             />
-            <span className="max-w-[420px] truncate text-slate-800 dark:text-slate-200">
+            <span className="max-w-[420px] truncate text-foreground">
               {selectedLogDetail.userAgent ?? "-"}
             </span>
           </div>
           <DialogClose asChild>
             <button
               aria-label={messages.endpoints.trafficLogDetailCloseAriaLabel}
-              className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 shadow-xs transition-colors hover:bg-slate-50 dark:border-border dark:bg-card dark:text-slate-200 dark:hover:bg-accent"
+              className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-lg border border-border bg-card text-foreground shadow-xs transition-colors hover:bg-accent"
               type="button"
             >
               <HugeiconsIcon
@@ -1037,13 +1037,13 @@ function TerminalState({
       <div
         className={cn(
           "w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner",
-          isEmergency && "border-red-400/35 bg-red-950/15"
+          isEmergency && "border-destructive/40 bg-destructive/15"
         )}
       >
         <div
           className={cn(
             "mb-3 flex items-center gap-2 text-foreground",
-            isEmergency && "text-red-200"
+            isEmergency && "text-destructive"
           )}
         >
           <Icon />
@@ -1059,8 +1059,8 @@ function TerminalState({
           {tone === "empty" && (
             <p className="flex items-center gap-1.5 text-muted-foreground">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400/60 opacity-75 motion-safe:animate-ping" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="absolute inline-flex h-full w-full rounded-full bg-success/60 opacity-75 motion-safe:animate-ping" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
               </span>
               <span>{messages.endpoints.trafficLogsWaiting}</span>
               <span className="loading-dots inline-flex gap-0.25">
@@ -1071,7 +1071,7 @@ function TerminalState({
             </p>
           )}
           {isEmergency && (
-            <p className="text-red-300/70">
+            <p className="text-destructive/80">
               {messages.endpoints.trafficLogsEmergencyFooter}
             </p>
           )}
@@ -1103,11 +1103,11 @@ function LogExchangePane({
 }) {
   const accentClass =
     tone === "request"
-      ? "border-sky-500/45 bg-sky-500/10 text-sky-700 dark:border-sky-400/45 dark:bg-sky-400/10 dark:text-sky-200"
-      : "border-emerald-500/45 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/45 dark:bg-emerald-400/10 dark:text-emerald-200";
+      ? "border-info/45 bg-info/10 text-info dark:bg-info/15"
+      : "border-success/45 bg-success/10 text-success dark:bg-success/15";
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white dark:bg-card">
+    <div className="flex h-full min-h-0 flex-col bg-card">
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3 dark:border-border">
         <div className="flex items-center gap-2">
           <span className={cn("rounded border p-1.5", accentClass)}>
@@ -1115,23 +1115,20 @@ function LogExchangePane({
           </span>
           <div>
             <h4 className="font-semibold text-sm">{title}</h4>
-            <p className="text-slate-600 text-xs dark:text-slate-400">
+            <p className="text-muted-foreground text-xs">
               {messages.endpoints.trafficLogHeadersAndBody}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-px border-b bg-slate-200 md:grid-cols-4 dark:border-border dark:bg-muted">
+      <div className="grid grid-cols-2 gap-px border-b bg-border md:grid-cols-4">
         {meta.map((item) => (
-          <div
-            className="min-w-0 bg-slate-50 px-3 py-2 dark:bg-card"
-            key={item.label}
-          >
-            <p className="font-mono text-slate-500 text-xs uppercase dark:text-slate-400">
+          <div className="min-w-0 bg-card px-3 py-2" key={item.label}>
+            <p className="font-mono text-muted-foreground text-xs uppercase">
               {item.label}
             </p>
-            <p className="truncate font-mono text-slate-900 text-xs dark:text-slate-100">
+            <p className="truncate font-mono text-foreground text-xs">
               {item.value}
             </p>
           </div>
@@ -1174,26 +1171,26 @@ function ShikiJsonBlock({
 
   return (
     <CodeBlock
-      className="overflow-hidden rounded-md border-slate-300 bg-white shadow-md dark:border-border dark:bg-card dark:shadow-md"
+      className="overflow-hidden rounded-md border-border bg-card shadow-md"
       data={[{ code, filename, language: "json" }]}
       defaultDarkTheme="github-dark-high-contrast"
       defaultLightTheme="github-light-high-contrast"
       defaultValue="json"
       storageKey={`traffic-log-detail-${filename}`}
     >
-      <CodeBlockHeader className="border-slate-300 bg-slate-100 px-3 py-2 dark:border-border dark:bg-muted">
+      <CodeBlockHeader className="border-border bg-muted/60 px-3 py-2">
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
-          <span className="truncate font-medium text-slate-900 text-xs dark:text-slate-100">
+          <span className="h-2 w-2 rounded-full bg-success" />
+          <span className="truncate font-medium text-foreground text-xs">
             {title}
           </span>
-          <span className="truncate font-mono text-slate-600 text-xs dark:text-slate-400">
+          <span className="truncate font-mono text-muted-foreground text-xs">
             {filename}
           </span>
         </div>
         <CodeBlockCopyButton size="icon-7" variant="ghost-slate" />
         <label
-          className="ml-1 inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-2 py-1 font-medium text-slate-700 text-xs dark:border-border dark:bg-card dark:text-slate-200"
+          className="ml-1 inline-flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1 font-medium text-foreground text-xs"
           htmlFor={`wrap-lines-${filename}`}
         >
           <span>{messages.endpoints.trafficLogWrapLabel}</span>
@@ -1211,7 +1208,7 @@ function ShikiJsonBlock({
             {(item) => (
               <CodeBlockItem
                 className={cn(
-                  "bg-white text-slate-950 text-xs dark:bg-card dark:text-slate-100 [&_.line]:min-h-5 [&_.line]:text-slate-950 [&_.line]:before:text-slate-500 dark:[&_.line]:text-slate-100 dark:[&_.line]:before:text-slate-400 [&_.shiki_span]:font-medium",
+                  "bg-card text-foreground text-xs [&_.line]:min-h-5 [&_.line]:text-foreground [&_.line]:before:text-muted-foreground [&_.shiki_span]:font-medium",
                   wrapLines
                     ? "[&_code]:!overflow-visible [&_code]:!whitespace-pre-wrap [&_pre]:!whitespace-pre-wrap [&_.line]:!whitespace-pre-wrap [&_.line]:break-all"
                     : "[&_code]:!w-max [&_code]:!overflow-visible [&_code]:!whitespace-pre [&_pre]:!w-max [&_pre]:!whitespace-pre [&_.line]:!w-max [&_.line]:!whitespace-pre [&_.line]:!break-normal [&_.line]:min-w-full [&_code]:min-w-full [&_pre]:min-w-full"

@@ -118,7 +118,7 @@ export function UserAgentClientBadge({
   return (
     <span
       className={cn(
-        "inline-flex min-w-0 items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-2 py-1 font-medium text-slate-700 text-xs shadow-xs dark:border-border dark:bg-card/70 dark:text-slate-200",
+        "inline-flex min-w-0 items-center gap-2 rounded-md border border-border bg-card/80 px-2 py-1 font-medium text-foreground text-xs shadow-xs",
         className
       )}
       title={userAgent ?? undefined}

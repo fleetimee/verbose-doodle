@@ -49,7 +49,7 @@ export function EndpointMetaStrip({
         className={cn(
           "inline-flex shrink-0 items-center gap-1.5 rounded-xl border-2 border-b-2 px-2.5 py-0.5 font-black text-xs transition-colors",
           responseCount > 0
-            ? "border-emerald-500/40 border-b-emerald-600/70 bg-emerald-500/15 text-emerald-600 dark:border-emerald-500/50 dark:border-b-emerald-400 dark:bg-emerald-500/20 dark:text-emerald-300"
+            ? "border-success/40 border-b-success/70 bg-success/15 text-success dark:border-success/50 dark:border-b-success/80 dark:bg-success/20"
             : "border-border/80 border-b-border/90 bg-muted/40 text-muted-foreground"
         )}
       >

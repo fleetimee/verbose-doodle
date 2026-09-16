@@ -25,9 +25,9 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 shadow-xs">
+      <div className="rounded-xl border border-success/30 bg-success/5 p-4 shadow-xs">
         <div className="flex items-start gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-xs">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-success text-success-foreground shadow-xs">
             <HugeiconsIcon
               className="size-4"
               icon={CheckmarkCircle02Icon}
@@ -35,10 +35,10 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
             />
           </div>
           <div className="min-w-0">
-            <div className="font-semibold text-base text-emerald-950 dark:text-emerald-100">
+            <div className="font-semibold text-base text-success">
               {messages.endpoints.stepperReviewReadyTitle}
             </div>
-            <p className="mt-0.5 text-emerald-800/80 text-xs leading-relaxed dark:text-emerald-300/80">
+            <p className="mt-0.5 text-muted-foreground text-xs leading-relaxed">
               {messages.endpoints.stepperReviewReadyDescription}
             </p>
           </div>
