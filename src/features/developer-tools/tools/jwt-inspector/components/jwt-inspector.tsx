@@ -150,7 +150,7 @@ function renderTokenStatus(token: string, tokenError: string) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+    <span className="inline-flex items-center gap-1.5 font-medium text-success">
       <HugeiconsIcon className="size-4" icon={CheckmarkCircle02Icon} />
       <span>{copy.validJwt}</span>
     </span>
@@ -164,7 +164,7 @@ function renderSignatureStatus(
 ) {
   if (isValidSig) {
     return (
-      <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+      <span className="inline-flex items-center gap-1.5 font-medium text-success">
         <HugeiconsIcon className="size-4" icon={CheckmarkCircle02Icon} />
         <span>{copy.signatureValid}</span>
       </span>

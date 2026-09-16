@@ -275,7 +275,7 @@ export function CronParser() {
               className="grid gap-5 border-y py-6 md:grid-cols-[auto_minmax(0,1fr)] md:items-start md:gap-7"
               variants={childVariants}
             >
-              <div className="flex size-12 items-center justify-center rounded-full border border-emerald-600/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+              <div className="flex size-12 items-center justify-center rounded-full border border-success/30 bg-success/10 text-success">
                 <HugeiconsIcon
                   className="size-5"
                   icon={CheckmarkCircle02Icon}
@@ -283,7 +283,7 @@ export function CronParser() {
                 />
               </div>
               <div>
-                <p className="font-mono text-emerald-700 text-xs uppercase tracking-widest dark:text-emerald-300">
+                <p className="font-mono text-success text-xs uppercase tracking-widest">
                   {messages.cronParser.validExpression}
                 </p>
                 <h2 className="mt-3 max-w-[28ch] font-semibold text-2xl leading-tight tracking-tight md:text-3xl">

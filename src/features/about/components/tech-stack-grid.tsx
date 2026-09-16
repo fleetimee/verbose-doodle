@@ -29,7 +29,7 @@ function ReactHookFormIcon({
   return (
     <svg
       aria-hidden="true"
-      className={cn("text-pink-500", className)}
+      className={cn("text-primary", className)}
       height={size}
       viewBox="0 0 24 24"
       width={size}
@@ -57,7 +57,7 @@ function BaseUiIcon({
   return (
     <svg
       aria-hidden="true"
-      className={cn("text-blue-600", className)}
+      className={cn("text-info", className)}
       height={size}
       viewBox="0 0 24 24"
       width={size}

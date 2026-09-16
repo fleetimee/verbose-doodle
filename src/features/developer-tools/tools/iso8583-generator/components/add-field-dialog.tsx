@@ -100,7 +100,7 @@ function ItemActionButton({
       type="button"
       variant="secondary"
     >
-      <Check className="size-4 text-emerald-500" />
+      <Check className="size-4 text-success" />
     </Button>
   );
 }

@@ -250,14 +250,14 @@ function JsonStatusBadge({
   }
   if (isValid) {
     return (
-      <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 text-xs dark:text-emerald-400">
+      <span className="inline-flex items-center gap-1.5 font-medium text-success text-xs">
         <HugeiconsIcon className="size-3.5" icon={CheckmarkCircle02Icon} />
         <span>{messages.jwtInspector.validJson}</span>
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 font-medium text-amber-600 text-xs dark:text-amber-400">
+    <span className="inline-flex items-center gap-1.5 font-medium text-warning text-xs">
       <HugeiconsIcon className="size-3.5" icon={AlertCircleIcon} />
       <span>{messages.jwtInspector.invalidJson}</span>
     </span>

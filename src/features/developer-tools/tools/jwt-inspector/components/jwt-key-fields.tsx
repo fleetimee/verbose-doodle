@@ -208,7 +208,7 @@ function SymmetricKeyEditor({
           </div>
           <div className="flex items-center gap-1.5 border-t bg-muted/5 px-3 py-2 text-xs">
             {keys.secret.trim() ? (
-              <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+              <span className="inline-flex items-center gap-1.5 font-medium text-success">
                 <HugeiconsIcon
                   className="size-3.5"
                   icon={CheckmarkCircle02Icon}
@@ -482,7 +482,7 @@ function AsymmetricInspectKeyEditor({
           </div>
           <div className="flex items-center gap-1.5 border-t bg-muted/5 px-3 py-2 text-xs">
             {keys.publicKey.trim() ? (
-              <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+              <span className="inline-flex items-center gap-1.5 font-medium text-success">
                 <HugeiconsIcon
                   className="size-3.5"
                   icon={CheckmarkCircle02Icon}
