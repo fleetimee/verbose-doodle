@@ -289,7 +289,7 @@ function InspectorStat({
 }) {
   return (
     <div className="min-w-0 rounded-lg border border-border/70 bg-card p-3 shadow-xs">
-      <p className="flex items-center gap-1.5 font-medium text-[11px] text-muted-foreground uppercase tracking-wide">
+      <p className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs uppercase tracking-wide">
         {icon}
         {label}
       </p>

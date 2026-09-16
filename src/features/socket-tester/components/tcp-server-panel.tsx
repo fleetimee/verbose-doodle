@@ -122,7 +122,7 @@ export function TcpServerPanel({
             ) : (
               state.clients.map((client) => (
                 <div
-                  className="flex items-center gap-3 rounded-md border border-border/70 bg-background/70 p-3 font-mono text-xs transition-[border-color,background-color,transform] duration-150 ease-out hover:border-primary/25 hover:bg-accent/40 active:scale-[0.997]"
+                  className="flex items-center gap-3 rounded-md border border-border/70 bg-background/70 p-3 font-mono text-xs transition-all duration-150 ease-out hover:border-primary/25 hover:bg-accent/40 active:scale-[0.997]"
                   key={client.id}
                 >
                   <Checkbox

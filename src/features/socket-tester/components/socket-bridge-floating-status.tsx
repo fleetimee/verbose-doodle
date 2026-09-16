@@ -44,7 +44,7 @@ export function SocketBridgeStatus() {
       <span
         aria-label={`${messages.socketTester.bridgeStatusLabel} ${bridge.bridgeStatus}`}
         className={cn(
-          "relative inline-flex h-full min-w-0 flex-1 items-center rounded-r-sm rounded-l-md border font-medium text-[11px] group-data-[collapsible=icon]:hidden",
+          "relative inline-flex h-full min-w-0 flex-1 items-center rounded-r-sm rounded-l-md border font-medium text-xs group-data-[collapsible=icon]:hidden",
           bridgeTone[bridge.bridgeStatus]
         )}
         role="status"
@@ -72,7 +72,7 @@ export function SocketBridgeStatus() {
                 )}
               />
             </span>
-            <span className="truncate font-mono uppercase tracking-[0.1em] group-data-[collapsible=icon]:sr-only">
+            <span className="truncate font-mono uppercase tracking-wider group-data-[collapsible=icon]:sr-only">
               {bridge.bridgeStatus}
             </span>
           </motion.span>

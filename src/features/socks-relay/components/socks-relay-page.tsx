@@ -493,7 +493,7 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
         <motion.div
           animate={traceAnimate}
           aria-hidden="true"
-          className="absolute -bottom-px left-0 h-px w-full origin-left bg-[linear-gradient(90deg,transparent,hsl(var(--primary)),hsl(var(--foreground)/0.7),transparent)] will-change-transform"
+          className="absolute -bottom-px left-0 h-px w-full origin-left bg-gradient-to-r from-transparent via-primary to-transparent will-change-transform"
           initial={traceInitial}
           transition={
             shouldReduceMotion
@@ -503,7 +503,7 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
         />
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
-            <p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-[0.18em]">
+            <p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
               {messages.socksRelay.pageEyebrow}
             </p>
             <h1 className="font-bold text-3xl tracking-tight">{modeLabel}</h1>
@@ -1035,10 +1035,10 @@ function RelayTable({
 
   if (!isLoading && relays.length === 0) {
     relayTableContent = (
-      <div className="relative grid min-h-[440px] flex-1 place-items-center overflow-hidden rounded-lg border border-border/70 bg-[radial-gradient(circle_at_50%_42%,hsl(var(--primary)/0.12),transparent_34%),linear-gradient(135deg,hsl(var(--muted)/0.42),hsl(var(--background))_62%)] p-5">
+      <div className="relative grid min-h-[440px] flex-1 place-items-center overflow-hidden rounded-lg border border-border/70 bg-gradient-to-br from-muted/40 via-background to-background p-5">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(hsl(var(--border)/0.42)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--border)/0.32)_1px,transparent_1px)] bg-[size:48px_48px] opacity-35"
+          className="pointer-events-none absolute inset-0 bg-muted/10"
         />
         <div className="relative grid w-full max-w-3xl gap-5">
           <div className="mx-auto grid size-14 place-items-center rounded-md border border-primary/25 bg-primary/10 text-primary shadow-xs">
@@ -1056,7 +1056,7 @@ function RelayTable({
           </div>
           <div className="mx-auto grid w-full max-w-md grid-cols-1 overflow-hidden rounded-md border border-border/70 bg-background/85 text-center shadow-xs sm:grid-cols-3">
             <div className="grid gap-1 border-border/70 border-b px-3 py-3 sm:border-r sm:border-b-0">
-              <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
+              <span className="font-medium text-muted-foreground text-xs uppercase tracking-widest">
                 {messages.socksRelay.noRelayDefaultListenLabel}
               </span>
               <span className="font-mono font-semibold text-sm">
@@ -1064,7 +1064,7 @@ function RelayTable({
               </span>
             </div>
             <div className="grid gap-1 border-border/70 border-b px-3 py-3 sm:border-r sm:border-b-0">
-              <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
+              <span className="font-medium text-muted-foreground text-xs uppercase tracking-widest">
                 {messages.socksRelay.noRelayDefaultHostLabel}
               </span>
               <span className="truncate font-mono font-semibold text-sm">
@@ -1072,7 +1072,7 @@ function RelayTable({
               </span>
             </div>
             <div className="grid gap-1 px-3 py-3">
-              <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
+              <span className="font-medium text-muted-foreground text-xs uppercase tracking-widest">
                 {messages.socksRelay.noRelayDefaultPortLabel}
               </span>
               <span className="font-mono font-semibold text-sm">8085</span>
@@ -1467,7 +1467,7 @@ function RelayLogConsole({
             {messages.socksRelay.relayLogsTitle}
           </CardTitle>
           <CardDescription>{logScopeDescription}</CardDescription>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-sky-500/25 bg-sky-500/10 px-2.5 py-1 font-medium text-[11px] text-sky-700 uppercase tracking-[0.12em] dark:text-sky-300">
+          <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-sky-500/25 bg-sky-500/10 px-2.5 py-1 font-medium text-sky-700 text-xs uppercase tracking-wider dark:text-sky-300">
             <HugeiconsIcon
               className="size-3.5"
               icon={Database01Icon}
@@ -1641,19 +1641,19 @@ function RelayEventList({
 }) {
   if (events.length === 0) {
     return (
-      <div className="flex h-[560px] items-center justify-center rounded-lg border border-[#2f2f2f] bg-[#151515] px-6 shadow-inner">
+      <div className="flex h-[560px] items-center justify-center rounded-lg border border-border/80 bg-muted/30 px-6 shadow-inner">
         <div className="w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner">
-          <div className="mb-3 flex items-center gap-2 text-[#d4d4d4]">
+          <div className="mb-3 flex items-center gap-2 text-foreground">
             <TimerReset className="size-5" />
             <span className="font-semibold">{emptyLabel}</span>
           </div>
-          <div className="grid gap-1 text-[#a3a3a3]">
+          <div className="grid gap-1 text-muted-foreground">
             <p>
-              <span className="text-[#60a5fa]">simulator@relay</span>
-              <span className="text-[#737373]">:~$</span>{" "}
-              <span className="text-[#d4d4d4]">tail -f relay.log</span>
+              <span className="text-primary">simulator@relay</span>
+              <span className="text-muted-foreground">:~$</span>{" "}
+              <span className="text-foreground">tail -f relay.log</span>
             </p>
-            <p className="flex items-center gap-1.5 text-[#737373]">
+            <p className="flex items-center gap-1.5 text-muted-foreground">
               <span className="relative flex size-2">
                 <span className="absolute inline-flex size-full rounded-full bg-emerald-400/60 opacity-75 motion-safe:animate-ping" />
                 <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
@@ -1668,7 +1668,7 @@ function RelayEventList({
 
   return (
     <ScrollArea className="h-[560px] min-w-0" variant="terminal">
-      <div className="min-w-max p-3 font-mono text-[#e7e7e7] text-[12px] leading-5">
+      <div className="min-w-max p-3 font-mono text-foreground text-xs leading-5">
         <div className="grid gap-2">
           {events
             .slice()
@@ -1696,9 +1696,9 @@ function RelayEventLine({ event }: { readonly event: RelayEvent }) {
 
   return (
     <div className="grid gap-1 rounded-md border border-white/10 bg-white/[0.035] p-2 shadow-sm">
-      <div className="flex flex-wrap items-center gap-2 text-[#a3a3a3]">
-        <span className="text-[#858585]">{timestamp}</span>
-        <span className="font-semibold text-[#d4d4d4]">
+      <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+        <span className="text-muted-foreground">{timestamp}</span>
+        <span className="font-semibold text-foreground">
           {event.payload.relayId ?? "unknown-relay"}
         </span>
         {isMessage && isKnownRelayFlow(flow) ? (
@@ -1718,7 +1718,7 @@ function RelayEventLine({ event }: { readonly event: RelayEvent }) {
         {event.payload.jobId ? <span>job {event.payload.jobId}</span> : null}
       </div>
       {isMessage ? (
-        <pre className="whitespace-pre-wrap break-words text-[#f5f5f5]">
+        <pre className="whitespace-pre-wrap break-words text-foreground">
           {displayLine ||
             event.payload.data ||
             event.payload.hex ||
@@ -1726,7 +1726,7 @@ function RelayEventLine({ event }: { readonly event: RelayEvent }) {
             ""}
         </pre>
       ) : (
-        <pre className="whitespace-pre-wrap break-words text-[#f5f5f5]">
+        <pre className="whitespace-pre-wrap break-words text-foreground">
           {displayLine ??
             event.payload.message ??
             JSON.stringify(event.payload, null, 2)}

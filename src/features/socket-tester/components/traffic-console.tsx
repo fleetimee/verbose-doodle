@@ -89,7 +89,7 @@ function ConsoleMetric({
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="text-[11px] text-muted-foreground uppercase">{label}</p>
+        <p className="text-muted-foreground text-xs uppercase">{label}</p>
         <p className="truncate font-mono font-semibold text-sm">{value}</p>
       </div>
     </div>
@@ -262,26 +262,26 @@ export function TrafficConsole({
 
       {logs.length === 0 ? (
         <div
-          className="flex h-[560px] min-w-0 items-center justify-center rounded-lg border border-[#2f2f2f] bg-[#151515] px-6 shadow-inner"
+          className="flex h-[560px] min-w-0 items-center justify-center rounded-lg border border-border/80 bg-muted/30 px-6 shadow-inner"
           data-testid="socket-console-empty"
         >
           <div className="w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner">
-            <div className="mb-3 flex items-center gap-2 text-[#d4d4d4]">
+            <div className="mb-3 flex items-center gap-2 text-foreground">
               <MousePointerClick className="size-5" />
               <span className="font-semibold">
                 {socketMessages.noFramesCapturedTitle}
               </span>
             </div>
-            <div className="grid gap-1 text-[#a3a3a3]">
+            <div className="grid gap-1 text-muted-foreground">
               <p>
-                <span className="text-[#60a5fa]">simulator@socket</span>
-                <span className="text-[#737373]">:~$</span>{" "}
-                <span className="text-[#d4d4d4]">tail -f socket.log</span>
+                <span className="text-primary">simulator@socket</span>
+                <span className="text-muted-foreground">:~$</span>{" "}
+                <span className="text-foreground">tail -f socket.log</span>
               </p>
-              <p className="text-[#b8b8b8]">
+              <p className="text-muted-foreground">
                 {socketMessages.noFramesCapturedDescription}
               </p>
-              <p className="flex items-center gap-1.5 text-[#737373]">
+              <p className="flex items-center gap-1.5 text-muted-foreground">
                 <span className="relative flex size-2">
                   <span className="absolute inline-flex size-full rounded-full bg-emerald-400/60 opacity-75 motion-safe:animate-ping" />
                   <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
@@ -297,20 +297,24 @@ export function TrafficConsole({
           ref={scrollAreaRef}
           variant="terminal"
         >
-          <div className="w-full min-w-0 p-4 font-mono text-[#e7e7e7] text-[13px] leading-5">
+          <div className="w-full min-w-0 p-4 font-mono text-foreground text-xs leading-5">
             {logs.map((entry) => (
               <button
-                className="group grid w-full min-w-0 grid-cols-[76px_64px_92px_minmax(140px,1fr)] items-start gap-2 rounded px-2 py-1 text-left tabular-nums transition-[background-color,transform] duration-150 ease-out hover:bg-white/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 active:scale-[0.997]"
+                className="group grid w-full min-w-0 grid-cols-[76px_64px_92px_minmax(140px,1fr)] items-start gap-2 rounded px-2 py-1 text-left tabular-nums transition-colors duration-150 ease-out hover:bg-white/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 active:scale-[0.997]"
                 key={entry.id}
                 onClick={() => onInspect(entry)}
                 type="button"
               >
-                <span className="text-[#858585]">{entry.timestamp}</span>
+                <span className="text-muted-foreground">{entry.timestamp}</span>
                 <DirectionBadge direction={entry.direction} />
-                <span className="truncate text-[#a3a3a3]">{entry.scope}</span>
-                <span className="whitespace-pre-wrap break-all text-[#f5f5f5]">
-                  <span className="text-[#6b7280]">{entry.protocol}</span>
-                  <span className="px-2 text-[#525252]">/</span>
+                <span className="truncate text-muted-foreground">
+                  {entry.scope}
+                </span>
+                <span className="whitespace-pre-wrap break-all text-foreground">
+                  <span className="text-muted-foreground">
+                    {entry.protocol}
+                  </span>
+                  <span className="px-2 text-muted-foreground">/</span>
                   {entry.data}
                 </span>
               </button>
