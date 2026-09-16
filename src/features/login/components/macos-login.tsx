@@ -161,7 +161,7 @@ export function MacOsLogin({
             type="submit"
           >
             {isLoading ? (
-              <Spinner className="size-3.5 text-white" />
+              <Spinner size="sm" variant="white" />
             ) : (
               <HugeiconsIcon
                 icon={ArrowRight01Icon}
