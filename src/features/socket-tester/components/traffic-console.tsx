@@ -283,8 +283,8 @@ export function TrafficConsole({
               </p>
               <p className="flex items-center gap-1.5 text-muted-foreground">
                 <span className="relative flex size-2">
-                  <span className="absolute inline-flex size-full rounded-full bg-emerald-400/60 opacity-75 motion-safe:animate-ping" />
-                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                  <span className="absolute inline-flex size-full rounded-full bg-success/60 opacity-75 motion-safe:animate-ping" />
+                  <span className="relative inline-flex size-2 rounded-full bg-success" />
                 </span>
                 <span>{socketMessages.waitingForFrames}</span>
               </p>
@@ -300,7 +300,7 @@ export function TrafficConsole({
           <div className="w-full min-w-0 p-4 font-mono text-foreground text-xs leading-5">
             {logs.map((entry) => (
               <button
-                className="group grid w-full min-w-0 grid-cols-[76px_64px_92px_minmax(140px,1fr)] items-start gap-2 rounded px-2 py-1 text-left tabular-nums transition-colors duration-150 ease-out hover:bg-white/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 active:scale-[0.997]"
+                className="group grid w-full min-w-0 grid-cols-[76px_64px_92px_minmax(140px,1fr)] items-start gap-2 rounded px-2 py-1 text-left tabular-nums transition-colors duration-150 ease-out hover:bg-white/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 active:scale-[0.997]"
                 key={entry.id}
                 onClick={() => onInspect(entry)}
                 type="button"

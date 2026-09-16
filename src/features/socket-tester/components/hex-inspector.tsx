@@ -368,14 +368,11 @@ function CodeSurface({
     <pre
       className={cn(
         "max-h-64 overflow-auto rounded-md border border-border/70 bg-muted/40 p-4 font-mono text-xs leading-relaxed shadow-inner",
-        "dark:bg-zinc-950/70",
-        tone === "payload" &&
-          "text-emerald-700 selection:bg-emerald-500/20 dark:text-emerald-300",
-        tone === "hex" &&
-          "text-sky-700 selection:bg-sky-500/20 dark:text-sky-300",
+        "dark:bg-muted/30",
+        tone === "payload" && "text-success selection:bg-success/20",
+        tone === "hex" && "text-info selection:bg-info/20",
         tone === "metadata" && "text-muted-foreground selection:bg-primary/20",
-        tone === "rendered" &&
-          "text-foreground selection:bg-primary/20 dark:text-zinc-100",
+        tone === "rendered" && "text-foreground selection:bg-primary/20",
         className
       )}
     >

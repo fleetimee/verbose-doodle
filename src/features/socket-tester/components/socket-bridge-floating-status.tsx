@@ -60,13 +60,13 @@ export function SocketBridgeStatus() {
           >
             <span className="relative flex size-1.5">
               {bridge.bridgeStatus === "connected" && (
-                <span className="absolute inline-flex size-full rounded-full bg-emerald-400 opacity-40 motion-safe:animate-ping" />
+                <span className="absolute inline-flex size-full rounded-full bg-success opacity-40 motion-safe:animate-ping" />
               )}
               <span
                 className={cn(
                   "relative inline-flex size-1.5 rounded-full",
-                  bridge.bridgeStatus === "connected" && "bg-emerald-400",
-                  bridge.bridgeStatus === "connecting" && "bg-amber-400",
+                  bridge.bridgeStatus === "connected" && "bg-success",
+                  bridge.bridgeStatus === "connecting" && "bg-warning",
                   bridge.bridgeStatus === "disconnected" &&
                     "bg-muted-foreground/50"
                 )}
@@ -95,8 +95,8 @@ export function SocketBridgeStatus() {
               aria-hidden="true"
               className={cn(
                 "absolute -right-0.5 -bottom-0.5 hidden size-2 rounded-full border border-sidebar bg-muted-foreground group-data-[collapsible=icon]:block",
-                bridge.bridgeStatus === "connected" && "bg-emerald-500",
-                bridge.bridgeStatus === "connecting" && "bg-amber-500"
+                bridge.bridgeStatus === "connected" && "bg-success",
+                bridge.bridgeStatus === "connecting" && "bg-warning"
               )}
             />
           </button>

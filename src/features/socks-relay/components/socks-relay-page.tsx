@@ -633,7 +633,7 @@ function RelayConnectionBadge({ tourId }: { readonly tourId?: string }) {
         <span
           className={cn(
             "size-2 rounded-full",
-            isConnected ? "bg-emerald-500" : "bg-amber-500"
+            isConnected ? "bg-success" : "bg-warning"
           )}
         />
         <span className="text-foreground">
@@ -1467,14 +1467,14 @@ function RelayLogConsole({
             {messages.socksRelay.relayLogsTitle}
           </CardTitle>
           <CardDescription>{logScopeDescription}</CardDescription>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-sky-500/25 bg-sky-500/10 px-2.5 py-1 font-medium text-sky-700 text-xs uppercase tracking-wider dark:text-sky-300">
+          <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-info/30 bg-info/10 px-2.5 py-1 font-medium text-info text-xs uppercase tracking-wider">
             <HugeiconsIcon
               className="size-3.5"
               icon={Database01Icon}
               strokeWidth={2}
             />
             {messages.socksRelay.savedHistoryLabel}
-            <span className="h-3 border-sky-500/25 border-l" />
+            <span className="h-3 border-info/30 border-l" />
             <span className="normal-case tracking-normal">
               {savedEvents.length} events
             </span>
@@ -1655,8 +1655,8 @@ function RelayEventList({
             </p>
             <p className="flex items-center gap-1.5 text-muted-foreground">
               <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full rounded-full bg-emerald-400/60 opacity-75 motion-safe:animate-ping" />
-                <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                <span className="absolute inline-flex size-full rounded-full bg-success/60 opacity-75 motion-safe:animate-ping" />
+                <span className="relative inline-flex size-2 rounded-full bg-success" />
               </span>
               <span>{messages.socksRelay.waitingForRelayEvents}</span>
             </p>
@@ -1711,7 +1711,7 @@ function RelayEventLine({ event }: { readonly event: RelayEvent }) {
             {flow}
           </span>
         ) : (
-          <span className="rounded bg-amber-400/15 px-1.5 py-0.5 font-semibold text-amber-200">
+          <span className="rounded bg-warning/15 px-1.5 py-0.5 font-semibold text-warning">
             {event.type}
           </span>
         )}

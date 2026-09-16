@@ -98,7 +98,7 @@ export function TcpServerPanel({
         >
           <span
             className={
-              state.listening ? "text-emerald-400" : "text-muted-foreground"
+              state.listening ? "text-success" : "text-muted-foreground"
             }
           >
             ●
