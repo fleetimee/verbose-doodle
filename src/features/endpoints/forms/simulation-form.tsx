@@ -92,7 +92,7 @@ export const SimulationForm = forwardRef<
         onSubmit={form.handleSubmit(handleSubmit)}
       >
         <div className="flex-1 space-y-6 overflow-y-auto">
-          <FieldGroup className="space-y-6">
+          <FieldGroup>
             {/* Step 1: Simulation Type Selection */}
             <Controller
               control={form.control}
@@ -107,17 +107,12 @@ export const SimulationForm = forwardRef<
                       {messages.endpoints.simulationTypeDescription}
                     </FieldDescription>
                     <Choicebox
-                      className="gap-4"
                       onValueChange={(value: unknown) => {
                         field.onChange(value as SimulationFormValues["type"]);
                       }}
                       value={field.value}
                     >
-                      <ChoiceboxItem
-                        className="transition-colors hover:bg-accent/50"
-                        id="none"
-                        value={SIMULATION_TYPE.NONE}
-                      >
+                      <ChoiceboxItem id="none" value={SIMULATION_TYPE.NONE}>
                         <ChoiceboxIndicator className="sr-only" />
                         <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
                           <HugeiconsIcon
@@ -141,11 +136,7 @@ export const SimulationForm = forwardRef<
                         </div>
                       </ChoiceboxItem>
 
-                      <ChoiceboxItem
-                        className="transition-colors hover:bg-accent/50"
-                        id="delay"
-                        value={SIMULATION_TYPE.DELAY}
-                      >
+                      <ChoiceboxItem id="delay" value={SIMULATION_TYPE.DELAY}>
                         <ChoiceboxIndicator className="sr-only" />
                         <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
                           <HugeiconsIcon
@@ -170,7 +161,6 @@ export const SimulationForm = forwardRef<
                       </ChoiceboxItem>
 
                       <ChoiceboxItem
-                        className="transition-colors hover:bg-accent/50"
                         id="timeout"
                         value={SIMULATION_TYPE.TIMEOUT}
                       >

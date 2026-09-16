@@ -65,7 +65,7 @@ export function EditResponseJsonForm({
   return (
     <Form {...form}>
       <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-        <FieldGroup className="space-y-4">
+        <FieldGroup size="compact">
           <Controller
             control={form.control}
             name="json"
@@ -79,10 +79,10 @@ export function EditResponseJsonForm({
                     {...field}
                     aria-invalid={fieldState.invalid}
                     autoFocus
-                    className="font-mono text-sm"
                     id="edit-response-json"
                     placeholder={messages.endpoints.jsonResponsePlaceholder}
                     rows={10}
+                    variant="mono"
                   />
                   <FieldDescription>
                     {messages.endpoints.jsonResponseDescription}

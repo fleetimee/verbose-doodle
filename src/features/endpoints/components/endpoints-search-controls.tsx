@@ -47,9 +47,9 @@ export function EndpointsSearchControls({
           strokeWidth={2}
         />
         <Input
-          className="pl-9"
           onChange={handleSearchChange}
           placeholder={searchPlaceholder}
+          size="search"
           value={searchValue}
         />
       </div>

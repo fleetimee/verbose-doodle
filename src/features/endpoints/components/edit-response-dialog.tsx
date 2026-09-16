@@ -81,9 +81,9 @@ export function EditResponseDialog({
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="max-w-2xl rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-lg">
+      <DialogContent size="2xl" variant="elevated">
         <DialogHeader>
-          <DialogTitle className="font-bold text-xl">
+          <DialogTitle size="xl" variant="bold">
             {getDialogTitle()}
           </DialogTitle>
           <DialogDescription>{getDialogDescription()}</DialogDescription>

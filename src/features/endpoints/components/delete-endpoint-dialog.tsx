@@ -60,9 +60,9 @@ export function DeleteEndpointDialog({
             {messages.common.cancel}
           </AlertDialogCancel>
           <AlertDialogAction
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             disabled={isDeleting}
             onClick={onConfirm}
+            variant="destructive"
           >
             {isDeleting && <Spinner className="mr-2" />}
             {isDeleting

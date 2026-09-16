@@ -166,13 +166,13 @@ function ExportFilePreview({
   return (
     <div className="grid gap-2 rounded-md border border-dashed bg-muted/35 p-3 text-xs">
       <div className="flex min-w-0 items-start gap-2 text-muted-foreground">
-        <FileJson className="h-3.5 w-3.5 text-orange-500" />
+        <FileJson className="h-3.5 w-3.5 text-chart-1" />
         <span className="min-w-0 break-all font-mono leading-relaxed">
           {getPostmanFilename(collectionName, "postman_collection")}
         </span>
       </div>
       <div className="flex min-w-0 items-start gap-2 text-muted-foreground">
-        <Braces className="h-3.5 w-3.5 text-emerald-500" />
+        <Braces className="h-3.5 w-3.5 text-chart-2" />
         <span className="min-w-0 break-all font-mono leading-relaxed">
           {getPostmanFilename(environmentName, "postman_environment")}
         </span>
@@ -300,23 +300,25 @@ export function ExportEndpointsDialog({
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="overflow-hidden p-0 sm:max-w-[920px]">
+      <DialogContent className="sm:max-w-[920px]" variant="pane">
         <div className="relative border-b bg-muted/25 px-6 py-5">
           <div
             aria-hidden="true"
-            className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,transparent,hsl(var(--primary)/0.75),#ff6c37,transparent)]"
+            className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/75 to-transparent"
           />
-          <DialogHeader className="relative gap-3">
+          <DialogHeader className="relative" size="relaxed">
             <div className="flex items-start gap-4 pr-8">
               <div className="space-y-1">
-                <DialogTitle className="flex flex-wrap items-center gap-2 text-xl">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-md border bg-background shadow-xs">
-                    <Postman className="h-5 w-5" />
+                <DialogTitle size="xl">
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-md border bg-background shadow-xs">
+                      <Postman className="h-5 w-5" />
+                    </span>
+                    {messages.endpoints.exportToPostman}
+                    <Badge variant="tag">
+                      {POSTMAN_EXPORT_MESSAGES.collectionEnvironmentBadge}
+                    </Badge>
                   </span>
-                  {messages.endpoints.exportToPostman}
-                  <Badge className="rounded-md text-xs" variant="outline">
-                    {POSTMAN_EXPORT_MESSAGES.collectionEnvironmentBadge}
-                  </Badge>
                 </DialogTitle>
                 <DialogDescription>
                   {POSTMAN_EXPORT_MESSAGES.description}
@@ -360,9 +362,9 @@ export function ExportEndpointsDialog({
                     strokeWidth={2}
                   />
                   <Input
-                    className="pl-9"
                     onChange={(event) => setSearchTerm(event.target.value)}
                     placeholder={POSTMAN_EXPORT_MESSAGES.searchPlaceholder}
+                    size="search"
                     value={searchTerm}
                   />
                 </div>
@@ -392,7 +394,7 @@ export function ExportEndpointsDialog({
                     indeterminate={checkboxState === "indeterminate"}
                     onCheckedChange={handleToggleAll}
                   />
-                  <Label className="font-medium text-sm" htmlFor="select-all">
+                  <Label htmlFor="select-all">
                     {POSTMAN_EXPORT_MESSAGES.selectAllBillers}
                   </Label>
                 </div>
@@ -427,8 +429,9 @@ export function ExportEndpointsDialog({
                         }
                       />
                       <Label
-                        className="grid min-w-0 flex-1 cursor-pointer gap-1"
+                        className="min-w-0 flex-1"
                         htmlFor={`biller-${group.billerSlug}`}
+                        variant="stacked"
                       >
                         <span className="truncate font-medium text-sm">
                           {group.billerName}
@@ -509,7 +512,7 @@ export function ExportEndpointsDialog({
           </aside>
         </div>
 
-        <DialogFooter className="border-t bg-muted/20 px-6 py-4">
+        <DialogFooter variant="pane">
           <Button onClick={() => onOpenChange(false)} variant="outline">
             {POSTMAN_EXPORT_MESSAGES.cancelButton}
           </Button>

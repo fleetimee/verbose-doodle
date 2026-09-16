@@ -17,9 +17,10 @@ export function EndpointPathTitle({ path }: EndpointPathTitleProps) {
         </span>
       </TooltipTrigger>
       <TooltipContent
-        className="max-w-[min(520px,calc(100vw-2rem))] break-all font-mono leading-relaxed"
+        className="max-w-[min(520px,calc(100vw-2rem))] break-all"
         side="top"
         sideOffset={8}
+        variant="mono"
       >
         {path}
       </TooltipContent>

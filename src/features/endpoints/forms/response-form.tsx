@@ -55,7 +55,7 @@ export const ResponseForm = forwardRef<ResponseFormHandle, ResponseFormProps>(
     return (
       <Form {...form}>
         <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-          <FieldGroup className="space-y-4">
+          <FieldGroup size="compact">
             <Controller
               control={form.control}
               name="name"
@@ -126,10 +126,10 @@ export const ResponseForm = forwardRef<ResponseFormHandle, ResponseFormProps>(
                     <Textarea
                       {...field}
                       aria-invalid={fieldState.invalid}
-                      className="font-mono text-sm"
                       id="response-json"
                       placeholder={messages.endpoints.jsonResponsePlaceholder}
                       rows={10}
+                      variant="mono"
                     />
                     <FieldDescription>
                       {messages.endpoints.jsonResponseDescription}
@@ -149,10 +149,7 @@ export const ResponseForm = forwardRef<ResponseFormHandle, ResponseFormProps>(
                 <Field data-invalid={fieldState.invalid}>
                   <div className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                      <FieldLabel
-                        className="text-base"
-                        htmlFor="response-activated"
-                      >
+                      <FieldLabel htmlFor="response-activated" variant="base">
                         {messages.endpoints.activateLabel}
                       </FieldLabel>
                       <FieldDescription>

@@ -78,14 +78,14 @@ export function StatusCodeCombobox({
         <Button
           aria-expanded={open}
           aria-invalid={!!fieldError}
-          className={cn(
-            "h-20 w-full justify-between rounded-none border-0 border-border border-b-2 bg-transparent px-0 font-normal text-3xl shadow-none hover:bg-transparent focus:ring-0 focus-visible:border-primary aria-invalid:border-destructive md:text-4xl",
-            !selectedCode && "text-muted-foreground"
-          )}
+          className="w-full"
           id="response-status-code"
           onKeyDown={handleTriggerKeyDown}
           role="combobox"
-          variant="outline"
+          size="display-xl"
+          variant={
+            selectedCode ? "underline-display" : "underline-display-muted"
+          }
         >
           {selectedCode
             ? selectedCode.label
@@ -97,7 +97,11 @@ export function StatusCodeCombobox({
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[var(--anchor-width)] p-0">
+      <PopoverContent
+        align="start"
+        className="w-[var(--anchor-width)]"
+        size="none"
+      >
         <Command>
           <CommandInput placeholder={messages.endpoints.searchStatusCodes} />
           <CommandList>

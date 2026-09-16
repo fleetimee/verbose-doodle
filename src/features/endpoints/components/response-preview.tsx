@@ -184,21 +184,15 @@ export function ResponsePreview({
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-lg">{response.name}</h3>
                 {response.activated ? (
-                  <Badge
-                    className="flex items-center gap-1.5"
-                    variant="secondary"
-                  >
+                  <Badge variant="secondary">
                     <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-chart-2 opacity-75 motion-safe:animate-ping" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-chart-2" />
                     </span>
                     {endpointMessages.responseActiveBadge}
                   </Badge>
                 ) : (
-                  <Badge
-                    className="flex items-center gap-1.5 text-muted-foreground"
-                    variant="outline"
-                  >
+                  <Badge variant="outline-muted">
                     <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
                     {endpointMessages.responseInactiveBadge}
                   </Badge>
@@ -209,7 +203,7 @@ export function ResponsePreview({
                   {endpointMessages.responseStatusCodeLabel}
                 </span>
                 <Badge
-                  className="font-mono"
+                  mono
                   variant={
                     response.statusCode < SUCCESS_STATUS_CODE_THRESHOLD
                       ? "default"
@@ -360,7 +354,7 @@ export function ResponsePreview({
           </motion.div>
         ) : (
           <div>
-            <Empty className="min-h-[300px] border-0">
+            <Empty className="min-h-[300px]" variant="plain">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <HugeiconsIcon icon={EyeIcon} strokeWidth={2} />

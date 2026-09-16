@@ -55,9 +55,8 @@ export function ResponseStepperHeader({
       <div className="h-1 bg-muted">
         <motion.div
           animate={{ transform: `scaleX(${progress / PERCENT_MULTIPLIER})` }}
-          className="h-full bg-primary"
+          className="h-full origin-left bg-primary"
           initial={{ transform: "scaleX(0)" }}
-          style={{ transformOrigin: "left" }}
           transition={{
             duration: MOTION_DURATION.standard,
             ease: MOTION_EASE.inOut,
@@ -75,10 +74,9 @@ export function ResponseStepperHeader({
                     ? endpointMessages.responseBuilderCloseAriaLabel
                     : endpointMessages.responseBuilderBackAriaLabel
                 }
-                className="rounded-xl border border-border/80 bg-background/80 shadow-xs hover:bg-accent"
                 onClick={isFirstStep ? onCancel : onBack}
                 size="icon"
-                variant="ghost"
+                variant="soft"
               >
                 <HugeiconsIcon icon={ArrowLeft02Icon} strokeWidth={2} />
               </Button>
@@ -96,10 +94,9 @@ export function ResponseStepperHeader({
             </div>
             <Button
               aria-label={endpointMessages.responseBuilderCancelAriaLabel}
-              className="rounded-xl border border-border/80 bg-background/80 shadow-xs hover:bg-accent"
               onClick={onCancel}
               size="icon"
-              variant="ghost"
+              variant="soft"
             >
               <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
             </Button>

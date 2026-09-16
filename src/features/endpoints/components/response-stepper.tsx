@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Controller, useForm } from "react-hook-form";
 import { useI18n } from "@/components/i18n-provider";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -336,18 +337,18 @@ export function ResponseStepper({
                 >
                   <div className="flex items-start gap-3 border-b pb-5">
                     <div
-                      className={`flex size-10 shrink-0 items-center justify-center rounded-xl border-2 border-border/80 border-b-[3px] shadow-xs ${currentStep.bgColor}`}
+                      className={`flex size-10 shrink-0 items-center justify-center rounded-xl border-2 border-border/80 border-b-2 shadow-xs ${currentStep.bgColor}`}
                     >
                       <currentStep.icon
                         className={`size-5 ${currentStep.color}`}
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="mb-2 inline-flex select-none items-center rounded-lg border border-border/70 bg-muted/50 px-2.5 py-0.5 font-medium text-muted-foreground text-xs">
+                      <Badge className="mb-2" variant="outline-muted">
                         {formatMessage(messages.common.stepOf, {
                           current: currentStepIndex + 1,
                         })}
-                      </span>
+                      </Badge>
                       <h2 className="font-bold text-2xl tracking-tight md:text-3xl">
                         {currentStep.title}
                       </h2>
@@ -370,12 +371,13 @@ export function ResponseStepper({
                                 aria-invalid={fieldState.invalid}
                                 autoComplete="off"
                                 autoFocus
-                                className="h-12 rounded-xl border bg-background px-4 font-mono text-lg shadow-xs focus-visible:ring-2 aria-invalid:border-destructive"
                                 id="response-name"
                                 placeholder={
                                   messages.endpoints
                                     .createResponseNamePlaceholder
                                 }
+                                size="xl"
+                                variant="mono-display"
                               />
                               <div className="mt-3 flex flex-wrap gap-2">
                                 {[
@@ -420,11 +422,6 @@ export function ResponseStepper({
                               <div className="mb-4 grid gap-2 sm:grid-cols-5">
                                 {COMMON_STATUS_CODES.map((status) => (
                                   <Button
-                                    className={`h-auto min-h-14 flex-col gap-1 rounded-xl transition-all duration-150 ${
-                                      field.value === status.code
-                                        ? "border-2 border-primary/50 border-b-4 bg-primary font-bold text-primary-foreground shadow-xs"
-                                        : "border border-border/80 bg-card font-medium text-foreground hover:bg-accent/50"
-                                    }`}
                                     key={status.code}
                                     onClick={() => {
                                       field.onChange(status.code);
@@ -432,8 +429,13 @@ export function ResponseStepper({
                                         .trigger("statusCode")
                                         .catch(() => undefined);
                                     }}
+                                    size="tile"
                                     type="button"
-                                    variant="ghost"
+                                    variant={
+                                      field.value === status.code
+                                        ? "elevated"
+                                        : "card"
+                                    }
                                   >
                                     <span className="font-bold font-mono text-base">
                                       {status.code}

@@ -159,7 +159,7 @@ export function ResponseList({
       </div>
       <ScrollArea className="flex-1">
         {responses.length === 0 ? (
-          <Empty className="min-h-[300px] border-0">
+          <Empty className="min-h-[300px]" variant="plain">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <ListX />

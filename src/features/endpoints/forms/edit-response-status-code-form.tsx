@@ -47,7 +47,7 @@ export function EditResponseStatusCodeForm({
   return (
     <Form {...form}>
       <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-        <FieldGroup className="space-y-4">
+        <FieldGroup size="compact">
           <Controller
             control={form.control}
             name="statusCode"
