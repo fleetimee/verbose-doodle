@@ -81,6 +81,10 @@ const fieldVariants = cva(
   "group/field flex w-full data-[invalid=true]:text-destructive",
   {
     variants: {
+      variant: {
+        default: "",
+        card: "rounded-lg border bg-muted/50 p-4",
+      },
       orientation: {
         vertical: ["flex-col [&>*]:w-full [&>.sr-only]:w-auto"],
         horizontal: [
@@ -100,6 +104,7 @@ const fieldVariants = cva(
       },
     },
     defaultVariants: {
+      variant: "default",
       orientation: "vertical",
       size: "default",
     },
@@ -110,6 +115,7 @@ function Field({
   className,
   orientation = "vertical",
   size = "default",
+  variant = "default",
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
   return (
@@ -118,7 +124,8 @@ function Field({
       data-slot="field"
       data-orientation={orientation}
       data-size={size}
-      className={cn(fieldVariants({ orientation, size }), className)}
+      data-variant={variant}
+      className={cn(fieldVariants({ orientation, size, variant }), className)}
       {...props}
     />
   )
