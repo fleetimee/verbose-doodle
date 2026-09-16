@@ -425,7 +425,8 @@ export function TourProvider({
             <motion.div
               animate={{ opacity: 1, scale: 1 }}
               className={cn(
-                "z-[100] border-2 border-muted-foreground",
+                "fixed z-[100] border-2 border-muted-foreground",
+                "top-(--spotlight-top) left-(--spotlight-left) h-(--spotlight-height) w-(--spotlight-width) rounded-(--spotlight-radius)",
                 className
               )}
               exit={{
@@ -436,14 +437,16 @@ export function TourProvider({
                 opacity: 0,
                 scale: shouldReduceMotion ? 1 : 0.95,
               }}
-              style={{
-                borderRadius: spotlightBorderRadius,
-                height: spotlightHeight,
-                left: elementPosition.left,
-                position: "fixed",
-                top: elementPosition.top,
-                width: spotlightWidth,
-              }}
+              // SAFETY: CSS custom properties for dynamic spotlight box geometry
+              style={
+                {
+                  "--spotlight-height": `${spotlightHeight}px`,
+                  "--spotlight-left": `${elementPosition.left}px`,
+                  "--spotlight-radius": `${spotlightBorderRadius}px`,
+                  "--spotlight-top": `${elementPosition.top}px`,
+                  "--spotlight-width": `${spotlightWidth}px`,
+                } as React.CSSProperties
+              }
             />
 
             <motion.div
@@ -453,15 +456,10 @@ export function TourProvider({
                 top: contentPosition.top,
                 y: 0,
               }}
-              className="relative z-[100] rounded-lg border bg-background p-4 shadow-lg"
+              className="fixed z-[100] min-w-[300px] max-w-[400px] rounded-lg border bg-background p-4 shadow-lg"
               exit={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
               initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
               ref={contentRef}
-              style={{
-                maxWidth: 400,
-                minWidth: 300,
-                position: "fixed",
-              }}
               transition={{
                 duration: shouldReduceMotion
                   ? MOTION_DURATION.instant
