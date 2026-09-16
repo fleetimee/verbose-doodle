@@ -32,6 +32,7 @@ const badgeVariants = cva(
       },
       size: {
         default: "px-2 py-0.5 text-xs",
+        status: "gap-1.5 font-semibold text-xs px-2 py-0.5",
         sm: "h-5 px-1.5 py-0 text-[10px]",
         xs: "h-4 px-1 py-0 text-[10px]",
         micro: "h-4 px-1.5 py-0 text-[10px] leading-4",
