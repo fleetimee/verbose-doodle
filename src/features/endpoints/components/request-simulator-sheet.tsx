@@ -580,7 +580,7 @@ export function RequestSimulatorSheet({
                         }
                       >
                         {getStatusIcon(result)}
-                        <span className="text-[10px] uppercase opacity-75">
+                        <span className="text-xs uppercase opacity-75">
                           {getStatusTone(result)}
                         </span>
                         <span className="truncate">

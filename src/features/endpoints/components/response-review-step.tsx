@@ -82,7 +82,7 @@ export function ResponseReviewStep({ formValues }: ResponseReviewStepProps) {
             <Code2 className="size-3.5" />
             {messages.endpoints.jsonResponseLabel}
           </div>
-          <span className="inline-flex select-none items-center rounded-xl border-2 border-border/80 border-b-[3px] bg-muted/60 px-2.5 py-0.5 font-bold font-mono text-xs">
+          <span className="inline-flex select-none items-center rounded-xl border-2 border-border/80 border-b-2 bg-muted/60 px-2.5 py-0.5 font-bold font-mono text-xs">
             response.json
           </span>
         </div>

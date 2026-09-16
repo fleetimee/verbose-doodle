@@ -545,7 +545,7 @@ function MiniStat({
 }) {
   return (
     <div className="flex min-h-0 flex-col justify-center gap-1 border-b px-5 py-4 last:border-b-0">
-      <span className="font-bold text-muted-foreground text-xs uppercase tracking-[0.14em]">
+      <span className="font-bold text-muted-foreground text-xs uppercase tracking-wider">
         {label}
       </span>
       <span className="break-words font-bold font-mono text-xl tracking-tight">
@@ -630,7 +630,7 @@ function StatusRow({
       <div className="h-2.5 overflow-hidden rounded-full bg-muted">
         <div
           aria-hidden="true"
-          className="h-full w-[var(--percentage)] rounded-full bg-primary/70 transition-[width] duration-300"
+          className="h-full w-[var(--percentage)] rounded-full bg-primary/70 transition-all duration-300"
           // SAFETY: CSS custom property for dynamic progress width
           style={{ "--percentage": `${percentage}%` } as React.CSSProperties}
         />

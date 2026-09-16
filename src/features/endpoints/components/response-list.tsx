@@ -106,7 +106,7 @@ function ResponseSectionHeader({
       <Separator className="flex-1" />
       <span
         className={cn(
-          "inline-flex shrink-0 select-none items-center gap-1.5 rounded-xl border-2 border-b-[3px] px-2.5 py-1 font-bold text-[10px] uppercase tracking-wider",
+          "inline-flex shrink-0 select-none items-center gap-1.5 rounded-xl border-2 border-b-2 px-2.5 py-1 font-bold text-xs uppercase tracking-wider",
           isActive
             ? "border-emerald-500/30 border-b-emerald-600/60 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
             : "border-border/80 border-b-border/90 bg-muted/50 text-muted-foreground"
@@ -119,9 +119,7 @@ function ResponseSectionHeader({
           )}
         />
         <span>{label}</span>
-        <span className="font-bold font-mono text-[10px] opacity-75">
-          {count}
-        </span>
+        <span className="font-bold font-mono text-xs opacity-75">{count}</span>
       </span>
       <Separator className="flex-1" />
     </div>
@@ -208,7 +206,7 @@ export function ResponseList({
                   {activeResponses.length === 0 && (
                     <div className="mb-3 rounded-2xl border-2 border-amber-500/30 border-b-4 bg-amber-500/10 p-3.5 text-sm shadow-xs dark:border-amber-500/40">
                       <div className="flex gap-3">
-                        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border-2 border-amber-500/40 border-b-[3px] bg-amber-500/15 text-amber-600 shadow-xs dark:text-amber-400">
+                        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border-2 border-amber-500/40 border-b-2 bg-amber-500/15 text-amber-600 shadow-xs dark:text-amber-400">
                           <span className="relative flex h-2 w-2">
                             <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 motion-safe:animate-ping" />
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />

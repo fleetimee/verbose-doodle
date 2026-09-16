@@ -30,7 +30,7 @@ export function HttpMethodBadge({
     return (
       <span
         className={cn(
-          "inline-flex select-none items-center rounded-xl border-2 border-b-[3px] px-2.5 py-0.5 font-black font-mono text-xs tracking-wider transition-all",
+          "inline-flex select-none items-center rounded-xl border-2 border-b-2 px-2.5 py-0.5 font-black font-mono text-xs tracking-wider transition-all",
           colors.text,
           colors.bg,
           colors.border,
