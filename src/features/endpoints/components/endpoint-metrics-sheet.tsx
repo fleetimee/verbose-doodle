@@ -570,18 +570,21 @@ function StatusMixBar({ metrics }: { readonly metrics: EndpointMetrics }) {
       <div className="flex h-3 overflow-hidden rounded-full bg-muted">
         <div
           aria-hidden="true"
-          className="bg-primary"
-          style={{ width: `${successWidth}%` }}
+          className="h-full w-[var(--bar-width)] bg-primary"
+          // SAFETY: CSS custom property for dynamic progress width
+          style={{ "--bar-width": `${successWidth}%` } as React.CSSProperties}
         />
         <div
           aria-hidden="true"
-          className="bg-primary/45"
-          style={{ width: `${delayedWidth}%` }}
+          className="h-full w-[var(--bar-width)] bg-primary/45"
+          // SAFETY: CSS custom property for dynamic progress width
+          style={{ "--bar-width": `${delayedWidth}%` } as React.CSSProperties}
         />
         <div
           aria-hidden="true"
-          className="bg-destructive"
-          style={{ width: `${errorWidth}%` }}
+          className="h-full w-[var(--bar-width)] bg-destructive"
+          // SAFETY: CSS custom property for dynamic progress width
+          style={{ "--bar-width": `${errorWidth}%` } as React.CSSProperties}
         />
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
@@ -627,8 +630,9 @@ function StatusRow({
       <div className="h-2.5 overflow-hidden rounded-full bg-muted">
         <div
           aria-hidden="true"
-          className="h-full rounded-full bg-primary/70 transition-[width] duration-300"
-          style={{ width: `${percentage}%` }}
+          className="h-full w-[var(--percentage)] rounded-full bg-primary/70 transition-[width] duration-300"
+          // SAFETY: CSS custom property for dynamic progress width
+          style={{ "--percentage": `${percentage}%` } as React.CSSProperties}
         />
       </div>
     </div>
