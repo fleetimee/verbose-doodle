@@ -15,8 +15,14 @@ function AspectRatio({
   return (
     <div
       data-slot="aspect-ratio"
-      className={cn("w-full", className)}
-      style={{ aspectRatio: ratio, ...style }}
+      className={cn("w-full aspect-(--aspect-ratio)", className)}
+      // SAFETY: Dynamic aspect ratio applied via CSS custom property
+      style={
+        {
+          "--aspect-ratio": ratio,
+          ...style,
+        } as React.CSSProperties
+      }
       {...props}
     />
   )

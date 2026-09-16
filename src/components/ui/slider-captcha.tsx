@@ -372,8 +372,7 @@ export const SliderCaptcha = ({
 
         <div
           ref={containerRef}
-          className="relative mb-2 overflow-hidden rounded-md bg-muted"
-          style={{ height: `${IMAGE_HEIGHT}px` }}
+          className="relative mb-2 h-40 overflow-hidden rounded-md bg-muted"
         >
           <img
             alt={messages.auth.captchaBackground}
@@ -389,17 +388,20 @@ export const SliderCaptcha = ({
 
             <svg
               aria-label={messages.auth.puzzleTargetArea}
-              className="absolute"
+              className="absolute left-(--target-left) top-(--target-top)"
+              height={PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}
               role="img"
-              style={{
-                left: `${targetPosition - PUZZLE_TAB_SIZE}px`,
-                top: `${targetY - PUZZLE_TAB_SIZE}px`,
-                width: `${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}px`,
-                height: `${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}px`,
-              }}
+              // SAFETY: Dynamic puzzle target coordinates via CSS custom properties
+              style={
+                {
+                  "--target-left": `${targetPosition - PUZZLE_TAB_SIZE}px`,
+                  "--target-top": `${targetY - PUZZLE_TAB_SIZE}px`,
+                } as React.CSSProperties
+              }
               viewBox={`${-PUZZLE_TAB_SIZE} ${-PUZZLE_TAB_SIZE} ${
                 PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2
               } ${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}`}
+              width={PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}
             >
               <title>{messages.common.puzzleTargetLocation}</title>
               <defs>
@@ -410,6 +412,22 @@ export const SliderCaptcha = ({
                   <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
                   <feOffset dx="0" dy="2" result="offsetblur" />
                   <feFlood floodColor="rgba(0, 0, 0, 0.5)" />
+                  <feComposite in2="offsetblur" operator="in" />
+                  <feMerge>
+                    <feMergeNode />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter id="target-glow">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+                  <feOffset dx="0" dy="0" result="offsetblur" />
+                  <feFlood
+                    floodColor={
+                      hasInteracted && !isVerified
+                        ? getProximityColor().glow
+                        : "rgba(255, 255, 255, 0.4)"
+                    }
+                  />
                   <feComposite in2="offsetblur" operator="in" />
                   <feMerge>
                     <feMergeNode />
@@ -432,8 +450,14 @@ export const SliderCaptcha = ({
                 strokeWidth="1"
               />
               <path
+                className={
+                  isDragging
+                    ? "transition-none"
+                    : "transition-colors duration-300 ease-out"
+                }
                 d={puzzlePath}
                 fill="none"
+                filter="url(#target-glow)"
                 stroke={
                   isVerified
                     ? "rgba(34, 197, 94, 1)"
@@ -442,20 +466,15 @@ export const SliderCaptcha = ({
                     : "rgba(255, 255, 255, 0.8)"
                 }
                 strokeWidth="3"
-                style={{
-                  transition: isDragging ? "none" : "stroke 0.3s ease",
-                  filter:
-                    hasInteracted && !isVerified
-                      ? `drop-shadow(0 0 6px ${getProximityColor().glow})`
-                      : "drop-shadow(0 0 4px rgba(255, 255, 255, 0.4))",
-                }}
               />
             </svg>
           </div>
 
           <div
+            aria-disabled={isVerified || isLocked}
             className={cn(
-              "absolute",
+              "absolute left-(--piece-left) top-(--piece-top) size-(--piece-size)",
+              isDragging && "will-change-transform",
               !isDragging && "transition-all duration-200",
               isVerified
                 ? "cursor-default drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]"
@@ -466,15 +485,15 @@ export const SliderCaptcha = ({
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
             role="button"
-            style={{
-              left: `${piecePosition - PUZZLE_TAB_SIZE}px`,
-              top: `${targetY - PUZZLE_TAB_SIZE}px`,
-              width: `${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}px`,
-              height: `${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}px`,
-              willChange: isDragging ? "transform" : "auto",
-            }}
+            // SAFETY: Dynamic puzzle piece coordinates and size via CSS custom properties
+            style={
+              {
+                "--piece-left": `${piecePosition - PUZZLE_TAB_SIZE}px`,
+                "--piece-size": `${PUZZLE_SIZE + PUZZLE_TAB_SIZE * 2}px`,
+                "--piece-top": `${targetY - PUZZLE_TAB_SIZE}px`,
+              } as React.CSSProperties
+            }
             tabIndex={isVerified || isLocked ? -1 : 0}
-            aria-disabled={isVerified || isLocked}
           >
             <svg
               aria-label={messages.common.draggablePuzzlePiece}
@@ -535,6 +554,11 @@ export const SliderCaptcha = ({
                 strokeWidth="1"
               />
               <path
+                className={
+                  isDragging
+                    ? "transition-none"
+                    : "transition-colors duration-300 ease-out"
+                }
                 d={puzzlePath}
                 fill="none"
                 filter={isVerified ? undefined : "url(#proximity-glow)"}
@@ -544,9 +568,6 @@ export const SliderCaptcha = ({
                     : getProximityColor().stroke
                 }
                 strokeWidth="4"
-                style={{
-                  transition: isDragging ? "none" : "stroke 0.3s ease",
-                }}
               />
             </svg>
           </div>
@@ -562,25 +583,33 @@ export const SliderCaptcha = ({
             <div className="space-y-0.5">
               <div className="relative h-1 overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full transition-all duration-150"
-                  style={{
-                    width: `${Math.max(
-                      0,
-                      Math.min(
-                        100,
-                        ((containerWidth -
-                          Math.abs(piecePosition - targetPosition)) /
-                          containerWidth) *
-                          100
-                      )
-                    )}%`,
-                    backgroundColor: getProximityColor().stroke,
-                  }}
+                  className="h-full w-(--proximity-width) bg-(--proximity-stroke) transition-all duration-150"
+                  // SAFETY: Dynamic proximity meter width and color via CSS custom properties
+                  style={
+                    {
+                      "--proximity-stroke": getProximityColor().stroke,
+                      "--proximity-width": `${Math.max(
+                        0,
+                        Math.min(
+                          100,
+                          ((containerWidth -
+                            Math.abs(piecePosition - targetPosition)) /
+                            containerWidth) *
+                            100
+                        )
+                      )}%`,
+                    } as React.CSSProperties
+                  }
                 />
               </div>
               <p
-                className="text-center text-[9px]"
-                style={{ color: getProximityColor().stroke }}
+                className="text-center text-(--proximity-stroke) text-[9px]"
+                // SAFETY: Dynamic proximity text color via CSS custom property
+                style={
+                  {
+                    "--proximity-stroke": getProximityColor().stroke,
+                  } as React.CSSProperties
+                }
               >
                 {Math.abs(piecePosition - targetPosition) <= 8
                   ? "Perfect! Release to verify"

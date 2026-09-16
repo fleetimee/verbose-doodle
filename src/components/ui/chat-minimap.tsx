@@ -95,10 +95,21 @@ function ChatMinimap({
   return (
     <nav
       aria-label={messages.common.chatMinimap}
-      className={cn("flex flex-col items-start", className)}
+      className={cn("flex flex-col items-start gap-(--minimap-gap)", className)}
       data-side={side}
       data-slot="chat-minimap"
-      style={{ gap, ...style }}
+      // SAFETY: CSS custom properties for minimap layout and animation tokens
+      style={
+        {
+          "--minimap-gap": `${gap}px`,
+          "--minimap-item-size": `${itemSize}px`,
+          "--minimap-item-width": `${itemSize * magnification}px`,
+          "--minimap-pill-height": `${pillWidth}px`,
+          "--minimap-transition-duration": `${transitionDuration}ms`,
+          "--minimap-transition-easing": easing,
+          ...style,
+        } as React.CSSProperties
+      }
       {...props}
     >
       {items.map((item, index) => {
@@ -116,7 +127,7 @@ function ChatMinimap({
                     title: item.title,
                   })}
                   className={cn(
-                    "group flex items-center rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                    "group flex h-(--minimap-item-size) w-(--minimap-item-width) items-center rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
                     side === "right" && "justify-end"
                   )}
                   onBlur={() => setHoveredIndex(null)}
@@ -124,29 +135,25 @@ function ChatMinimap({
                   onFocus={() => setHoveredIndex(index)}
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
-                  style={{
-                    height: itemSize,
-                    width: itemSize * magnification,
-                  }}
                   type="button"
                 />
               }
             >
               <span
-                className="rounded-full bg-muted-foreground/40 transition-[width,background-color] group-hover:bg-muted-foreground group-focus-visible:bg-muted-foreground data-[current=true]:bg-foreground"
+                className="h-(--minimap-pill-height) w-(--marker-width) rounded-full bg-muted-foreground/40 transition-all [transition-duration:var(--minimap-transition-duration)] [transition-timing-function:var(--minimap-transition-easing)] group-hover:bg-muted-foreground group-focus-visible:bg-muted-foreground data-[current=true]:bg-foreground"
                 data-current={isCurrent}
-                style={{
-                  width: getMarkerWidth(
-                    index,
-                    hoveredIndex,
-                    itemSize,
-                    itemSize * magnification,
-                    lensRange
-                  ),
-                  height: pillWidth,
-                  transitionDuration: `${transitionDuration}ms`,
-                  transitionTimingFunction: easing,
-                }}
+                // SAFETY: CSS custom property for dynamic marker width
+                style={
+                  {
+                    "--marker-width": `${getMarkerWidth(
+                      index,
+                      hoveredIndex,
+                      itemSize,
+                      itemSize * magnification,
+                      lensRange
+                    )}px`,
+                  } as React.CSSProperties
+                }
               />
             </HoverCardTrigger>
             <HoverCardContent

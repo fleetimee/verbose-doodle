@@ -67,6 +67,18 @@ function ChartContainer({
   }) {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    for (const [key, itemConfig] of Object.entries(config)) {
+      const color = itemConfig.theme?.light || itemConfig.color
+      if (color) {
+        el.style.setProperty(`--color-${key}`, color)
+      }
+    }
+  }, [config])
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -74,6 +86,7 @@ function ChartContainer({
         data-slot="chart"
         data-chart={chartId}
         data-size={size}
+        ref={containerRef}
         className={cn(chartContainerVariants({ size }), className)}
         {...props}
       >
@@ -88,38 +101,7 @@ function ChartContainer({
   )
 }
 
-const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config).filter(
-    ([, config]) => config.theme || config.color
-  )
-
-  if (!colorConfig.length) {
-    return null
-  }
-
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
-  })
-  .join("\n")}
-}
-`
-          )
-          .join("\n"),
-      }}
-    />
-  )
-}
+const ChartStyle = (_props: { id: string; config: ChartConfig }) => null
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
@@ -233,6 +215,7 @@ function ChartTooltipContent({
                               "my-0.5": nestLabel && indicator === "dashed",
                             }
                           )}
+                          // SAFETY: Dynamic indicator colors via CSS custom properties
                           style={
                             {
                               "--color-bg": indicatorColor,
@@ -317,10 +300,13 @@ function ChartLegendContent({
                 <itemConfig.icon />
               ) : (
                 <div
-                  className="h-2 w-2 shrink-0 rounded-[2px]"
-                  style={{
-                    backgroundColor: item.color,
-                  }}
+                  className="h-2 w-2 shrink-0 rounded-[2px] bg-(--color-item)"
+                  // SAFETY: Dynamic item color applied via CSS custom property
+                  style={
+                    {
+                      "--color-item": item.color,
+                    } as React.CSSProperties
+                  }
                 />
               )}
               {itemConfig?.label}
