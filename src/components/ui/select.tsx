@@ -65,6 +65,8 @@ const selectTriggerVariants = cva(
         subtle: "border-transparent shadow-none",
         "subtle-active": "border-transparent bg-background shadow-xs",
         ghost: "border-none text-muted-foreground text-xs shadow-none",
+        surface: "bg-background shadow-none",
+        "mono-sm": "bg-background font-mono text-xs shadow-none",
       },
       size: {
         default: "data-[size=default]:h-9",
@@ -161,18 +163,33 @@ function SelectLabel({
   )
 }
 
+const selectItemVariants = cva(
+  "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-highlighted:bg-accent data-highlighted:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+  {
+    variants: {
+      variant: {
+        default: "",
+        mono: "font-mono",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function SelectItem({
   className,
   children,
+  variant = "default",
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Item>) {
+}: React.ComponentProps<typeof SelectPrimitive.Item> &
+  VariantProps<typeof selectItemVariants>) {
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
-      className={cn(
-        "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-highlighted:bg-accent data-highlighted:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
-        className
-      )}
+      data-variant={variant}
+      className={cn(selectItemVariants({ variant }), className)}
       {...props}
     >
       <span className="absolute right-2 flex size-3.5 items-center justify-center">
@@ -246,4 +263,5 @@ export {
   SelectTrigger,
   SelectValue,
   selectTriggerVariants,
+  selectItemVariants,
 }

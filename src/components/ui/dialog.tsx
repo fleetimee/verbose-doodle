@@ -191,9 +191,14 @@ const dialogFooterVariants = cva(
         default: "",
         pane: "border-t bg-muted/20 px-6 py-4",
       },
+      size: {
+        default: "",
+        compact: "gap-2 sm:gap-0",
+      },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
     },
   }
 )
@@ -201,6 +206,7 @@ const dialogFooterVariants = cva(
 function DialogFooter({
   className,
   variant = "default",
+  size = "default",
   showCloseButton = false,
   children,
   ...props
@@ -212,7 +218,8 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       data-variant={variant}
-      className={cn(dialogFooterVariants({ variant }), className)}
+      data-size={size}
+      className={cn(dialogFooterVariants({ variant, size }), className)}
       {...props}
     >
       {children}

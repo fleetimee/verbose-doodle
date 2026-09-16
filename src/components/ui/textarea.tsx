@@ -14,6 +14,8 @@ const textareaVariants = cva(
         ghost: "rounded-none border-0 bg-transparent p-0 shadow-none focus-visible:ring-0",
         "ghost-mono":
           "rounded-none border-0 bg-transparent p-0 shadow-none focus-visible:ring-0 font-mono leading-relaxed placeholder:text-muted-foreground",
+        overlay:
+          "bg-transparent dark:bg-transparent font-mono text-transparent leading-6 caret-foreground selection:bg-primary/20 selection:text-transparent",
       },
       size: {
         default: "",

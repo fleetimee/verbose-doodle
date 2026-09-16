@@ -60,6 +60,18 @@ const buttonVariants = cva(
         "chat-expand": "overview-chat-expand",
         "chat-submit": "overview-chat-submit",
         "chat-reset": "overview-chat-reset",
+        "tool-action":
+          "border border-border/80 bg-background font-normal text-muted-foreground text-xs shadow-xs transition-colors hover:bg-accent hover:text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+        "tool-action-ghost":
+          "font-normal text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-foreground dark:hover:bg-accent/50",
+        "tool-destructive":
+          "border border-border/80 bg-background font-normal text-muted-foreground text-xs shadow-xs transition-colors hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+        "tool-destructive-ghost":
+          "font-normal text-muted-foreground text-xs transition-colors hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/10",
+        "segment-active":
+          "bg-background text-foreground shadow-xs hover:bg-background hover:text-foreground",
+        "mono-flat":
+          "bg-background font-mono font-normal shadow-none hover:bg-accent hover:text-accent-foreground",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -68,7 +80,9 @@ const buttonVariants = cva(
         "sm-compact": "h-8 gap-1 rounded-md px-1.5 text-xs",
         breadcrumb: "h-8 px-1.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+        xl: "h-12 rounded-md px-6 has-[>svg]:px-4 text-base",
         compact: "h-9 gap-1.5 rounded-md px-2.5 text-xs",
+        "tab-sm": "h-7 px-2.5 text-xs",
         tile: "h-auto min-h-14 flex-col gap-1 p-2",
         "display-xl": "h-20 px-0 text-3xl md:text-4xl",
         icon: "size-9",

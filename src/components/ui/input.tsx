@@ -18,6 +18,7 @@ const inputVariants = cva(
         "mono-lg": "font-mono text-lg rounded-xl tracking-widest shadow-xs",
         "mono-display": "font-mono text-lg rounded-xl bg-background shadow-xs",
         "mono-xs": "font-mono text-xs uppercase tracking-wider bg-background",
+        "mono-flat": "font-mono bg-background shadow-none",
       },
       size: {
         default: "h-9",

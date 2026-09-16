@@ -49,6 +49,8 @@ const fieldGroupVariants = cva(
       size: {
         default: "",
         compact: "gap-4",
+        sm: "gap-3",
+        wide: "gap-x-8 gap-y-7",
       },
     },
     defaultVariants: {
@@ -76,7 +78,7 @@ function FieldGroup({
 }
 
 const fieldVariants = cva(
-  "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
+  "group/field flex w-full data-[invalid=true]:text-destructive",
   {
     variants: {
       orientation: {
@@ -92,9 +94,14 @@ const fieldVariants = cva(
           "@md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
         ],
       },
+      size: {
+        default: "gap-3",
+        sm: "gap-1.5",
+      },
     },
     defaultVariants: {
       orientation: "vertical",
+      size: "default",
     },
   }
 )
@@ -102,6 +109,7 @@ const fieldVariants = cva(
 function Field({
   className,
   orientation = "vertical",
+  size = "default",
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
   return (
@@ -109,7 +117,8 @@ function Field({
       role="group"
       data-slot="field"
       data-orientation={orientation}
-      className={cn(fieldVariants({ orientation }), className)}
+      data-size={size}
+      className={cn(fieldVariants({ orientation, size }), className)}
       {...props}
     />
   )
