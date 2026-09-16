@@ -26,9 +26,6 @@ import { messages } from "@/lib/i18n";
 
 type SocketTestMode = "tcp-client" | "tcp-server" | "udp";
 
-const pageStyle = { willChange: "opacity, transform" };
-const sectionStyle = { willChange: "opacity, transform" };
-const traceStyle = { originX: 0, willChange: "opacity, transform" };
 const SOCKET_TEST_TOUR_DELAY_MS = 350;
 
 const socketTestCopy: Record<
@@ -381,18 +378,16 @@ export function SocketTesterLayout({
   return (
     <motion.div
       animate={pageAnimate}
-      className="mx-auto grid w-full max-w-[1500px] gap-4 md:gap-6"
+      className="mx-auto grid w-full max-w-[1500px] gap-4 will-change-transform md:gap-6"
       initial={pageInitial}
       key={mode}
-      style={pageStyle}
       transition={pageTransition}
     >
       <motion.header
         animate={sectionAnimate}
-        className="relative grid gap-4 border-border/70 border-b pb-5"
+        className="relative grid gap-4 border-border/70 border-b pb-5 will-change-transform"
         id={tourConfig.targets.header}
         initial={sectionInitial}
-        style={sectionStyle}
         transition={{
           ...sectionTransition,
           delay: shouldReduceMotion ? 0 : 0.05,
@@ -401,9 +396,8 @@ export function SocketTesterLayout({
         <motion.div
           animate={traceAnimate}
           aria-hidden="true"
-          className="absolute -bottom-px left-0 h-px w-full bg-[linear-gradient(90deg,transparent,hsl(var(--primary)),hsl(var(--foreground)/0.7),transparent)]"
+          className="absolute -bottom-px left-0 h-px w-full origin-left bg-[linear-gradient(90deg,transparent,hsl(var(--primary)),hsl(var(--foreground)/0.7),transparent)] will-change-transform"
           initial={traceInitial}
-          style={traceStyle}
           transition={
             shouldReduceMotion
               ? { duration: 0.01 }
@@ -475,9 +469,9 @@ export function SocketTesterLayout({
           ].map((metric, index) => (
             <motion.div
               animate={metricAnimate}
+              className="will-change-transform"
               initial={metricInitial}
               key={metric.label}
-              style={sectionStyle}
               transition={{
                 damping: 32,
                 delay: shouldReduceMotion ? 0 : 0.12 + index * 0.045,
@@ -497,10 +491,9 @@ export function SocketTesterLayout({
 
       <motion.section
         animate={sectionAnimate}
-        className="overflow-hidden rounded-lg border border-border/70 bg-card p-4 shadow-sm"
+        className="overflow-hidden rounded-lg border border-border/70 bg-card p-4 shadow-sm will-change-transform"
         id={tourConfig.targets.modePanel}
         initial={sectionInitial}
-        style={sectionStyle}
         transition={{
           ...sectionTransition,
           delay: shouldReduceMotion ? 0 : 0.12,
@@ -557,9 +550,8 @@ export function SocketTesterLayout({
 
       <motion.div
         animate={sectionAnimate}
-        className="min-w-0"
+        className="min-w-0 will-change-transform"
         initial={sectionInitial}
-        style={sectionStyle}
         transition={{
           ...sectionTransition,
           delay: shouldReduceMotion ? 0 : 0.18,
