@@ -82,7 +82,7 @@ export function AboutVersionFooter({
             <TagIcon className="h-3.5 w-3.5" />
           </div>
           <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="font-medium text-[11px] text-muted-foreground">
+            <span className="font-medium text-muted-foreground text-xs">
               {messages.about.versionTagLabel}
             </span>
             <span className="font-semibold text-foreground text-xs">
@@ -97,7 +97,7 @@ export function AboutVersionFooter({
             <GitCommitIcon className="h-3.5 w-3.5" />
           </div>
           <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="font-medium text-[11px] text-muted-foreground">
+            <span className="font-medium text-muted-foreground text-xs">
               {messages.about.gitReleaseShaLabel}
             </span>
             <a
@@ -129,7 +129,7 @@ export function AboutVersionFooter({
             />
           </div>
           <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="font-medium text-[11px] text-muted-foreground">
+            <span className="font-medium text-muted-foreground text-xs">
               {messages.about.buildTimestampLabel}
             </span>
             <span className="truncate font-semibold text-foreground text-xs">

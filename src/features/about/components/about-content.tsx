@@ -103,7 +103,7 @@ export function AboutContent({ locale }: AboutContentProps) {
         variants={sectionVariants}
       >
         <h2
-          className="font-medium text-[11px] text-muted-foreground uppercase tracking-wider"
+          className="font-medium text-muted-foreground text-xs uppercase tracking-wider"
           id="section-what-is-this"
         >
           {activeMessages.about.whatIsThisTitle}
@@ -121,7 +121,7 @@ export function AboutContent({ locale }: AboutContentProps) {
         variants={sectionVariants}
       >
         <h2
-          className="font-medium text-[11px] text-muted-foreground uppercase tracking-wider"
+          className="font-medium text-muted-foreground text-xs uppercase tracking-wider"
           id="section-key-features"
         >
           {activeMessages.about.keyFeaturesTitle}
@@ -144,7 +144,7 @@ export function AboutContent({ locale }: AboutContentProps) {
               <span className="font-semibold text-foreground text-xs">
                 {feature.title}
               </span>
-              <span className="text-[11px] text-muted-foreground leading-snug sm:text-xs">
+              <span className="text-muted-foreground text-xs leading-snug">
                 {feature.desc}
               </span>
             </motion.li>

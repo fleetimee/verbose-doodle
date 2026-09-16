@@ -257,7 +257,7 @@ function TechCard({ item, index }: TechCardProps) {
         {hovered && (
           <motion.p
             animate={{ opacity: 1, y: 0 }}
-            className="text-[11px] text-muted-foreground leading-relaxed"
+            className="text-muted-foreground text-xs leading-relaxed"
             exit={{ opacity: 0, y: 2 }}
             initial={{ opacity: 0, y: 2 }}
             transition={{ duration: 0.15 }}
@@ -329,7 +329,7 @@ export function TechStackGrid() {
         ))}
       </motion.div>
 
-      <p className="text-center text-[11px] text-muted-foreground">
+      <p className="text-center text-muted-foreground text-xs">
         {messages.about.techStack.docsHint}
       </p>
     </div>

@@ -62,12 +62,12 @@ export function AboutPage() {
           variants={footerItemVariants}
         >
           <Link
-            className="font-normal text-[11px] text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+            className="font-normal text-muted-foreground text-xs underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
             to="/"
           >
             {activeMessages.about.returnHome}
           </Link>
-          <span className="font-mono text-[10px] text-muted-foreground/40">
+          <span className="font-mono text-muted-foreground/40 text-xs">
             v1.2.0 • Fleetime Labs
           </span>
         </motion.footer>
