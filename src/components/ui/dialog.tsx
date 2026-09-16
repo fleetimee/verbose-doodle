@@ -95,10 +95,12 @@ const dialogContentVariants = cva(
       size: {
         default: "sm:max-w-lg",
         sm: "sm:max-w-sm",
+        "sm-compact": "sm:max-w-sm gap-3 p-4",
         md: "sm:max-w-md",
         lg: "sm:max-w-lg",
         xl: "sm:max-w-xl",
         "2xl": "sm:max-w-2xl",
+        "5xl": "sm:max-w-5xl",
       },
     },
     defaultVariants: {
@@ -155,6 +157,7 @@ const dialogHeaderVariants = cva(
       },
       size: {
         default: "gap-2",
+        compact: "gap-1 pr-6",
         relaxed: "gap-3",
         none: "gap-0",
       },
@@ -242,6 +245,7 @@ const dialogTitleVariants = cva("leading-none font-semibold", {
       default: "text-lg",
       sm: "text-base tracking-tight",
       xl: "text-xl",
+      "xl-icon": "flex items-center gap-2 text-xl tracking-tight",
     },
   },
   defaultVariants: {

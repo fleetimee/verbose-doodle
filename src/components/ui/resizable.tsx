@@ -21,6 +21,7 @@ const resizablePanelGroupVariants = cva(
         default: "",
         bordered:
           "rounded-xl border border-slate-200 bg-white dark:border-[#2b2f37] dark:bg-[#0d1117]",
+        card: "overflow-hidden rounded-lg border border-border/70 bg-card shadow-xs",
       },
     },
     defaultVariants: {
@@ -58,6 +59,7 @@ const resizableHandleVariants = cva(
     variants: {
       variant: {
         default: "bg-border w-px",
+        primary: "w-1 bg-border transition-colors hover:bg-primary/60",
         colored:
           "w-1 bg-slate-300 transition-colors hover:bg-sky-500 dark:bg-[#2b2f37] dark:hover:bg-sky-400",
       },
