@@ -73,12 +73,7 @@ export function TcpServerPanel({
             </FieldDescription>
           </div>
           {state.listening ? (
-            <Button
-              className="gap-2"
-              onClick={onStop}
-              type="button"
-              variant="destructive"
-            >
+            <Button onClick={onStop} type="button" variant="destructive">
               <HugeiconsIcon
                 className="size-4"
                 icon={StopCircleIcon}
@@ -88,7 +83,6 @@ export function TcpServerPanel({
             </Button>
           ) : (
             <Button
-              className="gap-2"
               disabled={!(bridgeConnected && Number.isInteger(parsedPort))}
               onClick={() => onStart(parsedPort)}
               type="button"

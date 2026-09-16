@@ -67,10 +67,11 @@ export function SendPanel({
       </div>
       <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
         <Textarea
-          className="h-40 min-h-40 resize-none overflow-y-auto font-mono leading-relaxed [field-sizing:fixed]"
+          className="h-40 min-h-40 resize-none overflow-y-auto [field-sizing:fixed]"
           onChange={(event) => setData(event.target.value)}
           placeholder={socketMessages.payloadPlaceholder}
           value={data}
+          variant="mono"
         />
         <div className="flex flex-col gap-3 md:w-[184px]">
           <div className="flex flex-col gap-1.5">

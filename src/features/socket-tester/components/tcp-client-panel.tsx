@@ -71,7 +71,7 @@ export function TcpClientPanel({
             </span>
           </div>
           <Badge
-            className="gap-1.5"
+            size="status"
             variant={state.connected ? "default" : "secondary"}
           >
             {state.connected ? (
@@ -90,8 +90,9 @@ export function TcpClientPanel({
         </div>
 
         <FieldGroup
-          className="gap-3 md:grid md:grid-cols-[minmax(0,1fr)_140px_140px] md:items-start"
+          className="md:grid md:grid-cols-[minmax(0,1fr)_140px_140px] md:items-start"
           id={tourIds?.connection}
+          size="sm"
         >
           <Field data-disabled={state.connected} data-invalid={!hostIsValid}>
             <FieldLabel htmlFor="tcp-client-host">

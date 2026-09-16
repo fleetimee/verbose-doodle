@@ -418,12 +418,7 @@ export function SocketTesterLayout({
             </p>
           </div>
           <div className="flex flex-wrap gap-2 lg:justify-end">
-            <Button
-              className="gap-2"
-              onClick={handleStartTour}
-              type="button"
-              variant="outline"
-            >
+            <Button onClick={handleStartTour} type="button" variant="outline">
               <HugeiconsIcon
                 data-icon="inline-start"
                 icon={HelpCircleIcon}
@@ -433,7 +428,6 @@ export function SocketTesterLayout({
             </Button>
             {bridgeConnected ? (
               <Button
-                className="gap-2"
                 onClick={bridge.disconnectBridge}
                 type="button"
                 variant="outline"
@@ -443,7 +437,6 @@ export function SocketTesterLayout({
               </Button>
             ) : (
               <Button
-                className="gap-2"
                 disabled={bridge.bridgeStatus === "connecting"}
                 onClick={bridge.connectBridge}
                 type="button"

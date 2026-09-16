@@ -185,7 +185,6 @@ export function TrafficConsole({
               />
             </label>
             <Button
-              className="h-8 gap-2 transition-transform duration-150 ease-out active:scale-[0.97]"
               onClick={() => exportLogs(logs)}
               size="sm"
               type="button"
@@ -198,13 +197,7 @@ export function TrafficConsole({
               />
               {socketMessages.saveButton}
             </Button>
-            <Button
-              className="h-8 gap-2 transition-transform duration-150 ease-out active:scale-[0.97]"
-              onClick={onClear}
-              size="sm"
-              type="button"
-              variant="outline"
-            >
+            <Button onClick={onClear} size="sm" type="button" variant="outline">
               <Eraser className="size-3.5" />
               {socketMessages.clearButton}
             </Button>
@@ -300,8 +293,9 @@ export function TrafficConsole({
         </div>
       ) : (
         <ScrollArea
-          className="h-[560px] min-w-0 rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner"
+          className="h-[560px] min-w-0"
           ref={scrollAreaRef}
+          variant="terminal"
         >
           <div className="w-full min-w-0 p-4 font-mono text-[#e7e7e7] text-[13px] leading-5">
             {logs.map((entry) => (

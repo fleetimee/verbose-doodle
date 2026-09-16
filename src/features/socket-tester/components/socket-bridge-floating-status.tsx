@@ -79,28 +79,31 @@ export function SocketBridgeStatus() {
         </AnimatePresence>
       </span>
       <Dialog>
-        <DialogTrigger
-          aria-label={messages.socketTester.bridgeHelpAriaLabel}
-          className="relative mx-1 inline-flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
-          title={messages.socketTester.bridgeHelpAriaLabel}
-        >
-          <HugeiconsIcon
-            className="size-3.5"
-            icon={HelpCircleIcon}
-            strokeWidth={2}
-          />
-          <span
-            aria-hidden="true"
-            className={cn(
-              "absolute -right-0.5 -bottom-0.5 hidden size-2 rounded-full border border-sidebar bg-muted-foreground group-data-[collapsible=icon]:block",
-              bridge.bridgeStatus === "connected" && "bg-emerald-500",
-              bridge.bridgeStatus === "connecting" && "bg-amber-500"
-            )}
-          />
+        <DialogTrigger asChild>
+          <button
+            aria-label={messages.socketTester.bridgeHelpAriaLabel}
+            className="relative mx-1 inline-flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+            title={messages.socketTester.bridgeHelpAriaLabel}
+            type="button"
+          >
+            <HugeiconsIcon
+              className="size-3.5"
+              icon={HelpCircleIcon}
+              strokeWidth={2}
+            />
+            <span
+              aria-hidden="true"
+              className={cn(
+                "absolute -right-0.5 -bottom-0.5 hidden size-2 rounded-full border border-sidebar bg-muted-foreground group-data-[collapsible=icon]:block",
+                bridge.bridgeStatus === "connected" && "bg-emerald-500",
+                bridge.bridgeStatus === "connecting" && "bg-amber-500"
+              )}
+            />
+          </button>
         </DialogTrigger>
-        <DialogContent className="max-w-sm gap-3 p-4">
-          <DialogHeader className="gap-1 pr-6">
-            <DialogTitle className="text-base">
+        <DialogContent size="sm-compact">
+          <DialogHeader size="compact">
+            <DialogTitle size="sm">
               {messages.socketTester.bridgeTitle}
             </DialogTitle>
             <DialogDescription>
@@ -130,8 +133,8 @@ export function SocketBridgeStatus() {
               transition={contentTransition}
             >
               <Button
-                className="h-6 w-full gap-1 px-1.5 text-[11px]"
                 onClick={bridge.disconnectBridge}
+                size="toggle-xs"
                 type="button"
                 variant="ghost"
               >
@@ -149,8 +152,8 @@ export function SocketBridgeStatus() {
               transition={contentTransition}
             >
               <Button
-                className="h-6 w-full gap-1 px-1.5 text-[11px]"
                 onClick={bridge.connectBridge}
+                size="toggle-xs"
                 type="button"
                 variant="ghost"
               >

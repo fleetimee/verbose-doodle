@@ -106,14 +106,14 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="max-h-[88vh] overflow-hidden border-border/70 bg-background p-0 text-foreground shadow-2xl sm:max-w-5xl">
+      <DialogContent className="max-h-[88vh]" size="5xl" variant="pane">
         {entry && (
           <div className="flex max-h-[88vh] min-h-0 flex-col">
             <div className="border-border/70 border-b bg-muted/30 px-6 py-5">
-              <DialogHeader className="gap-3">
+              <DialogHeader size="relaxed">
                 <div className="flex flex-wrap items-start justify-between gap-3 pr-8">
                   <div className="min-w-0">
-                    <DialogTitle className="flex items-center gap-2 font-semibold text-xl tracking-tight">
+                    <DialogTitle size="xl-icon">
                       <span className="flex size-9 items-center justify-center rounded-md border bg-background text-primary shadow-xs">
                         <Binary data-icon="inline-start" />
                       </span>
@@ -174,8 +174,9 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                 </div>
 
                 <ResizablePanelGroup
-                  className="min-h-[620px] overflow-hidden rounded-lg border border-border/70 bg-card shadow-xs"
+                  className="min-h-[620px]"
                   direction="horizontal"
+                  variant="card"
                 >
                   <ResizablePanel defaultSize={52} minSize={34}>
                     <FramePane
@@ -225,10 +226,7 @@ export function HexInspector({ entry, onOpenChange }: HexInspectorProps) {
                       </InspectorBlock>
                     </FramePane>
                   </ResizablePanel>
-                  <ResizableHandle
-                    className="w-1 bg-border transition-colors hover:bg-primary/60"
-                    withHandle
-                  />
+                  <ResizableHandle variant="primary" withHandle />
                   <ResizablePanel defaultSize={48} minSize={34}>
                     <FramePane
                       description={
