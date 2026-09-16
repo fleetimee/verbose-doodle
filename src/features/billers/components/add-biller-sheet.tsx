@@ -77,7 +77,7 @@ export function AddBillerSheet({
         className="overflow-hidden data-[vaul-drawer-direction=right]:w-[calc(100%-1rem)] data-[vaul-drawer-direction=right]:sm:max-w-lg"
         showSwipeHandle={false}
       >
-        <DrawerHeader className="shrink-0 px-6 pt-6 pb-2 text-left">
+        <DrawerHeader className="shrink-0" size="lg" variant="left">
           <DrawerTitle>{messages.billers.addBiller}</DrawerTitle>
           <DrawerDescription>
             {messages.billers.addBillerDescription}
@@ -102,7 +102,7 @@ export function AddBillerSheet({
               value={billerName}
             />
           </div>
-          <DrawerFooter className="shrink-0 border-t px-6 pt-4 pb-6">
+          <DrawerFooter className="shrink-0" size="lg" variant="bordered">
             <Button disabled={isSubmitting || !billerName.trim()} type="submit">
               {isSubmitting && <Spinner className="mr-2" />}
               {isSubmitting
