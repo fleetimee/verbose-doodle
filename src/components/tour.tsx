@@ -591,8 +591,8 @@ export function TourAlertDialog({
 
   return (
     <AlertDialog open={isOpen}>
-      <AlertDialogContent className="max-w-md p-6">
-        <AlertDialogHeader className="flex flex-col items-center justify-center">
+      <AlertDialogContent size="md">
+        <AlertDialogHeader variant="centered">
           <div className="relative mb-4">
             <motion.div
               animate={{
@@ -627,10 +627,10 @@ export function TourAlertDialog({
               <Torus className="size-32 stroke-1 text-primary" />
             </motion.div>
           </div>
-          <AlertDialogTitle className="text-center font-medium text-xl">
+          <AlertDialogTitle variant="lead">
             {messages.common.welcomeToTour}
           </AlertDialogTitle>
-          <AlertDialogDescription className="mt-2 text-center text-muted-foreground text-sm">
+          <AlertDialogDescription className="mt-2">
             {messages.common.tourWelcomeDescription}
           </AlertDialogDescription>
         </AlertDialogHeader>

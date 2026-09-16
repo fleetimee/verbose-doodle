@@ -505,13 +505,12 @@ export type CodeBlockSelectTriggerProps = ComponentProps<typeof SelectTrigger>;
 
 export const CodeBlockSelectTrigger = ({
   className,
+  variant = "ghost",
   ...props
 }: CodeBlockSelectTriggerProps) => (
   <SelectTrigger
-    className={cn(
-      "w-fit border-none text-muted-foreground text-xs shadow-none",
-      className
-    )}
+    className={cn("w-fit", className)}
+    variant={variant}
     {...props}
   />
 );
@@ -543,9 +542,7 @@ export type CodeBlockSelectItemProps = ComponentProps<typeof SelectItem>;
 export const CodeBlockSelectItem = ({
   className,
   ...props
-}: CodeBlockSelectItemProps) => (
-  <SelectItem className={cn("text-sm", className)} {...props} />
-);
+}: CodeBlockSelectItemProps) => <SelectItem className={className} {...props} />;
 
 export type CodeBlockCopyButtonProps = ComponentProps<typeof Button> & {
   asChild?: boolean;
@@ -835,12 +832,7 @@ export const CodeBlockThemeSelector = ({
 
   return (
     <Select onValueChange={onChange} value={currentTheme}>
-      <SelectTrigger
-        className={cn(
-          "w-fit border-none text-muted-foreground text-xs shadow-none",
-          className
-        )}
-      >
+      <SelectTrigger className={cn("w-fit", className)} variant="ghost">
         <SelectValue
           placeholder={
             mode === "light"
@@ -851,7 +843,7 @@ export const CodeBlockThemeSelector = ({
       </SelectTrigger>
       <SelectContent>
         {SHIKI_THEMES.map((theme) => (
-          <SelectItem className="text-sm" key={theme.value} value={theme.value}>
+          <SelectItem key={theme.value} value={theme.value}>
             {theme.label}
           </SelectItem>
         ))}

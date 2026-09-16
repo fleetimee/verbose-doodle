@@ -171,9 +171,9 @@ export function NavigationSearch({
         <SidebarMenuItem>
           <SidebarMenuButton
             aria-label={messages.common.searchDialogTitle}
-            className="navigation-search-trigger h-9"
             onClick={() => setOpen(true)}
             tooltip={messages.common.search}
+            variant="search"
           >
             <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
             <span>{messages.common.search}</span>
@@ -184,12 +184,12 @@ export function NavigationSearch({
         </SidebarMenuItem>
       </SidebarMenu>
       <CommandDialog
-        className="navigation-search-dialog"
         commandProps={{ defaultValue: currentResult?.url, key: String(open) }}
         description={messages.common.searchDialogDescription}
         onOpenChange={setOpen}
         open={open}
         title={messages.common.searchDialogTitle}
+        variant="search"
       >
         <CommandInput placeholder={messages.common.searchPlaceholder} />
         <div className="navigation-search-results">

@@ -50,8 +50,8 @@ export function ThemeToggle() {
           <Switch
             aria-label={messages.theme.toggleAriaLabel}
             checked={isDark}
-            className="data-[state=checked]:bg-slate-950 data-[state=unchecked]:bg-amber-500"
             onCheckedChange={handleToggle}
+            variant="theme"
           />
           <HugeiconsIcon
             className={cn(

@@ -91,16 +91,18 @@ export function TokenExpirationDialog() {
           <AlertDialogTitle>
             {messages.auth.sessionExpiringTitle}
           </AlertDialogTitle>
-          <AlertDialogDescription className="space-y-2">
-            <p>{messages.auth.sessionExpiringLead}</p>
-            <p className="font-semibold text-destructive text-lg">
-              {formatMessage(messages.auth.timeRemaining, {
-                time: tokenExpiration.formattedTime,
-              })}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              {messages.auth.sessionExpiringDescription}
-            </p>
+          <AlertDialogDescription>
+            <div className="space-y-2">
+              <p>{messages.auth.sessionExpiringLead}</p>
+              <p className="font-semibold text-destructive text-lg">
+                {formatMessage(messages.auth.timeRemaining, {
+                  time: tokenExpiration.formattedTime,
+                })}
+              </p>
+              <p className="text-muted-foreground text-sm">
+                {messages.auth.sessionExpiringDescription}
+              </p>
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

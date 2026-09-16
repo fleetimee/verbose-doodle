@@ -175,14 +175,15 @@ function NavMenuItem({
       <SidebarMenuItem>
         <SidebarMenuButton
           aria-keyshortcuts={`Alt+${shortcutKey.toUpperCase()}`}
-          className="h-9 rounded-lg data-[active=true]:shadow-xs"
           isActive={isActive}
           render={
             item.url ? (
               <Link onMouseEnter={item.onPrefetch} to={item.url} />
             ) : undefined
           }
+          size="md"
           tooltip={item.title}
+          variant="elevated"
         >
           <item.icon />
           <span>{item.title}</span>
@@ -195,9 +196,7 @@ function NavMenuItem({
           </SidebarMenuBadge>
         ) : null}
         {!isAltHeld && item.badge ? (
-          <SidebarMenuBadge className="text-sidebar-foreground/55">
-            {item.badge}
-          </SidebarMenuBadge>
+          <SidebarMenuBadge variant="muted">{item.badge}</SidebarMenuBadge>
         ) : null}
       </SidebarMenuItem>
     );
@@ -212,9 +211,10 @@ function NavMenuItem({
               <SidebarMenuButton
                 aria-keyshortcuts={`Alt+${shortcutKey.toUpperCase()}`}
                 aria-label={item.title}
-                className="relative rounded-lg data-popup-open:bg-sidebar-accent data-[active=true]:shadow-xs"
                 isActive={isChildActive}
+                size="md"
                 tooltip={flyoutOpen ? undefined : item.title}
+                variant="flyout"
               />
             }
           >
@@ -228,12 +228,13 @@ function NavMenuItem({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="w-64 max-w-[calc(100vw-2rem)] rounded-xl p-1.5 motion-reduce:transition-none"
+            className="w-64 max-w-[calc(100vw-2rem)]"
             side="right"
             sideOffset={10}
+            variant="subtle"
           >
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="px-2 py-2 text-muted-foreground text-xs">
+              <DropdownMenuLabel size="relaxed" variant="subtle">
                 {item.title}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -248,7 +249,6 @@ function NavMenuItem({
                     aria-keyshortcuts={
                       childKey ? `Alt+${childKey.toUpperCase()}` : undefined
                     }
-                    className="min-h-9 gap-2.5 rounded-lg aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium aria-[current=page]:text-sidebar-accent-foreground"
                     key={subItem.url}
                     render={
                       <Link
@@ -257,6 +257,7 @@ function NavMenuItem({
                         to={subItem.url}
                       />
                     }
+                    variant="nav"
                   >
                     <subItem.icon />
                     <span className="flex-1">{subItem.title}</span>
@@ -283,9 +284,10 @@ function NavMenuItem({
           render={
             <SidebarMenuButton
               aria-keyshortcuts={`Alt+${shortcutKey.toUpperCase()}`}
-              className="h-9 rounded-lg data-[active=true]:shadow-xs"
               isActive={isChildActive}
+              size="md"
               tooltip={item.title}
+              variant="elevated"
             >
               <item.icon />
               <span>{item.title}</span>

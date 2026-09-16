@@ -31,10 +31,10 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                   strokeWidth={2}
                 />
               </div>
-              <EmptyTitle className="font-black text-4xl">
+              <EmptyTitle variant="hero">
                 {messages.errors.fallbackTitle}
               </EmptyTitle>
-              <EmptyDescription className="text-nowrap">
+              <EmptyDescription variant="nowrap">
                 {messages.errors.fallbackDescriptionLine1} <br />
                 {messages.errors.fallbackDescriptionLine2}
               </EmptyDescription>

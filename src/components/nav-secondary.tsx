@@ -12,6 +12,7 @@ import {
 export function NavSecondary({
   items,
   children,
+  size = "none",
   ...props
 }: {
   items: {
@@ -25,7 +26,7 @@ export function NavSecondary({
   const location = useLocation();
 
   return (
-    <SidebarGroup {...props}>
+    <SidebarGroup size={size} {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => {
@@ -35,10 +36,10 @@ export function NavSecondary({
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
-                  className="rounded-lg text-sidebar-foreground/75"
                   isActive={isActive}
                   render={<Link onMouseEnter={item.onPrefetch} to={item.url} />}
                   size="sm"
+                  variant="secondary"
                 >
                   <item.icon />
                   <span>{item.title}</span>

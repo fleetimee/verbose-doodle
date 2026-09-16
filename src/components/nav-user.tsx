@@ -38,13 +38,10 @@ export function NavUser({
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              className="h-12 rounded-lg border border-sidebar-border/70 bg-sidebar-accent/35 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              size="lg"
-            >
-              <Avatar className="size-8 rounded-lg">
+            <SidebarMenuButton size="lg" variant="account">
+              <Avatar variant="square">
                 <AvatarImage alt={user.name} src={user.avatar} />
-                <AvatarFallback className="rounded-lg">
+                <AvatarFallback variant="square">
                   {user.name
                     .split(" ")
                     .map((n) => n[0])
@@ -65,16 +62,17 @@ export function NavUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-[--anchor-width] min-w-56 rounded-lg"
+            className="w-[--anchor-width] min-w-56"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
+            variant="sidebar"
           >
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="p-0 font-normal">
+              <DropdownMenuLabel size="none" variant="header">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="size-8 rounded-lg">
+                  <Avatar variant="square">
                     <AvatarImage alt={user.name} src={user.avatar} />
-                    <AvatarFallback className="rounded-lg">
+                    <AvatarFallback variant="square">
                       {user.name
                         .split(" ")
                         .map((n) => n[0])

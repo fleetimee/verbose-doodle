@@ -63,11 +63,8 @@ export function SessionTimer() {
       <Popover>
         <PopoverTrigger asChild>
           <SidebarMenuButton
-            className={cn(
-              "transition-colors",
-              isWarning && "text-destructive hover:text-destructive"
-            )}
             size="sm"
+            variant={isWarning ? "destructive" : "default"}
           >
             <HugeiconsIcon
               className={cn(isWarning && "motion-safe:animate-pulse")}

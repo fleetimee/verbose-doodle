@@ -283,13 +283,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       variant="sidebar"
       {...props}
     >
-      <SidebarHeader className="relative z-10 p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
+      <SidebarHeader className="relative z-10" variant="compact">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              className="h-14 rounded-lg border border-sidebar-border/70 bg-sidebar-accent/45 px-2.5 shadow-xs group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:shadow-none"
               render={<Link to="/dashboard/overview" />}
               size="lg"
+              variant="brand"
             >
               <Logo
                 className="size-9 shrink-0 group-data-[collapsible=icon]:size-8"
@@ -333,8 +333,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navMain} />
       </SidebarContent>
       <SidebarSeparator className="relative z-10" />
-      <SidebarFooter className="relative z-10 p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
-        <NavSecondary className="p-0" items={data.navSecondary}>
+      <SidebarFooter className="relative z-10" variant="compact">
+        <NavSecondary items={data.navSecondary}>
           <SessionTimer />
         </NavSecondary>
         <SocketBridgeStatus />

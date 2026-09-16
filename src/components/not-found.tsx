@@ -33,17 +33,24 @@ export function NotFoundPage() {
         />
 
         <div className="relative z-10 flex w-full flex-col-reverse items-center px-6 py-16 sm:px-12 lg:flex-row lg:justify-between lg:px-20 lg:py-12">
-          <Empty className="w-full flex-1 justify-center gap-8 border-0 p-0 lg:items-start lg:text-left">
-            <EmptyHeader className="max-w-md gap-4 lg:items-start lg:text-left">
-              <EmptyTitle className="font-black font-mono text-[clamp(5rem,18vw,9rem)] text-primary leading-[0.82] tracking-[-0.08em]">
+          <Empty
+            className="w-full flex-1 justify-center lg:items-start lg:text-left"
+            size="hero"
+            variant="plain"
+          >
+            <EmptyHeader
+              className="max-w-md lg:items-start lg:text-left"
+              size="lg"
+            >
+              <EmptyTitle variant="display">
                 {messages.errors.notFoundTitle}
               </EmptyTitle>
-              <EmptyDescription className="max-w-sm text-sm/relaxed sm:text-base">
+              <EmptyDescription className="max-w-sm" variant="lead">
                 {messages.errors.notFoundDescriptionLine1} <br />
                 {messages.errors.notFoundDescriptionLine2}
               </EmptyDescription>
             </EmptyHeader>
-            <EmptyContent className="max-w-none gap-3 lg:items-start">
+            <EmptyContent className="max-w-none lg:items-start" size="sm">
               <div className="flex flex-wrap justify-center gap-2 lg:justify-start">
                 <Button nativeButton={false} render={<Link to="/" />}>
                   <HugeiconsIcon icon={HomeIcon} strokeWidth={2} />{" "}
