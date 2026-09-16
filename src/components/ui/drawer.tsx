@@ -98,6 +98,10 @@ const drawerHeaderVariants = cva(
   "flex flex-col gap-0.5 group-data-[vaul-drawer-direction=bottom]/drawer-content:text-center group-data-[vaul-drawer-direction=top]/drawer-content:text-center md:gap-1.5 md:text-left",
   {
     variants: {
+      variant: {
+        default: "",
+        left: "text-left",
+      },
       size: {
         default: "p-4",
         lg: "px-6 pt-6 pb-2",
@@ -105,6 +109,7 @@ const drawerHeaderVariants = cva(
       },
     },
     defaultVariants: {
+      variant: "default",
       size: "default",
     },
   }
@@ -112,14 +117,16 @@ const drawerHeaderVariants = cva(
 
 function DrawerHeader({
   className,
+  variant = "default",
   size = "default",
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof drawerHeaderVariants>) {
   return (
     <div
       data-slot="drawer-header"
+      data-variant={variant}
       data-size={size}
-      className={cn(drawerHeaderVariants({ size }), className)}
+      className={cn(drawerHeaderVariants({ variant, size }), className)}
       {...props}
     />
   )

@@ -153,9 +153,15 @@ const dialogHeaderVariants = cva(
         banner:
           "flex-row items-center justify-between gap-3 border-b bg-muted/20 px-6 py-3.5 pr-14 text-left",
       },
+      size: {
+        default: "gap-2",
+        relaxed: "gap-3",
+        none: "gap-0",
+      },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
     },
   }
 )
@@ -163,33 +169,50 @@ const dialogHeaderVariants = cva(
 function DialogHeader({
   className,
   variant = "default",
+  size = "default",
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof dialogHeaderVariants>) {
   return (
     <div
       data-slot="dialog-header"
       data-variant={variant}
-      className={cn(dialogHeaderVariants({ variant }), className)}
+      data-size={size}
+      className={cn(dialogHeaderVariants({ variant, size }), className)}
       {...props}
     />
   )
 }
 
+const dialogFooterVariants = cva(
+  "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+  {
+    variants: {
+      variant: {
+        default: "",
+        pane: "border-t bg-muted/20 px-6 py-4",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function DialogFooter({
   className,
+  variant = "default",
   showCloseButton = false,
   children,
   ...props
-}: React.ComponentProps<"div"> & {
-  showCloseButton?: boolean
-}) {
+}: React.ComponentProps<"div"> &
+  VariantProps<typeof dialogFooterVariants> & {
+    showCloseButton?: boolean
+  }) {
   return (
     <div
       data-slot="dialog-footer"
-      className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
-      )}
+      data-variant={variant}
+      className={cn(dialogFooterVariants({ variant }), className)}
       {...props}
     >
       {children}

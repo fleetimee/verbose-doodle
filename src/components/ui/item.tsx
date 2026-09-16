@@ -41,8 +41,12 @@ const itemVariants = cva(
         muted: "bg-muted/50",
         elevated:
           "rounded-2xl border-2 border-border/80 border-b-4 bg-card/95 shadow-xs transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-border/90 hover:border-b-primary/60 hover:bg-card hover:shadow-md active:translate-y-1 active:border-b-2",
+        "elevated-static":
+          "rounded-2xl border-2 border-border/80 border-b-4 bg-card/95 shadow-xs",
         "elevated-subtle":
           "rounded-2xl border-2 border-border/80 border-b-4 bg-card/85 transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-border/90 hover:border-b-primary/60 hover:bg-accent/40 hover:shadow-sm active:translate-y-1 active:border-b-2",
+        "elevated-subtle-static":
+          "rounded-2xl border-2 border-border/80 border-b-4 bg-card/85",
         dashed:
           "rounded-2xl border-2 border-dashed border-border/80 bg-muted/35 shadow-xs transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-border/90 hover:bg-muted/50 hover:shadow-md active:translate-y-1",
         "dashed-subtle":
@@ -52,6 +56,7 @@ const itemVariants = cva(
         default: "p-4 gap-4",
         sm: "py-3 px-4 gap-2.5",
         none: "p-0 gap-0",
+        "card-skeleton": "min-h-24 p-0 gap-0",
       },
     },
     defaultVariants: {

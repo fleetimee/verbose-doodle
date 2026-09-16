@@ -19,8 +19,12 @@ import { cn } from "@/lib/utils";
 
 export type ChoiceboxProps = ComponentProps<typeof RadioGroup>;
 
-export const Choicebox = ({ className, ...props }: ChoiceboxProps) => (
-  <RadioGroup className={cn("w-full", className)} {...props} />
+export const Choicebox = ({
+  className,
+  size = "lg",
+  ...props
+}: ChoiceboxProps) => (
+  <RadioGroup className={cn("w-full", className)} size={size} {...props} />
 );
 
 type ChoiceboxItemContextValue = {
@@ -44,13 +48,16 @@ const useChoiceboxItemContext = () => {
   return context;
 };
 
-export type ChoiceboxItemProps = ComponentProps<typeof RadioGroupItem>;
+export type ChoiceboxItemProps = ComponentProps<typeof RadioGroupItem> & {
+  variant?: ComponentProps<typeof FieldLabel>["variant"];
+};
 
 export const ChoiceboxItem = ({
   className,
   children,
   value,
   id: providedId,
+  variant = "interactive",
 }: ChoiceboxItemProps) => {
   const generatedId = useId();
   const id = providedId || generatedId;
@@ -60,6 +67,7 @@ export const ChoiceboxItem = ({
       <FieldLabel
         className={cn("w-full cursor-pointer", className)}
         htmlFor={id}
+        variant={variant}
       >
         <Field className="w-full" orientation="horizontal">
           {children}

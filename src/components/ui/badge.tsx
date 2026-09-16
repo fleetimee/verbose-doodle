@@ -28,6 +28,7 @@ const badgeVariants = cva(
           "border-primary/40 bg-background/80 text-primary",
         "outline-muted":
           "border-border text-muted-foreground font-normal",
+        tag: "rounded-md border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
       },
       size: {
         default: "px-2 py-0.5 text-xs",

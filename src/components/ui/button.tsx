@@ -50,6 +50,10 @@ const buttonVariants = cva(
           "justify-between border-transparent bg-transparent font-medium text-foreground shadow-none hover:bg-accent hover:text-accent-foreground",
         floating:
           "rounded-full border border-border/70 bg-background/95 shadow-lg backdrop-blur hover:bg-accent hover:text-accent-foreground",
+        "underline-display":
+          "justify-between rounded-none border-0 border-border border-b-2 bg-transparent font-normal shadow-none hover:bg-transparent focus:ring-0 focus-visible:border-primary aria-invalid:border-destructive",
+        "underline-display-muted":
+          "justify-between rounded-none border-0 border-border border-b-2 bg-transparent font-normal text-muted-foreground shadow-none hover:bg-transparent focus:ring-0 focus-visible:border-primary aria-invalid:border-destructive",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -60,6 +64,7 @@ const buttonVariants = cva(
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         compact: "h-9 gap-1.5 rounded-md px-2.5 text-xs",
         tile: "h-auto min-h-14 flex-col gap-1 p-2",
+        "display-xl": "h-20 px-0 text-3xl md:text-4xl",
         icon: "size-9",
         "icon-7": "size-7",
         "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",

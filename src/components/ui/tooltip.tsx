@@ -55,8 +55,26 @@ function TooltipTrigger({
   )
 }
 
+import { cva, type VariantProps } from "class-variance-authority"
+
+const tooltipContentVariants = cva(
+  "z-50 w-fit origin-(--transform-origin) rounded-md bg-foreground px-3 py-1.5 text-background text-balance text-xs transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
+  {
+    variants: {
+      variant: {
+        default: "",
+        mono: "font-mono leading-relaxed",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function TooltipContent({
   className,
+  variant = "default",
   align = "center",
   alignOffset = 0,
   side = "top",
@@ -64,6 +82,7 @@ function TooltipContent({
   children,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Popup> &
+  VariantProps<typeof tooltipContentVariants> &
   Pick<
     TooltipPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
@@ -79,10 +98,8 @@ function TooltipContent({
       >
         <TooltipPrimitive.Popup
           data-slot="tooltip-content"
-          className={cn(
-            "z-50 w-fit origin-(--transform-origin) rounded-md bg-foreground px-3 py-1.5 text-background text-balance text-xs transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
-            className
-          )}
+          data-variant={variant}
+          className={cn(tooltipContentVariants({ variant }), className)}
           {...props}
         >
           {children}

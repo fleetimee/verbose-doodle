@@ -28,7 +28,7 @@ const cardVariants = cva(
         compact: "gap-4 rounded-xl p-4",
         sm: "gap-3 rounded-lg p-3.5",
         panel: "py-0",
-        none: "gap-0 rounded-xl p-0",
+        none: "gap-0 p-0",
       },
     },
     defaultVariants: {

@@ -5,16 +5,33 @@ import { Radio as RadioPrimitive } from "@base-ui/react/radio"
 import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group"
 import { CircleIcon } from "@/components/hugeicons"
 
+import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+
+const radioGroupVariants = cva("grid", {
+  variants: {
+    size: {
+      default: "gap-3",
+      lg: "gap-4",
+      sm: "gap-2",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+  },
+})
 
 function RadioGroup({
   className,
+  size = "default",
   ...props
-}: React.ComponentProps<typeof RadioGroupPrimitive>) {
+}: React.ComponentProps<typeof RadioGroupPrimitive> &
+  VariantProps<typeof radioGroupVariants>) {
   return (
     <RadioGroupPrimitive
       data-slot="radio-group"
-      className={cn("grid gap-3", className)}
+      data-size={size}
+      className={cn(radioGroupVariants({ size }), className)}
       {...props}
     />
   )

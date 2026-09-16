@@ -16,6 +16,7 @@ const inputVariants = cva(
         "ghost-title":
           "h-auto rounded-none border-0 bg-transparent px-0 py-0 font-bold font-mono text-xl tracking-tight shadow-none focus-visible:ring-0 lg:text-2xl",
         "mono-lg": "font-mono text-lg rounded-xl tracking-widest shadow-xs",
+        "mono-display": "font-mono text-lg rounded-xl bg-background shadow-xs",
         "mono-xs": "font-mono text-xs uppercase tracking-wider bg-background",
       },
       size: {
@@ -23,6 +24,7 @@ const inputVariants = cva(
         sm: "h-8 px-2 text-xs",
         xs: "h-7 px-2 text-xs",
         compact: "h-9 px-3 text-xs",
+        search: "h-9 pl-9",
         md: "h-11",
         lg: "h-11 px-4 text-base md:text-lg",
         xl: "h-12 px-4 text-base md:text-lg",
