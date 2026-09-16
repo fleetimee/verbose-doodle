@@ -173,7 +173,7 @@ function OutputCard({
     >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.18em]">
+          <p className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
             {definition.radix}
           </p>
           <h3 className="mt-1 font-medium text-sm">{definition.label}</h3>
@@ -215,7 +215,7 @@ function OutputCard({
           </span>
         </Button>
       </div>
-      <code className="mt-6 block overflow-x-auto pb-1 font-mono text-lg leading-7 tracking-[0.04em]">
+      <code className="mt-6 block overflow-x-auto pb-1 font-mono text-lg leading-7 tracking-wide">
         {formatOutput(value, definition.key)}
       </code>
     </section>
@@ -424,7 +424,7 @@ export function NumberBaseConverter() {
             </ToggleGroup>
           </div>
           <p
-            className="text-[11px] text-muted-foreground leading-5 lg:px-6"
+            className="text-muted-foreground text-xs leading-5 lg:px-6"
             id="number-base-help"
           >
             {messages.numberBaseConverter.inputHelp}
@@ -450,7 +450,7 @@ export function NumberBaseConverter() {
           </div>
         </div>
 
-        <p className="mt-4 text-right font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+        <p className="mt-4 text-right font-mono text-muted-foreground text-xs uppercase tracking-wider">
           {messages.numberBaseConverter.shortcutLabel}
         </p>
       </motion.section>
@@ -488,14 +488,14 @@ export function NumberBaseConverter() {
             <motion.section id={TOUR_TARGETS.results} variants={childVariants}>
               <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
                 <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                  <h2 className="font-semibold text-lg tracking-tight">
                     {messages.numberBaseConverter.resultTitle}
                   </h2>
                   <p className="mt-1 text-muted-foreground text-xs">
                     {messages.numberBaseConverter.resultDescription}
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                <div className="flex flex-wrap gap-2 font-mono text-muted-foreground text-xs uppercase tracking-wider">
                   <span className="border px-2 py-1">
                     {formatMessage(messages.numberBaseConverter.signedValue, {
                       value: result.signedDecimal,
@@ -526,7 +526,7 @@ export function NumberBaseConverter() {
               <div className="flex items-start gap-3 border-b pb-4">
                 <Binary className="mt-0.5 size-4 text-muted-foreground" />
                 <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                  <h2 className="font-semibold text-lg tracking-tight">
                     {messages.numberBaseConverter.patternTitle}
                   </h2>
                   <p className="mt-1 text-muted-foreground text-xs">
@@ -562,7 +562,7 @@ export function NumberBaseConverter() {
               <div className="flex items-start gap-3 border-b pb-4">
                 <Cpu className="mt-0.5 size-4 text-muted-foreground" />
                 <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                  <h2 className="font-semibold text-lg tracking-tight">
                     {messages.numberBaseConverter.bytesTitle}
                   </h2>
                   <p className="mt-1 text-muted-foreground text-xs">
@@ -574,7 +574,7 @@ export function NumberBaseConverter() {
                 <div className="flex flex-wrap gap-2 p-5">
                   {result.bytes.map((byte, index) => (
                     <div className="border bg-muted/25 px-3 py-2" key={index}>
-                      <span className="block font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+                      <span className="block font-mono text-muted-foreground text-xs uppercase tracking-wider">
                         {formatMessage(messages.numberBaseConverter.byteIndex, {
                           index: String(index).padStart(2, "0"),
                         })}
@@ -586,10 +586,10 @@ export function NumberBaseConverter() {
                   ))}
                 </div>
                 <div className="border-t p-5 lg:border-t-0 lg:border-l">
-                  <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+                  <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
                     {messages.numberBaseConverter.asciiLabel}
                   </span>
-                  <code className="mt-3 block overflow-x-auto font-mono text-xl tracking-[0.16em]">
+                  <code className="mt-3 block overflow-x-auto font-mono text-xl tracking-wider">
                     {result.ascii}
                   </code>
                 </div>

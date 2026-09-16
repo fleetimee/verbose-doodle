@@ -120,7 +120,7 @@ export function Bit43Input({
       <div className="relative min-w-0">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[calc(var(--radius)-1px)] px-3 py-2 font-mono text-base leading-6 md:text-sm"
+          className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-md px-3 py-2 font-mono text-base leading-6 md:text-sm"
           ref={visualRef}
         >
           <span className="whitespace-pre-wrap break-all">

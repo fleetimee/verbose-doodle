@@ -3179,3 +3179,7 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     opacity: 0;
   }
 }
+
+.text-fill-transparent {
+  -webkit-text-fill-color: transparent;
+}

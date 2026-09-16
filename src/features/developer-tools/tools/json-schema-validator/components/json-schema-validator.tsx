@@ -200,7 +200,7 @@ export function JsonSchemaValidator() {
               >
                 {messages.jsonSchemaValidator.assertFormatsLabel}
               </Label>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
+              <p className="mt-0.5 text-muted-foreground text-xs">
                 {messages.jsonSchemaValidator.assertFormatsDescription}
               </p>
             </div>
@@ -208,7 +208,7 @@ export function JsonSchemaValidator() {
         </div>
 
         <div className="flex items-center justify-between gap-5 border-t py-4 md:border-t-0 md:border-l md:pl-6">
-          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+          <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
             {messages.jsonSchemaValidator.shortcutLabel}
           </span>
           <Button
@@ -262,7 +262,7 @@ export function JsonSchemaValidator() {
             role="status"
             transition={{ bounce: 0.08, duration: 0.32, type: "spring" }}
           >
-            <div className="mb-3 flex items-center justify-between font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+            <div className="mb-3 flex items-center justify-between font-mono text-muted-foreground text-xs uppercase tracking-wider">
               <span>{messages.jsonSchemaValidator.validationInProgress}</span>
               <span>{messages.jsonSchemaValidator.deadlineLabel}</span>
             </div>

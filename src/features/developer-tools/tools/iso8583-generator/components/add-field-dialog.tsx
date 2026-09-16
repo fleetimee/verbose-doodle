@@ -140,7 +140,7 @@ function SituationalItemCard({
           <span className="font-medium text-foreground text-xs leading-none">
             {item.name}
           </span>
-          <span className="font-mono text-[11px] text-muted-foreground">
+          <span className="font-mono text-muted-foreground text-xs">
             {item.kind.toUpperCase()}({item.length})
           </span>
         </div>
@@ -148,7 +148,7 @@ function SituationalItemCard({
           {item.description}
         </p>
         {item.defaultValue ? (
-          <p className="mt-1 font-mono text-[11px] text-muted-foreground/80">
+          <p className="mt-1 font-mono text-muted-foreground/80 text-xs">
             {formatMessage(copy.bitDefaultValue, { value: item.defaultValue })}
           </p>
         ) : null}
@@ -245,7 +245,7 @@ function SituationalFieldsList({
         <div className="flex flex-col gap-2 px-4 pb-4">
           {filteredCustomFields.length > 0 ? (
             <div className="mb-2 flex flex-col gap-2">
-              <div className="px-1 font-semibold text-[11px] text-muted-foreground uppercase tracking-wider">
+              <div className="px-1 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
                 {formatMessage(copy.customElementsHeader, {
                   count: filteredCustomFields.length,
                 })}
@@ -266,12 +266,12 @@ function SituationalFieldsList({
                       <span className="font-medium text-foreground text-xs leading-none">
                         {field.label}
                       </span>
-                      <span className="font-mono text-[11px] text-muted-foreground">
+                      <span className="font-mono text-muted-foreground text-xs">
                         {field.kind.toUpperCase()}({field.length})
                       </span>
                     </div>
                     {field.value ? (
-                      <p className="mt-1 font-mono text-[11px] text-muted-foreground/80">
+                      <p className="mt-1 font-mono text-muted-foreground/80 text-xs">
                         Value:{" "}
                         <span className="text-foreground">{field.value}</span>
                       </p>
@@ -617,7 +617,7 @@ export function AddFieldDialog({
                     <Plus className="size-3.5 text-primary" />
                     <span>{copy.configureCustomBit}</span>
                   </div>
-                  <span className="font-mono text-[11px] text-muted-foreground">
+                  <span className="font-mono text-muted-foreground text-xs">
                     {copy.openDrawer}
                   </span>
                 </Button>

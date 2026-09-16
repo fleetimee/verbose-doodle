@@ -203,13 +203,13 @@ export function JsonYamlConverter() {
               </SelectContent>
             </Select>
           </div>
-          <p className="pb-2 text-[11px] text-muted-foreground leading-5">
+          <p className="pb-2 text-muted-foreground text-xs leading-5">
             {messages.jsonYamlConverter.preservationNote}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t py-4 lg:border-t-0 lg:border-l lg:pl-6">
-          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+          <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
             {messages.jsonYamlConverter.shortcutLabel}
           </span>
           <div className="flex items-center gap-2">
@@ -280,7 +280,7 @@ export function JsonYamlConverter() {
         id={JSON_YAML_TOUR_TARGETS.output}
         variants={childVariants}
       >
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {messages.jsonYamlConverter.preservationNote}
         </p>
         <Button
@@ -318,7 +318,7 @@ export function JsonYamlConverter() {
                   : error?.message}
               </p>
               {error?.line && error.column ? (
-                <p className="mt-1 font-mono text-[11px]">
+                <p className="mt-1 font-mono text-xs">
                   {formatMessage(messages.jsonYamlConverter.errorLocation, {
                     column: error.column,
                     line: error.line,

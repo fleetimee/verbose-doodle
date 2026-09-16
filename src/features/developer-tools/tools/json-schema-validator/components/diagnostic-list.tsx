@@ -56,15 +56,15 @@ export function DiagnosticList({
           className="group grid grid-cols-[34px_minmax(0,1fr)_auto] gap-3 border-b py-4 transition-colors hover:bg-muted/20"
           key={`${diagnostic.source}-${diagnosticPath(diagnostic)}-${index}`}
         >
-          <span className="mt-1 font-mono text-[10px] text-muted-foreground">
+          <span className="mt-1 font-mono text-muted-foreground text-xs">
             {String(index + 1).padStart(2, "0")}
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <code className="break-all font-mono text-[11px] text-foreground">
+              <code className="break-all font-mono text-foreground text-xs">
                 {diagnosticPath(diagnostic)}
               </code>
-              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">
+              <span className="text-muted-foreground text-xs uppercase tracking-wider">
                 {diagnostic.source}
                 {diagnostic.keyword ? ` · ${diagnostic.keyword}` : ""}
               </span>
@@ -76,7 +76,7 @@ export function DiagnosticList({
               messages.jsonSchemaValidator.diagnosticCopyAriaLabel,
               { number: index + 1 }
             )}
-            className="self-start font-mono text-[10px] text-muted-foreground uppercase tracking-wider underline decoration-border underline-offset-4 transition-colors hover:text-foreground active:translate-y-px"
+            className="self-start font-mono text-muted-foreground text-xs uppercase tracking-wider underline decoration-border underline-offset-4 transition-colors hover:text-foreground active:translate-y-px"
             onClick={() => copyDiagnostic(diagnostic, index)}
             type="button"
           >

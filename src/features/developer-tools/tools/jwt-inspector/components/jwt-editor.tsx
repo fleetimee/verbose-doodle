@@ -131,7 +131,7 @@ function InlineTokenInput({
       </div>
       <textarea
         aria-label={label}
-        className="!bg-transparent relative z-10 h-full min-h-[var(--min-height,320px)] w-full flex-1 resize-none overflow-auto font-mono text-sm text-transparent leading-6 caret-foreground shadow-none outline-none [-webkit-text-fill-color:transparent] selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground focus-visible:ring-0"
+        className="!bg-transparent relative z-10 h-full min-h-[var(--min-height,320px)] w-full flex-1 resize-none overflow-auto font-mono text-fill-transparent text-sm text-transparent leading-6 caret-foreground shadow-none outline-none selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground focus-visible:ring-0"
         onChange={(event) => onChange?.(event.target.value)}
         onScroll={syncScroll}
         placeholder={placeholder}
@@ -180,7 +180,7 @@ function ModalTokenInput({
       </div>
       <textarea
         aria-label={label}
-        className="!bg-transparent relative z-10 h-full w-full resize-none overflow-auto rounded-none border-0 p-4 font-mono text-sm text-transparent leading-6 caret-foreground shadow-none outline-none [-webkit-text-fill-color:transparent] selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground focus-visible:ring-0"
+        className="!bg-transparent relative z-10 h-full w-full resize-none overflow-auto rounded-none border-0 p-4 font-mono text-fill-transparent text-sm text-transparent leading-6 caret-foreground shadow-none outline-none selection:bg-primary/20 selection:text-transparent placeholder:text-muted-foreground focus-visible:ring-0"
         onChange={(event) => onChange?.(event.target.value)}
         onScroll={syncScroll}
         placeholder={placeholder}
@@ -412,7 +412,7 @@ function JwtDialogJsonView({
           <JsonStatusBadge isValid={isValidJson} value={value} />
         </div>
         <div className="ml-auto flex items-center gap-3">
-          <span className="hidden font-mono text-[11px] text-muted-foreground/70 sm:inline">
+          <span className="hidden font-mono text-muted-foreground/70 text-xs sm:inline">
             {messages.jwtInspector.escToClose}
           </span>
           <Button onClick={onClose} size="xs" variant="ghost">
@@ -537,7 +537,7 @@ function JwtDialogPlainView({
           )}
         </div>
         <div className="ml-auto flex items-center gap-3">
-          <span className="hidden font-mono text-[11px] text-muted-foreground/70 sm:inline">
+          <span className="hidden font-mono text-muted-foreground/70 text-xs sm:inline">
             {messages.jwtInspector.escToClose}
           </span>
           <Button onClick={onClose} size="xs" variant="ghost">

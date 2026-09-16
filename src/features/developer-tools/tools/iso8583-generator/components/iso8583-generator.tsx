@@ -139,7 +139,7 @@ function FieldRow({
           </span>
           <span className="truncate text-sm">{field.label}</span>
         </div>
-        <p className="mt-1 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+        <p className="mt-1 font-mono text-muted-foreground text-xs uppercase tracking-wider">
           {fieldTypeLabel(field)}
         </p>
       </div>
@@ -210,7 +210,7 @@ function BitmapInspector({
       <div className="mt-3 flex flex-wrap gap-1.5">
         {message.activeFields.map((fieldNumber) => (
           <span
-            className="rounded-sm bg-muted px-1.5 py-1 font-mono text-[10px] text-muted-foreground"
+            className="rounded-sm bg-muted px-1.5 py-1 font-mono text-muted-foreground text-xs"
             key={fieldNumber}
           >
             Bit {fieldNumber}
@@ -379,14 +379,14 @@ export function LegacyIso8583Generator() {
     <div className="mx-auto flex w-full min-w-0 max-w-[1400px] flex-col gap-6 overflow-x-clip pb-10">
       <header className="flex flex-col gap-5 border-b pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
-          <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.24em]">
+          <p className="font-mono text-muted-foreground text-xs uppercase tracking-widest">
             {copy.eyebrow}
           </p>
           <div className="mt-3 flex items-center gap-3">
             <span className="grid size-9 place-items-center border bg-muted/20 text-primary">
               <Code2 className="size-4" />
             </span>
-            <h1 className="font-semibold text-3xl tracking-[-0.045em] md:text-4xl">
+            <h1 className="font-semibold text-3xl tracking-tight md:text-4xl">
               {copy.title}
             </h1>
           </div>
@@ -459,7 +459,7 @@ export function LegacyIso8583Generator() {
                 ))}
               </datalist>
               <p
-                className="text-[11px] text-muted-foreground leading-5"
+                className="text-muted-foreground text-xs leading-5"
                 id="iso8583-mti-description"
               >
                 {copy.mtiDescription}
@@ -511,7 +511,7 @@ export function LegacyIso8583Generator() {
                   value="hex"
                 />
                 <span>{copy.bitmapHex}</span>
-                <span className="font-mono text-[10px] text-muted-foreground">
+                <span className="font-mono text-muted-foreground text-xs">
                   16 / 32 chars
                 </span>
               </label>
@@ -525,7 +525,7 @@ export function LegacyIso8583Generator() {
                   value="binary"
                 />
                 <span>{copy.bitmapBinary}</span>
-                <span className="font-mono text-[10px] text-muted-foreground">
+                <span className="font-mono text-muted-foreground text-xs">
                   8 / 16 bytes
                 </span>
               </label>
@@ -622,7 +622,7 @@ export function LegacyIso8583Generator() {
                 {copy.fieldListDescription}
               </p>
             </div>
-            <span className="shrink-0 border bg-background px-2 py-1 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+            <span className="shrink-0 border bg-background px-2 py-1 font-mono text-muted-foreground text-xs uppercase tracking-wider">
               {formatMessage(copy.activeFields, {
                 count: fields.filter((field) => field.enabled).length,
               })}
@@ -705,7 +705,7 @@ export function LegacyIso8583Generator() {
               </Button>
             )}
             {fields.some((field) => field.hidden) ? (
-              <p className="mt-3 text-[10px] text-muted-foreground leading-4">
+              <p className="mt-3 text-muted-foreground text-xs leading-4">
                 This preset keeps{" "}
                 {fields.filter((field) => field.hidden).length} private
                 extension bits in its packed sample tail.
@@ -743,7 +743,7 @@ export function LegacyIso8583Generator() {
               value={packedState.message?.displayPayload ?? ""}
               variant="mono-muted"
             />
-            <p className="mt-3 text-[10px] text-muted-foreground leading-4">
+            <p className="mt-3 text-muted-foreground text-xs leading-4">
               {copy.outputDescription} {copy.hexOutputHint}
             </p>
             {packedState.error ? (
@@ -754,7 +754,7 @@ export function LegacyIso8583Generator() {
             {status ? (
               <p
                 aria-live="polite"
-                className="mt-3 font-mono text-[10px] text-primary uppercase tracking-wider"
+                className="mt-3 font-mono text-primary text-xs uppercase tracking-wider"
                 role="status"
               >
                 {status}

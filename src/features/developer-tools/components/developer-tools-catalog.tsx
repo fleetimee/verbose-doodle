@@ -90,7 +90,7 @@ function ToolCard({
               <h3 className="truncate font-semibold text-foreground text-sm tracking-tight transition-colors group-hover:text-primary">
                 {tool.name}
               </h3>
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border/40 bg-muted/30 px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border/40 bg-muted/30 px-1.5 py-0.5 font-mono text-muted-foreground text-xs uppercase tracking-wider">
                 <CategoryIcon className="size-2.5" />
                 {category.name}
               </span>
@@ -102,7 +102,7 @@ function ToolCard({
         </div>
 
         <div className="flex shrink-0 items-center gap-4">
-          <div className="hidden font-mono text-[10px] text-muted-foreground/70 uppercase tracking-wider sm:block">
+          <div className="hidden font-mono text-muted-foreground/70 text-xs uppercase tracking-wider sm:block">
             {tool.runtime}
           </div>
           <div className="flex size-7 items-center justify-center rounded-md border border-transparent text-muted-foreground transition-all duration-200 group-hover:border-border/60 group-hover:bg-muted/50 group-hover:text-foreground">
@@ -145,7 +145,7 @@ function ToolCard({
             <Icon className="size-5" />
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-md border border-border/40 bg-muted/30 px-2 py-0.5 font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+            <span className="inline-flex items-center gap-1 rounded-md border border-border/40 bg-muted/30 px-2 py-0.5 font-mono text-muted-foreground text-xs uppercase tracking-wider">
               <CategoryIcon className="size-2.5" />
               {category.name}
             </span>
@@ -160,7 +160,7 @@ function ToolCard({
         </div>
 
         <div className="mt-3.5">
-          <h3 className="line-clamp-1 font-semibold text-[15px] text-foreground tracking-tight transition-colors group-hover:text-primary">
+          <h3 className="line-clamp-1 font-semibold text-foreground text-sm tracking-tight transition-colors group-hover:text-primary">
             {tool.name}
           </h3>
           <p className="mt-1 line-clamp-2 text-muted-foreground text-xs leading-relaxed">
@@ -169,7 +169,7 @@ function ToolCard({
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-border/40 border-t pt-2.5 font-mono text-[10px] text-muted-foreground/70 uppercase tracking-wider">
+      <div className="mt-4 flex items-center justify-between border-border/40 border-t pt-2.5 font-mono text-muted-foreground/70 text-xs uppercase tracking-wider">
         <span>{tool.runtime}</span>
         <span className="opacity-75">{tool.limit}</span>
       </div>
@@ -227,7 +227,7 @@ export function DeveloperToolsCatalog() {
         className="flex flex-col gap-1.5 border-border/60 border-b pb-5"
         variants={childVariants}
       >
-        <h1 className="font-semibold text-2xl tracking-[-0.03em] md:text-3xl">
+        <h1 className="font-semibold text-2xl tracking-tight md:text-3xl">
           {messages.developerTools.pageTitle}
         </h1>
         <p className="text-muted-foreground text-sm">
@@ -254,7 +254,7 @@ export function DeveloperToolsCatalog() {
             {messages.developerTools.allTools}
             <span
               aria-hidden="true"
-              className="ml-1 font-mono text-[10px] opacity-60"
+              className="ml-1 font-mono text-xs opacity-60"
             >
               {DEVELOPER_TOOL_COUNT}
             </span>
@@ -274,7 +274,7 @@ export function DeveloperToolsCatalog() {
               {category.name}
               <span
                 aria-hidden="true"
-                className="ml-1 font-mono text-[10px] opacity-60"
+                className="ml-1 font-mono text-xs opacity-60"
               >
                 {category.tools.length}
               </span>
@@ -283,7 +283,7 @@ export function DeveloperToolsCatalog() {
         </div>
 
         <div className="flex items-center justify-between gap-3 px-1 sm:justify-end">
-          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+          <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
             {formatPluralMessage(
               messages.developerTools.showingCount,
               visibleEntries.length

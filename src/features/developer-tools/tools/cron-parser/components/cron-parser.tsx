@@ -232,12 +232,12 @@ export function CronParser() {
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
           <p
-            className="text-[11px] text-muted-foreground leading-5"
+            className="text-muted-foreground text-xs leading-5"
             id="cron-expression-help"
           >
             {messages.cronParser.expressionHelp}
           </p>
-          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+          <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
             {messages.cronParser.shortcutLabel}
           </span>
         </div>
@@ -283,10 +283,10 @@ export function CronParser() {
                 />
               </div>
               <div>
-                <p className="font-mono text-[10px] text-emerald-700 uppercase tracking-[0.2em] dark:text-emerald-300">
+                <p className="font-mono text-emerald-700 text-xs uppercase tracking-widest dark:text-emerald-300">
                   {messages.cronParser.validExpression}
                 </p>
-                <h2 className="mt-3 max-w-[28ch] font-semibold text-2xl leading-tight tracking-[-0.035em] md:text-3xl">
+                <h2 className="mt-3 max-w-[28ch] font-semibold text-2xl leading-tight tracking-tight md:text-3xl">
                   {result.description}
                 </h2>
                 <code className="mt-4 block w-fit border bg-muted/30 px-2.5 py-1.5 font-mono text-xs">
@@ -301,14 +301,14 @@ export function CronParser() {
             >
               <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
                 <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                  <h2 className="font-semibold text-lg tracking-tight">
                     {messages.cronParser.fieldBreakdown}
                   </h2>
                   <p className="mt-1 text-muted-foreground text-xs">
                     {messages.cronParser.fieldBreakdownDescription}
                   </p>
                 </div>
-                <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
                   {result.mode === "five-field"
                     ? messages.cronParser.fiveFields
                     : messages.cronParser.sixFields}
@@ -321,7 +321,7 @@ export function CronParser() {
                     key={field.key}
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+                      <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
                         {String(index + 1).padStart(2, "0")}
                       </span>
                       <code className="max-w-full truncate bg-muted px-2 py-1 font-mono text-sm">
@@ -331,7 +331,7 @@ export function CronParser() {
                     <h3 className="mt-5 font-medium text-sm">
                       {messages.cronParser.fieldLabels[field.key]}
                     </h3>
-                    <p className="mt-1 text-[10px] text-muted-foreground">
+                    <p className="mt-1 text-muted-foreground text-xs">
                       {formatMessage(messages.cronParser.allowedRange, {
                         range: field.range,
                       })}
@@ -347,14 +347,14 @@ export function CronParser() {
             >
               <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
                 <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                  <h2 className="font-semibold text-lg tracking-tight">
                     {messages.cronParser.upcomingRuns}
                   </h2>
                   <p className="mt-1 text-muted-foreground text-xs">
                     {messages.cronParser.upcomingRunsDescription}
                   </p>
                 </div>
-                <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
                   {timeZone}
                 </span>
               </div>
@@ -364,7 +364,7 @@ export function CronParser() {
                     className="grid gap-3 px-4 py-4 sm:grid-cols-[48px_minmax(0,1fr)_auto] sm:items-center"
                     key={date.toISOString()}
                   >
-                    <span className="font-mono text-[10px] text-muted-foreground">
+                    <span className="font-mono text-muted-foreground text-xs">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <time

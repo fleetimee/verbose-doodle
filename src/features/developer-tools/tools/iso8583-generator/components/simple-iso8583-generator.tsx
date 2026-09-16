@@ -689,7 +689,7 @@ function FieldInput({
         />
       </p>
       {field.number === 43 ? (
-        <p className="font-mono text-[11px] text-muted-foreground/80">
+        <p className="font-mono text-muted-foreground/80 text-xs">
           {copy.bit43StandardLayout}
         </p>
       ) : null}
@@ -1009,7 +1009,7 @@ export function Iso8583Generator() {
       title={copy.title}
     >
       <div className="mb-6 flex flex-col gap-2">
-        <p className="font-mono text-muted-foreground text-xs uppercase tracking-[0.16em]">
+        <p className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
           {copy.messagePreset}
         </p>
         <div className="flex flex-col rounded-lg border bg-muted p-1 shadow-xs sm:flex-row">
@@ -1383,7 +1383,7 @@ export function Iso8583Generator() {
                 </div>
 
                 <div className="space-y-1">
-                  <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider">
+                  <span className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                     {copy.hexBitmap}
                   </span>
                   <div className="select-all break-all rounded border bg-background/80 px-2.5 py-1.5 font-mono text-foreground text-xs shadow-xs">
@@ -1392,7 +1392,7 @@ export function Iso8583Generator() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider">
+                  <span className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                     {formatMessage(copy.activeFieldsSection, {
                       count: packedState.message.activeFields.length,
                     })}
@@ -1402,7 +1402,7 @@ export function Iso8583Generator() {
                       const field = fields.find((f) => f.number === number);
                       return (
                         <span
-                          className="inline-flex items-center rounded border bg-background/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                          className="inline-flex items-center rounded border bg-background/60 px-1.5 py-0.5 font-mono text-muted-foreground text-xs transition-colors hover:bg-background hover:text-foreground"
                           key={number}
                           title={
                             field?.label

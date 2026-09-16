@@ -82,9 +82,7 @@ export function ValidationResult({ result }: ValidationResultProps) {
       transition={{ bounce: 0.08, duration: 0.32, type: "spring" }}
     >
       <div className="grid gap-4 sm:grid-cols-[90px_minmax(0,1fr)_auto] sm:items-start">
-        <span
-          className={cn("font-mono text-xs tracking-[0.16em]", details.tone)}
-        >
+        <span className={cn("font-mono text-xs tracking-wider", details.tone)}>
           {details.code}
         </span>
         <div>
@@ -95,7 +93,7 @@ export function ValidationResult({ result }: ValidationResultProps) {
             {details.description}
           </p>
         </div>
-        <dl className="grid grid-cols-3 gap-4 font-mono text-[10px] uppercase tracking-wider sm:text-right">
+        <dl className="grid grid-cols-3 gap-4 font-mono text-xs uppercase tracking-wider sm:text-right">
           <div>
             <dt className="text-muted-foreground">
               {messages.jsonSchemaValidator.resultDraftLabel}

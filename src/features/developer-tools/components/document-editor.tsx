@@ -117,14 +117,14 @@ export function DocumentEditor({
           </header>
         ) : (
           <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3 sm:grid sm:min-h-16 sm:grid-cols-[auto_1fr_auto] sm:gap-3 sm:py-0">
-            <span className="font-mono text-[10px] text-muted-foreground tracking-[0.18em]">
+            <span className="font-mono text-muted-foreground text-xs tracking-wider">
               {index}
             </span>
             <div className="min-w-0 flex-1 sm:flex-initial">
               <h2 className="font-semibold text-sm">{label}</h2>
-              <p className="text-[11px] text-muted-foreground">{description}</p>
+              <p className="text-muted-foreground text-xs">{description}</p>
             </div>
-            <div className="flex items-center gap-2 font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 font-mono text-muted-foreground text-xs uppercase tracking-wider">
               <span>
                 {lineCountMessage
                   ? formatMessage(lineCountMessage, { count: lineCount })

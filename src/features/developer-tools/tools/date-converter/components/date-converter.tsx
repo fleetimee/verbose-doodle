@@ -155,7 +155,7 @@ function OutputCard({
     >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.18em]">
+          <p className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
             {definition.marker}
           </p>
           <h3 className="mt-1 font-medium text-sm">{definition.label}</h3>
@@ -410,7 +410,7 @@ export function DateConverter() {
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
           <p
-            className="max-w-3xl text-[11px] text-muted-foreground leading-5"
+            className="max-w-3xl text-muted-foreground text-xs leading-5"
             id="date-converter-help"
           >
             {messages.dateConverter.inputHelp}
@@ -425,7 +425,7 @@ export function DateConverter() {
             {messages.dateConverter.useCurrentTime}
           </Button>
         </div>
-        <p className="mt-3 text-right font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+        <p className="mt-3 text-right font-mono text-muted-foreground text-xs uppercase tracking-wider">
           {messages.dateConverter.shortcutLabel}
         </p>
       </motion.section>
@@ -463,14 +463,14 @@ export function DateConverter() {
             <motion.section id={TOUR_TARGETS.results} variants={childVariants}>
               <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
                 <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                  <h2 className="font-semibold text-lg tracking-tight">
                     {messages.dateConverter.resultTitle}
                   </h2>
                   <p className="mt-1 text-muted-foreground text-xs">
                     {messages.dateConverter.resultDescription}
                   </p>
                 </div>
-                <span className="border px-2 py-1 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                <span className="border px-2 py-1 font-mono text-muted-foreground text-xs uppercase tracking-wider">
                   {formatMessage(messages.dateConverter.detectedAs, {
                     format: INPUT_MODE_LABELS[result.detectedMode],
                   })}
@@ -494,7 +494,7 @@ export function DateConverter() {
               <div className="flex items-start gap-3 border-b pb-4">
                 <Globe2 className="mt-0.5 size-4 text-muted-foreground" />
                 <div>
-                  <h2 className="font-semibold text-lg tracking-[-0.02em]">
+                  <h2 className="font-semibold text-lg tracking-tight">
                     {messages.dateConverter.timezoneTitle}
                   </h2>
                   <p className="mt-1 text-muted-foreground text-xs">
@@ -506,16 +506,16 @@ export function DateConverter() {
                 <div className="p-6">
                   <div className="flex items-center gap-3">
                     <CalendarDays className="size-5 text-muted-foreground" />
-                    <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
+                    <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
                       {timeZone}
                     </span>
                   </div>
-                  <code className="mt-5 block overflow-x-auto font-mono text-xl tracking-[-0.02em] sm:text-2xl">
+                  <code className="mt-5 block overflow-x-auto font-mono text-xl tracking-tight sm:text-2xl">
                     {result.zonedDateTime}
                   </code>
                 </div>
                 <div className="border-t p-6 lg:border-t-0 lg:border-l">
-                  <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
+                  <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
                     {messages.dateConverter.relativeLabel}
                   </span>
                   <p className="mt-3 font-medium text-lg">

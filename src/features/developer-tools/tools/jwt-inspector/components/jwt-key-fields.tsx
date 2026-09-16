@@ -593,7 +593,7 @@ export function JwtKeyFields({
           <h2 className="font-semibold text-sm">
             {mode === "inspect" ? copy.verificationOptional : copy.signing}
           </h2>
-          <p className="text-[11px] text-muted-foreground">{subtitle}</p>
+          <p className="text-muted-foreground text-xs">{subtitle}</p>
         </div>
         {symmetric && (
           <div className="flex items-center gap-2">

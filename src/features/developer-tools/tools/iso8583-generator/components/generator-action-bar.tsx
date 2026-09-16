@@ -40,13 +40,13 @@ export function GeneratorActionBar({
         <div
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute inset-0 -z-10 rounded-[inherit] bg-card transition-opacity duration-200 ease-[var(--ease-out)] motion-reduce:transition-none",
+            "pointer-events-none absolute inset-0 -z-10 rounded-b-xl bg-card transition-opacity duration-200 ease-out motion-reduce:transition-none",
             floating
-              ? "opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
+              ? "rounded-t-xl opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
               : "opacity-100"
           )}
         />
-        <div className="flex flex-col gap-4 rounded-[inherit] p-5 sm:px-7">
+        <div className="flex flex-col gap-4 rounded-b-xl p-5 sm:px-7">
           {children}
         </div>
       </div>
