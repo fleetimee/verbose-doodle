@@ -29,28 +29,42 @@ function Command({
   )
 }
 
+const commandDialogVariants = cva("overflow-hidden p-0", {
+  variants: {
+    variant: {
+      default: "",
+      search: "navigation-search-dialog",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+})
+
 function CommandDialog({
   title = messages.common.commandPaletteTitle,
   description = messages.common.commandPaletteDescription,
   children,
   className,
+  variant = "default",
   commandProps,
   showCloseButton = true,
   ...props
-}: React.ComponentProps<typeof Dialog> & {
-  title?: string
-  description?: string
-  children?: React.ReactNode
-  className?: string
-  commandProps?: React.ComponentProps<typeof Command>
-  showCloseButton?: boolean
-}) {
+}: React.ComponentProps<typeof Dialog> &
+  VariantProps<typeof commandDialogVariants> & {
+    title?: string
+    description?: string
+    children?: React.ReactNode
+    className?: string
+    commandProps?: React.ComponentProps<typeof Command>
+    showCloseButton?: boolean
+  }) {
   const { key: commandKey, ...commandOptions } = commandProps ?? {}
 
   return (
     <Dialog {...props}>
       <DialogContent
-        className={cn("overflow-hidden p-0", className)}
+        className={cn(commandDialogVariants({ variant }), className)}
         showCloseButton={showCloseButton}
       >
         <DialogHeader className="sr-only">

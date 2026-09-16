@@ -48,6 +48,16 @@
   padding: 4px;
 }
 
+.switch-theme[data-state="checked"],
+.switch-theme[data-checked] {
+  background-color: rgb(2 6 23);
+}
+
+.switch-theme[data-state="unchecked"],
+.switch-theme[data-unchecked] {
+  background-color: rgb(245 158 11);
+}
+
 .navigation-search-results {
   position: relative;
   overflow: hidden;

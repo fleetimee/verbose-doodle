@@ -64,6 +64,7 @@ const selectTriggerVariants = cva(
         mono: "font-mono text-sm shadow-none",
         subtle: "border-transparent shadow-none",
         "subtle-active": "border-transparent bg-background shadow-xs",
+        ghost: "border-none text-muted-foreground text-xs shadow-none",
       },
       size: {
         default: "data-[size=default]:h-9",

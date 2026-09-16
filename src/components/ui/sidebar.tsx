@@ -482,23 +482,59 @@ function SidebarInput({
   )
 }
 
-function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
+const sidebarHeaderVariants = cva("flex flex-col gap-2 p-2", {
+  variants: {
+    variant: {
+      default: "",
+      compact:
+        "p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+})
+
+function SidebarHeader({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof sidebarHeaderVariants>) {
   return (
     <div
       data-slot="sidebar-header"
       data-sidebar="header"
-      className={cn("flex flex-col gap-2 p-2", className)}
+      data-variant={variant}
+      className={cn(sidebarHeaderVariants({ variant }), className)}
       {...props}
     />
   )
 }
 
-function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
+const sidebarFooterVariants = cva("flex flex-col gap-2 p-2", {
+  variants: {
+    variant: {
+      default: "",
+      compact:
+        "p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+})
+
+function SidebarFooter({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof sidebarFooterVariants>) {
   return (
     <div
       data-slot="sidebar-footer"
       data-sidebar="footer"
-      className={cn("flex flex-col gap-2 p-2", className)}
+      data-variant={variant}
+      className={cn(sidebarFooterVariants({ variant }), className)}
       {...props}
     />
   )
@@ -545,12 +581,30 @@ function SidebarContent({
   )
 }
 
-function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
+const sidebarGroupVariants = cva("relative flex w-full min-w-0 flex-col", {
+  variants: {
+    size: {
+      default: "p-2",
+      none: "p-0",
+      sm: "p-1",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+  },
+})
+
+function SidebarGroup({
+  className,
+  size = "default",
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof sidebarGroupVariants>) {
   return (
     <div
       data-slot="sidebar-group"
       data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
+      data-size={size}
+      className={cn(sidebarGroupVariants({ size }), className)}
       {...props}
     />
   )
@@ -648,10 +702,24 @@ const sidebarMenuButtonVariants = cva(
         default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
+        elevated: "rounded-lg data-[active=true]:shadow-xs",
+        flyout:
+          "relative rounded-lg data-[active=true]:shadow-xs data-popup-open:bg-sidebar-accent",
+        brand:
+          "h-14 rounded-lg border border-sidebar-border/70 bg-sidebar-accent/45 px-2.5 shadow-xs group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:shadow-none",
+        secondary:
+          "rounded-lg text-sidebar-foreground/75 hover:text-sidebar-foreground",
+        account:
+          "rounded-lg border border-sidebar-border/70 bg-sidebar-accent/35 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
+        search:
+          "navigation-search-trigger h-9 rounded-lg border border-sidebar-border bg-sidebar text-muted-foreground",
+        destructive:
+          "text-destructive hover:text-destructive active:text-destructive hover:bg-destructive/10",
       },
       size: {
         default: "h-8 text-sm",
         sm: "h-7 text-xs",
+        md: "h-9 text-sm",
         lg: "h-12 text-sm group-data-[collapsible=icon]:p-0!",
       },
     },
@@ -749,23 +817,33 @@ function SidebarMenuAction({
   })
 }
 
+const sidebarMenuBadgeVariants = cva(
+  "text-sidebar-foreground pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-xs font-medium tabular-nums select-none peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[active=true]/menu-button:text-sidebar-accent-foreground peer-data-[size=sm]/menu-button:top-1 peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 group-data-[collapsible=icon]:hidden",
+  {
+    variants: {
+      variant: {
+        default: "",
+        muted: "text-sidebar-foreground/55",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function SidebarMenuBadge({
   className,
+  variant = "default",
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> &
+  VariantProps<typeof sidebarMenuBadgeVariants>) {
   return (
     <div
       data-slot="sidebar-menu-badge"
       data-sidebar="menu-badge"
-      className={cn(
-        "text-sidebar-foreground pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-xs font-medium tabular-nums select-none",
-        "peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[active=true]/menu-button:text-sidebar-accent-foreground",
-        "peer-data-[size=sm]/menu-button:top-1",
-        "peer-data-[size=default]/menu-button:top-1.5",
-        "peer-data-[size=lg]/menu-button:top-2.5",
-        "group-data-[collapsible=icon]:hidden",
-        className
-      )}
+      data-variant={variant}
+      className={cn(sidebarMenuBadgeVariants({ variant }), className)}
       {...props}
     />
   )

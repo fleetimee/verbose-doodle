@@ -1,6 +1,6 @@
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react/alert-dialog"
-import type { VariantProps } from "class-variance-authority"
+import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -43,33 +43,69 @@ function AlertDialogOverlay({
   )
 }
 
+const alertDialogContentVariants = cva(
+  "bg-background fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg transition-[opacity,transform] duration-200 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
+  {
+    variants: {
+      size: {
+        default: "sm:max-w-lg",
+        sm: "sm:max-w-sm",
+        md: "sm:max-w-md",
+        lg: "sm:max-w-lg",
+        xl: "sm:max-w-xl",
+      },
+    },
+    defaultVariants: {
+      size: "default",
+    },
+  }
+)
+
 function AlertDialogContent({
   className,
+  size = "default",
   ...props
-}: AlertDialogPrimitive.Popup.Props) {
+}: AlertDialogPrimitive.Popup.Props &
+  VariantProps<typeof alertDialogContentVariants>) {
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
       <AlertDialogPrimitive.Popup
         data-slot="alert-dialog-content"
-        className={cn(
-          "bg-background fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg transition-[opacity,transform] duration-200 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 sm:max-w-lg",
-          className
-        )}
+        data-size={size}
+        className={cn(alertDialogContentVariants({ size }), className)}
         {...props}
       />
     </AlertDialogPortal>
   )
 }
 
+const alertDialogHeaderVariants = cva(
+  "flex flex-col gap-2 text-center sm:text-left",
+  {
+    variants: {
+      variant: {
+        default: "",
+        centered: "items-center justify-center text-center sm:text-center",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function AlertDialogHeader({
   className,
+  variant = "default",
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> &
+  VariantProps<typeof alertDialogHeaderVariants>) {
   return (
     <div
       data-slot="alert-dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      data-variant={variant}
+      className={cn(alertDialogHeaderVariants({ variant }), className)}
       {...props}
     />
   )
@@ -91,14 +127,29 @@ function AlertDialogFooter({
   )
 }
 
+const alertDialogTitleVariants = cva("text-lg font-semibold", {
+  variants: {
+    variant: {
+      default: "",
+      lead: "font-medium text-xl",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+})
+
 function AlertDialogTitle({
   className,
+  variant = "default",
   ...props
-}: AlertDialogPrimitive.Title.Props) {
+}: AlertDialogPrimitive.Title.Props &
+  VariantProps<typeof alertDialogTitleVariants>) {
   return (
     <AlertDialogPrimitive.Title
       data-slot="alert-dialog-title"
-      className={cn("text-lg font-semibold", className)}
+      data-variant={variant}
+      className={cn(alertDialogTitleVariants({ variant }), className)}
       {...props}
     />
   )
@@ -163,4 +214,7 @@ export {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
+  alertDialogContentVariants,
+  alertDialogHeaderVariants,
+  alertDialogTitleVariants,
 }

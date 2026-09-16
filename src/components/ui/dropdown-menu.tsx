@@ -44,12 +44,13 @@ function DropdownMenuTrigger({
 }
 
 const dropdownMenuContentVariants = cva(
-  "z-50 max-h-(--available-height) min-w-[8rem] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md outline-none transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
+  "z-50 max-h-(--available-height) min-w-[8rem] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md outline-none transition-[opacity,transform] motion-reduce:transition-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
   {
     variants: {
       variant: {
         default: "",
         subtle: "rounded-xl p-1.5",
+        sidebar: "rounded-lg",
       },
       size: {
         default: "p-1",
@@ -115,6 +116,7 @@ const dropdownMenuItemVariants = cva(
         default: "",
         destructive:
           "text-destructive focus:bg-destructive/10 focus:text-destructive data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive dark:focus:bg-destructive/20 dark:data-[variant=destructive]:focus:bg-destructive/20",
+        nav: "min-h-9 gap-2.5 rounded-lg aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium aria-[current=page]:text-sidebar-accent-foreground",
       },
     },
     defaultVariants: {
@@ -204,18 +206,46 @@ function DropdownMenuRadioItem({
   )
 }
 
+const dropdownMenuLabelVariants = cva(
+  "px-2 py-1.5 text-sm font-medium data-[inset]:pl-8",
+  {
+    variants: {
+      variant: {
+        default: "",
+        subtle: "text-muted-foreground text-xs font-normal",
+        header: "font-normal",
+      },
+      size: {
+        default: "px-2 py-1.5",
+        compact: "px-2 py-1",
+        relaxed: "px-2 py-2",
+        none: "p-0",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
 function DropdownMenuLabel({
   className,
   inset,
+  variant = "default",
+  size = "default",
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.GroupLabel> & {
-  inset?: boolean
-}) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.GroupLabel> &
+  VariantProps<typeof dropdownMenuLabelVariants> & {
+    inset?: boolean
+  }) {
   return (
     <DropdownMenuPrimitive.GroupLabel
       data-inset={inset}
       data-slot="dropdown-menu-label"
-      className={cn("px-2 py-1.5 text-sm font-medium data-[inset]:pl-8", className)}
+      data-variant={variant}
+      data-size={size}
+      className={cn(dropdownMenuLabelVariants({ variant, size }), className)}
       {...props}
     />
   )
