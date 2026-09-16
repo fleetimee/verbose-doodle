@@ -54,6 +54,12 @@ const buttonVariants = cva(
           "justify-between rounded-none border-0 border-border border-b-2 bg-transparent font-normal shadow-none hover:bg-transparent focus:ring-0 focus-visible:border-primary aria-invalid:border-destructive",
         "underline-display-muted":
           "justify-between rounded-none border-0 border-border border-b-2 bg-transparent font-normal text-muted-foreground shadow-none hover:bg-transparent focus:ring-0 focus-visible:border-primary aria-invalid:border-destructive",
+        "chat-slash-option": "overview-chat-slash-option",
+        "chat-slash-option-selected":
+          "overview-chat-slash-option overview-chat-slash-option-selected",
+        "chat-expand": "overview-chat-expand",
+        "chat-submit": "overview-chat-submit",
+        "chat-reset": "overview-chat-reset",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

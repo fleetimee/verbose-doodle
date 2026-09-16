@@ -22,6 +22,12 @@ const cardVariants = cva(
         "metric-success": "overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/5 shadow-xs transition-transform duration-150 active:scale-[0.99]",
         "metric-warning": "overflow-hidden rounded-2xl border border-amber-500/30 bg-amber-500/5 shadow-xs transition-transform duration-150 active:scale-[0.99]",
         glass: "overflow-hidden rounded-xl border border-border/80 bg-card/60 shadow-lg backdrop-blur-md",
+        overview:
+          "rounded-xl border border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] transition-[border-color,box-shadow,transform] duration-300 ease-out hover:border-primary/35 hover:shadow-[0_24px_55px_-34px_color-mix(in_oklab,var(--primary)_65%,transparent)] motion-reduce:transition-none",
+        "overview-interactive":
+          "group overflow-hidden rounded-xl border border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)] transition-[border-color,box-shadow,transform] duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-[0_24px_55px_-34px_color-mix(in_oklab,var(--primary)_65%,transparent)] active:translate-y-px motion-reduce:transform-none motion-reduce:transition-none",
+        "overview-card":
+          "rounded-xl border border-border/70 bg-card/90 shadow-[0_18px_45px_-32px_color-mix(in_oklab,var(--foreground)_45%,transparent)]",
       },
       size: {
         default: "gap-6 rounded-xl py-6",
@@ -75,6 +81,7 @@ const cardHeaderVariants = cva(
         metric: "flex flex-row items-start justify-between gap-3 pb-2 px-6 pt-6",
         card: "gap-4 pb-3",
         loose: "gap-4",
+        chart: "gap-2 px-6 pb-2",
         none: "gap-0 p-0",
       },
     },
@@ -200,6 +207,9 @@ const cardContentVariants = cva("", {
       padded: "p-6",
       spaced: "px-6 space-y-4",
       card: "grid gap-4 md:grid-cols-2",
+      chart: "px-6 pb-0",
+      overview: "flex flex-col gap-6 p-5 sm:p-6",
+      "overview-role": "flex flex-col gap-5 px-6 pb-6",
       none: "p-0",
     },
   },

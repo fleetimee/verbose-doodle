@@ -41,19 +41,34 @@ function Bubble({
   );
 }
 
+const bubbleContentVariants = cva(
+  "wrap-break-word w-fit min-w-0 max-w-full overflow-hidden rounded-xl border border-transparent px-3 py-2 text-sm leading-relaxed group-data-[align=end]/bubble:self-end",
+  {
+    variants: {
+      variant: {
+        default: "",
+        chat: "overview-chat-bubble",
+        "chat-error": "overview-chat-bubble overview-chat-bubble-error",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
+
 function BubbleContent({
   className,
   render,
+  variant,
   ...props
-}: useRender.ComponentProps<"div">) {
+}: useRender.ComponentProps<"div"> &
+  VariantProps<typeof bubbleContentVariants>) {
   return useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
-        className: cn(
-          "wrap-break-word w-fit min-w-0 max-w-full overflow-hidden rounded-xl border border-transparent px-3 py-2 text-sm leading-relaxed group-data-[align=end]/bubble:self-end",
-          className
-        ),
+        className: cn(bubbleContentVariants({ variant }), className),
       },
       props
     ),
@@ -62,4 +77,4 @@ function BubbleContent({
   });
 }
 
-export { Bubble, BubbleContent };
+export { Bubble, BubbleContent, bubbleVariants, bubbleContentVariants };
