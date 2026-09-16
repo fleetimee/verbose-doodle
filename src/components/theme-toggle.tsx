@@ -39,7 +39,7 @@ export function ThemeToggle() {
         <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 shadow-sm transition-shadow hover:shadow-md">
           <HugeiconsIcon
             className={cn(
-              "h-4 w-4 transition-[color,transform] duration-200 ease-[var(--ease-out)] motion-reduce:transition-none",
+              "size-4 transition-all duration-200 ease-out motion-reduce:transition-none",
               isDark
                 ? "scale-90 text-muted-foreground"
                 : "scale-100 text-amber-500"
@@ -55,7 +55,7 @@ export function ThemeToggle() {
           />
           <HugeiconsIcon
             className={cn(
-              "h-4 w-4 transition-[color,transform] duration-200 ease-[var(--ease-out)] motion-reduce:transition-none",
+              "size-4 transition-all duration-200 ease-out motion-reduce:transition-none",
               isDark
                 ? "scale-100 text-blue-400"
                 : "scale-90 text-muted-foreground"

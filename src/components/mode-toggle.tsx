@@ -18,12 +18,12 @@ export function ModeToggle() {
       <DropdownMenuTrigger asChild>
         <Button size="icon" variant="outline">
           <HugeiconsIcon
-            className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 opacity-100 transition-[opacity,transform] duration-[160ms] ease-[var(--ease-out)] motion-reduce:transition-none dark:-rotate-90 dark:scale-[0.92] dark:opacity-0"
+            className="size-[1.2rem] rotate-0 scale-100 opacity-100 transition-all duration-150 ease-out motion-reduce:transition-none dark:-rotate-90 dark:scale-90 dark:opacity-0"
             icon={Sun03Icon}
             strokeWidth={2}
           />
           <HugeiconsIcon
-            className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-[0.92] opacity-0 transition-[opacity,transform] duration-[160ms] ease-[var(--ease-out)] motion-reduce:transition-none dark:rotate-0 dark:scale-100 dark:opacity-100"
+            className="absolute size-[1.2rem] rotate-90 scale-90 opacity-0 transition-all duration-150 ease-out motion-reduce:transition-none dark:rotate-0 dark:scale-100 dark:opacity-100"
             icon={MoonIcon}
             strokeWidth={2}
           />

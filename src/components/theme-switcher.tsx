@@ -106,7 +106,7 @@ export const ThemeSwitcher = ({
             )}
             <div
               className={cn(
-                "transition-[opacity,transform] duration-200 ease-[var(--ease-in-out)] motion-reduce:transition-none",
+                "transition-all duration-200 ease-in-out motion-reduce:transition-none",
                 isActive ? "scale-110 opacity-100" : "scale-100 opacity-60"
               )}
             >

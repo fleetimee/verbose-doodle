@@ -75,7 +75,7 @@ export function NotFoundPage() {
             <div className="absolute inset-x-8 bottom-2 h-24 rounded-full bg-primary/10 blur-3xl sm:bottom-4 sm:h-32" />
             <img
               alt=""
-              className="relative h-full w-full object-contain object-bottom drop-shadow-[0_16px_12px_rgba(0,0,0,0.18)]"
+              className="relative h-full w-full object-contain object-bottom drop-shadow-2xl"
               height={1536}
               src="/brand/biller-operator-mascot-not-found.png"
               width={1024}

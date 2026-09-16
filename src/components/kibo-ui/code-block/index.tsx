@@ -189,7 +189,7 @@ const lineNumberClassNames = cn(
   "[&_.line]:before:[counter-increment:line]",
   "[&_.line]:before:w-4",
   "[&_.line]:before:mr-4",
-  "[&_.line]:before:text-[13px]",
+  "[&_.line]:before:text-xs",
   "[&_.line]:before:text-right",
   "[&_.line]:before:text-muted-foreground/50",
   "[&_.line]:before:font-mono",
@@ -197,12 +197,12 @@ const lineNumberClassNames = cn(
 );
 
 const darkModeClassNames = cn(
-  "dark:[&_.shiki]:!text-[var(--shiki-dark)]",
+  "dark:[&_.shiki]:!text-(--shiki-dark)",
   // "dark:[&_.shiki]:!bg-[var(--shiki-dark-bg)]",
   "dark:[&_.shiki]:![font-style:var(--shiki-dark-font-style)]",
   "dark:[&_.shiki]:![font-weight:var(--shiki-dark-font-weight)]",
   "dark:[&_.shiki]:![text-decoration:var(--shiki-dark-text-decoration)]",
-  "dark:[&_.shiki_span]:!text-[var(--shiki-dark)]",
+  "dark:[&_.shiki_span]:!text-(--shiki-dark)",
   "dark:[&_.shiki_span]:![font-style:var(--shiki-dark-font-style)]",
   "dark:[&_.shiki_span]:![font-weight:var(--shiki-dark-font-weight)]",
   "dark:[&_.shiki_span]:![text-decoration:var(--shiki-dark-text-decoration)]"
@@ -234,7 +234,7 @@ const lineDiffClassNames = cn(
 );
 
 const lineFocusedClassNames = cn(
-  "[&_code:has(.focused)_.line]:blur-[2px]",
+  "[&_code:has(.focused)_.line]:blur-xs",
   "[&_code:has(.focused)_.line.focused]:blur-none"
 );
 

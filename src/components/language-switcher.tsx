@@ -64,7 +64,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
           <motion.button
             aria-label={title}
             aria-pressed={isActive}
-            className="relative flex h-6 w-7 items-center justify-center rounded-full font-medium text-[11px] transition-colors"
+            className="relative flex h-6 w-7 items-center justify-center rounded-full font-medium text-xs transition-colors"
             key={key}
             onClick={() => handleLanguageClick(key)}
             title={title}
