@@ -61,20 +61,21 @@ function JwtAlgorithmSelect({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <Label className="text-xs" htmlFor="jwt-algorithm">
+      <Label htmlFor="jwt-algorithm" size="sm">
         {copy.algorithm}
       </Label>
       <Select onValueChange={onValueChange} value={value}>
         <SelectTrigger
-          className="w-36 bg-background font-mono text-xs shadow-none"
+          className="w-36"
           id="jwt-algorithm"
           size="sm"
+          variant="mono-sm"
         >
           <SelectValue>{algorithmDisplayName(value)}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {JWT_ALGORITHMS.map((algorithm) => (
-            <SelectItem className="font-mono" key={algorithm} value={algorithm}>
+            <SelectItem key={algorithm} value={algorithm} variant="mono">
               {algorithmDisplayName(algorithm)}
             </SelectItem>
           ))}

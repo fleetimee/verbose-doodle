@@ -164,7 +164,6 @@ function OutputCard({
           aria-label={formatMessage(messages.dateConverter.copyOutput, {
             format: definition.label,
           })}
-          className="rounded-md"
           onClick={onCopy}
           size="icon-sm"
           type="button"
@@ -344,13 +343,14 @@ export function DateConverter() {
       >
         <div className="grid gap-5 xl:grid-cols-[180px_minmax(0,1fr)_260px_auto] xl:items-end">
           <div className="space-y-2">
-            <Label className="text-xs" htmlFor="date-input-mode">
+            <Label htmlFor="date-input-mode" size="sm">
               {messages.dateConverter.inputModeLabel}
             </Label>
             <Select onValueChange={changeInputMode} value={inputMode}>
               <SelectTrigger
-                className="w-full rounded-md bg-background shadow-none"
+                className="w-full"
                 id="date-input-mode"
+                variant="surface"
               >
                 <SelectValue>{INPUT_MODE_LABELS[inputMode]}</SelectValue>
               </SelectTrigger>
@@ -364,23 +364,24 @@ export function DateConverter() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs" htmlFor="date-converter-input">
+            <Label htmlFor="date-converter-input" size="sm">
               {messages.dateConverter.inputLabel}
             </Label>
             <Input
               aria-describedby="date-converter-help"
               aria-invalid={error ? true : undefined}
               autoComplete="off"
-              className="h-12 rounded-md bg-background px-4 font-mono text-base shadow-none md:text-base"
               id="date-converter-input"
               onChange={(event) => setInput(event.currentTarget.value)}
               placeholder={messages.dateConverter.inputPlaceholder}
+              size="xl"
               spellCheck={false}
               value={input}
+              variant="mono-flat"
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs" htmlFor="date-timezone">
+            <Label htmlFor="date-timezone" size="sm">
               {messages.dateConverter.timezoneLabel}
             </Label>
             <TimezoneCombobox
@@ -398,8 +399,9 @@ export function DateConverter() {
             />
           </div>
           <Button
-            className="h-12 min-w-28 rounded-md active:translate-y-px"
+            className="min-w-28 active:translate-y-px"
             onClick={() => convert()}
+            size="xl"
             type="button"
           >
             <Clock3 data-icon="inline-start" />
@@ -414,7 +416,6 @@ export function DateConverter() {
             {messages.dateConverter.inputHelp}
           </p>
           <Button
-            className="rounded-md"
             onClick={useCurrentTime}
             size="sm"
             type="button"

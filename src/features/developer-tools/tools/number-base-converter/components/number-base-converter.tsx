@@ -182,7 +182,6 @@ function OutputCard({
           aria-label={formatMessage(messages.numberBaseConverter.copyOutput, {
             base: definition.label.toLowerCase(),
           })}
-          className="rounded-md"
           onClick={onCopy}
           size="icon-sm"
           type="button"
@@ -350,13 +349,14 @@ export function NumberBaseConverter() {
       >
         <div className="grid gap-5 lg:grid-cols-[180px_minmax(0,1fr)_auto] lg:items-end">
           <div className="space-y-2">
-            <Label className="text-xs" htmlFor="number-input-base">
+            <Label htmlFor="number-input-base" size="sm">
               {messages.numberBaseConverter.inputBaseLabel}
             </Label>
             <Select onValueChange={changeBase} value={String(inputBase)}>
               <SelectTrigger
-                className="w-full rounded-md bg-background shadow-none"
+                className="w-full"
                 id="number-input-base"
+                variant="surface"
               >
                 <SelectValue>{BASE_LABELS[inputBase]}</SelectValue>
               </SelectTrigger>
@@ -370,24 +370,26 @@ export function NumberBaseConverter() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs" htmlFor="number-base-value">
+            <Label htmlFor="number-base-value" size="sm">
               {messages.numberBaseConverter.valueLabel}
             </Label>
             <Input
               aria-describedby="number-base-help"
               aria-invalid={error ? true : undefined}
               autoComplete="off"
-              className="h-12 rounded-md bg-background px-4 font-mono text-lg shadow-none md:text-lg"
               id="number-base-value"
               onChange={(event) => setInput(event.currentTarget.value)}
               placeholder={messages.numberBaseConverter.valuePlaceholder}
+              size="xl"
               spellCheck={false}
               value={input}
+              variant="mono-flat"
             />
           </div>
           <Button
-            className="h-12 min-w-28 rounded-md active:translate-y-px"
+            className="min-w-28 active:translate-y-px"
             onClick={convert}
+            size="xl"
             type="button"
           >
             <Hash data-icon="inline-start" />
@@ -397,7 +399,7 @@ export function NumberBaseConverter() {
 
         <div className="mt-5 grid gap-4 border-t pt-5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center">
           <div>
-            <Label className="text-xs">
+            <Label size="sm">
               {messages.numberBaseConverter.bitWidthLabel}
             </Label>
             <ToggleGroup
@@ -428,7 +430,7 @@ export function NumberBaseConverter() {
             {messages.numberBaseConverter.inputHelp}
           </p>
           <div>
-            <Label className="text-xs">
+            <Label size="sm">
               {messages.numberBaseConverter.representationLabel}
             </Label>
             <ToggleGroup

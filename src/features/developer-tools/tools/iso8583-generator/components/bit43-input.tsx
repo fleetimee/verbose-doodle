@@ -144,7 +144,7 @@ export function Bit43Input({
           {...props}
           aria-describedby={inputDescription}
           className={cn(
-            "relative z-10 h-auto min-h-11 resize-none overflow-hidden break-all bg-transparent py-2 font-mono text-transparent leading-6 caret-foreground selection:bg-primary/20 selection:text-transparent dark:bg-transparent",
+            "relative z-10 h-auto min-h-11 resize-none overflow-hidden break-all",
             className
           )}
           onChange={onChange}
@@ -157,6 +157,7 @@ export function Bit43Input({
           ref={inputRef}
           rows={1}
           value={value}
+          variant="overlay"
           wrap="soft"
         />
       </div>

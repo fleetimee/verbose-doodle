@@ -162,7 +162,7 @@ export function JsonSchemaValidator() {
       >
         <div className="grid gap-4 py-4 sm:grid-cols-2 sm:items-end sm:gap-6 md:pr-6">
           <div className="space-y-2">
-            <Label className="text-xs" htmlFor="schema-dialect">
+            <Label htmlFor="schema-dialect" size="sm">
               {messages.jsonSchemaValidator.schemaDraftLabel}
             </Label>
             <Select
@@ -170,8 +170,9 @@ export function JsonSchemaValidator() {
               value={dialect}
             >
               <SelectTrigger
-                className="w-full rounded-md bg-background shadow-none"
+                className="w-full"
                 id="schema-dialect"
+                variant="surface"
               >
                 <SelectValue>{dialectLabels[dialect]}</SelectValue>
               </SelectTrigger>
@@ -193,8 +194,9 @@ export function JsonSchemaValidator() {
             />
             <div>
               <Label
-                className="cursor-pointer text-xs"
+                className="cursor-pointer"
                 htmlFor="format-assertions"
+                size="sm"
               >
                 {messages.jsonSchemaValidator.assertFormatsLabel}
               </Label>
@@ -210,7 +212,7 @@ export function JsonSchemaValidator() {
             {messages.jsonSchemaValidator.shortcutLabel}
           </span>
           <Button
-            className="min-w-28 rounded-md active:translate-y-px"
+            className="min-w-28 active:translate-y-px"
             disabled={isValidating}
             onClick={validate}
             type="button"

@@ -182,13 +182,14 @@ export function JsonYamlConverter() {
       >
         <div className="grid gap-4 py-4 sm:grid-cols-[minmax(0,220px)_1fr] sm:items-end sm:gap-6 lg:pr-6">
           <div className="space-y-2">
-            <Label className="text-xs" htmlFor="source-format">
+            <Label htmlFor="source-format" size="sm">
               {messages.jsonYamlConverter.sourceFormatLabel}
             </Label>
             <Select onValueChange={changeFormat} value={sourceFormat}>
               <SelectTrigger
-                className="w-full rounded-md bg-background shadow-none"
+                className="w-full"
                 id="source-format"
+                variant="surface"
               >
                 <SelectValue>{sourceFormatLabel}</SelectValue>
               </SelectTrigger>
@@ -214,7 +215,7 @@ export function JsonYamlConverter() {
           <div className="flex items-center gap-2">
             <Button
               aria-label={messages.jsonYamlConverter.swap}
-              className="rounded-md active:translate-y-px"
+              className="active:translate-y-px"
               disabled={!canSwap}
               onClick={swapFormats}
               size="icon"
@@ -227,7 +228,7 @@ export function JsonYamlConverter() {
               />
             </Button>
             <Button
-              className="min-w-28 rounded-md active:translate-y-px"
+              className="min-w-28 active:translate-y-px"
               onClick={convert}
               type="button"
             >

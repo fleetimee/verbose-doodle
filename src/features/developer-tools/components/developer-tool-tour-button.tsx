@@ -92,7 +92,7 @@ export function DeveloperToolTourButton({
 
   return (
     <Button
-      className="w-fit rounded-md"
+      className="w-fit"
       onClick={handleStartTour}
       size="sm"
       type="button"

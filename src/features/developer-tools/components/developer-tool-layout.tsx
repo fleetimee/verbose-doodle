@@ -112,14 +112,11 @@ function ActionButtons({
       {tour}
       {onReset && resetLabel ? (
         <Button
-          className={cn(
-            "h-8 gap-2 font-normal text-muted-foreground text-xs transition-colors hover:text-foreground",
-            isHeader ? "px-3" : "w-full justify-start px-2.5"
-          )}
+          className={isHeader ? undefined : "w-full justify-start"}
           onClick={onReset}
           size="sm"
           type="button"
-          variant={isHeader ? "outline" : "ghost"}
+          variant={isHeader ? "tool-action" : "tool-action-ghost"}
         >
           <RotateCcw className="size-3.5 text-muted-foreground/70" />
           <span>{resetLabel}</span>
@@ -128,14 +125,11 @@ function ActionButtons({
       {extraActions}
       {onClear && clearLabel ? (
         <Button
-          className={cn(
-            "h-8 gap-2 font-normal text-muted-foreground text-xs transition-colors hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive",
-            isHeader ? "px-3" : "w-full justify-start px-2.5"
-          )}
+          className={isHeader ? undefined : "w-full justify-start"}
           onClick={onClear}
           size="sm"
           type="button"
-          variant={isHeader ? "outline" : "ghost"}
+          variant={isHeader ? "tool-destructive" : "tool-destructive-ghost"}
         >
           <Eraser className="size-3.5 text-muted-foreground/70" />
           <span>{clearLabel}</span>

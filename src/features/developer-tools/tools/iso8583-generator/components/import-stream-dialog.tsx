@@ -72,7 +72,7 @@ export function ImportStreamDialog({ onImport }: ImportStreamDialogProps) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button className="gap-1.5" size="sm" variant="outline">
+        <Button size="sm" variant="outline">
           <Binary className="size-3.5" />
           {messages.iso8583Generator.importStreamButton}
         </Button>
@@ -107,7 +107,7 @@ export function ImportStreamDialog({ onImport }: ImportStreamDialogProps) {
           ) : null}
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter size="compact">
           <Button onClick={() => setOpen(false)} variant="ghost">
             {messages.iso8583Generator.importStreamCancel}
           </Button>

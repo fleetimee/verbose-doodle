@@ -55,11 +55,11 @@ export function TimezoneCombobox({
       <PopoverTrigger asChild>
         <Button
           aria-expanded={open}
-          className="w-full justify-between rounded-md bg-background font-mono font-normal shadow-none"
+          className="w-full justify-between"
           id={id}
           role="combobox"
           type="button"
-          variant="outline"
+          variant="mono-flat"
         >
           <span className="truncate">{value}</span>
           <HugeiconsIcon
@@ -69,7 +69,11 @@ export function TimezoneCombobox({
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[var(--anchor-width)] p-0">
+      <PopoverContent
+        align="start"
+        className="w-[var(--anchor-width)]"
+        size="none"
+      >
         <Command>
           <CommandInput
             onValueChange={setQuery}

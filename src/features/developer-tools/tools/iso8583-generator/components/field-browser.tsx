@@ -109,7 +109,7 @@ function ViewSelect({
   readonly onChange: (value: string) => void;
 }) {
   return (
-    <Field className="gap-1.5">
+    <Field size="sm">
       <Label htmlFor={id}>{label}</Label>
       <Select onValueChange={onChange} value={value}>
         <SelectTrigger className="w-full" id={id}>
@@ -181,8 +181,11 @@ export function Iso8583FieldBrowser({
   return (
     <>
       <div className="flex flex-col gap-3 border-b px-5 py-4 sm:px-7">
-        <FieldGroup className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(180px,1.5fr)_repeat(3,minmax(0,1fr))]">
-          <Field className="gap-1.5">
+        <FieldGroup
+          className="grid sm:grid-cols-2 lg:grid-cols-[minmax(180px,1.5fr)_repeat(3,minmax(0,1fr))]"
+          size="sm"
+        >
+          <Field size="sm">
             <Label htmlFor="iso-field-search">{copy.fieldSearch}</Label>
             <Input
               id="iso-field-search"
@@ -239,7 +242,7 @@ export function Iso8583FieldBrowser({
         ) : null}
         {groups.map((group) => {
           const grid = (
-            <FieldGroup className="grid gap-x-8 gap-y-7 sm:grid-cols-2">
+            <FieldGroup className="grid sm:grid-cols-2" size="wide">
               {group.fields.map(renderField)}
             </FieldGroup>
           );
@@ -260,7 +263,7 @@ export function Iso8583FieldBrowser({
               open={open}
             >
               <h3>
-                <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 border-b pb-3 text-left font-medium text-sm focus-visible:outline-2 focus-visible:outline-ring">
+                <CollapsibleTrigger variant="header">
                   <span className="flex min-w-0 items-center gap-2.5">
                     <GroupIcon grouping={grouping} groupKey={group.key} />
                     {groupLabel(group.key, grouping)}{" "}
@@ -278,7 +281,7 @@ export function Iso8583FieldBrowser({
                   </span>
                 </CollapsibleTrigger>
               </h3>
-              <CollapsibleContent className="motion-reduce:transition-none">
+              <CollapsibleContent>
                 <div className="pt-5">{grid}</div>
               </CollapsibleContent>
             </Collapsible>

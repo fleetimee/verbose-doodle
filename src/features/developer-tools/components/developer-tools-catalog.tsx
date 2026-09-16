@@ -244,15 +244,12 @@ export function DeveloperToolsCatalog() {
           <Button
             aria-label={messages.developerTools.allTools}
             aria-pressed={activeCategory === ALL_CATEGORIES}
-            className={cn(
-              "h-7 text-xs",
-              activeCategory === ALL_CATEGORIES &&
-                "bg-background text-foreground shadow-xs"
-            )}
             onClick={() => setSelectedCategory(ALL_CATEGORIES)}
-            size="sm"
+            size="tab-sm"
             type="button"
-            variant={activeCategory === ALL_CATEGORIES ? "secondary" : "ghost"}
+            variant={
+              activeCategory === ALL_CATEGORIES ? "segment-active" : "ghost"
+            }
           >
             {messages.developerTools.allTools}
             <span
@@ -266,16 +263,13 @@ export function DeveloperToolsCatalog() {
             <Button
               aria-label={category.name}
               aria-pressed={activeCategory === category.id}
-              className={cn(
-                "h-7 text-xs",
-                activeCategory === category.id &&
-                  "bg-background text-foreground shadow-xs"
-              )}
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
-              size="sm"
+              size="tab-sm"
               type="button"
-              variant={activeCategory === category.id ? "secondary" : "ghost"}
+              variant={
+                activeCategory === category.id ? "segment-active" : "ghost"
+              }
             >
               {category.name}
               <span
@@ -299,30 +293,20 @@ export function DeveloperToolsCatalog() {
             <Button
               aria-label={messages.developerTools.gridView}
               aria-pressed={activeView === "grid"}
-              className={cn(
-                "size-7",
-                activeView === "grid" &&
-                  "bg-background text-foreground shadow-xs"
-              )}
               onClick={() => setView("grid")}
-              size="icon-sm"
+              size="icon-7"
               type="button"
-              variant={activeView === "grid" ? "secondary" : "ghost"}
+              variant={activeView === "grid" ? "segment-active" : "ghost"}
             >
               <Grid2X2 className="size-3.5" />
             </Button>
             <Button
               aria-label={messages.developerTools.listView}
               aria-pressed={activeView === "list"}
-              className={cn(
-                "size-7",
-                activeView === "list" &&
-                  "bg-background text-foreground shadow-xs"
-              )}
               onClick={() => setView("list")}
-              size="icon-sm"
+              size="icon-7"
               type="button"
-              variant={activeView === "list" ? "secondary" : "ghost"}
+              variant={activeView === "list" ? "segment-active" : "ghost"}
             >
               <HugeiconsIcon
                 className="size-3.5"

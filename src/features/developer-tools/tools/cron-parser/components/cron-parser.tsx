@@ -184,23 +184,24 @@ export function CronParser() {
       >
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)_auto] lg:items-end">
           <div className="space-y-2">
-            <Label className="text-xs" htmlFor="cron-expression">
+            <Label htmlFor="cron-expression" size="sm">
               {messages.cronParser.expressionLabel}
             </Label>
             <Input
               aria-describedby="cron-expression-help"
               aria-invalid={error ? true : undefined}
               autoComplete="off"
-              className="h-12 rounded-md bg-background px-4 font-mono text-base shadow-none md:text-base"
               id="cron-expression"
               onChange={(event) => setExpression(event.currentTarget.value)}
               placeholder={messages.cronParser.expressionPlaceholder}
+              size="xl"
               spellCheck={false}
               value={expression}
+              variant="mono-flat"
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs" htmlFor="cron-timezone">
+            <Label htmlFor="cron-timezone" size="sm">
               {messages.cronParser.timezoneLabel}
             </Label>
             <TimezoneCombobox
@@ -216,8 +217,9 @@ export function CronParser() {
             />
           </div>
           <Button
-            className="h-12 min-w-28 rounded-md active:translate-y-px"
+            className="min-w-28 active:translate-y-px"
             onClick={() => parse()}
+            size="xl"
             type="button"
           >
             <HugeiconsIcon
