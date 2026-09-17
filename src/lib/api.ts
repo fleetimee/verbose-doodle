@@ -11,7 +11,7 @@ export type ApiError = {
 
 export type ApiSession = {
   getSnapshot: () => { readonly accessToken: string | null };
-  refresh: () => Promise<unknown>;
+  refresh: () => Promise<void>;
   signOut: () => void;
 };
 

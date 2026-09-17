@@ -30,9 +30,11 @@ export type SessionTokenStorage = {
   clear: () => void;
 };
 
+export type SessionScheduleHandle = number | ReturnType<typeof setTimeout>;
+
 export type SessionScheduler = {
-  schedule: (callback: () => void, delayMs: number) => unknown;
-  cancel: (handle: unknown) => void;
+  schedule: (callback: () => void, delayMs: number) => SessionScheduleHandle;
+  cancel: (handle: SessionScheduleHandle) => void;
 };
 
 export type AuthenticatedSessionOptions = {
@@ -99,7 +101,7 @@ export function createAuthenticatedSession(
   options: AuthenticatedSessionOptions
 ) {
   const listeners = new Set<Listener>();
-  let expiryHandle: unknown;
+  let expiryHandle: SessionScheduleHandle | undefined;
   let refreshOperation: Promise<AuthenticatedSessionSnapshot> | null = null;
   let disposed = false;
   let snapshot: AuthenticatedSessionSnapshot = {

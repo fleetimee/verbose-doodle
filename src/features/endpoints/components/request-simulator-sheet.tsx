@@ -475,7 +475,7 @@ export function RequestSimulatorSheet({
                 <Badge
                   className="max-w-[45%]"
                   mono
-                  shape="rounded"
+                  radius="rounded"
                   size="lg"
                   variant="secondary"
                 >
@@ -571,7 +571,7 @@ export function RequestSimulatorSheet({
                     <div className="flex flex-wrap gap-2 rounded-md border bg-muted/25 p-2">
                       <Badge
                         mono
-                        shape="rounded"
+                        radius="rounded"
                         size="metric"
                         variant={
                           result.status < SUCCESS_STATUS_THRESHOLD
@@ -589,7 +589,7 @@ export function RequestSimulatorSheet({
                       </Badge>
                       <Badge
                         mono
-                        shape="rounded"
+                        radius="rounded"
                         size="metric"
                         variant="secondary"
                       >
@@ -598,7 +598,7 @@ export function RequestSimulatorSheet({
                       </Badge>
                       <Badge
                         mono
-                        shape="rounded"
+                        radius="rounded"
                         size="metric"
                         variant="outline"
                       >
@@ -608,7 +608,7 @@ export function RequestSimulatorSheet({
                       <Badge
                         className="max-w-full sm:max-w-52"
                         mono
-                        shape="rounded"
+                        radius="rounded"
                         size="metric"
                         variant="outline"
                       >
@@ -626,7 +626,7 @@ export function RequestSimulatorSheet({
                           <Badge
                             className="cursor-default"
                             mono
-                            shape="rounded"
+                            radius="rounded"
                             size="metric"
                             variant="outline"
                           >

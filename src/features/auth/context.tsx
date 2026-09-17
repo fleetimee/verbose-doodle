@@ -66,7 +66,7 @@ function createBrowserSession(): AuthenticatedSession {
       return response.data;
     },
     scheduler: {
-      cancel: (handle) => globalThis.clearTimeout(handle as number),
+      cancel: (handle) => globalThis.clearTimeout(handle),
       schedule: (callback, delayMs) => globalThis.setTimeout(callback, delayMs),
     },
     storage: {
@@ -96,7 +96,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const nextSession = createBrowserSession();
     setDefaultApiSession({
       getSnapshot: nextSession.getSnapshot,
-      refresh: nextSession.refresh,
+      refresh: async () => {
+        await nextSession.refresh();
+      },
       signOut: () => {
         nextSession.signOut();
         navigate("/login?reason=expired-during-request");

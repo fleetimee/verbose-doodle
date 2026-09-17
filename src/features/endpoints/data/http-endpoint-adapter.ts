@@ -50,7 +50,7 @@ function payload(response: unknown): ApiRecord {
   return isRecord(response.data) ? response.data : response;
 }
 
-function value(record: ApiRecord, ...keys: string[]): unknown {
+function value(record: ApiRecord, ...keys: string[]) {
   for (const key of keys) {
     if (record[key] !== undefined) {
       return record[key];
@@ -299,9 +299,10 @@ function trafficPayload(response: unknown): ApiRecord {
   return isRecord(nested) ? nested : data;
 }
 
-function metricsPayload(response: unknown): unknown {
+function metricsPayload(response: unknown): ApiRecord {
   const data = payload(response);
-  return value(data, "metrics", "summary") ?? data;
+  const nested = value(data, "metrics", "summary");
+  return isRecord(nested) ? nested : data;
 }
 
 function errorStatus(error: unknown): number | undefined {

@@ -134,12 +134,12 @@ export function AddEndpointSheet({
             initialBillerSlug={initialBillerSlug}
             isLoadingBillers={isLoadingBillers}
             onAddBiller={() => setIsAddBillerOpen(true)}
-            onDisableConflictingEndpoint={(endpointSlug) =>
-              updateEndpoint.mutateAsync({
+            onDisableConflictingEndpoint={async (endpointSlug) => {
+              await updateEndpoint.mutateAsync({
                 changes: { enabled: false },
                 endpointSlug,
-              })
-            }
+              });
+            }}
             onSubmit={handleFormSubmit}
             ref={formRef}
           >

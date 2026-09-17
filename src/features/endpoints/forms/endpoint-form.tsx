@@ -89,7 +89,7 @@ type EndpointFormProps = {
     input: EndpointAvailabilityInput
   ) => Promise<EndpointAvailability>;
   availabilityExcludeSlug?: string;
-  onDisableConflictingEndpoint?: (endpointSlug: string) => Promise<unknown>;
+  onDisableConflictingEndpoint?: (endpointSlug: string) => Promise<void>;
   children?: React.ReactNode;
 };
 

@@ -39,7 +39,7 @@ const badgeVariants = cva(
         lg: "px-2.5 py-1 text-xs",
         metric: "h-9 min-w-0 justify-start gap-1.5 px-2.5 py-1 text-xs",
       },
-      shape: {
+      radius: {
         default: "rounded-full",
         rounded: "rounded-md",
       },
@@ -50,7 +50,7 @@ const badgeVariants = cva(
     defaultVariants: {
       variant: "default",
       size: "default",
-      shape: "default",
+      radius: "default",
     },
   }
 )
@@ -59,7 +59,7 @@ function Badge({
   className,
   variant,
   size = "default",
-  shape = "default",
+  radius = "default",
   mono,
   render,
   ...props
@@ -70,7 +70,7 @@ function Badge({
     props: mergeProps<"span">(
       {
         "data-slot": "badge",
-        className: cn(badgeVariants({ variant, size, shape, mono }), className),
+        className: cn(badgeVariants({ variant, size, radius, mono }), className),
       } as React.ComponentProps<"span">,
       props
     ),
