@@ -78,15 +78,28 @@ export function parseDashboardVisitEvent(
     return null;
   }
 
+  const payload: {
+    ipAddress?: string;
+    role?: "ADMIN" | "USER";
+    userId: string;
+    username: string;
+    visitId: string;
+    visitedAt: string;
+  } = {
+    userId,
+    username,
+    visitId,
+    visitedAt,
+  };
+  if (ipAddress) {
+    payload.ipAddress = ipAddress;
+  }
+  if (role === "ADMIN" || role === "USER") {
+    payload.role = role;
+  }
+
   return {
-    payload: {
-      ...(ipAddress ? { ipAddress } : {}),
-      ...(role === "ADMIN" || role === "USER" ? { role } : {}),
-      userId,
-      username,
-      visitId,
-      visitedAt,
-    },
+    payload,
     type: DASHBOARD_VISIT_EVENT_TYPE,
   };
 }

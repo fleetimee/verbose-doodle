@@ -226,11 +226,13 @@ export function parseNdefMessage(
   metadata: { readonly timestamp?: string; readonly uid?: Uint8Array } = {}
 ): NdefScanResult {
   const timestamp = metadata.timestamp ?? new Date().toISOString();
-  const base = {
+  const base: { rawNdef: string; timestamp: string; uid?: string } = {
     rawNdef: toHex(raw),
     timestamp,
-    ...(metadata.uid ? { uid: toHex(metadata.uid) } : {}),
   };
+  if (metadata.uid) {
+    base.uid = toHex(metadata.uid);
+  }
 
   try {
     const records = parseRecords(raw);
@@ -266,18 +268,19 @@ export function parseNdefMessage(
     } else if (text) {
       decodingStatus = "decoded";
     }
-    return {
+    const result: NdefScanResult = {
       ...base,
-      ...(text ? { decodedText: text } : {}),
       decodingStatus,
       records,
-      ...(hasUnsupportedRecord
-        ? {
-            warning:
-              "One or more NDEF record types are not decoded by this inspector; raw data is preserved.",
-          }
-        : {}),
     };
+    if (text) {
+      result.decodedText = text;
+    }
+    if (hasUnsupportedRecord) {
+      result.warning =
+        "One or more NDEF record types are not decoded by this inspector; raw data is preserved.";
+    }
+    return result;
   } catch (error) {
     return {
       ...base,

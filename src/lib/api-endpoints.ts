@@ -34,12 +34,13 @@ export const API_ENDPOINTS = {
       visits: "/api/dashboard/visits",
     },
     endpoints: {
-      availability: (method: string, url: string, excludeSlug?: string) =>
-        `/api/endpoint/availability?${new URLSearchParams({
-          ...(excludeSlug ? { excludeSlug } : {}),
-          method,
-          url,
-        })}`,
+      availability: (method: string, url: string, excludeSlug?: string) => {
+        const search = new URLSearchParams({ method, url });
+        if (excludeSlug) {
+          search.set("excludeSlug", excludeSlug);
+        }
+        return `/api/endpoint/availability?${search}`;
+      },
       create: "/api/endpoint",
       delete: (slug: string) => `/api/endpoint/${slug}`,
       detail: (slug: string) => `/api/endpoint/${slug}`,

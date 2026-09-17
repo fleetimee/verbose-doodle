@@ -512,12 +512,13 @@ function persistConversationMessages(messagesToPersist: ConversationMessage[]) {
     }
 
     const serializableMessages: PersistedConversationMessage[] =
-      messagesToPersist.map(({ actions, ...message }) => ({
-        ...message,
-        ...(actions?.length
-          ? { actionIds: actions.map((action) => action.id) }
-          : {}),
-      }));
+      messagesToPersist.map(({ actions, ...message }) => {
+        const item: PersistedConversationMessage = { ...message };
+        if (actions?.length) {
+          item.actionIds = actions.map((action) => action.id);
+        }
+        return item;
+      });
 
     storage.setItem(
       overviewConversationStorageKey,

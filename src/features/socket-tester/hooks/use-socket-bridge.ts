@@ -24,6 +24,7 @@ function appendBridgeError(
   message: string,
   error?: unknown
 ) {
+  const metadata = error === undefined ? undefined : { error: String(error) };
   engine.appendLog({
     data: message,
     direction: "err",
@@ -32,7 +33,7 @@ function appendBridgeError(
     protocol: "tcp-client",
     scope: "bridge",
     timestamp: new Date().toLocaleTimeString(),
-    ...(error === undefined ? {} : { metadata: { error: String(error) } }),
+    metadata,
   });
 }
 

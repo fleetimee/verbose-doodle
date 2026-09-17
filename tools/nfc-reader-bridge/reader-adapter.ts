@@ -258,13 +258,18 @@ export class PcscReaderAdapter implements ReaderAdapter {
         return;
       }
       this.supportedReaders.add(message.name);
-      this.listener?.({
+      const status: {
+        readerName: string;
+        readerState: BridgeReaderState;
+        reason?: string;
+      } = {
         readerName: message.name,
         readerState: message.present ? "detected" : "waiting",
-        ...(message.present
-          ? {}
-          : { reason: "The ACS reader is ready and waiting for a tag." }),
-      });
+      };
+      if (!message.present) {
+        status.reason = "The ACS reader is ready and waiting for a tag.";
+      }
+      this.listener?.(status);
       return;
     }
     if (message.type === "reader-end") {

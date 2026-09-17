@@ -60,7 +60,7 @@ export function createBridgeSnapshot(
   scanStatus: BridgeScanStatus,
   latestScan?: NdefScanResult
 ): BridgeSnapshot {
-  return {
+  const snapshot: BridgeSnapshot = {
     bridge: {
       bridgeVersion: config.bridgeVersion,
       capabilities: ["health", "reader-status", "scan", "scan-session"],
@@ -70,8 +70,11 @@ export function createBridgeSnapshot(
     },
     reader,
     scanStatus,
-    ...(latestScan ? { latestScan } : {}),
   };
+  if (latestScan) {
+    snapshot.latestScan = latestScan;
+  }
+  return snapshot;
 }
 
 export function validateBridgeHandshake(

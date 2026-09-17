@@ -680,12 +680,17 @@ export function EndpointDetailPage() {
       updatePayload.method = editedMethod;
     }
 
+    const changes: { url?: string; method?: HttpMethod } = {};
+    if (updatePayload.url) {
+      changes.url = updatePayload.url;
+    }
+    if (updatePayload.method) {
+      changes.method = updatePayload.method;
+    }
+
     updateEndpoint(
       {
-        changes: {
-          ...(updatePayload.url ? { url: updatePayload.url } : {}),
-          ...(updatePayload.method ? { method: updatePayload.method } : {}),
-        },
+        changes,
         endpointSlug: updatePayload.endpointSlug,
       },
       {

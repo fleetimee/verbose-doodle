@@ -470,24 +470,30 @@ export function createHttpEndpointAdapter(
       } satisfies EndpointTrafficLogsResult;
     },
     async updateEndpoint(input) {
-      const response = await transport.patch<
-        unknown,
-        Partial<{
-          enabled: boolean;
-          method: CreateEndpointInput["method"];
-          url: string;
-          biller_slug: string;
-        }>
-      >(API_ENDPOINTS.admin.endpoints.update(input.endpointSlug), {
-        ...(input.changes.enabled === undefined
-          ? {}
-          : { enabled: input.changes.enabled }),
-        ...(input.changes.method ? { method: input.changes.method } : {}),
-        ...(input.changes.url ? { url: input.changes.url } : {}),
-        ...(input.changes.billerSlug
-          ? { biller_slug: input.changes.billerSlug }
-          : {}),
-      });
+      type UpdateEndpointPayload = Partial<{
+        enabled: boolean;
+        method: CreateEndpointInput["method"];
+        url: string;
+        biller_slug: string;
+      }>;
+      const payload: UpdateEndpointPayload = {};
+      if (input.changes.enabled !== undefined) {
+        payload.enabled = input.changes.enabled;
+      }
+      if (input.changes.method) {
+        payload.method = input.changes.method;
+      }
+      if (input.changes.url) {
+        payload.url = input.changes.url;
+      }
+      if (input.changes.billerSlug) {
+        payload.biller_slug = input.changes.billerSlug;
+      }
+
+      const response = await transport.patch<unknown, UpdateEndpointPayload>(
+        API_ENDPOINTS.admin.endpoints.update(input.endpointSlug),
+        payload
+      );
       return endpointFromResponse(response);
     },
     async updateResponse(input) {

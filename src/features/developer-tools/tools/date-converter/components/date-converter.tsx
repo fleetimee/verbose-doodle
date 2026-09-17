@@ -174,16 +174,16 @@ function OutputCard({
               <motion.span
                 animate={{
                   opacity: 1,
-                  ...(shouldReduceMotion ? {} : { scale: 1 }),
+                  scale: 1,
                 }}
                 className="absolute inset-0"
                 exit={{
                   opacity: 0,
-                  ...(shouldReduceMotion ? {} : { scale: 0.95 }),
+                  scale: shouldReduceMotion ? 1 : 0.95,
                 }}
                 initial={{
                   opacity: 0,
-                  ...(shouldReduceMotion ? {} : { scale: 0.95 }),
+                  scale: shouldReduceMotion ? 1 : 0.95,
                 }}
                 key={copied ? "copied" : "idle"}
                 transition={{
