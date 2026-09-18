@@ -64,9 +64,13 @@ import { formatMessage } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
+interface RouteLabelRegistry {
+  [key: string]: string;
+}
+
 function getRouteLabels(
   messages: import("@/lib/i18n").Messages
-): Record<string, string> {
+): RouteLabelRegistry {
   return {
     "cron-parser": messages.cronParser.title,
     "date-converter": messages.dateConverter.title,

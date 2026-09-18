@@ -78,14 +78,16 @@ export function parseDashboardVisitEvent(
     return null;
   }
 
-  const payload: {
+  type MutableDashboardVisitPayload = {
     ipAddress?: string;
     role?: "ADMIN" | "USER";
     userId: string;
     username: string;
     visitId: string;
     visitedAt: string;
-  } = {
+  };
+
+  const payload: MutableDashboardVisitPayload = {
     userId,
     username,
     visitId,

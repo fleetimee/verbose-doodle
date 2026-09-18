@@ -60,10 +60,12 @@ type SecondaryNavigationItem = {
   readonly url: string;
 };
 
-function getSidebarData(messages: import("@/lib/i18n").Messages): {
+type SidebarData = {
   readonly navMain: AppNavigationItem[];
   readonly navSecondary: SecondaryNavigationItem[];
-} {
+};
+
+function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
   return {
     navMain: [
       {

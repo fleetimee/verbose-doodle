@@ -152,8 +152,12 @@ const getStatusIcon = (result: SimulatorResult) =>
     />
   );
 
-const formatHeaders = (headers: Headers): Record<string, string> => {
-  const formattedHeaders: Record<string, string> = {};
+interface RequestHeadersRecord {
+  [headerName: string]: string;
+}
+
+const formatHeaders = (headers: Headers): RequestHeadersRecord => {
+  const formattedHeaders: RequestHeadersRecord = {};
 
   for (const [key, value] of headers.entries()) {
     formattedHeaders[key] = value;
@@ -162,14 +166,14 @@ const formatHeaders = (headers: Headers): Record<string, string> => {
   return formattedHeaders;
 };
 
-const parseHeaders = (value: string): Record<string, string> => {
+const parseHeaders = (value: string): RequestHeadersRecord => {
   const parsed = JSON.parse(value) as unknown;
 
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw new Error(SIMULATOR_MESSAGES.headersMustBeObjectError);
   }
 
-  const headers: Record<string, string> = {};
+  const headers: RequestHeadersRecord = {};
 
   for (const [key, headerValue] of Object.entries(parsed)) {
     if (typeof headerValue !== "string") {

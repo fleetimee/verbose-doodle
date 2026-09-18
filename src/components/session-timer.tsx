@@ -16,11 +16,13 @@ const MILLISECONDS_PER_SECOND = 1000;
 const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = 3600;
 
-function formatDigitalTime(ms: number): {
+type DigitalTime = {
   hours: string;
   minutes: string;
   seconds: string;
-} {
+};
+
+function formatDigitalTime(ms: number): DigitalTime {
   if (ms <= 0) {
     return { hours: "00", minutes: "00", seconds: "00" };
   }

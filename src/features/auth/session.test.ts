@@ -25,10 +25,11 @@ function createHarness(initial?: {
   refreshToken?: string;
 }) {
   let now = 1_000_000;
-  const storage: {
+  type TestSessionStorage = {
     accessToken?: string;
     refreshToken?: string | null;
-  } = { ...initial };
+  };
+  const storage: TestSessionStorage = { ...initial };
   const scheduled: Array<{ callback: () => void; delayMs: number }> = [];
   let cacheClears = 0;
   let refreshCalls = 0;

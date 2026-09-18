@@ -58,7 +58,11 @@ const CONVERTED_MTI_PATTERN = /\b\d{4}[0-9A-Fa-f]{16}/;
 const ESCAPE_PREFIX_PATTERN = /^(\\x[0-9A-Fa-f]{2})+/;
 const WHITESPACE_PATTERN = /\s+/g;
 
-const MTI_CLASSES: Record<string, string> = {
+interface MtiLabelRegistry {
+  readonly [code: string]: string;
+}
+
+const MTI_CLASSES: MtiLabelRegistry = {
   "1": "Authorization",
   "2": "Financial Transaction",
   "3": "File Actions",
@@ -70,7 +74,7 @@ const MTI_CLASSES: Record<string, string> = {
   "9": "Reserved",
 };
 
-const MTI_FUNCTIONS: Record<string, string> = {
+const MTI_FUNCTIONS: MtiLabelRegistry = {
   "0": "Request",
   "1": "Response",
   "2": "Advice",
@@ -79,7 +83,7 @@ const MTI_FUNCTIONS: Record<string, string> = {
   "8": "Response Acknowledgment",
 };
 
-const MTI_ORIGINS: Record<string, string> = {
+const MTI_ORIGINS: MtiLabelRegistry = {
   "0": "Acquirer",
   "1": "Acquirer Repeat",
   "2": "Issuer",
@@ -88,7 +92,7 @@ const MTI_ORIGINS: Record<string, string> = {
   "5": "Other Repeat",
 };
 
-const MTI_COMMON_DESCRIPTIONS: Record<string, string> = {
+const MTI_COMMON_DESCRIPTIONS: MtiLabelRegistry = {
   "0100": "Authorization Request",
   "0110": "Authorization Response",
   "0200": "Financial Transaction Request",
@@ -140,10 +144,17 @@ export function classifyMti(mti: string): MtiClassification {
   };
 }
 
-const STANDARD_FIELD_FALLBACKS: Record<
-  number,
-  { label: string; kind: Iso8583FieldKind; length: number }
-> = {
+export interface Iso8583FieldSpec {
+  readonly kind: Iso8583FieldKind;
+  readonly label: string;
+  readonly length: number;
+}
+
+interface StandardFieldFallbackRegistry {
+  readonly [fieldNumber: number]: Iso8583FieldSpec;
+}
+
+const STANDARD_FIELD_FALLBACKS: StandardFieldFallbackRegistry = {
   1: { kind: "ans", label: "Secondary Bitmap", length: 16 },
   8: { kind: "n", label: "Amount, Cardholder billing fee", length: 8 },
   16: { kind: "n", label: "Date, Conversion", length: 4 },
@@ -174,11 +185,7 @@ const STANDARD_FIELD_FALLBACKS: Record<
   96: { kind: "ans", label: "Key management data", length: 64 },
 };
 
-export function getFieldSpec(fieldNumber: number): {
-  readonly label: string;
-  readonly kind: Iso8583FieldKind;
-  readonly length: number;
-} {
+export function getFieldSpec(fieldNumber: number): Iso8583FieldSpec {
   const dict = ISO8583_FIELD_DICTIONARY[fieldNumber];
   if (dict) {
     return {
@@ -266,10 +273,31 @@ function hexToAscii(hex: string): string {
   return ascii;
 }
 
-function normalizeStream(rawInput: string): {
-  stream: string;
-  streamFormat: "ascii" | "hex";
-} {
+type NormalizedStream = {
+  readonly stream: string;
+  readonly streamFormat: "ascii" | "hex";
+};
+
+type ExtractedLengthHeader = {
+  readonly lengthHeader?: ParsedIso8583Message["lengthHeader"];
+  readonly index: number;
+};
+
+type ExtractedBitmaps = {
+  readonly primaryBitmapHex: string;
+  readonly secondaryBitmapHex?: string;
+  readonly activeBits: number[];
+  readonly bitmapBinary: string;
+  readonly nextIndex: number;
+};
+
+type UnpackedField = {
+  readonly field?: ParsedIso8583Field;
+  readonly nextIndex: number;
+  readonly warning?: string;
+};
+
+function normalizeStream(rawInput: string): NormalizedStream {
   let stream = rawInput.trim();
   let streamFormat: "ascii" | "hex" = "ascii";
 
@@ -299,10 +327,7 @@ function normalizeStream(rawInput: string): {
   return { stream, streamFormat };
 }
 
-function extractLengthHeader(stream: string): {
-  lengthHeader?: ParsedIso8583Message["lengthHeader"];
-  index: number;
-} {
+function extractLengthHeader(stream: string): ExtractedLengthHeader {
   if (ASCII_HEADER_STREAM_PATTERN.test(stream)) {
     const headerStr = stream.slice(0, 4);
     const headerVal = Number.parseInt(headerStr, 10);
@@ -342,16 +367,7 @@ function hexToBinary(hexStr: string): string {
   return binary;
 }
 
-function extractBitmaps(
-  stream: string,
-  startIndex: number
-): {
-  primaryBitmapHex: string;
-  secondaryBitmapHex?: string;
-  activeBits: number[];
-  bitmapBinary: string;
-  nextIndex: number;
-} {
+function extractBitmaps(stream: string, startIndex: number): ExtractedBitmaps {
   const primaryBitmapHex = stream.slice(startIndex, startIndex + 16);
   if (!BITMAP_HEX_PATTERN.test(primaryBitmapHex)) {
     throw new Error(
@@ -406,11 +422,7 @@ function unpackField(
   stream: string,
   startIndex: number,
   bitNumber: number
-): {
-  field?: ParsedIso8583Field;
-  nextIndex: number;
-  warning?: string;
-} {
+): UnpackedField {
   const spec = getFieldSpec(bitNumber);
   let index = startIndex;
   let rawValue = "";

@@ -99,7 +99,11 @@ const MORE_PRESET_IDS: readonly Iso8583PresetId[] = [
   "notification-response",
 ];
 
-const FIELD_EXPLANATIONS: Readonly<Record<number, string>> = {
+interface FieldExplanationRegistry {
+  readonly [fieldNumber: number]: string;
+}
+
+const FIELD_EXPLANATIONS: FieldExplanationRegistry = {
   2: "The card or account number used for this test message. Use synthetic test data only.",
   3: "Identifies the transaction operation. The meaning of each code depends on the selected host profile.",
   4: "The transaction amount in minor units, without a decimal separator. For IDR, 000000010000 represents 10,000.",

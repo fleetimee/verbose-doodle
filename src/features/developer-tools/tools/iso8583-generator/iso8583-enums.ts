@@ -6,9 +6,11 @@ export type Iso8583EnumOption = {
   readonly description?: string;
 };
 
-export const ISO8583_FIELD_ENUMS: Readonly<
-  Record<number, readonly Iso8583EnumOption[]>
-> = {
+export interface Iso8583FieldEnumRegistry {
+  readonly [fieldNumber: number]: readonly Iso8583EnumOption[];
+}
+
+export const ISO8583_FIELD_ENUMS: Iso8583FieldEnumRegistry = {
   // Bit 3: Processing Code (6 numeric digits)
   3: [
     { value: "000000", label: "000000 · Purchase / Goods & Services" },
@@ -205,17 +207,18 @@ export const COMMON_SITUATIONAL_FIELDS: readonly SituationalFieldDefinition[] =
     },
   ];
 
-export const ISO8583_FIELD_DICTIONARY: Readonly<
-  Record<
-    number,
-    {
-      readonly label: string;
-      readonly kind: Iso8583FieldKind;
-      readonly length: number;
-      readonly defaultValue: string;
-    }
-  >
-> = {
+export interface Iso8583FieldDefinition {
+  readonly defaultValue: string;
+  readonly kind: Iso8583FieldKind;
+  readonly label: string;
+  readonly length: number;
+}
+
+export interface Iso8583FieldDictionaryRegistry {
+  readonly [fieldNumber: number]: Iso8583FieldDefinition;
+}
+
+export const ISO8583_FIELD_DICTIONARY: Iso8583FieldDictionaryRegistry = {
   2: {
     label: "Primary account number (PAN)",
     kind: "llvar",

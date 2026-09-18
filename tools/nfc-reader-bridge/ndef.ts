@@ -226,7 +226,12 @@ export function parseNdefMessage(
   metadata: { readonly timestamp?: string; readonly uid?: Uint8Array } = {}
 ): NdefScanResult {
   const timestamp = metadata.timestamp ?? new Date().toISOString();
-  const base: { rawNdef: string; timestamp: string; uid?: string } = {
+  type NdefScanBase = {
+    rawNdef: string;
+    timestamp: string;
+    uid?: string;
+  };
+  const base: NdefScanBase = {
     rawNdef: toHex(raw),
     timestamp,
   };

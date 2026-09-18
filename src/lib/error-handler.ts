@@ -2,10 +2,14 @@ import { toast } from "sonner";
 import type { ApiError } from "@/lib/api";
 import { messages } from "@/lib/i18n";
 
+interface ErrorMessageRegistry {
+  [code: string]: string;
+}
+
 /**
  * Error message mapping for common error codes
  */
-function getErrorMessages(): Record<string, string> {
+function getErrorMessages(): ErrorMessageRegistry {
   return {
     FORBIDDEN: messages.errors.accessDenied,
     NETWORK_ERROR: messages.errors.networkError,
@@ -32,10 +36,14 @@ const HTTP_STATUS = {
   VALIDATION_ERROR: 422,
 } as const;
 
+interface StatusErrorCodeRegistry {
+  [status: number]: string;
+}
+
 /**
  * HTTP status code to error code mapping
  */
-const STATUS_TO_ERROR_CODE: Record<number, string> = {
+const STATUS_TO_ERROR_CODE: StatusErrorCodeRegistry = {
   [HTTP_STATUS.UNAUTHORIZED]: "UNAUTHORIZED",
   [HTTP_STATUS.FORBIDDEN]: "FORBIDDEN",
   [HTTP_STATUS.NOT_FOUND]: "NOT_FOUND",

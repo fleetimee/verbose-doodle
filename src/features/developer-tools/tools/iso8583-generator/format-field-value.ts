@@ -2,17 +2,25 @@ import { DEFAULT_LOCALE } from "@/lib/i18n";
 import type { Iso8583Field } from "./pack-iso8583";
 
 const DIGITS = /^\d+$/;
-const CURRENCIES: Readonly<Record<string, { code: string; decimals: number }>> =
-  {
-    // This host profile represents IDR amounts in whole rupiah.
-    "360": { code: "IDR", decimals: 0 },
-    "840": { code: "USD", decimals: 2 },
-    "978": { code: "EUR", decimals: 2 },
-    "702": { code: "SGD", decimals: 2 },
-    "392": { code: "JPY", decimals: 0 },
-    "458": { code: "MYR", decimals: 2 },
-    "036": { code: "AUD", decimals: 2 },
-  };
+interface CurrencyDefinition {
+  code: string;
+  decimals: number;
+}
+
+interface CurrencyRegistry {
+  readonly [code: string]: CurrencyDefinition;
+}
+
+const CURRENCIES: CurrencyRegistry = {
+  // This host profile represents IDR amounts in whole rupiah.
+  "360": { code: "IDR", decimals: 0 },
+  "840": { code: "USD", decimals: 2 },
+  "978": { code: "EUR", decimals: 2 },
+  "702": { code: "SGD", decimals: 2 },
+  "392": { code: "JPY", decimals: 0 },
+  "458": { code: "MYR", decimals: 2 },
+  "036": { code: "AUD", decimals: 2 },
+};
 
 function readableTime(value: string): string | undefined {
   const hours = Number(value.slice(0, 2));

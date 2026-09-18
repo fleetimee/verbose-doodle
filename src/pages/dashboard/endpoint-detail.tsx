@@ -62,6 +62,7 @@ import { EndpointDetailSkeleton } from "@/features/endpoints/components/endpoint
 import { EndpointMetricsSheet } from "@/features/endpoints/components/endpoint-metrics-sheet";
 import { EndpointTrafficLogViewer } from "@/features/endpoints/components/endpoint-traffic-log-viewer";
 import { ResponseStepper } from "@/features/endpoints/components/response-stepper";
+import type { UpdateEndpointInput } from "@/features/endpoints/data/endpoint-data-adapter";
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
 import type { ResponseFormData } from "@/features/endpoints/schemas/response-schema";
@@ -105,6 +106,10 @@ const ENDPOINT_DETAIL_TOUR_TARGETS = {
   responses: "endpoint-detail-tour-responses",
   trafficLogs: "endpoint-detail-tour-traffic-logs",
 } as const;
+
+type MutableEndpointChanges = {
+  -readonly [K in keyof UpdateEndpointInput["changes"]]: UpdateEndpointInput["changes"][K];
+};
 
 function getHistoryIndex() {
   const index = window.history.state?.idx;
@@ -664,34 +669,20 @@ export function EndpointDetailPage() {
     }
 
     // Build update payload - only include changed fields
-    const updatePayload: {
-      endpointSlug: string;
-      url?: string;
-      method?: HttpMethod;
-    } = {
-      endpointSlug: endpoint.slug,
-    };
+    const changes: MutableEndpointChanges = {};
 
     if (editedUrl.trim() !== endpoint.url) {
-      updatePayload.url = editedUrl.trim();
+      changes.url = editedUrl.trim();
     }
 
     if (editedMethod !== endpoint.method) {
-      updatePayload.method = editedMethod;
-    }
-
-    const changes: { url?: string; method?: HttpMethod } = {};
-    if (updatePayload.url) {
-      changes.url = updatePayload.url;
-    }
-    if (updatePayload.method) {
-      changes.method = updatePayload.method;
+      changes.method = editedMethod;
     }
 
     updateEndpoint(
       {
         changes,
-        endpointSlug: updatePayload.endpointSlug,
+        endpointSlug: endpoint.slug,
       },
       {
         onError: () => {

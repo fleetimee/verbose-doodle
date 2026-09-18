@@ -6,7 +6,11 @@ export interface ClaimDefinition {
   readonly rfc?: string;
 }
 
-export const HEADER_CLAIMS: Record<string, ClaimDefinition> = {
+export interface ClaimRegistry {
+  [claim: string]: ClaimDefinition;
+}
+
+export const HEADER_CLAIMS: ClaimRegistry = {
   alg: {
     name: "Algorithm",
     description: "Cryptographic algorithm used to secure the token (RFC 7515)",
@@ -69,7 +73,7 @@ export const HEADER_CLAIMS: Record<string, ClaimDefinition> = {
   },
 };
 
-export const PAYLOAD_CLAIMS: Record<string, ClaimDefinition> = {
+export const PAYLOAD_CLAIMS: ClaimRegistry = {
   iss: {
     name: "Issuer",
     description: "Identifies the principal that issued the JWT (RFC 7519)",

@@ -595,10 +595,15 @@ function resolveBitmaps(
   return { activeFields, primaryBytes, secondaryBytes };
 }
 
+type ResolvedLengthHeader = {
+  readonly bytes: Uint8Array;
+  readonly display: string;
+};
+
 function resolveLengthHeader(
   request: PackIso8583Request,
   bodyLength: number
-): { readonly bytes: Uint8Array; readonly display: string } {
+): ResolvedLengthHeader {
   if (request.headerType === "none") {
     return { bytes: new Uint8Array(), display: "" };
   }

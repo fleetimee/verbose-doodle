@@ -258,11 +258,13 @@ export class PcscReaderAdapter implements ReaderAdapter {
         return;
       }
       this.supportedReaders.add(message.name);
-      const status: {
-        readerName: string;
+      type MutableReaderStatus = {
+        readerName?: string;
         readerState: BridgeReaderState;
         reason?: string;
-      } = {
+        action?: string;
+      };
+      const status: MutableReaderStatus = {
         readerName: message.name,
         readerState: message.present ? "detected" : "waiting",
       };
