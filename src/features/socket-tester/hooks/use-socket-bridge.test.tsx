@@ -70,22 +70,20 @@ describe("useSocketBridge", () => {
     ticketNumber = 0;
     localStorage.clear();
     localStorage.setItem("auth_token", "full-jwt-value");
-    globalThis.WebSocket = FakeWebSocket as unknown as typeof WebSocket;
-    const fetchMock = (() => {
+    // SAFETY: FakeWebSocket implements mock WebSocket interface for hook testing.
+    globalThis.WebSocket = FakeWebSocket as never;
+    // SAFETY: Mock fetch handler fulfills response without Bun-specific preconnect
+    fetchSpy = spyOn(globalThis, "fetch").mockImplementation((() => {
       ticketNumber += 1;
-      return Promise.resolve({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => ({
+      return Promise.resolve(
+        Response.json({
           data: {
             expiresAt: "2026-07-14T00:00:30Z",
             ticket: `socket-ticket-${ticketNumber}`,
           },
-        }),
-        ok: true,
-        status: 200,
-      } as Response);
-    }) as unknown as typeof fetch;
-    fetchSpy = spyOn(globalThis, "fetch").mockImplementation(fetchMock);
+        })
+      );
+    }) as never);
   });
 
   afterEach(() => {

@@ -253,9 +253,10 @@ async function smokeWebSocket(
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     // Bun's WebSocket client supports custom headers during handshake, while DOM types declare string | string[]
+    // SAFETY: Bun's runtime WebSocket constructor accepts an options object with headers beyond standard DOM protocol strings.
     const socket = new WebSocket(
       `ws://${DEFAULT_NFC_BRIDGE_HOST}:${port}/ws?token=${token}`,
-      { headers: { Origin: origin } } as unknown as string[]
+      { headers: { Origin: origin } } as never
     );
     const timeout = setTimeout(() => {
       socket.close();

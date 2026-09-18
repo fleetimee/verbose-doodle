@@ -80,6 +80,30 @@ export function createNfcBridgeUrl(
   return url.toString();
 }
 
+function createDefaultNfcWebSocket(url: string): NfcWebSocket {
+  const ws = new WebSocket(url);
+  const bridgeSocket: NfcWebSocket = {
+    close: () => ws.close(),
+    get readyState() {
+      return ws.readyState;
+    },
+    onclose: null,
+    onerror: null,
+    onmessage: null,
+    onopen: null,
+    send: (data: string) => ws.send(data),
+  };
+
+  ws.onopen = () => bridgeSocket.onopen?.();
+  ws.onclose = () => bridgeSocket.onclose?.();
+  ws.onerror = () => bridgeSocket.onerror?.();
+  ws.onmessage = (event) => {
+    bridgeSocket.onmessage?.({ data: String(event.data) });
+  };
+
+  return bridgeSocket;
+}
+
 export class NfcBridgeClient {
   private readonly url: string;
   private readonly createSocket: NfcWebSocketFactory;
@@ -93,9 +117,7 @@ export class NfcBridgeClient {
 
   constructor(url: string, createSocket?: NfcWebSocketFactory) {
     this.url = url;
-    this.createSocket =
-      createSocket ??
-      ((nextUrl) => new WebSocket(nextUrl) as unknown as NfcWebSocket);
+    this.createSocket = createSocket ?? createDefaultNfcWebSocket;
   }
 
   subscribe(listener: () => void): () => void {

@@ -62,7 +62,7 @@ const DEFAULT_TIMEOUT = 30_000;
 const DEFAULT_BASE_URL = "";
 const HTTP_STATUS_UNAUTHORIZED = 401;
 
-type ApiFetchImplementation = (
+export type ApiFetchImplementation = (
   input: RequestInfo | URL,
   init?: RequestInit
 ) => Promise<Response>;

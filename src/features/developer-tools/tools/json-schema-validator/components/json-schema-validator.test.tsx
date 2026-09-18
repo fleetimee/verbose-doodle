@@ -46,7 +46,8 @@ describe("JsonSchemaValidator", () => {
   test("loads the example and validates by button and keyboard shortcut", async () => {
     const user = userEvent.setup();
     const fetchMock = mock(async () => successResponse());
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    // SAFETY: Test mock fulfills fetch without Bun-specific preconnect
+    globalThis.fetch = fetchMock as never;
     renderValidator();
 
     expect(screen.getByText("JSON Schema Validator")).toBeDefined();
@@ -76,8 +77,12 @@ describe("JsonSchemaValidator", () => {
 
   test("sends the selected draft and format assertion setting", async () => {
     const user = userEvent.setup();
-    const fetchMock = mock(async () => successResponse());
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    const fetchMock = mock(
+      async (_input?: RequestInfo | URL, _init?: RequestInit) =>
+        successResponse()
+    );
+    // SAFETY: Test mock fulfills fetch without Bun-specific preconnect
+    globalThis.fetch = fetchMock as never;
     renderValidator();
 
     await user.click(screen.getByRole("combobox", { name: "Schema draft" }));
@@ -88,20 +93,18 @@ describe("JsonSchemaValidator", () => {
     await user.click(screen.getByRole("button", { name: "Validate" }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
 
-    const [, config] = fetchMock.mock.calls[0] as unknown as [
-      string,
-      RequestInit,
-    ];
-    const request = JSON.parse(String(config.body));
+    const firstCall = fetchMock.mock.calls[0];
+    expect(firstCall).toBeDefined();
+    const [, config] = firstCall ?? [];
+    const request = JSON.parse(String(config?.body));
     expect(request.dialect).toBe("DRAFT_7");
     expect(request.formatAssertions).toBeFalse();
   });
 
   test("keeps the last result while editors change and supports reset and clear", async () => {
     const user = userEvent.setup();
-    globalThis.fetch = mock(async () =>
-      successResponse()
-    ) as unknown as typeof fetch;
+    // SAFETY: Test mock fulfills fetch without Bun-specific preconnect
+    globalThis.fetch = mock(async () => successResponse()) as never;
     renderValidator();
 
     await user.click(screen.getByRole("button", { name: "Validate" }));
@@ -117,6 +120,7 @@ describe("JsonSchemaValidator", () => {
     await waitFor(() =>
       expect(document.body.textContent).toContain("ayu@example.com")
     );
+    expect(screen.getByText("Document is valid")).toBeDefined();
   });
 
   test("shows invalid diagnostics and copies a path-based message", async () => {
@@ -126,6 +130,7 @@ describe("JsonSchemaValidator", () => {
       configurable: true,
       value: { writeText },
     });
+    // SAFETY: Test mock fulfills fetch without Bun-specific preconnect
     globalThis.fetch = mock(async () =>
       successResponse({
         diagnostics: [
@@ -140,7 +145,7 @@ describe("JsonSchemaValidator", () => {
         errorCount: 1,
         valid: false,
       })
-    ) as unknown as typeof fetch;
+    ) as never;
     renderValidator();
 
     await user.click(screen.getByRole("button", { name: "Validate" }));
@@ -181,9 +186,10 @@ describe("JsonSchemaValidator", () => {
         { status: 503 }
       ),
     ];
+    // SAFETY: Test mock fulfills fetch without Bun-specific preconnect
     globalThis.fetch = mock(
-      async () => responses.shift() as Response
-    ) as unknown as typeof fetch;
+      async () => responses.shift() ?? new Response()
+    ) as never;
     renderValidator();
 
     for (const expected of [

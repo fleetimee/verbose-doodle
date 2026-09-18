@@ -58,7 +58,7 @@ describe("responseSchema", () => {
   test("provides a helpful error when status code is not numeric", () => {
     const result = responseSchema.safeParse({
       ...VALID_RESPONSE_INPUT,
-      statusCode: "200" as unknown as number,
+      statusCode: "200",
     });
 
     expect(getIssueMessage(result, "statusCode")).toBe(

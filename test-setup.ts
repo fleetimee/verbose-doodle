@@ -18,25 +18,11 @@ if (!document.getAnimations) {
 }
 
 Element.prototype.animate = () => {
-  const animation = {
-    addEventListener: () => {},
-    cancel: () => {},
-    currentTime: 0,
-    finish: () => {},
-    finished: Promise.resolve(),
-    oncancel: null,
-    onfinish: null,
-    pause: () => {},
-    play: () => {},
-    playbackRate: 1,
-    playState: "finished",
-    ready: Promise.resolve(),
-    removeEventListener: () => {},
-    reverse: () => {},
-    startTime: 0,
-  } as unknown as Animation;
+  const animation = new Animation();
+  animation.finish();
 
   queueMicrotask(() => {
+    // SAFETY: Happy-dom test mock emits standard finish event to trigger onfinish callback
     animation.onfinish?.call(
       animation,
       new Event("finish") as AnimationPlaybackEvent

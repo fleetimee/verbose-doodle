@@ -1,13 +1,27 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import { apiFetch, apiPost, createApiClient } from "@/lib/api";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  type Mock,
+  mock,
+  test,
+} from "bun:test";
+import {
+  type ApiFetchImplementation,
+  apiFetch,
+  apiPost,
+  createApiClient,
+} from "@/lib/api";
 
 describe("API utilities", () => {
   const originalFetch = globalThis.fetch;
-  let fetchSpy: ReturnType<typeof mock>;
+  let fetchSpy: Mock<ApiFetchImplementation>;
 
   beforeEach(() => {
-    fetchSpy = mock();
-    globalThis.fetch = fetchSpy as unknown as typeof fetch;
+    fetchSpy = mock<ApiFetchImplementation>();
+    // SAFETY: Test mock fulfills ApiFetchImplementation without Bun-specific preconnect
+    globalThis.fetch = fetchSpy as never;
     localStorage.clear();
   });
 
@@ -116,15 +130,12 @@ describe("API utilities", () => {
     });
 
     test("handles error response without JSON body", async () => {
-      fetchSpy.mockResolvedValue({
-        headers: new Headers(),
-        json: () => {
-          throw new Error("Not JSON");
-        },
-        ok: false,
-        status: 500,
-        statusText: "Internal Server Error",
-      } as unknown as Response);
+      fetchSpy.mockResolvedValue(
+        new Response("Internal Server Error", {
+          status: 500,
+          statusText: "Internal Server Error",
+        })
+      );
 
       await expect(apiFetch("/test")).rejects.toEqual({
         code: "500",
@@ -136,7 +147,7 @@ describe("API utilities", () => {
     test("signs out through the session on an authenticated 401", async () => {
       let signOutCalls = 0;
       const client = createApiClient({
-        fetch: fetchSpy as unknown as typeof fetch,
+        fetch: fetchSpy,
         session: {
           getSnapshot: () => ({ accessToken: "access-token" }),
           refresh: () => Promise.resolve(),
@@ -170,7 +181,7 @@ describe("API utilities", () => {
       let refreshCalls = 0;
       let signOutCalls = 0;
       const client = createApiClient({
-        fetch: fetchSpy as unknown as typeof fetch,
+        fetch: fetchSpy,
         session: {
           getSnapshot: () => ({ accessToken }),
           refresh: () => {
@@ -230,7 +241,7 @@ describe("API utilities", () => {
         resolveRefresh = resolve;
       });
       const client = createApiClient({
-        fetch: fetchSpy as unknown as typeof fetch,
+        fetch: fetchSpy,
         session: {
           getSnapshot: () => ({ accessToken }),
           refresh: () => {
@@ -283,7 +294,7 @@ describe("API utilities", () => {
     test("emits one logout transition when a shared refresh fails", async () => {
       let signOutCalls = 0;
       const client = createApiClient({
-        fetch: fetchSpy as unknown as typeof fetch,
+        fetch: fetchSpy,
         session: {
           getSnapshot: () => ({ accessToken: "old-access-token" }),
           refresh: () => Promise.reject(new Error("refresh failed")),
@@ -315,7 +326,7 @@ describe("API utilities", () => {
     test("does not sign out when unauthorized handling is disabled", async () => {
       let signOutCalls = 0;
       const client = createApiClient({
-        fetch: fetchSpy as unknown as typeof fetch,
+        fetch: fetchSpy,
         session: {
           getSnapshot: () => ({ accessToken: null }),
           refresh: () => Promise.resolve(),
@@ -350,27 +361,29 @@ describe("API utilities", () => {
 
     test("handles timeout", async () => {
       // Mock fetch to respect AbortSignal
-      fetchSpy.mockImplementation((_url: string, options?: RequestInit) => {
-        return new Promise((resolve, reject) => {
-          const signal = options?.signal as AbortSignal;
+      fetchSpy.mockImplementation(
+        (_input: RequestInfo | URL, options?: RequestInit) => {
+          return new Promise((resolve, reject) => {
+            const signal = options?.signal as AbortSignal;
 
-          if (signal) {
-            signal.addEventListener("abort", () => {
-              reject(new DOMException("Aborted", "AbortError"));
-            });
-          }
+            if (signal) {
+              signal.addEventListener("abort", () => {
+                reject(new DOMException("Aborted", "AbortError"));
+              });
+            }
 
-          // Simulate slow response (longer than timeout)
-          setTimeout(() => {
-            resolve({
-              headers: new Headers({ "content-type": "application/json" }),
-              json: async () => ({}),
-              ok: true,
-              status: 200,
-            } as Response);
-          }, 1000);
-        });
-      });
+            // Simulate slow response (longer than timeout)
+            setTimeout(() => {
+              resolve({
+                headers: new Headers({ "content-type": "application/json" }),
+                json: async () => ({}),
+                ok: true,
+                status: 200,
+              } as Response);
+            }, 1000);
+          });
+        }
+      );
 
       await expect(apiFetch("/test", { timeout: 50 })).rejects.toEqual({
         code: "TIMEOUT",

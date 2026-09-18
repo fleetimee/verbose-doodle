@@ -1,10 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import type { QueryObserverResult } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { OverviewChat } from "@/features/overview/components/overview-chat";
 import type { OverviewData } from "@/features/overview/types";
-import type { ApiError } from "@/lib/api";
 
 const conversationStorageKey = "fleetime-labs.overview.conversation";
 const clearChatOptionPattern = /Clear chat/;
@@ -65,7 +63,7 @@ function renderOverview(isAdmin = true) {
     return Promise.resolve({
       data: overviewData,
       error: null,
-    } as unknown as QueryObserverResult<OverviewData, ApiError>);
+    });
   };
 
   const view = render(

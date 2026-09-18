@@ -103,23 +103,20 @@ describe("SocksRelayProvider", () => {
     ticketNumber = 0;
     localStorage.setItem("auth_token", createRelayToken());
     window.location.href = "http://localhost/dashboard";
-    globalThis.WebSocket =
-      FakeWebSocket as unknown as typeof globalThis.WebSocket;
-    const fetchMock = (() => {
+    // SAFETY: FakeWebSocket implements mock WebSocket interface for provider testing.
+    globalThis.WebSocket = FakeWebSocket as never;
+    // SAFETY: Mock fetch handler fulfills response without Bun-specific preconnect
+    fetchSpy = spyOn(globalThis, "fetch").mockImplementation((() => {
       ticketNumber += 1;
-      return Promise.resolve({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => ({
+      return Promise.resolve(
+        Response.json({
           data: {
             expiresAt: "2026-07-14T00:00:30Z",
             ticket: `ticket-${ticketNumber}`,
           },
-        }),
-        ok: true,
-        status: 200,
-      } as Response);
-    }) as unknown as typeof fetch;
-    fetchSpy = spyOn(globalThis, "fetch").mockImplementation(fetchMock);
+        })
+      );
+    }) as never);
   });
 
   afterEach(() => {
@@ -224,22 +221,21 @@ describe("SocksRelayProvider", () => {
 
   test("discards a ticket minted by a superseded StrictMode effect", async () => {
     let resolveFirstTicket: ((response: Response) => void) | undefined;
+    // SAFETY: Mock fetch handler fulfills response without Bun-specific preconnect
     const deferredFetch = (() =>
       new Promise<Response>((resolve) => {
         resolveFirstTicket = resolve;
-      })) as unknown as typeof fetch;
+      })) as never;
+    // SAFETY: Mock fetch handler fulfills response without Bun-specific preconnect
     const currentFetch = (() =>
-      Promise.resolve({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => ({
+      Promise.resolve(
+        Response.json({
           data: {
             expiresAt: "2026-07-14T00:00:30Z",
             ticket: "current-ticket",
           },
-        }),
-        ok: true,
-        status: 200,
-      } as Response)) as unknown as typeof fetch;
+        })
+      )) as never;
     fetchSpy.mockImplementationOnce(deferredFetch);
     fetchSpy.mockImplementationOnce(currentFetch);
     const queryClient = new QueryClient({

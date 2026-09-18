@@ -130,7 +130,8 @@ describe("NumberBaseConverter", () => {
       value: { writeText },
     });
     const fetchMock = mock(async () => new Response());
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    // SAFETY: Test mock fulfills fetch without Bun-specific preconnect
+    globalThis.fetch = fetchMock as never;
     renderConverter();
     fetchMock.mockClear();
 

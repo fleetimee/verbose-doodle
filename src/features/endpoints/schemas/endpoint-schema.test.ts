@@ -118,7 +118,7 @@ describe("endpointSchema", () => {
   test("rejects non-string biller identities", () => {
     const result = endpointSchema.safeParse({
       ...VALID_ENDPOINT_INPUT,
-      billerSlug: 123 as unknown as string,
+      billerSlug: 123,
     });
 
     expect(getIssueMessage(result, "billerSlug")).toBe("Biller is required");

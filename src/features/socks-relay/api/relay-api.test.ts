@@ -29,16 +29,20 @@ const relay: RelayInstance = {
 };
 
 const originalFetch = globalThis.fetch;
+let fetchMock: ReturnType<typeof mock>;
+
+function setFetchMock(handler: () => Promise<Response>) {
+  fetchMock = mock(handler);
+  // SAFETY: Test mock fulfills fetch without Bun-specific preconnect
+  globalThis.fetch = fetchMock as never;
+  return fetchMock;
+}
 
 function jsonResponse(body: unknown): Response {
   return new Response(JSON.stringify(body), {
     headers: { "content-type": "application/json" },
     status: 200,
   });
-}
-
-function getFetchMock() {
-  return globalThis.fetch as unknown as ReturnType<typeof mock>;
 }
 
 afterEach(() => {
@@ -55,24 +59,20 @@ describe("relay api", () => {
         type: "relay_started",
       },
     ];
-    globalThis.fetch = mock(() =>
-      Promise.resolve(jsonResponse({ data: { logs } }))
-    ) as unknown as typeof fetch;
+    setFetchMock(async () => jsonResponse({ data: { logs } }));
 
     await expect(listRelayLogs()).resolves.toEqual(logs);
-    expect(getFetchMock()).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledWith(
       "/api/relay/logs",
       expect.objectContaining({ method: "GET" })
     );
   });
 
   test("lists relays from /api/relay", async () => {
-    globalThis.fetch = mock(() =>
-      Promise.resolve(jsonResponse({ data: { relays: [relay] } }))
-    ) as unknown as typeof fetch;
+    setFetchMock(async () => jsonResponse({ data: { relays: [relay] } }));
 
     await expect(listRelays()).resolves.toEqual([relay]);
-    expect(getFetchMock()).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledWith(
       "/api/relay",
       expect.objectContaining({ method: "GET" })
     );
@@ -87,13 +87,11 @@ describe("relay api", () => {
       mode: "ISO_8583",
       relayId: "relay-1",
     };
-    globalThis.fetch = mock(() =>
-      Promise.resolve(jsonResponse({ data: { relay } }))
-    ) as unknown as typeof fetch;
+    setFetchMock(async () => jsonResponse({ data: { relay } }));
 
     await startRelay(input);
 
-    expect(getFetchMock()).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledWith(
       "/api/relay/start",
       expect.objectContaining({
         body: JSON.stringify(input),
@@ -111,13 +109,11 @@ describe("relay api", () => {
       mode: "REST_API",
       relayId: "",
     };
-    globalThis.fetch = mock(() =>
-      Promise.resolve(jsonResponse({ data: { relay } }))
-    ) as unknown as typeof fetch;
+    setFetchMock(async () => jsonResponse({ data: { relay } }));
 
     await startRelay(input);
 
-    expect(getFetchMock()).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledWith(
       "/api/relay/start",
       expect.objectContaining({
         body: JSON.stringify(input),
@@ -127,29 +123,25 @@ describe("relay api", () => {
   });
 
   test("stops a relay using encoded relay id", async () => {
-    globalThis.fetch = mock(() =>
-      Promise.resolve(jsonResponse({ data: { relay } }))
-    ) as unknown as typeof fetch;
+    setFetchMock(async () => jsonResponse({ data: { relay } }));
 
     await stopRelay("relay/main");
 
-    expect(getFetchMock()).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledWith(
       "/api/relay/relay%2Fmain/stop",
       expect.objectContaining({ method: "POST" })
     );
   });
 
   test("updates relay options through patch endpoint", async () => {
-    globalThis.fetch = mock(() =>
-      Promise.resolve(jsonResponse({ data: { relay } }))
-    ) as unknown as typeof fetch;
+    setFetchMock(async () => jsonResponse({ data: { relay } }));
 
     await updateRelayOptions({
       options: { ...relay.options, holdClient: true },
       relayId: "relay-1",
     });
 
-    expect(getFetchMock()).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledWith(
       "/api/relay/relay-1/options",
       expect.objectContaining({
         body: JSON.stringify({ ...relay.options, holdClient: true }),

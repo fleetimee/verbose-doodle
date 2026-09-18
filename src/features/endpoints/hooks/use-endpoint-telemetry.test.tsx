@@ -4,16 +4,18 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import type { EndpointDataAdapter } from "@/features/endpoints/data/endpoint-data-adapter";
 import { ENDPOINT_MUTATION_KEY } from "@/features/endpoints/data/endpoint-mutation-key";
+import { httpEndpointAdapter } from "@/features/endpoints/data/http-endpoint-adapter";
 import { useEndpointTelemetry } from "@/features/endpoints/hooks/use-endpoint-telemetry";
 
-const adapter = {
+let resolveClearTrafficLogs: (() => void) | null = null;
+
+const adapter: EndpointDataAdapter = {
+  ...httpEndpointAdapter,
   clearTrafficLogs: () =>
     new Promise<void>((resolve) => {
       resolveClearTrafficLogs = resolve;
     }),
-} as unknown as EndpointDataAdapter;
-
-let resolveClearTrafficLogs: (() => void) | null = null;
+};
 
 function createWrapper(queryClient: QueryClient) {
   return function QueryClientWrapper({ children }: { children: ReactNode }) {

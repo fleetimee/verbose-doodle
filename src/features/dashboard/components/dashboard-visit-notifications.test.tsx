@@ -65,7 +65,8 @@ describe("DashboardVisitNotifications", () => {
     dashboardVisitRequestCount = 0;
     localStorage.clear();
     localStorage.setItem("auth_token", createAdminToken());
-    globalThis.WebSocket = FakeWebSocket as unknown as typeof WebSocket;
+    // SAFETY: FakeWebSocket implements mock WebSocket interface for visit notifications testing.
+    globalThis.WebSocket = FakeWebSocket as never;
     const fetchMock = (
       input: Parameters<typeof globalThis.fetch>[0],
       init?: Parameters<typeof globalThis.fetch>[1]

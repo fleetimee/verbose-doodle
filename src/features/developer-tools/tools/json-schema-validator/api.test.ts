@@ -9,22 +9,24 @@ afterEach(() => {
 
 describe("validateJsonSchema", () => {
   test("serializes the editor content and validation controls", async () => {
-    const fetchMock = mock(async () =>
-      Response.json({
-        data: {
-          diagnostics: [],
-          durationMs: 3,
-          errorCount: 0,
-          outcome: "VALIDATION_RESULT",
-          resolvedDialect: "DRAFT_7",
-          truncated: false,
-          valid: true,
-        },
-        responseCode: "00",
-        responseDesc: "success",
-      })
+    const fetchMock = mock(
+      async (_input?: RequestInfo | URL, _init?: RequestInit) =>
+        Response.json({
+          data: {
+            diagnostics: [],
+            durationMs: 3,
+            errorCount: 0,
+            outcome: "VALIDATION_RESULT",
+            resolvedDialect: "DRAFT_7",
+            truncated: false,
+            valid: true,
+          },
+          responseCode: "00",
+          responseDesc: "success",
+        })
     );
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    // SAFETY: Test mock fulfills fetch without Bun-specific preconnect
+    globalThis.fetch = fetchMock as never;
 
     await validateJsonSchema({
       dialect: "DRAFT_7",
@@ -34,13 +36,12 @@ describe("validateJsonSchema", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, config] = fetchMock.mock.calls[0] as unknown as [
-      string,
-      RequestInit,
-    ];
+    const firstCall = fetchMock.mock.calls[0];
+    expect(firstCall).toBeDefined();
+    const [url, config] = firstCall ?? [];
     expect(url).toBe("/api/tools/json-schema/validate");
-    expect(config.method).toBe("POST");
-    expect(JSON.parse(String(config.body))).toEqual({
+    expect(config?.method).toBe("POST");
+    expect(JSON.parse(String(config?.body))).toEqual({
       dialect: "DRAFT_7",
       formatAssertions: false,
       instance: '"value"',

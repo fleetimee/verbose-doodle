@@ -90,7 +90,8 @@ describe("JsonYamlConverter", () => {
     );
 
     const fetchMock = mock(async () => new Response());
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    // SAFETY: Test mock fulfills fetch without Bun-specific preconnect
+    globalThis.fetch = fetchMock as never;
     fireEvent.click(screen.getByRole("button", { name: "Convert" }));
     expect(fetchMock).not.toHaveBeenCalled();
     globalThis.fetch = originalFetch;

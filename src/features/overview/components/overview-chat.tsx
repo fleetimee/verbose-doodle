@@ -171,12 +171,17 @@ type PersistedConversationMessage = Omit<ConversationMessage, "actions"> & {
 
 type ChatReply = Omit<ConversationMessage, "id" | "role">;
 
+export type OverviewChatRefetchResult = Pick<
+  QueryObserverResult<OverviewData, ApiError>,
+  "data" | "error"
+>;
+
 type OverviewChatProps = {
   data: OverviewData | undefined;
   error: ApiError | null;
   isAdmin: boolean;
   isLoading: boolean;
-  refetch: () => Promise<QueryObserverResult<OverviewData, ApiError>>;
+  refetch: () => Promise<OverviewChatRefetchResult>;
 };
 
 const allChatActions: Record<ChatActionId, ChatAction> = {
