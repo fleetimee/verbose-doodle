@@ -12,6 +12,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { TourProvider } from "@/components/tour";
 import { AuthProvider } from "@/features/auth/context";
+import type { Endpoint } from "@/features/endpoints/types";
 import { EndpointsPage } from "@/pages/dashboard/endpoints";
 
 const billers = [
@@ -52,9 +53,9 @@ const pdamEndpoint = {
 
 const originalFetch = globalThis.fetch;
 let lastCreateBody: { biller_slug?: string } | null = null;
-let lastBillerUpdateBody: Record<string, unknown> | null = null;
+let lastBillerUpdateBody: { billerName?: string } | null = null;
 let lastBillerUpdateSlug: string | null = null;
-let lastUpdateBody: Record<string, unknown> | null = null;
+let lastUpdateBody: Partial<Endpoint> | null = null;
 let lastDeleteId: string | null = null;
 let currentEndpoint: (typeof endpoints)[number] | null = { ...endpoints[0] };
 let extraCatalogEndpoint: typeof pdamEndpoint | null = null;
@@ -121,10 +122,9 @@ function installApiMock() {
 
     if (url.startsWith("/api/biller/") && method === "PATCH") {
       lastBillerUpdateSlug = url.replace("/api/biller/", "");
-      lastBillerUpdateBody = JSON.parse(String(init?.body)) as Record<
-        string,
-        unknown
-      >;
+      lastBillerUpdateBody = JSON.parse(String(init?.body)) as {
+        billerName?: string;
+      };
 
       if (shouldFailBillerUpdate) {
         return Promise.resolve(

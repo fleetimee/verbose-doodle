@@ -1,13 +1,23 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createElement, forwardRef, type ReactNode } from "react";
+import {
+  createElement,
+  forwardRef,
+  type HTMLAttributes,
+  type ReactNode,
+} from "react";
 import { TourProvider } from "@/components/tour";
 import { NumberBaseConverter } from "@/features/developer-tools/tools/number-base-converter/components/number-base-converter";
 
-type MotionTestProps = {
-  readonly children?: ReactNode;
-  readonly [key: string]: unknown;
+type MotionTestProps = HTMLAttributes<HTMLElement> & {
+  readonly [key: string]:
+    | string
+    | number
+    | boolean
+    | ReactNode
+    | null
+    | undefined;
 };
 
 const createMotionElement = (

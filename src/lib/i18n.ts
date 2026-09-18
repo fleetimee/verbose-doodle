@@ -59,7 +59,7 @@ function createMessageProxy<T extends object>(getTarget: () => T): T {
   return new Proxy({} as T, {
     get(_target, prop: string | symbol) {
       const active = getTarget();
-      const value = (active as Record<string | symbol, unknown>)[prop];
+      const value = Reflect.get(active, prop);
       if (
         typeof value === "object" &&
         value !== null &&
@@ -67,7 +67,7 @@ function createMessageProxy<T extends object>(getTarget: () => T): T {
       ) {
         return createMessageProxy(() => {
           const current = getTarget();
-          return (current as Record<string | symbol, unknown>)[prop] as object;
+          return Reflect.get(current, prop) as object;
         });
       }
       return value;

@@ -1,8 +1,10 @@
 import type {
   BridgeEvent,
+  BridgePayload,
   BridgeStatus,
   PayloadFormat,
   SocketCommand,
+  SocketMetadata,
   SocketMetrics,
   SocketProtocol,
   TcpClientState,
@@ -40,7 +42,7 @@ export function createId(prefix: string): string {
 }
 
 export function readString(
-  payload: Record<string, unknown> | undefined,
+  payload: BridgePayload | undefined,
   keys: readonly string[],
   fallback = ""
 ): string {
@@ -54,7 +56,7 @@ export function readString(
 }
 
 export function readNumber(
-  payload: Record<string, unknown> | undefined,
+  payload: BridgePayload | undefined,
   keys: readonly string[],
   fallback = 0
 ): number {
@@ -88,7 +90,7 @@ export function toLogEntry(
   scope: string,
   data: string,
   format: TrafficLogEntry["format"],
-  metadata?: Record<string, unknown>
+  metadata?: SocketMetadata
 ): TrafficLogEntry {
   return {
     data,
@@ -115,7 +117,7 @@ export function parseBridgeEvent(raw: string): BridgeEvent {
   }
 }
 
-export function formatClientAddress(payload: Record<string, unknown>): string {
+export function formatClientAddress(payload: BridgePayload): string {
   const host = readString(
     payload,
     ["host", "address", "remoteAddress"],
@@ -222,7 +224,7 @@ export class SocketBridgeEngine {
     this.notifyStateChange();
   }
 
-  appendSystemLog(data: string, metadata?: Record<string, unknown>): void {
+  appendSystemLog(data: string, metadata?: SocketMetadata): void {
     this.appendLog(
       toLogEntry("sys", "tcp-client", "bridge", data, "text", metadata)
     );
@@ -273,7 +275,7 @@ export class SocketBridgeEngine {
 
   private handleBridgeError(
     event: BridgeEvent,
-    payload: Record<string, unknown>,
+    payload: BridgePayload,
     normalizedType: string
   ): void {
     const errorScope = readString(
@@ -312,7 +314,7 @@ export class SocketBridgeEngine {
 
   private handleTcpClientEvent(
     normalizedType: string,
-    payload: Record<string, unknown>
+    payload: BridgePayload
   ): boolean {
     if (normalizedType.includes("tcp_client_connected")) {
       const connectedTarget = this.pendingTcpClient;
@@ -383,7 +385,7 @@ export class SocketBridgeEngine {
 
   private handleTcpServerEvent(
     normalizedType: string,
-    payload: Record<string, unknown>
+    payload: BridgePayload
   ): boolean {
     if (normalizedType.includes("tcp_server_started")) {
       this.tcpServer = { ...this.tcpServer, listening: true };
@@ -480,7 +482,7 @@ export class SocketBridgeEngine {
 
   private handleUdpServerEvent(
     normalizedType: string,
-    payload: Record<string, unknown>
+    payload: BridgePayload
   ): boolean {
     if (normalizedType.includes("udp_server_started")) {
       this.udpServer = { ...this.udpServer, listening: true };
@@ -520,7 +522,7 @@ export class SocketBridgeEngine {
 
   private appendGenericBridgeEvent(
     event: BridgeEvent,
-    payload: Record<string, unknown>,
+    payload: BridgePayload,
     normalizedType: string
   ): void {
     let protocol: SocketProtocol = "tcp-client";

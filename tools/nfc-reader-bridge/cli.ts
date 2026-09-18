@@ -4,7 +4,7 @@ import {
   DEFAULT_NFC_BRIDGE_PORT,
   DEFAULT_NFC_BRIDGE_VERSION,
 } from "./bridge";
-import { NFC_BRIDGE_PROTOCOL_VERSION } from "./protocol";
+import { type BridgeSnapshot, NFC_BRIDGE_PROTOCOL_VERSION } from "./protocol";
 
 export type NfcBridgeCliCommand =
   | "help"
@@ -83,7 +83,10 @@ async function readHealth(): Promise<void> {
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    const body = (await response.json()) as Record<string, unknown>;
+    const body = (await response.json()) as BridgeSnapshot & {
+      readonly status: string;
+      readonly protocolVersion: string;
+    };
     process.stdout.write(`${JSON.stringify(body, null, 2)}\n`);
   } catch (error) {
     const reason = error instanceof Error ? `: ${error.message}` : "";

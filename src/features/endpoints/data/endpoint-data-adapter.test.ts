@@ -4,8 +4,16 @@ import { createHttpEndpointAdapter } from "@/features/endpoints/data/http-endpoi
 import { createInMemoryEndpointAdapter } from "@/features/endpoints/data/in-memory-endpoint-adapter";
 import type { Endpoint } from "@/features/endpoints/types";
 
+type SafeTransportResponse =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly SafeTransportResponse[]
+  | { readonly [key: string]: SafeTransportResponse };
+
 function createTransport(
-  responses: Record<string, unknown>
+  responses: Readonly<Record<string, SafeTransportResponse>>
 ): EndpointDataTransport {
   return {
     delete: async <T>(path: string) => responses[path] as T,

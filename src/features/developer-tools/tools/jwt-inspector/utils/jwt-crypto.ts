@@ -10,7 +10,7 @@ import {
   importSPKI,
 } from "jose";
 import { messages } from "@/lib/i18n";
-import { parseJwt } from "./jwt";
+import { type JwtClaimsObject, parseJwt } from "./jwt";
 
 const BASE64URL_PATTERN = /^[A-Za-z0-9_-]+$/;
 
@@ -116,7 +116,8 @@ export async function signJwt(
   ) {
     throw new Error(messages.jwtInspector.errors.headerPayloadObjects);
   }
-  const alg = (h as Record<string, unknown>).alg;
+  // SAFETY: h and p are validated to be non-null objects before indexing claims
+  const alg = (h as JwtClaimsObject).alg;
   if (typeof alg !== "string" || !isSupportedAlgorithm(alg)) {
     throw new Error(messages.jwtInspector.errors.unsupportedAlgorithm);
   }

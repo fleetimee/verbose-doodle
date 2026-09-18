@@ -90,7 +90,12 @@ export type BridgeSnapshot = {
   readonly latestScan?: NdefScanResult;
 };
 
-export function isRecord(value: unknown): value is Record<string, unknown> {
+type RawBridgeCommand = {
+  readonly protocolVersion?: string | number | boolean | null;
+  readonly type?: string | null;
+};
+
+export function isRecord(value: unknown): value is RawBridgeCommand {
   return typeof value === "object" && value !== null;
 }
 

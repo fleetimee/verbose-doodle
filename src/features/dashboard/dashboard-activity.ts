@@ -17,7 +17,9 @@ export type DashboardVisitEvent = {
   readonly type: typeof DASHBOARD_VISIT_EVENT_TYPE;
 };
 
-type RecordValue = Record<string, unknown>;
+type RecordValue = {
+  readonly [key: string]: string | null | undefined;
+};
 
 function isRecord(value: unknown): value is RecordValue {
   return typeof value === "object" && value !== null;

@@ -118,10 +118,21 @@ export type EndpointTrafficLog = {
   readonly responseBodyPreview: string | null;
 };
 
+export type EndpointHttpHeaderValue =
+  | string
+  | number
+  | boolean
+  | readonly string[]
+  | undefined;
+
+export interface EndpointHttpHeaders {
+  readonly [header: string]: EndpointHttpHeaderValue;
+}
+
 export type EndpointTrafficLogDetail = EndpointTrafficLog & {
-  readonly requestHeaders: Record<string, unknown> | null;
+  readonly requestHeaders: EndpointHttpHeaders | null;
   readonly requestBody: unknown;
-  readonly responseHeaders: Record<string, unknown> | null;
+  readonly responseHeaders: EndpointHttpHeaders | null;
   readonly responseBody: unknown;
   readonly errorMessage: string | null;
 };

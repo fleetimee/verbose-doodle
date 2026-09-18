@@ -6,12 +6,24 @@ const UNDERSCORE_REGEX = /_/g;
 
 import { messages } from "@/lib/i18n";
 
+export type JwtClaimValue =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly JwtClaimValue[]
+  | { readonly [key: string]: JwtClaimValue };
+
+export interface JwtClaimsObject {
+  readonly [claim: string]: JwtClaimValue | undefined;
+}
+
 export interface ParsedJwt {
   readonly error?: string;
-  readonly header: Record<string, unknown>;
+  readonly header: JwtClaimsObject;
   readonly headerStr: string;
   readonly isValidStructure: boolean;
-  readonly payload: Record<string, unknown>;
+  readonly payload: JwtClaimsObject;
   readonly payloadStr: string;
   readonly raw: string;
   readonly signatureHex: string;
@@ -62,8 +74,8 @@ export function parseJwt(token: string): ParsedJwt {
   try {
     const headerStr = base64UrlDecode(parts[0]);
     const payloadStr = base64UrlDecode(parts[1]);
-    const header = JSON.parse(headerStr) as Record<string, unknown>;
-    const payload = JSON.parse(payloadStr) as Record<string, unknown>;
+    const header = JSON.parse(headerStr) as JwtClaimsObject;
+    const payload = JSON.parse(payloadStr) as JwtClaimsObject;
     if (
       !header ||
       typeof header !== "object" ||

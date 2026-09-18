@@ -7,6 +7,7 @@ import {
   Ruby,
   RustDark,
 } from "developer-icons";
+import type { ComponentType, SVGProps } from "react";
 import { SiAxios, SiCurl, SiGnu, SiHttpie } from "react-icons/si";
 import type { CodeLanguage } from "@/features/endpoints/utils/code-generator";
 import { CODE_LANGUAGE_LABELS } from "@/features/endpoints/utils/code-generator";
@@ -17,7 +18,10 @@ type CodeLanguageOptionProps = {
   readonly className?: string;
 };
 
-const CODE_LANGUAGE_ICONS = {
+const CODE_LANGUAGE_ICONS: Record<
+  CodeLanguage,
+  ComponentType<SVGProps<SVGSVGElement>>
+> = {
   curl: SiCurl,
   go: Go,
   httpie: SiHttpie,
@@ -29,7 +33,7 @@ const CODE_LANGUAGE_ICONS = {
   ruby: Ruby,
   rust: RustDark,
   wget: SiGnu,
-} satisfies Record<CodeLanguage, unknown>;
+};
 
 const CODE_LANGUAGE_ICON_COLORS: Record<CodeLanguage, string> = {
   curl: "#073551",

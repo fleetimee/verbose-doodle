@@ -45,7 +45,14 @@ export type RelayEventPayload = {
   readonly listeningPort?: number;
   readonly hostAddress?: string;
   readonly hostPort?: number;
-  readonly [key: string]: unknown;
+  readonly [key: string]:
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | readonly (string | number | boolean | null | undefined)[]
+    | Readonly<Record<string, string | number | boolean | null | undefined>>;
 };
 
 export type RelayEvent = {

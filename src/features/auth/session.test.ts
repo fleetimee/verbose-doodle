@@ -12,7 +12,11 @@ function toBase64Url(value: string): string {
     .replace(TRAILING_PADDING_REGEX, "");
 }
 
-function createJwtToken(payload: Record<string, unknown>): string {
+type TestJwtPayload = {
+  readonly [claim: string]: string | number | boolean | null | undefined;
+};
+
+function createJwtToken(payload: TestJwtPayload): string {
   return [
     toBase64Url(JSON.stringify({ alg: "HS256", typ: "JWT" })),
     toBase64Url(JSON.stringify(payload)),

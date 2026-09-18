@@ -4,6 +4,7 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TourProvider } from "@/components/tour";
 import { JsonSchemaValidator } from "@/features/developer-tools/tools/json-schema-validator/components/json-schema-validator";
+import type { JsonSchemaValidationResult } from "@/features/developer-tools/tools/json-schema-validator/types";
 
 const originalFetch = globalThis.fetch;
 
@@ -25,7 +26,9 @@ function renderValidator() {
   );
 }
 
-function successResponse(overrides: Record<string, unknown> = {}): Response {
+function successResponse(
+  overrides: Partial<JsonSchemaValidationResult> = {}
+): Response {
   return Response.json({
     data: {
       diagnostics: [],

@@ -8,6 +8,20 @@ export type BridgeStatus = "disconnected" | "connecting" | "connected";
 
 export type TrafficDirection = "in" | "out" | "err" | "sys";
 
+export type SocketMetadataValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | readonly (string | number | boolean | null | undefined)[]
+  | { readonly [key: string]: string | number | boolean | null | undefined }
+  | SocketCommand;
+
+export type SocketMetadata = {
+  readonly [key: string]: SocketMetadataValue;
+};
+
 export type TrafficLogEntry = {
   readonly id: string;
   readonly timestamp: string;
@@ -16,7 +30,7 @@ export type TrafficLogEntry = {
   readonly scope: string;
   readonly data: string;
   readonly format: PayloadFormat | "text" | "json";
-  readonly metadata?: Record<string, unknown>;
+  readonly metadata?: SocketMetadata;
 };
 
 export type TcpClientState = {
@@ -115,10 +129,30 @@ export type SocketCommand =
       };
     };
 
+export type BridgePayloadValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | readonly (string | number | boolean | null | undefined)[]
+  | { readonly [key: string]: string | number | boolean | null | undefined };
+
+export type BridgePayload = {
+  readonly [key: string]: BridgePayloadValue;
+};
+
 export type BridgeEvent = {
   readonly type?: string;
-  readonly payload?: Record<string, unknown>;
-  readonly [key: string]: unknown;
+  readonly payload?: BridgePayload;
+  readonly [key: string]:
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | BridgePayload
+    | readonly (string | number | boolean | null | undefined)[];
 };
 
 export type SocketMetrics = {

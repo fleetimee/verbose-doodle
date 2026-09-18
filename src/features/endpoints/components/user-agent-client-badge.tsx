@@ -6,6 +6,7 @@ import {
   Postman,
   Python,
 } from "developer-icons";
+import type { ComponentType, SVGProps } from "react";
 import { SiAxios, SiCurl, SiHttpie, SiOpenapiinitiative } from "react-icons/si";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +40,10 @@ const CLIENT_LABELS: Record<UserAgentClient, string> = {
   unknown: "Client",
 };
 
-const CLIENT_ICONS = {
+const CLIENT_ICONS: Record<
+  UserAgentClient,
+  ComponentType<SVGProps<SVGSVGElement>>
+> = {
   axios: SiAxios,
   browser: Chrome,
   curl: SiCurl,
@@ -50,7 +54,7 @@ const CLIENT_ICONS = {
   postman: Postman,
   python: Python,
   unknown: SiOpenapiinitiative,
-} satisfies Record<UserAgentClient, unknown>;
+};
 
 const CLIENT_ICON_COLORS: Record<UserAgentClient, string> = {
   axios: "#5a29e4",

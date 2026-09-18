@@ -75,6 +75,7 @@ import { UserAgentClientBadge } from "@/features/endpoints/components/user-agent
 import { useEndpointTelemetry } from "@/features/endpoints/hooks/use-endpoint-telemetry";
 import { useTrafficLogScroll } from "@/features/endpoints/hooks/use-traffic-log-scroll";
 import type {
+  EndpointHttpHeaders,
   EndpointTrafficLog,
   EndpointTrafficLogStatus,
   EndpointTrafficLogStatusFilter,
@@ -1091,7 +1092,7 @@ function LogExchangePane({
   wrapLines,
 }: {
   readonly body: unknown;
-  readonly headers: Record<string, unknown> | null;
+  readonly headers: EndpointHttpHeaders | null;
   readonly icon: ReactNode;
   readonly meta: readonly {
     readonly label: string;

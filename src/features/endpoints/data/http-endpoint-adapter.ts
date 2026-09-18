@@ -8,6 +8,7 @@ import type {
 import type {
   Endpoint,
   EndpointHourlyMetric,
+  EndpointHttpHeaders,
   EndpointMetric,
   EndpointResponse,
   EndpointTrafficLog,
@@ -25,7 +26,10 @@ import {
 } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
-type ApiRecord = Record<string, unknown>;
+type JsonPrimitive = string | number | boolean | null | undefined;
+type ApiRecord = {
+  readonly [key: string]: JsonPrimitive | readonly unknown[] | ApiRecord;
+};
 
 type ApiTransport = EndpointDataTransport;
 
@@ -97,8 +101,31 @@ function booleanValue(input: unknown, fallback = false): boolean {
   return fallback;
 }
 
-function objectValue(input: unknown): Record<string, unknown> {
+function objectValue(input: unknown): ApiRecord {
   return isRecord(input) ? input : {};
+}
+
+function readHeaders(input: unknown): EndpointHttpHeaders | null {
+  if (!isRecord(input)) {
+    return null;
+  }
+  const headers: Record<
+    string,
+    string | number | boolean | readonly string[] | undefined
+  > = {};
+  for (const [key, val] of Object.entries(input)) {
+    if (
+      typeof val === "string" ||
+      typeof val === "number" ||
+      typeof val === "boolean" ||
+      val === undefined
+    ) {
+      headers[key] = val;
+    } else if (Array.isArray(val)) {
+      headers[key] = val.map(String);
+    }
+  }
+  return headers;
 }
 
 function mapResponse(input: unknown): EndpointResponse {
@@ -232,19 +259,13 @@ function mapTrafficLogDetail(input: unknown): EndpointTrafficLogDetail {
     ...mapped,
     errorMessage: nullableString(value(log, "errorMessage", "error_message")),
     requestBody: value(log, "requestBody", "request_body") ?? null,
-    requestHeaders: isRecord(value(log, "requestHeaders", "request_headers"))
-      ? (value(log, "requestHeaders", "request_headers") as Record<
-          string,
-          unknown
-        >)
-      : null,
+    requestHeaders: readHeaders(
+      value(log, "requestHeaders", "request_headers")
+    ),
     responseBody: value(log, "responseBody", "response_body") ?? null,
-    responseHeaders: isRecord(value(log, "responseHeaders", "response_headers"))
-      ? (value(log, "responseHeaders", "response_headers") as Record<
-          string,
-          unknown
-        >)
-      : null,
+    responseHeaders: readHeaders(
+      value(log, "responseHeaders", "response_headers")
+    ),
   };
 }
 
@@ -356,18 +377,26 @@ export function createHttpEndpointAdapter(
       return endpointFromResponse(response);
     },
     async createResponse(input) {
-      const response = await transport.post<unknown, Record<string, unknown>>(
-        API_ENDPOINTS.admin.responses.create,
+      const response = await transport.post<
+        unknown,
         {
-          activated: "0",
-          delayMs: input.delayMs ?? 0,
-          endpointId: Number(input.endpointId),
-          json: input.json,
-          name: input.name,
-          simulateTimeout: input.simulateTimeout ?? false,
-          statusCode: String(input.statusCode),
+          activated: string;
+          delayMs: number;
+          endpointId: number;
+          json: string;
+          name: string;
+          simulateTimeout: boolean;
+          statusCode: string;
         }
-      );
+      >(API_ENDPOINTS.admin.responses.create, {
+        activated: "0",
+        delayMs: input.delayMs ?? 0,
+        endpointId: Number(input.endpointId),
+        json: input.json,
+        name: input.name,
+        simulateTimeout: input.simulateTimeout ?? false,
+        statusCode: String(input.statusCode),
+      });
       return responseFromResponse(response);
     },
     async cloneResponse(input: ResponseCloneInput) {
@@ -503,20 +532,23 @@ export function createHttpEndpointAdapter(
           key === "statusCode" ? String(item) : item,
         ])
       );
-      const response = await transport.patch<unknown, Record<string, unknown>>(
-        API_ENDPOINTS.admin.responses.detail(input.responseId),
-        changes
-      );
+      const response = await transport.patch<
+        unknown,
+        Record<string, string | number | boolean | undefined>
+      >(API_ENDPOINTS.admin.responses.detail(input.responseId), changes);
       return responseFromResponse(response);
     },
     async updateResponseSimulation(input) {
-      const response = await transport.patch<unknown, Record<string, unknown>>(
-        API_ENDPOINTS.admin.responses.updateSimulation(input.responseId),
+      const response = await transport.patch<
+        unknown,
         {
-          delayMs: input.delayMs,
-          simulateTimeout: input.simulateTimeout,
+          delayMs?: number;
+          simulateTimeout?: boolean;
         }
-      );
+      >(API_ENDPOINTS.admin.responses.updateSimulation(input.responseId), {
+        delayMs: input.delayMs,
+        simulateTimeout: input.simulateTimeout,
+      });
       return responseFromResponse(response);
     },
   };
