@@ -196,6 +196,7 @@ function formatRelativeTime(milliseconds: number, nowMilliseconds: number) {
     return messages.dateConverter.relativeNow;
   }
   const value = Math.round(absoluteDifference / unit.milliseconds);
+  // SAFETY: Relative-unit names map to the localized singular/plural message keys.
   const unitKey =
     `${unit.name}${value === 1 ? "" : "s"}` as keyof typeof messages.dateConverter.relativeUnits;
   const unitLabel = messages.dateConverter.relativeUnits[unitKey];

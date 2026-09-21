@@ -74,9 +74,11 @@ describe("CronParser", () => {
     const input = screen.getByRole("textbox", { name: "Cron expression" });
 
     await user.click(screen.getByRole("button", { name: "Clear" }));
+    // SAFETY: The accessible textbox query targets the native input element.
     expect((input as HTMLInputElement).value).toBe("");
 
     await user.click(screen.getByRole("button", { name: "Reset example" }));
+    // SAFETY: The accessible textbox query targets the native input element.
     expect((input as HTMLInputElement).value).toBe("*/15 * * * *");
   });
 

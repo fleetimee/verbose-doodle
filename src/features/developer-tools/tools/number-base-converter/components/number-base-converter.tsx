@@ -42,6 +42,10 @@ import { cn } from "@/lib/utils";
 
 type OutputKey = "binary" | "octal" | "decimal" | "hexadecimal";
 
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
 type OutputDefinition = {
   readonly key: OutputKey;
   readonly label: string;
@@ -272,13 +276,15 @@ export function NumberBaseConverter() {
   }, [convert]);
 
   const changeBase = (value: string) => {
+    // SAFETY: The select emits one of the supported numeric bases.
     setInputBase(Number(value) as NumberBase);
     resetResult();
   };
 
   const changeBitWidth = (values: readonly unknown[]) => {
     const value = values.at(-1);
-    if (typeof value === "string") {
+    if (isString(value)) {
+      // SAFETY: The select emits one of the supported bit widths.
       setBitWidth(Number(value) as NumberBitWidth);
       resetResult();
     }

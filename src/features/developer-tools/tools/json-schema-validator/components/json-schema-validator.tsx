@@ -166,7 +166,10 @@ export function JsonSchemaValidator() {
               {messages.jsonSchemaValidator.schemaDraftLabel}
             </Label>
             <Select
-              onValueChange={(value) => setDialect(value as JsonSchemaDialect)}
+              onValueChange={(value) =>
+                // SAFETY: The select options are the supported JSON Schema dialects.
+                setDialect(value as JsonSchemaDialect)
+              }
               value={dialect}
             >
               <SelectTrigger

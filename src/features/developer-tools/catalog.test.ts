@@ -12,7 +12,7 @@ describe("Developer tool registry", () => {
     for (const tool of DEVELOPER_TOOLS) {
       expect(tool.id).toBeTruthy();
       expect(getDeveloperToolHref(tool)).toBe(`/dashboard/${tool.path}`);
-      expect(typeof tool.load).toBe("function");
+      expect(tool.load).toBeInstanceOf(Function);
       expect(tool.document.title).toBeTruthy();
       expect(tool.document.description).toBeTruthy();
       expect(tool.document.keywords.length).toBeGreaterThan(0);

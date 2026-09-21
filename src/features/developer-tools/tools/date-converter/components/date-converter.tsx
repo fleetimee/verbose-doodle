@@ -266,7 +266,9 @@ export function DateConverter() {
   }, [convert]);
 
   const changeInputMode = (value: string) => {
+    // SAFETY: INPUT_MODES is the complete set of values accepted by the mode control.
     if (INPUT_MODES.includes(value as DateInputMode)) {
+      // SAFETY: The preceding membership check narrows value to DateInputMode.
       setInputMode(value as DateInputMode);
       setResult(null);
       setError(null);
