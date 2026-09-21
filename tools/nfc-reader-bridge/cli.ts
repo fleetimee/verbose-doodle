@@ -83,6 +83,7 @@ async function readHealth(): Promise<void> {
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
+    // SAFETY: The bridge health endpoint returns the BridgeSnapshot contract.
     const body = (await response.json()) as BridgeSnapshot & {
       readonly status: string;
       readonly protocolVersion: string;

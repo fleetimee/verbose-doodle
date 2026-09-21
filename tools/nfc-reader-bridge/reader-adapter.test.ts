@@ -67,6 +67,7 @@ describe("NFC reader adapter seam", () => {
       0x00, 0x03, 0x0c, 0xd1, 0x01, 0x08, 0x54, 0x02, 0x65, 0x6e, 0x48, 0x65,
       0x6c, 0x6c, 0x6f, 0xfe,
     ]);
+    // SAFETY: This fixture implements the reader interface consumed by readNdefScan.
     const reader = {
       close: () => undefined,
       connect: (

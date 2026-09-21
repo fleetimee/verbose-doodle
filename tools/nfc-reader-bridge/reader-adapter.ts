@@ -230,6 +230,7 @@ export class PcscReaderAdapter implements ReaderAdapter {
   private handleWorkerMessage(raw: string): void {
     let message: PcscWorkerMessage;
     try {
+      // SAFETY: The PC/SC worker protocol defines the JSON message shape.
       message = JSON.parse(raw) as PcscWorkerMessage;
     } catch {
       return;

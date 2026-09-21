@@ -265,7 +265,10 @@ export function parseNdefMessage(
           record.typeHex === toHex(Uint8Array.from([NDEF_TYPE_TEXT])) &&
           record.payload !== null
       )
-      .map((record) => record.payload as string)
+      .map((record) => {
+        // SAFETY: The preceding payload check narrows payload to string.
+        return record.payload as string;
+      })
       .join("\n");
     let decodingStatus: NdefDecodingStatus = "no-text";
     if (hasUnsupportedRecord) {

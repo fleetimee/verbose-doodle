@@ -133,6 +133,7 @@ async function buildRelease(args: readonly string[]): Promise<void> {
       `Unsupported release target: ${requestedTarget}. Supported targets: ${NFC_BRIDGE_RELEASE_TARGETS.map(({ bunTarget }) => bunTarget).join(", ")}.`
     );
   }
+  // SAFETY: The preceding check removes every undefined release target.
   const resolvedTargets = targets as NfcBridgeReleaseTarget[];
   await mkdir(outputDirectory, { recursive: true });
   for (const target of resolvedTargets) {
@@ -156,6 +157,7 @@ async function waitForReadyFile(path: string): Promise<{
     if (await Bun.file(path).exists()) {
       const content = await Bun.file(path).text();
       if (content) {
+        // SAFETY: The ready file is written by the bridge release process with this manifest shape.
         return JSON.parse(content) as {
           readonly bridgeVersion: string;
           readonly host: string;
@@ -222,6 +224,7 @@ async function smokeTarget(
     const healthResponse = await fetch(
       `http://${ready.host}:${ready.port}/health`
     );
+    // SAFETY: The bridge health endpoint returns the documented release health shape.
     const health = (await healthResponse.json()) as {
       readonly bridge?: { readonly host?: string };
       readonly protocolVersion?: string;
@@ -269,6 +272,7 @@ async function smokeWebSocket(
       );
     };
     socket.onmessage = (event) => {
+      // SAFETY: The bridge websocket sends JSON messages with the documented status fields.
       const message = JSON.parse(String(event.data)) as {
         readonly protocolVersion?: string;
         readonly type?: string;
