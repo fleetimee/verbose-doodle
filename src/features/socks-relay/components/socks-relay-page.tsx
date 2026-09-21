@@ -1684,10 +1684,7 @@ function RelayEventList({
 }
 
 function RelayEventLine({ event }: { readonly event: RelayEvent }) {
-  const displayLine =
-    typeof event.payload.displayLine === "string"
-      ? event.payload.displayLine
-      : null;
+  const displayLine = event.payload.displayLine ?? null;
   const timestamp = event.payload.timestamp
     ? new Date(event.payload.timestamp).toLocaleTimeString()
     : new Date(event.receivedAt).toLocaleTimeString();

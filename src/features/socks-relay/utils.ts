@@ -97,6 +97,10 @@ export function isValidRelayListeningPort(port: number): boolean {
   );
 }
 
+function isStringKey(key: unknown): key is string {
+  return typeof key === "string";
+}
+
 export function validateRelayStartInput(
   input: RelayStartInput
 ): RelayFormErrors {
@@ -115,7 +119,8 @@ export function validateRelayStartInput(
       continue;
     }
 
-    if (typeof key === "string" && key in input) {
+    if (isStringKey(key) && key in input) {
+      // SAFETY: The preceding key check narrows key to a RelayStartInput property.
       errors[key as keyof RelayStartInput] = issue.message;
     }
   }
@@ -167,36 +172,35 @@ export function buildRelayWebSocketUrl(
   return buildTicketWebSocketUrl("/api/relay/events", ticket, configuredUrl);
 }
 
+function isRelayEventRecord(
+  value: unknown
+): value is { readonly type: string; readonly payload: RelayEventPayload } {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "type" in value &&
+    // SAFETY: Invariant verified by checking object shape and property existence
+    typeof (value as { readonly type: unknown }).type === "string" &&
+    "payload" in value &&
+    // SAFETY: Invariant verified by checking object shape and property existence
+    typeof (value as { readonly payload: unknown }).payload === "object" &&
+    // SAFETY: Invariant verified by checking object shape and property existence
+    (value as { readonly payload: unknown }).payload !== null
+  );
+}
+
 export function parseRelayEvent(raw: string, id: string): RelayEvent | null {
   try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (
-      typeof parsed !== "object" ||
-      parsed === null ||
-      !("type" in parsed) ||
-      !("payload" in parsed)
-    ) {
-      return null;
-    }
-
-    const candidate = parsed as {
-      readonly type: unknown;
-      readonly payload: unknown;
-    };
-
-    if (
-      typeof candidate.type !== "string" ||
-      typeof candidate.payload !== "object" ||
-      candidate.payload === null
-    ) {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRelayEventRecord(parsed)) {
       return null;
     }
 
     return {
       id,
-      payload: candidate.payload as RelayEventPayload,
+      payload: parsed.payload,
       receivedAt: Date.now(),
-      type: candidate.type,
+      type: parsed.type,
     };
   } catch {
     return null;

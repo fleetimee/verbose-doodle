@@ -14,7 +14,6 @@ import type {
   BridgeStatus,
   PayloadFormat,
   SocketCommand,
-  TrafficLogEntry,
 } from "@/features/socket-tester/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { messages } from "@/lib/i18n";
@@ -22,9 +21,9 @@ import { messages } from "@/lib/i18n";
 function appendBridgeError(
   engine: SocketBridgeEngine,
   message: string,
-  error?: unknown
+  cause?: unknown
 ) {
-  const metadata = error === undefined ? undefined : { error: String(error) };
+  const metadata = cause === undefined ? undefined : { error: String(cause) };
   engine.appendLog({
     data: message,
     direction: "err",
@@ -262,7 +261,7 @@ export function useSocketBridge() {
       autoConnectRef.current &&
       (connectionStatus === "idle" || connectionStatus === "disconnected")
     ) {
-      connection.connect().catch((error: unknown) => {
+      connection.connect().catch((error) => {
         appendBridgeError(
           engine,
           messages.socketTester.websocketBridgeError,
@@ -280,7 +279,7 @@ export function useSocketBridge() {
     connectTcpClient,
     disconnectBridge,
     disconnectTcpClient,
-    logs: engineState.logs as TrafficLogEntry[],
+    logs: [...engineState.logs],
     metrics: engineState.metrics,
     sendTcpClient,
     sendTcpServer,

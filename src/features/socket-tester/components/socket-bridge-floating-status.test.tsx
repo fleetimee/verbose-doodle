@@ -5,7 +5,8 @@ import type { BridgeStatus } from "@/features/socket-tester/types";
 
 let bridge = {
   bridgeAutoConnect: false,
-  bridgeStatus: "disconnected" as BridgeStatus,
+  bridgeStatus:
+    /* SAFETY: The fixture uses a valid BridgeStatus value. */ "disconnected" as BridgeStatus,
   connectBridge: mock(() => undefined),
   disconnectBridge: mock(() => undefined),
 };

@@ -37,12 +37,16 @@ class FakeWebSocket {
     listener: (event?: { readonly data: string }) => void
   ) {
     if (type === "close") {
+      // SAFETY: The test event adapter assigns the close listener to the matching callback slot.
       this.onclose = listener as () => void;
     } else if (type === "error") {
+      // SAFETY: The test event adapter assigns the error listener to the matching callback slot.
       this.onerror = listener as () => void;
     } else if (type === "message") {
+      // SAFETY: The test event adapter supplies the expected message event shape.
       this.onmessage = listener as (message: { readonly data: string }) => void;
     } else if (type === "open") {
+      // SAFETY: The test event adapter assigns the open listener to the matching callback slot.
       this.onopen = listener as () => void;
     }
   }
@@ -254,6 +258,7 @@ describe("SocksRelayProvider", () => {
     expect(FakeWebSocket.instances[0]?.url).toContain("current-ticket");
 
     await act(async () => {
+      // SAFETY: The mocked ticket response implements the Response contract used by the connection.
       resolveFirstTicket?.({
         headers: new Headers({ "content-type": "application/json" }),
         json: async () => ({

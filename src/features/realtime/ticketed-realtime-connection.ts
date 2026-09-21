@@ -23,10 +23,16 @@ export type TicketedRealtimeConnectionSnapshot = {
   readonly url?: string;
 };
 
+export type RealtimeSocketMessageData =
+  | string
+  | ArrayBuffer
+  | Blob
+  | ArrayBufferView;
+
 export type RealtimeSocketEventHandlers = {
   readonly onClose: () => void;
-  readonly onError: (error: unknown) => void;
-  readonly onMessage: (data: unknown) => void;
+  readonly onError: (cause: unknown) => void;
+  readonly onMessage: (data: RealtimeSocketMessageData) => void;
   readonly onOpen: () => void;
 };
 
@@ -46,9 +52,9 @@ export type RealtimeSocketAdapter = {
 export type TicketedRealtimeConnectionOptions = {
   readonly acquireTicket: () => Promise<Pick<RealtimeTicket, "ticket">>;
   readonly configuredUrl?: string;
-  readonly onError?: (error: unknown) => void;
-  readonly onMessage?: (data: unknown) => void;
-  readonly onTicketError?: (error: unknown) => void;
+  readonly onError?: (cause: unknown) => void;
+  readonly onMessage?: (data: RealtimeSocketMessageData) => void;
+  readonly onTicketError?: (cause: unknown) => void;
   readonly path: string;
   readonly socketAdapter?: RealtimeSocketAdapter;
 };
@@ -131,9 +137,9 @@ export function createFakeRealtimeSocketAdapter(): RealtimeSocketAdapter & {
 }
 
 export type FakeRealtimeSocket = RealtimeSocket & {
-  readonly fail: (error?: unknown) => void;
+  readonly fail: (cause?: unknown) => void;
   readonly open: () => void;
-  readonly receive: (data: unknown) => void;
+  readonly receive: (data: RealtimeSocketMessageData) => void;
   readonly sent: string[];
   readonly url: string;
 };
@@ -222,7 +228,7 @@ export function createTicketedRealtimeConnection({
     });
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null;
-      startAttempt(currentGeneration).catch((error: unknown) => {
+      startAttempt(currentGeneration).catch((error) => {
         onError?.(error);
       });
     }, delay);

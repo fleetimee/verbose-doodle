@@ -38,7 +38,7 @@ function setFetchMock(handler: () => Promise<Response>) {
   return fetchMock;
 }
 
-function jsonResponse(body: unknown): Response {
+function jsonResponse<T>(body: T): Response {
   return new Response(JSON.stringify(body), {
     headers: { "content-type": "application/json" },
     status: 200,

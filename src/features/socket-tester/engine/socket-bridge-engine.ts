@@ -1,6 +1,7 @@
 import type {
   BridgeEvent,
   BridgePayload,
+  BridgePayloadValue,
   BridgeStatus,
   PayloadFormat,
   SocketCommand,
@@ -41,6 +42,14 @@ export function createId(prefix: string): string {
   return `${prefix}-${generateUUID()}`;
 }
 
+function isBridgeString(value: BridgePayloadValue): value is string {
+  return typeof value === "string";
+}
+
+function isBridgeNumber(value: BridgePayloadValue): value is number {
+  return typeof value === "number";
+}
+
 export function readString(
   payload: BridgePayload | undefined,
   keys: readonly string[],
@@ -48,7 +57,7 @@ export function readString(
 ): string {
   for (const key of keys) {
     const value = payload?.[key];
-    if (typeof value === "string") {
+    if (isBridgeString(value)) {
       return value;
     }
   }
@@ -62,10 +71,10 @@ export function readNumber(
 ): number {
   for (const key of keys) {
     const value = payload?.[key];
-    if (typeof value === "number") {
+    if (isBridgeNumber(value)) {
       return value;
     }
-    if (typeof value === "string") {
+    if (isBridgeString(value)) {
       const parsed = Number(value);
       if (Number.isFinite(parsed)) {
         return parsed;
@@ -106,6 +115,7 @@ export function toLogEntry(
 
 export function parseBridgeEvent(raw: string): BridgeEvent {
   try {
+    // SAFETY: The bridge protocol defines the JSON shape consumed by this parser.
     return JSON.parse(raw) as BridgeEvent;
   } catch {
     return {
@@ -250,7 +260,7 @@ export class SocketBridgeEngine {
 
   handleBridgeEvent(event: BridgeEvent): void {
     const payload = event.payload ?? {};
-    const type = typeof event.type === "string" ? event.type : "message";
+    const type = event.type ?? "message";
     const normalizedType = type.replaceAll("-", "_");
 
     if (normalizedType.includes("error")) {

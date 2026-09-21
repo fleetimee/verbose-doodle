@@ -79,7 +79,10 @@ export function SendPanel({
               {socketMessages.payloadFormatLabel}
             </span>
             <Select
-              onValueChange={(value) => setFormat(value as PayloadFormat)}
+              onValueChange={(value) =>
+                // SAFETY: The select options are the supported payload formats.
+                setFormat(value as PayloadFormat)
+              }
               value={format}
             >
               <SelectTrigger className="w-full">
@@ -129,6 +132,7 @@ export function SendPanel({
               </div>
               <Select
                 onValueChange={(value) =>
+                  // SAFETY: The select options are the supported delimiter values.
                   setDelimiter(value as DelimiterOption)
                 }
                 value={delimiter}
