@@ -1,4 +1,5 @@
 import { formatMessage, messages } from "@/lib/i18n";
+import type { JwtClaimValue } from "./jwt";
 
 export interface ClaimDefinition {
   readonly description: string;
@@ -163,13 +164,13 @@ export interface TimestampClaimStatus {
 
 export function formatClaimTimestamp(
   name: string,
-  value: unknown,
+  value: JwtClaimValue | undefined,
   now: number = Date.now()
 ): TimestampClaimStatus | null {
   if (!["exp", "iat", "nbf"].includes(name)) {
     return null;
   }
-  const numericVal = typeof value === "number" ? value : Number(value);
+  const numericVal = Number(value);
   if (!Number.isFinite(numericVal) || numericVal <= 0) {
     return {
       isValid: false,

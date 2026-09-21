@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import type { JwtClaimValue } from "../utils/jwt";
 import { type ClaimDefinition, getClaimInfo } from "../utils/jwt-claims";
 
 interface JwtClaimsBreakdownProps {
@@ -11,9 +12,24 @@ interface JwtClaimsBreakdownProps {
   readonly type?: "header" | "payload";
 }
 
-function formatClaimValue(key: string, value: unknown): string {
+function isClaimObject(
+  value: JwtClaimValue | undefined
+): value is { readonly [key: string]: JwtClaimValue } {
+  return typeof value === "object" && value !== null;
+}
+
+function isParsedObject(
+  value: unknown
+): value is Record<string, JwtClaimValue> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function formatClaimValue(
+  key: string,
+  value: JwtClaimValue | undefined
+): string {
   if (["iat", "exp", "nbf"].includes(key)) {
-    const num = typeof value === "number" ? value : Number(value);
+    const num = Number(value);
     if (Number.isFinite(num) && num > 0) {
       const date = new Date(num * 1000);
       if (!Number.isNaN(date.getTime())) {
@@ -21,7 +37,7 @@ function formatClaimValue(key: string, value: unknown): string {
       }
     }
   }
-  if (typeof value === "object" && value !== null) {
+  if (isClaimObject(value)) {
     return JSON.stringify(value);
   }
   return String(value);
@@ -73,10 +89,11 @@ export function JwtClaimsBreakdown({
     }
     try {
       const data = JSON.parse(jsonValue);
-      if (typeof data === "object" && data !== null && !Array.isArray(data)) {
+      if (isParsedObject(data)) {
         return {
           status: "success" as const,
-          entries: Object.entries(data),
+          // SAFETY: JSON object entries parsed from JSON input are valid claim values
+          entries: Object.entries(data) as [string, JwtClaimValue][],
         };
       }
       return { status: "not_object" as const, entries: [] };
@@ -90,10 +107,10 @@ export function JwtClaimsBreakdown({
     [parsed.entries]
   );
 
+  // SAFETY: This object contains the CSS custom property consumed by the container.
   const heightStyle = height
-    ? // SAFETY: CSS custom property for dynamic container height
-      ({
-        "--height": typeof height === "number" ? `${height}px` : height,
+    ? ({
+        "--height": height,
       } as React.CSSProperties)
     : undefined;
 

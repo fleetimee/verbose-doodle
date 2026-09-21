@@ -99,6 +99,14 @@ export async function createJwtKeys(algorithm: JwtAlgorithm): Promise<JwtKeys> {
   };
 }
 
+function isClaimsRecord(value: unknown): value is JwtClaimsObject {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
 export async function signJwt(
   header: string,
   payload: string,
@@ -106,19 +114,11 @@ export async function signJwt(
 ): Promise<string> {
   const h: unknown = JSON.parse(header);
   const p: unknown = JSON.parse(payload);
-  if (
-    !h ||
-    typeof h !== "object" ||
-    Array.isArray(h) ||
-    !p ||
-    typeof p !== "object" ||
-    Array.isArray(p)
-  ) {
+  if (!isClaimsRecord(h) || !isClaimsRecord(p)) {
     throw new Error(messages.jwtInspector.errors.headerPayloadObjects);
   }
-  // SAFETY: h and p are validated to be non-null objects before indexing claims
-  const alg = (h as JwtClaimsObject).alg;
-  if (typeof alg !== "string" || !isSupportedAlgorithm(alg)) {
+  const alg = h.alg;
+  if (!isString(alg) || !isSupportedAlgorithm(alg)) {
     throw new Error(messages.jwtInspector.errors.unsupportedAlgorithm);
   }
   if (!isCryptoAvailable()) {

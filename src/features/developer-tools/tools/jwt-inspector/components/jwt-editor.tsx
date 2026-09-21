@@ -304,7 +304,10 @@ function JwtDialogJsonView({
   return (
     <Tabs
       className="flex h-full flex-col overflow-hidden"
-      onValueChange={(val) => setModalTab(val as "json" | "claims")}
+      onValueChange={(val) =>
+        // SAFETY: The tabs expose only the JSON and claims values declared here.
+        setModalTab(val as "json" | "claims")
+      }
       value={modalTab}
       variant="flush"
     >
@@ -676,7 +679,10 @@ export function JwtEditor({
         {json ? (
           <Tabs
             className="w-full"
-            onValueChange={(val) => setActiveTab(val as "json" | "claims")}
+            onValueChange={(val) =>
+              // SAFETY: The tabs expose only the JSON and claims values declared here.
+              setActiveTab(val as "json" | "claims")
+            }
             value={activeTab}
             variant="flush"
           >

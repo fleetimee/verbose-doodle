@@ -94,7 +94,10 @@ function SymmetricKeyEditor({
     <div className="min-w-0 overflow-hidden rounded-md border bg-card text-card-foreground">
       <Tabs
         className="w-full"
-        onValueChange={(val) => setActiveTab(val as "secret" | "signature")}
+        onValueChange={(val) =>
+          // SAFETY: The tabs expose only the secret and signature values declared here.
+          setActiveTab(val as "secret" | "signature")
+        }
         value={activeTab}
         variant="flush"
       >
@@ -395,7 +398,10 @@ function AsymmetricInspectKeyEditor({
     <div className="min-w-0 overflow-hidden rounded-md border bg-card text-card-foreground">
       <Tabs
         defaultValue="public"
-        onValueChange={(val) => setActiveTab(val as "public" | "signature")}
+        onValueChange={(val) =>
+          // SAFETY: The tabs expose only the public and signature values declared here.
+          setActiveTab(val as "public" | "signature")
+        }
         value={activeTab}
       >
         <TerminalHeader

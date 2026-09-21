@@ -56,18 +56,14 @@ describe("JwtInspector Component", () => {
     await waitFor(() =>
       expect(screen.getByText("Signature Verified")).toBeDefined()
     );
-    const token = (
-      screen.getByRole("textbox", {
+    const token = screen.getByRole<HTMLTextAreaElement>("textbox", {
         name: "Encoded Token",
-      }) as HTMLTextAreaElement
-    ).value;
+      }).value;
     fireEvent.click(screen.getByRole("tab", { name: "Signature (Base64URL)" }));
     expect(
-      (
-        screen.getByRole("textbox", {
-          name: "Signature (Base64URL)",
-        }) as HTMLTextAreaElement
-      ).value
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
+        name: "Signature (Base64URL)",
+      }).value
     ).toBe(token.split(".")[2]);
     fireEvent.click(
       screen.getByRole("button", { name: "Copy Signature (Base64URL)" })
@@ -87,7 +83,7 @@ describe("JwtInspector Component", () => {
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(
-      (screen.getByRole("textbox", { name: "Payload" }) as HTMLTextAreaElement)
+      screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Payload" })
         .value
     ).toBe('{"sub":"expanded-edit"}');
   });
@@ -111,11 +107,9 @@ describe("JwtInspector Component", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Create" }));
     expect(
-      (
-        screen.getByRole("textbox", {
-          name: "Private key (PKCS8 PEM)",
-        }) as HTMLTextAreaElement
-      ).value
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
+        name: "Private key (PKCS8 PEM)",
+      }).value
     ).toContain("BEGIN PRIVATE KEY");
   });
 
@@ -141,8 +135,8 @@ describe("JwtInspector Component", () => {
 
     // The default token has issuer "biller-simulator-backend"
     await waitFor(() => {
-      const payloadEditor = screen.getByRole("textbox", { name: "Payload" });
-      expect((payloadEditor as HTMLTextAreaElement).value).toContain(
+      const payloadEditor = screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Payload" });
+      expect(payloadEditor.value).toContain(
         "biller-simulator-backend"
       );
     });
@@ -157,8 +151,8 @@ describe("JwtInspector Component", () => {
     });
 
     // Mutate the encoded token's signature part so that it becomes invalid for the current secret
-    const encodedInput = screen.getByRole("textbox", { name: "Encoded Token" });
-    const originalToken = (encodedInput as HTMLTextAreaElement).value;
+    const encodedInput = screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Encoded Token" });
+    const originalToken = encodedInput.value;
     const parts = originalToken.split(".");
     const invalidToken = `${parts[0]}.${parts[1]}.invalid_sig_suffix`;
 
@@ -180,11 +174,9 @@ describe("JwtInspector Component", () => {
     // Wait for the default token to load in the textarea
     let originalToken = "";
     await waitFor(() => {
-      originalToken = (
-        screen.getByRole("textbox", {
+      originalToken = screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Encoded Token",
-        }) as HTMLTextAreaElement
-      ).value;
+        }).value;
       expect(originalToken).not.toBe("");
     });
 
@@ -194,20 +186,16 @@ describe("JwtInspector Component", () => {
       target: { value: '{"sub":"custom_subject","name":"Tester"}' },
     });
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Encoded Token",
-        }) as HTMLTextAreaElement
-      ).value
+        }).value
     ).toBe("");
     fireEvent.click(screen.getByRole("button", { name: "Generate token" }));
 
     await waitFor(() => {
-      const newToken = (
-        screen.getByRole("textbox", {
+      const newToken = screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Encoded Token",
-        }) as HTMLTextAreaElement
-      ).value;
+        }).value;
       expect(newToken).not.toBe(originalToken);
       expect(newToken.split(".").length).toBe(3);
     });
@@ -218,11 +206,9 @@ describe("JwtInspector Component", () => {
 
     // Wait for default token to load
     await waitFor(() => {
-      const originalToken = (
-        screen.getByRole("textbox", {
+      const originalToken = screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Encoded Token",
-        }) as HTMLTextAreaElement
-      ).value;
+        }).value;
       expect(originalToken).not.toBe("");
     });
 
@@ -235,7 +221,7 @@ describe("JwtInspector Component", () => {
       expect(screen.getByText("Expected 3 dot-separated parts.")).toBeDefined();
     });
     expect(
-      (screen.getByRole("textbox", { name: "Payload" }) as HTMLTextAreaElement)
+      screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Payload" })
         .value
     ).toBe("");
   });
@@ -245,9 +231,9 @@ describe("JwtInspector Component", () => {
     await waitFor(() =>
       expect(screen.getByText("Signature Verified")).toBeDefined()
     );
-    const input = screen.getByRole("textbox", {
+    const input = screen.getByRole<HTMLTextAreaElement>("textbox", {
       name: "Encoded Token",
-    }) as HTMLTextAreaElement;
+    });
     const original = input.value;
     fireEvent.change(screen.getByLabelText("HMAC Secret Key"), {
       target: { value: "wrong-secret" },
@@ -257,7 +243,7 @@ describe("JwtInspector Component", () => {
     );
     expect(input.value).toBe(original);
     expect(
-      (screen.getByRole("textbox", { name: "Payload" }) as HTMLTextAreaElement)
+      screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Payload" })
         .readOnly
     ).toBe(true);
   });
@@ -267,9 +253,9 @@ describe("JwtInspector Component", () => {
     await waitFor(() =>
       expect(screen.getByText("Signature Verified")).toBeDefined()
     );
-    const input = screen.getByRole("textbox", {
+    const input = screen.getByRole<HTMLTextAreaElement>("textbox", {
       name: "Encoded Token",
-    }) as HTMLTextAreaElement;
+    });
     const original = input.value;
     fireEvent.change(input, { target: { value: `  Bearer ${original}  ` } });
     expect(input.value).toBe(original);
@@ -316,9 +302,9 @@ describe("JwtInspector Component", () => {
         expect(screen.getByText("Signature Verified")).toBeDefined()
       );
       expect(screen.queryByRole("alert")).toBeNull();
-      const input = screen.getByRole("textbox", {
+      const input = screen.getByRole<HTMLTextAreaElement>("textbox", {
         name: "Encoded Token",
-      }) as HTMLTextAreaElement;
+      });
       expect(input.value.split(".").length).toBe(3);
     } finally {
       Object.defineProperty(globalThis, "crypto", {

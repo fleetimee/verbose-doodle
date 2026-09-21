@@ -88,6 +88,7 @@ function JwtAlgorithmSelect({
 function parseHeaderAlgorithm(headerJson: string): JwtAlgorithm | null {
   try {
     const alg = JSON.parse(headerJson)?.alg;
+    // SAFETY: isSupportedAlgorithm narrows the parsed header algorithm to JwtAlgorithm.
     return isSupportedAlgorithm(alg) ? (alg as JwtAlgorithm) : null;
   } catch {
     return null;
@@ -373,7 +374,7 @@ export function JwtInspector() {
           });
         }
       })
-      .catch((failure: unknown) => {
+      .catch((failure) => {
         if (!cancelled) {
           setVerification({
             token,
@@ -414,6 +415,7 @@ export function JwtInspector() {
     setHeader(JSON.stringify(result.header, null, 2));
     setPayload(JSON.stringify(result.payload, null, 2));
     if (isSupportedAlgorithm(String(result.header.alg))) {
+      // SAFETY: The preceding algorithm guard validates the value before updating state.
       setPreset(result.header.alg as JwtAlgorithm);
     }
   };
@@ -493,6 +495,7 @@ export function JwtInspector() {
   };
 
   const changeAlgorithm = (value: string) => {
+    // SAFETY: The algorithm selector emits one of the supported JWT algorithms.
     const next = value as JwtAlgorithm;
     invalidate();
     setPreset(next);
