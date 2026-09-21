@@ -24,15 +24,19 @@ export const NFC_RECONNECT_DELAYS_MS = [
   1000, 2000, 4000, 8000, 15_000,
 ] as const;
 
+function isBridgePayload(
+  value: unknown
+): value is { readonly protocolVersion?: unknown; readonly type?: unknown } {
+  return typeof value === "object" && value !== null;
+}
+
 export function parseNfcBridgeEvent(
   raw: string
 ): { readonly event: NfcBridgeEvent } | { readonly error: string } {
   try {
     const value: unknown = JSON.parse(raw);
     if (
-      typeof value !== "object" ||
-      value === null ||
-      !("protocolVersion" in value) ||
+      !isBridgePayload(value) ||
       value.protocolVersion !== NFC_BRIDGE_PROTOCOL_VERSION
     ) {
       return {
@@ -63,6 +67,7 @@ export function parseNfcBridgeEvent(
       };
     }
 
+    // SAFETY: The protocol version and event type were validated above.
     return { event: value as NfcBridgeEvent };
   } catch {
     return { error: messages.developerTools.nfcBridgeErrors.malformedJson };

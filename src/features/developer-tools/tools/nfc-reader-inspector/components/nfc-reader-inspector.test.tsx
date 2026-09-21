@@ -4,21 +4,21 @@ import { TourProvider } from "@/components/tour";
 import { NfcReaderInspector } from "@/features/developer-tools/tools/nfc-reader-inspector/components/nfc-reader-inspector";
 import type { NfcBridgeState } from "@/features/developer-tools/tools/nfc-reader-inspector/types";
 
-let bridge = {
-  action: null as string | null,
-  bridgeVersion: null as string | null,
-  capabilities: [] as readonly string[],
+let bridge: NfcBridgeState = {
+  action: null,
+  bridgeVersion: null,
+  capabilities: [],
   clearScan: mock(() => undefined),
   connect: mock(() => undefined),
-  connectionStatus: "disconnected" as NfcBridgeState["connectionStatus"],
+  connectionStatus: "disconnected",
   disconnect: mock(() => undefined),
-  error: null as string | null,
-  latestScan: null as NfcBridgeState["latestScan"],
-  readerName: null as string | null,
-  readerState: "unavailable" as NfcBridgeState["readerState"],
-  reason: null as string | null,
+  error: null,
+  latestScan: null,
+  readerName: null,
+  readerState: "unavailable",
+  reason: null,
   refresh: mock(() => undefined),
-  scanStatus: "stopped" as NfcBridgeState["scanStatus"],
+  scanStatus: "stopped",
   startScan: mock(() => true),
   stopScan: mock(() => true),
 };
