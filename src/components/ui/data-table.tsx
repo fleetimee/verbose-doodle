@@ -86,6 +86,7 @@ export function DataTable<TData, TValue>({
 						}
 						placeholder={filterPlaceholder}
 						value={
+							// SAFETY: The filter column stores string values for this text input.
 							(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""
 						}
 					/>

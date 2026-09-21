@@ -62,7 +62,12 @@ export function CodeBlockWithThemeSelector() {
       <CodeBlockBody>
         {(item) => (
           <CodeBlockItem key={item.language} value={item.language}>
-            <CodeBlockContent language={item.language as BundledLanguage}>
+            <CodeBlockContent
+              language={
+                /* SAFETY: CodeBlockItem values come from the configured bundled-language list. */
+                item.language as BundledLanguage
+              }
+            >
               {item.code}
             </CodeBlockContent>
           </CodeBlockItem>

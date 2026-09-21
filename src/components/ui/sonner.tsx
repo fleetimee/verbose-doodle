@@ -8,7 +8,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={
+        // SAFETY: useTheme returns the toaster theme union accepted by Sonner.
+        theme as ToasterProps["theme"]
+      }
       className="toaster group"
       icons={{
         success: <HugeiconsIcon icon={CheckmarkCircle01Icon} strokeWidth={2} className="size-4" />,
@@ -18,6 +21,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         loading: <HugeiconsIcon icon={Loading03Icon} strokeWidth={2} className="size-4 animate-spin" />,
       }}
       style={
+        /* SAFETY: These keys are CSS custom properties consumed by the Sonner theme. */
         {
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",

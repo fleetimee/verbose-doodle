@@ -51,11 +51,15 @@ function createForwardHeaders(req: VercelRequest): Headers {
   return headers;
 }
 
+function isStringBody(body: unknown): body is string {
+  return typeof body === "string";
+}
+
 function createForwardBody(req: VercelRequest): BodyInit | undefined {
   if (req.method === "GET" || req.method === "HEAD" || req.body === undefined) {
     return;
   }
-  if (typeof req.body === "string" || req.body instanceof Uint8Array) {
+  if (isStringBody(req.body) || req.body instanceof Uint8Array) {
     return req.body;
   }
   return JSON.stringify(req.body);
@@ -89,7 +93,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const body = createForwardBody(req);
     const serializedJsonBody =
       body !== undefined &&
-      typeof req.body !== "string" &&
+      !isStringBody(req.body) &&
       !(req.body instanceof Uint8Array);
     if (
       serializedJsonBody ||

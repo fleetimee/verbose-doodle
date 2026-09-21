@@ -49,6 +49,7 @@ export function I18nProvider({ children, defaultLocale }: I18nProviderProps) {
 
   useEffect(() => {
     const handleLocaleChange = (event: Event) => {
+      // SAFETY: The application dispatches this event with an AppLocale detail.
       const customEvent = event as CustomEvent<AppLocale>;
       if (customEvent.detail && customEvent.detail !== locale) {
         setLocaleState(customEvent.detail);

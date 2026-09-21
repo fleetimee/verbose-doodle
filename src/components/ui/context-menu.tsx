@@ -24,6 +24,7 @@ function ContextMenuTrigger({
     <ContextMenuPrimitive.Trigger
       data-slot="context-menu-trigger"
       render={
+        // SAFETY: React.isValidElement below proves the child is a React element.
         asChild && React.isValidElement(children)
           ? (children as React.ReactElement)
           : undefined

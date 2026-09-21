@@ -75,6 +75,14 @@ const sidebarProviderVariants = cva(
   }
 )
 
+function isFunction<T>(value: T | ((prev: T) => T)): value is (prev: T) => T {
+  return typeof value === "function";
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
@@ -100,7 +108,7 @@ function SidebarProvider({
   const open = openProp ?? _open
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
-      const openState = typeof value === "function" ? value(open) : value
+      const openState = isFunction(value) ? value(open) : value
       if (setOpenProp) {
         setOpenProp(openState)
       } else {
@@ -168,6 +176,7 @@ function SidebarProvider({
           data-slot="sidebar-wrapper"
           data-variant={variant}
           style={
+            /* SAFETY: Custom CSS variables for sidebar styling */
             {
               "--sidebar-width": sidebarWidth,
               "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
@@ -224,6 +233,7 @@ function Sidebar({
           data-mobile="true"
           className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
           style={
+            /* SAFETY: The object contains only CSS custom properties consumed by the mobile sidebar. */
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
             } as React.CSSProperties
@@ -615,6 +625,7 @@ function SidebarGroupLabel({
   render,
   ...props
 }: useRender.ComponentProps<"div">) {
+  // SAFETY: mergeProps returns the div props contract declared by useRender.
   return useRender({
     defaultTagName: "div",
     render,
@@ -638,6 +649,7 @@ function SidebarGroupAction({
   render,
   ...props
 }: useRender.ComponentProps<"button">) {
+  // SAFETY: mergeProps returns the button props contract declared by useRender.
   return useRender({
     defaultTagName: "button",
     render,
@@ -745,6 +757,7 @@ function SidebarMenuButton({
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const { isMobile, state } = useSidebar()
 
+  // SAFETY: mergeProps returns the button props contract declared by useRender.
   const button = useRender({
     defaultTagName: "button",
     render,
@@ -764,7 +777,7 @@ function SidebarMenuButton({
     return button
   }
 
-  if (typeof tooltip === "string") {
+  if (isString(tooltip)) {
     tooltip = {
       children: tooltip,
     }
@@ -792,6 +805,7 @@ function SidebarMenuAction({
   render?: useRender.ComponentProps<"button">["render"]
   showOnHover?: boolean
 }) {
+  // SAFETY: mergeProps returns the button props contract declared by useRender.
   return useRender({
     defaultTagName: "button",
     render,
@@ -876,6 +890,7 @@ function SidebarMenuSkeleton({
         className="h-4 max-w-(--skeleton-width) flex-1"
         data-sidebar="menu-skeleton-text"
         style={
+          /* SAFETY: The object contains only the CSS custom property consumed by the skeleton width. */
           {
             "--skeleton-width": width,
           } as React.CSSProperties
@@ -925,6 +940,7 @@ function SidebarMenuSubButton({
   size?: "sm" | "md"
   isActive?: boolean
 }) {
+  // SAFETY: mergeProps returns the anchor props contract declared by useRender.
   return useRender({
     defaultTagName: "a",
     render,

@@ -51,6 +51,19 @@ const chartContainerVariants = cva(
   }
 )
 
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+type PayloadRecord = Record<
+  string,
+  string | number | boolean | null | undefined
+>;
+
+function isPayloadRecord(value: unknown): value is PayloadRecord {
+  return typeof value === "object" && value !== null;
+}
+
 function ChartContainer({
   id,
   className,
@@ -138,8 +151,9 @@ function ChartTooltipContent({
     const [item] = payload
     const key = `${labelKey || item?.dataKey || item?.name || "value"}`
     const itemConfig = getPayloadConfigFromPayload(config, item, key)
+    // SAFETY: ChartConfig is keyed by the label key selected from the chart payload.
     const value =
-      !labelKey && typeof label === "string"
+      !labelKey && isString(label)
         ? config[label as keyof typeof config]?.label || label
         : itemConfig?.label
 
@@ -317,20 +331,22 @@ function ChartLegendContent({
   )
 }
 
+type ChartItemPayload =
+  | NonNullable<RechartsPrimitive.TooltipContentProps["payload"]>[number]
+  | NonNullable<RechartsPrimitive.DefaultLegendContentProps["payload"]>[number];
+
 // Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(
   config: ChartConfig,
-  payload: unknown,
+  payload: ChartItemPayload | undefined,
   key: string
 ) {
-  if (typeof payload !== "object" || payload === null) {
-    return 
+  if (!payload) {
+    return;
   }
 
   const payloadPayload =
-    "payload" in payload &&
-    typeof payload.payload === "object" &&
-    payload.payload !== null
+    "payload" in payload && isPayloadRecord(payload.payload)
       ? payload.payload
       : undefined
 
@@ -338,19 +354,24 @@ function getPayloadConfigFromPayload(
 
   if (
     key in payload &&
-    typeof payload[key as keyof typeof payload] === "string"
+    // SAFETY: The preceding key check narrows this dynamic payload property to the payload shape.
+    isString(payload[key as keyof typeof payload])
   ) {
+    // SAFETY: The preceding isString check narrows the indexed payload value to string.
     configLabelKey = payload[key as keyof typeof payload] as string
   } else if (
     payloadPayload &&
     key in payloadPayload &&
-    typeof payloadPayload[key as keyof typeof payloadPayload] === "string"
+    // SAFETY: The preceding key check narrows this dynamic payload property to the payload shape.
+    isString(payloadPayload[key as keyof typeof payloadPayload])
   ) {
+    // SAFETY: The preceding isString check narrows the indexed payload value to string.
     configLabelKey = payloadPayload[
       key as keyof typeof payloadPayload
     ] as string
   }
 
+  // SAFETY: The preceding key check narrows the dynamic config lookup to a configured key.
   return configLabelKey in config
     ? config[configLabelKey]
     : config[key as keyof typeof config]

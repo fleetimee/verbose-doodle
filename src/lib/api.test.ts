@@ -39,12 +39,7 @@ describe("API utilities", () => {
     };
     const injectedFetch = (_input: RequestInfo | URL, init?: RequestInit) => {
       fetchCalls.push(init ?? {});
-      return Promise.resolve({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => ({ ok: true }),
-        ok: true,
-        status: 200,
-      } as Response);
+      return Promise.resolve(Response.json({ ok: true }));
     };
 
     const client = createApiClient({ fetch: injectedFetch, session });
@@ -60,12 +55,7 @@ describe("API utilities", () => {
   describe("apiFetch", () => {
     test("uses custom baseUrl when provided", async () => {
       const mockData = { success: true };
-      fetchSpy.mockResolvedValue({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => mockData,
-        ok: true,
-        status: 200,
-      } as Response);
+      fetchSpy.mockResolvedValue(Response.json(mockData));
 
       await apiFetch("/test", { baseUrl: "https://api.example.com" });
 
@@ -80,12 +70,7 @@ describe("API utilities", () => {
     });
 
     test("merges custom headers with defaults", async () => {
-      fetchSpy.mockResolvedValue({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => ({}),
-        ok: true,
-        status: 200,
-      } as Response);
+      fetchSpy.mockResolvedValue(Response.json({}));
 
       await apiFetch("/test", {
         headers: { Authorization: "Bearer token123" },
@@ -103,24 +88,24 @@ describe("API utilities", () => {
     });
 
     test("handles non-JSON response", async () => {
-      fetchSpy.mockResolvedValue({
-        headers: new Headers({ "content-type": "text/plain" }),
-        ok: true,
-        status: 200,
-      } as Response);
+      fetchSpy.mockResolvedValue(
+        new Response(null, {
+          headers: { "content-type": "text/plain" },
+          status: 200,
+        })
+      );
 
       const result = await apiFetch("/test");
       expect(result).toBeUndefined();
     });
 
     test("throws error for failed request", async () => {
-      fetchSpy.mockResolvedValue({
-        headers: new Headers(),
-        json: async () => ({ message: "Resource not found" }),
-        ok: false,
-        status: 404,
-        statusText: "Not Found",
-      } as Response);
+      fetchSpy.mockResolvedValue(
+        Response.json(
+          { message: "Resource not found" },
+          { status: 404, statusText: "Not Found" }
+        )
+      );
 
       await expect(apiFetch("/test")).rejects.toEqual({
         code: "404",
@@ -157,13 +142,12 @@ describe("API utilities", () => {
         },
       });
 
-      fetchSpy.mockResolvedValue({
-        headers: new Headers(),
-        json: async () => ({ message: "Unauthorized" }),
-        ok: false,
-        status: 401,
-        statusText: "Unauthorized",
-      } as Response);
+      fetchSpy.mockResolvedValue(
+        Response.json(
+          { message: "Unauthorized" },
+          { status: 401, statusText: "Unauthorized" }
+        )
+      );
 
       await expect(
         client.apiFetch("/test", { retryOnUnauthorized: false })
@@ -197,19 +181,13 @@ describe("API utilities", () => {
       const mockData = { ok: true };
 
       fetchSpy
-        .mockResolvedValueOnce({
-          headers: new Headers(),
-          json: async () => ({ message: "Unauthorized" }),
-          ok: false,
-          status: 401,
-          statusText: "Unauthorized",
-        } as Response)
-        .mockResolvedValueOnce({
-          headers: new Headers({ "content-type": "application/json" }),
-          json: async () => mockData,
-          ok: true,
-          status: 200,
-        } as Response);
+        .mockResolvedValueOnce(
+          Response.json(
+            { message: "Unauthorized" },
+            { status: 401, statusText: "Unauthorized" }
+          )
+        )
+        .mockResolvedValueOnce(Response.json(mockData));
 
       const result = await client.apiFetch("/test");
 
@@ -257,26 +235,19 @@ describe("API utilities", () => {
       fetchSpy.mockImplementation(
         (input: string | URL | Request, init?: RequestInit) => {
           const url = String(input);
-          const authorization = (
-            init?.headers as Record<string, string> | undefined
-          )?.Authorization;
+          const headers = new Headers(init?.headers);
+          const authorization = headers.get("authorization");
 
           if (authorization === "Bearer old-access-token") {
-            return Promise.resolve({
-              headers: new Headers(),
-              json: async () => ({ message: "Unauthorized" }),
-              ok: false,
-              status: 401,
-              statusText: "Unauthorized",
-            } as Response);
+            return Promise.resolve(
+              Response.json(
+                { message: "Unauthorized" },
+                { status: 401, statusText: "Unauthorized" }
+              )
+            );
           }
 
-          return Promise.resolve({
-            headers: new Headers({ "content-type": "application/json" }),
-            json: async () => ({ url }),
-            ok: true,
-            status: 200,
-          } as Response);
+          return Promise.resolve(Response.json({ url }));
         }
       );
 
@@ -304,13 +275,12 @@ describe("API utilities", () => {
         },
       });
 
-      fetchSpy.mockResolvedValue({
-        headers: new Headers(),
-        json: async () => ({ message: "Unauthorized" }),
-        ok: false,
-        status: 401,
-        statusText: "Unauthorized",
-      } as Response);
+      fetchSpy.mockResolvedValue(
+        Response.json(
+          { message: "Unauthorized" },
+          { status: 401, statusText: "Unauthorized" }
+        )
+      );
 
       const results = await Promise.allSettled([
         client.apiFetch("/first"),
@@ -336,13 +306,12 @@ describe("API utilities", () => {
         },
       });
 
-      fetchSpy.mockResolvedValue({
-        headers: new Headers(),
-        json: async () => ({ message: "Unauthorized" }),
-        ok: false,
-        status: 401,
-        statusText: "Unauthorized",
-      } as Response);
+      fetchSpy.mockResolvedValue(
+        Response.json(
+          { message: "Unauthorized" },
+          { status: 401, statusText: "Unauthorized" }
+        )
+      );
 
       await expect(
         client.apiFetch("/api/refresh", {
@@ -364,7 +333,7 @@ describe("API utilities", () => {
       fetchSpy.mockImplementation(
         (_input: RequestInfo | URL, options?: RequestInit) => {
           return new Promise((resolve, reject) => {
-            const signal = options?.signal as AbortSignal;
+            const signal = options?.signal;
 
             if (signal) {
               signal.addEventListener("abort", () => {
@@ -374,12 +343,7 @@ describe("API utilities", () => {
 
             // Simulate slow response (longer than timeout)
             setTimeout(() => {
-              resolve({
-                headers: new Headers({ "content-type": "application/json" }),
-                json: async () => ({}),
-                ok: true,
-                status: 200,
-              } as Response);
+              resolve(Response.json({}));
             }, 1000);
           });
         }
@@ -394,12 +358,7 @@ describe("API utilities", () => {
 
   describe("HTTP method helpers", () => {
     test("apiPost makes POST request with body", async () => {
-      fetchSpy.mockResolvedValue({
-        headers: new Headers({ "content-type": "application/json" }),
-        json: async () => ({ id: 1 }),
-        ok: true,
-        status: 201,
-      } as Response);
+      fetchSpy.mockResolvedValue(Response.json({ id: 1 }, { status: 201 }));
 
       const postData = { name: "Test" };
       await apiPost("/test", postData);

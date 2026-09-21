@@ -114,6 +114,7 @@ function Stepper({
       setActiveStep: handleSetActiveStep,
       stepsCount: React.Children.toArray(children).filter(
         (child): child is React.ReactElement =>
+          // SAFETY: React elements expose the optional displayName metadata used by this filter.
           React.isValidElement(child) && (child.type as { displayName?: string }).displayName === 'StepperItem',
       ).length,
       orientation,
@@ -258,7 +259,7 @@ function StepperTrigger({ asChild = false, className, children, tabIndex, ...pro
       id={id}
       aria-selected={isSelected}
       aria-controls={panelId}
-      tabIndex={typeof tabIndex === 'number' ? tabIndex : isSelected ? 0 : -1}
+      tabIndex={tabIndex !== undefined ? tabIndex : isSelected ? 0 : -1}
       data-slot="stepper-trigger"
       data-state={state}
       data-loading={isLoading}

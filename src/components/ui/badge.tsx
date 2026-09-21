@@ -64,6 +64,7 @@ function Badge({
   render,
   ...props
 }: useRender.ComponentProps<"span"> & VariantProps<typeof badgeVariants>) {
+  // SAFETY: mergeProps returns the span props contract declared by useRender.
   return useRender({
     defaultTagName: "span",
     render,

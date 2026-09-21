@@ -171,6 +171,7 @@ describe("AppSidebar developer tools navigation", () => {
 
     fireEvent.keyDown(document, { key: "k", ctrlKey: true });
     await waitFor(() => {
+      // SAFETY: The combobox role query targets the native search input.
       expect((screen.getByRole("combobox") as HTMLInputElement).value).toBe("");
       expect(
         screen.getByRole("option", { selected: true }).textContent
@@ -189,6 +190,7 @@ describe("AppSidebar developer tools navigation", () => {
     fireEvent.keyDown(screen.getByRole("combobox"), { key: "Escape" });
     fireEvent.keyDown(document, { key: "k", ctrlKey: true });
     await waitFor(() => {
+      // SAFETY: The combobox role query targets the native search input.
       expect((screen.getByRole("combobox") as HTMLInputElement).value).toBe("");
       expect(
         screen.getByRole("option", { selected: true }).textContent

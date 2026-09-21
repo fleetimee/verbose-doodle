@@ -69,6 +69,7 @@ function InputGroupAddon({
       data-align={align}
       className={cn(inputGroupAddonVariants({ align }), className)}
       onClick={(e) => {
+        // SAFETY: DOM events from this native group always expose an HTMLElement target.
         if ((e.target as HTMLElement).closest("button")) {
           return
         }

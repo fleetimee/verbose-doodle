@@ -73,6 +73,7 @@ function Item({
   render,
   ...props
 }: useRender.ComponentProps<"div"> & VariantProps<typeof itemVariants>) {
+  // SAFETY: mergeProps returns the div props contract declared by useRender.
   return useRender({
     defaultTagName: "div",
     render,

@@ -471,6 +471,7 @@ export const CodeBlockFilename = ({
     const regex = new RegExp(
       `^${pattern.replace(/\\/g, "\\\\").replace(/\./g, "\\.").replace(/\*/g, ".*")}$`
     );
+    // SAFETY: CodeBlockFilename is rendered with a string child for the filename label.
     return regex.test(children as string);
   })?.[1];
   const Icon = icon ?? defaultIcon;
@@ -601,6 +602,7 @@ export const CodeBlockCopyButton = ({
   };
 
   if (asChild) {
+    // SAFETY: The asChild branch is only used with the button element supplied by the caller.
     return cloneElement(children as ReactElement, {
       // @ts-expect-error - we know this is a button
       onClick: handleCopyToClipboard,
@@ -727,6 +729,7 @@ export const CodeBlockContent = ({
       light: lightTheme,
     };
 
+    // SAFETY: CodeBlockContent renders its source as a string child for syntax highlighting.
     highlight(children as string, language, effectiveThemes)
       .then(setHtml)
       .catch(console.error);

@@ -21,6 +21,7 @@ function SheetTrigger({
     <SheetPrimitive.Trigger
       data-slot="sheet-trigger"
       render={
+        // SAFETY: React.isValidElement below proves the child is a React element.
         asChild && React.isValidElement(children)
           ? (children as React.ReactElement)
           : undefined
@@ -43,6 +44,7 @@ function SheetClose({
     <SheetPrimitive.Close
       data-slot="sheet-close"
       render={
+        // SAFETY: React.isValidElement below proves the child is a React element.
         asChild && React.isValidElement(children)
           ? (children as React.ReactElement)
           : undefined

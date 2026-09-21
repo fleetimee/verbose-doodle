@@ -57,7 +57,10 @@ function ToggleGroup({
       data-variant={variant}
       data-size={size}
       data-spacing={spacing}
-      style={{ "--gap": spacing } as React.CSSProperties}
+      style={
+        /* SAFETY: The style object contains the CSS custom property consumed by the group layout. */
+        { "--gap": spacing } as React.CSSProperties
+      }
       className={cn(toggleGroupVariants({ variant }), className)}
       {...props}
     >

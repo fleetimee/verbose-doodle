@@ -19,7 +19,7 @@ const themes = [
     key: "dark",
     label: messages.theme.darkTheme,
   },
-];
+] as const;
 
 export type ThemeSwitcherProps = {
   value?: "light" | "dark";
@@ -88,7 +88,7 @@ export const ThemeSwitcher = ({
             aria-label={label}
             className="relative h-6 w-6 rounded-full"
             key={key}
-            onClick={() => handleThemeClick(key as "light" | "dark")}
+            onClick={() => handleThemeClick(key)}
             type="button"
             whileHover={shouldReduceMotion ? undefined : { scale: 1.05 }}
             whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}

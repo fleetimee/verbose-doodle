@@ -10,7 +10,7 @@ export function generateUUID(): string {
   // Check if crypto.randomUUID is available
   if (
     typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
+    typeof crypto.randomUUID !== "undefined"
   ) {
     return crypto.randomUUID();
   }

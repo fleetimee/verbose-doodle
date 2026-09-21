@@ -27,6 +27,7 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
+    // SAFETY: Stored values are selected from the Theme union before being persisted.
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   );
 

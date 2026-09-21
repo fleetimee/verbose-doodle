@@ -25,6 +25,7 @@ type FormFieldContextValue<
   name: TName
 }
 
+// SAFETY: FormField always provides the context before useFormField reads it.
 const FormFieldContext = React.createContext<FormFieldContextValue>(
   {} as FormFieldContextValue
 )
@@ -67,6 +68,7 @@ type FormItemContextValue = {
   id: string
 }
 
+// SAFETY: FormItem always provides the context before its descendants read it.
 const FormItemContext = React.createContext<FormItemContextValue>(
   {} as FormItemContextValue
 )
@@ -110,6 +112,7 @@ function FormControl({
 }) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
 
+  // SAFETY: mergeProps returns the div props contract declared by useRender.
   return useRender({
     defaultTagName: "div",
     render: children,

@@ -22,13 +22,17 @@ const streamingPlugins = { cjk }
 
 type StreamdownSpanProps = ComponentProps<"span"> & ExtraProps
 
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
 function AnimatedGlyphSpan({
   children,
   node: _node,
   ...props
 }: StreamdownSpanProps) {
   const glyph =
-    "data-sd-animate" in props && typeof children === "string"
+    "data-sd-animate" in props && isString(children)
       ? children
       : undefined
 

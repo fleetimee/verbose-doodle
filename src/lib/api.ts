@@ -92,10 +92,11 @@ async function fetchWithTimeout(
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
-      throw {
+      const timeoutError: ApiError = {
         code: "TIMEOUT",
         message: "Request timeout",
-      } as ApiError;
+      };
+      throw timeoutError;
     }
 
     throw error;
@@ -107,6 +108,7 @@ async function fetchWithTimeout(
 function parseResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get("content-type");
   if (!contentType?.includes("application/json")) {
+    // SAFETY: Non-JSON response returns undefined compatible with void/optional response types
     return Promise.resolve(undefined as T);
   }
 

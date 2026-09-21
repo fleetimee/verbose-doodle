@@ -54,32 +54,41 @@ const STATUS_TO_ERROR_CODE: StatusErrorCodeRegistry = {
   [HTTP_STATUS.GATEWAY_TIMEOUT]: "TIMEOUT",
 };
 
+function isApiError(cause: unknown): cause is ApiError {
+  if (typeof cause !== "object" || cause === null) {
+    return false;
+  }
+  return (
+    "message" in cause &&
+    // SAFETY: Invariant verified by checking typeof object and property presence
+    typeof (cause as { message: unknown }).message === "string"
+  );
+}
+
 /**
  * Get user-friendly error message from error object
  */
-export function getErrorMessage(error: unknown): string {
+export function getErrorMessage(cause: unknown): string {
   const errorMessages = getErrorMessages();
 
   // Handle ApiError
-  if (error && typeof error === "object" && "message" in error) {
-    const apiError = error as ApiError;
-
-    if (apiError.code && errorMessages[apiError.code]) {
-      return errorMessages[apiError.code];
+  if (isApiError(cause)) {
+    if (cause.code && errorMessages[cause.code]) {
+      return errorMessages[cause.code];
     }
 
-    if (apiError.status && STATUS_TO_ERROR_CODE[apiError.status]) {
-      const errorCode = STATUS_TO_ERROR_CODE[apiError.status];
+    if (cause.status && STATUS_TO_ERROR_CODE[cause.status]) {
+      const errorCode = STATUS_TO_ERROR_CODE[cause.status];
       return errorMessages[errorCode];
     }
 
-    if (typeof apiError.message === "string" && apiError.message) {
-      return apiError.message;
+    if (cause.message) {
+      return cause.message;
     }
   }
 
   // Handle network errors
-  if (error instanceof TypeError && error.message.includes("fetch")) {
+  if (cause instanceof TypeError && cause.message.includes("fetch")) {
     return errorMessages.NETWORK_ERROR;
   }
 
@@ -90,8 +99,8 @@ export function getErrorMessage(error: unknown): string {
 /**
  * Show error toast notification
  */
-export function showErrorToast(error: unknown, customMessage?: string) {
-  const message = customMessage || getErrorMessage(error);
+export function showErrorToast(cause: unknown, customMessage?: string) {
+  const message = customMessage || getErrorMessage(cause);
 
   toast.error(messages.errors.errorTitle, {
     description: message,
@@ -132,20 +141,21 @@ export function showWarningToast(message: string, description?: string) {
 /**
  * Handle authentication errors specifically
  */
-export function handleAuthError(error: unknown) {
-  const apiError = error as ApiError;
+export function handleAuthError(cause: unknown) {
+  // SAFETY: Auth callers pass the normalized ApiError produced by the API layer.
+  const apiError = cause as ApiError;
 
   // Handle specific auth error cases
   if (apiError.status === HTTP_STATUS.UNAUTHORIZED) {
-    showErrorToast(error, messages.errors.invalidCredentialsRetry);
+    showErrorToast(cause, messages.errors.invalidCredentialsRetry);
     return;
   }
 
   if (apiError.status === HTTP_STATUS.TOO_MANY_REQUESTS) {
-    showErrorToast(error, messages.errors.tooManyLoginAttempts);
+    showErrorToast(cause, messages.errors.tooManyLoginAttempts);
     return;
   }
 
   // Fallback to generic error handler
-  showErrorToast(error);
+  showErrorToast(cause);
 }

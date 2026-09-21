@@ -56,6 +56,7 @@ function BreadcrumbLink({
   render,
   ...props
 }: useRender.ComponentProps<"a">) {
+  // SAFETY: mergeProps returns the anchor props contract declared by useRender.
   return useRender({
     defaultTagName: "a",
     render,

@@ -24,6 +24,7 @@ function PopoverTrigger({
     <PopoverPrimitive.Trigger
       data-slot="popover-trigger"
       render={
+        // SAFETY: React.isValidElement below proves the child is a React element.
         asChild && React.isValidElement(children)
           ? (children as React.ReactElement)
           : undefined
@@ -92,6 +93,7 @@ function PopoverAnchor({
   render,
   ...props
 }: useRender.ComponentProps<"div">) {
+  // SAFETY: mergeProps returns the component props contract declared by useRender.
   return useRender({
     defaultTagName: "div",
     render,

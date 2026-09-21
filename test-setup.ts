@@ -43,6 +43,7 @@ window.getComputedStyle = (elt: Element) => {
       ) {
         return target.transform || "none";
       }
+      // SAFETY: Proxy trap forwards property access to CSSStyleDeclaration
       return target[prop as keyof CSSStyleDeclaration];
     },
   });
