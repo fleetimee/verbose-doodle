@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { isValidTimeZone } from "@/features/developer-tools/timezones";
 import { cn } from "@/lib/utils";
 
@@ -80,40 +81,42 @@ export function TimezoneCombobox({
             placeholder={searchPlaceholder}
             value={query}
           />
-          <CommandList>
-            <CommandEmpty>
-              {canUseQuery ? (
-                <button
-                  className="w-full px-3 py-2 text-left font-mono text-xs hover:bg-accent"
-                  onClick={() => selectTimeZone(normalizedQuery)}
-                  type="button"
-                >
-                  {useQueryLabel(normalizedQuery)}
-                </button>
-              ) : (
-                emptyMessage
-              )}
-            </CommandEmpty>
-            <CommandGroup>
-              {options.map((timeZone) => (
-                <CommandItem
-                  key={timeZone}
-                  onSelect={() => selectTimeZone(timeZone)}
-                  value={timeZone}
-                >
-                  <span className="font-mono text-xs">{timeZone}</span>
-                  <HugeiconsIcon
-                    className={cn(
-                      "ml-auto size-4",
-                      value === timeZone ? "opacity-100" : "opacity-0"
-                    )}
-                    icon={Tick02Icon}
-                    strokeWidth={2}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
+          <ScrollArea className="h-72" variant="visible">
+            <CommandList variant="scrollable">
+              <CommandEmpty>
+                {canUseQuery ? (
+                  <button
+                    className="w-full px-3 py-2 text-left font-mono text-xs hover:bg-accent"
+                    onClick={() => selectTimeZone(normalizedQuery)}
+                    type="button"
+                  >
+                    {useQueryLabel(normalizedQuery)}
+                  </button>
+                ) : (
+                  emptyMessage
+                )}
+              </CommandEmpty>
+              <CommandGroup>
+                {options.map((timeZone) => (
+                  <CommandItem
+                    key={timeZone}
+                    onSelect={() => selectTimeZone(timeZone)}
+                    value={timeZone}
+                  >
+                    <span className="font-mono text-xs">{timeZone}</span>
+                    <HugeiconsIcon
+                      className={cn(
+                        "ml-auto size-4",
+                        value === timeZone ? "opacity-100" : "opacity-0"
+                      )}
+                      icon={Tick02Icon}
+                      strokeWidth={2}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </ScrollArea>
         </Command>
       </PopoverContent>
     </Popover>
