@@ -55,11 +55,22 @@ export function getMessages(locale?: AppLocale): Messages {
     localeMessages[DEFAULT_LOCALE]) as Messages;
 }
 
+type MessageNode =
+  | string
+  | readonly MessageNode[]
+  | { readonly [key: string]: MessageNode };
+
 function createMessageProxy<T extends object>(getTarget: () => T): T {
   return new Proxy({} as T, {
     get(_target, prop: string | symbol) {
+      if (typeof prop !== "string") {
+        return;
+      }
       const active = getTarget();
-      const value = Reflect.get(active, prop);
+      // SAFETY: Proxy trap forwards property access directly to target messages tree
+      const value = (
+        active as { readonly [key: string]: MessageNode | undefined }
+      )[prop];
       if (
         typeof value === "object" &&
         value !== null &&
@@ -67,7 +78,10 @@ function createMessageProxy<T extends object>(getTarget: () => T): T {
       ) {
         return createMessageProxy(() => {
           const current = getTarget();
-          return Reflect.get(current, prop) as object;
+          // SAFETY: Proxy trap forwards property access directly to target messages tree
+          return (
+            current as { readonly [key: string]: MessageNode | undefined }
+          )[prop] as object;
         });
       }
       return value;
