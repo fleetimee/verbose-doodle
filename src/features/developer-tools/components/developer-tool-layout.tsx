@@ -6,6 +6,7 @@ import { Link, useInRouterContext } from "react-router";
 import { Eraser, RotateCcw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -107,16 +108,47 @@ function ActionButtons({
 
   const isHeader = variant === "top-header";
 
+  if (isHeader) {
+    return (
+      <ButtonGroup>
+        {tour}
+        {onReset && resetLabel ? (
+          <Button
+            onClick={onReset}
+            size="sm"
+            type="button"
+            variant="tool-action"
+          >
+            <RotateCcw className="size-3.5 text-muted-foreground/70" />
+            <span>{resetLabel}</span>
+          </Button>
+        ) : null}
+        {extraActions}
+        {onClear && clearLabel ? (
+          <Button
+            onClick={onClear}
+            size="sm"
+            type="button"
+            variant="tool-destructive"
+          >
+            <Eraser className="size-3.5 text-muted-foreground/70" />
+            <span>{clearLabel}</span>
+          </Button>
+        ) : null}
+      </ButtonGroup>
+    );
+  }
+
   return (
     <>
       {tour}
       {onReset && resetLabel ? (
         <Button
-          className={isHeader ? undefined : "w-full justify-start"}
+          className="w-full justify-start"
           onClick={onReset}
           size="sm"
           type="button"
-          variant={isHeader ? "tool-action" : "tool-action-ghost"}
+          variant="tool-action-ghost"
         >
           <RotateCcw className="size-3.5 text-muted-foreground/70" />
           <span>{resetLabel}</span>
@@ -125,11 +157,11 @@ function ActionButtons({
       {extraActions}
       {onClear && clearLabel ? (
         <Button
-          className={isHeader ? undefined : "w-full justify-start"}
+          className="w-full justify-start"
           onClick={onClear}
           size="sm"
           type="button"
-          variant={isHeader ? "tool-destructive" : "tool-destructive-ghost"}
+          variant="tool-destructive-ghost"
         >
           <Eraser className="size-3.5 text-muted-foreground/70" />
           <span>{clearLabel}</span>

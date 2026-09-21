@@ -124,20 +124,23 @@ export function DocumentEditor({
               <h2 className="font-semibold text-sm">{label}</h2>
               <p className="text-muted-foreground text-xs">{description}</p>
             </div>
-            <div className="flex items-center gap-2 font-mono text-muted-foreground text-xs uppercase tracking-wider">
-              <span>
-                {lineCountMessage
-                  ? formatMessage(lineCountMessage, { count: lineCount })
-                  : `${lineCount} lines`}
-              </span>
-              <span aria-hidden="true">/</span>
-              <span>
-                {byteCountMessage
-                  ? formatMessage(byteCountMessage, {
-                      count: byteCount.toLocaleString(),
-                    })
-                  : `${byteCount.toLocaleString()} bytes`}
-              </span>
+            <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+              {headerActions}
+              <div className="flex items-center gap-2 font-mono text-muted-foreground text-xs uppercase tracking-wider">
+                <span>
+                  {lineCountMessage
+                    ? formatMessage(lineCountMessage, { count: lineCount })
+                    : `${lineCount} lines`}
+                </span>
+                <span aria-hidden="true">/</span>
+                <span>
+                  {byteCountMessage
+                    ? formatMessage(byteCountMessage, {
+                        count: byteCount.toLocaleString(),
+                      })
+                    : `${byteCount.toLocaleString()} bytes`}
+                </span>
+              </div>
             </div>
           </header>
         ))}

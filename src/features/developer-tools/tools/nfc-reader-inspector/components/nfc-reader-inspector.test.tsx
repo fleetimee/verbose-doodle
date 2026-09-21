@@ -2,9 +2,9 @@ import { afterEach, describe, expect, mock, test } from "bun:test";
 import { render, screen } from "@testing-library/react";
 import { TourProvider } from "@/components/tour";
 import { NfcReaderInspector } from "@/features/developer-tools/tools/nfc-reader-inspector/components/nfc-reader-inspector";
-import type { NfcBridgeState } from "@/features/developer-tools/tools/nfc-reader-inspector/types";
+import type { useNfcBridge } from "@/features/developer-tools/tools/nfc-reader-inspector/hooks/use-nfc-bridge";
 
-let bridge: NfcBridgeState = {
+let bridge: ReturnType<typeof useNfcBridge> = {
   action: null,
   bridgeVersion: null,
   capabilities: [],
