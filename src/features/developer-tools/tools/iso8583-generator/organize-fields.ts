@@ -19,6 +19,7 @@ const CATEGORY_BITS: Readonly<Record<Category, readonly number[]>> = {
 
 export function fieldCategory(number: number): Category {
   return (
+    // SAFETY: CATEGORY_BITS contains every category key in the Category union.
     (Object.keys(CATEGORY_BITS) as Category[]).find((key) =>
       CATEGORY_BITS[key].includes(number)
     ) ?? "private"

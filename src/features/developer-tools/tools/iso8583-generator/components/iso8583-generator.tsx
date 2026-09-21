@@ -399,7 +399,10 @@ export function LegacyIso8583Generator() {
             {copy.preset}
           </Label>
           <Select
-            onValueChange={(value) => loadPreset(value as Iso8583PresetId)}
+            onValueChange={(value) =>
+              // SAFETY: The select options are the supported ISO 8583 presets.
+              loadPreset(value as Iso8583PresetId)
+            }
             value={presetId}
           >
             <SelectTrigger id="iso8583-preset" size="md" variant="subtle">
@@ -472,6 +475,7 @@ export function LegacyIso8583Generator() {
               </Label>
               <Select
                 onValueChange={(value) => {
+                  // SAFETY: The select options are the supported ISO 8583 header types.
                   setHeaderType(value as Iso8583HeaderType);
                   setCopied(false);
                   setStatus(null);
@@ -486,7 +490,10 @@ export function LegacyIso8583Generator() {
                   <SelectValue>{HEADER_LABELS[headerType]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {(Object.keys(HEADER_LABELS) as Iso8583HeaderType[]).map(
+                  {(
+                    // SAFETY: HEADER_LABELS is defined for every ISO 8583 header type.
+                    Object.keys(HEADER_LABELS) as Iso8583HeaderType[]
+                  ).map(
                     (value) => (
                       <SelectItem key={value} value={value}>
                         {HEADER_LABELS[value]}

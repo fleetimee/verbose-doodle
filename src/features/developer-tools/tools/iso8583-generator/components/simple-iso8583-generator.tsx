@@ -99,6 +99,10 @@ const MORE_PRESET_IDS: readonly Iso8583PresetId[] = [
   "notification-response",
 ];
 
+function isUpdater<T>(update: SetStateAction<T>): update is (prevState: T) => T {
+  return typeof update === "function";
+}
+
 interface FieldExplanationRegistry {
   readonly [fieldNumber: number]: string;
 }
@@ -707,6 +711,7 @@ export function Iso8583Generator() {
   const [drafts, setDrafts] = useState<
     Partial<Record<Iso8583PresetId, Iso8583Field[]>>
   >(() => ({ "sign-on": presetFields("sign-on") }));
+  // SAFETY: Every preset used by this component has a corresponding field draft.
   const fields = drafts[presetId] as Iso8583Field[];
   const [refreshTime, setRefreshTime] = useState(true);
   const [advanceStan, setAdvanceStan] = useState(true);
@@ -720,7 +725,7 @@ export function Iso8583Generator() {
     setDrafts((current) => ({
       ...current,
       [presetId]:
-        typeof update === "function" ? update(current[presetId] ?? []) : update,
+        isUpdater(update) ? update(current[presetId] ?? []) : update,
     }));
     invalidateOutput();
   };
@@ -1019,7 +1024,10 @@ export function Iso8583Generator() {
         <div className="flex flex-col rounded-lg border bg-muted p-1 shadow-xs sm:flex-row">
           <Tabs
             className="min-w-0 flex-1"
-            onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
+            onValueChange={(value) =>
+              // SAFETY: The tabs expose only the supported ISO 8583 presets.
+              choosePreset(value as Iso8583PresetId)
+            }
             value={presetId}
             variant="flush"
           >
@@ -1069,7 +1077,10 @@ export function Iso8583Generator() {
           <div className="mx-1 hidden w-px bg-border sm:block" />
 
           <Select
-            onValueChange={(value) => choosePreset(value as Iso8583PresetId)}
+            onValueChange={(value) =>
+              // SAFETY: The select exposes only the supported ISO 8583 presets.
+              choosePreset(value as Iso8583PresetId)
+            }
             value={morePreset ? presetId : ""}
           >
             <SelectTrigger
@@ -1273,6 +1284,7 @@ export function Iso8583Generator() {
               data={codeBlockData}
               defaultValue="text"
               onValueChange={(val) => {
+                // SAFETY: The tabs expose only the JSON and text payload views.
                 setPayloadView(val as "json" | "text");
                 setCopied(false);
                 setStatus(null);
@@ -1284,6 +1296,7 @@ export function Iso8583Generator() {
                 <div className="flex items-center gap-2">
                   <Tabs
                     onValueChange={(val) => {
+                      // SAFETY: The tabs expose only the JSON and text payload views.
                       setPayloadView(val as "json" | "text");
                       setCopied(false);
                       setStatus(null);
@@ -1339,7 +1352,10 @@ export function Iso8583Generator() {
                     <ScrollArea className="h-full min-h-0">
                       <CodeBlockContent
                         className="font-mono text-xs [&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
-                        language={item.language as never}
+                        language={
+                          // SAFETY: CodeBlock data uses languages supported by the renderer.
+                          item.language as never
+                        }
                       >
                         {item.code}
                       </CodeBlockContent>

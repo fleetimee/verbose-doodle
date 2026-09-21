@@ -420,6 +420,7 @@ function CustomFieldForm({
               </Label>
               <Select
                 onValueChange={(val) => {
+                  // SAFETY: The select options are the supported ISO 8583 field kinds.
                   const newKind = val as Iso8583FieldKind;
                   setKind(newKind);
                   if (newKind === "llvar" && length > 99) {

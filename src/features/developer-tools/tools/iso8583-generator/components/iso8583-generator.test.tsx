@@ -27,11 +27,9 @@ describe("Iso8583Generator", () => {
       screen.getByRole("heading", { name: "Sign-On message" })
     ).toBeDefined();
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 7 Transmission date / time",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).toBe("0901080037");
     expect(
       screen.getByRole("combobox", {
@@ -51,11 +49,9 @@ describe("Iso8583Generator", () => {
     expect(screen.getByRole("dialog", { name: "Raw message" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Raw message" })).toBeDefined();
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Raw stream",
-        }) as HTMLTextAreaElement
-      ).value
+        }).value
     ).toMatch(RAW_STREAM_0800_PATTERN);
     expect(
       screen.getByRole("heading", { name: "Bitmap Inspector" })
@@ -117,18 +113,14 @@ describe("Iso8583Generator", () => {
     await user.click(screen.getByRole("button", { name: "Close" }));
 
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 7 Transmission date / time",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).not.toBe("0901080037");
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 11 System trace audit number",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).toBe("003646");
     expect(
       screen.getByRole("button", { name: "View raw message" })
@@ -157,20 +149,16 @@ describe("Iso8583Generator", () => {
     await user.click(
       screen.getByRole("button", { name: "Generate raw message" })
     );
-    const first = (
-      screen.getByRole("textbox", { name: "Raw stream" }) as HTMLTextAreaElement
-    ).value;
+    const first = screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Raw stream" }).value;
     expect(first).toContain("0102030405123456");
     await user.click(screen.getByRole("button", { name: "Close" }));
     await user.click(
       screen.getByRole("button", { name: "Generate raw message" })
     );
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Raw stream",
-        }) as HTMLTextAreaElement
-      ).value
+        }).value
     ).toBe(first);
   });
 
@@ -189,11 +177,9 @@ describe("Iso8583Generator", () => {
     );
     await user.click(screen.getByRole("tab", { name: "0800 Sign-On" }));
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 11 System trace audit number",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).toBe("123456");
     expect(
       screen
@@ -202,19 +188,15 @@ describe("Iso8583Generator", () => {
     ).toBe("false");
     await user.click(screen.getByRole("button", { name: "Reset fields" }));
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 11 System trace audit number",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).toBe("003645");
     await user.click(screen.getByRole("tab", { name: "0200 Transaction" }));
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 11 System trace audit number",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).toBe("654321");
   });
 
@@ -231,11 +213,9 @@ describe("Iso8583Generator", () => {
         ?.textContent
     ).toContain("Exactly 6 digits.");
     expect(
-      (
-        screen.getByRole("button", {
+      screen.getByRole<HTMLButtonElement>("button", {
           name: "Generate raw message",
-        }) as HTMLButtonElement
-      ).disabled
+        }).disabled
     ).toBe(true);
     await user.click(
       screen.getByRole("button", { name: "Go to invalid field" })
@@ -244,11 +224,9 @@ describe("Iso8583Generator", () => {
     fireEvent.change(stan, { target: { value: "123456" } });
     expect(stan.getAttribute("aria-invalid")).toBeNull();
     expect(
-      (
-        screen.getByRole("button", {
+      screen.getByRole<HTMLButtonElement>("button", {
           name: "Generate raw message",
-        }) as HTMLButtonElement
-      ).disabled
+        }).disabled
     ).toBe(false);
   });
 
@@ -283,6 +261,7 @@ describe("Iso8583Generator", () => {
     expect(
       screen.queryByRole("button", { name: "View raw message" })
     ).toBeNull();
+    // SAFETY: messageSpy option payload includes optional toast action callback
     const undo = (
       messageSpy.mock.calls.at(-1)?.[1] as { action?: { onClick?: () => void } }
     )?.action?.onClick;
@@ -293,11 +272,9 @@ describe("Iso8583Generator", () => {
       screen.queryByRole("button", { name: "View raw message" })
     ).toBeNull();
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 60 Reserved private data",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).toBe("TEST");
   });
 
@@ -348,9 +325,7 @@ describe("Iso8583Generator", () => {
     await user.click(
       screen.getByRole("button", { name: "Generate raw message" })
     );
-    const original = (
-      screen.getByRole("textbox", { name: "Raw stream" }) as HTMLTextAreaElement
-    ).value;
+    const original = screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Raw stream" }).value;
     await user.click(screen.getByRole("button", { name: "Close" }));
     fireEvent.change(screen.getByRole("textbox", { name: "Search fields" }), {
       target: { value: "trace" },
@@ -367,20 +342,16 @@ describe("Iso8583Generator", () => {
       screen.getByRole("button", { name: "Generate raw message" })
     );
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Raw stream",
-        }) as HTMLTextAreaElement
-      ).value
+        }).value
     ).toBe(original);
     await user.click(screen.getByRole("button", { name: "Close" }));
     await user.click(screen.getByRole("button", { name: "Clear filters" }));
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 7 Transmission date / time",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).toBe("0901080037");
   });
 
@@ -409,11 +380,11 @@ describe("Iso8583Generator", () => {
     await user.click(
       screen.getByRole("button", { name: "Go to invalid field" })
     );
-    const revealed = screen.getByRole("textbox", {
+    const revealed = screen.getByRole<HTMLInputElement>("textbox", {
       name: "Bit 11 System trace audit number",
     });
     expect(document.activeElement).toBe(revealed);
-    expect((revealed as HTMLInputElement).value).toBe("bad");
+    expect(revealed.value).toBe("bad");
   });
 
   test("offers bit 62 as an optional transaction field", async () => {
@@ -428,11 +399,9 @@ describe("Iso8583Generator", () => {
         .getAttribute("aria-checked")
     ).toBe("false");
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 62 Reserved private data",
-        }) as HTMLInputElement
-      ).disabled
+        }).disabled
     ).toBe(true);
   });
 
@@ -443,18 +412,14 @@ describe("Iso8583Generator", () => {
     await user.click(screen.getByRole("tab", { name: "0200 Transaction" }));
 
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 41 Card acceptor terminal ID",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).toBe("TERM0001");
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 43 Card acceptor name / location",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).toBe("MERCHANT TEST 01          YOGYAKARTA IDN");
   });
 
@@ -498,11 +463,9 @@ describe("Iso8583Generator", () => {
     });
 
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 12 Local transaction time",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).toBe("142530");
     expect(
       screen.getByRole("button", { name: "Pick value for bit 13" })
@@ -536,11 +499,9 @@ describe("Iso8583Generator", () => {
     );
 
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Raw stream",
-        }) as HTMLTextAreaElement
-      ).value
+        }).value
     ).toMatch(RAW_STREAM_DISABLED_70_PATTERN);
   });
 
@@ -615,6 +576,7 @@ describe("Iso8583Generator", () => {
 
     // Trigger Undo action and verify Bit 60 is restored
     const lastToastCall = messageSpy.mock.calls.at(-1);
+    // SAFETY: messageSpy option payload includes optional toast action callback
     const undoAction = (
       lastToastCall?.[1] as { action?: { onClick?: () => void } }
     )?.action;
@@ -716,11 +678,9 @@ describe("Iso8583Generator", () => {
       screen.getByRole("textbox", { name: "Bit 48 Private Data Custom" })
     ).toBeDefined();
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLInputElement>("textbox", {
           name: "Bit 48 Private Data Custom",
-        }) as HTMLInputElement
-      ).value
+        }).value
     ).toBe("TEST48VAL");
   });
 });

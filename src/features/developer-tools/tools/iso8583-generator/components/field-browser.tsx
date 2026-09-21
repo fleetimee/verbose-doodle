@@ -61,6 +61,7 @@ function GroupIcon({
   readonly grouping: FieldGrouping;
 }) {
   if (grouping === "category") {
+    // SAFETY: groupKey is a category key when grouping by category.
     const Icon = CATEGORY_ICONS[groupKey as keyof typeof CATEGORY_ICONS];
     return (
       <Icon
@@ -131,6 +132,7 @@ function ViewSelect({
 
 function groupLabel(key: string, grouping: FieldGrouping) {
   if (grouping === "category") {
+    // SAFETY: key is a field-category key when grouping by category.
     return copy.fieldCategories[key as keyof typeof copy.fieldCategories];
   }
   if (grouping === "bit-range") {
@@ -198,6 +200,7 @@ export function Iso8583FieldBrowser({
             id="iso-field-group"
             label={copy.groupBy}
             onChange={(value) => {
+              // SAFETY: The select options are the supported field groupings.
               setGrouping(value as FieldGrouping);
               setCollapsed([]);
             }}
@@ -207,14 +210,20 @@ export function Iso8583FieldBrowser({
           <ViewSelect
             id="iso-field-sort"
             label={copy.sortBy}
-            onChange={(value) => setSort(value as FieldSort)}
+            onChange={(value) =>
+              // SAFETY: The select options are the supported field sort modes.
+              setSort(value as FieldSort)
+            }
             options={SORTS}
             value={sort}
           />
           <ViewSelect
             id="iso-field-filter"
             label={copy.fieldFilter}
-            onChange={(value) => setFilter(value as FieldFilter)}
+            onChange={(value) =>
+              // SAFETY: The select options are the supported field filters.
+              setFilter(value as FieldFilter)
+            }
             options={FILTERS}
             value={filter}
           />
