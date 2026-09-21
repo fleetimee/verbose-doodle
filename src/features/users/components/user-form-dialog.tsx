@@ -78,6 +78,7 @@ export const UserFormDialog = ({
         }
       );
     } else {
+      // SAFETY: The validated form data matches the create-user request contract.
       createUser(data as CreateUserRequest, {
         onError: () => {
           // Error is handled by the mutation hook with toast notification

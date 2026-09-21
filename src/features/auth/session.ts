@@ -58,6 +58,14 @@ type JwtPayload = {
 
 type Listener = () => void;
 
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+function isNumber(value: unknown): value is number {
+  return typeof value === "number";
+}
+
 function decodeToken(
   token: string,
   now: number
@@ -68,15 +76,15 @@ function decodeToken(
   try {
     const payload = jwtDecode<JwtPayload>(token);
     if (
-      typeof payload.user_id !== "string" ||
-      typeof payload.username !== "string" ||
+      !isString(payload.user_id) ||
+      !isString(payload.username) ||
       (payload.role !== "ADMIN" && payload.role !== "USER")
     ) {
       return null;
     }
 
     const expiresAt =
-      typeof payload.exp === "number" && Number.isFinite(payload.exp)
+      isNumber(payload.exp) && Number.isFinite(payload.exp)
         ? payload.exp * 1000
         : null;
 

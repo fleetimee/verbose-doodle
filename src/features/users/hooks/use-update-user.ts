@@ -34,31 +34,28 @@ type UpdateUserResponse = {
 async function updateUser(
   data: UpdateUserRequest
 ): Promise<UpdateUserResponse> {
-  try {
-    const apiResponse = await apiPatch<
-      ApiUpdateUserResponse,
-      Omit<UpdateUserRequest, "user_id">
-    >(getUserUpdateUrl(data.user_id), {
-      active: data.active,
-      role: data.role,
-      username: data.username,
-    });
+  const apiResponse = await apiPatch<
+    ApiUpdateUserResponse,
+    Omit<UpdateUserRequest, "user_id">
+  >(getUserUpdateUrl(data.user_id), {
+    active: data.active,
+    role: data.role,
+    username: data.username,
+  });
 
-    if (!apiResponse.responseCode) {
-      throw {
-        code: "INVALID_RESPONSE",
-        message: messages.errors.invalidResponseStructure,
-        status: 500,
-      } as ApiError;
-    }
-
-    return {
-      responseCode: apiResponse.responseCode,
-      responseDesc: apiResponse.responseDesc,
+  if (!apiResponse.responseCode) {
+    const error: ApiError = {
+      code: "INVALID_RESPONSE",
+      message: messages.errors.invalidResponseStructure,
+      status: 500,
     };
-  } catch (error) {
-    throw error as ApiError;
+    throw error;
   }
+
+  return {
+    responseCode: apiResponse.responseCode,
+    responseDesc: apiResponse.responseDesc,
+  };
 }
 
 /**

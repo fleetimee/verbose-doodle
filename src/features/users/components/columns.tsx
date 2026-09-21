@@ -101,6 +101,7 @@ export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
   {
     accessorKey: "active",
     cell: ({ row }) => {
+      // SAFETY: The active column is configured with string-valued table data.
       const status = row.getValue("active") as string;
 
       return (

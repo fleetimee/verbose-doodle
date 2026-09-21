@@ -279,7 +279,10 @@ function DemoProgressStatus({
             <span
               className="macos-password-dot"
               key={dot}
-              style={{ "--password-dot-index": index } as CSSProperties}
+              style={
+                /* SAFETY: The style object contains the CSS custom property used by the password-dot animation. */
+                { "--password-dot-index": index } as CSSProperties
+              }
             />
           ))}
         </span>

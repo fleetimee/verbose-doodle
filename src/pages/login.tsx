@@ -62,6 +62,7 @@ export const Login = () => {
   useEffect(() => {
     const reason = searchParams.get("reason");
     if (reason && reason in EXPIRATION_MESSAGES) {
+      // SAFETY: The preceding membership check narrows reason to an expiration-message key.
       setExpirationMessage(
         EXPIRATION_MESSAGES[reason as keyof typeof EXPIRATION_MESSAGES]
       );

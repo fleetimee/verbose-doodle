@@ -28,26 +28,23 @@ type DeleteUserResponse = {
 async function deleteUser({
   user_id,
 }: DeleteUserRequest): Promise<DeleteUserResponse> {
-  try {
-    const apiResponse = await apiDelete<ApiDeleteUserResponse>(
-      getUserDeleteUrl(user_id)
-    );
+  const apiResponse = await apiDelete<ApiDeleteUserResponse>(
+    getUserDeleteUrl(user_id)
+  );
 
-    if (!apiResponse.responseCode) {
-      throw {
-        code: "INVALID_RESPONSE",
-        message: messages.errors.invalidResponseStructure,
-        status: 500,
-      } as ApiError;
-    }
-
-    return {
-      responseCode: apiResponse.responseCode,
-      responseDesc: apiResponse.responseDesc,
+  if (!apiResponse.responseCode) {
+    const error: ApiError = {
+      code: "INVALID_RESPONSE",
+      message: messages.errors.invalidResponseStructure,
+      status: 500,
     };
-  } catch (error) {
-    throw error as ApiError;
+    throw error;
   }
+
+  return {
+    responseCode: apiResponse.responseCode,
+    responseDesc: apiResponse.responseDesc,
+  };
 }
 
 /**

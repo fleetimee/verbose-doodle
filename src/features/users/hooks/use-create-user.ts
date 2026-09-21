@@ -33,38 +33,35 @@ type CreateUserResponse = {
 async function createUser(
   data: CreateUserRequest
 ): Promise<CreateUserResponse> {
-  try {
-    const apiResponse = await apiPost<
-      ApiCreateUserResponse,
-      {
-        username: string;
-        role: "ADMIN" | "USER";
-        active: boolean;
-        password: string;
-      }
-    >(getUserCreateUrl(), {
-      active: data.active,
-      password: data.password,
-      role: data.role,
-      username: data.username,
-    });
-
-    // Validate that we have the expected response structure
-    if (!apiResponse.data) {
-      throw {
-        code: "INVALID_RESPONSE",
-        message: messages.errors.invalidResponseStructure,
-        status: 500,
-      } as ApiError;
+  const apiResponse = await apiPost<
+    ApiCreateUserResponse,
+    {
+      username: string;
+      role: "ADMIN" | "USER";
+      active: boolean;
+      password: string;
     }
+  >(getUserCreateUrl(), {
+    active: data.active,
+    password: data.password,
+    role: data.role,
+    username: data.username,
+  });
 
-    // Transform API response to internal format
-    return {
-      user_id: apiResponse.data.user_id,
+  // Validate that we have the expected response structure
+  if (!apiResponse.data) {
+    const error: ApiError = {
+      code: "INVALID_RESPONSE",
+      message: messages.errors.invalidResponseStructure,
+      status: 500,
     };
-  } catch (error) {
-    throw error as ApiError;
+    throw error;
   }
+
+  // Transform API response to internal format
+  return {
+    user_id: apiResponse.data.user_id,
+  };
 }
 
 export function useCreateUser() {

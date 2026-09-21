@@ -29,6 +29,7 @@ async function loginUser(data: LoginFormData): Promise<LoginResponse> {
     // Check if login was successful
     if (apiResponse.responseCode !== "00") {
       // Throw error with the API's response description
+      // SAFETY: This object matches the LoginError contract consumed by auth error handling.
       throw {
         code: apiResponse.responseCode,
         message: apiResponse.responseDesc || messages.auth.loginFailed,
@@ -43,6 +44,7 @@ async function loginUser(data: LoginFormData): Promise<LoginResponse> {
       responseDesc: apiResponse.responseDesc,
     };
   } catch (error) {
+    // SAFETY: apiFetch failures are normalized as LoginError by the auth boundary.
     throw error as LoginError;
   }
 }

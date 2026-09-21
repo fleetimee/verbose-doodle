@@ -58,6 +58,7 @@ describe("MacOsLogin", () => {
 
     const submitBtn = screen.getByRole("button", { name: "Signing in..." });
     expect(submitBtn).toBeDefined();
+    // SAFETY: The accessible button query targets the native submit button.
     expect((submitBtn as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByLabelText("Loading")).toBeDefined();
   });

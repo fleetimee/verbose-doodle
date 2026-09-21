@@ -22,11 +22,12 @@ async function createBiller(input: CreateBillerInput): Promise<Biller> {
   >(getAdminBillerCreateUrl(), { billerName: input.billerName });
 
   if (!response.data?.biller) {
-    throw {
+    const error: ApiError = {
       code: "INVALID_RESPONSE",
       message: messages.errors.invalidResponseStructure,
       status: 500,
-    } as ApiError;
+    };
+    throw error;
   }
 
   return mapCreatedBiller(response);
