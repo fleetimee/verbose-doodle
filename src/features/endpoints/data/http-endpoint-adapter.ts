@@ -43,15 +43,49 @@ const defaultTransport: ApiTransport = {
 
 const HTTP_NOT_FOUND = 404;
 
-function isRecord(value: unknown): value is ApiRecord {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+type RawApiInput = JsonPrimitive | readonly unknown[] | ApiRecord;
+
+function isRecord(candidate: unknown): candidate is ApiRecord {
+  return (
+    typeof candidate === "object" &&
+    candidate !== null &&
+    !Array.isArray(candidate)
+  );
 }
 
-function payload(response: unknown): ApiRecord {
-  if (!isRecord(response)) {
+function isApiRecord(candidate: RawApiInput): candidate is ApiRecord {
+  return (
+    typeof candidate === "object" &&
+    candidate !== null &&
+    !Array.isArray(candidate)
+  );
+}
+
+function isNumberInput(input: RawApiInput): input is number {
+  return typeof input === "number";
+}
+
+function isStringInput(input: RawApiInput): input is string {
+  return typeof input === "string";
+}
+
+function isHeaderScalar(
+  val: unknown
+): val is string | number | boolean | undefined {
+  return (
+    typeof val === "string" ||
+    typeof val === "number" ||
+    typeof val === "boolean" ||
+    val === undefined
+  );
+}
+
+function payload(candidate: RawApiInput): ApiRecord {
+  if (!isApiRecord(candidate)) {
     return {};
   }
-  return isRecord(response.data) ? response.data : response;
+  const data = candidate.data;
+  return isRecord(data) ? data : candidate;
 }
 
 function value(record: ApiRecord, ...keys: string[]) {
@@ -62,19 +96,19 @@ function value(record: ApiRecord, ...keys: string[]) {
   }
 }
 
-function stringValue(input: unknown, fallback = ""): string {
+function stringValue(input: RawApiInput, fallback = ""): string {
   return input === null || input === undefined ? fallback : String(input);
 }
 
-function nullableString(input: unknown): string | null {
+function nullableString(input: RawApiInput): string | null {
   return input === null || input === undefined ? null : String(input);
 }
 
-function numberValue(input: unknown, fallback = 0): number {
-  if (typeof input === "number" && Number.isFinite(input)) {
+function numberValue(input: RawApiInput, fallback = 0): number {
+  if (isNumberInput(input) && Number.isFinite(input)) {
     return input;
   }
-  if (typeof input === "string" && input.trim()) {
+  if (isStringInput(input) && input.trim()) {
     const parsed = Number(input);
     if (Number.isFinite(parsed)) {
       return parsed;
@@ -83,7 +117,7 @@ function numberValue(input: unknown, fallback = 0): number {
   return fallback;
 }
 
-function nullableNumber(input: unknown): number | null {
+function nullableNumber(input: RawApiInput): number | null {
   if (input === null || input === undefined || input === "") {
     return null;
   }
@@ -91,7 +125,7 @@ function nullableNumber(input: unknown): number | null {
   return Number.isNaN(result) ? null : result;
 }
 
-function booleanValue(input: unknown, fallback = false): boolean {
+function booleanValue(input: RawApiInput, fallback = false): boolean {
   if (input === true || input === "true" || input === 1 || input === "1") {
     return true;
   }
@@ -101,12 +135,12 @@ function booleanValue(input: unknown, fallback = false): boolean {
   return fallback;
 }
 
-function objectValue(input: unknown): ApiRecord {
-  return isRecord(input) ? input : {};
+function objectValue(input: RawApiInput): ApiRecord {
+  return isApiRecord(input) ? input : {};
 }
 
-function readHeaders(input: unknown): EndpointHttpHeaders | null {
-  if (!isRecord(input)) {
+function readHeaders(input: RawApiInput): EndpointHttpHeaders | null {
+  if (!isApiRecord(input)) {
     return null;
   }
   const headers: Record<
@@ -114,12 +148,7 @@ function readHeaders(input: unknown): EndpointHttpHeaders | null {
     string | number | boolean | readonly string[] | undefined
   > = {};
   for (const [key, val] of Object.entries(input)) {
-    if (
-      typeof val === "string" ||
-      typeof val === "number" ||
-      typeof val === "boolean" ||
-      val === undefined
-    ) {
+    if (isHeaderScalar(val)) {
       headers[key] = val;
     } else if (Array.isArray(val)) {
       headers[key] = val.map(String);
@@ -128,7 +157,7 @@ function readHeaders(input: unknown): EndpointHttpHeaders | null {
   return headers;
 }
 
-function mapResponse(input: unknown): EndpointResponse {
+function mapResponse(input: RawApiInput): EndpointResponse {
   const response = objectValue(input);
   return {
     activated: booleanValue(value(response, "activated")),
@@ -143,7 +172,7 @@ function mapResponse(input: unknown): EndpointResponse {
   };
 }
 
-function mapEndpoint(input: unknown): Endpoint {
+function mapEndpoint(input: RawApiInput): Endpoint {
   const endpoint = objectValue(input);
   const responses = value(endpoint, "responses");
   return {
@@ -152,6 +181,7 @@ function mapEndpoint(input: unknown): Endpoint {
     billerSlug: stringValue(value(endpoint, "billerSlug", "biller_slug")),
     enabled: booleanValue(value(endpoint, "enabled"), true),
     id: stringValue(value(endpoint, "id", "endpoint_id")),
+    // SAFETY: stringValue returns the method string defined by the backend endpoint contract.
     method: stringValue(value(endpoint, "method")) as Endpoint["method"],
     responses: Array.isArray(responses) ? responses.map(mapResponse) : [],
     slug: stringValue(value(endpoint, "slug", "endpoint_slug")),
@@ -164,13 +194,13 @@ function listValue(record: ApiRecord, ...keys: string[]): unknown[] {
   return Array.isArray(result) ? result : [];
 }
 
-function endpointFromResponse(response: unknown): Endpoint {
+function endpointFromResponse(response: RawApiInput): Endpoint {
   const data = payload(response);
   return mapEndpoint(value(data, "endpoint") ?? data);
 }
 
 function endpointAvailabilityFromResponse(
-  response: unknown
+  response: RawApiInput
 ): EndpointAvailability {
   const data = payload(response);
   const availability = objectValue(value(data, "availability") ?? data);
@@ -188,17 +218,18 @@ function endpointAvailabilityFromResponse(
   };
 }
 
-function responseFromResponse(response: unknown): EndpointResponse {
+function responseFromResponse(response: RawApiInput): EndpointResponse {
   const data = payload(response);
   return mapResponse(value(data, "response") ?? data);
 }
 
-function mapTrafficLog(input: unknown): EndpointTrafficLog {
+function mapTrafficLog(input: RawApiInput): EndpointTrafficLog {
   const log = objectValue(input);
   const rawStatus = stringValue(
     value(log, "hitStatus", "hit_status"),
     "backend_error"
   );
+  // SAFETY: The membership check below narrows rawStatus to EndpointTrafficLogStatus.
   const status: EndpointTrafficLogStatus = [
     "matched_success",
     "matched_empty",
@@ -252,7 +283,7 @@ function mapTrafficLog(input: unknown): EndpointTrafficLog {
   };
 }
 
-function mapTrafficLogDetail(input: unknown): EndpointTrafficLogDetail {
+function mapTrafficLogDetail(input: RawApiInput): EndpointTrafficLogDetail {
   const log = objectValue(input);
   const mapped = mapTrafficLog(log);
   return {
@@ -269,7 +300,7 @@ function mapTrafficLogDetail(input: unknown): EndpointTrafficLogDetail {
   };
 }
 
-function mapMetric(input: unknown): EndpointMetric {
+function mapMetric(input: RawApiInput): EndpointMetric {
   const metric = objectValue(input);
   const hitStatusCounts = objectValue(
     value(metric, "hitStatusCounts", "hit_status_counts")
@@ -306,7 +337,7 @@ function mapMetric(input: unknown): EndpointMetric {
   };
 }
 
-function mapHourlyMetric(input: unknown): EndpointHourlyMetric {
+function mapHourlyMetric(input: RawApiInput): EndpointHourlyMetric {
   const metric = objectValue(input);
   return {
     ...mapMetric(metric),
@@ -314,22 +345,32 @@ function mapHourlyMetric(input: unknown): EndpointHourlyMetric {
   };
 }
 
-function trafficPayload(response: unknown): ApiRecord {
+function trafficPayload(response: RawApiInput): ApiRecord {
   const data = payload(response);
   const nested = value(data, "trafficLogs", "traffic_logs");
   return isRecord(nested) ? nested : data;
 }
 
-function metricsPayload(response: unknown): ApiRecord {
+function metricsPayload(response: RawApiInput): ApiRecord {
   const data = payload(response);
   const nested = value(data, "metrics", "summary");
   return isRecord(nested) ? nested : data;
 }
 
-function errorStatus(error: unknown): number | undefined {
-  return isRecord(error) && typeof error.status === "number"
-    ? error.status
-    : undefined;
+function isErrorWithStatus(
+  cause: unknown
+): cause is { readonly status: number } {
+  return (
+    typeof cause === "object" &&
+    cause !== null &&
+    "status" in cause &&
+    // SAFETY: Invariant verified by checking object shape and property existence
+    typeof (cause as { readonly status: unknown }).status === "number"
+  );
+}
+
+function errorStatus(cause: unknown): number | undefined {
+  return isErrorWithStatus(cause) ? cause.status : undefined;
 }
 
 export function createHttpEndpointAdapter(
@@ -337,7 +378,7 @@ export function createHttpEndpointAdapter(
 ): EndpointDataAdapter {
   return {
     async activateResponse(input) {
-      const response = await transport.put<unknown, Record<string, never>>(
+      const response = await transport.put<RawApiInput, Record<string, never>>(
         API_ENDPOINTS.admin.responses.activate(
           input.endpointId,
           input.responseId
@@ -347,12 +388,12 @@ export function createHttpEndpointAdapter(
       return responseFromResponse(response);
     },
     async clearTrafficLogs(endpointId) {
-      await transport.delete<unknown>(
+      await transport.delete<RawApiInput>(
         API_ENDPOINTS.admin.endpoints.trafficLogs.clear(endpointId)
       );
     },
     async checkEndpointAvailability(input) {
-      const response = await transport.get<unknown>(
+      const response = await transport.get<RawApiInput>(
         API_ENDPOINTS.admin.endpoints.availability(
           input.method,
           input.url,
@@ -363,7 +404,7 @@ export function createHttpEndpointAdapter(
     },
     async createEndpoint(input) {
       const response = await transport.post<
-        unknown,
+        RawApiInput,
         {
           method: CreateEndpointInput["method"];
           url: string;
@@ -378,7 +419,7 @@ export function createHttpEndpointAdapter(
     },
     async createResponse(input) {
       const response = await transport.post<
-        unknown,
+        RawApiInput,
         {
           activated: string;
           delayMs: number;
@@ -400,13 +441,13 @@ export function createHttpEndpointAdapter(
       return responseFromResponse(response);
     },
     async cloneResponse(input: ResponseCloneInput) {
-      const response = await transport.post<unknown>(
+      const response = await transport.post<RawApiInput>(
         API_ENDPOINTS.admin.responses.clone(input.responseId)
       );
       return responseFromResponse(response);
     },
     async deactivateResponse(input) {
-      const response = await transport.put<unknown, Record<string, never>>(
+      const response = await transport.put<RawApiInput, Record<string, never>>(
         API_ENDPOINTS.admin.responses.deactivate(
           input.endpointId,
           input.responseId
@@ -416,18 +457,18 @@ export function createHttpEndpointAdapter(
       return responseFromResponse(response);
     },
     async deleteEndpoint(endpointSlug) {
-      await transport.delete<unknown>(
+      await transport.delete<RawApiInput>(
         API_ENDPOINTS.admin.endpoints.delete(endpointSlug)
       );
     },
     async deleteResponse(input) {
-      await transport.delete<unknown>(
+      await transport.delete<RawApiInput>(
         API_ENDPOINTS.admin.responses.detail(input.responseId)
       );
     },
     async getEndpoint(endpointSlug) {
       try {
-        const response = await transport.get<unknown>(
+        const response = await transport.get<RawApiInput>(
           API_ENDPOINTS.admin.endpoints.detail(endpointSlug)
         );
         return endpointFromResponse(response);
@@ -435,12 +476,13 @@ export function createHttpEndpointAdapter(
         if (errorStatus(error) === HTTP_NOT_FOUND) {
           return null;
         }
+        // SAFETY: API transport re-throws ApiError or unexpected network failure
         throw error as ApiError;
       }
     },
     async getHourlyMetrics(input) {
       const query = new URLSearchParams({ from: input.from, to: input.to });
-      const response = await transport.get<unknown>(
+      const response = await transport.get<RawApiInput>(
         `${API_ENDPOINTS.admin.endpoints.metrics.hourly(input.endpointId)}?${query.toString()}`
       );
       const rawData =
@@ -451,16 +493,19 @@ export function createHttpEndpointAdapter(
       const items = Array.isArray(rawData)
         ? rawData
         : listValue(data, "hourly", "items", "metrics");
-      return items.map(mapHourlyMetric);
+      return items.map((item) => {
+        // SAFETY: listValue returns backend records consumed by the adapter mapper.
+        return mapHourlyMetric(item as RawApiInput);
+      });
     },
     async getMetricsSummary(endpointId) {
-      const response = await transport.get<unknown>(
+      const response = await transport.get<RawApiInput>(
         API_ENDPOINTS.admin.endpoints.metrics.summary(endpointId)
       );
       return mapMetric(metricsPayload(response));
     },
     async getTrafficLogDetail(endpointId, logId) {
-      const response = await transport.get<unknown>(
+      const response = await transport.get<RawApiInput>(
         API_ENDPOINTS.admin.endpoints.trafficLogs.detail(endpointId, logId)
       );
       const data = payload(response);
@@ -469,11 +514,14 @@ export function createHttpEndpointAdapter(
       );
     },
     async listEndpoints() {
-      const response = await transport.get<unknown>(
+      const response = await transport.get<RawApiInput>(
         API_ENDPOINTS.admin.endpoints.list
       );
       const data = payload(response);
-      return listValue(data, "endpoints").map(mapEndpoint);
+      return listValue(data, "endpoints").map((item) => {
+        // SAFETY: The endpoint list response is decoded as backend records by this adapter.
+        return mapEndpoint(item as RawApiInput);
+      });
     },
     async listTrafficLogs(input) {
       const params = new URLSearchParams();
@@ -487,11 +535,14 @@ export function createHttpEndpointAdapter(
       if (input.filters.includeBody) {
         params.set("includeBody", "true");
       }
-      const response = await transport.get<unknown>(
+      const response = await transport.get<RawApiInput>(
         `${API_ENDPOINTS.admin.endpoints.trafficLogs.list(input.endpointId)}?${params.toString()}`
       );
       const data = trafficPayload(response);
-      const items = listValue(data, "items", "logs").map(mapTrafficLog);
+      const items = listValue(data, "items", "logs").map((item) => {
+        // SAFETY: The traffic-log response is decoded as backend records by this adapter.
+        return mapTrafficLog(item as RawApiInput);
+      });
       return {
         hasMore: booleanValue(value(data, "hasMore", "has_more")),
         items,
@@ -519,7 +570,7 @@ export function createHttpEndpointAdapter(
         payload.biller_slug = input.changes.billerSlug;
       }
 
-      const response = await transport.patch<unknown, UpdateEndpointPayload>(
+      const response = await transport.patch<RawApiInput, UpdateEndpointPayload>(
         API_ENDPOINTS.admin.endpoints.update(input.endpointSlug),
         payload
       );
@@ -533,14 +584,14 @@ export function createHttpEndpointAdapter(
         ])
       );
       const response = await transport.patch<
-        unknown,
+        RawApiInput,
         Record<string, string | number | boolean | undefined>
       >(API_ENDPOINTS.admin.responses.detail(input.responseId), changes);
       return responseFromResponse(response);
     },
     async updateResponseSimulation(input) {
       const response = await transport.patch<
-        unknown,
+        RawApiInput,
         {
           delayMs?: number;
           simulateTimeout?: boolean;

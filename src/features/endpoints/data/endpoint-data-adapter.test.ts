@@ -16,11 +16,16 @@ function createTransport(
   responses: Readonly<Record<string, SafeTransportResponse>>
 ): EndpointDataTransport {
   return {
+    // SAFETY: Test fixtures are authored to match each generic transport response.
     delete: async <T>(path: string) => responses[path] as T,
+    // SAFETY: Test fixtures are authored to match each generic transport response.
     get: async <T>(path: string) => responses[path] as T,
-    patch: async <T>(path: string, _body: unknown) => responses[path] as T,
-    post: async <T>(path: string, _body?: unknown) => responses[path] as T,
-    put: async <T>(path: string, _body: unknown) => responses[path] as T,
+    // SAFETY: Test fixtures are authored to match each generic transport response.
+    patch: async <T, D>(path: string, _body: D) => responses[path] as T,
+    // SAFETY: Test fixtures are authored to match each generic transport response.
+    post: async <T, D>(path: string, _body?: D) => responses[path] as T,
+    // SAFETY: Test fixtures are authored to match each generic transport response.
+    put: async <T, D>(path: string, _body: D) => responses[path] as T,
   };
 }
 
@@ -94,8 +99,9 @@ describe("Endpoint HTTP data adapter", () => {
     const requests: Array<{ body: unknown; path: string }> = [];
     const adapter = createHttpEndpointAdapter({
       ...createTransport({}),
-      post: <T>(path: string, body?: unknown) => {
+      post: <T, D>(path: string, body?: D) => {
         requests.push({ body, path });
+        // SAFETY: This test double returns the response shape expected by cloneResponse.
         return Promise.resolve({
           data: {
             response: {
@@ -134,14 +140,17 @@ describe("Endpoint HTTP data adapter", () => {
       ...createTransport({}),
       delete: <T>(path: string) => {
         requests.push(`DELETE ${path}`);
+        // SAFETY: The adapter only observes the generic delete response in this test.
         return {} as T;
       },
       get: <T>(path: string) => {
         requests.push(`GET ${path}`);
+        // SAFETY: This test double returns the endpoint envelope expected by getEndpoint.
         return { data: { endpoint: endpointResponse } } as T;
       },
       patch: <T>(path: string) => {
         requests.push(`PATCH ${path}`);
+        // SAFETY: This test double returns the endpoint envelope expected by updateEndpoint.
         return { data: { endpoint: endpointResponse } } as T;
       },
     });
@@ -223,12 +232,14 @@ describe("Endpoint HTTP data adapter", () => {
         "/api/response": { response: { id: 8, name: "Created" } },
         "/api/response/8": { response: { id: 8, name: "Updated" } },
       }),
-      patch: <T>(path: string, body: unknown) => {
+      patch: <T, D>(path: string, body: D) => {
         requests.push({ body, path });
+        // SAFETY: This test double returns the response envelope expected by updateResponse.
         return Promise.resolve({ response: { id: 8, name: "Updated" } } as T);
       },
-      post: <T>(path: string, body: unknown) => {
+      post: <T, D>(path: string, body: D) => {
         requests.push({ body, path });
+        // SAFETY: This test double returns the endpoint envelope expected by createEndpoint.
         return Promise.resolve({ endpoint } as T);
       },
     });

@@ -22,15 +22,18 @@ describe("ResponseForm", () => {
       </ResponseForm>
     );
 
+    // SAFETY: The accessible label query targets the form's native name input.
     const nameInput = screen.getByLabelText("Name") as HTMLInputElement;
     await user.type(nameInput, "Success Response");
 
+    // SAFETY: The accessible label query targets the form's native status input.
     const statusInput = screen.getByLabelText(
       "Status Code"
     ) as HTMLInputElement;
     await user.clear(statusInput);
     await user.type(statusInput, "404");
 
+    // SAFETY: The accessible label query targets the form's native JSON textarea.
     const jsonTextarea = screen.getByLabelText(
       "JSON Response"
     ) as HTMLTextAreaElement;
@@ -68,6 +71,7 @@ describe("ResponseForm", () => {
       </ResponseForm>
     );
 
+    // SAFETY: The accessible label query targets the form's native JSON textarea.
     const jsonTextarea = screen.getByLabelText(
       "JSON Response"
     ) as HTMLTextAreaElement;
@@ -75,6 +79,7 @@ describe("ResponseForm", () => {
     await user.click(jsonTextarea);
     await user.paste("{ invalid");
 
+    // SAFETY: The accessible label query targets the form's native status input.
     const statusInput = screen.getByLabelText(
       "Status Code"
     ) as HTMLInputElement;

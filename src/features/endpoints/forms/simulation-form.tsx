@@ -107,9 +107,7 @@ export const SimulationForm = forwardRef<
                       {messages.endpoints.simulationTypeDescription}
                     </FieldDescription>
                     <Choicebox
-                      onValueChange={(value: unknown) => {
-                        field.onChange(value as SimulationFormValues["type"]);
-                      }}
+                      onValueChange={field.onChange}
                       value={field.value}
                     >
                       <ChoiceboxItem id="none" value={SIMULATION_TYPE.NONE}>

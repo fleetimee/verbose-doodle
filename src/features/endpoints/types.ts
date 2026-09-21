@@ -129,11 +129,31 @@ export interface EndpointHttpHeaders {
   readonly [header: string]: EndpointHttpHeaderValue;
 }
 
+export interface EndpointTrafficPayloadRecord {
+  readonly [key: string]:
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | readonly unknown[]
+    | EndpointTrafficPayloadRecord;
+}
+
+export type EndpointTrafficPayload =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | readonly unknown[]
+  | EndpointTrafficPayloadRecord;
+
 export type EndpointTrafficLogDetail = EndpointTrafficLog & {
   readonly requestHeaders: EndpointHttpHeaders | null;
-  readonly requestBody: unknown;
+  readonly requestBody: EndpointTrafficPayload;
   readonly responseHeaders: EndpointHttpHeaders | null;
-  readonly responseBody: unknown;
+  readonly responseBody: EndpointTrafficPayload;
   readonly errorMessage: string | null;
 };
 

@@ -166,17 +166,25 @@ const formatHeaders = (headers: Headers): RequestHeadersRecord => {
   return formattedHeaders;
 };
 
-const parseHeaders = (value: string): RequestHeadersRecord => {
-  const parsed = JSON.parse(value) as unknown;
+function isRecordObject(value: unknown): value is object {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+function isHeaderValueString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+const parseHeaders = (value: string): RequestHeadersRecord => {
+  const parsed: unknown = JSON.parse(value);
+
+  if (!isRecordObject(parsed)) {
     throw new Error(SIMULATOR_MESSAGES.headersMustBeObjectError);
   }
 
   const headers: RequestHeadersRecord = {};
 
   for (const [key, headerValue] of Object.entries(parsed)) {
-    if (typeof headerValue !== "string") {
+    if (!isHeaderValueString(headerValue)) {
       throw new Error(SIMULATOR_MESSAGES.headerValuesMustBeStringsError);
     }
 

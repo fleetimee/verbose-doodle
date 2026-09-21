@@ -31,6 +31,16 @@ import {
 import { formatMessage, messages } from "@/lib/i18n";
 import { MOTION_DURATION } from "@/lib/motion";
 
+type FormFieldVal = ResponseFormData[keyof ResponseFormData];
+
+function isStringFieldValue(value: FormFieldVal): value is string {
+  return typeof value === "string";
+}
+
+function isNumberFieldValue(value: FormFieldVal): value is number {
+  return typeof value === "number";
+}
+
 const COMMON_STATUS_CODES = [
   {
     code: 200,
@@ -147,22 +157,24 @@ export function ResponseStepper({
       return true;
     }
 
+    // SAFETY: currentStep.id is one of the keys represented by ResponseFormData.
     const value = form.watch(stepId as keyof ResponseFormData);
+    // SAFETY: currentStep.id is one of the keys represented by ResponseFormData.
     const fieldState = form.getFieldState(stepId as keyof ResponseFormData);
 
     if (stepId === "name") {
       return (
-        typeof value === "string" &&
+        isStringFieldValue(value) &&
         value.trim().length > 0 &&
         !fieldState.invalid
       );
     }
     if (stepId === "statusCode") {
-      return typeof value === "number" && !fieldState.invalid;
+      return isNumberFieldValue(value) && !fieldState.invalid;
     }
     if (stepId === "json") {
       return (
-        typeof value === "string" &&
+        isStringFieldValue(value) &&
         value.trim().length > 0 &&
         !fieldState.invalid
       );
@@ -181,6 +193,7 @@ export function ResponseStepper({
       return;
     }
 
+    // SAFETY: The non-review step id is a valid ResponseFormData field key.
     const isValid = await form.trigger(stepId as keyof ResponseFormData);
 
     if (isValid && currentStepIndex < STEPS.length - 1) {
@@ -214,6 +227,7 @@ export function ResponseStepper({
 
     const stepId = currentStep.id;
     if (stepId !== "review") {
+      // SAFETY: The non-review step id is a valid ResponseFormData field key.
       const isValid = await form.trigger(stepId as keyof ResponseFormData);
       if (!isValid) {
         return;
@@ -264,7 +278,7 @@ export function ResponseStepper({
         formValues.name && formValues.name.trim().length > 0
       );
       const hasValidStatus =
-        typeof formValues.statusCode === "number" &&
+        Number.isInteger(formValues.statusCode) &&
         formValues.statusCode >= MIN_HTTP_STATUS &&
         formValues.statusCode <= MAX_HTTP_STATUS;
       const hasValidJson = Boolean(

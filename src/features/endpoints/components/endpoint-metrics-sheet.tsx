@@ -160,6 +160,7 @@ export function EndpointMetricsSheet({
     const nextValue = value[0];
 
     if (nextValue) {
+      // SAFETY: The segmented control emits one of the persisted time-window values.
       setTimeWindow(nextValue as PersistedMetricsTimeWindow);
     }
   };

@@ -275,6 +275,7 @@ export function getMetricsBuckets(
     return {
       bucketStart,
       label: formatBucketLabel(bucketStart),
+      // SAFETY: Each metrics bucket owns a mutable list of EndpointTrafficLog values.
       logs: [] as EndpointTrafficLog[],
     };
   });
@@ -315,9 +316,7 @@ function isSuccessfulLog(log: EndpointTrafficLog) {
 
 function getDurations(logs: readonly EndpointTrafficLog[]) {
   return logs
-    .flatMap((log) =>
-      typeof log.durationMs === "number" ? [log.durationMs] : []
-    )
+    .flatMap((log) => (log.durationMs !== null ? [log.durationMs] : []))
     .sort((a, b) => a - b);
 }
 

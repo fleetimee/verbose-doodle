@@ -95,6 +95,7 @@ export function abbreviateMethod(method: HttpMethod): string {
       return "PAT";
     default:
       // Exhaustiveness check - this should never be reached since all cases are handled
+      // SAFETY: The default branch is unreachable for the HttpMethod union.
       return (method as string)
         .slice(0, METHOD_ABBREVIATION_LENGTH)
         .toUpperCase();

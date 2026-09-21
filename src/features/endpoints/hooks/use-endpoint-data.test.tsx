@@ -35,9 +35,9 @@ function createAdapter() {
 
 describe("Endpoint data hooks", () => {
   test("expose catalog, workspace, and telemetry seams", () => {
-    expect(typeof useEndpointCatalog).toBe("function");
-    expect(typeof useEndpointWorkspace).toBe("function");
-    expect(typeof useEndpointTelemetry).toBe("function");
+    expect(useEndpointCatalog).toBeInstanceOf(Function);
+    expect(useEndpointWorkspace).toBeInstanceOf(Function);
+    expect(useEndpointTelemetry).toBeInstanceOf(Function);
   });
 
   test("refetch the catalog after a catalog mutation", async () => {

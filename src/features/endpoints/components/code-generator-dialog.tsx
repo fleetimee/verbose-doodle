@@ -147,6 +147,7 @@ export function CodeGeneratorDialog({
               </div>
               <Select
                 onValueChange={(value) =>
+                  // SAFETY: The select options are the supported code languages.
                   setSelectedLanguage(value as CodeLanguage)
                 }
                 value={selectedLanguage}
@@ -203,7 +204,12 @@ export function CodeGeneratorDialog({
                       value={highlightLanguage}
                     >
                       <ScrollArea className="h-full min-h-0">
-                        <CodeBlockContent language={highlightLanguage as never}>
+                        <CodeBlockContent
+                          language={
+                            // SAFETY: The code generator emits a language supported by the renderer.
+                            highlightLanguage as never
+                          }
+                        >
                           {item.code}
                         </CodeBlockContent>
                       </ScrollArea>

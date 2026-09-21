@@ -80,6 +80,7 @@ import type {
   EndpointTrafficLogStatus,
   EndpointTrafficLogStatusFilter,
   EndpointTrafficLogsFilters,
+  EndpointTrafficPayload,
 } from "@/features/endpoints/types";
 import { formatJakartaTimestamp } from "@/features/endpoints/utils/endpoint-time";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
@@ -192,11 +193,19 @@ function formatIp(ip: string | null, port: number | null) {
   return port ? `${ip}:${port}` : ip;
 }
 
-function formatJson(value: unknown) {
+function isPayloadString(
+  value: EndpointTrafficPayload | EndpointHttpHeaders
+): value is string {
+  return typeof value === "string";
+}
+
+function formatJson(
+  value: EndpointTrafficPayload | EndpointHttpHeaders | null | undefined
+) {
   if (value === null || value === undefined) {
     return "-";
   }
-  if (typeof value === "string") {
+  if (isPayloadString(value)) {
     try {
       return JSON.stringify(JSON.parse(value), null, 2);
     } catch {
@@ -759,6 +768,7 @@ export function EndpointTrafficLogViewer({
             <div className="grid items-center gap-3 sm:grid-cols-[280px_1fr]">
               <Select
                 onValueChange={(value) =>
+                  // SAFETY: The select options are the supported traffic-log filters.
                   setStatus(value as EndpointTrafficLogStatusFilter)
                 }
                 value={status}
@@ -800,6 +810,7 @@ export function EndpointTrafficLogViewer({
               <Select
                 onValueChange={(value) =>
                   setLineLimit(
+                    // SAFETY: The select options are the supported log-line limits.
                     Number(value) as (typeof LOG_LINE_LIMITS)[number]
                   )
                 }
@@ -1091,7 +1102,7 @@ function LogExchangePane({
   tone,
   wrapLines,
 }: {
-  readonly body: unknown;
+  readonly body: EndpointTrafficPayload;
   readonly headers: EndpointHttpHeaders | null;
   readonly icon: ReactNode;
   readonly meta: readonly {
@@ -1165,7 +1176,11 @@ function ShikiJsonBlock({
   readonly defaultWrapLines: boolean;
   readonly filename: string;
   readonly title: string;
-  readonly value: unknown;
+  readonly value:
+    | EndpointTrafficPayload
+    | EndpointHttpHeaders
+    | null
+    | undefined;
 }) {
   const [wrapLines, setWrapLines] = useState(defaultWrapLines);
   const code = formatJson(value);

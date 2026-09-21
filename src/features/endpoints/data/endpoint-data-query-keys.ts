@@ -1,10 +1,12 @@
+import type { EndpointTrafficLogsFilters } from "@/features/endpoints/types";
+
 const endpointDataQueryKeys = {
   catalog: ["endpoint-data", "catalog"] as const,
   hourlyMetrics: (endpointId: string, from: string, to: string) =>
     ["endpoint-data", "telemetry", endpointId, "metrics", from, to] as const,
   metrics: (endpointId: string) =>
     ["endpoint-data", "telemetry", endpointId, "metrics"] as const,
-  telemetry: (endpointId: string, filters: unknown) =>
+  telemetry: (endpointId: string, filters: EndpointTrafficLogsFilters) =>
     ["endpoint-data", "telemetry", endpointId, filters] as const,
   telemetryDetail: (endpointId: string, logId: string) =>
     ["endpoint-data", "telemetry", endpointId, "detail", logId] as const,

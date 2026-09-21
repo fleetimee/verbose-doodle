@@ -20,6 +20,7 @@ const jakartaTimeFormatter = new Intl.DateTimeFormat("en-GB", {
 });
 
 function getDateTimeParts(timestamp: number) {
+  // SAFETY: formatToParts produces string-valued date components after literals are removed.
   return Object.fromEntries(
     jakartaDateTimeFormatter
       .formatToParts(new Date(timestamp))

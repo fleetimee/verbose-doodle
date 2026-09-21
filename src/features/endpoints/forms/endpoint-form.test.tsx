@@ -21,6 +21,7 @@ describe("EndpointForm", () => {
       </EndpointForm>
     );
 
+    // SAFETY: The accessible label query targets the form's native URL input.
     const urlInput = screen.getByLabelText("URL") as HTMLInputElement;
     await user.clear(urlInput);
     await user.type(urlInput, "/api/v1/users");
@@ -39,6 +40,7 @@ describe("EndpointForm", () => {
       </EndpointForm>
     );
 
+    // SAFETY: The accessible label query targets the form's native URL input.
     const urlInput = screen.getByLabelText("URL") as HTMLInputElement;
     await user.clear(urlInput);
     await user.type(urlInput, "auth");
@@ -103,6 +105,7 @@ describe("EndpointForm", () => {
       </EndpointForm>
     );
 
+    // SAFETY: The accessible label query targets the form's native URL input.
     const urlInput = screen.getByLabelText("URL") as HTMLInputElement;
     await user.clear(urlInput);
     await user.type(urlInput, "/");
