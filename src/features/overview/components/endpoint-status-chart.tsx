@@ -24,6 +24,10 @@ const BAR_CORNER_RADIUS = 6;
 const BAR_LABEL_OFFSET = 12;
 const Y_AXIS_WIDTH = 124;
 
+function isChartNumber(value: unknown): value is number {
+  return typeof value === "number";
+}
+
 type EndpointStatusChartProps = {
   data: OverviewData;
   className?: string;
@@ -98,10 +102,11 @@ export function EndpointStatusChart({
               content={
                 <ChartTooltipContent
                   formatter={(value, _name, item) => {
-                    if (typeof value !== "number") {
+                    if (!isChartNumber(value)) {
                       return null;
                     }
 
+                    // SAFETY: Recharts supplies this formatter payload from the chartData records.
                     const payload = item?.payload as
                       | (typeof chartData)[number]
                       | undefined;
@@ -110,6 +115,7 @@ export function EndpointStatusChart({
                       return null;
                     }
 
+                    // SAFETY: Recharts colors are CSS color strings when supplied.
                     const indicatorColor =
                       (item?.color as string | undefined) ?? payload.fill;
 
@@ -157,7 +163,7 @@ export function EndpointStatusChart({
                 content={(props) => {
                   const { x = 0, y = 0, width = 0, height = 0, value } = props;
 
-                  if (typeof value !== "number") {
+                  if (!isChartNumber(value)) {
                     return null;
                   }
 

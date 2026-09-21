@@ -44,7 +44,7 @@ function createAdminToken() {
   return `header.${payload}.signature`;
 }
 
-function jsonResponse(body: unknown) {
+function jsonResponse<T>(body: T) {
   return new Response(JSON.stringify(body), {
     headers: { "Content-Type": "application/json" },
     status: 200,
@@ -95,6 +95,7 @@ function installApiMock() {
     const url = String(input);
 
     if (url === "/api/endpoint" && init?.method === "POST") {
+      // SAFETY: The test request body is the endpoint creation payload sent by the form.
       const request = JSON.parse(String(init.body)) as {
         biller_slug: string;
         method: string;
@@ -594,7 +595,9 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     );
 
     await waitFor(() => {
+      // SAFETY: The accessible combobox query targets the native button control.
       expect((billerSelector as HTMLButtonElement).disabled).toBe(true);
+      // SAFETY: The accessible combobox query targets the native button control.
       expect((endpointSelector as HTMLButtonElement).disabled).toBe(true);
     });
 
@@ -603,7 +606,9 @@ describe("DashboardLayout endpoint breadcrumbs", () => {
     });
 
     await waitFor(() => {
+      // SAFETY: The accessible combobox query targets the native button control.
       expect((billerSelector as HTMLButtonElement).disabled).toBe(false);
+      // SAFETY: The accessible combobox query targets the native button control.
       expect((endpointSelector as HTMLButtonElement).disabled).toBe(false);
     });
   });

@@ -326,6 +326,7 @@ const workspaceActions: ChatAction[] = [
 ];
 
 const workspaceActionById = new Map<ChatActionId, ChatAction>(
+  // SAFETY: allChatActions is keyed by the ChatActionId union used by the workspace map.
   Object.entries(allChatActions) as [ChatActionId, ChatAction][]
 );
 
@@ -427,50 +428,71 @@ function getSessionStorage(): Storage | null {
   }
 }
 
-function isChatActionId(value: unknown): value is ChatActionId {
-  return typeof value === "string" && value in allChatActions;
+function isChatActionId(candidate: unknown): candidate is ChatActionId {
+  return typeof candidate === "string" && candidate in allChatActions;
 }
 
-function isChatCardType(value: unknown): value is ChatCardType {
+function isChatCardType(candidate: unknown): candidate is ChatCardType {
   return (
-    value === "billers" ||
-    value === "developer-tools" ||
-    value === "endpoints" ||
-    value === "missing" ||
-    value === "snapshot" ||
-    value === "sockets" ||
-    value === "tool-detail" ||
-    value === "users"
+    candidate === "billers" ||
+    candidate === "developer-tools" ||
+    candidate === "endpoints" ||
+    candidate === "missing" ||
+    candidate === "snapshot" ||
+    candidate === "sockets" ||
+    candidate === "tool-detail" ||
+    candidate === "users"
   );
 }
 
 function isPersistedConversationMessage(
-  value: unknown
-): value is PersistedConversationMessage {
-  if (!value || typeof value !== "object") {
+  candidate: unknown
+): candidate is PersistedConversationMessage {
+  if (!candidate || typeof candidate !== "object") {
     return false;
   }
 
-  const candidate = value as Partial<PersistedConversationMessage>;
+  // SAFETY: Candidate has been verified as a non-null object
+  const message = candidate as Partial<PersistedConversationMessage>;
   return (
-    typeof candidate.id === "string" &&
-    (candidate.role === "assistant" || candidate.role === "user") &&
-    typeof candidate.text === "string" &&
-    (candidate.cardType === undefined || isChatCardType(candidate.cardType)) &&
-    (candidate.selectedToolId === undefined ||
-      typeof candidate.selectedToolId === "string") &&
-    (candidate.showSnapshot === undefined ||
-      typeof candidate.showSnapshot === "boolean") &&
-    (candidate.tone === undefined ||
-      candidate.tone === "default" ||
-      candidate.tone === "destructive") &&
-    (candidate.actionIds === undefined ||
-      (Array.isArray(candidate.actionIds) &&
-        candidate.actionIds.every(isChatActionId)))
+    typeof message.id === "string" &&
+    (message.role === "assistant" || message.role === "user") &&
+    typeof message.text === "string" &&
+    (message.cardType === undefined || isChatCardType(message.cardType)) &&
+    (message.selectedToolId === undefined ||
+      typeof message.selectedToolId === "string") &&
+    (message.showSnapshot === undefined ||
+      typeof message.showSnapshot === "boolean") &&
+    (message.tone === undefined ||
+      message.tone === "default" ||
+      message.tone === "destructive") &&
+    (message.actionIds === undefined ||
+      (Array.isArray(message.actionIds) &&
+        message.actionIds.every(isChatActionId)))
   );
 }
 
-function restoreConversationMessages(value: unknown): ConversationMessage[] {
+interface PersistedRecord {
+  readonly [key: string]:
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | readonly string[];
+}
+
+type StoredConversationPayload =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly PersistedRecord[]
+  | PersistedRecord;
+
+function restoreConversationMessages(
+  value: StoredConversationPayload
+): ConversationMessage[] {
   if (!Array.isArray(value)) {
     return [];
   }

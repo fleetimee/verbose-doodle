@@ -78,12 +78,15 @@ function renderOverview(isAdmin = true) {
     </MemoryRouter>
   );
 
+  // SAFETY: The accessible label query targets the chat textarea.
+  const input = screen.getByLabelText(
+    "Ask the biller operator"
+  ) as HTMLTextAreaElement;
+
   return {
     container: view.container,
     getRefetchCalls: () => refetchCalls,
-    input: screen.getByLabelText(
-      "Ask the biller operator"
-    ) as HTMLTextAreaElement,
+    input,
   };
 }
 

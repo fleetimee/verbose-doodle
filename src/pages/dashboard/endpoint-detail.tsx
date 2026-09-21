@@ -113,7 +113,7 @@ type MutableEndpointChanges = {
 
 function getHistoryIndex() {
   const index = window.history.state?.idx;
-  return typeof index === "number" ? index : null;
+  return Number.isInteger(index) ? index : null;
 }
 
 function getCurrentHistoryPath() {
@@ -946,6 +946,7 @@ export function EndpointDetailPage() {
                     <Select
                       disabled={isUpdatingEndpoint}
                       onValueChange={(value) =>
+                        // SAFETY: The select options are the supported HTTP methods.
                         setEditedMethod(value as HttpMethod)
                       }
                       value={editedMethod}
@@ -956,6 +957,7 @@ export function EndpointDetailPage() {
                             className="w-auto"
                             size="badge"
                             variant={
+                              /* SAFETY: editedMethod is one of the supported HTTP method variants. */
                               `method-${editedMethod.toLowerCase()}` as
                                 | "method-get"
                                 | "method-post"

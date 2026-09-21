@@ -53,7 +53,7 @@ function createAdminToken() {
   return `header.${payload}.signature`;
 }
 
-function jsonResponse(body: unknown) {
+function jsonResponse<T>(body: T) {
   return new Response(JSON.stringify(body), {
     headers: { "Content-Type": "application/json" },
     status: 200,

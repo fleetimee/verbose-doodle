@@ -17,12 +17,33 @@ export type DashboardVisitEvent = {
   readonly type: typeof DASHBOARD_VISIT_EVENT_TYPE;
 };
 
+interface DashboardVisitEventRecord {
+  readonly [key: string]:
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | DashboardVisitEventRecord;
+}
+
+export type DashboardVisitEventRaw =
+  | string
+  | ArrayBuffer
+  | Blob
+  | ArrayBufferView
+  | DashboardVisitEventRecord;
+
 type RecordValue = {
   readonly [key: string]: string | null | undefined;
 };
 
-function isRecord(value: unknown): value is RecordValue {
-  return typeof value === "object" && value !== null;
+function isRecord(candidate: unknown): candidate is RecordValue {
+  return typeof candidate === "object" && candidate !== null;
+}
+
+function isRawString(candidate: DashboardVisitEventRaw): candidate is string {
+  return typeof candidate === "string";
 }
 
 function readString(
@@ -31,7 +52,7 @@ function readString(
 ): string | undefined {
   for (const key of keys) {
     const value = record[key];
-    if (typeof value === "string" && value.length > 0) {
+    if (value && value.length > 0) {
       return value;
     }
   }
@@ -40,13 +61,13 @@ function readString(
 }
 
 export function parseDashboardVisitEvent(
-  raw: unknown
+  raw: DashboardVisitEventRaw
 ): DashboardVisitEvent | null {
   let parsed: unknown = raw;
 
-  if (typeof raw === "string") {
+  if (isRawString(raw)) {
     try {
-      parsed = JSON.parse(raw) as unknown;
+      parsed = JSON.parse(raw);
     } catch {
       return null;
     }
@@ -109,7 +130,7 @@ export function parseDashboardVisitEvent(
 }
 
 type RecordDashboardVisitResponse = {
-  readonly data?: unknown;
+  readonly data?: DashboardVisitEventRaw;
 };
 
 export async function recordDashboardVisit(): Promise<DashboardVisitEvent | null> {

@@ -79,7 +79,7 @@ function createAdminToken() {
   return `header.${payload}.signature`;
 }
 
-function jsonResponse(body: unknown) {
+function jsonResponse<T>(body: T) {
   return new Response(JSON.stringify(body), {
     headers: { "Content-Type": "application/json" },
     status: 200,
@@ -122,6 +122,7 @@ function installApiMock() {
 
     if (url.startsWith("/api/biller/") && method === "PATCH") {
       lastBillerUpdateSlug = url.replace("/api/biller/", "");
+      // SAFETY: The test request body is the biller update payload sent by the form.
       lastBillerUpdateBody = JSON.parse(String(init?.body)) as {
         billerName?: string;
       };
@@ -153,6 +154,7 @@ function installApiMock() {
     }
 
     if (url === "/api/endpoint" && method === "POST") {
+      // SAFETY: The test request body is the endpoint creation payload sent by the form.
       const body = JSON.parse(String(init?.body)) as { biller_slug?: string };
       lastCreateBody = body;
       return Promise.resolve(
@@ -182,6 +184,7 @@ function installApiMock() {
           })
         );
       }
+      // SAFETY: The test request body is the partial endpoint update payload sent by the form.
       const body = JSON.parse(String(init?.body)) as Partial<
         (typeof endpoints)[number]
       >;
@@ -586,6 +589,7 @@ describe("EndpointsPage catalog actions", () => {
         "Search endpoints..."
       );
       await user.type(searchInput, "/inquiry");
+      // SAFETY: The placeholder query targets the native endpoint search input.
       expect((searchInput as HTMLInputElement).value).toBe("/inquiry");
 
       act(() => {
@@ -626,6 +630,7 @@ describe("EndpointsPage catalog actions", () => {
         ).toBeNull();
       });
       expect(
+        // SAFETY: The placeholder query targets the native endpoint search input.
         (screen.getByPlaceholderText("Search endpoints...") as HTMLInputElement)
           .value
       ).toBe("/inquiry");
@@ -659,6 +664,7 @@ describe("EndpointsPage catalog actions", () => {
     });
 
     await user.click(confirmButton);
+    // SAFETY: The accessible button query targets the native delete button.
     expect((confirmButton as HTMLButtonElement).disabled).toBe(true);
     expect(lastDeleteId).toBe("endpoint-1");
     expect(deleteRequestResolver).not.toBeNull();

@@ -5,6 +5,7 @@ import { MemoryRouter } from "react-router";
 import { RecentEndpoints } from "@/features/overview/components/recent-endpoints";
 import type { OverviewData } from "@/features/overview/types";
 
+// SAFETY: This fixture matches the OverviewData shape consumed by RecentEndpoints.
 const data = {
   recentEndpoints: [
     {
