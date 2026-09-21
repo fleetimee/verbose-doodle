@@ -63,9 +63,9 @@ describe("JsonYamlConverter", () => {
     renderConverter();
 
     await user.click(screen.getByRole("button", { name: "Convert" }));
-    const output = screen.getByRole("textbox", { name: "Output YAML" });
+    const output = screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Output YAML" });
     expect(output.getAttribute("readonly")).not.toBeNull();
-    expect((output as HTMLTextAreaElement).value).toContain("customer:");
+    expect(output.value).toContain("customer:");
 
     fireEvent.change(screen.getByRole("textbox", { name: "Source JSON" }), {
       target: { value: "{" },
@@ -75,7 +75,7 @@ describe("JsonYamlConverter", () => {
     expect((await screen.findByRole("alert")).textContent).toContain(
       "JSON could not be parsed"
     );
-    expect((output as HTMLTextAreaElement).value).toContain("customer:");
+    expect(output.value).toContain("customer:");
 
     fireEvent.change(screen.getByRole("textbox", { name: "Source JSON" }), {
       target: { value: '{"ok":true}' },
@@ -86,7 +86,7 @@ describe("JsonYamlConverter", () => {
       );
     });
     await waitFor(() =>
-      expect((output as HTMLTextAreaElement).value).toContain("ok: true")
+      expect(output.value).toContain("ok: true")
     );
 
     const fetchMock = mock(async () => new Response());
@@ -113,8 +113,8 @@ describe("JsonYamlConverter", () => {
   test("switches direction and swaps a successful output into the source", async () => {
     const user = userEvent.setup();
     renderConverter();
-    const swap = screen.getByRole("button", { name: "Swap" });
-    expect((swap as HTMLButtonElement).disabled).toBeTrue();
+    const swap = screen.getByRole<HTMLButtonElement>("button", { name: "Swap" });
+    expect(swap.disabled).toBeTrue();
 
     await user.click(screen.getByRole("combobox", { name: "Source format" }));
     await user.click(await screen.findByRole("option", { name: "YAML" }));
@@ -125,24 +125,20 @@ describe("JsonYamlConverter", () => {
       target: { value: "name: Ayu\n" },
     });
     await user.click(screen.getByRole("button", { name: "Convert" }));
-    expect((swap as HTMLButtonElement).disabled).toBeFalse();
+    expect(swap.disabled).toBeFalse();
 
     await user.click(swap);
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Source JSON",
-        }) as HTMLTextAreaElement
-      ).value
+        }).value
     ).toBe('{\n  "name": "Ayu"\n}');
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Output YAML",
-        }) as HTMLTextAreaElement
-      ).value
+        }).value
     ).toBe("");
-    expect((swap as HTMLButtonElement).disabled).toBeTrue();
+    expect(swap.disabled).toBeTrue();
   });
 
   test("copies output and reports clipboard failures", async () => {
@@ -154,8 +150,8 @@ describe("JsonYamlConverter", () => {
     });
     renderConverter();
 
-    const copy = screen.getByRole("button", { name: "Copy output" });
-    expect((copy as HTMLButtonElement).disabled).toBeTrue();
+    const copy = screen.getByRole<HTMLButtonElement>("button", { name: "Copy output" });
+    expect(copy.disabled).toBeTrue();
     await user.click(screen.getByRole("button", { name: "Convert" }));
     await user.click(copy);
     expect(writeText).toHaveBeenCalledTimes(1);
@@ -177,27 +173,21 @@ describe("JsonYamlConverter", () => {
     await user.click(screen.getByRole("button", { name: "Convert" }));
     await user.click(screen.getByRole("button", { name: "Clear" }));
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Source JSON",
-        }) as HTMLTextAreaElement
-      ).value
+        }).value
     ).toBe("");
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Output YAML",
-        }) as HTMLTextAreaElement
-      ).value
+        }).value
     ).toBe("");
 
     await user.click(screen.getByRole("button", { name: "Reset example" }));
     expect(
-      (
-        screen.getByRole("textbox", {
+      screen.getByRole<HTMLTextAreaElement>("textbox", {
           name: "Source JSON",
-        }) as HTMLTextAreaElement
-      ).value
+        }).value
     ).toContain('"customer"');
   });
 });

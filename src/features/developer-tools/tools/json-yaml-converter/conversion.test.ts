@@ -68,7 +68,9 @@ describe("convertDocument", () => {
         throw new Error("Expected conversion to fail");
       } catch (error) {
         expect(error).toBeInstanceOf(ConversionError);
+        // SAFETY: toBeInstanceOf above narrows error to ConversionError.
         expect((error as ConversionError).line).toBeGreaterThan(0);
+        // SAFETY: toBeInstanceOf above narrows error to ConversionError.
         expect((error as ConversionError).column).toBeGreaterThan(0);
       }
     }

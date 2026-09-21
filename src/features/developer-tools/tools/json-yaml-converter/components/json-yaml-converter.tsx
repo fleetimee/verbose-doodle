@@ -122,6 +122,7 @@ export function JsonYamlConverter() {
   }, [convert]);
 
   const changeFormat = (value: string) => {
+    // SAFETY: Select component options match DocumentFormat values
     setSourceFormat(value as DocumentFormat);
     resetResult();
   };

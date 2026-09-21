@@ -16,6 +16,33 @@ type JsonValue =
   | JsonValue[]
   | { readonly [key: string]: JsonValue };
 
+interface JsonTreeRecord {
+  readonly [key: string]: JsonTree;
+}
+interface JsonTreeArray extends ReadonlyArray<JsonTree> {}
+type JsonTree =
+  | null
+  | boolean
+  | number
+  | string
+  | JsonTreeArray
+  | JsonTreeRecord;
+
+interface YamlTreeRecord {
+  readonly [key: string]: YamlTree;
+}
+interface YamlTreeArray extends ReadonlyArray<YamlTree> {}
+interface YamlTreeMap extends ReadonlyMap<YamlTree, YamlTree> {}
+type YamlTree =
+  | null
+  | boolean
+  | number
+  | bigint
+  | string
+  | YamlTreeArray
+  | YamlTreeRecord
+  | YamlTreeMap;
+
 type SourceLocation = {
   readonly line?: number;
   readonly column?: number;
@@ -61,7 +88,8 @@ function jsonErrorLocation(source: string, error: SyntaxError): SourceLocation {
 
 function parseJson(source: string): JsonValue {
   try {
-    return validateJsonValue(JSON.parse(source) as unknown);
+    // SAFETY: JSON.parse returns a parsed JSON tree structure
+    return validateJsonValue(JSON.parse(source) as JsonTree);
   } catch (error) {
     if (error instanceof ConversionError) {
       throw error;
@@ -80,16 +108,24 @@ function parseJson(source: string): JsonValue {
   }
 }
 
-function validateJsonValue(value: unknown): JsonValue {
-  if (
-    value === null ||
-    typeof value === "string" ||
-    typeof value === "boolean"
-  ) {
+function isPrimitiveJsonTree(value: JsonTree): value is string | boolean {
+  return typeof value === "string" || typeof value === "boolean";
+}
+
+function isJsonTreeNumber(value: JsonTree): value is number {
+  return typeof value === "number";
+}
+
+function isJsonTreeRecord(value: JsonTree): value is JsonTreeRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function validateJsonValue(value: JsonTree): JsonValue {
+  if (value === null || isPrimitiveJsonTree(value)) {
     return value;
   }
 
-  if (typeof value === "number") {
+  if (isJsonTreeNumber(value)) {
     if (!Number.isFinite(value)) {
       throw new ConversionError(
         messages.jsonYamlConverter.nonFiniteNumberError
@@ -112,7 +148,8 @@ function validateJsonValue(value: unknown): JsonValue {
     return value.map(validateJsonValue);
   }
 
-  if (typeof value === "object") {
+  if (isJsonTreeRecord(value)) {
+    // SAFETY: isJsonTreeRecord verifies that the value is a JSON object tree.
     const normalized: Record<string, JsonValue> = Object.create(null) as Record<
       string,
       JsonValue
@@ -133,19 +170,41 @@ function yamlErrorLocation(error: {
   return start ? { column: start.col, line: start.line } : {};
 }
 
+function isPrimitiveYamlTree(value: YamlTree): value is string | boolean {
+  return typeof value === "string" || typeof value === "boolean";
+}
+
+function isYamlTreeNumber(value: YamlTree): value is number {
+  return typeof value === "number";
+}
+
+function isYamlTreeBigInt(value: YamlTree): value is bigint {
+  return typeof value === "bigint";
+}
+
+function isYamlObject(
+  value: YamlTree
+): value is YamlTreeArray | YamlTreeRecord | YamlTreeMap {
+  return typeof value === "object" && value !== null;
+}
+
+function isStringKey(key: unknown): key is string {
+  return typeof key === "string";
+}
+
+function isScalarBigInt(value: unknown): value is bigint {
+  return typeof value === "bigint";
+}
+
 function normalizeYamlValue(
-  value: unknown,
+  value: YamlTree,
   ancestors: ReadonlySet<object> = new Set()
 ): JsonValue {
-  if (
-    value === null ||
-    typeof value === "string" ||
-    typeof value === "boolean"
-  ) {
+  if (value === null || isPrimitiveYamlTree(value)) {
     return value;
   }
 
-  if (typeof value === "number") {
+  if (isYamlTreeNumber(value)) {
     if (!Number.isFinite(value)) {
       throw new ConversionError(
         messages.jsonYamlConverter.nonFiniteNumberError
@@ -159,7 +218,7 @@ function normalizeYamlValue(
     return value;
   }
 
-  if (typeof value === "bigint") {
+  if (isYamlTreeBigInt(value)) {
     if (
       value < BigInt(Number.MIN_SAFE_INTEGER) ||
       value > BigInt(Number.MAX_SAFE_INTEGER)
@@ -171,7 +230,7 @@ function normalizeYamlValue(
     return Number(value);
   }
 
-  if (typeof value !== "object") {
+  if (!isYamlObject(value)) {
     throw new ConversionError(
       messages.jsonYamlConverter.unsupportedYamlValueError
     );
@@ -189,12 +248,13 @@ function normalizeYamlValue(
   }
 
   if (value instanceof Map) {
+    // SAFETY: The normalized null-prototype object is populated only with validated JSON values.
     const normalized: Record<string, JsonValue> = Object.create(null) as Record<
       string,
       JsonValue
     >;
     for (const [key, item] of value) {
-      if (typeof key !== "string") {
+      if (!isStringKey(key)) {
         throw new ConversionError(
           messages.jsonYamlConverter.nonStringYamlKeyError
         );
@@ -230,7 +290,7 @@ function parseYaml(source: string): JsonValue {
   visit(document, {
     Scalar: (_key, node) => {
       if (
-        typeof node.value === "bigint" &&
+        isScalarBigInt(node.value) &&
         node.value === 0n &&
         node.source?.startsWith("-")
       ) {
@@ -243,8 +303,9 @@ function parseYaml(source: string): JsonValue {
   });
 
   try {
+    // SAFETY: document.toJS produces an arbitrary YAML data structure matching YamlTree
     return normalizeYamlValue(
-      document.toJS({ mapAsMap: true, maxAliasCount: 100 })
+      document.toJS({ mapAsMap: true, maxAliasCount: 100 }) as YamlTree
     );
   } catch (error) {
     if (error instanceof ConversionError) {
