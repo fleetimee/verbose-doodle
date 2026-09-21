@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Navigate } from "react-router";
+import { Navigate, useLocation } from "react-router";
 import { useAuth } from "@/features/auth/context";
 import { hasManualLogout } from "@/features/auth/manual-logout";
 import type { Role } from "@/features/auth/types";
@@ -35,13 +35,14 @@ export function ProtectedRoute({
   fallback,
 }: ProtectedRouteProps) {
   const { snapshot } = useAuth();
+  const location = useLocation();
 
   // First check: User must be authenticated
   if (!snapshot.isAuthenticated) {
     if (hasManualLogout()) {
-      return <Navigate replace to="/logged-out" />;
+      return <Navigate replace state={{ from: location }} to="/logged-out" />;
     }
-    return <Navigate replace to="/login" />;
+    return <Navigate replace state={{ from: location }} to="/login" />;
   }
 
   // Second check: If a specific role is required, check it

@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { Navigate, useNavigate, useSearchParams } from "react-router";
+import {
+  Navigate,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router";
 import { useAuth } from "@/features/auth/context";
 import { hasManualLogout } from "@/features/auth/manual-logout";
+import { getSafeRedirectPath } from "@/features/auth/redirect";
 import { MacOsLogin } from "@/features/login/components/macos-login";
 import { useLogin } from "@/features/login/hooks/use-login";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
@@ -28,8 +34,13 @@ const AUTO_LOGIN_MAX_PENDING_PROGRESS = 86;
 export const Login = () => {
   const { snapshot } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const isManualLogout = hasManualLogout();
   const [searchParams, setSearchParams] = useSearchParams();
+  const redirectTarget = getSafeRedirectPath(
+    (location.state as { from?: unknown } | null)?.from ??
+      searchParams.get("redirect")
+  );
   const [expirationMessage, setExpirationMessage] = useState<string | null>(
     null
   );
@@ -108,29 +119,29 @@ export const Login = () => {
   };
 
   const handleLoginTransitionComplete = useCallback(() => {
-    const openDashboard = () => navigate("/dashboard", { replace: true });
+    const openDestination = () => navigate(redirectTarget, { replace: true });
     const shouldReduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
     if (shouldReduceMotion || !document.startViewTransition) {
-      openDashboard();
+      openDestination();
       return;
     }
 
     document.documentElement.dataset.transition = "login-dashboard";
     const transition = document.startViewTransition(() => {
-      flushSync(openDashboard);
+      flushSync(openDestination);
     });
 
     transition.finished.finally(() => {
       delete document.documentElement.dataset.transition;
     });
-  }, [navigate]);
+  }, [navigate, redirectTarget]);
 
-  // Redirect to dashboard if already authenticated
+  // Redirect to target destination if already authenticated
   if (snapshot.isAuthenticated && wasInitiallyAuthenticated) {
-    return <Navigate replace to="/dashboard" />;
+    return <Navigate replace to={redirectTarget} />;
   }
 
   if (isManualLogout) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -23,6 +23,7 @@ export function TokenExpirationDialog() {
   const tokenExpiration = useTokenExpiration();
   const { logout, refreshAuth } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showWarning, setShowWarning] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -35,7 +36,9 @@ export function TokenExpirationDialog() {
     // Check if token is expired
     if (tokenExpiration.isExpired) {
       logout();
-      navigate("/login?reason=expired-while-active");
+      navigate("/login?reason=expired-while-active", {
+        state: { from: location },
+      });
       return;
     }
 
@@ -45,7 +48,7 @@ export function TokenExpirationDialog() {
     } else {
       setShowWarning(false);
     }
-  }, [tokenExpiration, logout, navigate]);
+  }, [tokenExpiration, logout, navigate, location]);
 
   const handleStayLoggedIn = async () => {
     setIsRefreshing(true);
@@ -61,7 +64,10 @@ export function TokenExpirationDialog() {
         toast.error(messages.auth.refreshFailedTitle, {
           description: messages.auth.refreshFailedDescription,
         });
-        navigate("/login?reason=refresh-failed", { replace: true });
+        navigate("/login?reason=refresh-failed", {
+          replace: true,
+          state: { from: location },
+        });
       }
     } catch {
       logout();
@@ -69,7 +75,10 @@ export function TokenExpirationDialog() {
       toast.error(messages.auth.refreshFailedTitle, {
         description: messages.auth.refreshFailedDescription,
       });
-      navigate("/login?reason=refresh-failed", { replace: true });
+      navigate("/login?reason=refresh-failed", {
+        replace: true,
+        state: { from: location },
+      });
     } finally {
       setIsRefreshing(false);
     }
@@ -77,7 +86,9 @@ export function TokenExpirationDialog() {
 
   const handleLogoutNow = () => {
     logout();
-    navigate("/login?reason=expired-while-active");
+    navigate("/login?reason=expired-while-active", {
+      state: { from: location },
+    });
   };
 
   if (!(showWarning && tokenExpiration)) {

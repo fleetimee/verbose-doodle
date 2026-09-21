@@ -1,4 +1,4 @@
-import { Link, Navigate } from "react-router";
+import { Link, Navigate, useLocation } from "react-router";
 import { LogInIcon } from "@/components/hugeicons";
 import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/features/auth/context";
@@ -8,6 +8,7 @@ import { messages } from "@/lib/i18n";
 
 export function LoggedOut() {
   const { snapshot } = useAuth();
+  const location = useLocation();
   const now = new Date();
   const date = new Intl.DateTimeFormat(undefined, {
     day: "numeric",
@@ -62,6 +63,7 @@ export function LoggedOut() {
         <Link
           className="macos-logged-out-action"
           onClick={clearManualLogout}
+          state={location.state}
           to="/login"
         >
           <LogInIcon aria-hidden="true" />
