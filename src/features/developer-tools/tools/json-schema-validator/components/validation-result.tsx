@@ -8,6 +8,7 @@ import { formatMessage, formatPluralMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type ValidationResultProps = {
+  readonly className?: string;
   readonly result: JsonSchemaValidationResult;
 };
 
@@ -46,7 +47,7 @@ const getOutcomeCopy = (): Record<
   },
 });
 
-export function ValidationResult({ result }: ValidationResultProps) {
+export function ValidationResult({ className, result }: ValidationResultProps) {
   let details: ResultDetails;
   if (result.outcome !== "VALIDATION_RESULT") {
     details = getOutcomeCopy()[result.outcome];
@@ -75,7 +76,11 @@ export function ValidationResult({ result }: ValidationResultProps) {
     <motion.section
       animate={{ opacity: 1, y: 0 }}
       aria-live="polite"
-      className={cn("mt-8 border-t-2 border-b py-6", details.rule)}
+      className={cn(
+        "mt-4 border-t-2 border-b py-5 sm:py-6",
+        details.rule,
+        className
+      )}
       exit={{ opacity: 0, y: -8 }}
       initial={{ opacity: 0, y: 8 }}
       layout
@@ -119,7 +124,7 @@ export function ValidationResult({ result }: ValidationResultProps) {
         </dl>
       </div>
       {result.diagnostics.length > 0 ? (
-        <div className="mt-6 sm:ml-[106px]">
+        <div className="mt-6 max-h-72 overflow-y-auto pr-1 sm:ml-[106px]">
           <DiagnosticList
             diagnostics={result.diagnostics}
             errorCount={result.errorCount}

@@ -206,4 +206,26 @@ describe("JsonSchemaValidator", () => {
       expect(await screen.findByText(expected)).toBeDefined();
     }
   });
+
+  test("supports infer schema, generate mock, and prettify actions", async () => {
+    const user = userEvent.setup();
+    renderValidator();
+
+    const inferBtn = screen.getByRole("button", { name: "Infer schema" });
+    const mockBtn = screen.getByRole("button", { name: "Generate mock" });
+    const prettifyBtns = screen.getAllByRole("button", { name: "Prettify" });
+
+    expect(inferBtn).toBeDefined();
+    expect(mockBtn).toBeDefined();
+    expect(prettifyBtns.length).toBe(2);
+
+    await user.click(prettifyBtns[0]);
+    await user.click(inferBtn);
+    expect(document.body.textContent).toContain(
+      "https://json-schema.org/draft/2020-12/schema"
+    );
+
+    await user.click(mockBtn);
+    expect(document.body.textContent).toContain("developer@example.com");
+  });
 });

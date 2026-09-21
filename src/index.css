@@ -604,22 +604,28 @@ html:has([data-slot="sidebar-wrapper"]) #root {
   border-bottom-color: var(--popover) !important;
 }
 
-.jwt-inspector-scrollbars :where(textarea, .cm-scroller) {
+.jwt-inspector-scrollbars :where(textarea, .cm-scroller),
+.json-schema-scrollbars :where(textarea, .cm-scroller) {
   scrollbar-color: var(--border) transparent;
   scrollbar-width: thin;
 }
 
-.jwt-inspector-scrollbars :where(textarea, .cm-scroller)::-webkit-scrollbar {
+.jwt-inspector-scrollbars :where(textarea, .cm-scroller)::-webkit-scrollbar,
+.json-schema-scrollbars :where(textarea, .cm-scroller)::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
 .jwt-inspector-scrollbars
+  :where(textarea, .cm-scroller)::-webkit-scrollbar-track,
+.json-schema-scrollbars
   :where(textarea, .cm-scroller)::-webkit-scrollbar-track {
   background: transparent;
 }
 
 .jwt-inspector-scrollbars
+  :where(textarea, .cm-scroller)::-webkit-scrollbar-thumb,
+.json-schema-scrollbars
   :where(textarea, .cm-scroller)::-webkit-scrollbar-thumb {
   background: var(--border);
   background-clip: padding-box;
@@ -628,6 +634,8 @@ html:has([data-slot="sidebar-wrapper"]) #root {
 }
 
 .jwt-inspector-scrollbars
+  :where(textarea, .cm-scroller)::-webkit-scrollbar-corner,
+.json-schema-scrollbars
   :where(textarea, .cm-scroller)::-webkit-scrollbar-corner {
   background: transparent;
 }
