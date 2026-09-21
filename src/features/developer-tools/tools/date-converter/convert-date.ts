@@ -1,10 +1,17 @@
+import { getDayOfYear, getISOWeek } from "date-fns";
+import { formatMessage, messages } from "@/lib/i18n";
+
 export type DateInputMode =
   | "auto"
   | "iso-8601"
+  | "rfc-2822"
+  | "sql-datetime"
+  | "unix-microseconds"
   | "unix-milliseconds"
+  | "unix-nanoseconds"
   | "unix-seconds";
 
-type DetectedDateInputMode = Exclude<DateInputMode, "auto">;
+export type DetectedDateInputMode = Exclude<DateInputMode, "auto">;
 
 export type DateConversionRequest = {
   readonly input: string;
@@ -13,17 +20,33 @@ export type DateConversionRequest = {
   readonly timeZone: string;
 };
 
+export type DateCalendarDetails = {
+  readonly day: number;
+  readonly dayOfWeek: string;
+  readonly dayOfWeekNumber: number;
+  readonly dayOfYear: number;
+  readonly isLeapYear: boolean;
+  readonly isoWeek: number;
+  readonly month: number;
+  readonly monthName: string;
+  readonly timeZoneOffset: string;
+  readonly year: number;
+};
+
 export type DateConversionResult = {
+  readonly calendarDetails: DateCalendarDetails;
   readonly detectedMode: DetectedDateInputMode;
   readonly iso8601: string;
+  readonly iso8601Local: string;
   readonly relativeTime: string;
   readonly rfc2822: string;
+  readonly sqlDateTime: string;
+  readonly unixMicroseconds: string;
   readonly unixMilliseconds: string;
+  readonly unixNanoseconds: string;
   readonly unixSeconds: string;
   readonly zonedDateTime: string;
 };
-
-import { formatMessage, messages } from "@/lib/i18n";
 
 export type DateConversionErrorCode =
   | "empty-input"
@@ -46,61 +69,41 @@ const INTEGER_PATTERN = /^[+-]?\d+$/;
 const ISO_OFFSET_PATTERN = /(?:Z|[+-]\d{2}:?\d{2})$/i;
 const ISO_DATE_TIME_PATTERN =
   /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,9}))?)?(Z|[+-](\d{2}):?(\d{2}))$/i;
+const SQL_DATE_TIME_PATTERN =
+  /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,9}))?)?(Z|[+-](\d{2}):?(\d{2}))?$/i;
+const RFC_2822_PATTERN =
+  /^[A-Za-z]{3},\s+\d{1,2}\s+[A-Za-z]{3}\s+\d{4}\s+\d{2}:\d{2}:\d{2}/i;
 const LEADING_SIGN_PATTERN = /^[+-]/;
 const MAX_DATE_MILLISECONDS = 8_640_000_000_000_000;
 
 function detectInputMode(input: string): DetectedDateInputMode {
-  if (!INTEGER_PATTERN.test(input)) {
-    return "iso-8601";
-  }
-  const digitCount = input.replace(LEADING_SIGN_PATTERN, "").length;
-  return digitCount <= 10 ? "unix-seconds" : "unix-milliseconds";
-}
-
-function parseInput(input: string, mode: DetectedDateInputMode) {
-  if (mode === "iso-8601") {
-    if (!ISO_OFFSET_PATTERN.test(input)) {
-      throw new DateConversionError(
-        "missing-iso-offset",
-        messages.dateConverter.errors.missingIsoOffset
-      );
+  if (INTEGER_PATTERN.test(input)) {
+    const digitCount = input.replace(LEADING_SIGN_PATTERN, "").length;
+    if (digitCount <= 10) {
+      return "unix-seconds";
     }
-    const match = ISO_DATE_TIME_PATTERN.exec(input);
-    if (!(match && hasValidIsoParts(match))) {
-      throw new DateConversionError(
-        "invalid-input",
-        messages.dateConverter.errors.invalidIsoCalendar
-      );
+    if (digitCount <= 13) {
+      return "unix-milliseconds";
     }
-    const milliseconds = Date.parse(input);
-    if (Number.isNaN(milliseconds)) {
-      throw new DateConversionError(
-        "invalid-input",
-        messages.dateConverter.errors.invalidIsoDateTime
-      );
+    if (digitCount <= 16) {
+      return "unix-microseconds";
     }
-    return milliseconds;
+    return "unix-nanoseconds";
   }
 
-  if (!INTEGER_PATTERN.test(input)) {
-    throw new DateConversionError(
-      "invalid-input",
-      messages.dateConverter.errors.invalidUnix
-    );
+  if (RFC_2822_PATTERN.test(input)) {
+    return "rfc-2822";
   }
 
-  const value = Number(input);
-  const milliseconds = mode === "unix-seconds" ? value * 1000 : value;
   if (
-    !Number.isSafeInteger(milliseconds) ||
-    Math.abs(milliseconds) > MAX_DATE_MILLISECONDS
+    input.includes(" ") &&
+    SQL_DATE_TIME_PATTERN.test(input) &&
+    !input.includes("T")
   ) {
-    throw new DateConversionError(
-      "out-of-range",
-      messages.dateConverter.errors.outOfRange
-    );
+    return "sql-datetime";
   }
-  return milliseconds;
+
+  return "iso-8601";
 }
 
 function hasValidIsoParts(match: RegExpExecArray) {
@@ -140,6 +143,118 @@ function hasValidIsoParts(match: RegExpExecArray) {
   );
 }
 
+function parseIsoInput(input: string): number {
+  if (!ISO_OFFSET_PATTERN.test(input)) {
+    throw new DateConversionError(
+      "missing-iso-offset",
+      messages.dateConverter.errors.missingIsoOffset
+    );
+  }
+  const match = ISO_DATE_TIME_PATTERN.exec(input);
+  if (!(match && hasValidIsoParts(match))) {
+    throw new DateConversionError(
+      "invalid-input",
+      messages.dateConverter.errors.invalidIsoCalendar
+    );
+  }
+  const milliseconds = Date.parse(input);
+  if (Number.isNaN(milliseconds)) {
+    throw new DateConversionError(
+      "invalid-input",
+      messages.dateConverter.errors.invalidIsoDateTime
+    );
+  }
+  return milliseconds;
+}
+
+function parseSqlInput(input: string): number {
+  const normalized = input.trim();
+  const isoCandidate = normalized.includes("T")
+    ? normalized
+    : normalized.replace(" ", "T");
+  const withOffset = ISO_OFFSET_PATTERN.test(isoCandidate)
+    ? isoCandidate
+    : `${isoCandidate}Z`;
+  const milliseconds = Date.parse(withOffset);
+  if (Number.isNaN(milliseconds)) {
+    throw new DateConversionError(
+      "invalid-input",
+      messages.dateConverter.errors.invalidIsoDateTime
+    );
+  }
+  return milliseconds;
+}
+
+function parseRfcInput(input: string): number {
+  const milliseconds = Date.parse(input);
+  if (Number.isNaN(milliseconds)) {
+    throw new DateConversionError(
+      "invalid-input",
+      messages.dateConverter.errors.invalidIsoDateTime
+    );
+  }
+  return milliseconds;
+}
+
+function parseUnixInput(
+  input: string,
+  mode:
+    | "unix-seconds"
+    | "unix-milliseconds"
+    | "unix-microseconds"
+    | "unix-nanoseconds"
+): number {
+  if (!INTEGER_PATTERN.test(input)) {
+    throw new DateConversionError(
+      "invalid-input",
+      messages.dateConverter.errors.invalidUnix
+    );
+  }
+
+  if (mode === "unix-seconds") {
+    return Number(input) * 1000;
+  }
+  if (mode === "unix-milliseconds") {
+    return Number(input);
+  }
+  if (mode === "unix-microseconds") {
+    try {
+      return Number(BigInt(input) / 1000n);
+    } catch {
+      return Number(input) / 1000;
+    }
+  }
+  try {
+    return Number(BigInt(input) / 1_000_000n);
+  } catch {
+    return Number(input) / 1_000_000;
+  }
+}
+
+function parseInput(input: string, mode: DetectedDateInputMode): number {
+  let milliseconds: number;
+  if (mode === "iso-8601") {
+    milliseconds = parseIsoInput(input);
+  } else if (mode === "rfc-2822") {
+    milliseconds = parseRfcInput(input);
+  } else if (mode === "sql-datetime") {
+    milliseconds = parseSqlInput(input);
+  } else {
+    milliseconds = parseUnixInput(input, mode);
+  }
+
+  if (
+    !Number.isSafeInteger(Math.trunc(milliseconds)) ||
+    Math.abs(milliseconds) > MAX_DATE_MILLISECONDS
+  ) {
+    throw new DateConversionError(
+      "out-of-range",
+      messages.dateConverter.errors.outOfRange
+    );
+  }
+  return milliseconds;
+}
+
 function validateTimeZone(timeZone: string) {
   try {
     new Intl.DateTimeFormat("en-US", { timeZone }).format();
@@ -170,6 +285,40 @@ function formatZonedDateTime(date: Date, timeZone: string) {
   }).formatToParts(date);
   const values = new Map(parts.map((part) => [part.type, part.value]));
   return `${values.get("year")}-${values.get("month")}-${values.get("day")} ${values.get("hour")}:${values.get("minute")}:${values.get("second")}.${values.get("fractionalSecond")} ${values.get("timeZoneName")}`;
+}
+
+function formatIsoLocal(date: Date, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    fractionalSecondDigits: 3,
+    hour: "2-digit",
+    hour12: false,
+    minute: "2-digit",
+    month: "2-digit",
+    second: "2-digit",
+    timeZone,
+    timeZoneName: "longOffset",
+    year: "numeric",
+  }).formatToParts(date);
+  const values = new Map(parts.map((part) => [part.type, part.value]));
+  const offset = values.get("timeZoneName")?.replace("GMT", "") || "Z";
+  const normalizedOffset = offset === "" || offset === "+00:00" ? "Z" : offset;
+  return `${values.get("year")}-${values.get("month")}-${values.get("day")}T${values.get("hour")}:${values.get("minute")}:${values.get("second")}.${values.get("fractionalSecond")}${normalizedOffset}`;
+}
+
+function formatSqlDateTime(date: Date, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+    minute: "2-digit",
+    month: "2-digit",
+    second: "2-digit",
+    timeZone,
+    year: "numeric",
+  }).formatToParts(date);
+  const values = new Map(parts.map((part) => [part.type, part.value]));
+  return `${values.get("year")}-${values.get("month")}-${values.get("day")} ${values.get("hour")}:${values.get("minute")}:${values.get("second")}`;
 }
 
 const RELATIVE_UNITS = [
@@ -211,6 +360,71 @@ function formatRelativeTime(milliseconds: number, nowMilliseconds: number) {
       });
 }
 
+function calculateCalendarDetails(
+  date: Date,
+  timeZone: string
+): DateCalendarDetails {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    month: "numeric",
+    timeZone,
+    timeZoneName: "shortOffset",
+    weekday: "long",
+    year: "numeric",
+  }).formatToParts(date);
+  const values = new Map(parts.map((p) => [p.type, p.value]));
+
+  const year = Number(values.get("year") ?? date.getUTCFullYear());
+  const month = Number(values.get("month") ?? date.getUTCMonth() + 1);
+  const day = Number(values.get("day") ?? date.getUTCDate());
+  const dayOfWeek = values.get("weekday") ?? "Monday";
+  const timeZoneOffset = values.get("timeZoneName") ?? "UTC";
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const monthName = monthNames[month - 1] ?? "January";
+
+  const weekdayMap: Record<string, number> = {
+    Friday: 5,
+    Monday: 1,
+    Saturday: 6,
+    Sunday: 7,
+    Thursday: 4,
+    Tuesday: 2,
+    Wednesday: 3,
+  };
+  const dayOfWeekNumber = weekdayMap[dayOfWeek] ?? 1;
+
+  const dayOfYear = getDayOfYear(date);
+  const isoWeek = getISOWeek(date);
+  const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+
+  return {
+    day,
+    dayOfWeek,
+    dayOfWeekNumber,
+    dayOfYear,
+    isLeapYear,
+    isoWeek,
+    month,
+    monthName,
+    timeZoneOffset,
+    year,
+  };
+}
+
 export function convertDate({
   input,
   inputMode,
@@ -231,12 +445,21 @@ export function convertDate({
   const milliseconds = parseInput(normalizedInput, detectedMode);
   const date = new Date(milliseconds);
 
+  const truncMs = Math.trunc(milliseconds);
+  const unixMicros = (BigInt(truncMs) * 1000n).toString();
+  const unixNanos = (BigInt(truncMs) * 1_000_000n).toString();
+
   return {
+    calendarDetails: calculateCalendarDetails(date, timeZone),
     detectedMode,
     iso8601: date.toISOString(),
+    iso8601Local: formatIsoLocal(date, timeZone),
     relativeTime: formatRelativeTime(milliseconds, nowMilliseconds),
     rfc2822: date.toUTCString(),
+    sqlDateTime: formatSqlDateTime(date, timeZone),
+    unixMicroseconds: unixMicros,
     unixMilliseconds: String(milliseconds),
+    unixNanoseconds: unixNanos,
     unixSeconds: String(milliseconds / 1000),
     zonedDateTime: formatZonedDateTime(date, timeZone),
   };

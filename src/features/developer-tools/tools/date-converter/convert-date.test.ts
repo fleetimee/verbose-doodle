@@ -60,6 +60,44 @@ describe("convertDate", () => {
     expect(result.iso8601).toBe("1969-12-31T23:59:59.000Z");
   });
 
+  test("converts RFC 2822 and SQL datetime formats", () => {
+    const rfcResult = convertDate({
+      input: "Mon, 01 Jan 2024 00:00:00 GMT",
+      inputMode: "auto",
+      timeZone: "UTC",
+    });
+    expect(rfcResult.detectedMode).toBe("rfc-2822");
+    expect(rfcResult.unixSeconds).toBe("1704067200");
+
+    const sqlResult = convertDate({
+      input: "2024-01-01 00:00:00",
+      inputMode: "auto",
+      timeZone: "UTC",
+    });
+    expect(sqlResult.detectedMode).toBe("sql-datetime");
+    expect(sqlResult.unixSeconds).toBe("1704067200");
+    expect(sqlResult.sqlDateTime).toBe("2024-01-01 00:00:00");
+  });
+
+  test("calculates calendar details and high-precision epoch stamps", () => {
+    const result = convertDate({
+      input: "1704067200123",
+      inputMode: "unix-milliseconds",
+      timeZone: "UTC",
+    });
+
+    expect(result.calendarDetails.year).toBe(2024);
+    expect(result.calendarDetails.month).toBe(1);
+    expect(result.calendarDetails.day).toBe(1);
+    expect(result.calendarDetails.dayOfWeek).toBe("Monday");
+    expect(result.calendarDetails.dayOfYear).toBe(1);
+    expect(result.calendarDetails.isoWeek).toBe(1);
+    expect(result.calendarDetails.isLeapYear).toBe(true);
+    expect(result.unixMicroseconds).toBe("1704067200123000");
+    expect(result.unixNanoseconds).toBe("1704067200123000000");
+    expect(result.iso8601Local).toBe("2024-01-01T00:00:00.123Z");
+  });
+
   test("rejects ambiguous dates, malformed timestamps, invalid zones, and overflow", () => {
     const invalidRequests = [
       {
