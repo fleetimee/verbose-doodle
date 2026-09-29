@@ -33,6 +33,7 @@ export const numberBaseConverterMessages = {
     signedWordOutOfRange: "Nilai tidak muat dalam word signed {bitWidth}-bit.",
     unsignedWordOutOfRange: "Nilai tidak muat dalam word {bitWidth}-bit.",
   },
+  examplesLabel: "Contoh",
   hexadecimal: "Heksadesimal",
   inputBaseLabel: "Basis masukan",
   inputHelp:

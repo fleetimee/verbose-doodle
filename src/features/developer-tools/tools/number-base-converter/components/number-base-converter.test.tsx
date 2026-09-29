@@ -29,6 +29,7 @@ const createMotionElement = (
       exit: _exit,
       initial: _initial,
       layout: _layout,
+      layoutId: _layoutId,
       onAnimationComplete: _onAnimationComplete,
       transition: _transition,
       variants: _variants,
@@ -77,11 +78,8 @@ function renderConverter() {
 }
 
 describe("NumberBaseConverter", () => {
-  test("converts the default example into four bases and byte views", async () => {
-    const user = userEvent.setup();
+  test("shows the default example in four bases and byte views", () => {
     renderConverter();
-
-    await user.click(screen.getByRole("button", { name: "Convert" }));
 
     expect(
       screen.getByRole("region", { name: "Binary output" }).textContent
@@ -95,10 +93,13 @@ describe("NumberBaseConverter", () => {
     expect(
       screen.getByRole("region", { name: "Hexadecimal output" }).textContent
     ).toContain("FF");
-    expect(screen.getAllByText("FF", { selector: "code" })).toHaveLength(2);
+    expect(screen.getByText("Byte 00").parentElement?.textContent).toContain(
+      "FF"
+    );
+    expect(screen.queryByRole("button", { name: "Convert" })).toBeNull();
   });
 
-  test("interprets hexadecimal FF as signed negative one", async () => {
+  test("reinterprets hexadecimal FF when switching representation", async () => {
     const user = userEvent.setup();
     renderConverter();
 
@@ -110,29 +111,32 @@ describe("NumberBaseConverter", () => {
     const input = screen.getByRole("textbox", { name: "Value" });
     await user.clear(input);
     await user.type(input, "FF");
-    await user.click(screen.getByRole("button", { name: "Convert" }));
 
     expect(
       screen.getByRole("region", { name: "Decimal output" }).textContent
     ).toContain("-1");
     expect(screen.getByText("Signed -1")).toBeDefined();
     expect(screen.getByText("Unsigned 255")).toBeDefined();
+
+    await user.click(screen.getByRole("button", { name: "Unsigned" }));
+
+    expect(
+      screen.getByRole("region", { name: "Decimal output" }).textContent
+    ).toContain("255");
   });
 
   test("clears stale output when conversion fails", () => {
     renderConverter();
     const input = screen.getByRole("textbox", { name: "Value" });
 
-    fireEvent.click(screen.getByRole("button", { name: "Convert" }));
     expect(screen.getByRole("region", { name: "Binary output" })).toBeDefined();
     fireEvent.change(input, { target: { value: "256" } });
-    fireEvent.click(screen.getByRole("button", { name: "Convert" }));
 
     expect(screen.getByRole("alert")).toBeDefined();
     expect(screen.queryByRole("region", { name: "Binary output" })).toBeNull();
   });
 
-  test("copies an output and converts with the keyboard without a request", async () => {
+  test("copies an automatically converted output without a request", async () => {
     const user = userEvent.setup();
     const writeText = mock(async () => undefined);
     Object.defineProperty(navigator, "clipboard", {
@@ -145,7 +149,6 @@ describe("NumberBaseConverter", () => {
     renderConverter();
     fetchMock.mockClear();
 
-    fireEvent.keyDown(window, { key: "Enter", metaKey: true });
     expect(
       screen.getByRole("region", { name: "Hexadecimal output" })
     ).toBeDefined();
@@ -173,6 +176,56 @@ describe("NumberBaseConverter", () => {
     await user.click(screen.getByRole("button", { name: "Reset example" }));
     // SAFETY: The accessible textbox query targets the native input element.
     expect((input as HTMLInputElement).value).toBe("255");
+  });
+
+  test("applies presets with their matching base, width, and interpretation", async () => {
+    const user = userEvent.setup();
+    renderConverter();
+
+    await user.click(screen.getByRole("button", { name: "ASCII Hi" }));
+
+    expect(
+      screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Value" }).value
+    ).toBe("4869");
+    expect(
+      screen.getByRole("combobox", { name: "Input base" }).textContent
+    ).toContain("Hexadecimal");
+    expect(
+      screen
+        .getByRole("button", { name: "16 bit" })
+        .getAttribute("aria-pressed")
+    ).toBe("true");
+    expect(screen.getByText("Hi", { selector: "code" })).toBeDefined();
+  });
+
+  test("keeps negative decimal results when switching to unsigned", async () => {
+    const user = userEvent.setup();
+    renderConverter();
+
+    await user.click(screen.getByRole("button", { name: "-42 / signed" }));
+    await user.click(screen.getByRole("button", { name: "Unsigned" }));
+
+    expect(
+      screen.getByRole("region", { name: "Decimal output" }).textContent
+    ).toContain("214");
+    expect(
+      screen.getByRole<HTMLInputElement>("textbox", { name: "Value" }).value
+    ).toBe("214");
+  });
+
+  test("recalculates results when changing bit width", async () => {
+    const user = userEvent.setup();
+    renderConverter();
+
+    await user.click(screen.getByRole("button", { name: "16 bit" }));
+    expect(
+      screen.getByRole("region", { name: "Hexadecimal output" }).textContent
+    ).toContain("00 FF");
+
+    await user.click(screen.getByRole("button", { name: "8 bit" }));
+    expect(
+      screen.getByRole("region", { name: "Hexadecimal output" }).textContent
+    ).toContain("FF");
   });
 
   test("keeps every guided-tour target available after clearing", () => {

@@ -672,7 +672,7 @@ export function JwtEditor({
     <>
       <div
         className={cn(
-          "min-w-0 overflow-hidden rounded-md border bg-card text-card-foreground",
+          "min-w-0 overflow-hidden rounded-xl border border-border/70 bg-card text-card-foreground",
           className
         )}
       >

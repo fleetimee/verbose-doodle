@@ -1,12 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Binary,
-  Check,
-  ClipboardCopy,
-  Cpu,
-  Hash,
-} from "@/components/hugeicons";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { Binary, Check, ClipboardCopy, Cpu } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +36,14 @@ import { cn } from "@/lib/utils";
 
 type OutputKey = "binary" | "octal" | "decimal" | "hexadecimal";
 
+type ExamplePreset = {
+  readonly bitWidth: NumberBitWidth;
+  readonly input: string;
+  readonly inputBase: NumberBase;
+  readonly label: string;
+  readonly representation: NumberRepresentation;
+};
+
 function isString(value: unknown): value is string {
   return typeof value === "string";
 }
@@ -52,6 +54,59 @@ type OutputDefinition = {
   readonly radix: string;
 };
 
+type SelectionIndicatorProps = {
+  readonly layoutId: string;
+  readonly shouldReduceMotion: boolean;
+};
+
+function SelectionIndicator({
+  layoutId,
+  shouldReduceMotion,
+}: SelectionIndicatorProps) {
+  return (
+    <motion.span
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-0 bg-accent shadow-xs"
+      layoutId={layoutId}
+      transition={{
+        duration: shouldReduceMotion
+          ? MOTION_DURATION.instant
+          : MOTION_DURATION.fast,
+        ease: MOTION_EASE.inOut,
+      }}
+    />
+  );
+}
+
+function AnimatedValue({
+  children,
+  shouldReduceMotion,
+  valueKey,
+}: {
+  readonly children: ReactNode;
+  readonly shouldReduceMotion: boolean;
+  readonly valueKey: string;
+}) {
+  return (
+    <AnimatePresence initial={false} mode="popLayout">
+      <motion.span
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        initial={{ opacity: shouldReduceMotion ? 1 : 0 }}
+        key={valueKey}
+        transition={{
+          duration: shouldReduceMotion
+            ? MOTION_DURATION.instant
+            : MOTION_DURATION.standard,
+          ease: MOTION_EASE.out,
+        }}
+      >
+        {children}
+      </motion.span>
+    </AnimatePresence>
+  );
+}
+
 const EXAMPLE_VALUE = "255";
 const EXAMPLE_RESULT = convertNumberBase({
   bitWidth: 8,
@@ -60,6 +115,36 @@ const EXAMPLE_RESULT = convertNumberBase({
   representation: "unsigned",
 });
 const BIT_WIDTHS: readonly NumberBitWidth[] = [8, 16, 32, 64];
+const EXAMPLE_PRESETS: readonly ExamplePreset[] = [
+  {
+    bitWidth: 8,
+    input: "255",
+    inputBase: 10,
+    label: "255 / 8-bit",
+    representation: "unsigned",
+  },
+  {
+    bitWidth: 8,
+    input: "-42",
+    inputBase: 10,
+    label: "-42 / signed",
+    representation: "signed",
+  },
+  {
+    bitWidth: 32,
+    input: "DEADBEEF",
+    inputBase: 16,
+    label: "DEADBEEF",
+    representation: "unsigned",
+  },
+  {
+    bitWidth: 16,
+    input: "4869",
+    inputBase: 16,
+    label: "ASCII Hi",
+    representation: "unsigned",
+  },
+];
 const BASE_LABELS: Readonly<Record<NumberBase, string>> = {
   get 2() {
     return messages.numberBaseConverter.binary;
@@ -173,55 +258,52 @@ function OutputCard({
   return (
     <section
       aria-label={outputLabel}
-      className="group min-w-0 border-b p-5 odd:sm:border-r"
+      className="group grid min-w-0 grid-cols-[minmax(7rem,0.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-b px-4 py-3 last:border-b-0"
     >
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
-            {definition.radix}
-          </p>
-          <h3 className="mt-1 font-medium text-sm">{definition.label}</h3>
-        </div>
-        <Button
-          aria-label={formatMessage(messages.numberBaseConverter.copyOutput, {
-            base: definition.label.toLowerCase(),
-          })}
-          onClick={onCopy}
-          size="icon-sm"
-          type="button"
-          variant="ghost"
-        >
-          <span className="relative size-4">
-            <AnimatePresence initial={false} mode="sync">
-              <motion.span
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                }}
-                className="absolute inset-0"
-                exit={{
-                  opacity: 0,
-                  scale: shouldReduceMotion ? 1 : 0.95,
-                }}
-                initial={{
-                  opacity: 0,
-                  scale: shouldReduceMotion ? 1 : 0.95,
-                }}
-                key={copied ? "copied" : "idle"}
-                transition={{
-                  duration: MOTION_DURATION.fast,
-                  ease: MOTION_EASE.out,
-                }}
-              >
-                <CopyIcon data-icon={copied ? "check" : "clipboard-copy"} />
-              </motion.span>
-            </AnimatePresence>
-          </span>
-        </Button>
+      <div className="min-w-0">
+        <p className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
+          {definition.radix}
+        </p>
+        <h3 className="font-medium text-sm">{definition.label}</h3>
       </div>
-      <code className="mt-6 block overflow-x-auto pb-1 font-mono text-lg leading-7 tracking-wide">
-        {formatOutput(value, definition.key)}
+      <code className="min-w-0 overflow-x-auto font-mono text-sm tracking-wide">
+        <AnimatedValue shouldReduceMotion={shouldReduceMotion} valueKey={value}>
+          {formatOutput(value, definition.key)}
+        </AnimatedValue>
       </code>
+      <Button
+        aria-label={formatMessage(messages.numberBaseConverter.copyOutput, {
+          base: definition.label.toLowerCase(),
+        })}
+        onClick={onCopy}
+        size="icon-xs"
+        type="button"
+        variant="ghost"
+      >
+        <span className="relative size-3.5">
+          <AnimatePresence initial={false} mode="sync">
+            <motion.span
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute inset-0"
+              exit={{
+                opacity: 0,
+                scale: shouldReduceMotion ? 1 : 0.95,
+              }}
+              initial={{
+                opacity: 0,
+                scale: shouldReduceMotion ? 1 : 0.95,
+              }}
+              key={copied ? "copied" : "idle"}
+              transition={{
+                duration: MOTION_DURATION.fast,
+                ease: MOTION_EASE.out,
+              }}
+            >
+              <CopyIcon data-icon={copied ? "check" : "clipboard-copy"} />
+            </motion.span>
+          </AnimatePresence>
+        </span>
+      </Button>
     </section>
   );
 }
@@ -247,7 +329,13 @@ export function NumberBaseConverter() {
     setCopiedOutput(null);
   };
 
-  const convert = useCallback(() => {
+  useEffect(() => {
+    if (!input.trim()) {
+      setResult(null);
+      setError(null);
+      setCopiedOutput(null);
+      return;
+    }
     try {
       setResult(
         convertNumberBase({ bitWidth, input, inputBase, representation })
@@ -264,37 +352,30 @@ export function NumberBaseConverter() {
     }
   }, [bitWidth, input, inputBase, representation]);
 
-  useEffect(() => {
-    const handleShortcut = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-        event.preventDefault();
-        convert();
-      }
-    };
-    window.addEventListener("keydown", handleShortcut);
-    return () => window.removeEventListener("keydown", handleShortcut);
-  }, [convert]);
-
   const changeBase = (value: string) => {
     // SAFETY: The select emits one of the supported numeric bases.
     setInputBase(Number(value) as NumberBase);
-    resetResult();
   };
 
   const changeBitWidth = (values: readonly unknown[]) => {
     const value = values.at(-1);
     if (isString(value)) {
       // SAFETY: The select emits one of the supported bit widths.
-      setBitWidth(Number(value) as NumberBitWidth);
-      resetResult();
+      const nextBitWidth = Number(value) as NumberBitWidth;
+      setBitWidth(nextBitWidth);
     }
   };
 
   const changeRepresentation = (values: readonly unknown[]) => {
     const value = values.at(-1);
     if (value === "signed" || value === "unsigned") {
+      let interpretedInput = input;
+      if (inputBase === 10 && result) {
+        interpretedInput =
+          value === "signed" ? result.signedDecimal : result.unsignedDecimal;
+      }
       setRepresentation(value);
-      resetResult();
+      setInput(interpretedInput);
     }
   };
 
@@ -329,12 +410,24 @@ export function NumberBaseConverter() {
     resetResult();
   };
 
+  const applyPreset = (preset: ExamplePreset) => {
+    setInput(preset.input);
+    setInputBase(preset.inputBase);
+    setBitWidth(preset.bitWidth);
+    setRepresentation(preset.representation);
+    setResult(convertNumberBase(preset));
+    setError(null);
+    setCopiedOutput(null);
+  };
+
   const bitGroups = result?.binary.match(/.{1,4}/g) ?? [];
 
   return (
     <DeveloperToolLayout
+      className="min-h-0 flex-1 gap-4 pb-4 [&>header]:border-b-0 [&>header]:pb-2"
       clearLabel={messages.numberBaseConverter.clear}
       description={messages.numberBaseConverter.description}
+      mainClassName="flex min-h-0 flex-1 flex-col"
       onClear={clear}
       onReset={resetExample}
       resetLabel={messages.numberBaseConverter.resetExample}
@@ -349,12 +442,12 @@ export function NumberBaseConverter() {
       }
     >
       <motion.section
-        className="border-y py-5"
+        className="rounded-lg bg-muted/15 px-4 py-3.5 md:px-5"
         id={TOUR_TARGETS.controls}
         variants={childVariants}
       >
-        <div className="grid gap-5 lg:grid-cols-[180px_minmax(0,1fr)_auto] lg:items-end">
-          <div className="space-y-2">
+        <div className="grid gap-x-3 gap-y-1.5 sm:grid-cols-[10rem_minmax(12rem,1fr)] sm:grid-rows-[auto_2rem]">
+          <div className="grid gap-1.5 sm:row-span-2 sm:grid-rows-subgrid">
             <Label htmlFor="number-input-base" size="sm">
               {messages.numberBaseConverter.inputBaseLabel}
             </Label>
@@ -362,6 +455,7 @@ export function NumberBaseConverter() {
               <SelectTrigger
                 className="w-full"
                 id="number-input-base"
+                size="sm"
                 variant="surface"
               >
                 <SelectValue>{BASE_LABELS[inputBase]}</SelectValue>
@@ -375,7 +469,7 @@ export function NumberBaseConverter() {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
+          <div className="grid gap-1.5 sm:row-span-2 sm:grid-rows-subgrid">
             <Label htmlFor="number-base-value" size="sm">
               {messages.numberBaseConverter.valueLabel}
             </Label>
@@ -386,32 +480,24 @@ export function NumberBaseConverter() {
               id="number-base-value"
               onChange={(event) => setInput(event.currentTarget.value)}
               placeholder={messages.numberBaseConverter.valuePlaceholder}
-              size="xl"
+              size="sm"
               spellCheck={false}
               value={input}
               variant="mono-flat"
             />
           </div>
-          <Button
-            className="min-w-28 active:translate-y-px"
-            onClick={convert}
-            size="xl"
-            type="button"
-          >
-            <Hash data-icon="inline-start" />
-            {messages.numberBaseConverter.convert}
-          </Button>
         </div>
 
-        <div className="mt-5 grid gap-4 border-t pt-5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center">
+        <div className="mt-3 grid gap-3 border-t pt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)] lg:items-end">
           <div>
             <Label size="sm">
               {messages.numberBaseConverter.bitWidthLabel}
             </Label>
             <ToggleGroup
               aria-label={messages.numberBaseConverter.bitWidthLabel}
-              className="mt-2"
+              className="mt-1.5"
               onValueChange={changeBitWidth}
+              size="sm"
               value={[String(bitWidth)]}
               variant="outline"
             >
@@ -421,51 +507,95 @@ export function NumberBaseConverter() {
                     messages.numberBaseConverter.bitWidthItemAriaLabel,
                     { width }
                   )}
+                  className="relative isolate overflow-hidden data-pressed:bg-transparent"
                   key={width}
                   value={String(width)}
                 >
-                  {width}
+                  {bitWidth === width ? (
+                    <SelectionIndicator
+                      layoutId="number-base-bit-width-selection"
+                      shouldReduceMotion={shouldReduceMotion ?? false}
+                    />
+                  ) : null}
+                  <span className="relative z-10">{width}</span>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
           </div>
-          <p
-            className="text-muted-foreground text-xs leading-5 lg:px-6"
-            id="number-base-help"
-          >
-            {messages.numberBaseConverter.inputHelp}
-          </p>
           <div>
             <Label size="sm">
               {messages.numberBaseConverter.representationLabel}
             </Label>
             <ToggleGroup
               aria-label={messages.numberBaseConverter.representationLabel}
-              className="mt-2"
+              className="mt-1.5"
               onValueChange={changeRepresentation}
+              size="sm"
               value={[representation]}
               variant="outline"
             >
-              <ToggleGroupItem value="unsigned">
-                {messages.numberBaseConverter.unsigned}
+              <ToggleGroupItem
+                className="relative isolate overflow-hidden data-pressed:bg-transparent"
+                value="unsigned"
+              >
+                {representation === "unsigned" ? (
+                  <SelectionIndicator
+                    layoutId="number-base-representation-selection"
+                    shouldReduceMotion={shouldReduceMotion ?? false}
+                  />
+                ) : null}
+                <span className="relative z-10">
+                  {messages.numberBaseConverter.unsigned}
+                </span>
               </ToggleGroupItem>
-              <ToggleGroupItem value="signed">
-                {messages.numberBaseConverter.signed}
+              <ToggleGroupItem
+                className="relative isolate overflow-hidden data-pressed:bg-transparent"
+                value="signed"
+              >
+                {representation === "signed" ? (
+                  <SelectionIndicator
+                    layoutId="number-base-representation-selection"
+                    shouldReduceMotion={shouldReduceMotion ?? false}
+                  />
+                ) : null}
+                <span className="relative z-10">
+                  {messages.numberBaseConverter.signed}
+                </span>
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
+          <div className="min-w-0">
+            <Label size="sm">
+              {messages.numberBaseConverter.examplesLabel}
+            </Label>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {EXAMPLE_PRESETS.map((preset) => (
+                <Button
+                  key={preset.label}
+                  onClick={() => applyPreset(preset)}
+                  size="xs"
+                  type="button"
+                  variant="outline-muted"
+                >
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <p
+            className="text-muted-foreground text-xs leading-5 lg:col-span-3"
+            id="number-base-help"
+          >
+            {messages.numberBaseConverter.inputHelp}
+          </p>
         </div>
-
-        <p className="mt-4 text-right font-mono text-muted-foreground text-xs uppercase tracking-wider">
-          {messages.numberBaseConverter.shortcutLabel}
-        </p>
       </motion.section>
 
       <AnimatePresence>
         {error ? (
           <motion.div
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 border border-destructive/40 bg-destructive/5 px-5 py-4"
+            className="mt-4 border-destructive/30 border-y py-4"
             exit={{ opacity: 0, y: -10 }}
             initial={{ opacity: 0, y: 10 }}
             role="alert"
@@ -485,36 +615,51 @@ export function NumberBaseConverter() {
         {result ? (
           <motion.div
             animate={{ opacity: 1, y: 0 }}
-            className="mt-8 grid gap-8"
+            className="mt-4 grid items-start gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]"
             exit={{ opacity: 0, y: -10 }}
             initial={{ opacity: 0, y: 10 }}
             key="results"
             transition={{ duration: 0.2 }}
           >
-            <motion.section id={TOUR_TARGETS.results} variants={childVariants}>
-              <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-4">
+            <motion.section
+              className="overflow-hidden rounded-xl border border-border/70"
+              id={TOUR_TARGETS.results}
+              variants={childVariants}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-muted/10 px-4 py-3">
                 <div>
-                  <h2 className="font-semibold text-lg tracking-tight">
+                  <h2 className="font-semibold text-sm">
                     {messages.numberBaseConverter.resultTitle}
                   </h2>
-                  <p className="mt-1 text-muted-foreground text-xs">
+                  <p className="text-muted-foreground text-xs">
                     {messages.numberBaseConverter.resultDescription}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2 font-mono text-muted-foreground text-xs uppercase tracking-wider">
-                  <span className="border px-2 py-1">
-                    {formatMessage(messages.numberBaseConverter.signedValue, {
-                      value: result.signedDecimal,
-                    })}
+                  <span className="rounded-md border border-border/70 px-2 py-1">
+                    <AnimatedValue
+                      shouldReduceMotion={shouldReduceMotion ?? false}
+                      valueKey={result.signedDecimal}
+                    >
+                      {formatMessage(messages.numberBaseConverter.signedValue, {
+                        value: result.signedDecimal,
+                      })}
+                    </AnimatedValue>
                   </span>
-                  <span className="border px-2 py-1">
-                    {formatMessage(messages.numberBaseConverter.unsignedValue, {
-                      value: result.unsignedDecimal,
-                    })}
+                  <span className="rounded-md border border-border/70 px-2 py-1">
+                    <AnimatedValue
+                      shouldReduceMotion={shouldReduceMotion ?? false}
+                      valueKey={result.unsignedDecimal}
+                    >
+                      {formatMessage(
+                        messages.numberBaseConverter.unsignedValue,
+                        { value: result.unsignedDecimal }
+                      )}
+                    </AnimatedValue>
                   </span>
                 </div>
               </div>
-              <div className="grid border-x sm:grid-cols-2">
+              <div>
                 {OUTPUTS.map((definition) => (
                   <OutputCard
                     copied={copiedOutput === definition.key}
@@ -528,92 +673,137 @@ export function NumberBaseConverter() {
               </div>
             </motion.section>
 
-            <motion.section variants={childVariants}>
-              <div className="flex items-start gap-3 border-b pb-4">
-                <Binary className="mt-0.5 size-4 text-muted-foreground" />
-                <div>
-                  <h2 className="font-semibold text-lg tracking-tight">
-                    {messages.numberBaseConverter.patternTitle}
-                  </h2>
-                  <p className="mt-1 text-muted-foreground text-xs">
-                    {messages.numberBaseConverter.patternDescription}
-                  </p>
+            <div className="grid content-start gap-4">
+              <motion.section
+                className="overflow-hidden rounded-xl border border-border/70"
+                variants={childVariants}
+              >
+                <div className="flex items-start gap-3 border-b bg-muted/10 px-4 py-3">
+                  <Binary className="mt-0.5 size-4 text-muted-foreground" />
+                  <div>
+                    <h2 className="font-semibold text-sm">
+                      {messages.numberBaseConverter.patternTitle}
+                    </h2>
+                    <p className="mt-1 text-muted-foreground text-xs">
+                      {messages.numberBaseConverter.patternDescription}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="overflow-x-auto border-x border-b p-4">
-                <div className="flex min-w-max gap-2">
-                  {bitGroups.map((group, groupIndex) => (
-                    <div
-                      className={cn(
-                        "flex border font-mono text-sm",
-                        groupIndex % 2 === 0 ? "bg-muted/40" : "bg-background"
-                      )}
-                      key={`${group}-${groupIndex}`}
+                <div className="relative p-3">
+                  <AnimatePresence initial={false} mode="popLayout">
+                    <motion.div
+                      animate={{ opacity: 1 }}
+                      className="grid grid-cols-[repeat(auto-fit,minmax(7rem,1fr))] gap-2"
+                      exit={{ opacity: 0 }}
+                      initial={{ opacity: shouldReduceMotion ? 1 : 0 }}
+                      key={result.binary}
+                      transition={{
+                        duration: shouldReduceMotion
+                          ? MOTION_DURATION.instant
+                          : MOTION_DURATION.standard,
+                        ease: MOTION_EASE.out,
+                      }}
                     >
-                      {[...group].map((bit, bitIndex) => (
-                        <span
-                          className="flex size-8 items-center justify-center border-r last:border-r-0"
-                          key={`${groupIndex}-${bitIndex}`}
+                      {bitGroups.map((group, groupIndex) => (
+                        <div
+                          className={cn(
+                            "flex min-w-0 rounded-md border font-mono text-xs",
+                            groupIndex % 2 === 0
+                              ? "bg-muted/40"
+                              : "bg-background"
+                          )}
+                          key={`${group}-${groupIndex}`}
                         >
-                          {bit}
-                        </span>
+                          {[...group].map((bit, bitIndex) => (
+                            <span
+                              className="flex h-7 min-w-0 flex-1 items-center justify-center border-r last:border-r-0"
+                              key={`${groupIndex}-${bitIndex}`}
+                            >
+                              {bit}
+                            </span>
+                          ))}
+                        </div>
+                      ))}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </motion.section>
+
+              <motion.section
+                className="overflow-hidden rounded-xl border border-border/70"
+                id={TOUR_TARGETS.bytes}
+                variants={childVariants}
+              >
+                <div className="flex items-start gap-3 border-b bg-muted/10 px-4 py-3">
+                  <Cpu className="mt-0.5 size-4 text-muted-foreground" />
+                  <div>
+                    <h2 className="font-semibold text-sm">
+                      {messages.numberBaseConverter.bytesTitle}
+                    </h2>
+                    <p className="mt-1 text-muted-foreground text-xs">
+                      {messages.numberBaseConverter.bytesDescription}
+                    </p>
+                  </div>
+                </div>
+                <AnimatePresence initial={false} mode="popLayout">
+                  <motion.div
+                    animate={{ opacity: 1 }}
+                    className="grid lg:grid-cols-[minmax(0,1fr)_220px]"
+                    exit={{ opacity: 0 }}
+                    initial={{ opacity: shouldReduceMotion ? 1 : 0 }}
+                    key={`${result.hexadecimal}-${result.ascii}`}
+                    transition={{
+                      duration: shouldReduceMotion
+                        ? MOTION_DURATION.instant
+                        : MOTION_DURATION.standard,
+                      ease: MOTION_EASE.out,
+                    }}
+                  >
+                    <div className="flex flex-wrap gap-2 p-3">
+                      {result.bytes.map((byte, index) => (
+                        <div
+                          className="rounded-md border border-border/70 bg-muted/25 px-2.5 py-1.5"
+                          key={index}
+                        >
+                          <span className="block font-mono text-muted-foreground text-xs uppercase tracking-wider">
+                            {formatMessage(
+                              messages.numberBaseConverter.byteIndex,
+                              {
+                                index: String(index).padStart(2, "0"),
+                              }
+                            )}
+                          </span>
+                          <code className="mt-1 block font-mono text-base">
+                            {byte}
+                          </code>
+                        </div>
                       ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            </motion.section>
-
-            <motion.section id={TOUR_TARGETS.bytes} variants={childVariants}>
-              <div className="flex items-start gap-3 border-b pb-4">
-                <Cpu className="mt-0.5 size-4 text-muted-foreground" />
-                <div>
-                  <h2 className="font-semibold text-lg tracking-tight">
-                    {messages.numberBaseConverter.bytesTitle}
-                  </h2>
-                  <p className="mt-1 text-muted-foreground text-xs">
-                    {messages.numberBaseConverter.bytesDescription}
-                  </p>
-                </div>
-              </div>
-              <div className="grid border-x border-b lg:grid-cols-[minmax(0,1fr)_220px]">
-                <div className="flex flex-wrap gap-2 p-5">
-                  {result.bytes.map((byte, index) => (
-                    <div className="border bg-muted/25 px-3 py-2" key={index}>
-                      <span className="block font-mono text-muted-foreground text-xs uppercase tracking-wider">
-                        {formatMessage(messages.numberBaseConverter.byteIndex, {
-                          index: String(index).padStart(2, "0"),
-                        })}
+                    <div className="border-t p-3 lg:border-t-0 lg:border-l">
+                      <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
+                        {messages.numberBaseConverter.asciiLabel}
                       </span>
-                      <code className="mt-1 block font-mono text-base">
-                        {byte}
+                      <code className="mt-2 block overflow-x-auto font-mono text-base tracking-wider">
+                        {result.ascii}
                       </code>
                     </div>
-                  ))}
-                </div>
-                <div className="border-t p-5 lg:border-t-0 lg:border-l">
-                  <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
-                    {messages.numberBaseConverter.asciiLabel}
-                  </span>
-                  <code className="mt-3 block overflow-x-auto font-mono text-xl tracking-wider">
-                    {result.ascii}
-                  </code>
-                </div>
-              </div>
-            </motion.section>
+                  </motion.div>
+                </AnimatePresence>
+              </motion.section>
+            </div>
           </motion.div>
         ) : (
           <motion.div
             animate={{ opacity: 1 }}
             aria-hidden="true"
-            className="mt-8 grid gap-8"
+            className="mt-4 grid items-start gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]"
             exit={{ opacity: 0 }}
             initial={{ opacity: 0 }}
             key="empty"
             transition={{ duration: 0.15 }}
           >
             <section
-              className="grid min-h-40 place-items-center border border-dashed px-6 text-center"
+              className="grid min-h-32 place-items-center rounded-xl border border-border/70 border-dashed px-6 text-center"
               id={TOUR_TARGETS.results}
             >
               <p className="max-w-sm text-muted-foreground text-xs leading-5">
@@ -621,7 +811,7 @@ export function NumberBaseConverter() {
               </p>
             </section>
             <section
-              className="grid min-h-28 place-items-center border border-dashed px-6 text-center"
+              className="grid min-h-24 place-items-center rounded-xl border border-border/70 border-dashed px-6 text-center"
               id={TOUR_TARGETS.bytes}
             >
               <p className="max-w-sm text-muted-foreground text-xs leading-5">

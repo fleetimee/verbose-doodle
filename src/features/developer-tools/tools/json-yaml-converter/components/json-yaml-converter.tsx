@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -161,8 +162,10 @@ export function JsonYamlConverter() {
 
   return (
     <DeveloperToolLayout
+      className="min-h-0 flex-1 gap-4 pb-4 [&>header]:border-b-0 [&>header]:pb-2"
       clearLabel={messages.jsonYamlConverter.clear}
       description={messages.jsonYamlConverter.description}
+      mainClassName="flex min-h-0 flex-1 flex-col"
       onClear={clear}
       onReset={resetExample}
       resetLabel={messages.jsonYamlConverter.resetExample}
@@ -177,19 +180,20 @@ export function JsonYamlConverter() {
       }
     >
       <motion.section
-        className="grid border-y lg:grid-cols-[minmax(0,1fr)_auto]"
+        className="grid rounded-lg bg-muted/15 px-4 md:grid-cols-[minmax(0,1fr)_auto] md:px-5"
         id={JSON_YAML_TOUR_TARGETS.controls}
         variants={childVariants}
       >
-        <div className="grid gap-4 py-4 sm:grid-cols-[minmax(0,220px)_1fr] sm:items-end sm:gap-6 lg:pr-6">
-          <div className="space-y-2">
-            <Label htmlFor="source-format" size="sm">
+        <div className="flex flex-wrap items-center gap-6 py-3.5 md:pr-6">
+          <div className="flex items-center gap-2.5">
+            <Label className="shrink-0" htmlFor="source-format" size="sm">
               {messages.jsonYamlConverter.sourceFormatLabel}
             </Label>
             <Select onValueChange={changeFormat} value={sourceFormat}>
               <SelectTrigger
-                className="w-full"
+                className="w-32"
                 id="source-format"
+                size="sm"
                 variant="surface"
               >
                 <SelectValue>{sourceFormatLabel}</SelectValue>
@@ -204,26 +208,27 @@ export function JsonYamlConverter() {
               </SelectContent>
             </Select>
           </div>
-          <p className="pb-2 text-muted-foreground text-xs leading-5">
+          <p className="text-muted-foreground text-xs leading-5">
             {messages.jsonYamlConverter.preservationNote}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t py-4 lg:border-t-0 lg:border-l lg:pl-6">
-          <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
-            {messages.jsonYamlConverter.shortcutLabel}
-          </span>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-4 pb-3 md:py-3 md:pl-6">
+          <ButtonGroup>
+            <ButtonGroupText className="h-8 px-2.5 text-xs">
+              {messages.jsonYamlConverter.shortcutLabel}
+            </ButtonGroupText>
             <Button
               aria-label={messages.jsonYamlConverter.swap}
               className="active:translate-y-px"
               disabled={!canSwap}
               onClick={swapFormats}
-              size="icon"
+              size="icon-sm"
               type="button"
-              variant="outline"
+              variant="outline-muted"
             >
               <HugeiconsIcon
+                className="size-3.5"
                 icon={ArrowDataTransferHorizontalIcon}
                 strokeWidth={2}
               />
@@ -231,26 +236,29 @@ export function JsonYamlConverter() {
             <Button
               className="min-w-28 active:translate-y-px"
               onClick={convert}
+              size="sm"
               type="button"
             >
               {messages.jsonYamlConverter.convert}
             </Button>
-          </div>
+          </ButtonGroup>
         </div>
       </motion.section>
 
       <motion.div
-        className="mt-8 grid min-w-0 grid-cols-1 border-x border-b lg:grid-cols-2 lg:divide-x"
+        className="mt-4 grid min-h-[420px] min-w-0 flex-1 grid-cols-1 overflow-hidden rounded-xl border border-border/70 lg:min-h-0 lg:grid-cols-2"
         id={JSON_YAML_TOUR_TARGETS.editors}
         variants={childVariants}
       >
         <DocumentEditor
           byteCountMessage={messages.jsonYamlConverter.editorByteCount}
+          className="border-t-0"
           description={formatMessage(
             messages.jsonYamlConverter.sourceDescription,
             { format: sourceFormatLabel }
           )}
           format={sourceFormat}
+          height="100%"
           index="01"
           label={formatMessage(messages.jsonYamlConverter.sourceLabel, {
             format: sourceFormatLabel,
@@ -261,11 +269,29 @@ export function JsonYamlConverter() {
         />
         <DocumentEditor
           byteCountMessage={messages.jsonYamlConverter.editorByteCount}
+          className="border-border/60 lg:border-t-0 lg:border-l"
           description={formatMessage(
             messages.jsonYamlConverter.outputDescription,
             { format: outputFormatLabel }
           )}
           format={outputFormat}
+          headerActions={
+            <div id={JSON_YAML_TOUR_TARGETS.output}>
+              <Button
+                disabled={output.length === 0}
+                onClick={copyOutput}
+                size="sm"
+                type="button"
+                variant="outline-muted"
+              >
+                <HugeiconsIcon icon={Copy01Icon} strokeWidth={2} />
+                {copyState === "copied"
+                  ? messages.jsonYamlConverter.copied
+                  : messages.jsonYamlConverter.copyOutput}
+              </Button>
+            </div>
+          }
+          height="100%"
           index="02"
           label={formatMessage(messages.jsonYamlConverter.outputLabel, {
             format: outputFormatLabel,
@@ -276,34 +302,12 @@ export function JsonYamlConverter() {
         />
       </motion.div>
 
-      <motion.section
-        className="mt-5 flex min-h-10 flex-wrap items-center justify-between gap-3 border-y py-3"
-        id={JSON_YAML_TOUR_TARGETS.output}
-        variants={childVariants}
-      >
-        <p className="text-muted-foreground text-xs">
-          {messages.jsonYamlConverter.preservationNote}
-        </p>
-        <Button
-          disabled={output.length === 0}
-          onClick={copyOutput}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          <HugeiconsIcon icon={Copy01Icon} strokeWidth={2} />
-          {copyState === "copied"
-            ? messages.jsonYamlConverter.copied
-            : messages.jsonYamlConverter.copyOutput}
-        </Button>
-      </motion.section>
-
       <AnimatePresence>
         {error || copyState === "error" ? (
           <motion.section
             animate={{ opacity: 1, y: 0 }}
             aria-live="polite"
-            className="mt-6 grid gap-2 border-destructive/30 border-y py-5 sm:grid-cols-[180px_1fr]"
+            className="mt-4 grid gap-2 border-destructive/30 border-y py-4 sm:grid-cols-[180px_1fr]"
             exit={{ opacity: 0, y: -6 }}
             initial={{ opacity: 0, y: 6 }}
             role="alert"

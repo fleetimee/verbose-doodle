@@ -33,6 +33,7 @@ export const numberBaseConverterMessages = {
       "The value does not fit in a signed {bitWidth}-bit word.",
     unsignedWordOutOfRange: "The value does not fit in a {bitWidth}-bit word.",
   },
+  examplesLabel: "Examples",
   hexadecimal: "Hexadecimal",
   inputBaseLabel: "Input base",
   inputHelp:
