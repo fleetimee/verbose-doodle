@@ -265,7 +265,7 @@ export function JsonSchemaValidator() {
             />
             <div className="flex items-center gap-1.5">
               <Label
-                className="cursor-pointer font-medium text-xs"
+                className="cursor-pointer"
                 htmlFor="format-assertions"
                 size="sm"
               >
@@ -280,7 +280,7 @@ export function JsonSchemaValidator() {
 
         <div className="flex items-center justify-between gap-4 pb-3 md:py-3 md:pl-6">
           <ButtonGroup>
-            <ButtonGroupText className="h-8 font-mono text-[11px] text-muted-foreground uppercase tracking-wider">
+            <ButtonGroupText className="h-8">
               {messages.jsonSchemaValidator.shortcutLabel}
             </ButtonGroupText>
             <Button
@@ -310,7 +310,7 @@ export function JsonSchemaValidator() {
           headerActions={
             <div className="flex items-center gap-1.5">
               {!schemaSyntax.valid && (
-                <span className="inline-flex items-center gap-1 font-mono text-[11px] text-destructive">
+                <span className="inline-flex items-center gap-1 font-mono text-destructive text-xs">
                   <CircleAlert className="size-3.5" />
                   <span>
                     {schemaSyntax.line
@@ -328,12 +328,11 @@ export function JsonSchemaValidator() {
               <ButtonGroup>
                 <Button
                   aria-label={messages.jsonSchemaValidator.prettify}
-                  className="h-7 px-2.5 text-muted-foreground text-xs hover:text-foreground"
                   onClick={handlePrettifySchema}
-                  size="sm"
+                  size="tab-sm"
                   title={messages.jsonSchemaValidator.prettify}
                   type="button"
-                  variant="outline"
+                  variant="outline-muted"
                 >
                   <Braces className="size-3.5" />
                   <span className="ml-1.5 hidden sm:inline">
@@ -342,12 +341,11 @@ export function JsonSchemaValidator() {
                 </Button>
                 <Button
                   aria-label={messages.jsonSchemaValidator.generateMock}
-                  className="h-7 px-2.5 text-muted-foreground text-xs hover:text-foreground"
                   onClick={handleGenerateMock}
-                  size="sm"
+                  size="tab-sm"
                   title={messages.jsonSchemaValidator.generateMockDescription}
                   type="button"
-                  variant="outline"
+                  variant="outline-muted"
                 >
                   <Code2 className="size-3.5" />
                   <span className="ml-1.5 hidden sm:inline">
@@ -372,7 +370,7 @@ export function JsonSchemaValidator() {
           headerActions={
             <div className="flex items-center gap-1.5">
               {!instanceSyntax.valid && (
-                <span className="inline-flex items-center gap-1 font-mono text-[11px] text-destructive">
+                <span className="inline-flex items-center gap-1 font-mono text-destructive text-xs">
                   <CircleAlert className="size-3.5" />
                   <span>
                     {instanceSyntax.line
@@ -390,12 +388,11 @@ export function JsonSchemaValidator() {
               <ButtonGroup>
                 <Button
                   aria-label={messages.jsonSchemaValidator.prettify}
-                  className="h-7 px-2.5 text-muted-foreground text-xs hover:text-foreground"
                   onClick={handlePrettifyInstance}
-                  size="sm"
+                  size="tab-sm"
                   title={messages.jsonSchemaValidator.prettify}
                   type="button"
-                  variant="outline"
+                  variant="outline-muted"
                 >
                   <Braces className="size-3.5" />
                   <span className="ml-1.5 hidden sm:inline">
@@ -404,12 +401,11 @@ export function JsonSchemaValidator() {
                 </Button>
                 <Button
                   aria-label={messages.jsonSchemaValidator.inferSchema}
-                  className="h-7 px-2.5 text-muted-foreground text-xs hover:text-foreground"
                   onClick={handleInferSchema}
-                  size="sm"
+                  size="tab-sm"
                   title={messages.jsonSchemaValidator.inferSchemaDescription}
                   type="button"
-                  variant="outline"
+                  variant="outline-muted"
                 >
                   <Wand2 className="size-3.5" />
                   <span className="ml-1.5 hidden sm:inline">
