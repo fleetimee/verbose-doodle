@@ -204,7 +204,7 @@ export function JsonSchemaValidator() {
 
   return (
     <DeveloperToolLayout
-      className="json-schema-scrollbars min-h-0 flex-1 gap-4 pb-4"
+      className="json-schema-scrollbars min-h-0 flex-1 gap-4 pb-4 [&>header]:border-b-0 [&>header]:pb-2"
       clearLabel={messages.jsonSchemaValidator.clear}
       description={messages.jsonSchemaValidator.description}
       mainClassName="flex min-h-0 flex-1 flex-col"
@@ -222,7 +222,7 @@ export function JsonSchemaValidator() {
       }
     >
       <motion.section
-        className="grid border-y md:grid-cols-[minmax(0,1fr)_auto]"
+        className="grid rounded-lg bg-muted/15 px-4 md:grid-cols-[minmax(0,1fr)_auto] md:px-5"
         id={JSON_SCHEMA_TOUR_TARGETS.controls}
         variants={childVariants}
       >
@@ -278,7 +278,7 @@ export function JsonSchemaValidator() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 border-t py-3 md:border-t-0 md:border-l md:pl-6">
+        <div className="flex items-center justify-between gap-4 pb-3 md:py-3 md:pl-6">
           <ButtonGroup>
             <ButtonGroupText className="h-8 font-mono text-[11px] text-muted-foreground uppercase tracking-wider">
               {messages.jsonSchemaValidator.shortcutLabel}
@@ -298,12 +298,13 @@ export function JsonSchemaValidator() {
       </motion.section>
 
       <motion.div
-        className="mt-4 grid min-h-[420px] min-w-0 flex-1 grid-cols-1 border-x border-b lg:min-h-0 lg:grid-cols-2 lg:divide-x"
+        className="mt-4 grid min-h-[420px] min-w-0 flex-1 grid-cols-1 overflow-hidden rounded-xl border border-border/70 lg:min-h-0 lg:grid-cols-2"
         id={JSON_SCHEMA_TOUR_TARGETS.editors}
         variants={childVariants}
       >
         <DocumentEditor
           byteCountMessage={messages.jsonSchemaValidator.editorByteCount}
+          className="border-t-0"
           description={messages.jsonSchemaValidator.schemaEditorDescription}
           format="json"
           headerActions={
@@ -365,6 +366,7 @@ export function JsonSchemaValidator() {
         />
         <DocumentEditor
           byteCountMessage={messages.jsonSchemaValidator.editorByteCount}
+          className="border-border/60 lg:border-t-0 lg:border-l"
           description={messages.jsonSchemaValidator.instanceEditorDescription}
           format="json"
           headerActions={
