@@ -148,16 +148,14 @@ describe("DateConverter", () => {
       screen.getByRole("region", { name: "ISO 8601 output" })
     ).toBeDefined();
 
-    await user.click(
-      screen.getByRole("button", { name: "Calendar Breakdown" })
-    );
+    await user.click(screen.getByRole("tab", { name: "Calendar Breakdown" }));
     expect(
       await screen.findByText("Calendar & Date Coordinates")
     ).toBeDefined();
     expect(screen.getByText("ISO 8601 Week")).toBeDefined();
     expect(screen.getByText("High-Precision Timestamps")).toBeDefined();
 
-    await user.click(screen.getByRole("button", { name: "Canonical Formats" }));
+    await user.click(screen.getByRole("tab", { name: "Canonical Formats" }));
     expect(
       await screen.findByRole("region", { name: "ISO 8601 output" })
     ).toBeDefined();
@@ -173,8 +171,8 @@ describe("DateConverter", () => {
     await user.click(pickerButton);
 
     expect(await screen.findByText("Date & Time Picker")).toBeDefined();
-    const todayBtn = screen.getByRole("button", { name: "Today" });
-    await user.click(todayBtn);
+    await user.click(screen.getByRole("combobox", { name: "Quick date" }));
+    await user.click(await screen.findByRole("option", { name: "Today" }));
 
     expect(
       screen.getByRole("region", { name: "ISO 8601 output" })

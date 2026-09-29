@@ -32,6 +32,11 @@ export const dateConverterMessages = {
     "Mode otomatis memperlakukan 10 digit atau kurang sebagai detik dan angka lebih panjang sebagai milidetik. Masukan ISO harus menyertakan Z atau offset UTC.",
   inputLabel: "Tanggal atau timestamp",
   inputModeLabel: "Format masukan",
+  inputModeGroups: {
+    automatic: "Otomatis",
+    dateStandards: "Standar tanggal",
+    unixTimestamps: "Unix timestamp",
+  },
   inputModes: {
     auto: "Deteksi otomatis",
     iso8601: "ISO 8601",
@@ -57,6 +62,7 @@ export const dateConverterMessages = {
     tomorrow: "Besok",
     plus7Days: "+7 Hari",
     plus30Days: "+30 Hari",
+    presetsLabel: "Tanggal cepat",
     startOfMonth: "Awal Bulan",
     endOfDay: "Akhir Hari",
     timeLabel: "Waktu (HH:mm:ss)",
@@ -114,6 +120,7 @@ export const dateConverterMessages = {
     "alat pengembang",
   ],
   pageTitle: "Date Converter / Unix Timestamp",
+  quickShiftLabel: "Geser cepat",
   relativeLabel: "Relatif terhadap sekarang",
   resetExample: "Reset contoh",
   resultDescription:

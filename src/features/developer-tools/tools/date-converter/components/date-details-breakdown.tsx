@@ -149,28 +149,24 @@ export function DateDetailsBreakdown({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 p-4 sm:p-5">
       {sections.map((section) => (
-        <div className="border" key={section.title}>
-          <div className="border-b bg-muted/30 px-4 py-2.5">
-            <h3 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
-              {section.title}
-            </h3>
-          </div>
-          <div className="divide-y font-mono text-xs">
+        <section className="flex flex-col gap-2" key={section.title}>
+          <h3 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+            {section.title}
+          </h3>
+          <div className="border-t font-mono text-xs">
             {section.rows.map((row) => {
               const isCopied = copiedId === row.id;
               const CopyIcon = isCopied ? Check : ClipboardCopy;
 
               return (
                 <div
-                  className="group flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-muted/10"
+                  className="group grid grid-cols-[minmax(8rem,0.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-b py-2.5"
                   key={row.id}
                 >
-                  <span className="w-48 shrink-0 text-muted-foreground">
-                    {row.label}
-                  </span>
-                  <code className="min-w-0 flex-1 truncate font-medium text-foreground">
+                  <span className="text-muted-foreground">{row.label}</span>
+                  <code className="min-w-0 truncate font-medium text-foreground">
                     {row.value}
                   </code>
                   <Button
@@ -180,7 +176,6 @@ export function DateDetailsBreakdown({
                         format: row.label,
                       }
                     )}
-                    className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
                     onClick={() => copyRow(row.id, row.label, row.value)}
                     size="icon-xs"
                     type="button"
@@ -216,7 +211,7 @@ export function DateDetailsBreakdown({
               );
             })}
           </div>
-        </div>
+        </section>
       ))}
     </div>
   );

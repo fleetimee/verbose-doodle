@@ -10,6 +10,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { messages } from "@/lib/i18n";
 
 type DatePickerPopoverProps = {
@@ -80,29 +89,43 @@ export function DatePickerPopover({
     onDateChange(next);
   };
 
+  const handlePresetValue = (value: string) => {
+    const presets: Readonly<Record<string, (base: Date) => Date>> = {
+      today: (date) => startOfDay(date),
+      tomorrow: (date) => startOfDay(addDays(date, 1)),
+      "plus-7-days": (date) => addDays(date, 7),
+      "plus-30-days": (date) => addDays(date, 30),
+      "start-of-month": (date) => startOfMonth(date),
+      "end-of-day": (date) => endOfDay(date),
+    };
+    const preset = presets[value];
+    if (preset) {
+      handlePreset(preset);
+    }
+  };
+
   return (
     <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>
         <Button
           aria-label={messages.dateConverter.picker.buttonLabel}
-          className="size-12 shrink-0"
           disabled={disabled}
-          size="icon-lg"
+          size="icon-sm"
           type="button"
-          variant="outline"
+          variant="ghost"
         >
           <CalendarDays data-icon="inline-start" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-auto p-4"
+        className="w-80 overflow-hidden p-0"
         side="bottom"
         size="none"
       >
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between border-b pb-2">
-            <span className="font-medium text-xs">
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between px-3 py-2.5">
+            <span className="font-semibold text-sm">
               {messages.dateConverter.picker.title}
             </span>
             <Button
@@ -115,102 +138,100 @@ export function DatePickerPopover({
               {messages.dateConverter.picker.now}
             </Button>
           </div>
+          <Separator />
 
-          <div className="flex flex-wrap gap-1">
-            <Button
-              onClick={() => handlePreset((d) => startOfDay(d))}
-              size="xs"
-              type="button"
-              variant="outline"
-            >
-              {messages.dateConverter.picker.today}
-            </Button>
-            <Button
-              onClick={() => handlePreset((d) => startOfDay(addDays(d, 1)))}
-              size="xs"
-              type="button"
-              variant="outline"
-            >
-              {messages.dateConverter.picker.tomorrow}
-            </Button>
-            <Button
-              onClick={() => handlePreset((d) => addDays(d, 7))}
-              size="xs"
-              type="button"
-              variant="outline"
-            >
-              {messages.dateConverter.picker.plus7Days}
-            </Button>
-            <Button
-              onClick={() => handlePreset((d) => addDays(d, 30))}
-              size="xs"
-              type="button"
-              variant="outline"
-            >
-              {messages.dateConverter.picker.plus30Days}
-            </Button>
-            <Button
-              onClick={() => handlePreset((d) => startOfMonth(d))}
-              size="xs"
-              type="button"
-              variant="outline"
-            >
-              {messages.dateConverter.picker.startOfMonth}
-            </Button>
-            <Button
-              onClick={() => handlePreset((d) => endOfDay(d))}
-              size="xs"
-              type="button"
-              variant="outline"
-            >
-              {messages.dateConverter.picker.endOfDay}
-            </Button>
-          </div>
-
-          <div className="rounded-md border">
-            <Calendar
-              mode="single"
-              onSelect={handleSelectDay}
-              selected={currentDate ?? undefined}
-            />
-          </div>
-
-          <div className="flex items-center justify-between gap-2 border-t pt-3">
-            <div className="flex items-center gap-1.5">
-              <Clock3 className="size-4 text-muted-foreground" />
-              <Label
-                className="font-mono text-muted-foreground text-xs"
+          <div className="px-3 pt-3">
+            <Select onValueChange={handlePresetValue} value={null}>
+              <SelectTrigger
+                aria-label={messages.dateConverter.picker.presetsLabel}
+                className="w-full"
                 size="sm"
+                variant="surface"
               >
-                UTC
-              </Label>
+                <SelectValue
+                  placeholder={messages.dateConverter.picker.presetsLabel}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="today">
+                    {messages.dateConverter.picker.today}
+                  </SelectItem>
+                  <SelectItem value="tomorrow">
+                    {messages.dateConverter.picker.tomorrow}
+                  </SelectItem>
+                  <SelectItem value="plus-7-days">
+                    {messages.dateConverter.picker.plus7Days}
+                  </SelectItem>
+                  <SelectItem value="plus-30-days">
+                    {messages.dateConverter.picker.plus30Days}
+                  </SelectItem>
+                  <SelectItem value="start-of-month">
+                    {messages.dateConverter.picker.startOfMonth}
+                  </SelectItem>
+                  <SelectItem value="end-of-day">
+                    {messages.dateConverter.picker.endOfDay}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Calendar
+            className="w-full"
+            mode="single"
+            onSelect={handleSelectDay}
+            selected={currentDate ?? undefined}
+          />
+
+          <Separator />
+          <div className="flex flex-col gap-2.5 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5">
+                <Clock3 className="size-4 text-muted-foreground" />
+                <Label
+                  className="font-mono text-muted-foreground text-xs"
+                  size="sm"
+                >
+                  UTC
+                </Label>
+              </div>
+              <div className="flex items-center gap-1">
+                <Input
+                  aria-label={messages.dateConverter.picker.hours}
+                  className="h-8 w-10 px-1 text-center font-mono text-xs"
+                  inputMode="numeric"
+                  maxLength={2}
+                  onChange={(event) =>
+                    updateTime(event.target.value, minutes, seconds)
+                  }
+                  value={hours}
+                />
+                <span className="text-muted-foreground text-xs">:</span>
+                <Input
+                  aria-label={messages.dateConverter.picker.minutes}
+                  className="h-8 w-10 px-1 text-center font-mono text-xs"
+                  inputMode="numeric"
+                  maxLength={2}
+                  onChange={(event) =>
+                    updateTime(hours, event.target.value, seconds)
+                  }
+                  value={minutes}
+                />
+                <span className="text-muted-foreground text-xs">:</span>
+                <Input
+                  aria-label={messages.dateConverter.picker.seconds}
+                  className="h-8 w-10 px-1 text-center font-mono text-xs"
+                  inputMode="numeric"
+                  maxLength={2}
+                  onChange={(event) =>
+                    updateTime(hours, minutes, event.target.value)
+                  }
+                  value={seconds}
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Input
-                aria-label={messages.dateConverter.picker.hours}
-                className="h-8 w-11 px-1 text-center font-mono text-xs"
-                maxLength={2}
-                onChange={(e) => updateTime(e.target.value, minutes, seconds)}
-                value={hours}
-              />
-              <span className="text-muted-foreground text-xs">:</span>
-              <Input
-                aria-label={messages.dateConverter.picker.minutes}
-                className="h-8 w-11 px-1 text-center font-mono text-xs"
-                maxLength={2}
-                onChange={(e) => updateTime(hours, e.target.value, seconds)}
-                value={minutes}
-              />
-              <span className="text-muted-foreground text-xs">:</span>
-              <Input
-                aria-label={messages.dateConverter.picker.seconds}
-                className="h-8 w-11 px-1 text-center font-mono text-xs"
-                maxLength={2}
-                onChange={(e) => updateTime(hours, minutes, e.target.value)}
-                value={seconds}
-              />
-            </div>
-            <div className="flex items-center gap-1">
+            <div className="flex justify-end gap-1">
               <Button
                 onClick={() => updateTime("00", "00", "00")}
                 size="xs"

@@ -30,6 +30,11 @@ export const dateConverterMessages = {
     "Auto mode treats 10 digits or fewer as seconds and longer numbers as milliseconds. ISO input must include Z or a UTC offset.",
   inputLabel: "Date or timestamp",
   inputModeLabel: "Input format",
+  inputModeGroups: {
+    automatic: "Automatic",
+    dateStandards: "Date standards",
+    unixTimestamps: "Unix timestamps",
+  },
   inputModes: {
     auto: "Auto detect",
     iso8601: "ISO 8601",
@@ -55,6 +60,7 @@ export const dateConverterMessages = {
     tomorrow: "Tomorrow",
     plus7Days: "+7 Days",
     plus30Days: "+30 Days",
+    presetsLabel: "Quick date",
     startOfMonth: "Start of Month",
     endOfDay: "End of Day",
     timeLabel: "Time (HH:mm:ss)",
@@ -112,6 +118,7 @@ export const dateConverterMessages = {
     "developer tools",
   ],
   pageTitle: "Date / Unix Timestamp Converter",
+  quickShiftLabel: "Quick shift",
   relativeLabel: "Relative to now",
   resetExample: "Reset example",
   resultDescription: "Each value identifies the same exact instant.",

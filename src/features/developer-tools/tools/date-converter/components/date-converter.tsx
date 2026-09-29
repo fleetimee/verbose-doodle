@@ -1,8 +1,3 @@
-import {
-  AlertCircleIcon,
-  CheckmarkCircle02Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { addDays, addHours, addWeeks } from "date-fns";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,15 +11,28 @@ import {
 } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DeveloperToolLayout } from "@/features/developer-tools/components/developer-tool-layout";
 import {
   DeveloperToolTourButton,
@@ -60,7 +68,6 @@ type OutputKey =
 type OutputDefinition = {
   readonly key: OutputKey;
   readonly label: string;
-  readonly marker: string;
 };
 
 const EXAMPLE_VALUE = "2024-01-01T00:00:00.000Z";
@@ -73,6 +80,26 @@ const INPUT_MODES: readonly DateInputMode[] = [
   "iso-8601",
   "sql-datetime",
   "rfc-2822",
+];
+
+const INPUT_MODE_GROUPS: readonly {
+  readonly label: "automatic" | "dateStandards" | "unixTimestamps";
+  readonly modes: readonly DateInputMode[];
+}[] = [
+  { label: "automatic", modes: ["auto"] },
+  {
+    label: "unixTimestamps",
+    modes: [
+      "unix-seconds",
+      "unix-milliseconds",
+      "unix-microseconds",
+      "unix-nanoseconds",
+    ],
+  },
+  {
+    label: "dateStandards",
+    modes: ["iso-8601", "sql-datetime", "rfc-2822"],
+  },
 ];
 
 const INPUT_MODE_LABELS: Readonly<Record<DateInputMode, string>> = {
@@ -108,42 +135,36 @@ const OUTPUTS: readonly OutputDefinition[] = [
     get label() {
       return messages.dateConverter.unixSeconds;
     },
-    marker: "EPOCH / S",
   },
   {
     key: "unixMilliseconds",
     get label() {
       return messages.dateConverter.unixMilliseconds;
     },
-    marker: "EPOCH / MS",
   },
   {
     key: "iso8601",
     get label() {
       return messages.dateConverter.iso8601;
     },
-    marker: "ISO / UTC",
   },
   {
     key: "iso8601Local",
     get label() {
       return messages.dateConverter.details.isoLocal;
     },
-    marker: "ISO / LOCAL",
   },
   {
     key: "rfc2822",
     get label() {
       return messages.dateConverter.rfc2822;
     },
-    marker: "RFC / UTC",
   },
   {
     key: "sqlDateTime",
     get label() {
       return messages.dateConverter.details.sqlDateTime;
     },
-    marker: "SQL / LOCAL",
   },
 ];
 
@@ -195,84 +216,48 @@ function OutputCard({
       aria-label={formatMessage(messages.dateConverter.outputLabel, {
         format: definition.label,
       })}
-      className="group flex min-w-0 flex-col justify-between border-b p-4 sm:border-r"
+      className="group grid min-w-0 grid-cols-[minmax(8rem,0.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-b px-4 py-3 last:border-b-0"
     >
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
-            {definition.marker}
-          </p>
-          <h3 className="mt-0.5 font-medium text-sm">{definition.label}</h3>
-        </div>
-        <Button
-          aria-label={formatMessage(messages.dateConverter.copyOutput, {
-            format: definition.label,
-          })}
-          onClick={onCopy}
-          size="icon-xs"
-          type="button"
-          variant="ghost"
-        >
-          <span className="relative size-3.5">
-            <AnimatePresence initial={false} mode="sync">
-              <motion.span
-                animate={{ opacity: 1, scale: 1 }}
-                className="absolute inset-0"
-                exit={{
-                  opacity: 0,
-                  scale: shouldReduceMotion ? 1 : 0.95,
-                }}
-                initial={{
-                  opacity: 0,
-                  scale: shouldReduceMotion ? 1 : 0.95,
-                }}
-                key={copied ? "copied" : "idle"}
-                transition={{
-                  duration: MOTION_DURATION.fast,
-                  ease: MOTION_EASE.out,
-                }}
-              >
-                <CopyIcon data-icon={copied ? "check" : "clipboard-copy"} />
-              </motion.span>
-            </AnimatePresence>
-          </span>
-        </Button>
-      </div>
-      <code className="mt-3 block overflow-x-auto font-mono text-sm leading-6">
+      <h3 className="font-medium text-muted-foreground text-sm">
+        {definition.label}
+      </h3>
+      <code className="min-w-0 truncate font-mono text-sm" title={value}>
         {value}
       </code>
-    </section>
-  );
-}
-
-function renderStatusBadge(
-  result: DateConversionResult | null,
-  error: string | null
-) {
-  if (result) {
-    return (
-      <span className="inline-flex items-center gap-1.5 font-mono text-success text-xs">
-        <HugeiconsIcon className="size-3.5" icon={CheckmarkCircle02Icon} />
-        <span>
-          {formatMessage(messages.dateConverter.status.valid, {
-            format: INPUT_MODE_LABELS[result.detectedMode],
-          })}
+      <Button
+        aria-label={formatMessage(messages.dateConverter.copyOutput, {
+          format: definition.label,
+        })}
+        onClick={onCopy}
+        size="icon-xs"
+        type="button"
+        variant="ghost"
+      >
+        <span className="relative size-3.5">
+          <AnimatePresence initial={false} mode="sync">
+            <motion.span
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute inset-0"
+              exit={{
+                opacity: 0,
+                scale: shouldReduceMotion ? 1 : 0.95,
+              }}
+              initial={{
+                opacity: 0,
+                scale: shouldReduceMotion ? 1 : 0.95,
+              }}
+              key={copied ? "copied" : "idle"}
+              transition={{
+                duration: MOTION_DURATION.fast,
+                ease: MOTION_EASE.out,
+              }}
+            >
+              <CopyIcon data-icon={copied ? "check" : "clipboard-copy"} />
+            </motion.span>
+          </AnimatePresence>
         </span>
-      </span>
-    );
-  }
-  if (error) {
-    return (
-      <span className="inline-flex items-center gap-1.5 font-mono text-destructive text-xs">
-        <HugeiconsIcon className="size-3.5" icon={AlertCircleIcon} />
-        <span className="max-w-48 truncate">{error}</span>
-      </span>
-    );
-  }
-  return (
-    <span className="text-muted-foreground text-xs">
-      {messages.dateConverter.status.empty}
-    </span>
+      </Button>
+    </section>
   );
 }
 
@@ -310,7 +295,7 @@ function renderResultsContent({
   }
 
   return (
-    <div className="grid divide-y border-b sm:grid-cols-2 sm:divide-y-0">
+    <div>
       {OUTPUTS.map((definition) => (
         <OutputCard
           copied={copiedOutput === definition.key}
@@ -554,76 +539,97 @@ export function DateConverter() {
         />
       }
     >
-      <div className="grid min-w-0 items-start gap-4 lg:grid-cols-12">
-        {/* Left pane: Controls, Input, Steppers (Compact) */}
-        <div
-          className="flex flex-col gap-4 rounded-lg border bg-card p-4 lg:col-span-5"
-          id={TOUR_TARGETS.controls}
+      <FieldGroup
+        className="grid rounded-lg bg-muted/15 px-4 py-3 sm:grid-cols-2 lg:grid-cols-[20rem_minmax(0,1fr)_auto] lg:items-end lg:px-5"
+        id={TOUR_TARGETS.controls}
+        size="sm"
+      >
+        <Field size="sm">
+          <FieldLabel htmlFor="date-input-mode">
+            {messages.dateConverter.inputModeLabel}
+          </FieldLabel>
+          <Select onValueChange={changeInputMode} value={inputMode}>
+            <SelectTrigger
+              className="w-full"
+              id="date-input-mode"
+              variant="surface"
+            >
+              <SelectValue>{INPUT_MODE_LABELS[inputMode]}</SelectValue>
+            </SelectTrigger>
+            <SelectContent
+              align="start"
+              className="w-(--anchor-width)"
+              sideOffset={6}
+            >
+              {INPUT_MODE_GROUPS.map((group) => (
+                <SelectGroup key={group.label}>
+                  <SelectLabel>
+                    {messages.dateConverter.inputModeGroups[group.label]}
+                  </SelectLabel>
+                  {group.modes.map((mode) => (
+                    <SelectItem key={mode} value={mode}>
+                      {INPUT_MODE_LABELS[mode]}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+
+        <Field size="sm">
+          <FieldLabel htmlFor="date-timezone">
+            {messages.dateConverter.timezoneLabel}
+          </FieldLabel>
+          <TimezoneCombobox
+            emptyMessage={messages.dateConverter.timezoneEmpty}
+            id="date-timezone"
+            onChange={changeTimeZone}
+            options={timeZoneOptions}
+            searchPlaceholder={messages.dateConverter.timezoneSearch}
+            useQueryLabel={(tz) =>
+              formatMessage(messages.dateConverter.timezoneUse, {
+                timezone: tz,
+              })
+            }
+            value={timeZone}
+          />
+        </Field>
+
+        <Button
+          aria-label={messages.dateConverter.useCurrentTime}
+          className="w-fit justify-self-start sm:col-span-2 lg:col-span-1 lg:justify-self-end"
+          onClick={useCurrentTime}
+          size="sm-compact"
+          title={messages.dateConverter.useCurrentTime}
+          type="button"
+          variant="outline-muted"
         >
-          <div className="flex items-center justify-between border-b pb-3">
-            <div className="flex items-center gap-2">
-              <Clock3 className="size-4 text-muted-foreground" />
-              <h2 className="font-semibold text-sm tracking-tight">
+          <TimerReset data-icon="inline-start" />
+          {messages.dateConverter.stepper.now}
+        </Button>
+      </FieldGroup>
+
+      <div className="mt-4 grid min-h-[420px] min-w-0 overflow-hidden rounded-xl border border-border/70 lg:h-[clamp(32rem,calc(100dvh-23rem),46rem)] lg:min-h-0 lg:flex-none lg:grid-cols-[minmax(20rem,5fr)_minmax(0,7fr)] lg:grid-rows-[minmax(0,1fr)_auto]">
+        <section className="flex min-h-0 min-w-0 flex-col lg:border-r">
+          <header className="flex min-h-14 items-center gap-3 border-b px-4">
+            <span className="font-mono text-muted-foreground text-xs">01</span>
+            <h2 className="font-semibold text-sm">
+              {messages.dateConverter.inputLabel}
+            </h2>
+          </header>
+
+          <div className="flex flex-1 flex-col gap-5 p-4 sm:p-5">
+            <Field data-invalid={error ? true : undefined} size="sm">
+              <FieldLabel htmlFor="date-converter-input">
                 {messages.dateConverter.inputLabel}
-              </h2>
-            </div>
-            {renderStatusBadge(result, error)}
-          </div>
-
-          <div className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="date-input-mode" size="sm">
-                  {messages.dateConverter.inputModeLabel}
-                </Label>
-                <Select onValueChange={changeInputMode} value={inputMode}>
-                  <SelectTrigger
-                    className="w-full"
-                    id="date-input-mode"
-                    variant="surface"
-                  >
-                    <SelectValue>{INPUT_MODE_LABELS[inputMode]}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {INPUT_MODES.map((mode) => (
-                      <SelectItem key={mode} value={mode}>
-                        {INPUT_MODE_LABELS[mode]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="date-timezone" size="sm">
-                  {messages.dateConverter.timezoneLabel}
-                </Label>
-                <TimezoneCombobox
-                  emptyMessage={messages.dateConverter.timezoneEmpty}
-                  id="date-timezone"
-                  onChange={changeTimeZone}
-                  options={timeZoneOptions}
-                  searchPlaceholder={messages.dateConverter.timezoneSearch}
-                  useQueryLabel={(tz) =>
-                    formatMessage(messages.dateConverter.timezoneUse, {
-                      timezone: tz,
-                    })
-                  }
-                  value={timeZone}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="date-converter-input" size="sm">
-                {messages.dateConverter.inputLabel}
-              </Label>
-              <div className="flex items-center gap-2">
-                <Input
+              </FieldLabel>
+              <InputGroup className="h-11">
+                <InputGroupInput
                   aria-describedby="date-converter-help"
                   aria-invalid={error ? true : undefined}
                   autoComplete="off"
-                  className="flex-1"
+                  className="font-mono"
                   id="date-converter-input"
                   onChange={(event) => {
                     const val = event.currentTarget.value;
@@ -638,7 +644,7 @@ export function DateConverter() {
                         setResult(res);
                         setError(null);
                       } catch {
-                        // Silent live typing errors until convert is invoked
+                        // Keep the last valid result while the user is typing.
                       }
                     } else {
                       setResult(null);
@@ -646,44 +652,30 @@ export function DateConverter() {
                     }
                   }}
                   placeholder={messages.dateConverter.inputPlaceholder}
-                  size="xl"
                   spellCheck={false}
                   value={input}
-                  variant="mono-flat"
                 />
-                <DatePickerPopover
-                  currentDate={parsedDateForPicker}
-                  onDateChange={applyDate}
-                />
-              </div>
-            </div>
+                <InputGroupAddon align="inline-end">
+                  <DatePickerPopover
+                    currentDate={parsedDateForPicker}
+                    onDateChange={applyDate}
+                  />
+                </InputGroupAddon>
+              </InputGroup>
+              {error ? (
+                <FieldError>{error}</FieldError>
+              ) : (
+                <FieldDescription id="date-converter-help">
+                  {messages.dateConverter.inputHelp}
+                </FieldDescription>
+              )}
+            </Field>
 
-            <Button
-              className="w-full active:translate-y-px"
-              onClick={() => convert(input, inputMode, timeZone, true)}
-              size="lg"
-              type="button"
-            >
-              <Clock3 data-icon="inline-start" />
-              {messages.dateConverter.convert}
-            </Button>
-
-            <div className="rounded-md border bg-muted/20 p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
-                  Quick Shift
-                </span>
-                <Button
-                  onClick={useCurrentTime}
-                  size="xs"
-                  type="button"
-                  variant="ghost"
-                >
-                  <TimerReset data-icon="inline-start" />
-                  {messages.dateConverter.useCurrentTime}
-                </Button>
-              </div>
-              <div className="grid grid-cols-5 gap-1.5">
+            <div className="flex flex-col gap-2.5">
+              <p className="font-medium text-muted-foreground text-xs">
+                {messages.dateConverter.quickShiftLabel}
+              </p>
+              <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={() => shiftTime(-1, "day")}
                   size="xs"
@@ -727,124 +719,140 @@ export function DateConverter() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-muted-foreground text-xs">
-              <p id="date-converter-help">{messages.dateConverter.inputHelp}</p>
-              <span className="font-mono uppercase">
+            <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+              <span className="font-mono text-muted-foreground text-xs uppercase">
                 {messages.dateConverter.shortcutLabel}
               </span>
-            </div>
-
-            {error && (
-              <div
-                className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3"
-                role="alert"
+              <Button
+                className="active:translate-y-px"
+                onClick={() => convert(input, inputMode, timeZone, true)}
+                type="button"
               >
-                <p className="font-medium text-destructive text-sm">
-                  {messages.dateConverter.conversionFailed}
-                </p>
-                <p className="mt-0.5 text-muted-foreground text-xs">{error}</p>
-              </div>
-            )}
+                <Clock3 data-icon="inline-start" />
+                {messages.dateConverter.convert}
+              </Button>
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Right pane: Results & Breakdown (Side by Side) */}
-        <div
-          className="flex flex-col overflow-hidden rounded-lg border bg-card lg:col-span-7"
+        <section
+          className="flex min-h-0 min-w-0 flex-col overflow-hidden border-t lg:border-t-0"
           id={TOUR_TARGETS.results}
         >
-          <div className="flex-1 p-4">
-            <div className="flex items-center justify-between border-b pb-3">
-              <div className="flex items-center gap-2">
-                <Button
-                  aria-pressed={activeTab === "formats"}
-                  onClick={() => setActiveTab("formats")}
-                  size="sm"
-                  variant={activeTab === "formats" ? "secondary" : "ghost"}
-                >
-                  {messages.dateConverter.formatsTab}
-                </Button>
-                <Button
-                  aria-pressed={activeTab === "breakdown"}
-                  onClick={() => setActiveTab("breakdown")}
-                  size="sm"
-                  variant={activeTab === "breakdown" ? "secondary" : "ghost"}
-                >
-                  {messages.dateConverter.breakdownTab}
-                </Button>
+          <Tabs
+            className="flex min-h-0 flex-1 flex-col overflow-hidden"
+            onValueChange={(value) =>
+              setActiveTab(value === "breakdown" ? "breakdown" : "formats")
+            }
+            value={activeTab}
+            variant="flush"
+          >
+            <header className="flex min-h-14 flex-wrap items-center justify-between gap-3 border-b px-4">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-muted-foreground text-xs">
+                  02
+                </span>
+                <TabsList size="xs" variant="subtle">
+                  <TabsTrigger size="xs" value="formats">
+                    {messages.dateConverter.formatsTab}
+                  </TabsTrigger>
+                  <TabsTrigger size="xs" value="breakdown">
+                    {messages.dateConverter.breakdownTab}
+                  </TabsTrigger>
+                </TabsList>
               </div>
               {result && (
-                <span className="border px-2 py-0.5 font-mono text-muted-foreground text-xs uppercase tracking-wider">
+                <span className="font-mono text-muted-foreground text-xs">
                   {formatMessage(messages.dateConverter.detectedAs, {
                     format: INPUT_MODE_LABELS[result.detectedMode],
                   })}
                 </span>
               )}
+            </header>
+
+            <TabsContent
+              className="min-h-0 overflow-auto"
+              value="formats"
+              variant="flush"
+            >
+              {renderResultsContent({
+                activeTab: "formats",
+                copiedOutput,
+                copyOutput,
+                result,
+                shouldReduceMotion: shouldReduceMotion ?? false,
+                timeZone,
+              })}
+            </TabsContent>
+            <TabsContent
+              className="min-h-0 overflow-auto"
+              value="breakdown"
+              variant="flush"
+            >
+              {renderResultsContent({
+                activeTab: "breakdown",
+                copiedOutput,
+                copyOutput,
+                result,
+                shouldReduceMotion: shouldReduceMotion ?? false,
+                timeZone,
+              })}
+            </TabsContent>
+          </Tabs>
+        </section>
+
+        <footer
+          className="border-t bg-muted/15 px-4 py-3 lg:col-span-2"
+          id={TOUR_TARGETS.timezone}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <Globe2 className="size-3.5 text-muted-foreground" />
+              <span className="font-semibold text-xs">
+                {messages.dateConverter.timezoneTitle}
+              </span>
+              <span className="text-muted-foreground text-xs">·</span>
+              <span className="truncate font-mono text-muted-foreground text-xs">
+                {timeZone}
+              </span>
             </div>
-
-            {renderResultsContent({
-              activeTab,
-              copiedOutput,
-              copyOutput,
-              result,
-              shouldReduceMotion: shouldReduceMotion ?? false,
-              timeZone,
-            })}
-          </div>
-
-          {/* Timezone Projection Footer */}
-          <div
-            className="border-t bg-muted/15 px-4 py-2.5"
-            id={TOUR_TARGETS.timezone}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-xs">
-                <Globe2 className="size-3.5 text-muted-foreground" />
-                <span className="font-semibold text-xs tracking-tight">
-                  {messages.dateConverter.timezoneTitle}
-                </span>
-                <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground uppercase">
-                  {timeZone}
-                </span>
-              </div>
-              {result && (
-                <span className="font-mono text-[11px] text-muted-foreground">
-                  {result.relativeTime}
-                </span>
-              )}
-            </div>
-
-            {result ? (
-              <div className="mt-1.5 flex items-center justify-between gap-2">
-                <code className="truncate font-medium font-mono text-foreground text-xs sm:text-sm">
-                  {result.zonedDateTime}
-                </code>
-                <Button
-                  aria-label={formatMessage(messages.dateConverter.copyOutput, {
-                    format: messages.dateConverter.timezoneTitle,
-                  })}
-                  onClick={() => {
-                    copyToClipboard(result.zonedDateTime);
-                    toast.success(
-                      formatMessage(messages.dateConverter.copySuccess, {
-                        format: messages.dateConverter.timezoneTitle,
-                      })
-                    );
-                  }}
-                  size="icon-xs"
-                  type="button"
-                  variant="ghost"
-                >
-                  <ClipboardCopy className="size-3.5 text-muted-foreground" />
-                </Button>
-              </div>
-            ) : (
-              <p className="mt-1 text-muted-foreground text-xs leading-normal">
-                {messages.dateConverter.emptyTimezone}
-              </p>
+            {result && (
+              <span className="font-mono text-muted-foreground text-xs">
+                {result.relativeTime}
+              </span>
             )}
           </div>
-        </div>
+
+          {result ? (
+            <div className="mt-1.5 flex items-center justify-between gap-2">
+              <code className="truncate font-medium font-mono text-xs sm:text-sm">
+                {result.zonedDateTime}
+              </code>
+              <Button
+                aria-label={formatMessage(messages.dateConverter.copyOutput, {
+                  format: messages.dateConverter.timezoneTitle,
+                })}
+                onClick={() => {
+                  copyToClipboard(result.zonedDateTime);
+                  toast.success(
+                    formatMessage(messages.dateConverter.copySuccess, {
+                      format: messages.dateConverter.timezoneTitle,
+                    })
+                  );
+                }}
+                size="icon-xs"
+                type="button"
+                variant="ghost"
+              >
+                <ClipboardCopy />
+              </Button>
+            </div>
+          ) : (
+            <p className="mt-1 text-muted-foreground text-xs leading-normal">
+              {messages.dateConverter.emptyTimezone}
+            </p>
+          )}
+        </footer>
       </div>
     </DeveloperToolLayout>
   );

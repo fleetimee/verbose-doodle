@@ -280,13 +280,14 @@ export function JsonSchemaValidator() {
 
         <div className="flex items-center justify-between gap-4 pb-3 md:py-3 md:pl-6">
           <ButtonGroup>
-            <ButtonGroupText className="h-8">
+            <ButtonGroupText className="h-8 px-2.5 text-xs">
               {messages.jsonSchemaValidator.shortcutLabel}
             </ButtonGroupText>
             <Button
-              className="h-8 min-w-28 active:translate-y-px"
+              className="active:translate-y-px"
               disabled={isValidating}
               onClick={validate}
+              size="sm"
               type="button"
             >
               {isValidating
@@ -329,28 +330,22 @@ export function JsonSchemaValidator() {
                 <Button
                   aria-label={messages.jsonSchemaValidator.prettify}
                   onClick={handlePrettifySchema}
-                  size="tab-sm"
+                  size="icon-sm"
                   title={messages.jsonSchemaValidator.prettify}
                   type="button"
                   variant="outline-muted"
                 >
                   <Braces className="size-3.5" />
-                  <span className="ml-1.5 hidden sm:inline">
-                    {messages.jsonSchemaValidator.prettify}
-                  </span>
                 </Button>
                 <Button
                   aria-label={messages.jsonSchemaValidator.generateMock}
                   onClick={handleGenerateMock}
-                  size="tab-sm"
+                  size="icon-sm"
                   title={messages.jsonSchemaValidator.generateMockDescription}
                   type="button"
                   variant="outline-muted"
                 >
                   <Code2 className="size-3.5" />
-                  <span className="ml-1.5 hidden sm:inline">
-                    {messages.jsonSchemaValidator.generateMock}
-                  </span>
                 </Button>
               </ButtonGroup>
             </div>
@@ -389,28 +384,22 @@ export function JsonSchemaValidator() {
                 <Button
                   aria-label={messages.jsonSchemaValidator.prettify}
                   onClick={handlePrettifyInstance}
-                  size="tab-sm"
+                  size="icon-sm"
                   title={messages.jsonSchemaValidator.prettify}
                   type="button"
                   variant="outline-muted"
                 >
                   <Braces className="size-3.5" />
-                  <span className="ml-1.5 hidden sm:inline">
-                    {messages.jsonSchemaValidator.prettify}
-                  </span>
                 </Button>
                 <Button
                   aria-label={messages.jsonSchemaValidator.inferSchema}
                   onClick={handleInferSchema}
-                  size="tab-sm"
+                  size="icon-sm"
                   title={messages.jsonSchemaValidator.inferSchemaDescription}
                   type="button"
                   variant="outline-muted"
                 >
                   <Wand2 className="size-3.5" />
-                  <span className="ml-1.5 hidden sm:inline">
-                    {messages.jsonSchemaValidator.inferSchema}
-                  </span>
                 </Button>
               </ButtonGroup>
             </div>
