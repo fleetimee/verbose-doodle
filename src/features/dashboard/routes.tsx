@@ -44,6 +44,12 @@ const Chess3dPage = lazy(() =>
   }))
 );
 
+const NovaLancerPage = lazy(() =>
+  import("@/pages/dashboard/nova-lancer").then(({ NovaLancerPage }) => ({
+    default: NovaLancerPage,
+  }))
+);
+
 export const dashboardRoutes = (
   <Route
     element={
@@ -64,6 +70,7 @@ export const dashboardRoutes = (
     <Route element={<EmberwakePage />} path="games/emberwake" />
     <Route element={<BuildYourTownPage />} path="games/build-your-town" />
     <Route element={<Chess3dPage />} path="games/chess-3d" />
+    <Route element={<NovaLancerPage />} path="games/nova-lancer" />
     {overviewRoutes}
     {endpointRoutes}
     {socketTesterRoutes}

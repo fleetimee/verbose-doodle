@@ -9,7 +9,8 @@
       "!public/games/ponpoko-kart",
       "!public/games/emberwake",
       "!public/games/build-your-town",
-      "!public/games/chess-3d"
+      "!public/games/chess-3d",
+      "!public/games/nova-lancer"
     ]
   },
   "javascript": {

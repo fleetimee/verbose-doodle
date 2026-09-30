@@ -248,6 +248,12 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             title: messages.common.chess3dTitle,
             url: "/dashboard/games/chess-3d",
           },
+          {
+            icon: Route,
+            description: messages.common.novaLancerDescription,
+            title: messages.common.novaLancerTitle,
+            url: "/dashboard/games/nova-lancer",
+          },
         ],
       },
     ],

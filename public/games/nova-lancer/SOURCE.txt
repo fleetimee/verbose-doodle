@@ -1,0 +1,4 @@
+NOVA LANCER by tanuu5 / たぬ
+https://github.com/tanuu5/nova-lancer
+Source commit: eb488caa96a3e283d3e79de6aa62e250143ee921
+Local changes: remove Google Fonts links; add shared game activity script.
