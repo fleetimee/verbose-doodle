@@ -62,6 +62,21 @@ export function ScreenLockProvider({ children }: { children: ReactNode }) {
       scheduleTimer(IDLE_LOCK_TIMEOUT_MS);
     };
 
+    const handleGameActivity = (event: MessageEvent) => {
+      if (event.data?.type !== "fleetime-game-activity") {
+        return;
+      }
+      const frames = document.querySelectorAll<HTMLIFrameElement>(
+        "iframe[data-game-frame]"
+      );
+      for (const frame of frames) {
+        if (event.source === frame.contentWindow && event.source !== null) {
+          handleActivity();
+          return;
+        }
+      }
+    };
+
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         const elapsed = Date.now() - lastActivity;
@@ -87,6 +102,7 @@ export function ScreenLockProvider({ children }: { children: ReactNode }) {
     for (const event of activityEvents) {
       window.addEventListener(event, handleActivity, { passive: true });
     }
+    window.addEventListener("message", handleGameActivity);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
@@ -96,6 +112,7 @@ export function ScreenLockProvider({ children }: { children: ReactNode }) {
       for (const event of activityEvents) {
         window.removeEventListener(event, handleActivity);
       }
+      window.removeEventListener("message", handleGameActivity);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [snapshot.user, account, lock]);

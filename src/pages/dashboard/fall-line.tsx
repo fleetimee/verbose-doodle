@@ -22,6 +22,7 @@ export function FallLinePage() {
       <iframe
         allow="fullscreen"
         className="aspect-video max-h-[75dvh] min-h-80 w-full rounded-lg border [&:fullscreen]:h-dvh [&:fullscreen]:max-h-none [&:fullscreen]:rounded-none [&:fullscreen]:border-0"
+        data-game-frame=""
         ref={frameRef}
         sandbox="allow-scripts allow-pointer-lock"
         src={`${import.meta.env.BASE_URL}games/fall-line/index.html`}

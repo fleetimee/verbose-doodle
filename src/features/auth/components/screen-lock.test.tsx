@@ -105,6 +105,60 @@ describe("screen lock", () => {
     vi.useRealTimers();
   });
 
+  test("game iframe activity prevents idle lock, then inactivity still locks", () => {
+    vi.useFakeTimers();
+    sessionStorage.clear();
+    const view = render(
+      <ScreenLockProvider>
+        <iframe data-game-frame="" title="Game" />
+      </ScreenLockProvider>
+    );
+    const frame = screen.getByTitle("Game") as HTMLIFrameElement;
+
+    act(() => {
+      vi.advanceTimersByTime(100_000);
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          data: { type: "fleetime-game-activity" },
+          source: frame.contentWindow,
+        })
+      );
+      vi.advanceTimersByTime(100_000);
+    });
+    expect(sessionStorage.getItem("workspace-lock-account")).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(50_000);
+    });
+    expect(sessionStorage.getItem("workspace-lock-account")).toBe("operator");
+    view.unmount();
+    vi.useRealTimers();
+  });
+
+  test("ignores activity messages from unrelated windows", () => {
+    vi.useFakeTimers();
+    sessionStorage.clear();
+    const view = render(
+      <ScreenLockProvider>
+        <iframe title="Other content" />
+      </ScreenLockProvider>
+    );
+    const frame = screen.getByTitle("Other content") as HTMLIFrameElement;
+    act(() => {
+      vi.advanceTimersByTime(100_000);
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          data: { type: "fleetime-game-activity" },
+          source: frame.contentWindow,
+        })
+      );
+      vi.advanceTimersByTime(50_000);
+    });
+    expect(sessionStorage.getItem("workspace-lock-account")).toBe("operator");
+    view.unmount();
+    vi.useRealTimers();
+  });
+
   test("unlocks when pressing Enter key", async () => {
     sessionStorage.clear();
     render(

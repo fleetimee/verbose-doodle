@@ -392,6 +392,7 @@ export function TerrabrowserPage() {
       <iframe
         allow="fullscreen"
         className="aspect-video max-h-[75dvh] min-h-80 w-full rounded-lg border [&:fullscreen]:h-dvh [&:fullscreen]:max-h-none [&:fullscreen]:rounded-none [&:fullscreen]:border-0"
+        data-game-frame=""
         onLoad={() => setReady(true)}
         ref={frameRef}
         src={`${import.meta.env.BASE_URL}games/terrabrowser/index.html`}
