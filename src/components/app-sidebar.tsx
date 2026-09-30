@@ -266,6 +266,12 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             title: messages.common.arkanoidNeonTitle,
             url: "/dashboard/games/arkanoid-neon",
           },
+          {
+            icon: LayoutGrid,
+            description: messages.common.hearthvaleDescription,
+            title: messages.common.hearthvaleTitle,
+            url: "/dashboard/games/hearthvale",
+          },
         ],
       },
     ],

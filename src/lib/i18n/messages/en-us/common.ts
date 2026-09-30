@@ -9,6 +9,9 @@ export const commonMessages = {
   sunbreakDescription: "Race downhill, land tricks, and chase your best time.",
   arkanoidNeonTitle: "Arkanoid Neon",
   arkanoidNeonDescription: "Break neon bricks and collect power-ups.",
+  hearthvaleTitle: "Hearthvale",
+  hearthvaleDescription:
+    "Grow your farm and explore the valley in single-player.",
   emberwakeTitle: "Emberwake",
   emberwakeDescription: "Keep your lantern burning and survive until dawn.",
   ponpokoKartTitle: "Ponpoko Kart",

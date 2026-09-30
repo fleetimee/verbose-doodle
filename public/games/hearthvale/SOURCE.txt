@@ -1,0 +1,5 @@
+Hearthvale by duolahypercho
+https://github.com/duolahypercho/hearthvale
+Source commit: 9a66ae32c26406fc9577a8dd694e9e0d0628a89b
+Local changes: single-player only; relative asset paths; remove external fonts; game activity script.
+No upstream project license file or package license is declared at this revision.

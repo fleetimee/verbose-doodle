@@ -62,6 +62,12 @@ const ArkanoidNeonPage = lazy(() =>
   }))
 );
 
+const HearthvalePage = lazy(() =>
+  import("@/pages/dashboard/hearthvale").then(({ HearthvalePage }) => ({
+    default: HearthvalePage,
+  }))
+);
+
 export const dashboardRoutes = (
   <Route
     element={
@@ -85,6 +91,7 @@ export const dashboardRoutes = (
     <Route element={<NovaLancerPage />} path="games/nova-lancer" />
     <Route element={<SunbreakPage />} path="games/sunbreak" />
     <Route element={<ArkanoidNeonPage />} path="games/arkanoid-neon" />
+    <Route element={<HearthvalePage />} path="games/hearthvale" />
     {overviewRoutes}
     {endpointRoutes}
     {socketTesterRoutes}

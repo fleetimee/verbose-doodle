@@ -11,6 +11,9 @@ export const commonMessages = {
     "Balapan menuruni gunung, lakukan trik, dan raih waktu terbaik.",
   arkanoidNeonTitle: "Arkanoid Neon",
   arkanoidNeonDescription: "Hancurkan bata neon dan kumpulkan power-up.",
+  hearthvaleTitle: "Hearthvale",
+  hearthvaleDescription:
+    "Kembangkan pertanianmu dan jelajahi lembah dalam mode pemain tunggal.",
   emberwakeTitle: "Emberwake",
   emberwakeDescription: "Jaga lentera tetap menyala dan bertahan hingga fajar.",
   ponpokoKartTitle: "Ponpoko Kart",

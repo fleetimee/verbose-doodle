@@ -85,6 +85,7 @@ function getRouteLabels(
     "nova-lancer": messages.common.novaLancerTitle,
     sunbreak: messages.common.sunbreakTitle,
     "arkanoid-neon": messages.common.arkanoidNeonTitle,
+    hearthvale: messages.common.hearthvaleTitle,
     emberwake: messages.common.emberwakeTitle,
     "iso-8583": messages.common.navIso8583,
     "json-schema-validator": messages.jsonSchemaValidator.title,
