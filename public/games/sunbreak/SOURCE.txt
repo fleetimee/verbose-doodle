@@ -1,0 +1,6 @@
+SUNBREAK — Downhill Club by Imirushik
+https://github.com/Imirushik/sunbreak-downhill-3D-game
+Source commit: 72e7626a0a37e8db96adcb11678c8eef641f7714
+Build: bun install --ignore-scripts; bun run build --base=./
+Local change: add ../activity.js in generated HTML.
+Upstream has no project license file or declared package license at this revision.

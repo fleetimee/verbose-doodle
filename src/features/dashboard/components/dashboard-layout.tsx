@@ -83,6 +83,7 @@ function getRouteLabels(
     "build-your-town": messages.common.buildYourTownTitle,
     "chess-3d": messages.common.chess3dTitle,
     "nova-lancer": messages.common.novaLancerTitle,
+    sunbreak: messages.common.sunbreakTitle,
     emberwake: messages.common.emberwakeTitle,
     "iso-8583": messages.common.navIso8583,
     "json-schema-validator": messages.jsonSchemaValidator.title,

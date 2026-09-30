@@ -50,6 +50,12 @@ const NovaLancerPage = lazy(() =>
   }))
 );
 
+const SunbreakPage = lazy(() =>
+  import("@/pages/dashboard/sunbreak").then(({ SunbreakPage }) => ({
+    default: SunbreakPage,
+  }))
+);
+
 export const dashboardRoutes = (
   <Route
     element={
@@ -71,6 +77,7 @@ export const dashboardRoutes = (
     <Route element={<BuildYourTownPage />} path="games/build-your-town" />
     <Route element={<Chess3dPage />} path="games/chess-3d" />
     <Route element={<NovaLancerPage />} path="games/nova-lancer" />
+    <Route element={<SunbreakPage />} path="games/sunbreak" />
     {overviewRoutes}
     {endpointRoutes}
     {socketTesterRoutes}

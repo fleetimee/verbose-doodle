@@ -6,6 +6,9 @@ export const commonMessages = {
   novaLancerTitle: "Nova Lancer",
   novaLancerDescription:
     "Terbangkan pesawat tempurmu dalam misi luar angkasa 3D.",
+  sunbreakTitle: "Sunbreak Downhill",
+  sunbreakDescription:
+    "Balapan menuruni gunung, lakukan trik, dan raih waktu terbaik.",
   emberwakeTitle: "Emberwake",
   emberwakeDescription: "Jaga lentera tetap menyala dan bertahan hingga fajar.",
   ponpokoKartTitle: "Ponpoko Kart",

@@ -10,7 +10,8 @@
       "!public/games/emberwake",
       "!public/games/build-your-town",
       "!public/games/chess-3d",
-      "!public/games/nova-lancer"
+      "!public/games/nova-lancer",
+      "!public/games/sunbreak"
     ]
   },
   "javascript": {

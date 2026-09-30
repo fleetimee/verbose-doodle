@@ -254,6 +254,12 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             title: messages.common.novaLancerTitle,
             url: "/dashboard/games/nova-lancer",
           },
+          {
+            icon: Route,
+            description: messages.common.sunbreakDescription,
+            title: messages.common.sunbreakTitle,
+            url: "/dashboard/games/sunbreak",
+          },
         ],
       },
     ],
