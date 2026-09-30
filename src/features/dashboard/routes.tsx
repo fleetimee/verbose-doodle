@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import { Navigate, Route } from "react-router";
 import { ProtectedRoute } from "@/components/protected-route";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
@@ -6,6 +7,12 @@ import { endpointRoutes } from "@/features/endpoints/routes";
 import { overviewRoutes } from "@/features/overview/routes";
 import { socketTesterRoutes } from "@/features/socket-tester/routes";
 import { socksRelayRoutes } from "@/features/socks-relay/routes";
+
+const FallLinePage = lazy(() =>
+  import("@/pages/dashboard/fall-line").then(({ FallLinePage }) => ({
+    default: FallLinePage,
+  }))
+);
 
 export const dashboardRoutes = (
   <Route
@@ -17,6 +24,11 @@ export const dashboardRoutes = (
     path="/dashboard"
   >
     <Route element={<Navigate replace to="/dashboard/overview" />} index />
+    <Route
+      element={<Navigate replace to="/dashboard/games/fall-line" />}
+      path="games"
+    />
+    <Route element={<FallLinePage />} path="games/fall-line" />
     {overviewRoutes}
     {endpointRoutes}
     {socketTesterRoutes}

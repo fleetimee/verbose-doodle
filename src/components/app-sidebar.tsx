@@ -207,6 +207,19 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
           })),
         title: category.name,
       })).filter((category) => category.items.length > 0),
+      {
+        groupLabel: messages.common.navFun,
+        icon: Waves,
+        title: messages.common.navFunGames,
+        items: [
+          {
+            icon: Waves,
+            description: messages.common.fallLineDescription,
+            title: messages.common.fallLineTitle,
+            url: "/dashboard/games/fall-line",
+          },
+        ],
+      },
     ],
     navSecondary: [
       {

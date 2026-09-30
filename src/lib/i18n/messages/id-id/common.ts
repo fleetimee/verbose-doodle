@@ -1,4 +1,14 @@
 export const commonMessages = {
+  gameFullscreen: "Layar penuh",
+  gameFullscreenHint: "Tekan Esc untuk keluar dari layar penuh.",
+  gameFullscreenUnsupported: "Layar penuh tidak tersedia di peramban ini.",
+  gameFullscreenFailed: "Tidak dapat membuka layar penuh. Coba lagi.",
+
+  fallLineDescription: "Gim ski freeride.",
+  navFun: "Hiburan",
+  navFunGames: "Gim",
+  fallLineTitle: "Fall Lines",
+
   appName: "Fleetime Labs",
   cancel: "Batal",
   delete: "Hapus",

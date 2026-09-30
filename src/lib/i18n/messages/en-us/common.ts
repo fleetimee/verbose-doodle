@@ -1,4 +1,14 @@
 export const commonMessages = {
+  gameFullscreen: "Fullscreen",
+  gameFullscreenHint: "Press Esc to leave fullscreen.",
+  gameFullscreenUnsupported: "Fullscreen is unavailable in this browser.",
+  gameFullscreenFailed: "Could not enter fullscreen. Try again.",
+
+  fallLineDescription: "Freeride skiing game.",
+  navFun: "Fun",
+  navFunGames: "Games",
+  fallLineTitle: "Fall Lines",
+
   appName: "Fleetime Labs",
   cancel: "Cancel",
   delete: "Delete",
