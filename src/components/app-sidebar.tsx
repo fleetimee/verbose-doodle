@@ -260,6 +260,12 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             title: messages.common.sunbreakTitle,
             url: "/dashboard/games/sunbreak",
           },
+          {
+            icon: LayoutGrid,
+            description: messages.common.arkanoidNeonDescription,
+            title: messages.common.arkanoidNeonTitle,
+            url: "/dashboard/games/arkanoid-neon",
+          },
         ],
       },
     ],

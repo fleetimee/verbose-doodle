@@ -84,6 +84,7 @@ function getRouteLabels(
     "chess-3d": messages.common.chess3dTitle,
     "nova-lancer": messages.common.novaLancerTitle,
     sunbreak: messages.common.sunbreakTitle,
+    "arkanoid-neon": messages.common.arkanoidNeonTitle,
     emberwake: messages.common.emberwakeTitle,
     "iso-8583": messages.common.navIso8583,
     "json-schema-validator": messages.jsonSchemaValidator.title,

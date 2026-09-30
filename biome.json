@@ -11,7 +11,8 @@
       "!public/games/build-your-town",
       "!public/games/chess-3d",
       "!public/games/nova-lancer",
-      "!public/games/sunbreak"
+      "!public/games/sunbreak",
+      "!public/games/arkanoid-neon"
     ]
   },
   "javascript": {

@@ -1,0 +1,18 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  background: radial-gradient(ellipse at 50% 30%, #0c1330 0%, #03040b 70%);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+body {
+  display: grid;
+  place-items: center;
+}
+canvas {
+  display: block;
+  border-radius: 6px;
+  box-shadow: 0 0 60px rgba(46, 230, 255, 0.18), 0 0 140px rgba(255, 75, 214, 0.10);
+}

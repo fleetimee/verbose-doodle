@@ -56,6 +56,12 @@ const SunbreakPage = lazy(() =>
   }))
 );
 
+const ArkanoidNeonPage = lazy(() =>
+  import("@/pages/dashboard/arkanoid-neon").then(({ ArkanoidNeonPage }) => ({
+    default: ArkanoidNeonPage,
+  }))
+);
+
 export const dashboardRoutes = (
   <Route
     element={
@@ -78,6 +84,7 @@ export const dashboardRoutes = (
     <Route element={<Chess3dPage />} path="games/chess-3d" />
     <Route element={<NovaLancerPage />} path="games/nova-lancer" />
     <Route element={<SunbreakPage />} path="games/sunbreak" />
+    <Route element={<ArkanoidNeonPage />} path="games/arkanoid-neon" />
     {overviewRoutes}
     {endpointRoutes}
     {socketTesterRoutes}

@@ -1,0 +1,5 @@
+Arkanoid Neon by Jack-c3l2w
+https://github.com/Jack-c3l2w/arkanoid-neon
+Source commit: 70e416d2320d3f7fb726384c8da99403be1a8ca4
+Local changes: English interface, remove Google Fonts links, shared game activity script.
+Upstream has no license file at this revision. Original in-game attribution is preserved in English.

@@ -7,6 +7,8 @@ export const commonMessages = {
   novaLancerDescription: "Pilot your fighter through a 3D space mission.",
   sunbreakTitle: "Sunbreak Downhill",
   sunbreakDescription: "Race downhill, land tricks, and chase your best time.",
+  arkanoidNeonTitle: "Arkanoid Neon",
+  arkanoidNeonDescription: "Break neon bricks and collect power-ups.",
   emberwakeTitle: "Emberwake",
   emberwakeDescription: "Keep your lantern burning and survive until dawn.",
   ponpokoKartTitle: "Ponpoko Kart",

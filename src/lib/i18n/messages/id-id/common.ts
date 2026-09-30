@@ -9,6 +9,8 @@ export const commonMessages = {
   sunbreakTitle: "Sunbreak Downhill",
   sunbreakDescription:
     "Balapan menuruni gunung, lakukan trik, dan raih waktu terbaik.",
+  arkanoidNeonTitle: "Arkanoid Neon",
+  arkanoidNeonDescription: "Hancurkan bata neon dan kumpulkan power-up.",
   emberwakeTitle: "Emberwake",
   emberwakeDescription: "Jaga lentera tetap menyala dan bertahan hingga fajar.",
   ponpokoKartTitle: "Ponpoko Kart",
