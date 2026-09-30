@@ -1,4 +1,7 @@
 export const commonMessages = {
+  ponpokoKartTitle: "Ponpoko Kart",
+  ponpokoKartDescription:
+    "Race through Japanese countryside, shrines, and summer festivals.",
   gameFullscreen: "Fullscreen",
   gameFullscreenHint: "Press Esc to leave fullscreen.",
   gameFullscreenUnsupported: "Fullscreen is unavailable in this browser.",

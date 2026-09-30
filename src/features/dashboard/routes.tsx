@@ -20,6 +20,12 @@ const TerrabrowserPage = lazy(() =>
   }))
 );
 
+const PonpokoKartPage = lazy(() =>
+  import("@/pages/dashboard/ponpoko-kart").then(({ PonpokoKartPage }) => ({
+    default: PonpokoKartPage,
+  }))
+);
+
 export const dashboardRoutes = (
   <Route
     element={
@@ -36,6 +42,7 @@ export const dashboardRoutes = (
     />
     <Route element={<FallLinePage />} path="games/fall-line" />
     <Route element={<TerrabrowserPage />} path="games/terrabrowser" />
+    <Route element={<PonpokoKartPage />} path="games/ponpoko-kart" />
     {overviewRoutes}
     {endpointRoutes}
     {socketTesterRoutes}

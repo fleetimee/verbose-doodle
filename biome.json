@@ -5,7 +5,8 @@
     "includes": [
       "!!tools/oxlint/anti-slop",
       "!public/games/fall-line/index.html",
-      "!public/games/terrabrowser"
+      "!public/games/terrabrowser",
+      "!public/games/ponpoko-kart"
     ]
   },
   "javascript": {

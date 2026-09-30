@@ -1,4 +1,7 @@
 export const commonMessages = {
+  ponpokoKartTitle: "Ponpoko Kart",
+  ponpokoKartDescription:
+    "Balapan melintasi pedesaan Jepang, kuil, dan festival musim panas.",
   gameFullscreen: "Layar penuh",
   gameFullscreenHint: "Tekan Esc untuk keluar dari layar penuh.",
   gameFullscreenUnsupported: "Layar penuh tidak tersedia di peramban ini.",

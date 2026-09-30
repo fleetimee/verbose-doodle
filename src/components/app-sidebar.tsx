@@ -224,6 +224,12 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             title: messages.common.terrabrowserTitle,
             url: "/dashboard/games/terrabrowser",
           },
+          {
+            icon: Route,
+            description: messages.common.ponpokoKartDescription,
+            title: messages.common.ponpokoKartTitle,
+            url: "/dashboard/games/ponpoko-kart",
+          },
         ],
       },
     ],
