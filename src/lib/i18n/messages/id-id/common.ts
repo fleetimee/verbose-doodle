@@ -1,6 +1,8 @@
 export const commonMessages = {
   buildYourTownTitle: "Build Your Town",
   buildYourTownDescription: "Bangun dan kelola kotamu yang terus berkembang.",
+  chess3dTitle: "3D Chess",
+  chess3dDescription: "Main catur melawan komputer dalam tampilan 3D atau 2D.",
   emberwakeTitle: "Emberwake",
   emberwakeDescription: "Jaga lentera tetap menyala dan bertahan hingga fajar.",
   ponpokoKartTitle: "Ponpoko Kart",

@@ -242,6 +242,12 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             title: messages.common.buildYourTownTitle,
             url: "/dashboard/games/build-your-town",
           },
+          {
+            icon: LayoutGrid,
+            description: messages.common.chess3dDescription,
+            title: messages.common.chess3dTitle,
+            url: "/dashboard/games/chess-3d",
+          },
         ],
       },
     ],

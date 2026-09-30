@@ -38,6 +38,12 @@ const BuildYourTownPage = lazy(() =>
   }))
 );
 
+const Chess3dPage = lazy(() =>
+  import("@/pages/dashboard/chess-3d").then(({ Chess3dPage }) => ({
+    default: Chess3dPage,
+  }))
+);
+
 export const dashboardRoutes = (
   <Route
     element={
@@ -57,6 +63,7 @@ export const dashboardRoutes = (
     <Route element={<PonpokoKartPage />} path="games/ponpoko-kart" />
     <Route element={<EmberwakePage />} path="games/emberwake" />
     <Route element={<BuildYourTownPage />} path="games/build-your-town" />
+    <Route element={<Chess3dPage />} path="games/chess-3d" />
     {overviewRoutes}
     {endpointRoutes}
     {socketTesterRoutes}

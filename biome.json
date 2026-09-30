@@ -8,7 +8,8 @@
       "!public/games/terrabrowser",
       "!public/games/ponpoko-kart",
       "!public/games/emberwake",
-      "!public/games/build-your-town"
+      "!public/games/build-your-town",
+      "!public/games/chess-3d"
     ]
   },
   "javascript": {

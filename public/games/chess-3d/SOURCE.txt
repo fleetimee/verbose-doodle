@@ -1,0 +1,6 @@
+chess3dastra by yortch
+https://github.com/yortch/chess3dastra
+Source commit: f7748d0557c6f98a1255046810188e6a23dd0b63
+The prebuilt HTML is preserved with the addition of ../activity.js.
+Bundled Three.js and chess.js license comments are preserved in index.html.
+Upstream contains no project license file at this revision.
