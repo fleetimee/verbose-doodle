@@ -90,15 +90,15 @@ export function DatePickerPopover({
   };
 
   const handlePresetValue = (value: string) => {
-    const presets: Readonly<Record<string, (base: Date) => Date>> = {
-      today: (date) => startOfDay(date),
-      tomorrow: (date) => startOfDay(addDays(date, 1)),
-      "plus-7-days": (date) => addDays(date, 7),
-      "plus-30-days": (date) => addDays(date, 30),
-      "start-of-month": (date) => startOfMonth(date),
-      "end-of-day": (date) => endOfDay(date),
-    };
-    const preset = presets[value];
+    const presets = new Map<string, (base: Date) => Date>([
+      ["today", (date) => startOfDay(date)],
+      ["tomorrow", (date) => startOfDay(addDays(date, 1))],
+      ["plus-7-days", (date) => addDays(date, 7)],
+      ["plus-30-days", (date) => addDays(date, 30)],
+      ["start-of-month", (date) => startOfMonth(date)],
+      ["end-of-day", (date) => endOfDay(date)],
+    ]);
+    const preset = presets.get(value);
     if (preset) {
       handlePreset(preset);
     }
@@ -119,7 +119,7 @@ export function DatePickerPopover({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-80 overflow-hidden p-0"
+        className="w-80 overflow-hidden"
         side="bottom"
         size="none"
       >
@@ -189,45 +189,48 @@ export function DatePickerPopover({
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-1.5">
                 <Clock3 className="size-4 text-muted-foreground" />
-                <Label
-                  className="font-mono text-muted-foreground text-xs"
-                  size="sm"
-                >
+                <Label size="sm" variant="muted-mono">
                   UTC
                 </Label>
               </div>
               <div className="flex items-center gap-1">
                 <Input
                   aria-label={messages.dateConverter.picker.hours}
-                  className="h-8 w-10 px-1 text-center font-mono text-xs"
+                  className="w-10 text-center"
                   inputMode="numeric"
                   maxLength={2}
                   onChange={(event) =>
                     updateTime(event.target.value, minutes, seconds)
                   }
+                  size="time"
                   value={hours}
+                  variant="mono"
                 />
                 <span className="text-muted-foreground text-xs">:</span>
                 <Input
                   aria-label={messages.dateConverter.picker.minutes}
-                  className="h-8 w-10 px-1 text-center font-mono text-xs"
+                  className="w-10 text-center"
                   inputMode="numeric"
                   maxLength={2}
                   onChange={(event) =>
                     updateTime(hours, event.target.value, seconds)
                   }
+                  size="time"
                   value={minutes}
+                  variant="mono"
                 />
                 <span className="text-muted-foreground text-xs">:</span>
                 <Input
                   aria-label={messages.dateConverter.picker.seconds}
-                  className="h-8 w-10 px-1 text-center font-mono text-xs"
+                  className="w-10 text-center"
                   inputMode="numeric"
                   maxLength={2}
                   onChange={(event) =>
                     updateTime(hours, minutes, event.target.value)
                   }
+                  size="time"
                   value={seconds}
+                  variant="mono"
                 />
               </div>
             </div>

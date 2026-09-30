@@ -395,6 +395,7 @@ export function DateConverter() {
   const changeInputMode = (value: string) => {
     // SAFETY: INPUT_MODES is the complete set of values accepted by the mode control.
     if (INPUT_MODES.includes(value as DateInputMode)) {
+      // SAFETY: Membership in INPUT_MODES was checked above.
       const nextMode = value as DateInputMode;
       setInputMode(nextMode);
       if (result) {
@@ -540,9 +541,10 @@ export function DateConverter() {
       }
     >
       <FieldGroup
-        className="grid rounded-lg bg-muted/15 px-4 py-3 sm:grid-cols-2 lg:grid-cols-[20rem_minmax(0,1fr)_auto] lg:items-end lg:px-5"
+        className="grid sm:grid-cols-2 lg:grid-cols-[20rem_minmax(0,1fr)_auto] lg:items-end"
         id={TOUR_TARGETS.controls}
         size="sm"
+        variant="toolbar"
       >
         <Field size="sm">
           <FieldLabel htmlFor="date-input-mode">
@@ -629,7 +631,6 @@ export function DateConverter() {
                   aria-describedby="date-converter-help"
                   aria-invalid={error ? true : undefined}
                   autoComplete="off"
-                  className="font-mono"
                   id="date-converter-input"
                   onChange={(event) => {
                     const val = event.currentTarget.value;
@@ -654,6 +655,7 @@ export function DateConverter() {
                   placeholder={messages.dateConverter.inputPlaceholder}
                   spellCheck={false}
                   value={input}
+                  variant="mono"
                 />
                 <InputGroupAddon align="inline-end">
                   <DatePickerPopover

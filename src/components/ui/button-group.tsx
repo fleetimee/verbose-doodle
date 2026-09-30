@@ -46,18 +46,27 @@ function ButtonGroup({
   )
 }
 
+const buttonGroupTextVariants = cva(
+  "bg-muted flex items-center gap-2 rounded-md border font-medium shadow-xs [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
+  {
+    variants: { size: { default: "px-4 text-sm", sm: "px-2.5 text-xs" } },
+    defaultVariants: { size: "default" },
+  }
+)
+
 function ButtonGroupText({
   className,
+  size = "default",
   render,
   ...props
-}: useRender.ComponentProps<"div">) {
+}: useRender.ComponentProps<"div"> & VariantProps<typeof buttonGroupTextVariants>) {
   return useRender({
     defaultTagName: "div",
     render,
     props: mergeProps<"div">(
       {
         className: cn(
-          "bg-muted flex items-center gap-2 rounded-md border px-4 text-sm font-medium shadow-xs [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
+          buttonGroupTextVariants({ size }),
           className
         ),
       },

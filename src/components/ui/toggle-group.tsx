@@ -23,6 +23,7 @@ const toggleGroupVariants = cva(
       variant: {
         default: "rounded-md data-[spacing=default]:data-[variant=outline]:shadow-xs",
         outline: "rounded-md border border-input shadow-xs",
+        "outline-indicator": "rounded-md border border-input shadow-xs",
         subtle: "rounded-xl border border-border/80 bg-muted/40 p-1",
       },
     },
@@ -47,9 +48,11 @@ function ToggleGroup({
   const itemVariant =
     variant === "subtle"
       ? "tab"
-      : variant === "outline"
-        ? "outline"
-        : "default"
+      : variant === "outline-indicator"
+        ? "outline-indicator"
+        : variant === "outline"
+          ? "outline"
+          : "default"
 
   return (
     <ToggleGroupPrimitive
@@ -94,7 +97,7 @@ function ToggleGroupItem({
           size: context.size || size,
         }),
         "w-auto min-w-0 shrink-0 px-3 focus:z-10 focus-visible:z-10",
-        "data-[spacing=0]:rounded-none data-[spacing=0]:shadow-none data-[spacing=0]:first:rounded-l-md data-[spacing=0]:last:rounded-r-md data-[spacing=0]:data-[variant=outline]:border-l-0 data-[spacing=0]:data-[variant=outline]:first:border-l",
+        "data-[spacing=0]:rounded-none data-[spacing=0]:shadow-none data-[spacing=0]:first:rounded-l-md data-[spacing=0]:last:rounded-r-md data-[spacing=0]:data-[variant=outline]:border-l-0 data-[spacing=0]:data-[variant=outline]:first:border-l data-[spacing=0]:data-[variant=outline-indicator]:border-l-0 data-[spacing=0]:data-[variant=outline-indicator]:first:border-l",
         className
       )}
       {...props}

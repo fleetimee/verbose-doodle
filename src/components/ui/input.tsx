@@ -24,6 +24,7 @@ const inputVariants = cva(
         default: "h-9",
         sm: "h-8 px-2 text-xs",
         xs: "h-7 px-2 text-xs",
+        time: "h-8 px-1 text-xs",
         compact: "h-9 px-3 text-xs",
         search: "h-9 pl-9",
         md: "h-11",

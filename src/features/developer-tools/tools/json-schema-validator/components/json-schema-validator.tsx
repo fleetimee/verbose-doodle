@@ -280,7 +280,7 @@ export function JsonSchemaValidator() {
 
         <div className="flex items-center justify-between gap-4 pb-3 md:py-3 md:pl-6">
           <ButtonGroup>
-            <ButtonGroupText className="h-8 px-2.5 text-xs">
+            <ButtonGroupText className="h-8" size="sm">
               {messages.jsonSchemaValidator.shortcutLabel}
             </ButtonGroupText>
             <Button

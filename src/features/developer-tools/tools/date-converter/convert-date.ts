@@ -396,16 +396,16 @@ function calculateCalendarDetails(
   ];
   const monthName = monthNames[month - 1] ?? "January";
 
-  const weekdayMap: Record<string, number> = {
-    Friday: 5,
-    Monday: 1,
-    Saturday: 6,
-    Sunday: 7,
-    Thursday: 4,
-    Tuesday: 2,
-    Wednesday: 3,
-  };
-  const dayOfWeekNumber = weekdayMap[dayOfWeek] ?? 1;
+  const weekdayMap = new Map<string, number>([
+    ["Friday", 5],
+    ["Monday", 1],
+    ["Saturday", 6],
+    ["Sunday", 7],
+    ["Thursday", 4],
+    ["Tuesday", 2],
+    ["Wednesday", 3],
+  ]);
+  const dayOfWeekNumber = weekdayMap.get(dayOfWeek) ?? 1;
 
   const dayOfYear = getDayOfYear(date);
   const isoWeek = getISOWeek(date);

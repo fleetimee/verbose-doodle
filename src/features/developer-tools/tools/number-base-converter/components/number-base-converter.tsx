@@ -469,7 +469,7 @@ export function NumberBaseConverter() {
               onValueChange={changeBitWidth}
               size="sm"
               value={[String(bitWidth)]}
-              variant="outline"
+              variant="outline-indicator"
             >
               {BIT_WIDTHS.map((width) => (
                 <ToggleGroupItem
@@ -477,7 +477,7 @@ export function NumberBaseConverter() {
                     messages.numberBaseConverter.bitWidthItemAriaLabel,
                     { width }
                   )}
-                  className="relative isolate overflow-hidden data-pressed:bg-transparent"
+                  className="relative isolate overflow-hidden"
                   key={width}
                   value={String(width)}
                 >
@@ -500,10 +500,10 @@ export function NumberBaseConverter() {
               onValueChange={changeRepresentation}
               size="sm"
               value={[representation]}
-              variant="outline"
+              variant="outline-indicator"
             >
               <ToggleGroupItem
-                className="relative isolate overflow-hidden data-pressed:bg-transparent"
+                className="relative isolate overflow-hidden"
                 value="unsigned"
               >
                 <SelectionIndicator
@@ -515,7 +515,7 @@ export function NumberBaseConverter() {
                 </span>
               </ToggleGroupItem>
               <ToggleGroupItem
-                className="relative isolate overflow-hidden data-pressed:bg-transparent"
+                className="relative isolate overflow-hidden"
                 value="signed"
               >
                 <SelectionIndicator

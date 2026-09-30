@@ -10,6 +10,7 @@ const labelVariants = cva(
       variant: {
         default: "",
         muted: "text-muted-foreground",
+        "muted-mono": "font-mono text-muted-foreground",
         mono: "font-mono uppercase tracking-wider text-muted-foreground",
         stacked: "grid gap-1 cursor-pointer",
       },

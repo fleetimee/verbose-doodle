@@ -45,6 +45,7 @@ const fieldGroupVariants = cva(
     variants: {
       variant: {
         default: "",
+        toolbar: "rounded-lg bg-muted/15 px-4 py-3 lg:px-5",
       },
       size: {
         default: "",
