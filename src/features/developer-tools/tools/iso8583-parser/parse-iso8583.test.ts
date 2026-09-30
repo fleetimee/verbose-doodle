@@ -100,6 +100,24 @@ describe("parseIso8583Stream", () => {
     expect(bit63?.cleanValue).toBe(ACCOUNT_FIELD_63);
   });
 
+  test("preserves fixed-width payee padding before LLVAR institution and account fields", () => {
+    const payee = "000112".padEnd(25, " ");
+    // Secondary bitmap activates fields 98, 100 and 102.
+    const stream = `021080000000000000000000000054000000${payee}0311212001111001172`;
+    const result = parseIso8583Stream(stream);
+    expect(result.activeBits).toEqual([98, 100, 102]);
+    expect(result.fields.map((field) => field.rawValue)).toEqual([
+      payee,
+      "112",
+      "001111001172",
+    ]);
+    expect(result.fields[1].rawSlice).toBe("03112");
+    expect(result.fields[2].rawSlice).toBe("12001111001172");
+    expect(result.remainingStream).toBe("");
+    expect(result.warnings).toEqual([]);
+    expect(result.isValid).toBe(true);
+  });
+
   test("parses hex-encoded stream", () => {
     // Convert SIGN_ON_SAMPLE to hex
     const hexInput = Array.from(SIGN_ON_SAMPLE)

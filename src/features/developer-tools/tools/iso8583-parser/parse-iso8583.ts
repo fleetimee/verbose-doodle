@@ -183,6 +183,12 @@ const STANDARD_FIELD_FALLBACKS: StandardFieldFallbackRegistry = {
   56: { kind: "llvar", label: "Original data elements", length: 35 },
   64: { kind: "ans", label: "Primary MAC", length: 16 },
   96: { kind: "ans", label: "Key management data", length: 64 },
+  98: { kind: "ans", label: "Payee", length: 25 },
+  100: {
+    kind: "llvar",
+    label: "Receiving institution identification code",
+    length: 11,
+  },
 };
 
 export function getFieldSpec(fieldNumber: number): Iso8583FieldSpec {
