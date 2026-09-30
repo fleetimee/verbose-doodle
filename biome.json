@@ -6,7 +6,8 @@
       "!!tools/oxlint/anti-slop",
       "!public/games/fall-line/index.html",
       "!public/games/terrabrowser",
-      "!public/games/ponpoko-kart"
+      "!public/games/ponpoko-kart",
+      "!public/games/emberwake"
     ]
   },
   "javascript": {

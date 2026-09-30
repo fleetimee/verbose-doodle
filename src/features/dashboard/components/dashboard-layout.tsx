@@ -80,6 +80,7 @@ function getRouteLabels(
     "fall-line": messages.common.fallLineTitle,
     terrabrowser: messages.common.terrabrowserTitle,
     "ponpoko-kart": messages.common.ponpokoKartTitle,
+    emberwake: messages.common.emberwakeTitle,
     "iso-8583": messages.common.navIso8583,
     "json-schema-validator": messages.jsonSchemaValidator.title,
     "jwt-inspector": messages.jwtInspector.title,

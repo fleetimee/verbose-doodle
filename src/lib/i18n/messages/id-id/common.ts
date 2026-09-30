@@ -1,4 +1,6 @@
 export const commonMessages = {
+  emberwakeTitle: "Emberwake",
+  emberwakeDescription: "Jaga lentera tetap menyala dan bertahan hingga fajar.",
   ponpokoKartTitle: "Ponpoko Kart",
   ponpokoKartDescription:
     "Balapan melintasi pedesaan Jepang, kuil, dan festival musim panas.",

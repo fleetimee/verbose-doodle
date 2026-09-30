@@ -26,6 +26,12 @@ const PonpokoKartPage = lazy(() =>
   }))
 );
 
+const EmberwakePage = lazy(() =>
+  import("@/pages/dashboard/emberwake").then(({ EmberwakePage }) => ({
+    default: EmberwakePage,
+  }))
+);
+
 export const dashboardRoutes = (
   <Route
     element={
@@ -43,6 +49,7 @@ export const dashboardRoutes = (
     <Route element={<FallLinePage />} path="games/fall-line" />
     <Route element={<TerrabrowserPage />} path="games/terrabrowser" />
     <Route element={<PonpokoKartPage />} path="games/ponpoko-kart" />
+    <Route element={<EmberwakePage />} path="games/emberwake" />
     {overviewRoutes}
     {endpointRoutes}
     {socketTesterRoutes}

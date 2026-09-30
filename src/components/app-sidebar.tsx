@@ -230,6 +230,12 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             title: messages.common.ponpokoKartTitle,
             url: "/dashboard/games/ponpoko-kart",
           },
+          {
+            icon: Waves,
+            description: messages.common.emberwakeDescription,
+            title: messages.common.emberwakeTitle,
+            url: "/dashboard/games/emberwake",
+          },
         ],
       },
     ],
