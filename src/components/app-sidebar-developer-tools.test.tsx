@@ -282,6 +282,8 @@ describe("AppSidebar developer tools navigation", () => {
       </QueryClientProvider>
     );
 
+    expect(screen.queryByRole("button", { name: "Inspection" })).toBeNull();
+
     // Expand ISO 8583 submenu
     const iso8583Button = await screen.findByRole("button", {
       name: "ISO 8583",

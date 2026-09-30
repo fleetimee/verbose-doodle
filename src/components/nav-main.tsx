@@ -174,6 +174,7 @@ function NavMenuItem({
     return (
       <SidebarMenuItem>
         <SidebarMenuButton
+          aria-current={isActive ? "page" : undefined}
           aria-keyshortcuts={`Alt+${shortcutKey.toUpperCase()}`}
           isActive={isActive}
           render={
@@ -287,7 +288,7 @@ function NavMenuItem({
               isActive={isChildActive}
               size="md"
               tooltip={item.title}
-              variant="elevated"
+              variant="section"
             >
               <item.icon />
               <span>{item.title}</span>
@@ -299,7 +300,7 @@ function NavMenuItem({
                 </span>
               ) : null}
               <HugeiconsIcon
-                className="size-4 transition-transform duration-200 group-data-[open]/collapsible-trigger:rotate-90"
+                className="ml-auto size-4 transition-transform duration-200 group-data-[open]/collapsible-trigger:rotate-90"
                 icon={ArrowRight01Icon}
                 strokeWidth={2}
               />
@@ -316,6 +317,7 @@ function NavMenuItem({
               return (
                 <SidebarMenuSubItem key={subItem.title}>
                   <SidebarMenuSubButton
+                    aria-current={isSubActive ? "page" : undefined}
                     aria-keyshortcuts={
                       childShortcutKey
                         ? `Alt+${childShortcutKey.toUpperCase()}`

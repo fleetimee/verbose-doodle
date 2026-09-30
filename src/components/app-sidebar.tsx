@@ -206,7 +206,7 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             url: getDeveloperToolHref(tool),
           })),
         title: category.name,
-      })),
+      })).filter((category) => category.items.length > 0),
     ],
     navSecondary: [
       {
