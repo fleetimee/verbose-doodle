@@ -10,6 +10,7 @@ import {
 
 function LocationInspector() {
   const location = useLocation();
+  // SAFETY: This fixture reads the return location written by ProtectedRoute.
   const from = (location.state as { from?: { pathname: string } } | null)?.from;
 
   return (

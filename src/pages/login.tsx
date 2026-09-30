@@ -37,6 +37,7 @@ export const Login = () => {
   const location = useLocation();
   const isManualLogout = hasManualLogout();
   const [searchParams, setSearchParams] = useSearchParams();
+  // SAFETY: Router state carries the optional return location; getSafeRedirectPath parses it before use.
   const redirectTarget = getSafeRedirectPath(
     (location.state as { from?: unknown } | null)?.from ??
       searchParams.get("redirect")

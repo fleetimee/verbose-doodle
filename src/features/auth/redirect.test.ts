@@ -35,6 +35,19 @@ describe("getSafeRedirectPath", () => {
     expect(getSafeRedirectPath("   ")).toBe("/dashboard");
   });
 
+  test("rejects malformed return locations without coercing their fields", () => {
+    expect(getSafeRedirectPath({ pathname: 42 })).toBe("/dashboard");
+    expect(getSafeRedirectPath({ pathname: "/dashboard", search: {} })).toBe(
+      "/dashboard"
+    );
+    expect(
+      getSafeRedirectPath({ pathname: "/dashboard", hash: ["#preview"] })
+    ).toBe("/dashboard");
+    expect(
+      getSafeRedirectPath({ pathname: "/dashboard", search: null, hash: null })
+    ).toBe("/dashboard");
+  });
+
   test("uses custom fallback when provided", () => {
     expect(getSafeRedirectPath(undefined, "/dashboard/overview")).toBe(
       "/dashboard/overview"

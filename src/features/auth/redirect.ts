@@ -1,8 +1,27 @@
+import { z } from "zod";
+
 export type RedirectLocation = {
   hash?: string;
   pathname: string;
   search?: string;
 };
+
+const redirectInputSchema = z.union([
+  z.string(),
+  z.object({
+    pathname: z.string(),
+    search: z.string().nullish(),
+    hash: z.string().nullish(),
+  }),
+]);
+
+type RedirectInput = Parameters<typeof redirectInputSchema.safeParse>[0];
+
+function isRedirectLocation(
+  value: z.infer<typeof redirectInputSchema>
+): value is Exclude<z.infer<typeof redirectInputSchema>, string> {
+  return typeof value === "object";
+}
 
 const DISALLOWED_TARGET_PREFIXES = ["//", "/\\"];
 const BLOCKED_TARGET_PATHS = new Set(["/login", "/logged-out", "/"]);
@@ -13,22 +32,17 @@ const QUERY_OR_HASH_REGEX = /[?#]/;
  * Falls back to a safe default (e.g. `/dashboard`) if the path is invalid, external, or causes a loop.
  */
 export function getSafeRedirectPath(
-  from: unknown,
+  from: RedirectInput,
   fallback = "/dashboard"
 ): string {
-  let target = "";
-
-  if (typeof from === "string") {
-    target = from;
-  } else if (
-    from &&
-    typeof from === "object" &&
-    "pathname" in from &&
-    typeof (from as { pathname: unknown }).pathname === "string"
-  ) {
-    const loc = from as RedirectLocation;
-    target = `${loc.pathname}${loc.search ?? ""}${loc.hash ?? ""}`;
+  const parsed = redirectInputSchema.safeParse(from);
+  if (!parsed.success) {
+    return fallback;
   }
+  const location = parsed.data;
+  let target = isRedirectLocation(location)
+    ? `${location.pathname}${location.search ?? ""}${location.hash ?? ""}`
+    : location;
 
   target = target.trim();
 
