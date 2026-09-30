@@ -32,9 +32,7 @@ describe("DeveloperToolsCatalog", () => {
         .getAttribute("href")
     ).toBe("/dashboard/developer-tools/json-yaml-converter");
     expect(
-      screen
-        .getByRole("link", { name: "Open Cron Tool" })
-        .getAttribute("href")
+      screen.getByRole("link", { name: "Open Cron Tool" }).getAttribute("href")
     ).toBe("/dashboard/developer-tools/cron-parser");
     expect(
       screen

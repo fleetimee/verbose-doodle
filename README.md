@@ -38,4 +38,3 @@ bun run preview     # Serve the production build locally
 - [Product scope and terminology](PRODUCT.md)
 - [Design system](DESIGN.md)
 - [Mascot references](docs/mascot.md)
-- [NFC reader bridge](tools/nfc-reader-bridge/README.md)

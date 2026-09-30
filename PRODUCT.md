@@ -44,7 +44,6 @@ Within the Biller Simulator domain, a **Biller** is a billing service represente
 - Test TCP client, TCP server, and UDP behavior.
 - Inspect authorized SOCKS relay activity for REST API and ISO 8583 traffic.
 - Use developer utilities for JSON/YAML conversion, JSON Schema validation, JWT inspection, cron parsing, number-base conversion, date conversion, and related integration tasks.
-- Inspect NFC reader data through the local NFC bridge tooling.
 - Preserve role-based access and the distinction between `ADMIN` and `USER` capabilities.
 - Treat each module as a distinct tool within Fleetime Labs rather than presenting every capability as part of the Biller Simulator module.
 

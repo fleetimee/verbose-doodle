@@ -75,8 +75,6 @@ export const overviewMessages = {
       baseLabel: "Konverter basis angka",
       dateDescription: "Konversi timestamp Unix, ISO 8601, dan zona waktu",
       dateLabel: "Tanggal & zona waktu",
-      nfcDescription: "Periksa dan dekode payload tag NFC mentah",
-      nfcLabel: "Inspektor NFC",
       socketsDescription: "Uji alur client/server TCP dan datagram UDP",
       socketsLabel: "Socket tester",
       socksRelayDescription:
@@ -109,7 +107,7 @@ export const overviewMessages = {
       activeResponseTemplates: "active response template",
     },
     replies: {
-      help: "Berikut slash command dan query yang tersedia:\n\n• /snapshot — Lihat cakupan dan metrik simulator\n• /endpoints — Tinjau endpoint dan method HTTP\n• /billers — Rincian endpoint berdasarkan biller\n• /missing — Cari endpoint tanpa response template aktif\n• /tools — Buka 8 integration tool developer\n• /jwt, /iso8583, /schema, /json-yaml, /cron, /base, /date, /nfc — Buka developer tool tertentu\n• /sockets & /socks-relay — Buka workspace pengujian socket dan proxy\n• /users — Aktivitas account (Admin)\n• /refresh — Ambil overview terbaru\n• /clear — Reset chat",
+      help: "Berikut slash command dan query yang tersedia:\n\n• /snapshot — Lihat cakupan dan metrik simulator\n• /endpoints — Tinjau endpoint dan method HTTP\n• /billers — Rincian endpoint berdasarkan biller\n• /missing — Cari endpoint tanpa response template aktif\n• /tools — Buka 8 integration tool developer\n• /jwt, /iso8583, /schema, /json-yaml, /cron, /base, /date — Buka developer tool tertentu\n• /sockets & /socks-relay — Buka workspace pengujian socket dan proxy\n• /users — Aktivitas account (Admin)\n• /refresh — Ambil overview terbaru\n• /clear — Reset chat",
       jwt: "JWT Inspector memungkinkan Anda mendecode JSON Web Token, memeriksa Header dan Payload claims, serta memverifikasi signature kriptografi HS256/RS256 secara instan.",
       iso8583:
         "ISO 8583 Generator membantu membuat dan mensimulasikan financial transaction message, mengatur primary dan secondary bitmap, menguji MTI (0100, 0200, 0800), serta memeriksa packed byte stream.",
@@ -119,7 +117,6 @@ export const overviewMessages = {
       cron: "Cron Parser menguraikan cron expression 5-field dan 6-field (dengan seconds) ke bahasa sederhana serta menghitung 5 execution timestamp berikutnya.",
       base: "Number Base Converter menangani konversi real-time antara binary, octal, decimal, hexadecimal, dan base64 dengan dukungan signed 2's complement dan unsigned integer.",
       date: "Date & Timestamp Converter mengonversi Unix epoch seconds/milliseconds, string ISO 8601, dan custom timezone offset.",
-      nfc: "NFC Reader Inspector memproses scan stream contactless, mendecode NDEF text record, dan menampilkan raw hex dump untuk hardware simulation.",
       sockets:
         "Socket & Relay Workspace memungkinkan pengujian interaktif TCP client/server endpoint, UDP datagram flow, dan konfigurasi SOCKS5 proxy relay tunnel.",
       tools:

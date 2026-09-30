@@ -54,124 +54,6 @@ export const developerToolsMessages = {
   jwtInspectorTags: ["JWT", "Base64URL", "HMAC", "RSA", "ECDSA", "Ed25519"],
   listView: "List view",
   navigationGroup: "Developer Tools",
-  nfcBridgeConnectionStates: {
-    connected: "Connected",
-    connecting: "Connecting",
-    disconnected: "Disconnected",
-    error: "Connection error",
-    reconnecting: "Reconnecting",
-  },
-  nfcBridgeErrors: {
-    eventTypeMissing: "The bridge sent an event without a type.",
-    localBridgeUnavailable:
-      "The local bridge could not be reached. Start the bridge and retry.",
-    malformedJson: "The bridge sent malformed JSON.",
-    protocolUnsupported: "The bridge protocol version is not supported.",
-    unknownEvent: "The bridge sent an unknown event: {type}.",
-  },
-  nfcBridgeNotConnected:
-    "Connect to the local bridge to read its version and capabilities.",
-  nfcBridgeStatusLabel: "Bridge status",
-  nfcBridgeVersionLabel: "Protocol bridge",
-  nfcClearScan: "Clear scan",
-  nfcConnectBridge: "Connect bridge",
-  nfcCopied: "Copied",
-  nfcCopy: "Copy",
-  nfcCopyDecoded: "Copy decoded text",
-  nfcCopyFailed: "Copy failed",
-  nfcCopyRaw: "Copy raw NDEF",
-  nfcCopyRecord: "Copy record",
-  nfcCopyUid: "Copy tag UID",
-  nfcDisconnectBridge: "Disconnect",
-  nfcDownloadBridge: "Download bridge release",
-  nfcReaderCatalogDescription:
-    "Connect to a loopback bridge and inspect structured NDEF records from an ACS reader.",
-  nfcReaderDescription:
-    "Inspect each NDEF record from your ACS reader while the scan stays on your local bridge.",
-  nfcReaderDocumentDescription:
-    "Inspect local NFC scans, NDEF records, and ACS PC/SC reader health.",
-  nfcReaderDocumentKeywords: [
-    "NFC reader",
-    "ACS reader",
-    "PC/SC",
-    "WebSocket bridge",
-  ],
-  nfcReaderDocumentTitle: "NFC Reader Inspector",
-  nfcReaderEyebrow: "Hardware inspection / local bridge",
-  nfcReaderLimit: "Loopback WebSocket",
-  nfcReaderName: "NFC Reader Inspector",
-  nfcReaderNextStepDescription:
-    "Every scan keeps its raw NDEF message, record order, metadata, and decoded payloads visible so you can compare the tag with an integration fixture.",
-  nfcReaderNextStepTitle: "Structured inspection ready",
-  nfcReaderNotDetected:
-    "No compatible reader has reported itself to the bridge.",
-  nfcReaderRuntime: "Local Bun bridge",
-  nfcReaderStates: {
-    detected: "Reader detected",
-    "tag-detected": "Tag detected",
-    unavailable: "Reader unavailable",
-    waiting: "Waiting for tag",
-  },
-  nfcReaderStatusLabel: "Reader status",
-  nfcReaderTags: ["NFC", "PC/SC", "ACS", "WebSocket"],
-  nfcReaderTitle: "NFC Reader Inspector",
-  nfcReaderTransport: "LOOPBACK / WS",
-  nfcRetryBridge: "Retry connection",
-  nfcScanConnectionInterrupted:
-    "The local bridge connection was interrupted. Reconnecting…",
-  nfcScanConnectionUnavailable:
-    "The local bridge did not return. Check the bridge and retry manually.",
-  nfcScanDecodedLabel: "Decoded text",
-  nfcScanDecodingStatuses: {
-    decoded: "Text decoded",
-    malformed: "Malformed record",
-    "no-text": "No text record",
-    unsupported: "Unsupported record",
-  },
-  nfcScanDecodingStatusLabel: "Decode status",
-  nfcScanEmpty:
-    "Place an NDEF tag on the reader to populate the inspection surface.",
-  nfcScanNoDecodedText: "No human-readable text was decoded.",
-  nfcScanRawLabel: "Raw NDEF",
-  nfcScanRecordIdHexLabel: "Record ID hex",
-  nfcScanRecordIdLabel: "Record ID",
-  nfcScanRecordIdUnavailable: "No record ID",
-  nfcScanRecordLabel: "Record {index}",
-  nfcScanRecordPayloadHexLabel: "Payload hex",
-  nfcScanRecordPayloadLabel: "Decoded payload",
-  nfcScanRecordPayloadUnavailable: "No decoded payload",
-  nfcScanRecordRawLabel: "Raw record",
-  nfcScanRecordsLabel: "NDEF records",
-  nfcScanRecordTnfLabel: "TNF",
-  nfcScanRecordTypeHexLabel: "Type hex",
-  nfcScanRecordTypeLabel: "Type",
-  nfcScanSessionLabel: "Scan session",
-  nfcScanSessionStates: {
-    scanning: "Scanning",
-    stopped: "Stopped",
-  },
-  nfcScanTimestampLabel: "Captured",
-  nfcScanTitle: "Latest scan",
-  nfcScanUidLabel: "Tag UID",
-  nfcScanUidUnavailable: "The reader did not expose a UID.",
-  nfcScanWarningLabel: "Decode warning",
-  nfcStartScan: "Start scan",
-  nfcStopScan: "Stop scan",
-  nfcTour: {
-    bridgeDescription:
-      "Start here. The browser connects to the local bridge, which reports the ACS reader and keeps card data on this machine.",
-    bridgeTitle: "Connect the local bridge",
-    releaseDescription:
-      "Need the local connector? Open the v0.1.0 Gitea release to download the bridge for your platform and its helper files.",
-    releaseTitle: "Install the bridge release",
-    scanDescription:
-      "The latest NDEF payload, UID, decode status, and individual records appear here with copy actions for integration fixtures.",
-    scanTitle: "Inspect the latest scan",
-    sessionDescription:
-      "Start a session when the reader is ready, then stop it when you want to keep the current capture unchanged.",
-    sessionTitle: "Control the scan session",
-    startButton: "Take the NFC tour",
-  },
   numberBaseConverterDescription:
     "Convert exact 8-, 16-, 32-, and 64-bit values across binary, octal, decimal, and hexadecimal.",
   numberBaseConverterLimit: "64-bit exact",
@@ -197,7 +79,6 @@ export const developerToolsMessages = {
     "Convert binary, octal, decimal, and hexadecimal values.",
   cronParserSearchDescription:
     "Build cron schedules, explain expressions, and preview upcoming runs.",
-  nfcReaderSearchDescription: "Inspect NFC scans and NDEF records.",
   iso8583ParserSearchDescription:
     "Parse raw ISO 8583 streams and inspect fields.",
   showingCount: {

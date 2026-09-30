@@ -27,7 +27,6 @@ import {
   MessageSquareText,
   Network,
   Plug,
-  RadioReceiver,
   RefreshCw,
   SendHorizontal,
   ShieldAlert,
@@ -218,17 +217,6 @@ const slashCommands: SlashCommand[] = [
     id: "date",
     get label() {
       return messages.overview.chat.commands.dateLabel;
-    },
-  },
-  {
-    command: "/nfc",
-    get description() {
-      return messages.overview.chat.commands.nfcDescription;
-    },
-    icon: RadioReceiver,
-    id: "nfc",
-    get label() {
-      return messages.overview.chat.commands.nfcLabel;
     },
   },
   {

@@ -75,8 +75,6 @@ export const overviewMessages = {
       baseLabel: "Number base converter",
       dateDescription: "Convert Unix timestamps, ISO 8601, and timezones",
       dateLabel: "Date & timezone",
-      nfcDescription: "Inspect and decode raw NFC tag payloads",
-      nfcLabel: "NFC inspector",
       socketsDescription: "Test TCP client/server and UDP datagram flows",
       socketsLabel: "Socket tester",
       socksRelayDescription: "Inspect SOCKS5 proxy relay for REST and ISO 8583",
@@ -107,7 +105,7 @@ export const overviewMessages = {
       activeResponseTemplates: "active response templates",
     },
     replies: {
-      help: "Here are the available slash commands and queries you can run:\n\n• /snapshot — View complete simulator coverage and metrics\n• /endpoints — Review configured endpoints and HTTP methods\n• /billers — Breakdown of endpoints grouped by biller\n• /missing — Find endpoints without active response templates\n• /tools — Open the 8 developer integration tools\n• /jwt, /iso8583, /schema, /json-yaml, /cron, /base, /date, /nfc — Jump to specific developer tools\n• /sockets & /socks-relay — Socket and proxy test workspaces\n• /users — Account activity (Admin)\n• /refresh — Fetch latest overview snapshot\n• /clear — Reset chat conversation",
+      help: "Here are the available slash commands and queries you can run:\n\n• /snapshot — View complete simulator coverage and metrics\n• /endpoints — Review configured endpoints and HTTP methods\n• /billers — Breakdown of endpoints grouped by biller\n• /missing — Find endpoints without active response templates\n• /tools — Open the 8 developer integration tools\n• /jwt, /iso8583, /schema, /json-yaml, /cron, /base, /date — Jump to specific developer tools\n• /sockets & /socks-relay — Socket and proxy test workspaces\n• /users — Account activity (Admin)\n• /refresh — Fetch latest overview snapshot\n• /clear — Reset chat conversation",
       jwt: "The JWT Inspector allows you to decode JSON Web Tokens, inspect Header and Payload claims, and verify HS256/RS256 cryptographic signatures with instant validation.",
       iso8583:
         "The ISO 8583 Generator helps you construct and simulate financial transaction messages, configure primary and secondary bitmaps, test MTIs (0100, 0200, 0800), and inspect packed byte streams.",
@@ -117,7 +115,6 @@ export const overviewMessages = {
       cron: "The Cron Parser breaks down 5-field and 6-field (with seconds) cron expressions into plain language and calculates the next 5 scheduled execution timestamps.",
       base: "The Number Base Converter handles real-time conversions across binary, octal, decimal, hexadecimal, and base64 formats with signed 2's complement and unsigned integer support.",
       date: "The Date & Timestamp Converter translates between Unix epoch seconds/milliseconds, ISO 8601 strings, and custom timezone offsets.",
-      nfc: "The NFC Reader Inspector processes contactless scan streams, decoding NDEF text records and displaying raw hex dumps for hardware simulation.",
       sockets:
         "The Socket & Relay Workspace allows you to interactively test TCP client/server endpoints, UDP datagram flows, and configure SOCKS5 proxy relay tunnels.",
       tools:

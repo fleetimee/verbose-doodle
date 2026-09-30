@@ -149,11 +149,6 @@ const loadCronParser: DeveloperToolLoader = () =>
     default: CronParserPage,
   }));
 
-const loadNfcReaderInspector: DeveloperToolLoader = () =>
-  import("@/pages/dashboard/nfc-reader-inspector").then(
-    ({ NfcReaderInspectorPage }) => ({ default: NfcReaderInspectorPage })
-  );
-
 export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
   {
     categoryId: "validation",
@@ -377,38 +372,6 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     },
     get tags() {
       return messages.developerTools.cronParserTags;
-    },
-  },
-  {
-    categoryId: "inspection",
-    get description() {
-      return messages.developerTools.nfcReaderCatalogDescription;
-    },
-    get document() {
-      return {
-        description: messages.developerTools.nfcReaderDocumentDescription,
-        keywords: messages.developerTools.nfcReaderDocumentKeywords,
-        title: messages.developerTools.nfcReaderDocumentTitle,
-      };
-    },
-    icon: RadioReceiver,
-    id: "nfc-reader-inspector",
-    get searchDescription() {
-      return messages.developerTools.nfcReaderSearchDescription;
-    },
-    get limit() {
-      return messages.developerTools.nfcReaderLimit;
-    },
-    load: loadNfcReaderInspector,
-    get name() {
-      return messages.developerTools.nfcReaderName;
-    },
-    path: "developer-tools/nfc-reader-inspector",
-    get runtime() {
-      return messages.developerTools.nfcReaderRuntime;
-    },
-    get tags() {
-      return messages.developerTools.nfcReaderTags;
     },
   },
   {

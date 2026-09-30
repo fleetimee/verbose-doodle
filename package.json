@@ -9,10 +9,6 @@
     "fix": "ultracite fix",
     "lint": "ultracite check",
     "lint:oxlint": "oxlint",
-    "nfc-bridge": "bun tools/nfc-reader-bridge/cli.ts",
-    "nfc-bridge:build": "bun tools/nfc-reader-bridge/release.ts build",
-    "nfc-bridge:compile": "bun run nfc-bridge:build",
-    "nfc-bridge:smoke": "bun tools/nfc-reader-bridge/release.ts smoke",
     "preview": "vite preview",
     "test": "bun test --isolate",
     "test:coverage": "bun test --isolate --coverage",
@@ -91,11 +87,5 @@
     "typescript": "7.0.2",
     "ultracite": "7.12.2",
     "vite": "^8.3.1"
-  },
-  "optionalDependencies": {
-    "@pokusew/pcsclite": "^0.6.0"
-  },
-  "trustedDependencies": [
-    "@pokusew/pcsclite"
-  ]
+  }
 }

@@ -82,7 +82,6 @@ type ConsolePath =
   | "/dashboard/developer-tools/json-schema-validator"
   | "/dashboard/developer-tools/json-yaml-converter"
   | "/dashboard/developer-tools/jwt-inspector"
-  | "/dashboard/developer-tools/nfc-reader-inspector"
   | "/dashboard/developer-tools/number-base-converter"
   | "/dashboard/endpoints"
   | "/dashboard/socket-test/tcp-client"
@@ -96,7 +95,6 @@ type ChatActionId =
   | "endpoints"
   | "iso8583"
   | "jwt"
-  | "nfc"
   | "schema"
   | "socket-tester"
   | "socks-relay"
@@ -262,17 +260,6 @@ const allChatActions: Record<ChatActionId, ChatAction> = {
     },
     to: "/dashboard/developer-tools/jwt-inspector",
   },
-  nfc: {
-    get description() {
-      return messages.overview.chat.commands.nfcDescription;
-    },
-    icon: RadioReceiver,
-    id: "nfc",
-    get label() {
-      return messages.overview.chat.commands.nfcLabel;
-    },
-    to: "/dashboard/developer-tools/nfc-reader-inspector",
-  },
   schema: {
     get description() {
       return messages.overview.chat.commands.schemaDescription;
@@ -345,7 +332,6 @@ const baseQueryPattern =
   /(^\/base\b|number base|binary|hexadecimal|hex converter|base64)/i;
 const dateQueryPattern =
   /(^\/date\b|date converter|unix time|epoch|timestamp|timezone)/i;
-const nfcQueryPattern = /(^\/nfc\b|nfc|ndef|contactless|smartcard)/i;
 const socketsQueryPattern =
   /(^\/sockets?\b|socket|tcp|udp|socket tester|datagram)/i;
 const socksRelayQueryPattern =
@@ -645,15 +631,6 @@ function getToolReply(query: string): ChatReply | undefined {
       cardType: "tool-detail",
       selectedToolId: "date-converter",
       text: messages.overview.chat.replies.date,
-    };
-  }
-
-  if (nfcQueryPattern.test(query)) {
-    return {
-      actions: [allChatActions.nfc, allChatActions["developer-tools"]],
-      cardType: "tool-detail",
-      selectedToolId: "nfc-reader-inspector",
-      text: messages.overview.chat.replies.nfc,
     };
   }
 
