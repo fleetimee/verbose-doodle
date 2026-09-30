@@ -32,13 +32,13 @@ function tx(db, mode, fn) {
 function b64(u8) { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); }
 function unb64(s) { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
 const TA = { Uint8Array, Uint16Array, Int16Array, Uint32Array };
-function lsEncode(v) {
+export function lsEncode(v) {
   return JSON.stringify(v, (k, x) => {
     if (x && TA[x.constructor && x.constructor.name] && ArrayBuffer.isView(x)) return { __ta: x.constructor.name, d: b64(new Uint8Array(x.buffer, x.byteOffset, x.byteLength)) };
     return x;
   });
 }
-function lsDecode(s) {
+export function lsDecode(s) {
   return JSON.parse(s, (k, x) => {
     if (x && x.__ta) { const u = unb64(x.d); return new TA[x.__ta](u.buffer); }
     return x;
@@ -66,6 +66,33 @@ export async function listKeys(prefix) {
   if (db) { try { const ks = await tx(db, 'readonly', st => st.getAllKeys()); for (const k of ks || []) if (String(k).startsWith(prefix)) out.add(String(k)); } catch (e) { /* ignore */ } }
   try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(LS + prefix)) out.add(k.slice(LS.length)); } } catch (e) { /* ignore */ }
   return [...out];
+}
+
+// Backup imports insert copies in one transaction, never overwrite live saves.
+export async function insertBackup(entries) {
+  const db = await openDB();
+  if (db) {
+    await new Promise((resolve, reject) => {
+      const t = db.transaction(STORE, 'readwrite');
+      const store = t.objectStore(STORE);
+      for (const [key, value] of entries) store.add(value, key);
+      t.oncomplete = resolve;
+      t.onerror = () => reject(t.error);
+      t.onabort = () => reject(t.error);
+    });
+    return;
+  }
+  const written = [];
+  try {
+    for (const [key, value] of entries) {
+      if (localStorage.getItem(LS + key) !== null) throw new Error('Save ID already exists.');
+      localStorage.setItem(LS + key, lsEncode(value));
+      written.push(key);
+    }
+  } catch (error) {
+    for (const key of written) localStorage.removeItem(LS + key);
+    throw error;
+  }
 }
 
 // ---- RLE: pairs of (value, runLength) packed in a Uint16Array (or Uint32 for large values)

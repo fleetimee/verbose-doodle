@@ -4,6 +4,43 @@ export const commonMessages = {
   gameFullscreenUnsupported: "Layar penuh tidak tersedia di peramban ini.",
   gameFullscreenFailed: "Tidak dapat membuka layar penuh. Coba lagi.",
 
+  backupSource: "Tersimpan di peramban ini",
+  backupClearGroup: "Hapus pilihan {group}",
+  backupSelectGroup: "Pilih semua {group}",
+  backupClear: "Hapus pilihan",
+  backupSelectAll: "Pilih semua",
+  backupNoneSelected: "Belum ada data yang dipilih",
+  backupSelectionCount: "{count} dipilih",
+  backupImporting: "Mengimpor…",
+  backupExporting: "Mengekspor…",
+
+  backupInfo: "Tentang ekspor dan impor",
+  backupImportSelected: "Impor yang dipilih",
+  backupExportSelected: "Ekspor yang dipilih",
+  backupNoSaves: "Tidak ada data tersimpan.",
+  backupWorlds: "Dunia",
+  backupCharacters: "Karakter",
+  backupImportHint:
+    "Pilih data yang ingin dipulihkan dari cadangan ini. Data yang dipilih akan ditambahkan sebagai salinan.",
+  backupImportTitle: "Impor data tersimpan",
+  backupExportTitle: "Ekspor data tersimpan",
+  backupSelectHint: "Pilih karakter atau dunia yang ingin diekspor.",
+  backupActions: "Cadangan gim",
+  backupExport: "Ekspor",
+  backupImport: "Impor",
+  backupHint: "Pilih karakter atau dunia untuk diekspor atau diimpor.",
+  backupBusy:
+    "Gim masih memuat atau pencadangan sedang berjalan. Coba lagi sebentar.",
+  backupMenuRequired: "Kembali ke menu gim sebelum mengimpor cadangan.",
+  backupInvalid:
+    "Pilih berkas JSON cadangan Terrabrowser yang valid, maksimal 50 MB.",
+  backupStorageFailed:
+    "Impor gagal. Periksa ruang penyimpanan peramban dan coba lagi.",
+  backupSaveFailed:
+    "Gim saat ini tidak dapat disimpan. Kosongkan ruang penyimpanan peramban dan coba lagi.",
+  backupFailed: "Pencadangan gagal. Coba lagi.",
+  backupImported: "Data yang dipilih diimpor sebagai salinan.",
+
   terrabrowserTitle: "Terrabrowser",
   terrabrowserDescription: "Gali, bangun, dan jelajahi dunia sandbox 2D.",
   fallLineDescription: "Gim ski freeride.",

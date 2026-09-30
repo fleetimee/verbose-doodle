@@ -54,6 +54,7 @@ import { initTime, updateTime, updateEvents, skyState, detectZone } from './even
 import { createUI, uiUpdate, uiDraw, menuUpdate, menuDraw, initMap, randomLook } from './ui.js';
 import { solidAt } from './world.js';
 import { migrateChar } from './items.js';
+import { exportBackup, importBackup, listBackupSaves, describeBackup, parseBackup } from './backup.js';
 
 const canvas = document.getElementById('game');
 const input = createInput(canvas);
@@ -132,6 +133,7 @@ async function saveGame(auto) {
   const ok2 = await putData('wmeta:' + wd.id, meta);
   const ok3 = await putData('char:' + G.player.id, charData(G.player));
   G.msg(ok1 && ok2 && ok3 ? 'World saved.' : 'Saving failed (storage full or unavailable).', ok1 && ok2 && ok3 ? '#96ff96' : '#ff8080');
+  return ok1 && ok2 && ok3;
 }
 
 G.actions = {
@@ -184,6 +186,43 @@ G.actions = {
     await G.actions.refreshLists();
   },
   saveSettings() { try { localStorage.setItem('tb:settings', JSON.stringify(settings)); } catch (e) { /* storage unavailable */ } },
+};
+
+let backupBusy = false;
+window.terrabrowserBackup = {
+  list: listBackupSaves,
+  inspect(text) {
+    if (G.state !== 'menu') throw new Error('backupMenuRequired');
+    try { return describeBackup(parseBackup(text)); }
+    catch { throw new Error('backupInvalid'); }
+  },
+  async export(selection) {
+    if (!selection) throw new Error('backupSelectionRequired');
+    if (backupBusy || (G.state === 'menu' && G.menu.screen === 'loading')) throw new Error('backupBusy');
+    backupBusy = true;
+    const paused = G.ui.pause;
+    G.ui.pause = true;
+    try {
+      if (G.state === 'play' && !await saveGame(false)) throw new Error('backupSaveFailed');
+      return await exportBackup(selection);
+    } finally { G.ui.pause = paused; backupBusy = false; }
+  },
+  async import(text, selection) {
+    if (!selection) throw new Error('backupSelectionRequired');
+    if (backupBusy || (G.state === 'menu' && G.menu.screen === 'loading')) throw new Error('backupBusy');
+    if (G.state !== 'menu') throw new Error('backupMenuRequired');
+    backupBusy = true;
+    try {
+      let result;
+      try { result = await importBackup(text, selection); }
+      catch (error) {
+        if (error.message === 'backupSelectionRequired') throw error;
+        throw new Error(error.message === 'Invalid Terrabrowser backup.' || error instanceof SyntaxError ? 'backupInvalid' : 'backupStorageFailed');
+      }
+      await G.actions.refreshLists();
+      return result;
+    } finally { backupBusy = false; }
+  },
 };
 
 // ------------------------------------------------------------------ loop

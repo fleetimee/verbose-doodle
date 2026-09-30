@@ -4,6 +4,42 @@ export const commonMessages = {
   gameFullscreenUnsupported: "Fullscreen is unavailable in this browser.",
   gameFullscreenFailed: "Could not enter fullscreen. Try again.",
 
+  backupSource: "Saved in this browser",
+  backupClearGroup: "Clear {group} selection",
+  backupSelectGroup: "Select all {group}",
+  backupClear: "Clear",
+  backupSelectAll: "Select all",
+  backupNoneSelected: "No saves selected",
+  backupSelectionCount: "{count} selected",
+  backupImporting: "Importing…",
+  backupExporting: "Exporting…",
+
+  backupInfo: "About export and import",
+  backupImportSelected: "Import selected",
+  backupExportSelected: "Export selected",
+  backupNoSaves: "No saves available.",
+  backupWorlds: "Worlds",
+  backupCharacters: "Characters",
+  backupImportHint:
+    "Choose what to restore from this backup. Selected saves will be added as copies.",
+  backupImportTitle: "Import saves",
+  backupExportTitle: "Export saves",
+  backupSelectHint: "Select the characters or worlds you want to export.",
+  backupActions: "Game backups",
+  backupExport: "Export",
+  backupImport: "Import",
+  backupHint: "Choose characters or worlds to export or import.",
+  backupBusy:
+    "The game is still loading or a backup is in progress. Try again shortly.",
+  backupMenuRequired: "Return to the game menu before importing a backup.",
+  backupInvalid: "Choose a valid Terrabrowser backup JSON file, up to 50 MB.",
+  backupStorageFailed:
+    "Import failed. Check available browser storage and try again.",
+  backupSaveFailed:
+    "The current game could not be saved. Free browser storage and try again.",
+  backupFailed: "Backup failed. Try again.",
+  backupImported: "Selected saves imported as copies.",
+
   terrabrowserTitle: "Terrabrowser",
   terrabrowserDescription: "Dig, build, and explore a 2D sandbox world.",
   fallLineDescription: "Freeride skiing game.",
