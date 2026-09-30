@@ -570,10 +570,10 @@ export function createHttpEndpointAdapter(
         payload.biller_slug = input.changes.billerSlug;
       }
 
-      const response = await transport.patch<RawApiInput, UpdateEndpointPayload>(
-        API_ENDPOINTS.admin.endpoints.update(input.endpointSlug),
-        payload
-      );
+      const response = await transport.patch<
+        RawApiInput,
+        UpdateEndpointPayload
+      >(API_ENDPOINTS.admin.endpoints.update(input.endpointSlug), payload);
       return endpointFromResponse(response);
     },
     async updateResponse(input) {

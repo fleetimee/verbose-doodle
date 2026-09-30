@@ -71,23 +71,23 @@ export function parseJwt(token: string): ParsedJwt {
     };
   }
 
-function isClaimsRecord(value: unknown): value is JwtClaimsObject {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
+  function isClaimsRecord(value: unknown): value is JwtClaimsObject {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
 
-function isString(value: unknown): value is string {
-  return typeof value === "string";
-}
+  function isString(value: unknown): value is string {
+    return typeof value === "string";
+  }
 
   try {
     const headerStr = base64UrlDecode(parts[0]);
     const payloadStr = base64UrlDecode(parts[1]);
     const headerParsed: unknown = JSON.parse(headerStr);
     const payloadParsed: unknown = JSON.parse(payloadStr);
-    if (!isClaimsRecord(headerParsed) || !isClaimsRecord(payloadParsed)) {
+    if (!(isClaimsRecord(headerParsed) && isClaimsRecord(payloadParsed))) {
       throw new Error(messages.jwtInspector.errors.headerPayloadObjects);
     }
-    if (!isString(headerParsed.alg) || !headerParsed.alg) {
+    if (!(isString(headerParsed.alg) && headerParsed.alg)) {
       throw new Error(messages.jwtInspector.errors.headerAlgRequired);
     }
     const header = headerParsed;

@@ -76,8 +76,7 @@ function decodeToken(
   try {
     const payload = jwtDecode<JwtPayload>(token);
     if (
-      !isString(payload.user_id) ||
-      !isString(payload.username) ||
+      !(isString(payload.user_id) && isString(payload.username)) ||
       (payload.role !== "ADMIN" && payload.role !== "USER")
     ) {
       return null;

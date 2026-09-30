@@ -490,16 +490,16 @@ export function LegacyIso8583Generator() {
                   <SelectValue>{HEADER_LABELS[headerType]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {(
+                  {
                     // SAFETY: HEADER_LABELS is defined for every ISO 8583 header type.
-                    Object.keys(HEADER_LABELS) as Iso8583HeaderType[]
-                  ).map(
-                    (value) => (
-                      <SelectItem key={value} value={value}>
-                        {HEADER_LABELS[value]}
-                      </SelectItem>
+                    (Object.keys(HEADER_LABELS) as Iso8583HeaderType[]).map(
+                      (value) => (
+                        <SelectItem key={value} value={value}>
+                          {HEADER_LABELS[value]}
+                        </SelectItem>
+                      )
                     )
-                  )}
+                  }
                 </SelectContent>
               </Select>
             </div>

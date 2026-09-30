@@ -76,9 +76,7 @@ function isMessageString(value: MessageValue): value is string {
   return typeof value === "string";
 }
 
-function isMessageObject(
-  value: MessageValue
-): value is Record<string, string> {
+function isMessageObject(value: MessageValue): value is Record<string, string> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 

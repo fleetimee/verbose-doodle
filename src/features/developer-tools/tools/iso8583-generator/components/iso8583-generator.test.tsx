@@ -28,8 +28,8 @@ describe("Iso8583Generator", () => {
     ).toBeDefined();
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 7 Transmission date / time",
-        }).value
+        name: "Bit 7 Transmission date / time",
+      }).value
     ).toBe("0901080037");
     expect(
       screen.getByRole("combobox", {
@@ -50,8 +50,8 @@ describe("Iso8583Generator", () => {
     expect(screen.getByRole("heading", { name: "Raw message" })).toBeDefined();
     expect(
       screen.getByRole<HTMLTextAreaElement>("textbox", {
-          name: "Raw stream",
-        }).value
+        name: "Raw stream",
+      }).value
     ).toMatch(RAW_STREAM_0800_PATTERN);
     expect(
       screen.getByRole("heading", { name: "Bitmap Inspector" })
@@ -114,13 +114,13 @@ describe("Iso8583Generator", () => {
 
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 7 Transmission date / time",
-        }).value
+        name: "Bit 7 Transmission date / time",
+      }).value
     ).not.toBe("0901080037");
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 11 System trace audit number",
-        }).value
+        name: "Bit 11 System trace audit number",
+      }).value
     ).toBe("003646");
     expect(
       screen.getByRole("button", { name: "View raw message" })
@@ -149,7 +149,9 @@ describe("Iso8583Generator", () => {
     await user.click(
       screen.getByRole("button", { name: "Generate raw message" })
     );
-    const first = screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Raw stream" }).value;
+    const first = screen.getByRole<HTMLTextAreaElement>("textbox", {
+      name: "Raw stream",
+    }).value;
     expect(first).toContain("0102030405123456");
     await user.click(screen.getByRole("button", { name: "Close" }));
     await user.click(
@@ -157,8 +159,8 @@ describe("Iso8583Generator", () => {
     );
     expect(
       screen.getByRole<HTMLTextAreaElement>("textbox", {
-          name: "Raw stream",
-        }).value
+        name: "Raw stream",
+      }).value
     ).toBe(first);
   });
 
@@ -178,8 +180,8 @@ describe("Iso8583Generator", () => {
     await user.click(screen.getByRole("tab", { name: "0800 Sign-On" }));
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 11 System trace audit number",
-        }).value
+        name: "Bit 11 System trace audit number",
+      }).value
     ).toBe("123456");
     expect(
       screen
@@ -189,14 +191,14 @@ describe("Iso8583Generator", () => {
     await user.click(screen.getByRole("button", { name: "Reset fields" }));
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 11 System trace audit number",
-        }).value
+        name: "Bit 11 System trace audit number",
+      }).value
     ).toBe("003645");
     await user.click(screen.getByRole("tab", { name: "0200 Transaction" }));
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 11 System trace audit number",
-        }).value
+        name: "Bit 11 System trace audit number",
+      }).value
     ).toBe("654321");
   });
 
@@ -214,8 +216,8 @@ describe("Iso8583Generator", () => {
     ).toContain("Exactly 6 digits.");
     expect(
       screen.getByRole<HTMLButtonElement>("button", {
-          name: "Generate raw message",
-        }).disabled
+        name: "Generate raw message",
+      }).disabled
     ).toBe(true);
     await user.click(
       screen.getByRole("button", { name: "Go to invalid field" })
@@ -225,8 +227,8 @@ describe("Iso8583Generator", () => {
     expect(stan.getAttribute("aria-invalid")).toBeNull();
     expect(
       screen.getByRole<HTMLButtonElement>("button", {
-          name: "Generate raw message",
-        }).disabled
+        name: "Generate raw message",
+      }).disabled
     ).toBe(false);
   });
 
@@ -273,8 +275,8 @@ describe("Iso8583Generator", () => {
     ).toBeNull();
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 60 Reserved private data",
-        }).value
+        name: "Bit 60 Reserved private data",
+      }).value
     ).toBe("TEST");
   });
 
@@ -325,7 +327,9 @@ describe("Iso8583Generator", () => {
     await user.click(
       screen.getByRole("button", { name: "Generate raw message" })
     );
-    const original = screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Raw stream" }).value;
+    const original = screen.getByRole<HTMLTextAreaElement>("textbox", {
+      name: "Raw stream",
+    }).value;
     await user.click(screen.getByRole("button", { name: "Close" }));
     fireEvent.change(screen.getByRole("textbox", { name: "Search fields" }), {
       target: { value: "trace" },
@@ -343,15 +347,15 @@ describe("Iso8583Generator", () => {
     );
     expect(
       screen.getByRole<HTMLTextAreaElement>("textbox", {
-          name: "Raw stream",
-        }).value
+        name: "Raw stream",
+      }).value
     ).toBe(original);
     await user.click(screen.getByRole("button", { name: "Close" }));
     await user.click(screen.getByRole("button", { name: "Clear filters" }));
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 7 Transmission date / time",
-        }).value
+        name: "Bit 7 Transmission date / time",
+      }).value
     ).toBe("0901080037");
   });
 
@@ -400,8 +404,8 @@ describe("Iso8583Generator", () => {
     ).toBe("false");
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 62 Reserved private data",
-        }).disabled
+        name: "Bit 62 Reserved private data",
+      }).disabled
     ).toBe(true);
   });
 
@@ -413,13 +417,13 @@ describe("Iso8583Generator", () => {
 
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 41 Card acceptor terminal ID",
-        }).value
+        name: "Bit 41 Card acceptor terminal ID",
+      }).value
     ).toBe("TERM0001");
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 43 Card acceptor name / location",
-        }).value
+        name: "Bit 43 Card acceptor name / location",
+      }).value
     ).toBe("MERCHANT TEST 01          YOGYAKARTA IDN");
   });
 
@@ -464,8 +468,8 @@ describe("Iso8583Generator", () => {
 
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 12 Local transaction time",
-        }).value
+        name: "Bit 12 Local transaction time",
+      }).value
     ).toBe("142530");
     expect(
       screen.getByRole("button", { name: "Pick value for bit 13" })
@@ -500,8 +504,8 @@ describe("Iso8583Generator", () => {
 
     expect(
       screen.getByRole<HTMLTextAreaElement>("textbox", {
-          name: "Raw stream",
-        }).value
+        name: "Raw stream",
+      }).value
     ).toMatch(RAW_STREAM_DISABLED_70_PATTERN);
   });
 
@@ -679,8 +683,8 @@ describe("Iso8583Generator", () => {
     ).toBeDefined();
     expect(
       screen.getByRole<HTMLInputElement>("textbox", {
-          name: "Bit 48 Private Data Custom",
-        }).value
+        name: "Bit 48 Private Data Custom",
+      }).value
     ).toBe("TEST48VAL");
   });
 });

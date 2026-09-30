@@ -63,7 +63,9 @@ describe("JsonYamlConverter", () => {
     renderConverter();
 
     await user.click(screen.getByRole("button", { name: "Convert" }));
-    const output = screen.getByRole<HTMLTextAreaElement>("textbox", { name: "Output YAML" });
+    const output = screen.getByRole<HTMLTextAreaElement>("textbox", {
+      name: "Output YAML",
+    });
     expect(output.getAttribute("readonly")).not.toBeNull();
     expect(output.value).toContain("customer:");
 
@@ -85,9 +87,7 @@ describe("JsonYamlConverter", () => {
         new KeyboardEvent("keydown", { key: "Enter", metaKey: true })
       );
     });
-    await waitFor(() =>
-      expect(output.value).toContain("ok: true")
-    );
+    await waitFor(() => expect(output.value).toContain("ok: true"));
 
     const fetchMock = mock(async () => new Response());
     // SAFETY: Test mock fulfills fetch without Bun-specific preconnect
@@ -113,7 +113,9 @@ describe("JsonYamlConverter", () => {
   test("switches direction and swaps a successful output into the source", async () => {
     const user = userEvent.setup();
     renderConverter();
-    const swap = screen.getByRole<HTMLButtonElement>("button", { name: "Swap" });
+    const swap = screen.getByRole<HTMLButtonElement>("button", {
+      name: "Swap",
+    });
     expect(swap.disabled).toBeTrue();
 
     await user.click(screen.getByRole("combobox", { name: "Source format" }));
@@ -130,13 +132,13 @@ describe("JsonYamlConverter", () => {
     await user.click(swap);
     expect(
       screen.getByRole<HTMLTextAreaElement>("textbox", {
-          name: "Source JSON",
-        }).value
+        name: "Source JSON",
+      }).value
     ).toBe('{\n  "name": "Ayu"\n}');
     expect(
       screen.getByRole<HTMLTextAreaElement>("textbox", {
-          name: "Output YAML",
-        }).value
+        name: "Output YAML",
+      }).value
     ).toBe("");
     expect(swap.disabled).toBeTrue();
   });
@@ -150,7 +152,9 @@ describe("JsonYamlConverter", () => {
     });
     renderConverter();
 
-    const copy = screen.getByRole<HTMLButtonElement>("button", { name: "Copy output" });
+    const copy = screen.getByRole<HTMLButtonElement>("button", {
+      name: "Copy output",
+    });
     expect(copy.disabled).toBeTrue();
     await user.click(screen.getByRole("button", { name: "Convert" }));
     await user.click(copy);
@@ -174,20 +178,20 @@ describe("JsonYamlConverter", () => {
     await user.click(screen.getByRole("button", { name: "Clear" }));
     expect(
       screen.getByRole<HTMLTextAreaElement>("textbox", {
-          name: "Source JSON",
-        }).value
+        name: "Source JSON",
+      }).value
     ).toBe("");
     expect(
       screen.getByRole<HTMLTextAreaElement>("textbox", {
-          name: "Output YAML",
-        }).value
+        name: "Output YAML",
+      }).value
     ).toBe("");
 
     await user.click(screen.getByRole("button", { name: "Reset example" }));
     expect(
       screen.getByRole<HTMLTextAreaElement>("textbox", {
-          name: "Source JSON",
-        }).value
+        name: "Source JSON",
+      }).value
     ).toContain('"customer"');
   });
 });

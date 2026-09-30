@@ -114,11 +114,11 @@ export async function signJwt(
 ): Promise<string> {
   const h: unknown = JSON.parse(header);
   const p: unknown = JSON.parse(payload);
-  if (!isClaimsRecord(h) || !isClaimsRecord(p)) {
+  if (!(isClaimsRecord(h) && isClaimsRecord(p))) {
     throw new Error(messages.jwtInspector.errors.headerPayloadObjects);
   }
   const alg = h.alg;
-  if (!isString(alg) || !isSupportedAlgorithm(alg)) {
+  if (!(isString(alg) && isSupportedAlgorithm(alg))) {
     throw new Error(messages.jwtInspector.errors.unsupportedAlgorithm);
   }
   if (!isCryptoAvailable()) {

@@ -99,7 +99,9 @@ const MORE_PRESET_IDS: readonly Iso8583PresetId[] = [
   "notification-response",
 ];
 
-function isUpdater<T>(update: SetStateAction<T>): update is (prevState: T) => T {
+function isUpdater<T>(
+  update: SetStateAction<T>
+): update is (prevState: T) => T {
   return typeof update === "function";
 }
 
@@ -724,8 +726,7 @@ export function Iso8583Generator() {
   const setFields = (update: SetStateAction<Iso8583Field[]>) => {
     setDrafts((current) => ({
       ...current,
-      [presetId]:
-        isUpdater(update) ? update(current[presetId] ?? []) : update,
+      [presetId]: isUpdater(update) ? update(current[presetId] ?? []) : update,
     }));
     invalidateOutput();
   };
