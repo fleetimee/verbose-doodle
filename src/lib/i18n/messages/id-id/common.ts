@@ -1,4 +1,6 @@
 export const commonMessages = {
+  buildYourTownTitle: "Build Your Town",
+  buildYourTownDescription: "Bangun dan kelola kotamu yang terus berkembang.",
   emberwakeTitle: "Emberwake",
   emberwakeDescription: "Jaga lentera tetap menyala dan bertahan hingga fajar.",
   ponpokoKartTitle: "Ponpoko Kart",

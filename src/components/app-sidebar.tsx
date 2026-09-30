@@ -236,6 +236,12 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             title: messages.common.emberwakeTitle,
             url: "/dashboard/games/emberwake",
           },
+          {
+            icon: LayoutGrid,
+            description: messages.common.buildYourTownDescription,
+            title: messages.common.buildYourTownTitle,
+            url: "/dashboard/games/build-your-town",
+          },
         ],
       },
     ],

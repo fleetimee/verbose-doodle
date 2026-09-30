@@ -1,0 +1,5 @@
+BuildYourTown by Rapsody09 / Erwann
+https://github.com/Rapsody09/buildyourtown
+Source commit: d12a19973a331e392ac8db80cedb9ec0e18c1444
+Local changes: relative Vite base, remove Google Fonts requests, add shared game activity script.
+The upstream repository contains no license file or declared package license at this revision.
