@@ -11,7 +11,7 @@ export const developerToolsMessages = {
   converterRuntime: "Browser only",
   converterTags: ["JSON", "YAML 1.2", "Local conversion"],
   cronParserDescription:
-    "Explain five- or six-field Unix cron expressions and preview the next five runs in any IANA timezone.",
+    "Build a Unix cron schedule or inspect an expression, with the next five runs in any IANA timezone.",
   cronParserLimit: "5 or 6 fields",
   cronParserRuntime: "Browser only",
   cronParserTags: ["Cron", "Timezones", "Run preview"],
@@ -196,7 +196,7 @@ export const developerToolsMessages = {
   numberBaseConverterSearchDescription:
     "Convert binary, octal, decimal, and hexadecimal values.",
   cronParserSearchDescription:
-    "Explain cron expressions and preview upcoming runs.",
+    "Build cron schedules, explain expressions, and preview upcoming runs.",
   nfcReaderSearchDescription: "Inspect NFC scans and NDEF records.",
   iso8583ParserSearchDescription:
     "Parse raw ISO 8583 streams and inspect fields.",

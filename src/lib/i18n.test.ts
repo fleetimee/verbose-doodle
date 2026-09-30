@@ -49,7 +49,7 @@ describe("i18n multilingual support", () => {
     expect(idMessages.socketTester.documentTitle).toBe("Socket Tester");
     expect(idMessages.socksRelay.documentTitle).toBe("SOCKS Relay");
     expect(idMessages.jwtInspector.title).toBe("JWT Inspector");
-    expect(idMessages.cronParser.title).toBe("Cron Parser");
+    expect(idMessages.cronParser.title).toBe("Cron Tool");
     expect(idMessages.dateConverter.title).toBe("Date Converter");
     expect(idMessages.numberBaseConverter.title).toBe("Number Base Converter");
     expect(idMessages.jsonYamlConverter.title).toBe("JSON/YAML Converter");

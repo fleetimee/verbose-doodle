@@ -1,8 +1,45 @@
 export const cronParserMessages = {
+  builder: {
+    preview: "Preview",
+    modeLabel: "Input mode",
+    expressionMode: "Read expression",
+    scheduleMode: "Build schedule",
+    frequencyLabel: "Schedule",
+    frequencies: {
+      minutes: "Every few minutes",
+      hourly: "Every hour",
+      daily: "Every day",
+      weekdays: "Every weekday",
+      weekly: "Every week",
+      monthly: "Every month",
+    },
+    intervalLabel: "Every",
+    intervalOption: "{count} minutes",
+    minuteLabel: "At minute",
+    timeLabel: "At time",
+    weekdayLabel: "On",
+    dayLabel: "On day",
+    weekdays: [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ],
+    help: "Choose a schedule. The expression and next five runs update automatically.",
+    monthlyHelp: "Days 29–31 only run in months that contain that day.",
+    invalidSchedule:
+      "Enter a valid time and a whole number within the allowed range.",
+    copyExpression: "Copy expression",
+    copied: "Copied",
+    copyFailed: "Could not copy the expression. Try again.",
+  },
   allowedRange: "Allowed {range}",
   clear: "Clear",
   description:
-    "Read a Unix schedule before you ship it. Parsing stays in this browser.",
+    "Build or inspect a Unix schedule and preview its next runs. Everything stays in this browser.",
   expressionHelp:
     "Minute, hour, day of month, month, weekday. Add seconds as the first field when needed.",
   expressionLabel: "Cron expression",
@@ -35,9 +72,9 @@ export const cronParserMessages = {
   outputLabel: "Preview",
   outputValue: "Next 5 runs",
   pageDescription:
-    "Explain Unix cron expressions and preview their next executions by timezone.",
+    "Build Unix cron schedules, explain expressions, and preview executions by timezone.",
   pageKeywords: ["cron", "parser", "scheduler", "developer tools"],
-  pageTitle: "Cron Parser",
+  pageTitle: "Cron Tool",
   parse: "Parse",
   parseFailed: "Could not parse expression",
   resetExample: "Reset example",
@@ -49,10 +86,10 @@ export const cronParserMessages = {
   timezoneLabel: "Timezone",
   timezoneSearch: "Search timezones...",
   timezoneUse: "Use {timezone}",
-  title: "Cron Parser",
+  title: "Cron Tool",
   tour: {
     controlsDescription:
-      "Enter a five-field Unix expression, or add seconds at the front. Choose the timezone before parsing.",
+      "Enter an expression or build a schedule with the schedule mode. Choose the timezone to verify its next runs.",
     controlsTitle: "Set the schedule context",
     fieldsDescription:
       "The breakdown keeps the original tokens beside their names and valid ranges.",

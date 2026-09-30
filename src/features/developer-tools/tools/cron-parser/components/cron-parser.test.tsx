@@ -22,11 +22,78 @@ function renderCronParser() {
 }
 
 describe("CronParser", () => {
-  test("explains the example and shows its fields and next five runs", async () => {
+  test("copies a built expression and resets the builder example", async () => {
+    const user = userEvent.setup();
+    renderCronParser();
+    await user.click(screen.getByRole("button", { name: "Build schedule" }));
+    await user.click(screen.getByRole("combobox", { name: "Schedule" }));
+    await user.click(await screen.findByRole("option", { name: "Every day" }));
+    await user.click(screen.getByRole("button", { name: "Copy expression" }));
+    expect(await navigator.clipboard.readText()).toBe("0 9 * * *");
+    expect(screen.getByRole("button", { name: "Copied" })).toBeDefined();
+
+    await user.click(screen.getByRole("button", { name: "Reset example" }));
+    expect(screen.getByText("*/15 * * * *")).toBeDefined();
+    expect(
+      screen.getByRole("combobox", { name: "Timezone" }).textContent
+    ).toContain("Asia/Jakarta");
+    await user.click(screen.getByRole("button", { name: "Clear" }));
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Cron expression",
+        }) as HTMLInputElement
+      ).value
+    ).toBe("");
+  });
+
+  test("builds a weekday schedule and carries it into expression mode", async () => {
     const user = userEvent.setup();
     const { container } = renderCronParser();
+    await user.click(screen.getByRole("button", { name: "Build schedule" }));
+    await user.click(screen.getByRole("combobox", { name: "Schedule" }));
+    await user.click(
+      await screen.findByRole("option", { name: "Every weekday" })
+    );
+    fireEvent.change(screen.getByLabelText("At time"), {
+      target: { value: "09:30" },
+    });
 
-    await user.click(screen.getByRole("button", { name: "Parse" }));
+    expect(screen.getByText("30 9 * * 1-5")).toBeDefined();
+    expect(container.querySelectorAll("time")).toHaveLength(5);
+    await user.click(screen.getByRole("button", { name: "Read expression" }));
+    expect(
+      (
+        screen.getByRole("textbox", {
+          name: "Cron expression",
+        }) as HTMLInputElement
+      ).value
+    ).toBe("30 9 * * 1-5");
+  });
+
+  test("clears an invalid builder preview and recovers after correction", async () => {
+    const user = userEvent.setup();
+    const { container } = renderCronParser();
+    await user.click(screen.getByRole("button", { name: "Build schedule" }));
+    await user.click(screen.getByRole("combobox", { name: "Schedule" }));
+    await user.click(await screen.findByRole("option", { name: "Every hour" }));
+    fireEvent.change(screen.getByLabelText("At minute"), {
+      target: { value: "60" },
+    });
+    expect(await screen.findByRole("alert")).toBeDefined();
+    await waitFor(() =>
+      expect(container.querySelectorAll("time")).toHaveLength(0)
+    );
+    fireEvent.change(screen.getByLabelText("At minute"), {
+      target: { value: "30" },
+    });
+    await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+    expect(screen.getByText("30 * * * *")).toBeDefined();
+    expect(container.querySelectorAll("time")).toHaveLength(5);
+  });
+
+  test("shows the example fields and next five runs on arrival", () => {
+    const { container } = renderCronParser();
 
     expect(screen.getByText("Every 15 minutes")).toBeDefined();
     expect(screen.getByText("Minute")).toBeDefined();
@@ -70,7 +137,7 @@ describe("CronParser", () => {
 
   test("clears the expression and restores the example", async () => {
     const user = userEvent.setup();
-    renderCronParser();
+    const { container } = renderCronParser();
     const input = screen.getByRole("textbox", { name: "Cron expression" });
 
     await user.click(screen.getByRole("button", { name: "Clear" }));
@@ -80,6 +147,22 @@ describe("CronParser", () => {
     await user.click(screen.getByRole("button", { name: "Reset example" }));
     // SAFETY: The accessible textbox query targets the native input element.
     expect((input as HTMLInputElement).value).toBe("*/15 * * * *");
+    expect(screen.getByText("Every 15 minutes")).toBeDefined();
+    expect(container.querySelectorAll("time")).toHaveLength(5);
+  });
+
+  test("defaults to Jakarta without a saved timezone", () => {
+    localStorage.setItem("cron-parser-tour-seen", "true");
+    render(
+      <TourProvider closeable>
+        <CronParser />
+      </TourProvider>
+    );
+
+    expect(
+      screen.getByRole("combobox", { name: "Timezone" }).textContent
+    ).toContain("Asia/Jakarta");
+    expect(screen.getByText("Every 15 minutes")).toBeDefined();
   });
 
   test("falls back from an invalid saved timezone", async () => {
@@ -91,7 +174,7 @@ describe("CronParser", () => {
       </TourProvider>
     );
 
-    const expectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const expectedTimeZone = "Asia/Jakarta";
     expect(
       screen.getByRole("combobox", { name: "Timezone" }).textContent
     ).toContain(expectedTimeZone);

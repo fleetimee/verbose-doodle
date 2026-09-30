@@ -11,7 +11,7 @@ export const developerToolsMessages = {
   converterRuntime: "Hanya browser",
   converterTags: ["JSON", "YAML 1.2", "Konversi lokal"],
   cronParserDescription:
-    "Jelaskan ekspresi Unix cron lima atau enam field dan pratinjau lima eksekusi berikutnya di zona waktu IANA mana pun.",
+    "Buat jadwal Unix cron atau periksa ekspresi, dengan lima eksekusi berikutnya di zona waktu IANA mana pun.",
   cronParserLimit: "5 atau 6 field",
   cronParserRuntime: "Hanya browser",
   cronParserTags: ["Cron", "Zona waktu", "Pratinjau eksekusi"],
@@ -197,7 +197,7 @@ export const developerToolsMessages = {
   numberBaseConverterSearchDescription:
     "Konversi nilai biner, oktal, desimal, dan heksadesimal.",
   cronParserSearchDescription:
-    "Jelaskan ekspresi cron dan pratinjau eksekusi mendatang.",
+    "Buat jadwal cron, jelaskan ekspresi, dan lihat eksekusi mendatang.",
   nfcReaderSearchDescription: "Periksa pemindaian NFC dan record NDEF.",
   iso8583ParserSearchDescription:
     "Urai stream ISO 8583 mentah dan periksa field-nya.",

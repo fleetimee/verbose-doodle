@@ -1,8 +1,38 @@
 export const cronParserMessages = {
+  builder: {
+    preview: "Pratinjau",
+    modeLabel: "Mode input",
+    expressionMode: "Baca ekspresi",
+    scheduleMode: "Buat jadwal",
+    frequencyLabel: "Jadwal",
+    frequencies: {
+      minutes: "Setiap beberapa menit",
+      hourly: "Setiap jam",
+      daily: "Setiap hari",
+      weekdays: "Setiap hari kerja",
+      weekly: "Setiap minggu",
+      monthly: "Setiap bulan",
+    },
+    intervalLabel: "Setiap",
+    intervalOption: "{count} menit",
+    minuteLabel: "Pada menit",
+    timeLabel: "Pada pukul",
+    weekdayLabel: "Pada hari",
+    dayLabel: "Pada tanggal",
+    weekdays: ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
+    help: "Pilih jadwal. Ekspresi dan lima eksekusi berikutnya diperbarui otomatis.",
+    monthlyHelp:
+      "Tanggal 29–31 hanya berjalan pada bulan yang memiliki tanggal tersebut.",
+    invalidSchedule:
+      "Masukkan waktu yang valid dan bilangan bulat dalam rentang yang diizinkan.",
+    copyExpression: "Salin ekspresi",
+    copied: "Tersalin",
+    copyFailed: "Tidak dapat menyalin ekspresi. Coba lagi.",
+  },
   allowedRange: "Diizinkan {range}",
   clear: "Bersihkan",
   description:
-    "Baca jadwal Unix sebelum Anda menggunakannya. Penguraian tetap berada di browser ini.",
+    "Buat atau periksa jadwal Unix dan lihat eksekusi berikutnya. Semua tetap di browser ini.",
   expressionHelp:
     "Menit, jam, hari dalam bulan, bulan, hari dalam minggu. Tambahkan detik sebagai field pertama bila diperlukan.",
   expressionLabel: "Ekspresi Cron",
@@ -35,9 +65,9 @@ export const cronParserMessages = {
   outputLabel: "Pratinjau",
   outputValue: "5 eksekusi berikutnya",
   pageDescription:
-    "Jelaskan ekspresi Unix cron dan pratinjau eksekusi berikutnya berdasarkan zona waktu.",
+    "Buat jadwal Unix cron, jelaskan ekspresi, dan lihat eksekusi berdasarkan zona waktu.",
   pageKeywords: ["cron", "parser", "scheduler", "alat pengembang"],
-  pageTitle: "Cron Parser",
+  pageTitle: "Cron Tool",
   parse: "Urai",
   parseFailed: "Tidak dapat mengurai ekspresi",
   resetExample: "Reset contoh",
@@ -49,10 +79,10 @@ export const cronParserMessages = {
   timezoneLabel: "Zona waktu",
   timezoneSearch: "Cari zona waktu...",
   timezoneUse: "Gunakan {timezone}",
-  title: "Cron Parser",
+  title: "Cron Tool",
   tour: {
     controlsDescription:
-      "Masukkan ekspresi Unix lima field, atau tambahkan detik di bagian depan. Pilih zona waktu sebelum mengurai.",
+      "Masukkan ekspresi atau buat jadwal melalui mode jadwal. Pilih zona waktu untuk memeriksa eksekusi berikutnya.",
     controlsTitle: "Atur konteks jadwal",
     fieldsDescription:
       "Rincian mempertahankan token asli di samping nama dan rentang validnya.",
