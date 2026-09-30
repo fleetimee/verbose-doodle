@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { Iso8583Parser } from "./iso8583-parser";
 
@@ -11,15 +11,13 @@ function renderWithRouter(ui: React.ReactElement) {
 }
 
 describe("Iso8583Parser component", () => {
-  test("renders tool layout with title and badge", () => {
+  test("renders the parsed message overview", () => {
     renderWithRouter(<Iso8583Parser />);
 
     expect(
       screen.getByRole("heading", { name: "ISO 8583 Parser" })
     ).toBeTruthy();
-    expect(screen.getByText("ISO 8583:1987 / ASCII")).toBeTruthy();
-    expect(screen.getByText("Message Type (MTI)")).toBeTruthy();
-    expect(screen.getByText("0800")).toBeTruthy();
+    expect(screen.getAllByText("0800").length).toBeGreaterThan(0);
   });
 
   test("renders parsed elements for default sample stream", () => {
@@ -38,6 +36,21 @@ describe("Iso8583Parser component", () => {
 
     expect(screen.getByText("Interactive Bitmap Matrix")).toBeTruthy();
     expect(screen.getByTitle(BIT_7_ACTIVE_PATTERN)).toBeTruthy();
+  });
+
+  test("pretty print keeps lengths beside values without padding to the longest field", () => {
+    renderWithRouter(<Iso8583Parser />);
+    fireEvent.click(screen.getByRole("tab", { name: "Pretty print" }));
+    const output =
+      screen.getByLabelText("Pretty print").querySelector("pre")?.textContent ??
+      "";
+    expect(output).toContain("[007] : '0901080037'");
+    expect(output).toContain("[070] : '001'");
+    const rows = output.split("\n").slice(1);
+    expect(rows[0]).toBe("[007] : '0901080037'  (10)");
+    expect(rows.at(-1)).toBe("[070] : '001'  (3)");
+    expect(rows[0]).toEndWith("(10)");
+    expect(rows.at(-1)).toEndWith("(3)");
   });
 
   test("renders Assign to Generator button", () => {

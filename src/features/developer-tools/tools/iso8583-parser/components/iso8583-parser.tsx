@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import {
@@ -21,7 +21,6 @@ import {
   CodeBlockHeader,
   CodeBlockItem,
 } from "@/components/kibo-ui/code-block";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -74,129 +73,23 @@ function getBitButtonClass(isActive: boolean, isSelected: boolean): string {
   if (isSelected) {
     return "bg-primary text-primary-foreground shadow-xs ring-2 ring-primary ring-offset-1";
   }
-  return "border border-primary/40 bg-primary/10 font-semibold text-primary hover:scale-105 hover:bg-primary/20";
+  return "border border-primary/40 bg-primary/10 font-semibold text-primary hover:bg-primary/20";
 }
 
-function OverviewChips({
+function MessageOverview({
   parsed,
-  onCopy,
 }: {
   readonly parsed: ParsedIso8583Message;
-  readonly onCopy: (text: string, label: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <div className="rounded-xl border border-border/70 bg-card p-4 shadow-2xs">
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-xs">
-            {messages.iso8583Parser.mtiLabel}
-          </span>
-          <Badge mono variant="secondary">
-            {parsed.mti.mti}
-          </Badge>
-        </div>
-        <p className="mt-1.5 font-semibold text-foreground text-sm">
-          {parsed.mti.description}
-        </p>
-        <p className="mt-0.5 text-muted-foreground text-xs">
-          {parsed.mti.version} · {parsed.mti.messageOrigin}
-        </p>
-      </div>
-
-      <div className="rounded-xl border border-border/70 bg-card p-4 shadow-2xs">
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-xs">
-            {messages.iso8583Parser.lengthFraming}
-          </span>
-          <Badge
-            mono
-            size="sm"
-            variant={parsed.lengthHeader ? "outline" : "secondary"}
-          >
-            {parsed.lengthHeader
-              ? parsed.lengthHeader.type
-              : messages.iso8583Parser.noLengthHeaderType}
-          </Badge>
-        </div>
-        <p className="mt-1.5 font-semibold text-foreground text-sm">
-          {parsed.lengthHeader
-            ? formatMessage(messages.iso8583Parser.bytesBody, {
-                count: parsed.lengthHeader.value,
-              })
-            : messages.iso8583Parser.noFramingHeader}
-        </p>
-        <p className="mt-0.5 text-muted-foreground text-xs">
-          {parsed.lengthHeader
-            ? formatMessage(messages.iso8583Parser.prefixLabel, {
-                prefix: parsed.lengthHeader.raw,
-              })
-            : messages.iso8583Parser.startsAtMti}
-        </p>
-      </div>
-
-      <div className="rounded-xl border border-border/70 bg-card p-4 shadow-2xs">
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-xs">
-            {messages.iso8583Parser.dataElements}
-          </span>
-          <Badge variant="primary-subtle">
-            {formatMessage(messages.iso8583Parser.fieldsActive, {
-              count: parsed.fields.length,
-            })}
-          </Badge>
-        </div>
-        <p className="mt-1.5 font-semibold text-foreground text-sm">
-          {formatMessage(messages.iso8583Parser.fieldsUnpacked, {
-            count: parsed.fields.length,
-          })}
-        </p>
-        <p className="mt-0.5 text-muted-foreground text-xs">
-          {parsed.secondaryBitmapHex
-            ? messages.iso8583Parser.primaryAndSecondaryBitmaps
-            : messages.iso8583Parser.primaryBitmapOnly}
-        </p>
-      </div>
-
-      <div className="rounded-xl border border-border/70 bg-card p-4 shadow-2xs">
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground text-xs">
-            {messages.iso8583Parser.bitmaps}
-          </span>
-          <button
-            className="text-muted-foreground transition hover:text-foreground"
-            onClick={() =>
-              onCopy(
-                parsed.primaryBitmapHex + (parsed.secondaryBitmapHex ?? ""),
-                messages.iso8583Parser.bitmaps
-              )
-            }
-            title={messages.iso8583Parser.copyBitmaps}
-            type="button"
-          >
-            <ClipboardCopy className="size-3.5" />
-          </button>
-        </div>
-        <p
-          className="mt-1.5 truncate font-medium font-mono text-foreground text-xs"
-          title={parsed.primaryBitmapHex}
-        >
-          {messages.iso8583Parser.primaryBitmapShortLabel}{" "}
-          {parsed.primaryBitmapHex}
-        </p>
-        {parsed.secondaryBitmapHex ? (
-          <p
-            className="mt-0.5 truncate font-mono text-muted-foreground text-xs"
-            title={parsed.secondaryBitmapHex}
-          >
-            {messages.iso8583Parser.secondaryBitmapShortLabel}{" "}
-            {parsed.secondaryBitmapHex}
-          </p>
-        ) : (
-          <p className="mt-0.5 text-muted-foreground text-xs">
-            {formatMessage(messages.iso8583Parser.totalBits, { count: 64 })}
-          </p>
-        )}
-      </div>
+    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-3">
+      <span className="font-mono font-semibold text-sm">{parsed.mti.mti}</span>
+      <p className="font-medium text-sm">{parsed.mti.description}</p>
+      <span className="text-muted-foreground text-xs">
+        {formatMessage(messages.iso8583Parser.fieldsUnpacked, {
+          count: parsed.fields.length,
+        })}
+      </span>
     </div>
   );
 }
@@ -214,8 +107,8 @@ function BitmapMatrix({
 }) {
   const totalBits = hasSecondary ? 128 : 64;
   return (
-    <div className="rounded-xl border border-border/70 bg-card p-4 shadow-xs sm:p-5">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <div className="flex flex-col gap-4 rounded-md bg-muted/20 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3 className="font-semibold text-foreground text-sm">
             {messages.iso8583Parser.bitmapMatrixTitle}
@@ -233,7 +126,7 @@ function BitmapMatrix({
         ) : null}
       </div>
 
-      <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-16">
+      <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-16 xl:grid-cols-32">
         {Array.from({ length: totalBits }, (_, i) => i + 1).map((bitNum) => {
           const isActive =
             bitNum === 1 ? hasSecondary : activeBits.includes(bitNum);
@@ -242,13 +135,17 @@ function BitmapMatrix({
           return (
             <button
               className={cn(
-                "flex h-7 items-center justify-center rounded-md font-mono text-xs transition-all",
-                getBitButtonClass(isActive, isSelected)
+                "flex h-7 items-center justify-center rounded-sm font-mono text-xs transition-colors",
+                getBitButtonClass(isActive, isSelected),
+                isActive && "iso8583-active-bit",
+                isSelected && "iso8583-selected-bit"
               )}
               disabled={!isActive}
               key={bitNum}
               onClick={() => {
-                if (isActive && bitNum !== 1) {
+                if (bitNum === 1) {
+                  toast.info(messages.iso8583Parser.secondaryBitmapExplanation);
+                } else if (isActive) {
                   onSelectBit(isSelected ? null : bitNum);
                 }
               }}
@@ -272,7 +169,7 @@ function BitmapMatrix({
   );
 }
 
-function FieldCard({
+function FieldRow({
   field,
   onCopy,
 }: {
@@ -280,75 +177,61 @@ function FieldCard({
   readonly onCopy: (text: string, label: string) => void;
 }) {
   return (
-    <div className="group relative flex flex-col justify-between rounded-xl border border-border/70 bg-card p-4 shadow-2xs transition-all hover:border-border hover:shadow-xs">
-      <div>
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Badge mono variant="secondary">
-              BIT {String(field.number).padStart(2, "0")}
-            </Badge>
-            <span className="font-semibold text-foreground text-sm leading-tight">
-              {field.name}
-            </span>
-          </div>
-          <Badge mono size="sm" variant="outline-muted">
+    <div className="flex min-w-0 items-start gap-3 px-3 py-2.5">
+      <span className="shrink-0 font-mono text-sm">
+        BIT {String(field.number).padStart(2, "0")}
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <span className="font-medium text-sm">{field.name}</span>
+          <span className="font-mono text-muted-foreground text-xs">
             {getFieldKindLabel(field.kind, field.maxOrFixedLength)}
-          </Badge>
+          </span>
         </div>
-
-        <div className="relative mt-2 rounded-lg border border-border/60 bg-muted/20 p-2.5 font-mono text-foreground text-xs">
-          <div className="select-all break-all">
-            {field.cleanValue || (
-              <span className="text-muted-foreground italic">
-                {messages.iso8583Parser.bitEmptyValue}
-              </span>
-            )}
-          </div>
-          <button
-            className="absolute top-2 right-2 opacity-0 transition hover:text-primary group-hover:opacity-100"
-            onClick={() =>
-              onCopy(
-                field.cleanValue,
-                formatMessage(messages.iso8583Parser.bitValueLabel, {
-                  bit: field.number,
-                })
-              )
-            }
-            title={messages.iso8583Parser.copyFieldValue}
-            type="button"
-          >
-            <ClipboardCopy className="size-3.5" />
-          </button>
+        <div className="select-all break-all font-mono text-sm">
+          {field.cleanValue || messages.iso8583Parser.bitEmptyValue}
         </div>
-
-        {field.decodedMeaning ? (
-          <div className="mt-2 flex items-center gap-1.5 rounded-md border border-primary/20 bg-primary/5 px-2.5 py-1 text-primary text-xs">
-            <CheckCircle2 className="size-3.5 shrink-0" />
-            <span className="font-medium">{field.decodedMeaning}</span>
-          </div>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+          {field.decodedMeaning ? (
+            <span className="flex items-center gap-1 text-primary">
+              <CheckCircle2 className="size-3.5 shrink-0" />
+              {field.decodedMeaning}
+            </span>
+          ) : null}
+          <span className="text-muted-foreground">
+            {formatMessage(messages.iso8583Parser.streamSlice, {
+              end: field.endIndex,
+              start: field.startIndex,
+            })}
+            {" · "}
+            {formatMessage(messages.iso8583Parser.characterCount, {
+              count: field.rawSlice.length,
+            })}
+          </span>
+        </div>
       </div>
-
-      <div className="mt-3 flex items-center justify-between border-border/40 border-t pt-2 text-muted-foreground text-xs">
-        <span>
-          {formatMessage(messages.iso8583Parser.streamSlice, {
-            end: field.endIndex,
-            start: field.startIndex,
-          })}
-        </span>
-        <span>
-          {formatMessage(messages.iso8583Parser.characterCount, {
-            count: field.rawSlice.length,
-          })}
-        </span>
-      </div>
+      <Button
+        aria-label={messages.iso8583Parser.copyFieldValue}
+        onClick={() =>
+          onCopy(
+            field.cleanValue,
+            formatMessage(messages.iso8583Parser.bitValueLabel, {
+              bit: field.number,
+            })
+          )
+        }
+        size="icon-xs"
+        variant="ghost"
+      >
+        <ClipboardCopy className="size-3.5" />
+      </Button>
     </div>
   );
 }
 
 function SlicesTable({ parsed }: { readonly parsed: ParsedIso8583Message }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
+    <div className="overflow-hidden rounded-md border border-border/70 bg-card">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead className="border-border/60 border-b bg-muted/40 font-medium text-muted-foreground">
@@ -449,6 +332,82 @@ function SlicesTable({ parsed }: { readonly parsed: ParsedIso8583Message }) {
   );
 }
 
+function PrettyPrintView({
+  parsed,
+  onCopy,
+}: {
+  readonly parsed: ParsedIso8583Message;
+  readonly onCopy: (text: string, label: string) => void;
+}) {
+  const [wordWrap, setWordWrap] = useState(false);
+  const lines = [
+    `[MTI] : '${parsed.mti.mti}'`,
+    ...parsed.fields.map(
+      (field) =>
+        `[${String(field.number).padStart(3, "0")}] : '${field.rawValue}'`
+    ),
+  ];
+  const content = lines
+    .map((line, index) =>
+      index === 0
+        ? line
+        : `${line}  (${parsed.fields[index - 1].rawValue.length})`
+    )
+    .join("\n");
+
+  return (
+    <section
+      aria-label={messages.iso8583Parser.tabPrettyPrint}
+      className="relative rounded-md bg-muted/20"
+    >
+      <div className="flex items-center justify-end gap-1 px-2 pt-2">
+        <Button
+          aria-pressed={wordWrap}
+          onClick={() => setWordWrap((value) => !value)}
+          size="xs"
+          variant={wordWrap ? "secondary" : "ghost"}
+        >
+          {messages.iso8583Parser.wordWrap}
+        </Button>
+        <Button
+          aria-label={messages.iso8583Parser.copyPrettyPrint}
+          onClick={() => onCopy(content, messages.iso8583Parser.tabPrettyPrint)}
+          size="icon-xs"
+          variant="ghost"
+        >
+          <ClipboardCopy className="size-3.5" />
+        </Button>
+      </div>
+      <pre
+        className={cn(
+          "p-4 font-mono text-xs leading-relaxed",
+          wordWrap
+            ? "whitespace-pre-wrap break-all"
+            : "overflow-x-auto whitespace-pre"
+        )}
+      >
+        <span className="iso8583-syntax-mti">[MTI]</span>
+        <span className="text-muted-foreground"> : </span>
+        <span className="iso8583-syntax-value">'{parsed.mti.mti}'</span>
+        {parsed.fields.map((field) => (
+          <span key={field.number}>
+            {"\n"}
+            <span className="iso8583-syntax-field">
+              [{String(field.number).padStart(3, "0")}]
+            </span>
+            <span className="text-muted-foreground"> : </span>
+            <span className="iso8583-syntax-value">'{field.rawValue}'</span>
+            {"  "}
+            <span className="iso8583-syntax-length">
+              ({field.rawValue.length})
+            </span>
+          </span>
+        ))}
+      </pre>
+    </section>
+  );
+}
+
 function JsonView({ parsed }: { readonly parsed: ParsedIso8583Message }) {
   const jsonContent = useMemo(
     () =>
@@ -499,7 +458,7 @@ function JsonView({ parsed }: { readonly parsed: ParsedIso8583Message }) {
   );
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border/80 bg-card">
+    <div className="overflow-hidden rounded-md border border-border/80 bg-card">
       <CodeBlock data={codeData} defaultValue="json">
         <CodeBlockHeader className="border-border/60 border-b px-4 py-2 text-xs">
           <span className="font-mono text-muted-foreground">
@@ -521,6 +480,66 @@ function JsonView({ parsed }: { readonly parsed: ParsedIso8583Message }) {
   );
 }
 
+function StreamInput({
+  parsed,
+  streamInput,
+  onChange,
+}: {
+  readonly parsed?: ParsedIso8583Message;
+  readonly streamInput: string;
+  readonly onChange: (value: string) => void;
+}) {
+  const inputHighlightRef = useRef<HTMLPreElement>(null);
+  return (
+    <div className="relative rounded-md bg-muted/20">
+      {parsed && parsed.sanitizedStream === streamInput ? (
+        <pre
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 overflow-hidden whitespace-pre-wrap break-all rounded-md border border-transparent p-3 font-mono text-xs leading-relaxed"
+          ref={inputHighlightRef}
+        >
+          <span className="iso8583-syntax-length">
+            {parsed.lengthHeader?.raw}
+          </span>
+          <span className="iso8583-syntax-mti">{parsed.mti.mti}</span>
+          <span className="iso8583-syntax-field">
+            {parsed.primaryBitmapHex}
+            {parsed.secondaryBitmapHex}
+          </span>
+          <span className="iso8583-syntax-value">
+            {streamInput.slice(
+              (parsed.lengthHeader?.raw.length ?? 0) +
+                4 +
+                16 +
+                (parsed.secondaryBitmapHex ? 16 : 0)
+            )}
+          </span>
+        </pre>
+      ) : null}
+      <textarea
+        className={cn(
+          "relative block h-20 w-full resize-none rounded-md border border-border/80 bg-transparent p-3 font-mono text-xs leading-relaxed placeholder:text-muted-foreground/50 focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring",
+          parsed && parsed.sanitizedStream === streamInput
+            ? "text-transparent caret-foreground"
+            : "text-foreground"
+        )}
+        id="iso8583-stream"
+        onChange={(e) => onChange(e.target.value)}
+        onScroll={(event) => {
+          if (inputHighlightRef.current) {
+            inputHighlightRef.current.scrollTop = event.currentTarget.scrollTop;
+            inputHighlightRef.current.scrollLeft =
+              event.currentTarget.scrollLeft;
+          }
+        }}
+        placeholder={messages.iso8583Parser.inputPlaceholder}
+        spellCheck={false}
+        value={streamInput}
+      />
+    </div>
+  );
+}
+
 export function Iso8583Parser() {
   useI18n();
   const navigate = useNavigate();
@@ -529,9 +548,9 @@ export function Iso8583Parser() {
   );
   const [selectedBit, setSelectedBit] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"fields" | "json" | "slices">(
-    "fields"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "fields" | "pretty" | "json" | "slices"
+  >("fields");
 
   const parsedResult = useMemo<{
     readonly data?: ParsedIso8583Message;
@@ -619,12 +638,16 @@ export function Iso8583Parser() {
 
   return (
     <DeveloperToolLayout
-      categoryLabel={messages.developerTools.inspectionCategory}
+      className="min-h-0 flex-1 gap-4 pb-4 [&>header]:border-b-0 [&>header]:pb-2"
       description={messages.iso8583Parser.pageDescription}
       extraActions={
         <div className="flex flex-wrap items-center gap-2">
           {parsed ? (
-            <Button onClick={handleAssignToGenerator} size="sm">
+            <Button
+              onClick={handleAssignToGenerator}
+              size="xs"
+              variant="outline"
+            >
               <SendHorizontal className="size-3.5" />
               {messages.iso8583Parser.openInGenerator}
             </Button>
@@ -634,36 +657,27 @@ export function Iso8583Parser() {
               setStreamInput("");
               setSelectedBit(null);
             }}
-            size="sm"
-            variant="outline-muted"
+            size="xs"
+            variant="ghost"
           >
             <Trash2 className="size-3.5" />
             {messages.iso8583Parser.clear}
           </Button>
         </div>
       }
-      headerExtra={
-        <Badge className="shrink-0 self-start sm:self-center" variant="outline">
-          ISO 8583:1987 / ASCII
-        </Badge>
-      }
+      mainClassName="flex min-h-0 flex-1 flex-col"
       title={messages.iso8583Parser.title}
     >
-      <div className="space-y-6">
-        {/* Stream Input Workbench Card */}
-        <div className="rounded-xl border border-border/70 bg-card p-4 shadow-xs transition-colors sm:p-5">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-3">
+        <div className="px-3 py-1">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="font-medium text-foreground text-sm">
+              <label
+                className="font-medium text-foreground text-sm"
+                htmlFor="iso8583-stream"
+              >
                 {messages.iso8583Parser.inputLabel}
-              </span>
-              {parsed ? (
-                <Badge mono size="sm" variant="outline">
-                  {parsed.streamFormat === "hex"
-                    ? messages.iso8583Parser.formatHex
-                    : messages.iso8583Parser.formatAscii}
-                </Badge>
-              ) : null}
+              </label>
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
@@ -671,31 +685,29 @@ export function Iso8583Parser() {
                 {messages.iso8583Parser.samples}
               </span>
               {SAMPLE_STREAMS.map((sample) => (
-                <button
-                  className="rounded-md border border-border/60 bg-muted/40 px-2 py-0.5 text-muted-foreground text-xs transition hover:border-primary/40 hover:bg-muted hover:text-foreground"
+                <Button
                   key={sample.labelKey}
                   onClick={() => {
                     setStreamInput(sample.stream);
                     setSelectedBit(null);
                   }}
+                  size="xs"
                   type="button"
+                  variant="ghost"
                 >
                   {messages.iso8583Parser[sample.labelKey]}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
-          <textarea
-            aria-label={messages.iso8583Parser.inputLabel}
-            className="h-28 w-full resize-y rounded-lg border border-border/80 bg-muted/20 p-3 font-mono text-foreground text-xs leading-relaxed placeholder:text-muted-foreground/50 focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
-            onChange={(e) => setStreamInput(e.target.value)}
-            placeholder={messages.iso8583Parser.inputPlaceholder}
-            spellCheck={false}
-            value={streamInput}
+          <StreamInput
+            onChange={setStreamInput}
+            parsed={parsed}
+            streamInput={streamInput}
           />
 
-          <div className="mt-2 flex items-center justify-between text-muted-foreground text-xs">
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-muted-foreground text-xs">
             <span>
               {formatMessage(messages.iso8583Parser.characterCount, {
                 count: streamInput.length,
@@ -719,9 +731,9 @@ export function Iso8583Parser() {
         </div>
 
         {error ? (
-          <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm">
+          <div className="flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
               <p className="font-medium">
                 {messages.iso8583Parser.parsingError}
               </p>
@@ -731,7 +743,7 @@ export function Iso8583Parser() {
         ) : null}
 
         {!streamInput.trim() && (
-          <div className="flex flex-col items-center justify-center rounded-xl border border-border border-dashed p-12 text-center">
+          <div className="flex flex-col items-center justify-center rounded-md border border-border border-dashed p-12 text-center">
             <Binary className="mb-3 size-8 text-muted-foreground/40" />
             <p className="font-medium text-foreground text-sm">
               {messages.iso8583Parser.emptyStateTitle}
@@ -743,22 +755,24 @@ export function Iso8583Parser() {
         )}
 
         {parsed ? (
-          <div className="space-y-6">
-            <OverviewChips onCopy={handleCopy} parsed={parsed} />
+          <div className="flex min-h-0 flex-1 flex-col gap-3">
+            <MessageOverview parsed={parsed} />
 
             <BitmapMatrix
               activeBits={parsed.activeBits}
               hasSecondary={Boolean(parsed.secondaryBitmapHex)}
+              key={parsed.sanitizedStream}
               onSelectBit={setSelectedBit}
               selectedBit={selectedBit}
             />
 
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-border/70 border-b pb-3">
+            <div className="flex min-h-0 flex-1 flex-col gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <Tabs
                   onValueChange={(val) => {
-                    // SAFETY: val is one of the three tab values: "fields", "json", or "slices"
-                    setActiveTab(val as "fields" | "json" | "slices");
+                    setActiveTab(
+                      val as "fields" | "pretty" | "json" | "slices"
+                    );
                   }}
                   value={activeTab}
                 >
@@ -768,6 +782,10 @@ export function Iso8583Parser() {
                       {formatMessage(messages.iso8583Parser.tabDataElements, {
                         count: filteredFields.length,
                       })}
+                    </TabsTrigger>
+                    <TabsTrigger size="sm" value="pretty">
+                      <Code2 className="size-3.5" />
+                      {messages.iso8583Parser.tabPrettyPrint}
                     </TabsTrigger>
                     <TabsTrigger size="sm" value="json">
                       <FileJson className="size-3.5" />
@@ -782,7 +800,8 @@ export function Iso8583Parser() {
 
                 {activeTab === "fields" ? (
                   <Input
-                    className="w-48 sm:w-64"
+                    aria-label={messages.iso8583Parser.searchPlaceholder}
+                    className="w-full sm:w-64"
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={messages.iso8583Parser.searchPlaceholder}
                     size="sm"
@@ -792,15 +811,15 @@ export function Iso8583Parser() {
               </div>
 
               {activeTab === "fields" ? (
-                <div className="space-y-3">
+                <div className="min-h-0 flex-1">
                   {filteredFields.length === 0 ? (
-                    <div className="rounded-xl border border-border border-dashed p-8 text-center text-muted-foreground text-xs">
+                    <div className="rounded-md border border-border border-dashed p-8 text-center text-muted-foreground text-xs">
                       {messages.iso8583Parser.noMatchingElements}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                    <div className="grid gap-x-6 gap-y-2 md:grid-cols-2">
                       {filteredFields.map((field) => (
-                        <FieldCard
+                        <FieldRow
                           field={field}
                           key={field.number}
                           onCopy={handleCopy}
@@ -811,27 +830,13 @@ export function Iso8583Parser() {
                 </div>
               ) : null}
 
+              {activeTab === "pretty" ? (
+                <PrettyPrintView onCopy={handleCopy} parsed={parsed} />
+              ) : null}
+
               {activeTab === "json" ? <JsonView parsed={parsed} /> : null}
 
               {activeTab === "slices" ? <SlicesTable parsed={parsed} /> : null}
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-primary/30 bg-primary/5 p-4 sm:p-5">
-              <div>
-                <h4 className="font-semibold text-foreground text-sm">
-                  {messages.iso8583Parser.readyToTestTitle}
-                </h4>
-                <p className="text-muted-foreground text-xs">
-                  {formatMessage(
-                    messages.iso8583Parser.readyToTestDescription,
-                    { count: parsed.fields.length }
-                  )}
-                </p>
-              </div>
-              <Button onClick={handleAssignToGenerator} size="default">
-                <SendHorizontal className="size-4" />
-                {messages.iso8583Parser.openInGenerator}
-              </Button>
             </div>
           </div>
         ) : null}

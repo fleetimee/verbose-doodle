@@ -89,6 +89,8 @@ export const iso8583ParserMessages = {
   bitmapMatrixDescription:
     "Active bits are highlighted. Click any active bit to isolate that data element below.",
   clearBitFilter: "Clear bit filter (#{bit})",
+  secondaryBitmapExplanation:
+    "Bit 1 indicates a secondary bitmap (bits 65–128). It is not a data field.",
   bitActiveTooltip: "Bit {bit} is active. Click to view.",
   bitInactiveTooltip: "Bit {bit} is not present in message.",
   bitEmptyValue: "[Empty / Zero length]",
@@ -109,6 +111,9 @@ export const iso8583ParserMessages = {
   bitNumberLabel: "Bit {bit}",
   tabDataElements: "Data Elements ({count})",
   tabJsonStructure: "JSON Structure",
+  wordWrap: "Word wrap",
+  tabPrettyPrint: "Pretty print",
+  copyPrettyPrint: "Copy pretty print",
   tabStreamSlices: "Stream Slices",
   searchPlaceholder: "Search bit # or name...",
   noMatchingElements: "No data elements match the current filter.",

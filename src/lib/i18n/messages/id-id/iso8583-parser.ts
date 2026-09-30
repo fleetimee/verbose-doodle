@@ -89,6 +89,8 @@ export const iso8583ParserMessages = {
   bitmapMatrixDescription:
     "Bit aktif disorot. Klik bit aktif mana pun untuk mengisolasi elemen data di bawah.",
   clearBitFilter: "Hapus filter bit (#{bit})",
+  secondaryBitmapExplanation:
+    "Bit 1 menandakan bitmap sekunder (bit 65–128). Bit ini bukan field data.",
   bitActiveTooltip: "Bit {bit} aktif. Klik untuk melihat.",
   bitInactiveTooltip: "Bit {bit} tidak ada di pesan.",
   bitEmptyValue: "[Kosong / Panjang nol]",
@@ -109,6 +111,9 @@ export const iso8583ParserMessages = {
   bitNumberLabel: "Bit {bit}",
   tabDataElements: "Elemen Data ({count})",
   tabJsonStructure: "Struktur JSON",
+  wordWrap: "Bungkus baris",
+  tabPrettyPrint: "Cetak rapi",
+  copyPrettyPrint: "Salin cetak rapi",
   tabStreamSlices: "Potongan Stream",
   searchPlaceholder: "Cari nomor bit atau nama...",
   noMatchingElements:

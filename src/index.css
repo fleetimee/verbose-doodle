@@ -3274,3 +3274,72 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   border-color: color-mix(in srgb, #a855f7 50%, transparent);
   border-bottom-color: #c084fc;
 }
+
+/* Keep bitmap values still while the halo indicates active fields. */
+.iso8583-active-bit {
+  position: relative;
+  isolation: isolate;
+}
+
+.iso8583-active-bit::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  border-radius: inherit;
+  box-shadow: 0 0 10px 2px color-mix(in oklch, var(--primary) 55%, transparent);
+  opacity: 0.45;
+  animation: iso8583-bit-glow 240ms
+    var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.iso8583-selected-bit::before {
+  box-shadow:
+    0 0 0 2px color-mix(in oklch, var(--primary) 65%, transparent),
+    0 0 16px 4px color-mix(in oklch, var(--primary) 65%, transparent);
+  opacity: 1;
+  animation: none;
+}
+
+@keyframes iso8583-bit-glow {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iso8583-active-bit::before {
+    animation: none;
+  }
+}
+
+.iso8583-syntax-mti {
+  color: #b45309;
+}
+.iso8583-syntax-field {
+  color: #7e22ce;
+}
+.iso8583-syntax-value {
+  color: #047857;
+}
+.iso8583-syntax-length {
+  color: #1d4ed8;
+}
+
+.dark .iso8583-syntax-mti {
+  color: #fbbf24;
+}
+.dark .iso8583-syntax-field {
+  color: #d8b4fe;
+}
+.dark .iso8583-syntax-value {
+  color: #6ee7b7;
+}
+.dark .iso8583-syntax-length {
+  color: #93c5fd;
+}
