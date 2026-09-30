@@ -458,7 +458,7 @@ export function NumberBaseConverter() {
           </div>
         </div>
 
-        <div className="mt-3 grid gap-3 border-t pt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)] lg:items-end">
+        <div className="mt-3 grid gap-3 border-t pt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)] lg:items-start">
           <div>
             <Label size="sm">
               {messages.numberBaseConverter.bitWidthLabel}
@@ -537,7 +537,7 @@ export function NumberBaseConverter() {
                 <Button
                   key={preset.label}
                   onClick={() => applyPreset(preset)}
-                  size="xs"
+                  size="sm"
                   type="button"
                   variant="outline-muted"
                 >
