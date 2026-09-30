@@ -97,6 +97,38 @@ describe("schema-tools", () => {
       expect(Array.isArray(parsed.roles)).toBe(true);
     });
 
+    test("rejects non-object schemas and malformed nested property schemas", () => {
+      for (const schema of [
+        "null",
+        "[]",
+        "42",
+        '{"type":"object","properties":{"name":null}}',
+      ]) {
+        const result = generateMockFromSchema(schema);
+        expect(result.mock).toBeUndefined();
+        expect(result.error).toBeDefined();
+      }
+    });
+
+    test("preserves nested JSON values supplied by examples and defaults", () => {
+      const { mock, error } = generateMockFromSchema(
+        JSON.stringify({
+          properties: {
+            settings: { default: { enabled: false, tags: ["one", null] } },
+            count: { examples: [0] },
+            empty: { default: null },
+          },
+          type: "object",
+        })
+      );
+      expect(error).toBeUndefined();
+      expect(JSON.parse(mock ?? "{}")).toEqual({
+        settings: { enabled: false, tags: ["one", null] },
+        count: 0,
+        empty: null,
+      });
+    });
+
     test("uses default or examples if defined", () => {
       const schema = JSON.stringify({
         properties: {

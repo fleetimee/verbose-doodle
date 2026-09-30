@@ -1,3 +1,54 @@
+import { z } from "zod";
+
+type JsonValue = z.infer<ReturnType<typeof z.json>>;
+type JsonObject = { [key: string]: JsonValue };
+
+interface InferredSchema {
+  format?: string;
+  items?: InferredSchema;
+  properties?: Record<string, InferredSchema>;
+  required?: string[];
+  type?:
+    | "null"
+    | "boolean"
+    | "integer"
+    | "number"
+    | "string"
+    | "array"
+    | "object";
+}
+
+interface FormatResult {
+  readonly error?: string;
+  readonly formatted?: string;
+}
+
+interface SchemaResult {
+  readonly error?: string;
+  readonly schema?: string;
+}
+
+interface MockResult {
+  readonly error?: string;
+  readonly mock?: string;
+}
+
+function isJsonObject(value: JsonValue): value is JsonObject {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isJsonString(value: JsonValue | undefined): value is string {
+  return typeof value === "string";
+}
+
+function isJsonNumber(value: JsonValue | undefined): value is number {
+  return typeof value === "number";
+}
+
+function isJsonBoolean(value: JsonValue): value is boolean {
+  return typeof value === "boolean";
+}
+
 export type JsonSyntaxCheck = {
   readonly valid: boolean;
   readonly error?: string;
@@ -58,10 +109,7 @@ export function validateJsonSyntax(text: string): JsonSyntaxCheck {
   }
 }
 
-export function formatJsonText(text: string): {
-  readonly formatted?: string;
-  readonly error?: string;
-} {
+export function formatJsonText(text: string): FormatResult {
   try {
     const parsed = JSON.parse(text);
     return { formatted: JSON.stringify(parsed, null, 2) };
@@ -70,7 +118,7 @@ export function formatJsonText(text: string): {
   }
 }
 
-function inferStringType(value: string): Record<string, unknown> {
+function inferStringType(value: string): InferredSchema {
   if (DATE_TIME_REGEX.test(value)) {
     return { format: "date-time", type: "string" };
   }
@@ -92,33 +140,31 @@ function inferStringType(value: string): Record<string, unknown> {
   return { type: "string" };
 }
 
-function inferObjectType(
-  value: Record<string, unknown>
-): Record<string, unknown> {
-  const properties: Record<string, unknown> = {};
+function inferObjectType(value: JsonObject): InferredSchema {
+  const properties: Record<string, InferredSchema> = {};
   const required: string[] = [];
   for (const [key, propValue] of Object.entries(value)) {
     properties[key] = inferSchemaType(propValue);
     required.push(key);
   }
-  return {
-    properties,
-    type: "object",
-    ...(required.length > 0 ? { required } : {}),
-  };
+  const schema: InferredSchema = { properties, type: "object" };
+  if (required.length > 0) {
+    schema.required = required;
+  }
+  return schema;
 }
 
-function inferSchemaType(value: unknown): Record<string, unknown> {
+function inferSchemaType(value: JsonValue): InferredSchema {
   if (value === null) {
     return { type: "null" };
   }
-  if (typeof value === "boolean") {
+  if (isJsonBoolean(value)) {
     return { type: "boolean" };
   }
-  if (typeof value === "number") {
+  if (isJsonNumber(value)) {
     return Number.isInteger(value) ? { type: "integer" } : { type: "number" };
   }
-  if (typeof value === "string") {
+  if (isJsonString(value)) {
     return inferStringType(value);
   }
   if (Array.isArray(value)) {
@@ -127,18 +173,15 @@ function inferSchemaType(value: unknown): Record<string, unknown> {
       type: "array",
     };
   }
-  if (typeof value === "object") {
-    return inferObjectType(value as Record<string, unknown>);
+  if (isJsonObject(value)) {
+    return inferObjectType(value);
   }
   return {};
 }
 
-export function inferSchemaFromJson(instanceJson: string): {
-  readonly schema?: string;
-  readonly error?: string;
-} {
+export function inferSchemaFromJson(instanceJson: string): SchemaResult {
   try {
-    const parsed = JSON.parse(instanceJson);
+    const parsed = z.json().parse(JSON.parse(instanceJson));
     const inferred = inferSchemaType(parsed);
     const rootSchema = {
       $schema: "https://json-schema.org/draft/2020-12/schema",
@@ -150,7 +193,7 @@ export function inferSchemaFromJson(instanceJson: string): {
   }
 }
 
-function mockStringValue(schema: Record<string, unknown>): string {
+function mockStringValue(schema: JsonObject): string {
   const format = schema.format;
   if (format === "email") {
     return "developer@example.com";
@@ -173,15 +216,16 @@ function mockStringValue(schema: Record<string, unknown>): string {
   return "sample";
 }
 
-function mockObjectValue(
-  schema: Record<string, unknown>
-): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-  const properties = (schema.properties ?? {}) as Record<
-    string,
-    Record<string, unknown>
-  >;
+function mockObjectValue(schema: JsonObject) {
+  const result: JsonObject = {};
+  const properties = schema.properties;
+  if (properties === undefined || !isJsonObject(properties)) {
+    return result;
+  }
   for (const [key, propSchema] of Object.entries(properties)) {
+    if (!isJsonObject(propSchema)) {
+      throw new Error(`Schema for property "${key}" must be an object`);
+    }
     result[key] = generateMockValue(propSchema);
   }
   return result;
@@ -189,16 +233,16 @@ function mockObjectValue(
 
 function mockPrimitiveOrTyped(
   type: string | undefined,
-  schema: Record<string, unknown>
-): unknown {
+  schema: JsonObject
+): JsonValue {
   if (type === "string") {
     return mockStringValue(schema);
   }
   if (type === "integer") {
-    return typeof schema.minimum === "number" ? schema.minimum : 1;
+    return isJsonNumber(schema.minimum) ? schema.minimum : 1;
   }
   if (type === "number") {
-    return typeof schema.minimum === "number" ? schema.minimum : 1.0;
+    return isJsonNumber(schema.minimum) ? schema.minimum : 1.0;
   }
   if (type === "boolean") {
     return true;
@@ -207,20 +251,20 @@ function mockPrimitiveOrTyped(
     return null;
   }
   if (type === "array") {
-    return schema.items && typeof schema.items === "object"
-      ? [generateMockValue(schema.items as Record<string, unknown>)]
+    return schema.items !== undefined && isJsonObject(schema.items)
+      ? [generateMockValue(schema.items)]
       : [];
   }
   if (
     type === "object" ||
-    (schema.properties && typeof schema.properties === "object")
+    (schema.properties !== undefined && isJsonObject(schema.properties))
   ) {
     return mockObjectValue(schema);
   }
   return "value";
 }
 
-function generateMockValue(schema: Record<string, unknown>): unknown {
+function generateMockValue(schema: JsonObject): JsonValue {
   if (Array.isArray(schema.examples) && schema.examples.length > 0) {
     return schema.examples[0];
   }
@@ -234,20 +278,17 @@ function generateMockValue(schema: Record<string, unknown>): unknown {
     return schema.const[0];
   }
 
-  const type = typeof schema.type === "string" ? schema.type : undefined;
+  const type = isJsonString(schema.type) ? schema.type : undefined;
   return mockPrimitiveOrTyped(type, schema);
 }
 
-export function generateMockFromSchema(schemaJson: string): {
-  readonly mock?: string;
-  readonly error?: string;
-} {
+export function generateMockFromSchema(schemaJson: string): MockResult {
   try {
-    const parsed = JSON.parse(schemaJson);
-    if (typeof parsed !== "object" || parsed === null) {
+    const parsed = z.json().parse(JSON.parse(schemaJson));
+    if (!isJsonObject(parsed)) {
       return { error: "Schema must be an object" };
     }
-    const mock = generateMockValue(parsed as Record<string, unknown>);
+    const mock = generateMockValue(parsed);
     return { mock: JSON.stringify(mock, null, 2) };
   } catch (err) {
     return { error: err instanceof Error ? err.message : String(err) };
