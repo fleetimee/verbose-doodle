@@ -4,6 +4,8 @@ export const commonMessages = {
   gameFullscreenUnsupported: "Layar penuh tidak tersedia di peramban ini.",
   gameFullscreenFailed: "Tidak dapat membuka layar penuh. Coba lagi.",
 
+  terrabrowserTitle: "Terrabrowser",
+  terrabrowserDescription: "Gali, bangun, dan jelajahi dunia sandbox 2D.",
   fallLineDescription: "Gim ski freeride.",
   navFun: "Hiburan",
   navFunGames: "Gim",

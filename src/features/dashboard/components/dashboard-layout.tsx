@@ -78,6 +78,7 @@ function getRouteLabels(
     endpoints: messages.common.navEndpoints,
     games: messages.common.navFunGames,
     "fall-line": messages.common.fallLineTitle,
+    terrabrowser: messages.common.terrabrowserTitle,
     "iso-8583": messages.common.navIso8583,
     "json-schema-validator": messages.jsonSchemaValidator.title,
     "jwt-inspector": messages.jwtInspector.title,

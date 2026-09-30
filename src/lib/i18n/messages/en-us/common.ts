@@ -4,6 +4,8 @@ export const commonMessages = {
   gameFullscreenUnsupported: "Fullscreen is unavailable in this browser.",
   gameFullscreenFailed: "Could not enter fullscreen. Try again.",
 
+  terrabrowserTitle: "Terrabrowser",
+  terrabrowserDescription: "Dig, build, and explore a 2D sandbox world.",
   fallLineDescription: "Freeride skiing game.",
   navFun: "Fun",
   navFunGames: "Games",

@@ -4,7 +4,8 @@
   "files": {
     "includes": [
       "!!tools/oxlint/anti-slop",
-      "!public/games/fall-line/index.html"
+      "!public/games/fall-line/index.html",
+      "!public/games/terrabrowser"
     ]
   },
   "javascript": {

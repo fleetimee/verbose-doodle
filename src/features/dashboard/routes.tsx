@@ -14,6 +14,12 @@ const FallLinePage = lazy(() =>
   }))
 );
 
+const TerrabrowserPage = lazy(() =>
+  import("@/pages/dashboard/terrabrowser").then(({ TerrabrowserPage }) => ({
+    default: TerrabrowserPage,
+  }))
+);
+
 export const dashboardRoutes = (
   <Route
     element={
@@ -29,6 +35,7 @@ export const dashboardRoutes = (
       path="games"
     />
     <Route element={<FallLinePage />} path="games/fall-line" />
+    <Route element={<TerrabrowserPage />} path="games/terrabrowser" />
     {overviewRoutes}
     {endpointRoutes}
     {socketTesterRoutes}

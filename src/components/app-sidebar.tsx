@@ -218,6 +218,12 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             title: messages.common.fallLineTitle,
             url: "/dashboard/games/fall-line",
           },
+          {
+            icon: LayoutGrid,
+            description: messages.common.terrabrowserDescription,
+            title: messages.common.terrabrowserTitle,
+            url: "/dashboard/games/terrabrowser",
+          },
         ],
       },
     ],
