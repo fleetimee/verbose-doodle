@@ -59,7 +59,7 @@ describe("AppSidebar developer tools navigation", () => {
     expect(await screen.findByRole("menuitem", { name: "UDP" })).toBeTruthy();
   });
 
-  test("opens the QRIS parent and navigates to its MPM parser", async () => {
+  test("opens the QRIS parent and navigates to its MPM parser and MDR calculator", async () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
         <MemoryRouter initialEntries={["/dashboard/developer-tools"]}>
@@ -77,6 +77,14 @@ describe("AppSidebar developer tools navigation", () => {
     await waitFor(() =>
       expect(screen.getByTestId("location").textContent).toBe(
         "/dashboard/developer-tools/qris-parser"
+      )
+    );
+    fireEvent.click(
+      await screen.findByRole("link", { name: "MDR calculator" })
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("location").textContent).toBe(
+        "/dashboard/developer-tools/qris-mdr-calculator"
       )
     );
   });

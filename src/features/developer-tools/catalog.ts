@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import {
   Binary,
   Braces,
+  Calculator,
   CalendarClock,
   CalendarDays,
   Code2,
@@ -216,6 +217,49 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
       return messages.developerTools.qris.description;
     },
     tags: ["QRIS", "MPM", "TLV", "CRC"],
+  },
+  {
+    categoryId: "inspection",
+    get description() {
+      return messages.developerTools.qrisMdr.description;
+    },
+    get document() {
+      return {
+        description: messages.developerTools.qrisMdr.description,
+        keywords: [
+          "QRIS",
+          "MDR",
+          "calculator",
+          "Switch",
+          "Issuer",
+          "Acquirer",
+          "fee",
+        ],
+        title: messages.developerTools.qrisMdr.title,
+      };
+    },
+    icon: Calculator,
+    id: "qris-mdr-calculator",
+    get limit() {
+      return messages.developerTools.qris.payloadLimit;
+    },
+    load: () =>
+      import("@/pages/dashboard/qris-mdr-calculator").then(
+        ({ QrisMdrCalculatorPage }) => ({
+          default: QrisMdrCalculatorPage,
+        })
+      ),
+    get name() {
+      return messages.developerTools.qrisMdr.title;
+    },
+    path: "developer-tools/qris-mdr-calculator",
+    get runtime() {
+      return messages.developerTools.iso8583ParserRuntime;
+    },
+    get searchDescription() {
+      return messages.developerTools.qrisMdr.description;
+    },
+    tags: ["QRIS", "MDR", "calculator", "fee", "GPN"],
   },
   {
     categoryId: "validation",

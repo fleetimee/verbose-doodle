@@ -16,6 +16,7 @@ import {
 } from "@/components/game-icons";
 import {
   Binary,
+  Calculator,
   Code2,
   type HugeIcon,
   Info,
@@ -220,6 +221,23 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             title: messages.developerTools.qrisCreator.menu,
             url: "/dashboard/developer-tools/qris-creator",
           },
+          {
+            description: messages.developerTools.qrisMdr.description,
+            icon: Calculator,
+            keywords: [
+              "QRIS",
+              "MDR",
+              "calculator",
+              "Switch",
+              "Issuer",
+              "Acquirer",
+              "fee",
+              "GPN",
+            ],
+            onPrefetch: () => import("@/pages/dashboard/qris-mdr-calculator"),
+            title: messages.developerTools.qrisMdr.menu,
+            url: "/dashboard/developer-tools/qris-mdr-calculator",
+          },
         ],
       },
       ...DEVELOPER_TOOL_CATEGORIES.map((category) => ({
@@ -231,7 +249,8 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
               tool.id !== "iso8583-parser" &&
               tool.id !== "iso8583-generator" &&
               tool.id !== "qris-parser" &&
-              tool.id !== "qris-creator"
+              tool.id !== "qris-creator" &&
+              tool.id !== "qris-mdr-calculator"
           )
           .map((tool) => ({
             description: tool.searchDescription,

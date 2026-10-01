@@ -10,6 +10,7 @@ import {
   BracesIcon,
   Building01Icon,
   CableIcon,
+  CalculatorIcon,
   Calendar03Icon,
   CalendarClockIcon,
   CheckIcon as CheckDefinition,
@@ -107,6 +108,7 @@ export const Binary = createHugeIcon(BinaryIcon);
 export const Braces = createHugeIcon(BracesIcon);
 export const Building2 = createHugeIcon(Building01Icon);
 export const Cable = createHugeIcon(CableIcon);
+export const Calculator = createHugeIcon(CalculatorIcon);
 export const CalendarClock = createHugeIcon(CalendarClockIcon);
 export const CalendarDays = createHugeIcon(Calendar03Icon);
 export const Check = createHugeIcon(CheckDefinition);
