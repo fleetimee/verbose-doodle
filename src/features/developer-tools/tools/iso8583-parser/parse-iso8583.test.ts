@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { parseIso8583Stream } from "./parse-iso8583";
+import { SAMPLE_STREAMS } from "./sample-streams";
 
 const MTI_ERROR_PATTERN = /Expected 4-digit MTI/;
 
@@ -38,6 +39,40 @@ const ACCOUNT_INQUIRY_SAMPLE = [
 ].join("");
 
 describe("parseIso8583Stream", () => {
+  test("fully unpacks the captured inquiry request and response samples", () => {
+    for (const labelKey of ["sampleInquiryRequest", "sampleInquiryResponse"]) {
+      const sample = SAMPLE_STREAMS.find((item) => item.labelKey === labelKey);
+      if (!sample) {
+        throw new Error(`Missing sample: ${labelKey}`);
+      }
+      const result = parseIso8583Stream(sample.stream);
+      expect(result.isValid).toBe(true);
+      expect(result.warnings).toEqual([]);
+      expect(result.remainingStream).toBe("");
+      expect(result.fields.map((field) => field.number)).toEqual([
+        ...result.activeBits,
+      ]);
+      expect(result.fields).toHaveLength(21);
+      const fields = new Map(
+        result.fields.map((field) => [field.number, field.rawValue])
+      );
+      expect(fields.get(3)).toBe("360000");
+      expect(fields.get(63)).toHaveLength(156);
+      expect(fields.get(98)).toBe("000112                   ");
+      expect(fields.get(102)).toBe("001111001172");
+      if (labelKey === "sampleInquiryRequest") {
+        expect(result.mti.mti).toBe("0200");
+        expect(fields.get(120)).toBe("0040000044");
+        expect(fields.has(39)).toBe(false);
+      } else {
+        expect(result.mti.mti).toBe("0210");
+        expect(fields.get(39)).toBe("00");
+        expect(fields.get(48)).toBe("3009202630092026000006000010000000IDR012");
+        expect(fields.has(120)).toBe(false);
+      }
+    }
+  });
+
   test("parses a standard Sign-On request stream with ASCII-4 length header", () => {
     const result = parseIso8583Stream(SIGN_ON_SAMPLE);
 

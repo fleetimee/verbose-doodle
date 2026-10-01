@@ -65,7 +65,8 @@ export const iso8583ParserMessages = {
   rawStreamJson: "Stream Mentah & JSON",
   sampleAccountInquiry: "0200 · Pertanyaan Rekening (Inquiry)",
   sampleSignOn: "0800 · Permintaan Sign-On",
-  sampleTransaction: "0200 · Transaksi Pembelian",
+  sampleInquiryRequest: "0200 · Permintaan Inquiry (360000)",
+  sampleInquiryResponse: "0210 · Respons Inquiry (360000)",
   sampleHexSignOn: "Hex Dump (Sign-On)",
   copiedValue: "{label} disalin ke papan klip",
   samples: "Contoh:",
@@ -85,6 +86,8 @@ export const iso8583ParserMessages = {
   bitmaps: "Bitmaps",
   copyBitmaps: "Salin Bitmaps",
   totalBits: "Total {count} bit",
+  showAllBits: "Tampilkan semua bit",
+  activeBitsOnly: "Hanya bit aktif",
   bitmapMatrixTitle: "Matriks Bitmap Interaktif",
   bitmapMatrixDescription:
     "Bit aktif disorot. Klik bit aktif mana pun untuk mengisolasi elemen data di bawah.",

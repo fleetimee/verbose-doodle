@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import {
   Binary,
   CheckCircle2,
+  ChevronDown,
   CircleAlert,
   ClipboardCopy,
   Code2,
@@ -22,9 +23,17 @@ import {
   CodeBlockItem,
 } from "@/components/kibo-ui/code-block";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DeveloperToolLayout } from "@/features/developer-tools/components/developer-tool-layout";
+import { SAMPLE_STREAMS } from "@/features/developer-tools/tools/iso8583-parser/sample-streams";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -33,28 +42,6 @@ import {
   type ParsedIso8583Message,
   parseIso8583Stream,
 } from "../parse-iso8583";
-
-const SAMPLE_STREAMS = [
-  {
-    labelKey: "sampleSignOn",
-    stream: "0060080082200000800000000400000000000000090108003700364503112001",
-  },
-  {
-    labelKey: "sampleAccountInquiry",
-    stream:
-      "03730200F23A400188E0801600000000005600000039200000000000000008070925090004791625090807080760990311203112080700000479        000000000000000KANTOR PUSAT                     DIY IDN3600030000001301000000000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000C00000000                         0311219999003200000000000100",
-  },
-  {
-    labelKey: "sampleTransaction",
-    stream:
-      "0200B220000000100000000000000000000016621487000000000100000000000001000001010000000000010000000101251260110120006000112000000000001TERM0001MERCHANT000001MERCHANT TEST 01          YOGYAKARTA IDN360",
-  },
-  {
-    labelKey: "sampleHexSignOn",
-    stream:
-      "30 30 36 30 30 38 30 30 38 32 32 30 30 30 30 30 38 30 30 30 30 30 30 30 30 34 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 39 30 31 30 38 30 30 33 37 30 30 33 36 34 35 30 33 31 31 32 30 30 31",
-  },
-] as const;
 
 function getFieldKindLabel(kind: string, length: number): string {
   if (kind === "llvar") {
@@ -105,7 +92,12 @@ function BitmapMatrix({
   readonly selectedBit: number | null;
   readonly onSelectBit: (bit: number | null) => void;
 }) {
+  const [activeOnly, setActiveOnly] = useState(true);
   const totalBits = hasSecondary ? 128 : 64;
+  const visibleBits = Array.from({ length: totalBits }, (_, i) => i + 1).filter(
+    (bit) =>
+      !activeOnly || (bit === 1 ? hasSecondary : activeBits.includes(bit))
+  );
   return (
     <div className="flex flex-col gap-4 rounded-md bg-muted/20 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -117,17 +109,35 @@ function BitmapMatrix({
             {messages.iso8583Parser.bitmapMatrixDescription}
           </p>
         </div>
-        {selectedBit ? (
-          <Button onClick={() => onSelectBit(null)} size="xs" variant="ghost">
-            {formatMessage(messages.iso8583Parser.clearBitFilter, {
-              bit: selectedBit,
-            })}
+        <div className="flex items-center gap-1">
+          {selectedBit ? (
+            <Button onClick={() => onSelectBit(null)} size="xs" variant="ghost">
+              {formatMessage(messages.iso8583Parser.clearBitFilter, {
+                bit: selectedBit,
+              })}
+            </Button>
+          ) : null}
+          <Button
+            aria-pressed={activeOnly}
+            onClick={() => setActiveOnly((value) => !value)}
+            size="xs"
+            variant="outline"
+          >
+            {activeOnly
+              ? messages.iso8583Parser.showAllBits
+              : messages.iso8583Parser.activeBitsOnly}
           </Button>
-        ) : null}
+        </div>
       </div>
 
-      <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-16 xl:grid-cols-32">
-        {Array.from({ length: totalBits }, (_, i) => i + 1).map((bitNum) => {
+      <div
+        className={
+          activeOnly
+            ? "flex flex-wrap gap-1.5"
+            : "grid grid-cols-8 gap-1.5 sm:grid-cols-16 xl:grid-cols-32"
+        }
+      >
+        {visibleBits.map((bitNum) => {
           const isActive =
             bitNum === 1 ? hasSecondary : activeBits.includes(bitNum);
           const isSelected = selectedBit === bitNum;
@@ -136,6 +146,7 @@ function BitmapMatrix({
             <button
               className={cn(
                 "flex h-7 items-center justify-center rounded-sm font-mono text-xs transition-colors",
+                activeOnly && "w-9",
                 getBitButtonClass(isActive, isSelected),
                 isActive && "iso8583-active-bit",
                 isSelected && "iso8583-selected-bit"
@@ -334,9 +345,11 @@ function SlicesTable({ parsed }: { readonly parsed: ParsedIso8583Message }) {
 
 function PrettyPrintView({
   parsed,
+  selectedBit,
   onCopy,
 }: {
   readonly parsed: ParsedIso8583Message;
+  readonly selectedBit: number | null;
   readonly onCopy: (text: string, label: string) => void;
 }) {
   const [wordWrap, setWordWrap] = useState(false);
@@ -386,11 +399,20 @@ function PrettyPrintView({
             : "overflow-x-auto whitespace-pre"
         )}
       >
-        <span className="iso8583-syntax-mti">[MTI]</span>
-        <span className="text-muted-foreground"> : </span>
-        <span className="iso8583-syntax-value">'{parsed.mti.mti}'</span>
+        <span className="block">
+          <span className="iso8583-syntax-mti">[MTI]</span>
+          <span className="text-muted-foreground"> : </span>
+          <span className="iso8583-syntax-value">'{parsed.mti.mti}'</span>
+        </span>
         {parsed.fields.map((field) => (
-          <span key={field.number}>
+          <span
+            className={cn(
+              "iso8583-pretty-line",
+              !wordWrap && "w-max min-w-full"
+            )}
+            data-selected={selectedBit === field.number ? "true" : undefined}
+            key={field.number}
+          >
             {"\n"}
             <span className="iso8583-syntax-field">
               [{String(field.number).padStart(3, "0")}]
@@ -680,25 +702,30 @@ export function Iso8583Parser() {
               </label>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-muted-foreground text-xs">
-                {messages.iso8583Parser.samples}
-              </span>
-              {SAMPLE_STREAMS.map((sample) => (
-                <Button
-                  key={sample.labelKey}
-                  onClick={() => {
-                    setStreamInput(sample.stream);
-                    setSelectedBit(null);
-                  }}
-                  size="xs"
-                  type="button"
-                  variant="ghost"
-                >
-                  {messages.iso8583Parser[sample.labelKey]}
-                </Button>
-              ))}
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={<Button size="xs" variant="outline" />}
+              >
+                {messages.iso8583Parser.loadSample}
+                <ChevronDown data-icon="inline-end" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  {SAMPLE_STREAMS.map((sample) => (
+                    <DropdownMenuItem
+                      key={sample.labelKey}
+                      onClick={() => {
+                        setStreamInput(sample.stream);
+                        setSelectedBit(null);
+                        setSearchQuery("");
+                      }}
+                    >
+                      {messages.iso8583Parser[sample.labelKey]}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <StreamInput
@@ -831,7 +858,11 @@ export function Iso8583Parser() {
               ) : null}
 
               {activeTab === "pretty" ? (
-                <PrettyPrintView onCopy={handleCopy} parsed={parsed} />
+                <PrettyPrintView
+                  onCopy={handleCopy}
+                  parsed={parsed}
+                  selectedBit={selectedBit}
+                />
               ) : null}
 
               {activeTab === "json" ? <JsonView parsed={parsed} /> : null}

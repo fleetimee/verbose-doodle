@@ -65,7 +65,8 @@ export const iso8583ParserMessages = {
   rawStreamJson: "Raw Stream & JSON",
   sampleAccountInquiry: "0200 · Account Inquiry",
   sampleSignOn: "0800 · Sign-On Request",
-  sampleTransaction: "0200 · Purchase Transaction",
+  sampleInquiryRequest: "0200 · Inquiry Request (360000)",
+  sampleInquiryResponse: "0210 · Inquiry Response (360000)",
   sampleHexSignOn: "Hex Dump (Sign-On)",
   copiedValue: "Copied {label} to clipboard",
   samples: "Samples:",
@@ -85,6 +86,8 @@ export const iso8583ParserMessages = {
   bitmaps: "Bitmaps",
   copyBitmaps: "Copy Bitmaps",
   totalBits: "{count} bits total",
+  showAllBits: "Show all bits",
+  activeBitsOnly: "Active bits only",
   bitmapMatrixTitle: "Interactive Bitmap Matrix",
   bitmapMatrixDescription:
     "Active bits are highlighted. Click any active bit to isolate that data element below.",
