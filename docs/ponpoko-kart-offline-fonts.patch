@@ -1,0 +1,43 @@
+diff --git a/src/ui/UI.js b/src/ui/UI.js
+index 69a4f32..823788b 100644
+--- a/src/ui/UI.js
++++ b/src/ui/UI.js
+@@ -26,9 +26,6 @@ import './ui.css';
+ import * as ART from './art.js';
+ import { Minimap } from './minimap.js';
+ 
+-const FONT_HREF =
+-  'https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;800&family=Yuji+Syuku&display=swap';
+-
+ const KEYMAP = {
+   ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down',
+   ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
+@@ -131,20 +128,6 @@ function charType(c) {
+ }
+ const uPx = () => Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+ 
+-let fontsInjected = false;
+-function injectFonts() {
+-  if (fontsInjected) return;
+-  fontsInjected = true;
+-  if (document.querySelector('link[data-pk-fonts]')) return;
+-  const a = document.createElement('link');
+-  a.rel = 'preconnect'; a.href = 'https://fonts.googleapis.com';
+-  const b = document.createElement('link');
+-  b.rel = 'preconnect'; b.href = 'https://fonts.gstatic.com'; b.crossOrigin = 'anonymous';
+-  const l = document.createElement('link');
+-  l.rel = 'stylesheet'; l.href = FONT_HREF; l.dataset.pkFonts = '1';
+-  document.head.append(a, b, l);
+-}
+-
+ let artVars = null;
+ function getArtVars() {
+   if (artVars) return artVars;
+@@ -213,7 +196,6 @@ export class UI {
+     this._mouseArmed = false;
+     this._loadingOn = false;
+ 
+-    injectFonts();
+     const el = (this.el = h('div', 'pk-ui'));
+     el.lang = 'ja';
+     if (root !== document.body && root !== document.documentElement) el.classList.add('pk-ui--contained');

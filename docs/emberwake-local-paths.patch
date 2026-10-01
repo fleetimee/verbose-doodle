@@ -1,0 +1,76 @@
+diff --git a/index.html b/index.html
+index 4ab971b..43966b6 100644
+--- a/index.html
++++ b/index.html
+@@ -16,9 +16,9 @@
+           <div class="bar hp"><div id="hpfill"></div><div id="hpghost"></div><span id="hptext">100</span></div>
+         </div>
+         <div class="night">
+-          <img src="/sprites/hud_moon.png" class="nicon" alt="" />
++          <img src="./sprites/hud_moon.png" class="nicon" alt="" />
+           <div class="bar nightbar"><div id="nightfill"></div><div id="bossmark"></div></div>
+-          <img src="/sprites/hud_sun.png" class="nicon" alt="" />
++          <img src="./sprites/hud_sun.png" class="nicon" alt="" />
+           <div id="clock">5:00</div>
+         </div>
+         <div class="score-wrap">
+@@ -33,7 +33,7 @@
+       </div>
+ 
+       <div id="title" class="screen">
+-        <img id="logo" src="/sprites/logo.png" alt="Emberwake" />
++        <img id="logo" src="./sprites/logo.png" alt="Emberwake" />
+         <div class="tag">Keep the flame alive until dawn.</div>
+         <div class="press blink">PRESS ANY KEY</div>
+         <div class="how">
+diff --git a/src/render.js b/src/render.js
+index 1fc47b1..2edebcc 100644
+--- a/src/render.js
++++ b/src/render.js
+@@ -91,7 +91,7 @@ export async function loadSprites(names, hints = {}) {
+   const out = {};
+   await Promise.all(names.map(async (n) => {
+     const img = new Image();
+-    img.src = `/sprites/${n}.png`;
++    img.src = `./sprites/${n}.png`;
+     await img.decode();
+     out[n] = { img, w: img.width, h: img.height, map: pixelTex(img), emap: pixelTex(emissiveFrom(img, hints[n])) };
+   }));
+@@ -99,7 +99,7 @@ export async function loadSprites(names, hints = {}) {
+ }
+ 
+ export function loadTile(name) {
+-  const t = new THREE.TextureLoader().load(`/sprites/${name}.png`);
++  const t = new THREE.TextureLoader().load(`./sprites/${name}.png`);
+   t.magFilter = t.minFilter = THREE.NearestFilter;
+   t.generateMipmaps = false;
+   t.wrapS = t.wrapT = THREE.RepeatWrapping;
+diff --git a/src/ui.js b/src/ui.js
+index d5767db..3ef3d1a 100644
+--- a/src/ui.js
++++ b/src/ui.js
+@@ -43,7 +43,7 @@ export function hud(g) {
+   const key = JSON.stringify(g.lv);
+   if (cache.kit !== key) {
+     cache.kit = key;
+-    $('kit').innerHTML = UPGRADES.filter((u) => g.lv[u.id]).map((u) => `<div class="kit"><img src="/sprites/icon_${u.icon}.png" alt=""><b>${g.lv[u.id]}</b></div>`).join('');
++    $('kit').innerHTML = UPGRADES.filter((u) => g.lv[u.id]).map((u) => `<div class="kit"><img src="./sprites/icon_${u.icon}.png" alt=""><b>${g.lv[u.id]}</b></div>`).join('');
+   }
+ }
+ 
+@@ -64,7 +64,7 @@ export function cards(opts, lv, cb) {
+   $('cards').innerHTML = opts.map((u, i) => {
+     const l = (lv[u.id] || 0) + 1;
+     return `<div class="card${i === 0 ? ' sel' : ''}" data-i="${i}">
+-      <div class="ic"><img src="/sprites/icon_${u.icon}.png" alt=""></div>
++      <div class="ic"><img src="./sprites/icon_${u.icon}.png" alt=""></div>
+       ${l === 1 ? '<div class="new">NEW</div>' : ''}
+       <div class="nm">${u.name}</div>
+       <div class="lv">${'★'.repeat(l)}${'☆'.repeat(u.max - l)}</div>
+diff --git a/vite.config.js b/vite.config.js
+index e7d077c..6561601 100644
+--- a/vite.config.js
++++ b/vite.config.js
+@@ -1 +1 @@
+-export default { build: { target: 'esnext' }, server: { port: 5199 } };
++export default { base: './', build: { target: 'esnext' }, server: { port: 5199 } };
