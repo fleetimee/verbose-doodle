@@ -189,15 +189,22 @@ function NavMenuItem({
           <item.icon />
           <span>{item.title}</span>
         </SidebarMenuButton>
-        {isAltHeld ? (
-          <SidebarMenuBadge>
-            <Kbd aria-hidden="true">
-              {formatOptionShortcut(shortcutKey.toUpperCase())}
-            </Kbd>
+        <SidebarMenuBadge
+          className="navigation-shortcut-hint"
+          hidden={!isAltHeld}
+        >
+          <Kbd aria-hidden="true">
+            {formatOptionShortcut(shortcutKey.toUpperCase())}
+          </Kbd>
+        </SidebarMenuBadge>
+        {item.badge ? (
+          <SidebarMenuBadge
+            className="navigation-shortcut-hint"
+            hidden={isAltHeld}
+            variant="muted"
+          >
+            {item.badge}
           </SidebarMenuBadge>
-        ) : null}
-        {!isAltHeld && item.badge ? (
-          <SidebarMenuBadge variant="muted">{item.badge}</SidebarMenuBadge>
         ) : null}
       </SidebarMenuItem>
     );
@@ -292,13 +299,14 @@ function NavMenuItem({
             >
               <item.icon />
               <span>{item.title}</span>
-              {isAltHeld ? (
-                <span className="ml-auto flex shrink-0 gap-1">
-                  <Kbd aria-hidden="true">
-                    {formatOptionShortcut(shortcutKey.toUpperCase())}
-                  </Kbd>
-                </span>
-              ) : null}
+              <span
+                className="navigation-shortcut-hint ml-auto flex shrink-0 gap-1"
+                hidden={!isAltHeld}
+              >
+                <Kbd aria-hidden="true">
+                  {formatOptionShortcut(shortcutKey.toUpperCase())}
+                </Kbd>
+              </span>
               <HugeiconsIcon
                 className="ml-auto size-4 transition-transform duration-200 group-data-[open]/collapsible-trigger:rotate-90"
                 icon={ArrowRight01Icon}
@@ -334,8 +342,12 @@ function NavMenuItem({
                   >
                     <subItem.icon />
                     <span>{subItem.title}</span>
-                    {isAltHeld && childShortcutKey ? (
-                      <Kbd aria-hidden="true" className="ml-auto">
+                    {childShortcutKey ? (
+                      <Kbd
+                        aria-hidden="true"
+                        className="navigation-shortcut-hint ml-auto"
+                        hidden={!isAltHeld}
+                      >
                         {formatOptionShortcut(childShortcutKey.toUpperCase())}
                       </Kbd>
                     ) : null}

@@ -264,7 +264,7 @@ describe("AppSidebar developer tools navigation", () => {
     );
 
     fireEvent.keyUp(document, { key: "Alt" });
-    expect(screen.queryByText("Alt+O")).toBeNull();
+    expect(screen.getByText("Alt+O").closest("[hidden]")).toBeTruthy();
   });
 
   test("renders dedicated ISO 8583 submenu with Parser and Generator and finds it via nav search", async () => {

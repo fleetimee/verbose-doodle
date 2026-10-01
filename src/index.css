@@ -3343,3 +3343,73 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 .dark .iso8583-syntax-length {
   color: #93c5fd;
 }
+
+/* Keep shortcut hints mounted so both reveal and dismissal can transition. */
+.navigation-shortcut-hint {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 150ms var(--ease-out),
+    transform 150ms var(--ease-out),
+    display 150ms allow-discrete;
+}
+
+.navigation-shortcut-hint[hidden] {
+  display: none !important;
+  opacity: 0;
+  transform: translateY(2px) scale(0.96);
+}
+
+@starting-style {
+  .navigation-shortcut-hint:not([hidden]) {
+    opacity: 0;
+    transform: translateY(2px) scale(0.96);
+  }
+}
+
+.navigation-shortcut-hint[data-slot="kbd"],
+.navigation-shortcut-hint [data-slot="kbd"] {
+  position: relative;
+  color: var(--primary);
+  background: color-mix(in oklch, var(--primary) 12%, var(--background));
+  border: 1px solid color-mix(in oklch, var(--primary) 30%, transparent);
+  isolation: isolate;
+}
+
+.navigation-shortcut-hint[data-slot="kbd"]::before,
+.navigation-shortcut-hint [data-slot="kbd"]::before {
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  content: "";
+  border-radius: inherit;
+  box-shadow: 0 0 10px color-mix(in oklch, var(--primary) 28%, transparent);
+  opacity: 1;
+  transition: opacity 150ms var(--ease-out);
+}
+
+.navigation-shortcut-hint[hidden]::before,
+.navigation-shortcut-hint[hidden] [data-slot="kbd"]::before {
+  opacity: 0;
+}
+
+@starting-style {
+  .navigation-shortcut-hint[data-slot="kbd"]::before,
+  .navigation-shortcut-hint [data-slot="kbd"]::before {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navigation-shortcut-hint,
+  .navigation-shortcut-hint[hidden] {
+    transform: none;
+    transition-duration: 100ms;
+  }
+
+  @starting-style {
+    .navigation-shortcut-hint:not([hidden]) {
+      transform: none;
+    }
+  }
+}
