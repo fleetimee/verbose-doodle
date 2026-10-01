@@ -1,7 +1,14 @@
 import { useMemo, useState } from "react";
+import { Label, Pie, PieChart } from "recharts";
 import { Check, ClipboardCopy } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -32,6 +39,65 @@ export function QrisMdrCalculator() {
   const [copied, setCopied] = useState(false);
 
   const result = useMemo(() => calculateQrisMdr(input), [input]);
+
+  const chartConfig = useMemo(
+    () =>
+      ({
+        share: {
+          label: "Share (%)",
+        },
+        switch: {
+          color: "var(--chart-1)",
+          label: copy.switchFee,
+        },
+        issuer: {
+          color: "var(--chart-2)",
+          label: copy.issuerFee,
+        },
+        acquirer: {
+          color: "var(--chart-3)",
+          label: copy.acquirerFee,
+        },
+      }) satisfies ChartConfig,
+    [copy.switchFee, copy.issuerFee, copy.acquirerFee]
+  );
+
+  const chartData = useMemo(
+    () => [
+      {
+        amount: result.switchAmount,
+        entity: "switch",
+        fill: "var(--color-switch)",
+        name: copy.switchFee,
+        share: result.switchSharePercent,
+      },
+      {
+        amount: result.issuerAmount,
+        entity: "issuer",
+        fill: "var(--color-issuer)",
+        name: copy.issuerFee,
+        share: result.issuerSharePercent,
+      },
+      {
+        amount: result.acquirerAmount,
+        entity: "acquirer",
+        fill: "var(--color-acquirer)",
+        name: copy.acquirerFee,
+        share: result.acquirerSharePercent,
+      },
+    ],
+    [
+      result.switchAmount,
+      result.switchSharePercent,
+      result.issuerAmount,
+      result.issuerSharePercent,
+      result.acquirerAmount,
+      result.acquirerSharePercent,
+      copy.switchFee,
+      copy.issuerFee,
+      copy.acquirerFee,
+    ]
+  );
 
   function handleFieldChange(key: keyof QrisMdrInput, value: string) {
     setInput((prev) => ({ ...prev, [key]: value }));
@@ -318,29 +384,110 @@ export function QrisMdrCalculator() {
               </div>
             </div>
 
-            {/* Visual Sharing Proportion Bar */}
+            {/* Pie Chart Revenue Sharing Proportion */}
             {result.totalMdr > 0 && result.isShareValid && (
-              <div className="space-y-1.5 pt-1">
-                <div className="flex items-center justify-between text-muted-foreground text-xs">
-                  <span>Proportion</span>
-                  <span>100% Total MDR</span>
-                </div>
-                <div className="flex h-3 w-full overflow-hidden rounded-full border bg-muted">
-                  <div
-                    className="bg-sky-500 transition-all"
-                    style={{ width: `${result.switchSharePercent}%` }}
-                    title={`Switch: ${result.switchSharePercent}%`}
-                  />
-                  <div
-                    className="bg-indigo-500 transition-all"
-                    style={{ width: `${result.issuerSharePercent}%` }}
-                    title={`Issuer: ${result.issuerSharePercent}%`}
-                  />
-                  <div
-                    className="bg-emerald-500 transition-all"
-                    style={{ width: `${result.acquirerSharePercent}%` }}
-                    title={`Acquirer: ${result.acquirerSharePercent}%`}
-                  />
+              <div className="flex flex-col items-center justify-around gap-4 rounded-xl border border-border/80 bg-muted/20 p-4 sm:flex-row">
+                <ChartContainer
+                  className="mx-auto aspect-square h-[170px] w-full max-w-[170px]"
+                  config={chartConfig}
+                >
+                  <PieChart>
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          formatter={(_value, _name, item) => (
+                            <div className="flex w-full items-center justify-between gap-3 font-medium text-xs">
+                              <span className="text-muted-foreground">
+                                {item.payload.name}
+                              </span>
+                              <span className="font-bold font-mono text-foreground">
+                                {formatRupiah(item.payload.amount, useRounding)}{" "}
+                                ({item.payload.share}%)
+                              </span>
+                            </div>
+                          )}
+                          hideLabel
+                        />
+                      }
+                    />
+                    <Pie
+                      data={chartData}
+                      dataKey="share"
+                      innerRadius={46}
+                      nameKey="name"
+                      outerRadius={68}
+                      stroke="var(--background)"
+                      strokeWidth={2}
+                    >
+                      <Label
+                        content={({ viewBox }) => {
+                          if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                            return (
+                              <text
+                                dominantBaseline="middle"
+                                textAnchor="middle"
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                              >
+                                <tspan
+                                  className="fill-foreground font-bold font-mono text-base"
+                                  x={viewBox.cx}
+                                  y={viewBox.cy}
+                                >
+                                  {result.mdrRate}%
+                                </tspan>
+                                <tspan
+                                  className="fill-muted-foreground text-[10px]"
+                                  x={viewBox.cx}
+                                  y={(viewBox.cy ?? 0) + 14}
+                                >
+                                  MDR
+                                </tspan>
+                              </text>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </Pie>
+                  </PieChart>
+                </ChartContainer>
+
+                {/* Legend badges */}
+                <div className="flex w-full flex-col justify-center gap-2.5 sm:w-auto sm:min-w-[180px]">
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="size-2.5 shrink-0 rounded-full bg-[var(--chart-1)]" />
+                      <span className="text-muted-foreground">
+                        {copy.switchFee}
+                      </span>
+                    </div>
+                    <span className="font-bold font-mono">
+                      {result.switchSharePercent}%
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="size-2.5 shrink-0 rounded-full bg-[var(--chart-2)]" />
+                      <span className="text-muted-foreground">
+                        {copy.issuerFee}
+                      </span>
+                    </div>
+                    <span className="font-bold font-mono">
+                      {result.issuerSharePercent}%
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="size-2.5 shrink-0 rounded-full bg-[var(--chart-3)]" />
+                      <span className="text-muted-foreground">
+                        {copy.acquirerFee}
+                      </span>
+                    </div>
+                    <span className="font-bold font-mono">
+                      {result.acquirerSharePercent}%
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
@@ -362,7 +509,7 @@ export function QrisMdrCalculator() {
                 <tbody className="divide-y divide-border">
                   <tr>
                     <td className="flex items-center gap-2 px-3.5 py-2.5 font-medium">
-                      <span className="size-2 rounded-full bg-sky-500" />
+                      <span className="size-2 rounded-full bg-[var(--chart-1)]" />
                       {copy.switchFee}
                     </td>
                     <td className="px-3.5 py-2.5 text-right font-mono">
@@ -374,7 +521,7 @@ export function QrisMdrCalculator() {
                   </tr>
                   <tr>
                     <td className="flex items-center gap-2 px-3.5 py-2.5 font-medium">
-                      <span className="size-2 rounded-full bg-indigo-500" />
+                      <span className="size-2 rounded-full bg-[var(--chart-2)]" />
                       {copy.issuerFee}
                     </td>
                     <td className="px-3.5 py-2.5 text-right font-mono">
@@ -386,7 +533,7 @@ export function QrisMdrCalculator() {
                   </tr>
                   <tr>
                     <td className="flex items-center gap-2 px-3.5 py-2.5 font-medium">
-                      <span className="size-2 rounded-full bg-emerald-500" />
+                      <span className="size-2 rounded-full bg-[var(--chart-3)]" />
                       {copy.acquirerFee}
                     </td>
                     <td className="px-3.5 py-2.5 text-right font-mono">
