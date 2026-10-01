@@ -291,6 +291,12 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
         title: messages.common.navFunGames,
         items: [
           {
+            icon: GamesIcon,
+            description: messages.common.gamesDescription,
+            title: messages.common.gamesBrowse,
+            url: "/dashboard/games",
+          },
+          {
             icon: FallLinesIcon,
             description: messages.common.fallLineDescription,
             title: messages.common.fallLineTitle,

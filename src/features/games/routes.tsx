@@ -1,5 +1,11 @@
 import { lazy } from "react";
-import { Navigate, Route } from "react-router";
+import { Route } from "react-router";
+
+const GamesPage = lazy(() =>
+  import("@/pages/dashboard/games").then(({ GamesPage }) => ({
+    default: GamesPage,
+  }))
+);
 
 const FallLinePage = lazy(() =>
   import("@/pages/dashboard/fall-line").then(({ FallLinePage }) => ({
@@ -63,10 +69,7 @@ const HearthvalePage = lazy(() =>
 
 export const gameRoutes = (
   <>
-    <Route
-      element={<Navigate replace to="/dashboard/games/fall-line" />}
-      path="games"
-    />
+    <Route element={<GamesPage />} path="games" />
     <Route element={<FallLinePage />} path="games/fall-line" />
     <Route element={<TerrabrowserPage />} path="games/terrabrowser" />
     <Route element={<PonpokoKartPage />} path="games/ponpoko-kart" />

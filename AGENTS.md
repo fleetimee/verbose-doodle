@@ -21,6 +21,13 @@
 - Follow `biome.json`, including its shared UI overrides. Keep design tokens in
   `src/index.css`; use the existing translation system for localized copy.
 
+## Game media
+
+- When adding games or capturing storefront covers, gameplay screenshots, or preview
+  videos, follow [docs/game-storefront-media.md](docs/game-storefront-media.md).
+- Use actual bundled-game captures and record reproducible per-game steps. Preserve
+  player saves and keep media capture separate from runtime game execution.
+
 ## Validation
 
 - Run relevant tests with `rtk bun test --isolate <path>`.

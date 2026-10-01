@@ -56,17 +56,19 @@ function HoverCardContent({
   alignOffset = 0,
   side = "bottom",
   sideOffset = 4,
+  collisionPadding = 5,
   size = "default",
   ...props
 }: React.ComponentProps<typeof HoverCardPrimitive.Popup> &
   Pick<
     HoverCardPrimitive.Positioner.Props,
-    "align" | "alignOffset" | "side" | "sideOffset"
+    "align" | "alignOffset" | "side" | "sideOffset" | "collisionPadding"
   > &
   VariantProps<typeof hoverCardContentVariants>) {
   return (
     <HoverCardPrimitive.Portal data-slot="hover-card-portal">
       <HoverCardPrimitive.Positioner
+        collisionPadding={collisionPadding}
         align={align}
         alignOffset={alignOffset}
         side={side}

@@ -1,4 +1,14 @@
 export const commonMessages = {
+  gamesBrowse: "Jelajahi gim",
+  gamesDescription: "Pilih gim dan langsung mainkan.",
+  gamesFeatured: "Gim pilihan",
+  gamesPlay: "Main sekarang",
+  gamesAll: "Semua gim",
+  gamesSearch: "Cari gim...",
+  gamesEmpty: "Tidak ada gim yang cocok dengan pencarianmu.",
+  gamesClear: "Hapus pencarian",
+  gamesCount: "{count} gim siap dimainkan",
+
   buildYourTownTitle: "Build Your Town",
   buildYourTownDescription: "Bangun dan kelola kotamu yang terus berkembang.",
   chess3dTitle: "3D Chess",

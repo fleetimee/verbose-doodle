@@ -1,4 +1,14 @@
 export const commonMessages = {
+  gamesBrowse: "Browse games",
+  gamesDescription: "Pick a game and jump straight in.",
+  gamesFeatured: "Featured game",
+  gamesPlay: "Play now",
+  gamesAll: "All games",
+  gamesSearch: "Search games...",
+  gamesEmpty: "No games match your search.",
+  gamesClear: "Clear search",
+  gamesCount: "{count} games ready to play",
+
   buildYourTownTitle: "Build Your Town",
   buildYourTownDescription: "Build and manage your own growing city.",
   chess3dTitle: "3D Chess",

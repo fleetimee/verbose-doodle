@@ -38,3 +38,5 @@ bun run preview     # Serve the production build locally
 - [Product scope and terminology](PRODUCT.md)
 - [Design system](DESIGN.md)
 - [Mascot references](docs/mascot.md)
+
+- [Game storefront media capture and hover previews](docs/game-storefront-media.md)
