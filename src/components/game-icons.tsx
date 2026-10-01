@@ -253,3 +253,37 @@ export const DynamiteMoleIcon: HugeIcon = (props) => (
     {...props}
   />
 );
+
+const yetAnotherVoxelcraftDefinition: IconSvgElement = [
+  [
+    "path",
+    {
+      d: "m12 2 9 5v10l-9 5-9-5V7Zm0 10v10M3 7l9 5 9-5M7 5l9 5M7 9v4m9-3v4",
+      key: "yetanothervoxelcraft-0",
+    },
+  ],
+];
+
+export const YetAnotherVoxelcraftIcon: HugeIcon = (props) => (
+  <HugeiconsIcon
+    aria-hidden="true"
+    icon={yetAnotherVoxelcraftDefinition}
+    strokeWidth={2}
+    {...props}
+  />
+);
+
+const pokemonClaudeRedDefinition: IconSvgElement = [
+  ["circle", { cx: 12, cy: 12, r: 9, key: "pokemonclaudered-0" }],
+  ["circle", { cx: 12, cy: 12, r: 3, key: "pokemonclaudered-1" }],
+  ["path", { d: "M3 12h6m6 0h6", key: "pokemonclaudered-2" }],
+];
+
+export const PokemonClaudeRedIcon: HugeIcon = (props) => (
+  <HugeiconsIcon
+    aria-hidden="true"
+    icon={pokemonClaudeRedDefinition}
+    strokeWidth={2}
+    {...props}
+  />
+);

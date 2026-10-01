@@ -15,7 +15,9 @@
       "!public/games/arkanoid-neon",
       "!public/games/hearthvale",
       "!public/games/gravewake",
-      "!public/games/dynamite-mole"
+      "!public/games/dynamite-mole",
+      "!public/games/yet-another-voxelcraft",
+      "!public/games/pokemon-claude-red"
     ]
   },
   "javascript": {

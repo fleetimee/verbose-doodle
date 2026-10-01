@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Yet Another VoxelCraft</title>
+<style>
+:root{--ui:#c6c6c6;--dark:#373737;--hl:#fff;--sh:#555;--gold:#ffd84a}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#000;font-family:"Segoe UI","Trebuchet MS",Verdana,sans-serif;color:#fff}
+canvas#gl{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none}
+.pix{image-rendering:pixelated}
+#hud{position:fixed;inset:0;pointer-events:none;display:none}
+#cross{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;mix-blend-mode:difference}
+#cross:before,#cross:after{content:"";position:absolute;background:#fff}
+#cross:before{left:10px;top:2px;width:2px;height:18px}
+#cross:after{top:10px;left:2px;height:2px;width:18px}
+#bars{position:absolute;left:50%;bottom:78px;transform:translateX(-50%);width:364px;display:flex;justify-content:space-between;align-items:flex-end}
+#hearts,#food{display:flex;gap:1px;height:20px}
+#food{flex-direction:row-reverse}
+#air{position:absolute;left:50%;bottom:104px;transform:translateX(-50%);width:364px;display:flex;justify-content:flex-end;gap:1px;height:20px}
+#hearts img,#food img,#air img{width:18px;height:18px}
+#hotbar{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;background:rgba(20,20,20,.65);border:3px solid #111;border-radius:2px;padding:2px;gap:2px}
+.slot{width:46px;height:46px;background:#8b8b8b;border:2px solid;border-color:#373737 #fff #fff #373737;position:relative;display:flex;align-items:center;justify-content:center}
+#hotbar .slot{background:rgba(60,60,60,.55);border-color:#2a2a2a #4a4a4a #4a4a4a #2a2a2a;pointer-events:none}
+#hotbar .slot.sel{border-color:#fff;box-shadow:0 0 0 2px #000,0 0 8px 2px rgba(255,255,255,.35);z-index:2;background:rgba(120,120,120,.55)}
+.slot img{width:36px;height:36px;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(1px 2px 0 rgba(0,0,0,.35))}
+.slot .n{position:absolute;right:2px;bottom:0;font:bold 14px/16px "Courier New",monospace;text-shadow:2px 2px 0 #333;color:#fff;pointer-events:none}
+.slot .d{position:absolute;left:5px;right:5px;bottom:3px;height:3px;background:#222;pointer-events:none}
+.slot .d i{display:block;height:100%}
+.slot.big{cursor:pointer}
+.slot.big:hover{background:#a8a8ff88}
+#itemname{position:absolute;left:50%;bottom:108px;transform:translateX(-50%);font:bold 16px "Courier New",monospace;text-shadow:2px 2px 0 #222;opacity:0;transition:opacity .4s;white-space:nowrap}
+#vig,#underwater,#fire,#dmg{position:absolute;inset:0;pointer-events:none;opacity:0}
+#dmg{background:radial-gradient(ellipse at center,rgba(255,0,0,0) 40%,rgba(200,0,0,.75) 100%)}
+#underwater{background:rgba(20,70,170,.42)}
+#fire{background:radial-gradient(ellipse at 50% 100%,rgba(255,140,20,.8),rgba(255,60,0,0) 60%)}
+#debug{position:absolute;left:8px;top:8px;font:12px/16px "Courier New",monospace;text-shadow:1px 1px 0 #000;background:rgba(0,0,0,.35);padding:6px 8px;display:none;white-space:pre}
+#adv{position:absolute;right:14px;top:44px;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.advt{display:flex;align-items:center;gap:10px;background:rgba(30,30,34,.92);border:3px solid #6a6a78;padding:8px 14px 8px 8px;font:bold 13px 'Courier New',monospace;animation:advin .5s ease-out,advout .6s 4.4s forwards;box-shadow:0 4px 18px #0008}
+.advt img{width:36px;height:36px;image-rendering:pixelated;background:#555;padding:2px}.advt b{display:block;color:#ffe45c;font-size:12px}
+@keyframes advin{from{transform:translateX(120%)}to{transform:none}}@keyframes advout{to{transform:translateX(120%);opacity:0}}
+#toasts{position:absolute;left:50%;top:14%;transform:translateX(-50%);text-align:center;font:bold 18px "Courier New",monospace}
+#toasts div{text-shadow:2px 2px 0 #222;margin:4px;animation:fade 3.5s forwards}
+@keyframes fade{0%{opacity:0;transform:translateY(-6px)}8%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
+#clock{position:absolute;right:10px;top:8px;font:bold 13px "Courier New",monospace;text-shadow:1px 1px 0 #000;text-align:right;opacity:.85}
+#eat{position:absolute;left:50%;top:56%;transform:translateX(-50%);width:120px;height:6px;background:rgba(0,0,0,.5);display:none}
+#eat i{display:block;height:100%;background:#9f9;width:0}
+#mineinfo{position:absolute;left:50%;top:calc(50% + 30px);transform:translateX(-50%);font:bold 13px "Courier New",monospace;text-shadow:1px 1px 0 #000;opacity:.9}
+/* overlay screens */
+.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:20}
+#panel{background:var(--ui);border:4px solid;border-color:#fff #555 #555 #fff;outline:3px solid #000;padding:12px 14px 14px;color:#404040;box-shadow:0 10px 60px #000a}
+#panel h3{margin:0 0 6px;font:bold 15px "Courier New",monospace;color:#404040}
+.grid{display:grid;gap:0}
+.row{display:flex;gap:18px;align-items:center;justify-content:center}
+.arrow{width:34px;height:24px;background:linear-gradient(90deg,#8b8b8b,#8b8b8b);clip-path:polygon(0 30%,55% 30%,55% 0,100% 50%,55% 100%,55% 70%,0 70%)}
+.arrow.prog{background:linear-gradient(90deg,#3a3 var(--p,0%),#8b8b8b var(--p,0%))}
+.flame{width:26px;height:26px;background:linear-gradient(0deg,#f80 var(--p,0%),#6b6b6b var(--p,0%));clip-path:polygon(50% 0,80% 35%,100% 65%,85% 100%,15% 100%,0 65%,25% 30%)}
+.slot.out{width:56px;height:56px}
+.slot.out img{width:44px;height:44px}
+#cursor{position:fixed;pointer-events:none;z-index:99;width:40px;height:40px;display:none}
+#cursor img{width:100%;height:100%;image-rendering:pixelated}
+#cursor .n{position:absolute;right:0;bottom:0;font:bold 14px "Courier New",monospace;text-shadow:2px 2px 0 #333;color:#fff}
+#tip{position:fixed;z-index:100;pointer-events:none;background:rgba(16,0,16,.94);border:2px solid #2a0a5a;padding:3px 8px;font:bold 14px "Courier New",monospace;display:none;white-space:nowrap;color:#fff}
+#book{width:214px;max-height:470px;overflow-y:auto;padding-right:4px;border-right:2px solid #8b8b8b}
+#book::-webkit-scrollbar{width:8px}#book::-webkit-scrollbar-thumb{background:#999}
+.rb.dim{opacity:.38}.rb:not(.dim){background:#9bb98a}
+.tabs{display:flex;gap:4px;margin-bottom:6px;align-items:center}.tabs span{padding:3px 9px;background:#8b8b8b;border:2px solid;border-color:#fff #555 #555 #fff;font:bold 12px 'Courier New',monospace;cursor:pointer;text-transform:capitalize}.tabs span.on{background:#a9c98a}
+.tabs input{margin-left:auto;background:#222;color:#fff;border:2px solid #555;padding:3px 6px;font:12px 'Courier New',monospace;width:150px;user-select:text}
+.armorslot{background:#9a9aa8}
+#armorbar{position:absolute;left:calc(50% - 182px);bottom:100px;display:flex;gap:1px}#armorbar img{width:18px;height:16px}
+#creative{max-height:230px;overflow-y:auto;margin-bottom:8px;border:2px solid #555;background:#777;padding:2px}
+#creative::-webkit-scrollbar{width:10px}#creative::-webkit-scrollbar-thumb{background:#999}
+.sep{height:10px}
+/* menu */
+#menu{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.35));overflow:hidden}
+#menu:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(0,0,0,.35),rgba(0,0,0,0) 70%);pointer-events:none}
+#logo{font:900 78px/1 "Arial Black",Impact,sans-serif;letter-spacing:6px;color:#dcdcdc;text-shadow:0 2px 0 #9a9a9a,0 4px 0 #7a7a7a,0 6px 0 #5a5a5a,0 8px 0 #3a3a3a,0 14px 30px rgba(0,0,0,.6);margin-bottom:6px;position:relative;text-align:center}
+#splash{position:absolute;right:-52px;bottom:4px;transform:rotate(-18deg);font:900 24px/1 'Arial Black',Impact,sans-serif;letter-spacing:0;color:#ffe83a;text-shadow:3px 3px 0 #3f3a00;white-space:nowrap;animation:splashpulse 0.9s ease-in-out infinite alternate;pointer-events:none}
+@keyframes splashpulse{from{transform:rotate(-18deg) scale(1)}to{transform:rotate(-18deg) scale(1.12)}}
+@media (max-width:640px){#splash{font-size:15px;right:-6px;bottom:-10px}}
+#logo b{color:#8fd45a;text-shadow:0 2px 0 #5a9a30,0 4px 0 #3f7a20,0 6px 0 #2f5a18,0 8px 0 #1f3a10,0 14px 30px rgba(0,0,0,.6)}
+#tag{font:italic 16px Georgia,serif;color:#ffef7a;text-shadow:2px 2px 0 #333;margin-bottom:22px;position:relative}
+.box{background:rgba(20,20,20,.72);border:3px solid #000;outline:2px solid #666;padding:16px 20px;position:relative;min-width:420px}
+.btn{display:block;width:100%;padding:11px;margin:6px 0;background:#7a7a7a;color:#fff;border:2px solid;border-color:#bbb #222 #222 #bbb;font:bold 17px "Courier New",monospace;text-shadow:2px 2px 0 #333;cursor:pointer;text-align:center}
+.btn:hover{background:#6a7bd0;border-color:#cbd #114 #114 #cbd}
+.btn.dis{opacity:.4;pointer-events:none}
+.opt{display:flex;justify-content:space-between;align-items:center;font:14px "Courier New",monospace;margin:7px 0;gap:14px}
+.opt input[type=range]{width:180px;accent-color:#8fd45a}
+.opt input[type=text]{background:#111;color:#fff;border:2px solid #666;padding:4px 6px;font:14px "Courier New",monospace;width:180px}
+.seg{display:flex;gap:4px}.seg span{padding:4px 9px;background:#444;border:2px solid #222;cursor:pointer;font:bold 13px "Courier New",monospace}.seg span.on{background:#4a8a3a;border-color:#8fd45a}
+#worldlist{max-height:170px;overflow-y:auto;margin-bottom:8px}
+.hint{font:13px 'Courier New',monospace;color:#bbb;padding:6px 2px}
+.wrow{display:flex;align-items:center;gap:8px;background:#2c2c2c;border:2px solid #555;margin:4px 0;padding:6px 8px}
+.wi{flex:1;font:13px 'Courier New',monospace}.wi b{display:block;color:#fff;font-size:15px}.wi span{color:#aaa;font-size:12px}
+.wb{padding:6px 12px;background:#4a8a3a;border:2px solid #8fd45a;cursor:pointer;font:bold 14px 'Courier New',monospace}.wb.del{background:#7a2a2a;border-color:#c66;padding:6px 10px}.wb:hover{filter:brightness(1.25)}
+#touch{position:fixed;inset:0;z-index:15;display:none;touch-action:none}
+#touch *{touch-action:none}
+#lookzone{position:absolute;inset:0}
+#joyzone{position:absolute;left:0;bottom:0;width:42%;height:62%}
+#joybase{position:absolute;display:none;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12);border:3px solid rgba(255,255,255,.35);pointer-events:none}
+#joyknob{position:absolute;left:45px;top:45px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.5)}
+.tb{position:absolute;display:flex;align-items:center;justify-content:center;width:68px;height:68px;border-radius:50%;background:rgba(30,30,30,.5);border:3px solid rgba(255,255,255,.5);color:#fff;font:bold 26px sans-serif;user-select:none}
+.tb.down,.tb.on{background:rgba(120,190,90,.75)}
+.tb.sm{width:46px;height:46px;font-size:18px}
+#tbJump{right:24px;bottom:104px;width:80px;height:80px}
+#tbBreak{right:120px;bottom:40px;width:76px;height:76px}
+#tbPlace{right:24px;bottom:200px}
+#tbSneak{right:120px;bottom:130px}
+#tbInv{right:14px;top:14px}#tbMenu{right:70px;top:14px}#tbDrop{right:126px;top:14px}
+body.touch #keys{display:none}
+body.touch #hotbar{bottom:6px}
+@media (max-width:640px){.slot{width:38px;height:38px}#hotbar .slot{width:36px;height:36px}.slot img{width:28px;height:28px}#bars,#air{width:300px}#hearts img,#food img,#air img{width:14px;height:14px}#armorbar{left:calc(50% - 150px)}#logo{font-size:44px}.box{min-width:0;width:92vw}#tag{font-size:13px}}
+@media (max-height:520px){#logo{font-size:40px;margin-bottom:0}#tag{margin-bottom:8px}.box{padding:8px 14px}#worldlist{max-height:70px}.btn{padding:6px;margin:3px 0}.opt{margin:3px 0}#bars{bottom:64px}#air{bottom:88px}#armorbar{bottom:86px}}
+#keys{font:12px/1.6 "Courier New",monospace;color:#ddd;columns:2;margin-top:10px}
+#keys kbd{background:#333;border:1px solid #777;padding:0 5px;border-radius:2px;color:#ffe680}
+#loading{position:fixed;inset:0;z-index:60;background:#2a1d10;display:none;align-items:center;justify-content:center;flex-direction:column;font:bold 22px "Courier New",monospace}
+#bar{width:320px;height:14px;background:#111;border:2px solid #777;margin-top:16px}#bar i{display:block;height:100%;background:#7dcf4a;width:0}
+#loadmsg{font-size:14px;margin-top:10px;color:#bbb}
+#pause .box,#death .box{text-align:center;min-width:360px}
+#death{background:rgba(120,0,0,.6);z-index:30}
+#death h1{font:900 54px "Arial Black",sans-serif;margin:0 0 10px;text-shadow:3px 3px 0 #300}
+</style>
+<script src="../activity.js"></script>
+</head>
+<body>
+<canvas id="gl" tabindex="0"></canvas>
+<div id="hud">
+  <div id="vig"></div><div id="underwater"></div><div id="fire"></div><div id="dmg"></div>
+  <div id="cross"></div>
+  <div id="mineinfo"></div>
+  <div id="eat"><i></i></div>
+  <div id="air"></div><div id="armorbar"></div><div id="adv"></div>
+  <div id="bars"><div id="hearts"></div><div id="food"></div></div>
+  <div id="hotbar"></div>
+  <div id="itemname"></div>
+  <div id="toasts"></div>
+  <div id="clock"></div>
+  <div id="debug"></div>
+</div>
+<div id="touch"><div id="lookzone"></div><div id="joyzone"></div><div id="joybase"><div id="joyknob"></div></div>
+  <div class="tb" id="tbJump">&#9650;</div><div class="tb" id="tbBreak">&#9874;</div><div class="tb" id="tbPlace">&#9635;</div>
+  <div class="tb sm" id="tbSneak">&#9660;</div><div class="tb sm" id="tbInv">&#9776;</div><div class="tb sm" id="tbDrop">Q</div><div class="tb sm" id="tbMenu">II</div></div>
+<div class="overlay" id="screen"><div id="panel"></div></div>
+<div id="cursor"></div><div id="tip"></div>
+<div class="overlay" id="pause"><div class="box"><h2 style="font:900 28px 'Courier New',monospace;margin:0 0 12px">Game Paused</h2>
+  <div class="btn" id="bResume">Back to Game</div>
+  <div class="opt"><span>Render distance</span><input type="range" id="pRender" min="3" max="14" value="7"><b id="pRenderV">7</b></div>
+  <div class="opt"><span>Field of view</span><input type="range" id="pFov" min="60" max="110" value="75"><b id="pFovV">75</b></div>
+  <div class="opt"><span>Volume</span><input type="range" id="pVol" min="0" max="100" value="70"></div>
+  <div class="opt"><span>Music</span><div class="seg" id="pMusic"><span data-v="1" class="on">On</span><span data-v="0">Off</span></div></div>
+  <div class="opt"><span>Mouse sensitivity</span><input type="range" id="pSens" min="20" max="250" value="100"></div>
+  <div class="btn" id="bSave">Save</div>
+  <div class="btn" id="bQuit">Save &amp; Quit to Title</div></div></div>
+<div class="overlay" id="death"><div class="box"><h1>You died!</h1><div id="deathmsg" style="margin-bottom:14px;font:16px 'Courier New',monospace"></div><div class="btn" id="bRespawn">Respawn</div></div></div>
+<div id="loading"><div id="loadtitle">Generating world...</div><div id="bar"><i></i></div><div id="loadmsg">Carving caves, planting trees</div></div>
+<div id="menu">
+  <div id="logo">VOXEL<b>CRAFT</b><span id="splash">Yet another!</span></div>
+  <div id="tag">an infinite, procedurally generated block world</div>
+  <div class="box">
+    <div id="worldlist"></div>
+    <div class="btn" id="bNew">New World</div>
+    <div class="opt"><span>Game mode</span><div class="seg" id="mMode"><span data-v="s" class="on">Survival</span><span data-v="c">Creative</span></div></div>
+    <div class="opt"><span>Difficulty</span><div class="seg" id="mDiff"><span data-v="0">Peaceful</span><span data-v="1" class="on">Normal</span><span data-v="2">Hard</span></div></div>
+    <div class="opt"><span>Seed</span><input type="text" id="mSeed" placeholder="random"></div>
+    <div class="opt"><span>Render distance</span><input type="range" id="mRender" min="3" max="14" value="7"><b id="mRenderV">7</b></div>
+    <div id="keys"><kbd>WASD</kbd> move &nbsp; <kbd>Space</kbd> jump/swim<br><kbd>Shift</kbd> sprint &nbsp; <kbd>C</kbd> sneak<br><kbd>LMB</kbd> mine/attack<br><kbd>RMB</kbd> place/use/eat<br><kbd>E</kbd> inventory<br><kbd>1-9</kbd>/wheel hotbar<br><kbd>Q</kbd> drop &nbsp; <kbd>F3</kbd> debug<br><kbd>Space x2</kbd> fly (creative)<br><kbd>MMB</kbd> pick block<br>TNT: RMB with Flint &amp; Steel (iron + coal)</div>
+  </div>
+</div>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>

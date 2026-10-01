@@ -12,9 +12,11 @@ import {
   GravewakeIcon,
   HearthvaleIcon,
   NovaLancerIcon,
+  PokemonClaudeRedIcon,
   PonpokoKartIcon,
   SunbreakIcon,
   TerrabrowserIcon,
+  YetAnotherVoxelcraftIcon,
 } from "@/components/game-icons";
 import {
   Binary,
@@ -377,6 +379,18 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             description: messages.common.dynamiteMoleDescription,
             title: messages.common.dynamiteMoleTitle,
             url: "/dashboard/games/dynamite-mole",
+          },
+          {
+            icon: YetAnotherVoxelcraftIcon,
+            description: messages.common.yetAnotherVoxelcraftDescription,
+            title: messages.common.yetAnotherVoxelcraftTitle,
+            url: "/dashboard/games/yet-another-voxelcraft",
+          },
+          {
+            icon: PokemonClaudeRedIcon,
+            description: messages.common.pokemonClaudeRedDescription,
+            title: messages.common.pokemonClaudeRedTitle,
+            url: "/dashboard/games/pokemon-claude-red",
           },
         ],
       },

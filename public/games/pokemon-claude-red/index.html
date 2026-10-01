@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pokémon Claude Red</title>
+<meta name="theme-color" content="#0d0c16">
+<style>
+  html, body { margin: 0; height: 100%; background: #0d0c16; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; }
+  #disclaimer { position: fixed; left: 0; right: 0; bottom: 2px; margin: 0; text-align: center; font: 10px/1.2 system-ui, sans-serif; color: #6a6488; pointer-events: none; }
+  canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
+  /* Levy St. bar (src/game/topbar.js): page chrome around the game, not part of it */
+  body.has-bar { padding-top: 44px; box-sizing: border-box; }
+  #lsbar { position: fixed; z-index: 20; top: 0; left: 0; right: 0; height: 44px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 0 14px;
+    background: linear-gradient(#17152c, #100e1e); border-bottom: 1px solid #28233f; font: 500 13px/1.2 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; color: #bdb6d8; }
+  #lsbar a { color: inherit; text-decoration: none; }
+  #lsbar svg { width: 18px; height: 18px; fill: currentColor; flex: none; }
+  #lsbar #ls-logo { height: 22px; width: auto; image-rendering: auto; display: block; }
+  .ls-brand { display: flex; align-items: center; flex: none; }
+  .ls-pitch { color: #8a83a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .ls-pitch b { color: #e08a5f; font-weight: 600; }
+  .ls-drop { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  #ls-form { display: flex; align-items: center; gap: 6px; margin: 0; }
+  #ls-form input[type=email] { width: 210px; height: 30px; box-sizing: border-box; padding: 0 10px; border-radius: 7px; border: 1px solid #3a3360; background: #0b0a14; color: #f3f0e9; font: inherit; outline: none; }
+  #ls-form input[type=email]:focus { border-color: #e08a5f; }
+  #lsbar button { height: 30px; padding: 0 12px; border-radius: 7px; border: 0; background: #e08a5f; color: #1b1020; font: 700 12px/1 ui-sans-serif, system-ui, -apple-system, sans-serif; letter-spacing: .03em; cursor: pointer; white-space: nowrap; }
+  #lsbar button:disabled { opacity: .6; cursor: default; }
+  .ls-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  #ls-msg { color: #5fd3b0; white-space: nowrap; }
+  #ls-msg.err { color: #ff8a7a; white-space: normal; }
+  .ls-fine { display: none; color: #7d769c; font-size: 11px; }
+  .ls-links { display: flex; align-items: center; gap: 14px; flex: none; }
+  .ls-links a { display: flex; align-items: center; gap: 6px; }
+  .ls-links a:hover, .ls-brand:hover { color: #fff; }
+  #ls-toggle { display: none; align-items: center; gap: 6px; margin-left: auto; }
+  @media (max-width: 980px) { .ls-pitch { display: none; } }
+  /* compact: the signup drops down under a button */
+  #lsbar.compact .ls-pitch, #lsbar.compact .ls-links span { display: none; }
+  #lsbar.compact #ls-toggle { display: flex; }
+  #lsbar.compact .ls-drop { display: none; position: absolute; top: calc(100% + 6px); right: 8px; flex-direction: column; align-items: stretch; gap: 8px; margin: 0; padding: 12px;
+    width: min(320px, calc(100vw - 16px)); box-sizing: border-box; background: #17152c; border: 1px solid #2f2950; border-radius: 10px; box-shadow: 0 12px 32px rgba(0, 0, 0, .55); }
+  #lsbar.compact.open .ls-drop { display: flex; }
+  #lsbar.compact #ls-form input[type=email] { flex: 1; width: auto; min-width: 0; }
+  #lsbar.compact .ls-fine { display: block; }
+  /* pill: floats over the corner when a full bar would shrink the game a whole scale step */
+  #lsbar.pill { left: auto; right: 8px; top: 8px; height: 38px; padding: 0 6px 0 12px; gap: 12px; border: 1px solid #2f2950; border-radius: 19px; opacity: .55; transition: opacity .2s; }
+  #lsbar.pill:hover, #lsbar.pill.open, #lsbar.pill:focus-within { opacity: 1; }
+  #lsbar.pill .ls-brand, #lsbar.pill #ls-toggle span { display: none; }
+  #lsbar.pill #ls-toggle { order: 3; padding: 0 9px; }
+  #ls-hits { image-rendering: pixelated; image-rendering: crisp-edges; flex: none; }
+  #lsbar.pill #ls-hits { display: none; }
+  /* touch screens: 16px text stops iOS zooming into fields; bigger targets for thumbs */
+  html.touch body { touch-action: manipulation; }
+  html.touch #lsbar input, html.touch #acct input { font-size: 16px; }
+  html.touch #ls-form input[type=email], html.touch #lsbar .ls-drop button { height: 42px; }
+  html.touch #disclaimer { z-index: 6; font-size: 8px; line-height: 1.3; padding: 0 14px; }
+  #pad #ls-hits { position: absolute; }
+  #pad #ls-hits.cramped { display: none; }
+
+  /* on-screen controller (src/game/touchpad.js) */
+  #pad { position: fixed; inset: 0; z-index: 5; pointer-events: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  #pad[hidden] { display: none; }
+  #pad-body { position: absolute; background: linear-gradient(#1a182e, #110f20 70%); border-top: 1px solid #2a2544; border-bottom-right-radius: 72px; }
+  #pad-body::after { content: ''; position: absolute; right: 22px; bottom: 44px; width: 58px; height: 46px; transform: rotate(-28deg);
+    background: repeating-linear-gradient(90deg, #07060e 0 5px, transparent 5px 11px); border-radius: 3px; opacity: .8; }
+  .dpad, .pbtn { position: absolute; pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent; }
+  .dpad svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .dpad .hl { opacity: 0; }
+  .dpad.up .hl.u, .dpad.down .hl.d, .dpad.left .hl.l, .dpad.right .hl.r { opacity: .2; }
+  .pbtn { border: 0; margin: 0; padding: 0; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; cursor: pointer; }
+  .pbtn.ab { border-radius: 50%; color: #3b1509; font-size: 20px; font-weight: 800;
+    background: radial-gradient(circle at 34% 28%, #f7b391 0, #e3825b 40%, #b9573a 82%);
+    box-shadow: 0 4px 0 #6d2d17, 0 8px 16px rgba(0, 0, 0, .45), inset 0 -3px 6px rgba(0, 0, 0, .2); }
+  .pbtn.ab.on { transform: translateY(3px); filter: brightness(.9); box-shadow: 0 1px 0 #6d2d17, 0 3px 6px rgba(0, 0, 0, .45), inset 0 2px 6px rgba(0, 0, 0, .3); }
+  .pbtn.pill { border-radius: 11px; color: #bab4d8; font-size: 9px; font-weight: 800; letter-spacing: .14em;
+    background: linear-gradient(#47445f, #34324b); box-shadow: 0 2px 0 #14121f, 0 4px 8px rgba(0, 0, 0, .35); }
+  #pad.portrait .pbtn.pill { transform: rotate(-24deg); }
+  .pbtn.pill.on { filter: brightness(1.3); }
+
+  /* account box for cloud saves (src/game/cloudsave.js) */
+  #acct { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; background: rgba(4, 3, 10, .74); }
+  #acct[hidden] { display: none; }
+  #acct.arming .acct-card { pointer-events: none; }
+  html.touch #acct { align-items: flex-start; padding-top: max(16px, env(safe-area-inset-top)); }
+  .acct-card { width: min(380px, 100%); box-sizing: border-box; padding: 20px 20px 16px; border-radius: 6px; background: #17152c; color: #d8d3ee;
+    border: 2px solid #f3f0e9; box-shadow: 0 0 0 4px #17152c, 0 0 0 6px #5a5480, 0 20px 50px rgba(0, 0, 0, .6); font: 15px/1.45 ui-sans-serif, system-ui, -apple-system, sans-serif; }
+  .acct-card h2 { margin: 0 0 6px; font-size: 19px; color: #ffd66a; letter-spacing: .02em; }
+  .acct-card p { margin: 0 0 14px; color: #a9a3c9; font-size: 14px; }
+  .acct-card label { display: block; margin: 0 0 10px; font-size: 13px; font-weight: 600; color: #c9c3e0; }
+  .acct-card input[type=email], .acct-card input[type=password], .acct-card input[type=text]:not(.ls-hp) { display: block; width: 100%; box-sizing: border-box; height: 44px; margin-top: 4px; padding: 0 12px;
+    border-radius: 8px; border: 1px solid #3a3360; background: #0b0a14; color: #f3f0e9; font: inherit; font-size: 15px; outline: none; }
+  .acct-card input:focus { border-color: #e08a5f; }
+  .acct-pw { position: relative; }
+  .acct-pw button { position: absolute; right: 6px; bottom: 7px; height: 30px; padding: 0 10px; border: 0; border-radius: 6px; background: #2a2544; color: #c9c3e0; font: 600 12px/1 ui-sans-serif, system-ui, sans-serif; cursor: pointer; }
+  .acct-card label.acct-opt { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; color: #a9a3c9; font-size: 13px; line-height: 1.35; }
+  .acct-opt input { width: 18px; height: 18px; margin: 1px 0 0; flex: none; accent-color: #e08a5f; }
+  #acct-err { color: #ff8a7a; margin: 4px 0 10px; }
+  #acct-go { width: 100%; height: 46px; border: 0; border-radius: 8px; background: #e08a5f; color: #1b1020; font: 800 15px/1 ui-sans-serif, system-ui, sans-serif; cursor: pointer; }
+  #acct-go:disabled { opacity: .6; }
+  .acct-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 13px; color: #8a83a8; }
+  .acct-row button { border: 0; background: none; color: #e08a5f; font: 600 13px/1 ui-sans-serif, system-ui, sans-serif; padding: 8px 0; cursor: pointer; }
+  /* "Not now" lives up top, away from where the on-screen A and B buttons sit under the box */
+  .acct-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  #acct-skip { flex: none; border: 0; background: none; color: #8a83a8; font: 600 13px/1 ui-sans-serif, system-ui, sans-serif; padding: 6px 0 6px 8px; cursor: pointer; }
+  #cloud-toast { position: fixed; z-index: 30; left: 50%; top: 54px; transform: translate(-50%, -8px); opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none;
+    padding: 8px 14px; border-radius: 18px; background: #17152c; border: 1px solid #2f2950; color: #5fd3b0; font: 600 13px/1 ui-sans-serif, system-ui, sans-serif; white-space: nowrap; }
+  #cloud-toast.show { opacity: 1; transform: translate(-50%, 0); }
+  /* what the canvas shows, in words: for screen readers and search engines (the game itself is pixels) */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  noscript p { position: fixed; inset: 40% 16px auto; text-align: center; color: #ece8f6; font: 16px/1.5 system-ui, sans-serif; }
+  noscript a { color: #e08a5f; }
+  /* live SOCIAL ZONE chat (src/game/lounge.js) */
+  #lounge-chat { position: fixed; z-index: 25; display: flex; gap: 6px; margin: 0; padding: 6px; box-sizing: border-box; border-radius: 10px; background: rgba(12, 10, 28, .88); border: 1px solid #3a3360; }
+  #lounge-chat[hidden], #lounge-chat-btn[hidden] { display: none; }
+  #lounge-chat input { flex: 1; min-width: 0; height: 34px; box-sizing: border-box; padding: 0 10px; border-radius: 7px; border: 1px solid #3a3360; background: #0b0a14; color: #f3f0e9; font: 15px/1 ui-sans-serif, system-ui, -apple-system, sans-serif; outline: none; }
+  #lounge-chat input:focus { border-color: #e08a5f; }
+  #lounge-chat button { height: 34px; padding: 0 14px; border: 0; border-radius: 7px; background: #e08a5f; color: #1b1020; font: 700 13px/1 ui-sans-serif, system-ui, -apple-system, sans-serif; cursor: pointer; }
+  html.touch #lounge-chat input { font-size: 16px; height: 40px; }
+  html.touch #lounge-chat button { height: 40px; }
+  #lounge-chat-btn { position: fixed; z-index: 24; width: 38px; height: 38px; padding: 9px; border: 1px solid #3a3360; border-radius: 50%; background: rgba(12, 10, 28, .8); color: #f3f0e9; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  #lounge-chat-btn svg { display: block; width: 100%; height: 100%; fill: currentColor; }
+</style>
+
+<script src="../activity.js"></script>
+</head>
+<body>
+
+
+<noscript>Pokémon Claude Red needs JavaScript to run.</noscript>
+<canvas id="screen" role="img" aria-label="Pokémon Claude Red, the game"></canvas>
+<div id="pad" data-chrome hidden>
+  <div id="pad-body"></div>
+  <div class="dpad" id="dpad" role="group" aria-label="D-pad">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <defs>
+        <linearGradient id="dp-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#403d58"/><stop offset="1" stop-color="#2a2840"/></linearGradient>
+        <radialGradient id="dp-c"><stop offset="0" stop-color="#1b192b"/><stop offset="1" stop-color="#312f47"/></radialGradient>
+      </defs>
+      <g fill="#0a0913" transform="translate(0 4)"><rect x="33" y="0" width="34" height="100" rx="7"/><rect x="0" y="33" width="100" height="34" rx="7"/></g>
+      <g fill="url(#dp-g)"><rect x="33" y="0" width="34" height="100" rx="7"/><rect x="0" y="33" width="100" height="34" rx="7"/></g>
+      <g fill="#fff"><rect class="hl u" x="33" y="0" width="34" height="34" rx="7"/><rect class="hl d" x="33" y="66" width="34" height="34" rx="7"/><rect class="hl l" x="0" y="33" width="34" height="34" rx="7"/><rect class="hl r" x="66" y="33" width="34" height="34" rx="7"/></g>
+      <circle cx="50" cy="50" r="10" fill="url(#dp-c)"/>
+      <g fill="#6f6b92"><path d="M50 8l7 9H43z"/><path d="M50 92l7-9H43z"/><path d="M8 50l9-7v14z"/><path d="M92 50l-9-7v14z"/></g>
+    </svg>
+  </div>
+  <button class="pbtn ab" data-btn="b" aria-label="B">B</button>
+  <button class="pbtn ab" data-btn="a" aria-label="A">A</button>
+  <button class="pbtn pill" data-btn="select" aria-label="Select">SELECT</button>
+  <button class="pbtn pill" data-btn="start" aria-label="Start">START</button>
+</div>
+<p id="disclaimer">Free non-commercial fan project. Pokémon © Nintendo / Creatures / GAME FREAK. Not affiliated with Nintendo, The Pokémon Company, Anthropic or OpenAI.</p>
+<script src="src/core/gfx.js"></script>
+<script src="src/core/font.js"></script>
+<script src="src/core/input.js"></script>
+<script src="src/core/engine.js"></script>
+<script src="src/core/audio.js"></script>
+<script src="src/art/palette.js"></script>
+<script src="src/art/terrain.js"></script>
+<script src="src/art/buildings.js"></script>
+<script src="src/art/chars.js"></script>
+<script src="src/art/objsprites.js"></script>
+<script src="src/art/pokesprite.js"></script>
+<script src="src/art/interior.js"></script>
+<script src="src/art/ambient.js"></script>
+<script src="src/art/logo.js"></script>
+<script src="src/art/battlebg.js"></script>
+<script src="src/art/trainerpics.js"></script>
+<script src="src/art/portraitpx.js"></script>
+<script src="src/data/maps.js"></script>
+<script src="src/data/labels.js"></script>
+<script src="src/data/labels_interior.js"></script>
+<script src="src/data/text/maps_a.js"></script>
+<script src="src/data/text/maps_b.js"></script>
+<script src="src/data/text/general.js"></script>
+<script src="src/data/text/dex.js"></script>
+<script src="src/data/text/aliases.js"></script>
+<script src="src/data/music.js"></script>
+<script src="src/data/buildingstyles.js"></script>
+<script src="src/data/cast.js"></script>
+<script src="src/data/pokedata.js"></script>
+<script src="src/data/mons/test.js"></script>
+<script src="src/data/mons/001-030.js"></script>
+<script src="src/data/mons/031-060.js"></script>
+<script src="src/data/mons/061-090.js"></script>
+<script src="src/data/mons/091-120.js"></script>
+<script src="src/data/mons/121-151.js"></script>
+<script src="src/game/map.js"></script>
+<script src="src/game/maprender.js"></script>
+<script src="src/game/ui.js"></script>
+<script src="src/game/overworld.js"></script>
+<script src="src/game/scripts.js"></script>
+<script src="src/game/pokemon.js"></script>
+<script src="src/game/battle.js"></script>
+<script src="src/game/battlescene.js"></script>
+<script src="src/art/vfx.js"></script>
+<script src="src/game/party.js"></script>
+<script src="src/game/bag.js"></script>
+<script src="src/game/battleflow.js"></script>
+<script src="src/game/menus.js"></script>
+<script src="src/game/pc.js"></script>
+<script src="src/game/title.js"></script>
+<script src="src/data/levylogo.js"></script>
+<script src="src/game/intro.js"></script>
+<script src="src/game/customizer.js"></script>
+<script src="src/game/story.js"></script>
+<script src="src/game/fieldmoves.js"></script>
+<script src="src/game/townmap.js"></script>
+<script src="src/scripts/pallet.js"></script>
+<script src="src/scripts/early.js"></script>
+<script src="src/scripts/mid.js"></script>
+<script src="src/scripts/late.js"></script>
+<script src="src/scripts/extra.js"></script>
+<script src="src/game/share.js"></script>
+<script src="src/game/social.js"></script>
+<script src="src/game/follower.js"></script>
+<script src="src/game/wtp.js"></script>
+<script src="src/game/savetransfer.js"></script>
+<script src="src/game/glitches.js"></script>
+<script src="src/game/touchpad.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>

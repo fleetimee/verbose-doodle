@@ -79,6 +79,20 @@ const DynamiteMolePage = lazy(() =>
   }))
 );
 
+const YetAnotherVoxelcraftPage = lazy(() =>
+  import("@/pages/dashboard/yet-another-voxelcraft").then(
+    ({ YetAnotherVoxelcraftPage }) => ({ default: YetAnotherVoxelcraftPage })
+  )
+);
+
+const PokemonClaudeRedPage = lazy(() =>
+  import("@/pages/dashboard/pokemon-claude-red").then(
+    ({ PokemonClaudeRedPage }) => ({
+      default: PokemonClaudeRedPage,
+    })
+  )
+);
+
 export const gameRoutes = (
   <>
     <Route element={<GamesPage />} path="games" />
@@ -94,5 +108,10 @@ export const gameRoutes = (
     <Route element={<HearthvalePage />} path="games/hearthvale" />
     <Route element={<GravewakePage />} path="games/gravewake" />
     <Route element={<DynamiteMolePage />} path="games/dynamite-mole" />
+    <Route element={<PokemonClaudeRedPage />} path="games/pokemon-claude-red" />
+    <Route
+      element={<YetAnotherVoxelcraftPage />}
+      path="games/yet-another-voxelcraft"
+    />
   </>
 );

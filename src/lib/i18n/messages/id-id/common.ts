@@ -21,6 +21,12 @@ export const commonMessages = {
     "Balapan menuruni gunung, lakukan trik, dan raih waktu terbaik.",
   arkanoidNeonTitle: "Arkanoid Neon",
   arkanoidNeonDescription: "Hancurkan bata neon dan kumpulkan power-up.",
+  pokemonClaudeRedTitle: "Pokémon Claude Red",
+  pokemonClaudeRedDescription:
+    "Jelajahi Kanto, tangkap Pokémon, dan bertarung dalam gim buatan penggemar Pokémon Red.",
+  yetAnotherVoxelcraftTitle: "Yet Another VoxelCraft",
+  yetAnotherVoxelcraftDescription:
+    "Menambang, merakit, dan membangun di dunia voxel dengan mode bertahan hidup dan kreatif.",
   dynamiteMoleTitle: "Dynamite Mole",
   dynamiteMoleDescription:
     "Ledakkan batu dan musuh gua dengan dinamit untuk mencapai pintu keluar.",

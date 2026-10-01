@@ -88,6 +88,8 @@ function getRouteLabels(
     hearthvale: messages.common.hearthvaleTitle,
     gravewake: messages.common.gravewakeTitle,
     "dynamite-mole": messages.common.dynamiteMoleTitle,
+    "yet-another-voxelcraft": messages.common.yetAnotherVoxelcraftTitle,
+    "pokemon-claude-red": messages.common.pokemonClaudeRedTitle,
     emberwake: messages.common.emberwakeTitle,
     "iso-8583": messages.common.navIso8583,
     "json-schema-validator": messages.jsonSchemaValidator.title,

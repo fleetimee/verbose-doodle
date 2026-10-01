@@ -19,6 +19,12 @@ export const commonMessages = {
   sunbreakDescription: "Race downhill, land tricks, and chase your best time.",
   arkanoidNeonTitle: "Arkanoid Neon",
   arkanoidNeonDescription: "Break neon bricks and collect power-ups.",
+  pokemonClaudeRedTitle: "Pokémon Claude Red",
+  pokemonClaudeRedDescription:
+    "Explore Kanto, catch Pokémon, and battle through a fan remake of Pokémon Red.",
+  yetAnotherVoxelcraftTitle: "Yet Another VoxelCraft",
+  yetAnotherVoxelcraftDescription:
+    "Mine, craft, and build in a voxel world with survival and creative modes.",
   dynamiteMoleTitle: "Dynamite Mole",
   dynamiteMoleDescription:
     "Blast rocks and cave enemies with dynamite to reach the exit.",

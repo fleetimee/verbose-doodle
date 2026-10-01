@@ -69,15 +69,31 @@ const games = [
   },
   {
     slug: "gravewake",
+    cover: "placeholder.svg",
     screenshots: [],
     title: "gravewakeTitle",
     description: "gravewakeDescription",
   },
   {
     slug: "dynamite-mole",
+    cover: "placeholder.svg",
     screenshots: [],
     title: "dynamiteMoleTitle",
     description: "dynamiteMoleDescription",
+  },
+  {
+    slug: "yet-another-voxelcraft",
+    cover: "placeholder.svg",
+    screenshots: [],
+    title: "yetAnotherVoxelcraftTitle",
+    description: "yetAnotherVoxelcraftDescription",
+  },
+  {
+    slug: "pokemon-claude-red",
+    cover: "placeholder.svg",
+    screenshots: [],
+    title: "pokemonClaudeRedTitle",
+    description: "pokemonClaudeRedDescription",
   },
 ] as const;
 
@@ -93,8 +109,8 @@ export function GamesPage() {
       .includes(query)
   );
   const featured = games[0];
-  const cover = (slug: string) =>
-    `${import.meta.env.BASE_URL}games/covers/${slug === "gravewake" || slug === "dynamite-mole" ? "placeholder.svg" : `${slug}.jpg`}`;
+  const cover = (game: (typeof games)[number]) =>
+    `${import.meta.env.BASE_URL}games/covers/${"cover" in game ? game.cover : `${game.slug}.jpg`}`;
 
   const previewMedia = (game: (typeof games)[number]) => ({
     video:
@@ -132,7 +148,7 @@ export function GamesPage() {
 
       <GamePreviewCard
         active={activePreview === "featured"}
-        cover={cover(featured.slug)}
+        cover={cover(featured)}
         description={copy[featured.description]}
         media={previewMedia(featured)}
         onActiveChange={(active) => changePreview("featured", active)}
@@ -148,7 +164,7 @@ export function GamesPage() {
               className="aspect-video h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transition-none"
               fetchPriority="high"
               height={720}
-              src={cover(featured.slug)}
+              src={cover(featured)}
               width={1280}
             />
           </div>
@@ -190,7 +206,7 @@ export function GamesPage() {
           {visibleGames.map((game) => (
             <GamePreviewCard
               active={activePreview === game.slug}
-              cover={cover(game.slug)}
+              cover={cover(game)}
               description={copy[game.description]}
               key={game.slug}
               media={previewMedia(game)}
@@ -207,7 +223,7 @@ export function GamesPage() {
                     className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none"
                     height={720}
                     loading="lazy"
-                    src={cover(game.slug)}
+                    src={cover(game)}
                     width={1280}
                   />
                 </div>
