@@ -2,6 +2,19 @@ import type React from "react";
 import { useMemo } from "react";
 import { Link } from "react-router";
 import {
+  ArkanoidNeonIcon,
+  BuildYourTownIcon,
+  Chess3dIcon,
+  EmberwakeIcon,
+  FallLinesIcon,
+  GamesIcon,
+  HearthvaleIcon,
+  NovaLancerIcon,
+  PonpokoKartIcon,
+  SunbreakIcon,
+  TerrabrowserIcon,
+} from "@/components/game-icons";
+import {
   Binary,
   Code2,
   type HugeIcon,
@@ -209,65 +222,65 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
       })).filter((category) => category.items.length > 0),
       {
         groupLabel: messages.common.navFun,
-        icon: Waves,
+        icon: GamesIcon,
         title: messages.common.navFunGames,
         items: [
           {
-            icon: Waves,
+            icon: FallLinesIcon,
             description: messages.common.fallLineDescription,
             title: messages.common.fallLineTitle,
             url: "/dashboard/games/fall-line",
           },
           {
-            icon: LayoutGrid,
+            icon: TerrabrowserIcon,
             description: messages.common.terrabrowserDescription,
             title: messages.common.terrabrowserTitle,
             url: "/dashboard/games/terrabrowser",
           },
           {
-            icon: Route,
+            icon: PonpokoKartIcon,
             description: messages.common.ponpokoKartDescription,
             title: messages.common.ponpokoKartTitle,
             url: "/dashboard/games/ponpoko-kart",
           },
           {
-            icon: Waves,
+            icon: EmberwakeIcon,
             description: messages.common.emberwakeDescription,
             title: messages.common.emberwakeTitle,
             url: "/dashboard/games/emberwake",
           },
           {
-            icon: LayoutGrid,
+            icon: BuildYourTownIcon,
             description: messages.common.buildYourTownDescription,
             title: messages.common.buildYourTownTitle,
             url: "/dashboard/games/build-your-town",
           },
           {
-            icon: LayoutGrid,
+            icon: Chess3dIcon,
             description: messages.common.chess3dDescription,
             title: messages.common.chess3dTitle,
             url: "/dashboard/games/chess-3d",
           },
           {
-            icon: Route,
+            icon: NovaLancerIcon,
             description: messages.common.novaLancerDescription,
             title: messages.common.novaLancerTitle,
             url: "/dashboard/games/nova-lancer",
           },
           {
-            icon: Route,
+            icon: SunbreakIcon,
             description: messages.common.sunbreakDescription,
             title: messages.common.sunbreakTitle,
             url: "/dashboard/games/sunbreak",
           },
           {
-            icon: LayoutGrid,
+            icon: ArkanoidNeonIcon,
             description: messages.common.arkanoidNeonDescription,
             title: messages.common.arkanoidNeonTitle,
             url: "/dashboard/games/arkanoid-neon",
           },
           {
-            icon: LayoutGrid,
+            icon: HearthvaleIcon,
             description: messages.common.hearthvaleDescription,
             title: messages.common.hearthvaleTitle,
             url: "/dashboard/games/hearthvale",
