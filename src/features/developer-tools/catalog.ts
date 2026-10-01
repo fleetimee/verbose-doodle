@@ -188,6 +188,76 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
   {
     categoryId: "inspection",
     get description() {
+      return messages.developerTools.qrisCpm.description;
+    },
+    get document() {
+      return {
+        description: messages.developerTools.qrisCpm.description,
+        keywords: ["QRIS", "CPM", "BER-TLV", "Base64", "QR parser"],
+        title: messages.developerTools.qrisCpm.title,
+      };
+    },
+    icon: QrCode,
+    id: "qris-cpm-parser",
+    get limit() {
+      return messages.developerTools.qrisCpm.limit;
+    },
+    load: () =>
+      import("@/pages/dashboard/qris-cpm-parser").then(
+        ({ QrisCpmParserPage }) => ({
+          default: QrisCpmParserPage,
+        })
+      ),
+    get name() {
+      return messages.developerTools.qrisCpm.title;
+    },
+    path: "developer-tools/qris-cpm-parser",
+    get runtime() {
+      return messages.developerTools.iso8583ParserRuntime;
+    },
+    get searchDescription() {
+      return messages.developerTools.qrisCpm.description;
+    },
+    tags: ["QRIS", "CPM", "BER-TLV", "Base64"],
+  },
+  {
+    categoryId: "inspection",
+    get description() {
+      return messages.developerTools.qrisTap.description;
+    },
+    get document() {
+      return {
+        description: messages.developerTools.qrisTap.description,
+        keywords: ["QRIS", "TAP", "BER-TLV", "Base64", "QR parser"],
+        title: messages.developerTools.qrisTap.title,
+      };
+    },
+    icon: QrCode,
+    id: "qris-tap-parser",
+    get limit() {
+      return messages.developerTools.qrisTap.limit;
+    },
+    load: () =>
+      import("@/pages/dashboard/qris-tap-parser").then(
+        ({ QrisTapParserPage }) => ({
+          default: QrisTapParserPage,
+        })
+      ),
+    get name() {
+      return messages.developerTools.qrisTap.title;
+    },
+    path: "developer-tools/qris-tap-parser",
+    get runtime() {
+      return messages.developerTools.iso8583ParserRuntime;
+    },
+    get searchDescription() {
+      return messages.developerTools.qrisTap.description;
+    },
+    tags: ["QRIS", "TAP", "BER-TLV", "Base64"],
+  },
+  {
+    categoryId: "inspection",
+    get description() {
       return messages.developerTools.qris.description;
     },
     get document() {

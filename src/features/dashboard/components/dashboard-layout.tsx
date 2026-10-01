@@ -91,6 +91,8 @@ function getRouteLabels(
     "json-schema-validator": messages.jsonSchemaValidator.title,
     "jwt-inspector": messages.jwtInspector.title,
     "qris-parser": messages.developerTools.qris.title,
+    "qris-cpm-parser": messages.developerTools.qrisCpm.title,
+    "qris-tap-parser": messages.developerTools.qrisTap.title,
     "qris-creator": messages.developerTools.qrisCreator.title,
     "number-base-converter": messages.numberBaseConverter.title,
     overview: messages.common.navOverview,
@@ -280,8 +282,12 @@ export function DashboardLayout() {
                 contentClassName={cn(
                   "flex flex-col",
                   isOverview ? "h-full min-h-0" : "min-h-full",
-                  location.pathname ===
-                    "/dashboard/developer-tools/qris-creator" &&
+                  (location.pathname ===
+                    "/dashboard/developer-tools/qris-creator" ||
+                    location.pathname ===
+                      "/dashboard/developer-tools/qris-cpm-parser" ||
+                    location.pathname ===
+                      "/dashboard/developer-tools/qris-tap-parser") &&
                     "lg:h-full lg:min-h-0"
                 )}
                 variant={isOverview ? "overview" : "fit"}

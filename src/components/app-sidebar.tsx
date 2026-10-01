@@ -214,6 +214,22 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             url: "/dashboard/developer-tools/qris-parser",
           },
           {
+            description: messages.developerTools.qrisCpm.description,
+            icon: QrCode,
+            keywords: ["QRIS", "CPM", "BER-TLV", "Base64"],
+            onPrefetch: () => import("@/pages/dashboard/qris-cpm-parser"),
+            title: messages.developerTools.qrisCpm.menu,
+            url: "/dashboard/developer-tools/qris-cpm-parser",
+          },
+          {
+            description: messages.developerTools.qrisTap.description,
+            icon: QrCode,
+            keywords: ["QRIS", "TAP", "BER-TLV", "Base64"],
+            onPrefetch: () => import("@/pages/dashboard/qris-tap-parser"),
+            title: messages.developerTools.qrisTap.menu,
+            url: "/dashboard/developer-tools/qris-tap-parser",
+          },
+          {
             description: messages.developerTools.qrisCreator.description,
             icon: QrCode,
             keywords: ["QRIS", "MPM", "QR", "generator"],
@@ -249,6 +265,8 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
               tool.id !== "iso8583-parser" &&
               tool.id !== "iso8583-generator" &&
               tool.id !== "qris-parser" &&
+              tool.id !== "qris-cpm-parser" &&
+              tool.id !== "qris-tap-parser" &&
               tool.id !== "qris-creator" &&
               tool.id !== "qris-mdr-calculator"
           )

@@ -1,4 +1,123 @@
 export const developerToolsMessages = {
+  qrisCpm: {
+    auto: "Otomatis",
+    infoLabel: "Tentang tag {tag}",
+    unknownInfo:
+      "Tag ini tidak memiliki definisi pada dekoder sumber. Byte dipertahankan sesuai input; maknanya bergantung pada issuer atau aplikasi.",
+    tagInfo: {
+      "85": "Mengidentifikasi format payload. CPV01 adalah indikator format CPM yang digunakan qris-cpm-tap.",
+      "61": "Mengelompokkan field aplikasi pembayaran. Nilainya memuat tag TLV anak yang didekode secara rekursif.",
+      "4F": "Application identifier (AID). Mengidentifikasi aplikasi pembayaran dan ditampilkan sebagai byte heksadesimal.",
+      "50": "Label aplikasi pembayaran yang dapat dibaca. Ditampilkan sebagai ASCII jika byte dapat dicetak.",
+      "5A": "Consumer PAN (CPAN). Disimpan sebagai digit BCD; parser menghapus nibble padding F di akhir jika ada.",
+      "5F20":
+        "Nama pemegang kartu. Ditampilkan sebagai ASCII jika byte dapat dicetak.",
+      "5F2D":
+        "Preferensi bahasa. Aplikasi sumber menyimpan kode bahasa di sini, seperti id atau en.",
+      "5F50":
+        "URL issuer. Hanya ditampilkan sebagai teks; parser tidak membuka atau mengakses URL.",
+      "9F25":
+        "Empat digit terakhir CPAN, disimpan sebagai BCD pada aplikasi sumber.",
+      "63": "Mengelompokkan data khusus aplikasi, termasuk field issuer. Nilainya memuat tag TLV anak.",
+      "9F74":
+        "Data privat issuer. Aplikasi sumber menggunakan field ini untuk data terenkripsi. Parser menampilkan byte input sebagai hex dan Base64 tanpa enkripsi atau dekripsi.",
+      "9F7A":
+        "Sertifikat issuer atau material kunci publik yang digunakan alur autentikasi TAP pada aplikasi sumber. Menampilkan field ini tidak memvalidasi sertifikat atau kunci.",
+      "9F7B":
+        "Tanda tangan autentikasi issuer yang digunakan alur TAP pada aplikasi sumber. Parser menampilkan byte tanda tangan tanpa memverifikasinya.",
+    },
+    menu: "CPM parser",
+    title: "Parser QRIS CPM",
+    description:
+      "Dekode payload CPM Base64 atau heksadesimal menjadi struktur BER-TLV.",
+    input: "Payload CPM",
+    encoding: "Encoding input",
+    fields: "Field hasil dekode",
+    tag: "Tag",
+    length: "Byte",
+    value: "Nilai",
+    unknown: "Field tidak dikenal",
+    empty: "Tempel payload CPM untuk memeriksa field.",
+    invalid: "Payload ini tidak dapat didekode.",
+    profile:
+      "Payload ini tidak memuat indikator CPM CPV01 dan template aplikasi.",
+    local: "Didekode secara lokal di browser. Payload tidak dikirim ke server.",
+    crypto:
+      "Parser ini tidak mengenkripsi atau mendekripsi data. Field terenkripsi ditampilkan sesuai input.",
+    sample: "Muat contoh",
+    sampleNote: "Contoh payload yang diberikan untuk pemeriksaan CPM.",
+    clear: "Bersihkan",
+    limit: "Input 128 KiB",
+    raw: "Hex payload",
+  },
+  qrisTap: {
+    inspection: "Detail inspeksi",
+    base64Source: "Sumber Base64",
+    decodedHex: "HEX hasil dekode",
+    textTree: "Struktur teks BER-TLV",
+    executionLog: "Log eksekusi",
+    apdu: "Transkrip APDU",
+    apduUnavailable:
+      "Payload tidak memuat perintah NFC, potongan respons, atau status SW1/SW2. Gunakan transkrip yang ditangkap pada pembaca NFC untuk memeriksa pertukaran tersebut.",
+    copyOutput: "Salin output",
+    copiedOutput: "Tersalin",
+    copyFailed: "Gagal menyalin",
+    unavailable: "Tidak tersedia untuk hasil ini.",
+    success: "Parsing berhasil",
+    failure: "Parsing gagal",
+    failureStage: "Tahap kegagalan",
+    inputOrigin: "Input payload lokal",
+
+    auto: "Otomatis",
+    infoLabel: "Tentang tag {tag}",
+    unknownInfo:
+      "Tag ini tidak memiliki definisi pada dekoder sumber. Byte dipertahankan sesuai input; maknanya bergantung pada issuer atau aplikasi.",
+    tagInfo: {
+      "85": "Mengidentifikasi format payload. CPV01 adalah indikator format CPM yang digunakan qris-cpm-tap.",
+      "61": "Mengelompokkan field aplikasi pembayaran. Nilainya memuat tag TLV anak yang didekode secara rekursif.",
+      "4F": "Application identifier (AID). Mengidentifikasi aplikasi pembayaran dan ditampilkan sebagai byte heksadesimal.",
+      "50": "Label aplikasi pembayaran yang dapat dibaca. Ditampilkan sebagai ASCII jika byte dapat dicetak.",
+      "5A": "Consumer PAN (CPAN). Disimpan sebagai digit BCD; parser menghapus nibble padding F di akhir jika ada.",
+      "5F20":
+        "Nama pemegang kartu. Ditampilkan sebagai ASCII jika byte dapat dicetak.",
+      "5F2D":
+        "Preferensi bahasa. Aplikasi sumber menyimpan kode bahasa di sini, seperti id atau en.",
+      "5F50":
+        "URL issuer. Hanya ditampilkan sebagai teks; parser tidak membuka atau mengakses URL.",
+      "9F25":
+        "Empat digit terakhir CPAN, disimpan sebagai BCD pada aplikasi sumber.",
+      "63": "Mengelompokkan data khusus aplikasi, termasuk field issuer. Nilainya memuat tag TLV anak.",
+      "9F74":
+        "Data privat issuer. Aplikasi sumber menggunakan field ini untuk data terenkripsi. Parser menampilkan byte input sebagai hex dan Base64 tanpa enkripsi atau dekripsi.",
+      "9F7A":
+        "Sertifikat issuer atau material kunci publik yang digunakan alur autentikasi TAP pada aplikasi sumber. Menampilkan field ini tidak memvalidasi sertifikat atau kunci.",
+      "9F7B":
+        "Tanda tangan autentikasi issuer yang digunakan alur TAP pada aplikasi sumber. Parser menampilkan byte tanda tangan tanpa memverifikasinya.",
+    },
+    menu: "TAP parser",
+    title: "Parser QRIS TAP",
+    description:
+      "Dekode Base64 gabungan record NFC atau hex menggunakan aturan BER-TLV nfc-reader-diy.",
+    input: "Payload TAP",
+    encoding: "Encoding input",
+    fields: "Field hasil dekode",
+    tag: "Tag",
+    length: "Byte",
+    value: "Nilai",
+    unknown: "Field tidak dikenal",
+    empty: "Tempel payload TAP untuk memeriksa field.",
+    invalid: "Payload ini tidak dapat didekode.",
+    profile:
+      "Payload ini tidak memuat indikator CPM CPV01 dan template aplikasi.",
+    local: "Didekode secara lokal di browser. Payload tidak dikirim ke server.",
+    crypto:
+      "Parser ini tidak mengenkripsi atau mendekripsi data. Field terenkripsi ditampilkan sesuai input.",
+    sample: "Muat contoh",
+    sampleNote: "Contoh payload yang diberikan untuk pemeriksaan TAP.",
+    clear: "Bersihkan",
+    limit: "Input 128 KiB",
+    raw: "Hex payload",
+  },
   qrisCreator: {
     branding: "Logo aplikasi",
     qrTooLarge:

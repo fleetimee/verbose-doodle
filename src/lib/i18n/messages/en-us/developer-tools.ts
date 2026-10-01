@@ -1,4 +1,123 @@
 export const developerToolsMessages = {
+  qrisCpm: {
+    auto: "Auto",
+    infoLabel: "About tag {tag}",
+    unknownInfo:
+      "This tag has no definition in the source decoder. Its bytes are preserved as supplied; its meaning depends on the issuer or application.",
+    tagInfo: {
+      "85": "Identifies the payload format. CPV01 is the CPM format indicator used by qris-cpm-tap.",
+      "61": "Groups the fields for a payment application. Its value contains child TLV tags, which this parser decodes recursively.",
+      "4F": "The application identifier (AID). Identifies the payment application; displayed as hexadecimal bytes.",
+      "50": "The readable label of the payment application. Displayed as ASCII when its bytes are printable.",
+      "5A": "The consumer PAN (CPAN). Stored as packed BCD digits; the parser removes a trailing F padding nibble when present.",
+      "5F20":
+        "The cardholder name. Displayed as ASCII when its bytes are printable.",
+      "5F2D":
+        "The language preference. The source application stores language codes here, such as id or en.",
+      "5F50":
+        "The issuer URL. Shown as text only; this parser does not open or request the URL.",
+      "9F25":
+        "The last four digits of the CPAN, stored as packed BCD in the source application.",
+      "63": "Groups application-specific data, including issuer fields. Its value contains child TLV tags.",
+      "9F74":
+        "Issuer private data. The source application uses this field for encrypted data. This parser displays the supplied bytes as hex and Base64 without encryption or decryption.",
+      "9F7A":
+        "Issuer certificate or public key material used by the source TAP authentication flow. Displaying this field does not validate its certificate or key.",
+      "9F7B":
+        "Issuer authentication signature used by the source TAP flow. This parser displays the signature bytes without verifying them.",
+    },
+    menu: "CPM parser",
+    title: "QRIS CPM parser",
+    description:
+      "Decode Base64 or hexadecimal CPM payloads into a BER-TLV tree.",
+    input: "CPM payload",
+    encoding: "Input encoding",
+    fields: "Decoded fields",
+    tag: "Tag",
+    length: "Bytes",
+    value: "Value",
+    unknown: "Unknown field",
+    empty: "Paste a CPM payload to inspect its fields.",
+    invalid: "Unable to decode this payload.",
+    profile:
+      "This payload does not contain the CPM indicator CPV01 and an application template.",
+    local: "Decoded locally in your browser. No payload is sent to a server.",
+    crypto:
+      "This parser does not encrypt or decrypt data. Existing encrypted fields are shown as supplied.",
+    sample: "Load sample",
+    sampleNote: "Example payload provided for CPM inspection.",
+    clear: "Clear",
+    limit: "128 KiB input",
+    raw: "Payload hex",
+  },
+  qrisTap: {
+    inspection: "Inspection details",
+    base64Source: "Base64 source",
+    decodedHex: "Decoded HEX",
+    textTree: "BER-TLV text tree",
+    executionLog: "Execution log",
+    apdu: "APDU transcript",
+    apduUnavailable:
+      "A payload does not contain NFC commands, response chunks, or SW1/SW2 status words. Import a captured transcript in the NFC reader to inspect those exchanges.",
+    copyOutput: "Copy output",
+    copiedOutput: "Copied",
+    copyFailed: "Copy failed",
+    unavailable: "Not available for this outcome.",
+    success: "Parsing succeeded",
+    failure: "Parsing failed",
+    failureStage: "Failure stage",
+    inputOrigin: "Local payload input",
+
+    auto: "Auto",
+    infoLabel: "About tag {tag}",
+    unknownInfo:
+      "This tag has no definition in the source decoder. Its bytes are preserved as supplied; its meaning depends on the issuer or application.",
+    tagInfo: {
+      "85": "Identifies the payload format. CPV01 is the CPM format indicator used by qris-cpm-tap.",
+      "61": "Groups the fields for a payment application. Its value contains child TLV tags, which this parser decodes recursively.",
+      "4F": "The application identifier (AID). Identifies the payment application; displayed as hexadecimal bytes.",
+      "50": "The readable label of the payment application. Displayed as ASCII when its bytes are printable.",
+      "5A": "The consumer PAN (CPAN). Stored as packed BCD digits; the parser removes a trailing F padding nibble when present.",
+      "5F20":
+        "The cardholder name. Displayed as ASCII when its bytes are printable.",
+      "5F2D":
+        "The language preference. The source application stores language codes here, such as id or en.",
+      "5F50":
+        "The issuer URL. Shown as text only; this parser does not open or request the URL.",
+      "9F25":
+        "The last four digits of the CPAN, stored as packed BCD in the source application.",
+      "63": "Groups application-specific data, including issuer fields. Its value contains child TLV tags.",
+      "9F74":
+        "Issuer private data. The source application uses this field for encrypted data. This parser displays the supplied bytes as hex and Base64 without encryption or decryption.",
+      "9F7A":
+        "Issuer certificate or public key material used by the source TAP authentication flow. Displaying this field does not validate its certificate or key.",
+      "9F7B":
+        "Issuer authentication signature used by the source TAP flow. This parser displays the signature bytes without verifying them.",
+    },
+    menu: "TAP parser",
+    title: "QRIS TAP parser",
+    description:
+      "Decode assembled NFC record Base64 or decoded hex using the nfc-reader-diy BER-TLV rules.",
+    input: "TAP payload",
+    encoding: "Input encoding",
+    fields: "Decoded fields",
+    tag: "Tag",
+    length: "Bytes",
+    value: "Value",
+    unknown: "Unknown field",
+    empty: "Paste a TAP payload to inspect its fields.",
+    invalid: "Unable to decode this payload.",
+    profile:
+      "This payload does not contain the CPM indicator CPV01 and an application template.",
+    local: "Decoded locally in your browser. No payload is sent to a server.",
+    crypto:
+      "This parser does not encrypt or decrypt data. Existing encrypted fields are shown as supplied.",
+    sample: "Load sample",
+    sampleNote: "Example payload provided for TAP inspection.",
+    clear: "Clear",
+    limit: "128 KiB input",
+    raw: "Payload hex",
+  },
   qrisCreator: {
     branding: "App logo",
     qrTooLarge:
