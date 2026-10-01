@@ -7,7 +7,7 @@ import {
 
 describe("Developer tool registry", () => {
   test("gives every entry identity, navigation, loading, and document metadata", () => {
-    expect(DEVELOPER_TOOLS).toHaveLength(8);
+    expect(DEVELOPER_TOOLS).toHaveLength(10);
 
     for (const tool of DEVELOPER_TOOLS) {
       expect(tool.id).toBeTruthy();

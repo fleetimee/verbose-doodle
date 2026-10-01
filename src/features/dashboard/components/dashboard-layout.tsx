@@ -90,6 +90,8 @@ function getRouteLabels(
     "iso-8583": messages.common.navIso8583,
     "json-schema-validator": messages.jsonSchemaValidator.title,
     "jwt-inspector": messages.jwtInspector.title,
+    "qris-parser": messages.developerTools.qris.title,
+    "qris-creator": messages.developerTools.qrisCreator.title,
     "number-base-converter": messages.numberBaseConverter.title,
     overview: messages.common.navOverview,
     "rest-api": messages.common.navRestApi,
@@ -275,11 +277,13 @@ export function DashboardLayout() {
             <SidebarInset variant="card">
               <ScrollArea
                 className="h-full min-h-0 w-full"
-                contentClassName={
-                  isOverview
-                    ? "flex h-full min-h-0 flex-col"
-                    : "flex min-h-full flex-col"
-                }
+                contentClassName={cn(
+                  "flex flex-col",
+                  isOverview ? "h-full min-h-0" : "min-h-full",
+                  location.pathname ===
+                    "/dashboard/developer-tools/qris-creator" &&
+                    "lg:h-full lg:min-h-0"
+                )}
                 variant={isOverview ? "overview" : "fit"}
                 viewportRef={scrollViewportRef}
               >

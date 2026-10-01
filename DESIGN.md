@@ -272,6 +272,14 @@ The endpoint card is the signature work item. It combines a semantic method stri
 
 Tabs sit inside a muted rounded track. The active tab returns to the workspace surface and gains a small grounding edge. Keep tab transitions limited to color and shadow so switching feels immediate.
 
+### QRIS MPM parser
+
+The parser uses two bordered panels that fill the available desktop height, with a narrower input panel and a wider results panel whose field table scrolls independently. Stack the panels on mobile. The shadcn-style image dropzone uses a dashed button, a selected-image thumbnail, and visible decoding, success, and error states. Disable the monospace payload field while an image is decoding. Keep static and dynamic sample actions beside Clear in the compact tool header.
+
+### QRIS MPM creator
+
+The creator pairs a compact merchant form with a live QR preview and read-only monospace payload in stable-height bordered desktop panels, each using shadcn ScrollArea; stack the panels on mobile. Keep optional fields and image import collapsed until needed, show original imported tags in a nested disclosure, and disable the form during image decoding. Keep static/dynamic controls in the form and Clear in the tool header. Render the QR in black on white with its quiet zone intact in both themes and a small embedded app-icon logo; place merchant details, formatted amount, and PNG/SVG exports outside the code. Inline validation replaces an invalid preview with a clear empty state, and fictional sample identifiers remain visibly labeled.
+
 ### Screen lock
 
 The lock button sits beside the theme switcher in the dashboard header. Locking reuses the macOS lock screen and provides a direct unlock action to resume the workspace. The screen also locks automatically after 2.5 minutes of user inactivity. The lock persists per tab across reloads until unlocked. A full-screen modal keeps keyboard focus and interaction within the lock screen.

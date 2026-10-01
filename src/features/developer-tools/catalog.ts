@@ -7,6 +7,7 @@ import {
   Code2,
   FileJson,
   Fingerprint,
+  QrCode,
   RadioReceiver,
   RefreshCw,
   ShieldCheck,
@@ -150,6 +151,72 @@ const loadCronParser: DeveloperToolLoader = () =>
   }));
 
 export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
+  {
+    categoryId: "conversion",
+    get description() {
+      return messages.developerTools.qrisCreator.description;
+    },
+    get searchDescription() {
+      return messages.developerTools.qrisCreator.description;
+    },
+    get document() {
+      return {
+        description: messages.developerTools.qrisCreator.description,
+        keywords: ["QRIS", "MPM", "QR generator", "CRC"],
+        title: messages.developerTools.qrisCreator.title,
+      };
+    },
+    icon: QrCode,
+    id: "qris-creator",
+    get limit() {
+      return messages.developerTools.qris.payloadLimit;
+    },
+    load: () =>
+      import("@/pages/dashboard/qris-creator").then(({ QrisCreatorPage }) => ({
+        default: QrisCreatorPage,
+      })),
+    get name() {
+      return messages.developerTools.qrisCreator.title;
+    },
+    path: "developer-tools/qris-creator",
+    get runtime() {
+      return messages.developerTools.iso8583ParserRuntime;
+    },
+    tags: ["QRIS", "MPM", "QR", "generator"],
+  },
+  {
+    categoryId: "inspection",
+    get description() {
+      return messages.developerTools.qris.description;
+    },
+    get document() {
+      return {
+        description: messages.developerTools.qris.description,
+        keywords: ["QRIS", "MPM", "EMVCo", "CRC", "QR parser"],
+        title: messages.developerTools.qris.title,
+      };
+    },
+    icon: QrCode,
+    id: "qris-parser",
+    get limit() {
+      return messages.developerTools.qris.payloadLimit;
+    },
+    load: () =>
+      import("@/pages/dashboard/qris-parser").then(({ QrisParserPage }) => ({
+        default: QrisParserPage,
+      })),
+    get name() {
+      return messages.developerTools.qris.title;
+    },
+    path: "developer-tools/qris-parser",
+    get runtime() {
+      return messages.developerTools.iso8583ParserRuntime;
+    },
+    get searchDescription() {
+      return messages.developerTools.qris.description;
+    },
+    tags: ["QRIS", "MPM", "TLV", "CRC"],
+  },
   {
     categoryId: "validation",
     get description() {

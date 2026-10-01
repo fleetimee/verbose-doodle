@@ -23,6 +23,7 @@ import {
   LayoutGrid,
   MonitorUp,
   Plug,
+  QrCode,
   RadioTower,
   Route,
   Server,
@@ -197,13 +198,40 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
           },
         ],
       },
+      {
+        groupLabel: messages.developerTools.navigationGroup,
+        icon: QrCode,
+        description: messages.developerTools.qris.description,
+        title: "QRIS",
+        items: [
+          {
+            description: messages.developerTools.qris.description,
+            icon: QrCode,
+            keywords: ["QRIS", "MPM", "QR", "EMVCo", "TLV", "CRC"],
+            onPrefetch: () => import("@/pages/dashboard/qris-parser"),
+            title: messages.developerTools.qris.parserLabel,
+            url: "/dashboard/developer-tools/qris-parser",
+          },
+          {
+            description: messages.developerTools.qrisCreator.description,
+            icon: QrCode,
+            keywords: ["QRIS", "MPM", "QR", "generator"],
+            onPrefetch: () => import("@/pages/dashboard/qris-creator"),
+            title: messages.developerTools.qrisCreator.menu,
+            url: "/dashboard/developer-tools/qris-creator",
+          },
+        ],
+      },
       ...DEVELOPER_TOOL_CATEGORIES.map((category) => ({
         groupLabel: messages.developerTools.navigationGroup,
         icon: category.icon,
         items: category.tools
           .filter(
             (tool) =>
-              tool.id !== "iso8583-parser" && tool.id !== "iso8583-generator"
+              tool.id !== "iso8583-parser" &&
+              tool.id !== "iso8583-generator" &&
+              tool.id !== "qris-parser" &&
+              tool.id !== "qris-creator"
           )
           .map((tool) => ({
             description: tool.searchDescription,

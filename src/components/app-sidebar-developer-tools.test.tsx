@@ -59,6 +59,28 @@ describe("AppSidebar developer tools navigation", () => {
     expect(await screen.findByRole("menuitem", { name: "UDP" })).toBeTruthy();
   });
 
+  test("opens the QRIS parent and navigates to its MPM parser", async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter initialEntries={["/dashboard/developer-tools"]}>
+          <AuthProvider>
+            <SidebarProvider>
+              <AppSidebar />
+              <LocationProbe />
+            </SidebarProvider>
+          </AuthProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "QRIS" }));
+    fireEvent.click(await screen.findByRole("link", { name: "MPM parser" }));
+    await waitFor(() =>
+      expect(screen.getByTestId("location").textContent).toBe(
+        "/dashboard/developer-tools/qris-parser"
+      )
+    );
+  });
+
   test("uses the Option symbol for shortcuts on macOS", () => {
     expect(formatOptionShortcut("O", "MacIntel")).toBe("⌥O");
   });

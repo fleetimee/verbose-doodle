@@ -62,6 +62,7 @@ import {
   PlayIcon,
   Plug01Icon,
   PlugSocketIcon,
+  QrCodeIcon,
   Radio02Icon,
   RadioIcon,
   Refresh01Icon,
@@ -101,6 +102,7 @@ export const BarChart3 = createHugeIcon(BarChartIcon);
 export const Banknote = createHugeIcon(Money03Icon);
 export const CreditCard = createHugeIcon(CreditCardIcon);
 export const ChevronDown = createHugeIcon(ArrowDown01Icon);
+export const QrCode = createHugeIcon(QrCodeIcon);
 export const Binary = createHugeIcon(BinaryIcon);
 export const Braces = createHugeIcon(BracesIcon);
 export const Building2 = createHugeIcon(Building01Icon);
