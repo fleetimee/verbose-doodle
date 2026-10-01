@@ -13,7 +13,8 @@
       "!public/games/nova-lancer",
       "!public/games/sunbreak",
       "!public/games/arkanoid-neon",
-      "!public/games/hearthvale"
+      "!public/games/hearthvale",
+      "!public/games/gravewake"
     ]
   },
   "javascript": {

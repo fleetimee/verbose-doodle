@@ -1,0 +1,12 @@
+Gravewake by Liora Labs
+https://github.com/LioraLabs/gravewake
+Source commit: e0ebab1e7f948570d10b74d1750dfdb344eea2dc
+License: MIT. Bundled dependency and Cinzel font licenses are in licenses/.
+Built with Bun using the upstream package-lock.json and `bun run build`.
+Local changes: added ../activity.js for the dashboard inactivity lock;
+removed the external article link while retaining Liora Labs attribution.
+To reproduce, remove tap="credit" and its binding from src/screens/title.kdl
+and src/screens/title.ts, and replace the credit text with "BY LIORA LABS".
+All runtime libraries, models, fonts, and assets are bundled locally. No CDN,
+external service, or additional app dependency is required to play.
+Serve this directory from the local app server, as with the other games.

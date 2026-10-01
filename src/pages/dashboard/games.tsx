@@ -67,6 +67,12 @@ const games = [
     title: "arkanoidNeonTitle",
     description: "arkanoidNeonDescription",
   },
+  {
+    slug: "gravewake",
+    screenshots: [],
+    title: "gravewakeTitle",
+    description: "gravewakeDescription",
+  },
 ] as const;
 
 export function GamesPage() {
@@ -82,7 +88,7 @@ export function GamesPage() {
   );
   const featured = games[0];
   const cover = (slug: string) =>
-    `${import.meta.env.BASE_URL}games/covers/${slug}.jpg`;
+    `${import.meta.env.BASE_URL}games/covers/${slug === "gravewake" ? "placeholder.svg" : `${slug}.jpg`}`;
 
   const previewMedia = (game: (typeof games)[number]) => ({
     video:

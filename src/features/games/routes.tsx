@@ -67,6 +67,12 @@ const HearthvalePage = lazy(() =>
   }))
 );
 
+const GravewakePage = lazy(() =>
+  import("@/pages/dashboard/gravewake").then(({ GravewakePage }) => ({
+    default: GravewakePage,
+  }))
+);
+
 export const gameRoutes = (
   <>
     <Route element={<GamesPage />} path="games" />
@@ -80,5 +86,6 @@ export const gameRoutes = (
     <Route element={<SunbreakPage />} path="games/sunbreak" />
     <Route element={<ArkanoidNeonPage />} path="games/arkanoid-neon" />
     <Route element={<HearthvalePage />} path="games/hearthvale" />
+    <Route element={<GravewakePage />} path="games/gravewake" />
   </>
 );

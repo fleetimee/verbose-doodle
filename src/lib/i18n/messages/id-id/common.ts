@@ -21,6 +21,9 @@ export const commonMessages = {
     "Balapan menuruni gunung, lakukan trik, dan raih waktu terbaik.",
   arkanoidNeonTitle: "Arkanoid Neon",
   arkanoidNeonDescription: "Hancurkan bata neon dan kumpulkan power-up.",
+  gravewakeTitle: "Gravewake",
+  gravewakeDescription:
+    "Gunakan sihir, pilih berkah, dan bertahan dari gelombang mayat hidup.",
   hearthvaleTitle: "Hearthvale",
   hearthvaleDescription:
     "Kembangkan pertanianmu dan jelajahi lembah dalam mode pemain tunggal.",

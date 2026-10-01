@@ -86,6 +86,7 @@ function getRouteLabels(
     sunbreak: messages.common.sunbreakTitle,
     "arkanoid-neon": messages.common.arkanoidNeonTitle,
     hearthvale: messages.common.hearthvaleTitle,
+    gravewake: messages.common.gravewakeTitle,
     emberwake: messages.common.emberwakeTitle,
     "iso-8583": messages.common.navIso8583,
     "json-schema-validator": messages.jsonSchemaValidator.title,

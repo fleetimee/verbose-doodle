@@ -364,6 +364,12 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
             title: messages.common.hearthvaleTitle,
             url: "/dashboard/games/hearthvale",
           },
+          {
+            icon: GamesIcon,
+            description: messages.common.gravewakeDescription,
+            title: messages.common.gravewakeTitle,
+            url: "/dashboard/games/gravewake",
+          },
         ],
       },
     ],
