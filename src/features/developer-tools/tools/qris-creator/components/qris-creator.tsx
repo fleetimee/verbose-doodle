@@ -115,14 +115,17 @@ export function QrisCreator() {
       return null;
     }
     try {
-      return renderQrisQr(result.payload, previewLogo);
+      return {
+        ...renderQrisQr(result.payload, previewLogo),
+        plainSrc: renderQrisQr(result.payload).src,
+        brandedSrc: logo
+          ? renderQrisQr(result.payload, logo).brandingSrc
+          : undefined,
+      };
     } catch {
       return null;
     }
-  }, [result.payload, previewLogo]);
-  const fictional =
-    input.providerGuid === QRIS_CREATOR_SAMPLE.providerGuid &&
-    input.merchantPan === QRIS_CREATOR_SAMPLE.merchantPan;
+  }, [result.payload, previewLogo, logo]);
   function replace(value: QrisCreatorInput) {
     setInput({ ...value });
     setImported(undefined);
@@ -387,13 +390,26 @@ export function QrisCreator() {
             {qr ? (
               <>
                 <div className="flex flex-1 flex-col items-center justify-center gap-3 p-4">
-                  <img
-                    alt={copy.scan}
-                    className="aspect-square w-full max-w-80 shrink-0 rounded-sm border"
-                    height={320}
-                    src={qr.src}
-                    width={320}
-                  />
+                  <div className="qris-creator-preview-frame aspect-square w-full max-w-80 shrink-0">
+                    <img
+                      alt={copy.scan}
+                      className="relative block size-full rounded-[inherit]"
+                      height={320}
+                      src={qr.plainSrc}
+                      width={320}
+                    />
+                    {qr.brandedSrc && (
+                      <img
+                        alt=""
+                        aria-hidden="true"
+                        className="qris-creator-preview-branding size-full rounded-[inherit]"
+                        data-visible={branded}
+                        height={320}
+                        src={qr.brandedSrc}
+                        width={320}
+                      />
+                    )}
+                  </div>
                   <div className="text-center">
                     <p className="font-semibold text-sm">
                       {input.merchantName.trim()}
@@ -407,11 +423,6 @@ export function QrisCreator() {
                         : copy.noAmount}
                     </p>
                   </div>
-                  {fictional && (
-                    <p className="text-muted-foreground text-xs">
-                      {copy.fictional}
-                    </p>
-                  )}
                   <div className="flex flex-wrap justify-center gap-2">
                     <Button
                       disabled={saving || exportBlocked}

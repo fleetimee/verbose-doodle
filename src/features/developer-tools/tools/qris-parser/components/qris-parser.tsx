@@ -294,7 +294,7 @@ export function QrisParser() {
           <Label htmlFor="qris-payload">{copy.input}</Label>
           <Textarea
             aria-busy={imageBusy}
-            aria-describedby={error ? "qris-error" : "qris-local"}
+            aria-describedby={error ? "qris-error" : undefined}
             aria-invalid={Boolean(error)}
             className="field-sizing-fixed min-h-40 flex-1 resize-y lg:resize-none"
             disabled={imageBusy}
@@ -304,12 +304,6 @@ export function QrisParser() {
             value={source}
             variant="mono-muted"
           />
-          <p className="text-muted-foreground text-xs" id="qris-local">
-            {copy.local}
-          </p>
-          {source === QRIS_SAMPLE || source === QRIS_DYNAMIC_SAMPLE ? (
-            <p className="text-muted-foreground text-xs">{copy.sampleNote}</p>
-          ) : null}
           {errorText ? (
             <p
               className="text-destructive text-sm"

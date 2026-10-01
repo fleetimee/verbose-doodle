@@ -7,6 +7,67 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.qris-creator-preview-frame {
+  position: relative;
+  background: white;
+  border: 1px solid color-mix(in oklch, var(--primary) 35%, var(--border));
+  border-radius: var(--radius-xl);
+  isolation: isolate;
+}
+
+.qris-creator-preview-frame::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  border-radius: inherit;
+  box-shadow:
+    0 0 0 3px color-mix(in oklch, var(--primary) 12%, transparent),
+    0 4px 24px 2px color-mix(in oklch, var(--primary) 28%, transparent);
+  opacity: 0.45;
+  animation: qris-creator-preview-pulse 2.4s cubic-bezier(0.77, 0, 0.175, 1) 3;
+}
+
+.qris-creator-preview-branding {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(1%) scale(0.94);
+  transition:
+    opacity 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.qris-creator-preview-branding[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@keyframes qris-creator-preview-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qris-creator-preview-frame::before {
+    animation: none;
+  }
+
+  .qris-creator-preview-branding,
+  .qris-creator-preview-branding[data-visible="true"] {
+    transform: none;
+    transition-duration: 100ms;
+    transition-property: opacity;
+  }
+}
+
 .navigation-search-trigger {
   color: var(--muted-foreground);
   background: var(--sidebar);

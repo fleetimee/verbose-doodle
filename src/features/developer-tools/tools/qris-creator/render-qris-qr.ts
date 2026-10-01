@@ -44,7 +44,14 @@ export function renderQrisQr(payload: string, logo?: string) {
     ? `<rect x="${logoStart}" y="${logoStart}" width="${logoSize}" height="${logoSize}" fill="#fff"/><image href="${logo}" x="${logoStart + 0.5}" y="${logoStart + 0.5}" width="${logoSize - 1}" height="${logoSize - 1}" style="image-rendering:auto"/>`
     : "";
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges"><path fill="#fff" d="M0 0h${size}v${size}H0z"/><path fill="#000" d="${paths.join("")}"/>${branding}</svg>`;
-  return { svg, src: `data:image/svg+xml,${encodeURIComponent(svg)}` };
+  const brandingSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">${branding}</svg>`;
+  return {
+    svg,
+    src: `data:image/svg+xml,${encodeURIComponent(svg)}`,
+    brandingSrc: logo
+      ? `data:image/svg+xml,${encodeURIComponent(brandingSvg)}`
+      : undefined,
+  };
 }
 
 export async function renderQrisPng(payload: string, logo?: string) {

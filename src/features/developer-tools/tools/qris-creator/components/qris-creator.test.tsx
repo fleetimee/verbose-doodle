@@ -262,10 +262,14 @@ test("branding switch controls preview and both exports without changing the pay
       "Scannable QR for the current payload"
     ) as HTMLImageElement;
     await waitFor(() =>
-      expect(decodeURIComponent(image.src)).toContain(
-        '<image href="data:image/png;base64,brand"'
-      )
+      expect(
+        decodeURIComponent(
+          (image.nextElementSibling as HTMLImageElement)?.src ?? ""
+        )
+      ).toContain('<image href="data:image/png;base64,brand"')
     );
+    const branding = image.nextElementSibling as HTMLImageElement;
+    expect(branding.dataset.visible).toBe("true");
     const payload = (screen.getByLabelText("QR payload") as HTMLTextAreaElement)
       .value;
     fireEvent.click(screen.getByRole("button", { name: "Download PNG" }));
@@ -278,6 +282,7 @@ test("branding switch controls preview and both exports without changing the pay
       ).toBe(false)
     );
     fireEvent.click(screen.getByRole("switch", { name: "App logo" }));
+    expect(branding.dataset.visible).toBe("false");
     expect(decodeURIComponent(image.src)).not.toContain("<image");
     expect(
       (screen.getByLabelText("QR payload") as HTMLTextAreaElement).value
@@ -289,6 +294,8 @@ test("branding switch controls preview and both exports without changing the pay
     fireEvent.click(screen.getByRole("button", { name: "Download SVG" }));
     const svgLink = download.mock.contexts.at(-1) as HTMLAnchorElement;
     expect(decodeURIComponent(svgLink.href)).not.toContain("<image");
+    fireEvent.click(screen.getByRole("switch", { name: "App logo" }));
+    expect(branding.dataset.visible).toBe("true");
   } finally {
     download.mockRestore();
   }
