@@ -19,6 +19,9 @@ export const commonMessages = {
   sunbreakDescription: "Race downhill, land tricks, and chase your best time.",
   arkanoidNeonTitle: "Arkanoid Neon",
   arkanoidNeonDescription: "Break neon bricks and collect power-ups.",
+  dynamiteMoleTitle: "Dynamite Mole",
+  dynamiteMoleDescription:
+    "Blast rocks and cave enemies with dynamite to reach the exit.",
   gravewakeTitle: "Gravewake",
   gravewakeDescription:
     "Cast spells, choose boons, and survive waves of undead.",

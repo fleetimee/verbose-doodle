@@ -14,7 +14,8 @@
       "!public/games/sunbreak",
       "!public/games/arkanoid-neon",
       "!public/games/hearthvale",
-      "!public/games/gravewake"
+      "!public/games/gravewake",
+      "!public/games/dynamite-mole"
     ]
   },
   "javascript": {

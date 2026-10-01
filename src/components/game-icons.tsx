@@ -215,3 +215,41 @@ export const HearthvaleIcon: HugeIcon = (props) => (
     {...props}
   />
 );
+
+const gravewakeDefinition: IconSvgElement = [
+  [
+    "path",
+    {
+      d: "M6 21V8a6 6 0 0 1 12 0v13M3 21h18M12 7v8m-3-5h6M9 18h6",
+      key: "gravewake-0",
+    },
+  ],
+];
+
+export const GravewakeIcon: HugeIcon = (props) => (
+  <HugeiconsIcon
+    aria-hidden="true"
+    icon={gravewakeDefinition}
+    strokeWidth={2}
+    {...props}
+  />
+);
+
+const dynamiteMoleDefinition: IconSvgElement = [
+  [
+    "path",
+    {
+      d: "M6 9h12v12H6ZM10 9V6h4v3M12 6V4l3-2M3 3l2 2m13-1 2-1M9 12v6m6-6v6",
+      key: "dynamitemole-0",
+    },
+  ],
+];
+
+export const DynamiteMoleIcon: HugeIcon = (props) => (
+  <HugeiconsIcon
+    aria-hidden="true"
+    icon={dynamiteMoleDefinition}
+    strokeWidth={2}
+    {...props}
+  />
+);

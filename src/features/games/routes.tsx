@@ -73,6 +73,12 @@ const GravewakePage = lazy(() =>
   }))
 );
 
+const DynamiteMolePage = lazy(() =>
+  import("@/pages/dashboard/dynamite-mole").then(({ DynamiteMolePage }) => ({
+    default: DynamiteMolePage,
+  }))
+);
+
 export const gameRoutes = (
   <>
     <Route element={<GamesPage />} path="games" />
@@ -87,5 +93,6 @@ export const gameRoutes = (
     <Route element={<ArkanoidNeonPage />} path="games/arkanoid-neon" />
     <Route element={<HearthvalePage />} path="games/hearthvale" />
     <Route element={<GravewakePage />} path="games/gravewake" />
+    <Route element={<DynamiteMolePage />} path="games/dynamite-mole" />
   </>
 );

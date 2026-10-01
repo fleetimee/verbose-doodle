@@ -73,6 +73,12 @@ const games = [
     title: "gravewakeTitle",
     description: "gravewakeDescription",
   },
+  {
+    slug: "dynamite-mole",
+    screenshots: [],
+    title: "dynamiteMoleTitle",
+    description: "dynamiteMoleDescription",
+  },
 ] as const;
 
 export function GamesPage() {
@@ -88,7 +94,7 @@ export function GamesPage() {
   );
   const featured = games[0];
   const cover = (slug: string) =>
-    `${import.meta.env.BASE_URL}games/covers/${slug === "gravewake" ? "placeholder.svg" : `${slug}.jpg`}`;
+    `${import.meta.env.BASE_URL}games/covers/${slug === "gravewake" || slug === "dynamite-mole" ? "placeholder.svg" : `${slug}.jpg`}`;
 
   const previewMedia = (game: (typeof games)[number]) => ({
     video:
