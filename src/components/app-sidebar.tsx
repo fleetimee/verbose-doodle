@@ -16,15 +16,12 @@ import {
 } from "@/components/game-icons";
 import {
   Binary,
-  Calculator,
-  Code2,
   type HugeIcon,
   Info,
   LayoutDashboard,
   LayoutGrid,
   MonitorUp,
   Plug,
-  QrCode,
   RadioTower,
   Route,
   Server,
@@ -35,6 +32,17 @@ import { NavMain, type NavMainItem } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import { NavigationSearch } from "@/components/navigation-search";
+import {
+  CpmParserIcon,
+  Iso8583GeneratorIcon,
+  Iso8583ParserIcon,
+  Iso8583ToolsIcon,
+  MdrCalculatorIcon,
+  MpmCreatorIcon,
+  MpmParserIcon,
+  QrisToolsIcon,
+  TapParserIcon,
+} from "@/components/payment-tool-icons";
 import { SessionTimer } from "@/components/session-timer";
 import { Logo } from "@/components/ui/logo";
 import {
@@ -157,13 +165,13 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
       },
       {
         groupLabel: messages.developerTools.navigationGroup,
-        icon: Binary,
+        icon: Iso8583ToolsIcon,
         description: messages.developerTools.iso8583NavigationDescription,
         title: messages.common.navIso8583,
         items: [
           {
             description: messages.developerTools.iso8583ParserDescription,
-            icon: Binary,
+            icon: Iso8583ParserIcon,
             keywords: [
               "ISO",
               "8583",
@@ -182,7 +190,7 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
           },
           {
             description: messages.developerTools.iso8583GeneratorDescription,
-            icon: Code2,
+            icon: Iso8583GeneratorIcon,
             keywords: [
               "ISO",
               "8583",
@@ -201,13 +209,13 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
       },
       {
         groupLabel: messages.developerTools.navigationGroup,
-        icon: QrCode,
+        icon: QrisToolsIcon,
         description: messages.developerTools.qris.description,
         title: "QRIS",
         items: [
           {
             description: messages.developerTools.qris.description,
-            icon: QrCode,
+            icon: MpmParserIcon,
             keywords: ["QRIS", "MPM", "QR", "EMVCo", "TLV", "CRC"],
             onPrefetch: () => import("@/pages/dashboard/qris-parser"),
             title: messages.developerTools.qris.parserLabel,
@@ -215,7 +223,7 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
           },
           {
             description: messages.developerTools.qrisCpm.description,
-            icon: QrCode,
+            icon: CpmParserIcon,
             keywords: ["QRIS", "CPM", "BER-TLV", "Base64"],
             onPrefetch: () => import("@/pages/dashboard/qris-cpm-parser"),
             title: messages.developerTools.qrisCpm.menu,
@@ -223,7 +231,7 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
           },
           {
             description: messages.developerTools.qrisTap.description,
-            icon: QrCode,
+            icon: TapParserIcon,
             keywords: ["QRIS", "TAP", "BER-TLV", "Base64"],
             onPrefetch: () => import("@/pages/dashboard/qris-tap-parser"),
             title: messages.developerTools.qrisTap.menu,
@@ -231,7 +239,7 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
           },
           {
             description: messages.developerTools.qrisCreator.description,
-            icon: QrCode,
+            icon: MpmCreatorIcon,
             keywords: ["QRIS", "MPM", "QR", "generator"],
             onPrefetch: () => import("@/pages/dashboard/qris-creator"),
             title: messages.developerTools.qrisCreator.menu,
@@ -239,7 +247,7 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
           },
           {
             description: messages.developerTools.qrisMdr.description,
-            icon: Calculator,
+            icon: MdrCalculatorIcon,
             keywords: [
               "QRIS",
               "MDR",

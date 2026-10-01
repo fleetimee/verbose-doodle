@@ -2,18 +2,24 @@ import type { ComponentType } from "react";
 import {
   Binary,
   Braces,
-  Calculator,
   CalendarClock,
   CalendarDays,
-  Code2,
   FileJson,
   Fingerprint,
-  QrCode,
   RadioReceiver,
   RefreshCw,
   ShieldCheck,
   Timer,
 } from "@/components/hugeicons";
+import {
+  CpmParserIcon,
+  Iso8583GeneratorIcon,
+  Iso8583ParserIcon,
+  MdrCalculatorIcon,
+  MpmCreatorIcon,
+  MpmParserIcon,
+  TapParserIcon,
+} from "@/components/payment-tool-icons";
 import { messages } from "@/lib/i18n";
 
 export type DeveloperToolCategoryId =
@@ -167,7 +173,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
         title: messages.developerTools.qrisCreator.title,
       };
     },
-    icon: QrCode,
+    icon: MpmCreatorIcon,
     id: "qris-creator",
     get limit() {
       return messages.developerTools.qris.payloadLimit;
@@ -197,7 +203,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
         title: messages.developerTools.qrisCpm.title,
       };
     },
-    icon: QrCode,
+    icon: CpmParserIcon,
     id: "qris-cpm-parser",
     get limit() {
       return messages.developerTools.qrisCpm.limit;
@@ -232,7 +238,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
         title: messages.developerTools.qrisTap.title,
       };
     },
-    icon: QrCode,
+    icon: TapParserIcon,
     id: "qris-tap-parser",
     get limit() {
       return messages.developerTools.qrisTap.limit;
@@ -267,7 +273,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
         title: messages.developerTools.qris.title,
       };
     },
-    icon: QrCode,
+    icon: MpmParserIcon,
     id: "qris-parser",
     get limit() {
       return messages.developerTools.qris.payloadLimit;
@@ -308,7 +314,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
         title: messages.developerTools.qrisMdr.title,
       };
     },
-    icon: Calculator,
+    icon: MdrCalculatorIcon,
     id: "qris-mdr-calculator",
     get limit() {
       return messages.developerTools.qris.payloadLimit;
@@ -439,7 +445,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
         title: messages.iso8583Generator.title,
       };
     },
-    icon: Code2,
+    icon: Iso8583GeneratorIcon,
     id: "iso8583-generator",
     get searchDescription() {
       return messages.developerTools.iso8583GeneratorSearchDescription;
@@ -567,7 +573,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
         title: messages.iso8583Parser.documentTitle,
       };
     },
-    icon: Binary,
+    icon: Iso8583ParserIcon,
     id: "iso8583-parser",
     get limit() {
       return messages.developerTools.iso8583ParserLimit;
