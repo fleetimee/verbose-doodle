@@ -21,7 +21,6 @@ import {
   CodeBlockThemeSelector,
 } from "@/components/kibo-ui/code-block";
 import { useTheme } from "@/components/theme-provider";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -222,7 +221,7 @@ function FieldDateTimePicker({
         <Button
           aria-label={formatMessage(copy.pickValueAriaLabel, { fieldNumber })}
           className="shrink-0"
-          size="sm"
+          size="sm-compact"
           type="button"
           variant="ghost"
         >
@@ -282,7 +281,7 @@ function FieldDateTimePicker({
               writeValue(now);
               setOpen(false);
             }}
-            size="sm"
+            size="sm-compact"
             type="button"
             variant="outline"
           >
@@ -434,7 +433,7 @@ function FieldExplainDialog({ field }: { readonly field: Iso8583Field }) {
             number: field.number,
           })}
           className="shrink-0"
-          size="icon-sm"
+          size="icon-7"
           type="button"
           variant="ghost"
         >
@@ -616,6 +615,7 @@ function FieldInput({
       className="min-w-0"
       data-disabled={!field.enabled || undefined}
       data-invalid={invalid || undefined}
+      size="sm"
     >
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <Checkbox
@@ -634,9 +634,9 @@ function FieldInput({
           </span>
           <span className="truncate">{field.label}</span>
           {field.isCustom ? (
-            <Badge className="shrink-0" size="micro" variant="outline-muted">
+            <span className="shrink-0 text-muted-foreground text-xs">
               {copy.customBadge}
-            </Badge>
+            </span>
           ) : null}
         </label>
         <FieldExplainDialog field={field} />
@@ -647,7 +647,7 @@ function FieldInput({
             })}
             className="shrink-0"
             onClick={onRemove}
-            size="icon-sm"
+            size="icon-7"
             type="button"
             variant="ghost-destructive"
           >
@@ -665,7 +665,7 @@ function FieldInput({
             })}
             className="shrink-0"
             onClick={onHelper}
-            size="sm"
+            size="sm-compact"
             type="button"
             variant="ghost"
           >
@@ -998,11 +998,12 @@ export function Iso8583Generator() {
 
   return (
     <DeveloperToolLayout
+      className="min-h-0 flex-1 gap-4 pb-4 [&>header]:border-b-0 [&>header]:pb-2"
       description={copy.subtitle}
       extraActions={
         <a
           className={cn(
-            buttonVariants({ size: "sm", variant: "outline" }),
+            buttonVariants({ size: "sm-compact", variant: "tool-action" }),
             "gap-1.5 text-muted-foreground hover:text-foreground"
           )}
           href="/dashboard/developer-tools/iso8583-parser"
@@ -1012,17 +1013,15 @@ export function Iso8583Generator() {
         </a>
       }
       headerExtra={
-        <Badge className="shrink-0 self-start sm:self-center" variant="outline">
-          BPD DIY ASCII
-        </Badge>
+        <span className="text-muted-foreground text-xs">BPD DIY ASCII</span>
       }
       title={copy.title}
     >
-      <div className="mb-6 flex flex-col gap-2">
-        <p className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
+      <div className="mb-3 flex flex-col gap-1.5">
+        <p className="font-medium text-muted-foreground text-xs">
           {copy.messagePreset}
         </p>
-        <div className="flex flex-col rounded-lg border bg-muted p-1 shadow-xs sm:flex-row">
+        <div className="flex flex-col gap-1 rounded-lg bg-muted/60 p-1 sm:flex-row">
           <Tabs
             className="min-w-0 flex-1"
             onValueChange={(value) =>
@@ -1035,7 +1034,6 @@ export function Iso8583Generator() {
             <TabsList
               aria-label={copy.preset}
               className="grid w-full grid-cols-3"
-              size="lg"
               variant="transparent"
             >
               {ISO8583_PRESETS.filter((item) =>
@@ -1045,7 +1043,7 @@ export function Iso8583Generator() {
                   className="relative overflow-hidden"
                   key={item.id}
                   value={item.id}
-                  variant="tile"
+                  variant="compact"
                 >
                   <span
                     className={cn(
@@ -1055,7 +1053,7 @@ export function Iso8583Generator() {
                   >
                     {item.mti}
                   </span>
-                  <span className="text-xs sm:text-sm">
+                  <span className="text-xs">
                     {item.label.split("·")[1]?.trim() ?? item.label}
                   </span>
                   {presetId === item.id ? (
@@ -1086,7 +1084,7 @@ export function Iso8583Generator() {
           >
             <SelectTrigger
               aria-label={copy.moreMessages}
-              className="w-full data-[size=default]:h-11 sm:w-52 sm:data-[size=default]:h-14"
+              className="w-full sm:w-52"
               variant={morePreset ? "subtle-active" : "subtle"}
             >
               <SelectValue placeholder={copy.moreMessages}>
@@ -1111,7 +1109,7 @@ export function Iso8583Generator() {
       <motion.section
         animate={{ opacity: 1, transform: "translateY(0)" }}
         aria-label={copy.fields}
-        className="flex flex-col overflow-hidden rounded-t-xl border bg-card"
+        className="flex flex-col overflow-hidden rounded-t-lg border border-border/70 bg-card"
         initial={{
           opacity: shouldReduceMotion ? 0.7 : 0.45,
           transform: shouldReduceMotion ? "translateY(0)" : "translateY(14px)",
@@ -1122,14 +1120,14 @@ export function Iso8583Generator() {
           ease: [0.23, 1, 0.32, 1],
         }}
       >
-        <div className="flex flex-col gap-3 border-b bg-muted/20 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+        <div className="flex flex-col gap-2 border-b bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-semibold">
+            <h2 className="font-semibold text-sm">
               {formatMessage(copy.presetMessageHeading, {
                 preset: preset.label.split("·")[1]?.trim() ?? preset.label,
               })}
             </h2>
-            <p className="mt-1 text-muted-foreground text-sm">
+            <p className="mt-1 text-muted-foreground text-xs leading-relaxed">
               {preset.description}
             </p>
           </div>
@@ -1196,11 +1194,16 @@ export function Iso8583Generator() {
       </motion.section>
 
       <GeneratorActionBar>
-        <FieldSet>
-          <FieldLegend variant="label">{copy.onGenerate}</FieldLegend>
-          <div className="flex flex-row flex-wrap gap-x-6 gap-y-3">
+        <FieldSet className="min-w-0 gap-2">
+          <FieldLegend
+            className="mb-2 text-muted-foreground text-xs"
+            variant="label"
+          >
+            {copy.onGenerate}
+          </FieldLegend>
+          <div className="flex flex-row flex-wrap gap-x-4 gap-y-2">
             <label
-              className="flex items-center gap-2 text-sm"
+              className="flex items-center gap-2 text-xs"
               htmlFor="iso-refresh-time"
             >
               <Checkbox
@@ -1211,7 +1214,7 @@ export function Iso8583Generator() {
               {copy.refreshTransmissionTime}
             </label>
             <label
-              className="flex items-center gap-2 text-sm"
+              className="flex items-center gap-2 text-xs"
               htmlFor="iso-advance-stan"
             >
               <Checkbox
@@ -1223,9 +1226,9 @@ export function Iso8583Generator() {
             </label>
           </div>
         </FieldSet>
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <Button
-            className="h-11 sm:mr-auto"
+            className="mr-auto"
             onClick={() => {
               const previousFields = fields;
               setFields(presetFields(presetId));
@@ -1236,6 +1239,7 @@ export function Iso8583Generator() {
                 },
               });
             }}
+            size="sm-compact"
             type="button"
             variant="ghost"
           >
@@ -1245,8 +1249,8 @@ export function Iso8583Generator() {
           {generatedPayload ? (
             <Button
               aria-haspopup="dialog"
-              className="h-11 w-full sm:w-auto"
               onClick={() => setOutputOpen(true)}
+              size="sm-compact"
               type="button"
               variant="outline"
             >
@@ -1255,9 +1259,9 @@ export function Iso8583Generator() {
             </Button>
           ) : null}
           <Button
-            className="h-11 w-full sm:w-auto"
             disabled={!packedState.message}
             onClick={generate}
+            size="sm-compact"
             type="button"
           >
             <Code2 data-icon="inline-start" />
@@ -1330,7 +1334,7 @@ export function Iso8583Generator() {
                       setCopied(true);
                       setStatus(copy.copied);
                     }}
-                    size="sm"
+                    size="sm-compact"
                     text={
                       payloadView === "json" ? formattedJson : generatedPayload
                     }
@@ -1384,15 +1388,15 @@ export function Iso8583Generator() {
                     <h3 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
                       {copy.bitmapInspectorTitle}
                     </h3>
-                    <Badge mono size="sm" variant="secondary">
+                    <span className="font-mono text-muted-foreground text-xs">
                       {packedState.message.activeFields.some((b) => b > 64)
                         ? copy.bitmap128Bit
                         : copy.bitmap64Bit}
-                    </Badge>
+                    </span>
                   </div>
                   <Button
                     onClick={copyOutput}
-                    size="sm"
+                    size="sm-compact"
                     type="button"
                     variant="outline"
                   >
@@ -1418,12 +1422,12 @@ export function Iso8583Generator() {
                       count: packedState.message.activeFields.length,
                     })}
                   </span>
-                  <div className="flex flex-wrap gap-1 pt-0.5">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1">
                     {packedState.message.activeFields.map((number) => {
                       const field = fields.find((f) => f.number === number);
                       return (
                         <span
-                          className="inline-flex items-center rounded border bg-background/60 px-1.5 py-0.5 font-mono text-muted-foreground text-xs transition-colors hover:bg-background hover:text-foreground"
+                          className="font-mono text-muted-foreground text-xs"
                           key={number}
                           title={
                             field?.label

@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { Check, Plus, Trash2 } from "@/components/hugeicons";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -63,7 +62,7 @@ function ItemActionButton({
         aria-label={formatMessage(copy.addBitAriaLabel, { bit: item.bit })}
         className="mt-0.5 shrink-0"
         onClick={onAdd}
-        size="icon-sm"
+        size="icon-7"
         type="button"
         variant="outline"
       >
@@ -80,7 +79,7 @@ function ItemActionButton({
         })}
         className="mt-0.5 shrink-0"
         onClick={onRemove}
-        size="icon-sm"
+        size="icon-7"
         type="button"
         variant="destructive"
       >
@@ -96,7 +95,7 @@ function ItemActionButton({
       })}
       className="mt-0.5 shrink-0 cursor-default"
       disabled
-      size="icon-sm"
+      size="icon-7"
       type="button"
       variant="secondary"
     >
@@ -121,21 +120,21 @@ function SituationalItemCard({
   return (
     <div
       className={cn(
-        "flex items-start justify-between gap-3 rounded-xl border p-3.5 transition-colors",
+        "flex items-start justify-between gap-3 border-b px-1 py-3 transition-colors",
         isAdded
-          ? "border-primary/20 bg-primary/5 dark:bg-primary/10"
+          ? "border-border/60 bg-muted/20"
           : "border-border/60 bg-card hover:border-border hover:bg-muted/30"
       )}
     >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge mono variant={isAdded ? "default" : "secondary"}>
+          <span className="font-mono text-muted-foreground text-xs">
             {formatMessage(copy.bitBadge, { bit: item.bit })}
-          </Badge>
+          </span>
           {isAdded ? (
-            <Badge size="sm" variant="success">
+            <span className="font-mono text-muted-foreground text-xs">
               {copy.bitAddedBadge}
-            </Badge>
+            </span>
           ) : null}
           <span className="font-medium text-foreground text-xs leading-none">
             {item.name}
@@ -257,12 +256,12 @@ function SituationalFieldsList({
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge mono variant="default">
+                      <span className="font-mono text-muted-foreground text-xs">
                         {formatMessage(copy.bitBadge, { bit: field.number })}
-                      </Badge>
-                      <Badge size="sm" variant="primary-subtle">
+                      </span>
+                      <span className="font-mono text-muted-foreground text-xs">
                         {copy.customBadge}
-                      </Badge>
+                      </span>
                       <span className="font-medium text-foreground text-xs leading-none">
                         {field.label}
                       </span>
@@ -284,7 +283,7 @@ function SituationalFieldsList({
                       })}
                       className="mt-0.5 shrink-0"
                       onClick={() => onRemoveCatalogItem(field.number)}
-                      size="icon-sm"
+                      size="icon-7"
                       type="button"
                       variant="destructive"
                     >
@@ -504,11 +503,16 @@ function CustomFieldForm({
 
       <div className="flex shrink-0 items-center justify-end gap-2 border-t px-4 pt-3 pb-1">
         {onCancel ? (
-          <Button onClick={onCancel} size="sm" type="button" variant="ghost">
+          <Button
+            onClick={onCancel}
+            size="sm-compact"
+            type="button"
+            variant="ghost"
+          >
             {copy.backToSituationalFields}
           </Button>
         ) : null}
-        <Button size="sm" type="submit">
+        <Button size="sm-compact" type="submit">
           {formatMessage(copy.submitCustomBit, { bitNumber })}
         </Button>
       </div>
@@ -578,7 +582,7 @@ export function AddFieldDialog({
       <DrawerTrigger asChild>
         <Button
           aria-label={copy.addFieldButton}
-          size="sm"
+          size="sm-compact"
           type="button"
           variant="outline"
         >
@@ -663,7 +667,7 @@ export function AddFieldDialog({
 
         <DrawerFooter className="shrink-0" size="compact" variant="bordered">
           <DrawerClose asChild>
-            <Button className="w-full" size="sm" variant="outline">
+            <Button className="w-full" size="sm-compact" variant="outline">
               {copy.close}
             </Button>
           </DrawerClose>

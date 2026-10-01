@@ -32,21 +32,21 @@ export function GeneratorActionBar({
     <>
       <div
         className={cn(
-          "sticky bottom-0 isolate z-20 rounded-b-xl border border-t-0 bg-card/90 backdrop-blur-sm",
-          floating && "rounded-t-xl border-t"
+          "sticky bottom-0 isolate z-20 rounded-b-lg border border-border/70 border-t-0 bg-card/90 backdrop-blur-sm",
+          floating && "rounded-t-lg border-t"
         )}
         data-floating={floating}
       >
         <div
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute inset-0 -z-10 rounded-b-xl bg-card transition-opacity duration-200 ease-out motion-reduce:transition-none",
+            "pointer-events-none absolute inset-0 -z-10 rounded-b-lg bg-card transition-opacity duration-200 ease-out motion-reduce:transition-none",
             floating
-              ? "rounded-t-xl opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
+              ? "rounded-t-lg opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
               : "opacity-100"
           )}
         />
-        <div className="flex flex-col gap-4 rounded-b-xl p-5 sm:px-7">
+        <div className="flex flex-col gap-3 rounded-b-lg px-4 py-3 xl:flex-row xl:items-center xl:justify-between">
           {children}
         </div>
       </div>

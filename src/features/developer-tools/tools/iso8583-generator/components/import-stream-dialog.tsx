@@ -72,7 +72,7 @@ export function ImportStreamDialog({ onImport }: ImportStreamDialogProps) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
+        <Button size="sm-compact" variant="outline">
           <Binary className="size-3.5" />
           {messages.iso8583Generator.importStreamButton}
         </Button>
@@ -108,10 +108,18 @@ export function ImportStreamDialog({ onImport }: ImportStreamDialogProps) {
         </div>
 
         <DialogFooter size="compact">
-          <Button onClick={() => setOpen(false)} variant="ghost">
+          <Button
+            onClick={() => setOpen(false)}
+            size="sm-compact"
+            variant="ghost"
+          >
             {messages.iso8583Generator.importStreamCancel}
           </Button>
-          <Button onClick={handleParseAndAssign} variant="default">
+          <Button
+            onClick={handleParseAndAssign}
+            size="sm-compact"
+            variant="default"
+          >
             {messages.iso8583Generator.importStreamSubmit}
           </Button>
         </DialogFooter>

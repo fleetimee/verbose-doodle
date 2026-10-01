@@ -182,7 +182,7 @@ export function Iso8583FieldBrowser({
 
   return (
     <>
-      <div className="flex flex-col gap-3 border-b px-5 py-4 sm:px-7">
+      <div className="flex flex-col gap-2 border-b bg-muted/10 px-4 py-3">
         <FieldGroup
           className="grid sm:grid-cols-2 lg:grid-cols-[minmax(180px,1.5fr)_repeat(3,minmax(0,1fr))]"
           size="sm"
@@ -235,7 +235,7 @@ export function Iso8583FieldBrowser({
           <Button
             disabled={!search && filter === "all"}
             onClick={clearFilters}
-            size="sm"
+            size="sm-compact"
             type="button"
             variant="ghost"
           >
@@ -243,7 +243,7 @@ export function Iso8583FieldBrowser({
           </Button>
         </div>
       </div>
-      <div className="flex flex-col gap-6 p-5 sm:p-7">
+      <div className="flex flex-col gap-4 p-4">
         {shown === 0 ? (
           <p className="py-6 text-center text-muted-foreground text-sm">
             {copy.noMatchingFields}
@@ -251,7 +251,10 @@ export function Iso8583FieldBrowser({
         ) : null}
         {groups.map((group) => {
           const grid = (
-            <FieldGroup className="grid sm:grid-cols-2" size="wide">
+            <FieldGroup
+              className="grid gap-x-5 gap-y-4 sm:grid-cols-2"
+              size="compact"
+            >
               {group.fields.map(renderField)}
             </FieldGroup>
           );
@@ -291,7 +294,7 @@ export function Iso8583FieldBrowser({
                 </CollapsibleTrigger>
               </h3>
               <CollapsibleContent>
-                <div className="pt-5">{grid}</div>
+                <div className="pt-3">{grid}</div>
               </CollapsibleContent>
             </Collapsible>
           );
@@ -299,7 +302,7 @@ export function Iso8583FieldBrowser({
       </div>
       {error ? (
         <div
-          className="mx-5 mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-destructive text-xs"
+          className="mx-4 mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-destructive text-xs"
           role="alert"
         >
           {error.message || copy.packErrorMessageFallback}
@@ -310,7 +313,7 @@ export function Iso8583FieldBrowser({
                 setCollapsed([]);
                 setFocusNumber(error.fieldNumber ?? null);
               }}
-              size="sm"
+              size="sm-compact"
               type="button"
               variant="link"
             >
