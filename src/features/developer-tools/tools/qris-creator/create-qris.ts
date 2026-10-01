@@ -31,18 +31,18 @@ export type QrisCreatorInput = {
 };
 export const QRIS_CREATOR_SAMPLE: QrisCreatorInput = {
   mode: "static",
-  merchantName: "DEMO MERCHANT",
+  merchantName: "Twin Kitchen",
   merchantCity: "YOGYAKARTA",
   merchantCategoryCode: "5812",
-  postalCode: "55181",
-  providerGuid: "ID.CO.EXAMPLE",
-  merchantPan: "9360000000000000000",
-  merchantId: "DEMO01",
-  nationalMerchantId: "ID0000000000000",
+  postalCode: "55242",
+  providerGuid: "ID.CO.BPDDIY.WWW",
+  merchantPan: "936001120010054078",
+  merchantId: "000000000030933",
+  nationalMerchantId: "ID1021124757365",
   merchantCriteria: "UMI",
   amount: "12500",
   reference: "",
-  terminal: "",
+  terminal: "A01",
 };
 export const QRIS_CREATOR_EMPTY: QrisCreatorInput = Object.fromEntries(
   Object.keys(QRIS_CREATOR_SAMPLE).map((key) => [

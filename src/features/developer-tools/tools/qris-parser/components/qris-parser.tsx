@@ -1,9 +1,21 @@
 import { useMemo, useState } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DeveloperToolLayout } from "@/features/developer-tools/components/developer-tool-layout";
+import {
+  renderQrisPng,
+  renderQrisQr,
+} from "@/features/developer-tools/tools/qris-creator/render-qris-qr";
 import { QrImageInput } from "@/features/developer-tools/tools/qris-parser/components/qr-image-input";
 import { formatQrisAmount } from "@/features/developer-tools/tools/qris-parser/format-qris-amount";
 import {
@@ -14,6 +26,13 @@ import {
   type QrisParseError,
 } from "@/features/developer-tools/tools/qris-parser/parse-qris";
 import { formatMessage, messages } from "@/lib/i18n";
+
+function download(src: string, filename: string) {
+  const link = document.createElement("a");
+  link.href = src;
+  link.download = filename;
+  link.click();
+}
 
 function fieldLabel(field: QrisField): string {
   const copy = messages.developerTools.qris;
@@ -87,29 +106,113 @@ function FieldRows({ fields }: { readonly fields: readonly QrisField[] }) {
 
 function MerchantSummary({
   result,
+  payload,
+  qrSrc,
 }: {
   readonly result: ReturnType<typeof parseQris>;
+  readonly payload: string;
+  readonly qrSrc?: string | null;
 }) {
   const copy = messages.developerTools.qris;
+  const [savingPng, setSavingPng] = useState(false);
+
   return (
-    <dl className="grid grid-cols-2 gap-3 border-b p-4 text-sm">
-      {[
-        [copy.merchant, result.merchant ?? "—"],
-        [copy.city, result.city ?? "—"],
-        [copy.mode, copy[result.mode as "static" | "dynamic" | "unknown"]],
-        [
-          copy.amount,
-          result.amount
-            ? formatQrisAmount(result.amount, result.currency)
-            : copy.noAmount,
-        ],
-      ].map(([label, value]) => (
-        <div key={label}>
-          <dt className="text-muted-foreground text-xs">{label}</dt>
-          <dd className="mt-1 break-all font-medium">{value}</dd>
+    <div className="flex flex-col gap-4 border-b p-4 sm:flex-row sm:items-center">
+      {qrSrc ? (
+        <div className="flex shrink-0 justify-center">
+          <Dialog>
+            <DialogTrigger
+              aria-label={copy.viewQr}
+              className="group relative cursor-pointer rounded-md border bg-white p-1 transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-ring"
+            >
+              <img
+                alt={copy.scan}
+                className="size-24 shrink-0 rounded-sm"
+                height={96}
+                src={qrSrc}
+                width={96}
+              />
+            </DialogTrigger>
+            <DialogContent
+              className="flex flex-col items-center gap-4 text-center"
+              size="sm"
+            >
+              <DialogHeader className="items-center text-center">
+                <DialogTitle className="font-semibold text-base">
+                  {result.merchant || copy.title}
+                </DialogTitle>
+                {result.city ? (
+                  <DialogDescription className="text-xs">
+                    {result.city}
+                  </DialogDescription>
+                ) : null}
+              </DialogHeader>
+              <div className="rounded-lg border bg-white p-3 shadow-xs">
+                <img
+                  alt={copy.scan}
+                  className="aspect-square size-64 max-w-full rounded-sm"
+                  height={256}
+                  src={qrSrc}
+                  width={256}
+                />
+              </div>
+              <div className="text-center">
+                <p className="font-medium font-mono text-sm">
+                  {result.amount
+                    ? formatQrisAmount(result.amount, result.currency)
+                    : copy.noAmount}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  {copy[result.mode as "static" | "dynamic" | "unknown"]}
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button
+                  disabled={savingPng}
+                  onClick={async () => {
+                    setSavingPng(true);
+                    try {
+                      download(await renderQrisPng(payload), "qris-mpm.png");
+                    } finally {
+                      setSavingPng(false);
+                    }
+                  }}
+                  size="sm"
+                  variant="outline"
+                >
+                  {copy.png}
+                </Button>
+                <Button
+                  onClick={() => download(qrSrc, "qris-mpm.svg")}
+                  size="sm"
+                  variant="outline"
+                >
+                  {copy.svg}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
-      ))}
-    </dl>
+      ) : null}
+      <dl className="grid flex-1 grid-cols-2 gap-3 text-sm">
+        {[
+          [copy.merchant, result.merchant ?? "—"],
+          [copy.city, result.city ?? "—"],
+          [copy.mode, copy[result.mode as "static" | "dynamic" | "unknown"]],
+          [
+            copy.amount,
+            result.amount
+              ? formatQrisAmount(result.amount, result.currency)
+              : copy.noAmount,
+          ],
+        ].map(([label, value]) => (
+          <div key={label}>
+            <dt className="text-muted-foreground text-xs">{label}</dt>
+            <dd className="mt-1 break-all font-medium">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 
@@ -132,6 +235,16 @@ export function QrisParser() {
       return { result: parseQris(source), error: null };
     } catch (error) {
       return { result: null, error: error as QrisParseError };
+    }
+  }, [source]);
+  const qr = useMemo(() => {
+    if (!source.trim()) {
+      return null;
+    }
+    try {
+      return renderQrisQr(source);
+    } catch {
+      return null;
     }
   }, [source]);
   const result = parsed?.result;
@@ -242,7 +355,11 @@ export function QrisParser() {
           </h2>
           {result ? (
             <>
-              <MerchantSummary result={result} />
+              <MerchantSummary
+                payload={source}
+                qrSrc={qr?.src}
+                result={result}
+              />
               <div
                 aria-live="polite"
                 className="space-y-1 border-b px-4 py-3 text-xs"

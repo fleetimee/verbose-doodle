@@ -98,7 +98,7 @@ test("removes dynamic amount when switching to static and detects expanded templ
 test("preserves whitespace and non-ASCII provider fields on an unchanged import", () => {
   const payload = providerPayload();
   const body =
-    payload.slice(0, -8).replace("5913DEMO MERCHANT", "5915 DEMO MERCHANT ") +
+    payload.slice(0, -8).replace("5912Twin Kitchen", "5914 Twin Kitchen ") +
     "64070003東京店6304";
   const source = body + calculateQrisCrc(body);
   const imported = importQris(source);

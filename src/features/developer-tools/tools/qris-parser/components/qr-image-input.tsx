@@ -38,15 +38,6 @@ export function QrImageInput({
     null
   );
   const [selected, setSelected] = useState<SelectedImage | null>(null);
-  useEffect(
-    () => () => {
-      request.current += 1;
-      if (previewUrl.current) {
-        URL.revokeObjectURL(previewUrl.current);
-      }
-    },
-    []
-  );
 
   function clearPreview() {
     if (previewUrl.current) {
@@ -60,7 +51,10 @@ export function QrImageInput({
     const id = ++request.current;
     clearPreview();
     previewUrl.current = URL.createObjectURL(file);
-    setSelected({ name: file.name, preview: previewUrl.current });
+    setSelected({
+      name: file.name || "clipboard-qr.png",
+      preview: previewUrl.current,
+    });
     setBusy(true);
     onProcessing(true);
     setError(null);
@@ -79,6 +73,51 @@ export function QrImageInput({
       if (request.current === id) {
         setBusy(false);
         onProcessing(false);
+      }
+    }
+  }
+
+  useEffect(() => {
+    function handlePaste(event: ClipboardEvent) {
+      const items = event.clipboardData?.items;
+      if (!items) {
+        return;
+      }
+      for (const item of items) {
+        if (item.kind === "file" && item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) {
+            event.preventDefault();
+            readImage(file);
+            return;
+          }
+        }
+      }
+    }
+
+    window.addEventListener("paste", handlePaste);
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+      request.current += 1;
+      if (previewUrl.current) {
+        URL.revokeObjectURL(previewUrl.current);
+      }
+    };
+  }, []);
+
+  function handleSyntheticPaste(event: React.ClipboardEvent) {
+    const items = event.clipboardData?.items;
+    if (!items) {
+      return;
+    }
+    for (const item of items) {
+      if (item.kind === "file" && item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) {
+          event.preventDefault();
+          readImage(file);
+          return;
+        }
       }
     }
   }
@@ -117,7 +156,11 @@ export function QrImageInput({
   });
 
   return (
-    <Field data-invalid={Boolean(error)} size="sm">
+    <Field
+      data-invalid={Boolean(error)}
+      onPaste={handleSyntheticPaste}
+      size="sm"
+    >
       <div className="flex items-center justify-between gap-2">
         <FieldLabel htmlFor="qris-image">{copy.upload}</FieldLabel>
         {selected ? (

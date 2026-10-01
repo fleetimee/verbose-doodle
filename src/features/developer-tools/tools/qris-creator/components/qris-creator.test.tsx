@@ -51,6 +51,22 @@ function uploadQr() {
     target: { files: [new File(["qr"], "real.png", { type: "image/png" })] },
   });
 }
+function pasteQr() {
+  const pasteEvent = new Event("paste", { bubbles: true, cancelable: true });
+  Object.defineProperty(pasteEvent, "clipboardData", {
+    value: {
+      items: [
+        {
+          kind: "file",
+          type: "image/png",
+          getAsFile: () =>
+            new File(["qr"], "clipboard.png", { type: "image/png" }),
+        },
+      ],
+    },
+  });
+  window.dispatchEvent(pasteEvent);
+}
 
 import { parseQris } from "@/features/developer-tools/tools/qris-parser/parse-qris";
 
@@ -276,4 +292,18 @@ test("branding switch controls preview and both exports without changing the pay
   } finally {
     download.mockRestore();
   }
+});
+
+test("imports QR image pasted from clipboard via Ctrl+V", async () => {
+  render(
+    <MemoryRouter>
+      <QrisCreator />
+    </MemoryRouter>
+  );
+  fireEvent.click(screen.getByText("Import existing QRIS"));
+  pasteQr();
+  await screen.findByText("QR decoded");
+  expect(
+    (screen.getByLabelText("Merchant name") as HTMLInputElement).value
+  ).toBe("IMPORTED SHOP");
 });

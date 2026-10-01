@@ -85,7 +85,11 @@ describe("validation", () => {
   });
   test("static omits amount and optional empty templates", () => {
     const parsed = parseQris(
-      createQris({ ...QRIS_CREATOR_SAMPLE, amount: "invalid" }).payload ?? ""
+      createQris({
+        ...QRIS_CREATOR_SAMPLE,
+        amount: "invalid",
+        terminal: "",
+      }).payload ?? ""
     );
     expect(parsed.fields.some((field) => field.id === "62")).toBe(false);
     expect(parsed.amount).toBeUndefined();

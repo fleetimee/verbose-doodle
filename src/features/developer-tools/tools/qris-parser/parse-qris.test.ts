@@ -18,15 +18,15 @@ describe("QRIS MPM parsing", () => {
     expect(result.profileMatches).toBe(true);
     expect(result.missing).toEqual([]);
     expect(result.mode).toBe("static");
-    expect(result.merchant).toBe("DEMO MERCHANT");
+    expect(result.merchant).toBe("Twin Kitchen");
     expect(
       result.fields.find((field) => field.id === "26")?.children[0]?.value
-    ).toBe("ID.CO.EXAMPLE");
+    ).toBe("ID.CO.BPDDIY.WWW");
   });
   test("decodes a dynamic amount and additional reference", () => {
-    const body =
-      QRIS_SAMPLE.slice(0, -8).replace("010211", "010212") +
-      "54051000062100506INV001";
+    const body = `${QRIS_SAMPLE.slice(0, -8)
+      .replace("010211", "010212")
+      .replace("62070703A01", "")}54051000062100506INV001`;
     const result = parseQris(withCrc(body));
     expect(result.mode).toBe("dynamic");
     expect(result.amount).toBe("10000");
@@ -37,7 +37,7 @@ describe("QRIS MPM parsing", () => {
   });
   test("detects tampering, missing CRC, and a non-final CRC", () => {
     expect(
-      parseQris(QRIS_SAMPLE.replace("DEMO MERCHANT", "FAKE MERCHANT")).crcValid
+      parseQris(QRIS_SAMPLE.replace("Twin Kitchen", "Fake Kitchen")).crcValid
     ).toBe(false);
     expect(parseQris(QRIS_SAMPLE.slice(0, -8)).missing).toContain("63");
     expect(parseQris(`${QRIS_SAMPLE}6501X`).crcValid).toBe(false);
