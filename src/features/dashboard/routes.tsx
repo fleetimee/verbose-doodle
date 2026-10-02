@@ -5,6 +5,7 @@ import { developerToolRoutes } from "@/features/developer-tools/routes";
 import { endpointRoutes } from "@/features/endpoints/routes";
 import { gameRoutes } from "@/features/games/routes";
 import { overviewRoutes } from "@/features/overview/routes";
+import { serverInventoryRoutes } from "@/features/server-inventory/routes";
 import { socketTesterRoutes } from "@/features/socket-tester/routes";
 import { socksRelayRoutes } from "@/features/socks-relay/routes";
 
@@ -21,6 +22,7 @@ export const dashboardRoutes = (
     {gameRoutes}
     {overviewRoutes}
     {endpointRoutes}
+    {serverInventoryRoutes}
     {socketTesterRoutes}
     {developerToolRoutes}
     {socksRelayRoutes}

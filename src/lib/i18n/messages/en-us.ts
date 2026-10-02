@@ -14,6 +14,7 @@ import { jsonYamlConverterMessages } from "@/lib/i18n/messages/en-us/json-yaml-c
 import { jwtInspectorMessages } from "@/lib/i18n/messages/en-us/jwt-inspector";
 import { numberBaseConverterMessages } from "@/lib/i18n/messages/en-us/number-base-converter";
 import { overviewMessages } from "@/lib/i18n/messages/en-us/overview";
+import { serversMessages } from "@/lib/i18n/messages/en-us/servers";
 import { socketTesterMessages } from "@/lib/i18n/messages/en-us/socket-tester";
 import { socksRelayMessages } from "@/lib/i18n/messages/en-us/socks-relay";
 import { themeMessages } from "@/lib/i18n/messages/en-us/theme";
@@ -49,6 +50,7 @@ export const enUsMessages = {
   numberBaseConverter: numberBaseConverterMessages,
   overview: overviewMessages,
   socketTester: socketTesterMessages,
+  servers: serversMessages,
   socksRelay: socksRelayMessages,
   theme: themeMessages,
   users: usersMessages,

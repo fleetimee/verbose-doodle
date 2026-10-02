@@ -74,6 +74,14 @@ export const API_ENDPOINTS = {
       updateSimulation: (id: string | number) =>
         `/api/response/${id}/simulation`,
     },
+    servers: {
+      accessTypes: "/api/servers/access-types",
+      create: "/api/servers",
+      delete: (id: string) => `/api/servers/${id}`,
+      list: "/api/servers",
+      revealPassword: (id: string) => `/api/servers/${id}/password/reveal`,
+      update: (id: string) => `/api/servers/${id}`,
+    },
     users: {
       create: "/api/users/add",
       delete: (id: string | number) => `/api/users/${id}`,

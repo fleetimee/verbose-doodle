@@ -49,6 +49,7 @@ export type NavMainItem = {
   groupLabel: string;
   badge?: string;
   exact?: boolean;
+  deferShortcut?: boolean;
   isActive?: boolean;
   onPrefetch?: () => void;
   items?: NavMainSubItem[];
@@ -380,12 +381,19 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
       usedKeys.add(shortcutKey);
       return shortcutKey;
     };
-    const itemKeys = items.map((item) => findAvailableKey(item.title));
+    const itemKeys = items.map((item) =>
+      item.deferShortcut ? null : findAvailableKey(item.title)
+    );
     const childKeys = items.map((item) =>
       (item.items ?? []).map((child) => findAvailableKey(child.title))
     );
 
-    return { childKeys, itemKeys };
+    return {
+      childKeys,
+      itemKeys: itemKeys.map(
+        (key, index) => key ?? findAvailableKey(items[index].title)
+      ),
+    };
   }, [items]);
 
   useEffect(() => {

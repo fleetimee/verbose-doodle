@@ -110,6 +110,14 @@ function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
         url: "/dashboard/endpoints",
       },
       {
+        groupLabel: messages.common.navWorkspace,
+        icon: Server,
+        deferShortcut: true,
+        description: messages.servers.navigationDescription,
+        title: messages.servers.title,
+        url: "/dashboard/servers",
+      },
+      {
         groupLabel: messages.common.navNetworkTools,
         icon: RadioTower,
         items: [

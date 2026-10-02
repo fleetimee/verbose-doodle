@@ -101,6 +101,7 @@ function getRouteLabels(
     "number-base-converter": messages.numberBaseConverter.title,
     overview: messages.common.navOverview,
     "rest-api": messages.common.navRestApi,
+    servers: messages.servers.title,
     settings: messages.common.navSettings,
     "socket-test": messages.common.navSocketTester,
     "socket-tester": messages.common.navSocketTester,
