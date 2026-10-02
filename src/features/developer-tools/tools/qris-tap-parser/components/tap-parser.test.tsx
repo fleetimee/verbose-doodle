@@ -24,3 +24,18 @@ test("the separate TAP page decodes generic constructed tags and clears stale re
   fireEvent.click(screen.getByRole("button", { name: "Clear" }));
   expect(screen.queryByRole("alert")).toBeNull();
 });
+
+test("renders QR preview and opens enlarged QR dialog with download buttons in TAP parser", async () => {
+  render(
+    <MemoryRouter>
+      <QrisTapParserPage />
+    </MemoryRouter>
+  );
+  const qrButton = screen.getByRole("button", { name: "View larger QR code" });
+  expect(qrButton).toBeTruthy();
+  fireEvent.click(qrButton);
+  expect(
+    await screen.findByRole("button", { name: "Download PNG" })
+  ).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Download SVG" })).toBeTruthy();
+});

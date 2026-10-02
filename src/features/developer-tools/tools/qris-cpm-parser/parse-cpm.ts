@@ -215,6 +215,9 @@ export function parseCpm(source: string, encoding: CpmEncoding) {
   return {
     tlv,
     hex: toHex(bytes),
+    base64: btoa(
+      Array.from(bytes, (byte) => String.fromCharCode(byte)).join("")
+    ),
     byteLength: bytes.length,
     profileMatches:
       tlv.some((node) => node.tag === "85" && node.value_ascii === "CPV01") &&

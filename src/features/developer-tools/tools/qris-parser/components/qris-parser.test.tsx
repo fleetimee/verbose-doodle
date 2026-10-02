@@ -182,4 +182,29 @@ describe("QRIS parser input transitions", () => {
       ).toBe(false);
     }
   );
+
+  test("copies merchant summary and decoded field values on click", async () => {
+    let copiedText = "";
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: (text: string) => {
+          copiedText = text;
+          return Promise.resolve();
+        },
+      },
+    });
+
+    renderParser();
+
+    const copyMerchantButton = screen.getByRole("button", {
+      name: "Copy Merchant",
+    });
+    expect(copyMerchantButton).toBeDefined();
+    fireEvent.click(copyMerchantButton);
+    expect(
+      await screen.findByRole("button", { name: "Copy Merchant" })
+    ).toBeDefined();
+    expect(copiedText).toBe("Twin Kitchen");
+  });
 });

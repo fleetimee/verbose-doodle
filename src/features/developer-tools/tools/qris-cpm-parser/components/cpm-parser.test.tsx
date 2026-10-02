@@ -41,3 +41,43 @@ test("opens tag help without collapsing its template", async () => {
   ).toBeTruthy();
   expect(template?.open).toBe(true);
 });
+
+test("renders QR preview and opens enlarged QR dialog with download buttons", async () => {
+  render(
+    <MemoryRouter>
+      <CpmParser />
+    </MemoryRouter>
+  );
+  const qrButton = screen.getByRole("button", { name: "View larger QR code" });
+  expect(qrButton).toBeTruthy();
+  fireEvent.click(qrButton);
+  expect(
+    await screen.findByRole("button", { name: "Download PNG" })
+  ).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Download SVG" })).toBeTruthy();
+});
+
+test("copies summary fields and decoded values when copy button is clicked", async () => {
+  let copiedText = "";
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: {
+      writeText: (text: string) => {
+        copiedText = text;
+        return Promise.resolve();
+      },
+    },
+  });
+
+  render(
+    <MemoryRouter>
+      <CpmParser />
+    </MemoryRouter>
+  );
+
+  const copyCpanButton = screen.getByRole("button", { name: "Copy CPAN" });
+  expect(copyCpanButton).toBeTruthy();
+  fireEvent.click(copyCpanButton);
+  expect(await screen.findByRole("button", { name: "Copy CPAN" })).toBeTruthy();
+  expect(copiedText).toBe("9360011210006580709");
+});

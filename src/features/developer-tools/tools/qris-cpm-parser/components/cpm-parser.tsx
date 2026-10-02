@@ -1,7 +1,16 @@
 import { useMemo, useState } from "react";
-import { Check, Info } from "@/components/hugeicons";
+import { toast } from "sonner";
+import { Check, ClipboardCopy, Info } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -19,13 +28,237 @@ import {
   parseCpm,
   type TlvNode,
 } from "@/features/developer-tools/tools/qris-cpm-parser/parse-cpm";
+import {
+  renderQrisPng,
+  renderQrisQr,
+} from "@/features/developer-tools/tools/qris-creator/render-qris-qr";
+import { QrImageInput } from "@/features/developer-tools/tools/qris-parser/components/qr-image-input";
 import { TapInspectionOutput } from "@/features/developer-tools/tools/qris-tap-parser/components/tap-inspection-output";
 import {
   parseTap,
   TAP_SAMPLE,
   TAP_SAMPLE_HEX,
 } from "@/features/developer-tools/tools/qris-tap-parser/parse-tap";
+import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+
+function CopyButton({
+  value,
+  label,
+  className,
+}: {
+  readonly value: string;
+  readonly label?: string;
+  readonly className?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+    try {
+      const ok = await copyToClipboard(value);
+      if (ok) {
+        setCopied(true);
+        toast.success(
+          label
+            ? formatMessage(messages.developerTools.qrisCpm.copiedNamed, {
+                name: label,
+              })
+            : messages.developerTools.qrisCpm.copied
+        );
+        setTimeout(() => setCopied(false), 1500);
+      } else {
+        toast.error(messages.developerTools.qrisCpm.copyFailed);
+      }
+    } catch {
+      toast.error(messages.developerTools.qrisCpm.copyFailed);
+    }
+  };
+
+  return (
+    <Button
+      aria-label={
+        label ? `Copy ${label}` : messages.developerTools.qrisCpm.copyValue
+      }
+      className={cn(
+        "size-6 shrink-0 text-muted-foreground hover:text-foreground",
+        className
+      )}
+      onClick={handleCopy}
+      size="icon-xs"
+      type="button"
+      variant="ghost"
+    >
+      {copied ? (
+        <Check className="size-3 text-primary" />
+      ) : (
+        <ClipboardCopy className="size-3" />
+      )}
+    </Button>
+  );
+}
+
+function download(src: string, filename: string) {
+  const link = document.createElement("a");
+  link.href = src;
+  link.download = filename;
+  link.click();
+}
+
+type TlvLikeNode = {
+  readonly tag: string;
+  readonly value_ascii?: string;
+  readonly value_bcd?: string;
+  readonly value_hex?: string;
+  readonly children?: readonly TlvLikeNode[];
+};
+
+function findTlvValue(
+  nodes: readonly TlvLikeNode[],
+  tag: string
+): string | undefined {
+  for (const node of nodes) {
+    if (node.tag === tag) {
+      return node.value_ascii ?? node.value_bcd ?? node.value_hex;
+    }
+    if (node.children) {
+      const found = findTlvValue(node.children, tag);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return undefined;
+}
+
+function CpmSummary({
+  result,
+  qrPayload,
+  qrSrc,
+  mode,
+}: {
+  readonly result: {
+    readonly tlv: readonly TlvLikeNode[];
+  };
+  readonly qrPayload: string | null;
+  readonly qrSrc?: string | null;
+  readonly mode: "cpm" | "tap";
+}) {
+  const copy =
+    mode === "tap"
+      ? messages.developerTools.qrisTap
+      : messages.developerTools.qrisCpm;
+  const [savingPng, setSavingPng] = useState(false);
+
+  const cardholder = findTlvValue(result.tlv, "5F20");
+  const cpan = findTlvValue(result.tlv, "5A");
+  const appLabel = findTlvValue(result.tlv, "50");
+  const format = findTlvValue(result.tlv, "85");
+
+  return (
+    <div className="flex flex-col gap-4 border-b p-4 sm:flex-row sm:items-center">
+      {qrSrc && qrPayload ? (
+        <div className="flex shrink-0 justify-center">
+          <Dialog>
+            <DialogTrigger
+              aria-label={copy.viewQr}
+              className="group relative cursor-pointer rounded-md border bg-white p-1 transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-ring"
+            >
+              <img
+                alt={copy.scan}
+                className="size-24 shrink-0 rounded-sm"
+                height={96}
+                src={qrSrc}
+                width={96}
+              />
+            </DialogTrigger>
+            <DialogContent
+              className="flex flex-col items-center gap-4 text-center"
+              size="sm"
+            >
+              <DialogHeader className="items-center text-center">
+                <DialogTitle className="font-semibold text-base">
+                  {cardholder || appLabel || copy.title}
+                </DialogTitle>
+                {cpan ? (
+                  <DialogDescription className="font-mono text-xs">
+                    {cpan}
+                  </DialogDescription>
+                ) : null}
+              </DialogHeader>
+              <div className="rounded-lg border bg-white p-3 shadow-xs">
+                <img
+                  alt={copy.scan}
+                  className="aspect-square size-64 max-w-full rounded-sm"
+                  height={256}
+                  src={qrSrc}
+                  width={256}
+                />
+              </div>
+              <div className="text-center">
+                <p className="font-medium font-mono text-sm">
+                  {cpan ?? (mode === "tap" ? "QRIS TAP" : "QRIS CPM")}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  {cardholder ?? (mode === "tap" ? "NFC / CPM" : "CPV01")}
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button
+                  disabled={savingPng}
+                  onClick={async () => {
+                    setSavingPng(true);
+                    try {
+                      download(
+                        await renderQrisPng(qrPayload),
+                        `qris-${mode}.png`
+                      );
+                    } finally {
+                      setSavingPng(false);
+                    }
+                  }}
+                  size="sm"
+                  variant="outline"
+                >
+                  {copy.png}
+                </Button>
+                <Button
+                  onClick={() => download(qrSrc, `qris-${mode}.svg`)}
+                  size="sm"
+                  variant="outline"
+                >
+                  {copy.svg}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      ) : null}
+      <dl className="grid flex-1 grid-cols-2 gap-3 text-sm">
+        {[
+          [copy.cardholder, cardholder],
+          [copy.cpan, cpan],
+          [copy.appLabel, appLabel],
+          [copy.format, format ?? (mode === "tap" ? "TAP" : "CPM")],
+        ].map(([label, value]) => (
+          <div className="group/item min-w-0" key={label}>
+            <dt className="text-muted-foreground text-xs">{label}</dt>
+            <dd className="mt-1 flex items-center justify-between gap-1 break-all font-medium">
+              <span className="min-w-0">{value ?? "—"}</span>
+              {value ? (
+                <CopyButton
+                  className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/item:opacity-100"
+                  label={label}
+                  value={value}
+                />
+              ) : null}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
 
 function FieldTree({
   nodes,
@@ -94,11 +327,18 @@ function FieldTree({
             ].map(([label, value]) =>
               value === undefined ? null : (
                 <div
-                  className="grid grid-cols-[4rem_minmax(0,1fr)] gap-2"
+                  className="group/item flex items-center justify-between gap-2 rounded px-1.5 py-0.5 hover:bg-muted/30"
                   key={label}
                 >
-                  <dt className="text-muted-foreground">{label}</dt>
-                  <dd className="select-text">{value}</dd>
+                  <div className="grid min-w-0 grid-cols-[4rem_minmax(0,1fr)] items-center gap-2">
+                    <dt className="text-muted-foreground">{label}</dt>
+                    <dd className="select-text">{value}</dd>
+                  </div>
+                  <CopyButton
+                    className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/item:opacity-100"
+                    label={`${node.name ?? node.tag} (${label})`}
+                    value={value}
+                  />
                 </div>
               )
             )}
@@ -119,6 +359,21 @@ export function CpmParser({ mode = "cpm" }: { readonly mode?: "cpm" | "tap" }) {
   const sampleHex = mode === "tap" ? TAP_SAMPLE_HEX : CPM_SAMPLE_HEX;
   const [source, setSource] = useState(sample);
   const [encoding, setEncoding] = useState<CpmEncoding>("auto");
+  const [imageBusy, setImageBusy] = useState(false);
+  const [imageRevision, setImageRevision] = useState(0);
+
+  function changeSource(value: string) {
+    setSource(value);
+    setImageBusy(false);
+    setImageRevision((revision) => revision + 1);
+  }
+
+  function handleDecode(decodedPayload: string) {
+    setSource(decodedPayload);
+    setEncoding("auto");
+    setImageBusy(false);
+  }
+
   const parsed = useMemo(() => {
     if (!source.trim()) {
       return null;
@@ -139,6 +394,18 @@ export function CpmParser({ mode = "cpm" }: { readonly mode?: "cpm" | "tap" }) {
     }
   }, [source, encoding, mode]);
   const result = parsed?.result;
+
+  const qr = useMemo(() => {
+    if (!result?.base64) {
+      return null;
+    }
+    try {
+      return renderQrisQr(result.base64);
+    } catch {
+      return null;
+    }
+  }, [result?.base64]);
+
   return (
     <DeveloperToolLayout
       className="min-h-0 flex-1 gap-4 pb-4 [&>header]:shrink-0"
@@ -146,7 +413,7 @@ export function CpmParser({ mode = "cpm" }: { readonly mode?: "cpm" | "tap" }) {
       description={copy.description}
       extraActions={
         <Button
-          onClick={() => setSource(encoding === "hex" ? sampleHex : sample)}
+          onClick={() => changeSource(encoding === "hex" ? sampleHex : sample)}
           size="sm"
           variant="tool-action"
         >
@@ -154,11 +421,17 @@ export function CpmParser({ mode = "cpm" }: { readonly mode?: "cpm" | "tap" }) {
         </Button>
       }
       mainClassName="flex min-h-0 flex-1 flex-col"
-      onClear={() => setSource("")}
+      onClear={() => changeSource("")}
       title={copy.title}
     >
       <div className="grid min-h-0 min-w-0 flex-1 gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
         <section className="flex min-h-0 min-w-0 flex-col gap-3 rounded-xl border border-border/70 p-4">
+          <QrImageInput
+            key={imageRevision}
+            onDecode={handleDecode}
+            onProcessing={setImageBusy}
+            onRemove={() => changeSource("")}
+          />
           <span className="font-medium text-sm" id="cpm-encoding-label">
             {copy.encoding}
           </span>
@@ -171,40 +444,30 @@ export function CpmParser({ mode = "cpm" }: { readonly mode?: "cpm" | "tap" }) {
                 setEncoding(value);
               }
             }}
-            spacing={2}
+            spacing={1}
             value={[encoding]}
-            variant="outline"
+            variant="subtle"
           >
-            <ToggleGroupItem className="min-h-12 flex-1" value="auto">
-              <Check
-                aria-hidden="true"
-                className={encoding === "auto" ? "visible" : "invisible"}
-              />
+            <ToggleGroupItem className="flex-1" value="auto">
               {copy.auto}
             </ToggleGroupItem>
-            <ToggleGroupItem className="min-h-12 flex-1" value="base64">
-              <Check
-                aria-hidden="true"
-                className={encoding === "base64" ? "visible" : "invisible"}
-              />
+            <ToggleGroupItem className="flex-1" value="base64">
               Base64
             </ToggleGroupItem>
-            <ToggleGroupItem className="min-h-12 flex-1" value="hex">
-              <Check
-                aria-hidden="true"
-                className={encoding === "hex" ? "visible" : "invisible"}
-              />
+            <ToggleGroupItem className="flex-1" value="hex">
               Hex
             </ToggleGroupItem>
           </ToggleGroup>
           <Label htmlFor="cpm-payload">{copy.input}</Label>
           <ScrollArea className="h-64 min-h-0 lg:flex-1" variant="fit">
             <Textarea
+              aria-busy={imageBusy}
               aria-describedby={parsed?.error ? "cpm-error" : undefined}
               aria-invalid={Boolean(parsed?.error)}
               className="field-sizing-content min-h-64 resize-none overflow-hidden"
+              disabled={imageBusy}
               id="cpm-payload"
-              onChange={(event) => setSource(event.target.value)}
+              onChange={(event) => changeSource(event.target.value)}
               value={source}
               variant="mono-muted"
             />
@@ -226,6 +489,14 @@ export function CpmParser({ mode = "cpm" }: { readonly mode?: "cpm" | "tap" }) {
           <h2 className="shrink-0 border-b bg-muted/10 px-4 py-3 font-semibold text-sm">
             {copy.fields}
           </h2>
+          {result ? (
+            <CpmSummary
+              mode={mode}
+              qrPayload={result.base64}
+              qrSrc={qr?.src}
+              result={result}
+            />
+          ) : null}
           <ScrollArea
             className="h-96 min-h-0 lg:h-auto lg:flex-1"
             variant="fit"
@@ -246,7 +517,12 @@ export function CpmParser({ mode = "cpm" }: { readonly mode?: "cpm" | "tap" }) {
                     <summary className="cursor-pointer rounded-sm focus-visible:outline-2 focus-visible:outline-ring">
                       {copy.raw}
                     </summary>
-                    <p className="mt-2 break-all font-mono">{result.hex}</p>
+                    <div className="mt-2 flex items-start justify-between gap-2 rounded-md bg-muted/20 p-2.5">
+                      <p className="min-w-0 select-text break-all font-mono">
+                        {result.hex}
+                      </p>
+                      <CopyButton label={copy.raw} value={result.hex} />
+                    </div>
                   </details>
                 </div>
                 <ul className="pr-4 pb-4">

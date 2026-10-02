@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
+import { Check, ClipboardCopy } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +27,64 @@ import {
   type QrisField,
   type QrisParseError,
 } from "@/features/developer-tools/tools/qris-parser/parse-qris";
+import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+
+function CopyButton({
+  value,
+  label,
+  className,
+}: {
+  readonly value: string;
+  readonly label?: string;
+  readonly className?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+    try {
+      const ok = await copyToClipboard(value);
+      if (ok) {
+        setCopied(true);
+        toast.success(
+          label
+            ? formatMessage(messages.developerTools.qris.copiedNamed, {
+                name: label,
+              })
+            : messages.developerTools.qris.copied
+        );
+        setTimeout(() => setCopied(false), 1500);
+      } else {
+        toast.error(messages.developerTools.qris.copyFailed);
+      }
+    } catch {
+      toast.error(messages.developerTools.qris.copyFailed);
+    }
+  };
+
+  return (
+    <Button
+      aria-label={
+        label ? `Copy ${label}` : messages.developerTools.qris.copyValue
+      }
+      className={cn(
+        "size-6 shrink-0 text-muted-foreground hover:text-foreground",
+        className
+      )}
+      onClick={handleCopy}
+      size="icon-xs"
+      type="button"
+      variant="ghost"
+    >
+      {copied ? (
+        <Check className="size-3 text-primary" />
+      ) : (
+        <ClipboardCopy className="size-3" />
+      )}
+    </Button>
+  );
+}
 
 function download(src: string, filename: string) {
   const link = document.createElement("a");
@@ -70,7 +129,7 @@ function fieldLabel(field: QrisField): string {
 function FieldRows({ fields }: { readonly fields: readonly QrisField[] }) {
   return fields.map((field) => (
     <tbody className="border-t" key={field.path}>
-      <tr>
+      <tr className="group/row">
         <td className="px-3 py-2 font-mono text-muted-foreground">
           {field.path}
         </td>
@@ -82,21 +141,38 @@ function FieldRows({ fields }: { readonly fields: readonly QrisField[] }) {
           {field.children.length ? (
             <details>
               <summary className="cursor-pointer rounded-sm focus-visible:outline-2 focus-visible:outline-ring">
-                {field.value}
+                <span className="select-text">{field.value}</span>
               </summary>
               <dl className="mt-2 space-y-2 border-t pt-2">
                 {field.children.map((child) => (
-                  <div key={child.path}>
-                    <dt className="text-muted-foreground">
-                      {child.path} · {fieldLabel(child)}
-                    </dt>
-                    <dd>{child.value}</dd>
+                  <div
+                    className="group/child flex items-center justify-between gap-2"
+                    key={child.path}
+                  >
+                    <div className="min-w-0">
+                      <dt className="text-muted-foreground">
+                        {child.path} · {fieldLabel(child)}
+                      </dt>
+                      <dd className="select-text">{child.value}</dd>
+                    </div>
+                    <CopyButton
+                      className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/child:opacity-100"
+                      label={`${fieldLabel(child)} (${child.path})`}
+                      value={child.value}
+                    />
                   </div>
                 ))}
               </dl>
             </details>
           ) : (
-            field.value
+            <div className="flex items-center justify-between gap-2">
+              <span className="min-w-0 select-text">{field.value}</span>
+              <CopyButton
+                className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/row:opacity-100"
+                label={`${fieldLabel(field)} (${field.path})`}
+                value={field.value}
+              />
+            </div>
           )}
         </td>
       </tr>
@@ -196,19 +272,35 @@ function MerchantSummary({
       ) : null}
       <dl className="grid flex-1 grid-cols-2 gap-3 text-sm">
         {[
-          [copy.merchant, result.merchant ?? "—"],
-          [copy.city, result.city ?? "—"],
-          [copy.mode, copy[result.mode as "static" | "dynamic" | "unknown"]],
+          [copy.merchant, result.merchant, result.merchant],
+          [copy.city, result.city, result.city],
+          [
+            copy.mode,
+            copy[result.mode as "static" | "dynamic" | "unknown"],
+            copy[result.mode as "static" | "dynamic" | "unknown"],
+          ],
           [
             copy.amount,
             result.amount
               ? formatQrisAmount(result.amount, result.currency)
               : copy.noAmount,
+            result.amount
+              ? formatQrisAmount(result.amount, result.currency)
+              : undefined,
           ],
-        ].map(([label, value]) => (
-          <div key={label}>
+        ].map(([label, displayText, copyValue]) => (
+          <div className="group/item min-w-0" key={label}>
             <dt className="text-muted-foreground text-xs">{label}</dt>
-            <dd className="mt-1 break-all font-medium">{value}</dd>
+            <dd className="mt-1 flex items-center justify-between gap-1 break-all font-medium">
+              <span className="min-w-0">{displayText ?? "—"}</span>
+              {copyValue ? (
+                <CopyButton
+                  className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/item:opacity-100"
+                  label={label}
+                  value={copyValue}
+                />
+              ) : null}
+            </dd>
           </div>
         ))}
       </dl>

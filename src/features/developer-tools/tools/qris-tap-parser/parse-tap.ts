@@ -42,7 +42,7 @@ export type TapNode = Omit<TlvNode, "children"> & {
 
 // Mirrors nfc-reader-diy's BerTlvParser limits and constructed-tag handling.
 export function parseTap(source: string, encoding: CpmEncoding) {
-  const { bytes } = decodeTapInput(source, encoding);
+  const { bytes, base64 } = decodeTapInput(source, encoding);
   let position = 0;
   let count = 0;
   function read(end: number) {
@@ -132,6 +132,7 @@ export function parseTap(source: string, encoding: CpmEncoding) {
   return {
     tlv: parseNodes(bytes.length, 0),
     hex: toHex(bytes),
+    base64,
     byteLength: bytes.length,
     profileMatches: true,
   };
