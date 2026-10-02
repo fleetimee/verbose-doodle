@@ -182,10 +182,10 @@ function renderPage(role: "ADMIN" | "USER" = "ADMIN") {
 
 async function editEntry(user: ReturnType<typeof userEvent.setup>) {
   await user.click(
-    await screen.findByRole("button", { name: "Actions for Linux" })
+    await screen.findByRole("row", { name: "View details for Linux" })
   );
-  await user.click(await screen.findByRole("menuitem", { name: "Edit entry" }));
-  return screen.findByRole("dialog");
+  await user.click(await screen.findByRole("button", { name: "Edit entry" }));
+  return screen.findByRole("dialog", { name: "Edit server entry" });
 }
 
 test("metadata edits omit passwords and keep failed saves editable", async () => {
@@ -218,20 +218,18 @@ test("creates a custom access type through the picker", async () => {
   renderPage();
   await user.click(screen.getByRole("button", { name: "Add entry" }));
   const dialog = await screen.findByRole("dialog");
-  await user.type(within(dialog).getByLabelText("Name"), "SFTP access");
+  await user.type(within(dialog).getByLabelText("Name"), "SCP access");
   await user.type(within(dialog).getByLabelText("Host"), "192.0.2.2");
   await user.click(
     within(dialog).getByRole("combobox", { name: "Access type" })
   );
   await user.type(
     await screen.findByPlaceholderText("Find or create an access type..."),
-    "sftp"
+    "scp"
   );
-  await user.click(
-    await screen.findByRole("option", { name: 'Create "SFTP"' })
-  );
+  await user.click(await screen.findByRole("option", { name: 'Create "SCP"' }));
   await user.click(within(dialog).getByRole("button", { name: "Save entry" }));
-  await waitFor(() => expect(lastSave?.accessType).toBe("SFTP"));
+  await waitFor(() => expect(lastSave?.accessType).toBe("SCP"));
 });
 
 test("password reveal never enters the shared query cache and must be requested again", async () => {
@@ -242,6 +240,7 @@ test("password reveal never enters the shared query cache and must be requested 
     await screen.findByRole("button", { name: "Reveal password for Linux" })
   );
   await screen.findByText("fake-revealed-secret");
+  expect(screen.queryByRole("dialog")).toBeNull();
   expect(
     JSON.stringify(
       queryClient
@@ -250,7 +249,9 @@ test("password reveal never enters the shared query cache and must be requested 
         .map((query) => query.state.data)
     )
   ).not.toContain("fake-revealed-secret");
-  await user.click(screen.getByRole("button", { name: "Hide password" }));
+  await user.click(
+    screen.getByRole("button", { name: "Hide password for Linux" })
+  );
   await waitFor(() =>
     expect(screen.queryByText("fake-revealed-secret")).toBeNull()
   );
@@ -261,7 +262,7 @@ test("password reveal never enters the shared query cache and must be requested 
   expect(revealCalls).toBe(2);
 });
 
-test("ignores a reveal response that arrives after the dialog closes", async () => {
+test("ignores a reveal response that arrives after the inline reveal is hidden", async () => {
   const user = userEvent.setup();
   holdReveal = true;
   renderPage();
@@ -269,7 +270,9 @@ test("ignores a reveal response that arrives after the dialog closes", async () 
     await screen.findByRole("button", { name: "Reveal password for Linux" })
   );
   await waitFor(() => expect(resolveReveal).not.toBeNull());
-  await user.click(screen.getByRole("button", { name: "Hide password" }));
+  await user.click(
+    screen.getByRole("button", { name: "Hide password for Linux" })
+  );
   await act(async () => {
     resolveReveal?.(json({ data: { password: "late-secret" } }));
     await Promise.resolve();
@@ -278,15 +281,74 @@ test("ignores a reveal response that arrives after the dialog closes", async () 
   expect(screen.queryByRole("dialog")).toBeNull();
 });
 
+test("inline password reveal expires after 30 seconds", async () => {
+  const user = userEvent.setup();
+  renderPage();
+  const revealButton = await screen.findByRole("button", {
+    name: "Reveal password for Linux",
+  });
+  const originalTimer = window.setTimeout;
+  let expire: (() => void) | undefined;
+  window.setTimeout = ((
+    handler: TimerHandler,
+    delay?: number,
+    ...args: unknown[]
+  ) => {
+    if (delay === 30_000 && typeof handler === "function" && !expire) {
+      expire = () => handler(...args);
+    }
+    return originalTimer(handler, delay, ...args);
+  }) as typeof window.setTimeout;
+  try {
+    await user.click(revealButton);
+    await screen.findByText("fake-revealed-secret");
+    expect(expire).toBeDefined();
+    await act(async () => expire?.());
+    expect(screen.queryByText("fake-revealed-secret")).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Reveal password for Linux" })
+    ).toBeDefined();
+  } finally {
+    window.setTimeout = originalTimer;
+  }
+});
+
+test("individual inline reveal clears when the tab is hidden", async () => {
+  const user = userEvent.setup();
+  const originalVisibility = Object.getOwnPropertyDescriptor(
+    document,
+    "visibilityState"
+  );
+  try {
+    renderPage();
+    await user.click(
+      await screen.findByRole("button", { name: "Reveal password for Linux" })
+    );
+    await screen.findByText("fake-revealed-secret");
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    await act(async () =>
+      document.dispatchEvent(new Event("visibilitychange"))
+    );
+    expect(screen.queryByText("fake-revealed-secret")).toBeNull();
+  } finally {
+    if (originalVisibility) {
+      Object.defineProperty(document, "visibilityState", originalVisibility);
+    } else {
+      Reflect.deleteProperty(document, "visibilityState");
+    }
+  }
+});
+
 test("requires deletion confirmation and preserves the entry on failure", async () => {
   const user = userEvent.setup();
   renderPage();
   await user.click(
-    await screen.findByRole("button", { name: "Actions for Linux" })
+    await screen.findByRole("row", { name: "View details for Linux" })
   );
-  await user.click(
-    await screen.findByRole("menuitem", { name: "Delete entry" })
-  );
+  await user.click(await screen.findByRole("button", { name: "Delete entry" }));
   const dialog = await screen.findByRole("alertdialog");
   expect(entries).toHaveLength(1);
   failDelete = true;
@@ -299,6 +361,7 @@ test("requires deletion confirmation and preserves the entry on failure", async 
 });
 
 test("ordinary users can read entries but cannot edit or reveal credentials", async () => {
+  const user = userEvent.setup();
   renderPage("USER");
   await screen.findByText("Linux");
   expect(screen.queryByRole("button", { name: "Add entry" })).toBeNull();
@@ -312,6 +375,14 @@ test("ordinary users can read entries but cannot edit or reveal credentials", as
     screen.queryByRole("switch", { name: "Reveal all passwords" })
   ).toBeNull();
   expect(revealCalls).toBe(0);
+  await user.click(screen.getByRole("row", { name: "View details for Linux" }));
+  const drawer = await screen.findByRole("dialog");
+  expect(
+    within(drawer).queryByRole("button", { name: "Edit entry" })
+  ).toBeNull();
+  expect(
+    within(drawer).queryByRole("button", { name: "Delete entry" })
+  ).toBeNull();
 });
 
 test("table switch reveals every entry without a dialog or query caching and hides on tab exit", async () => {
@@ -379,12 +450,12 @@ test("table reveal ignores responses arriving after the switch is turned off", a
   expect(screen.queryByText("late-table-secret")).toBeNull();
 });
 
-test("notes stay out of table cells and open in a readable drawer for ordinary users", async () => {
+test("connection details stay out of table cells and open in a drawer for ordinary users", async () => {
   entries[0].notes = "Connection instructions\nSecond line";
   const user = userEvent.setup();
   renderPage("USER");
   const row = await screen.findByRole("row", {
-    name: "View notes for Linux",
+    name: "View details for Linux",
   });
   expect(screen.queryByText(connectionInstructions)).toBeNull();
   await user.click(row);
@@ -394,21 +465,22 @@ test("notes stay out of table cells and open in a readable drawer for ordinary u
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 });
 
-test("row actions do not open notes and keyboard activation does", async () => {
+test("row actions do not open details and keyboard activation does", async () => {
   const user = userEvent.setup();
   renderPage();
-  const row = await screen.findByRole("row", { name: "View notes for Linux" });
+  const row = await screen.findByRole("row", {
+    name: "View details for Linux",
+  });
   await user.click(
-    within(row).getByRole("button", { name: "Actions for Linux" })
+    within(row).getByRole("button", { name: "Copy username for Linux" })
   );
   expect(screen.queryByRole("dialog")).toBeNull();
-  await user.keyboard("{Escape}");
   row.focus();
   await user.keyboard("{Enter}");
   expect(await screen.findByRole("dialog")).toBeDefined();
 });
 
-test("database engine badges and filtering distinguish database entries", async () => {
+test("database engine icons and filtering distinguish database entries", async () => {
   entries = [
     {
       ...baseEntry,
@@ -428,8 +500,10 @@ test("database engine badges and filtering distinguish database entries", async 
   ];
   const user = userEvent.setup();
   renderPage("USER");
-  await screen.findByText("DATABASE | PG");
-  expect(screen.getByText("DATABASE | ORA")).toBeDefined();
+  await screen.findByRole("button", { name: "DATABASE · POSTGRESQL" });
+  expect(
+    screen.getByRole("button", { name: "DATABASE · ORACLE" })
+  ).toBeDefined();
   await user.click(
     screen.getByRole("combobox", { name: "Filter by database engine" })
   );
@@ -543,10 +617,17 @@ test("entry host suggests existing hosts outside the loaded page and accepts a n
   await user.click(screen.getByRole("button", { name: "Add entry" }));
   const dialog = await screen.findByRole("dialog");
   const host = within(dialog).getByLabelText("Host");
-  await waitFor(() =>
-    expect(dialog.querySelector('option[value="192.0.2.99"]')).not.toBeNull()
+  await user.click(
+    within(dialog).getByRole("button", {
+      name: "Choose an existing host or enter a new IP address or hostname.",
+    })
   );
-  expect(host.getAttribute("list")).toBe("server-host-suggestions");
+  expect(
+    await screen.findByRole("option", { name: "192.0.2.99" })
+  ).toBeDefined();
+  await user.click(screen.getByRole("option", { name: "192.0.2.99" }));
+  expect((host as HTMLInputElement).value).toBe("192.0.2.99");
+  await user.clear(host);
   await user.type(within(dialog).getByLabelText("Name"), "New host");
   await user.type(host, "192.0.2.250");
   await user.click(within(dialog).getByRole("button", { name: "Save entry" }));
@@ -565,7 +646,7 @@ test("host groups collapse independently and expand with the keyboard", async ()
     name: "Collapse host 192.0.2.1",
   });
   expect(toggle.getAttribute("aria-expanded")).toBe("true");
-  await user.click(toggle);
+  await user.click(toggle.closest("tr") as HTMLElement);
   expect(screen.queryByText("Linux")).toBeNull();
   expect(screen.queryByText("Second access")).toBeNull();
   expect(screen.getByText("Other host")).toBeDefined();
@@ -577,4 +658,106 @@ test("host groups collapse independently and expand with the keyboard", async ()
   expect(screen.getByText("Linux")).toBeDefined();
   expect(screen.getByText("Second access")).toBeDefined();
   expect(screen.queryByRole("dialog")).toBeNull();
+});
+
+test("access type changes show matching fields and preserve entered database details", async () => {
+  const user = userEvent.setup();
+  renderPage();
+  await user.click(screen.getByRole("button", { name: "Add entry" }));
+  const drawer = await screen.findByRole("dialog");
+  expect(within(drawer).queryByLabelText("Database engine")).toBeNull();
+  expect(within(drawer).queryByLabelText("Web URL")).toBeNull();
+  const chooseType = async (type: string) => {
+    await user.click(
+      within(drawer).getByRole("combobox", { name: "Access type" })
+    );
+    await user.click(await screen.findByRole("option", { name: type }));
+  };
+  await chooseType("DATABASE");
+  await user.click(
+    within(drawer).getByRole("combobox", { name: "Database engine" })
+  );
+  await user.click(await screen.findByRole("option", { name: "PostgreSQL" }));
+  await user.type(within(drawer).getByLabelText("Database name"), "billing");
+  await chooseType("WEB");
+  expect(within(drawer).getByLabelText("Web URL")).toBeDefined();
+  await chooseType("DATABASE");
+  expect(
+    within(drawer).getByRole("combobox", { name: "Database engine" })
+      .textContent
+  ).toContain("PostgreSQL");
+  expect(
+    (within(drawer).getByLabelText("Database name") as HTMLInputElement).value
+  ).toBe("billing");
+});
+
+test("SSH port is visible with default 22 and preserves a custom port across type changes", async () => {
+  const user = userEvent.setup();
+  renderPage();
+  await user.click(screen.getByRole("button", { name: "Add entry" }));
+  const drawer = await screen.findByRole("dialog");
+  const port = within(drawer).getByLabelText("Port") as HTMLInputElement;
+  expect(port.value).toBe("22");
+  await user.clear(port);
+  await user.type(port, "2222");
+  for (const type of ["DATABASE", "SSH"]) {
+    await user.click(
+      within(drawer).getByRole("combobox", { name: "Access type" })
+    );
+    await user.click(await screen.findByRole("option", { name: type }));
+  }
+  expect(
+    (within(drawer).getByLabelText("Port") as HTMLInputElement).value
+  ).toBe("2222");
+  await user.type(within(drawer).getByLabelText("Name"), "SSH server");
+  await user.type(within(drawer).getByLabelText("Host"), "192.0.2.22");
+  await user.click(within(drawer).getByRole("button", { name: "Save entry" }));
+  await waitFor(() => expect(lastSave?.port).toBe(2222));
+});
+
+test("access types offer standard ports without carrying SSH defaults into database entries", async () => {
+  const user = userEvent.setup();
+  renderPage();
+  await user.click(screen.getByRole("button", { name: "Add entry" }));
+  const drawer = await screen.findByRole("dialog");
+  for (const [type, expected] of [
+    ["RDP", "3389"],
+    ["SFTP", "22"],
+    ["HTTP", "80"],
+    ["HTTPS", "443"],
+    ["DATABASE", ""],
+  ]) {
+    await user.click(
+      within(drawer).getByRole("combobox", { name: "Access type" })
+    );
+    await user.click(await screen.findByRole("option", { name: type }));
+    expect(
+      (within(drawer).getByLabelText("Port") as HTMLInputElement).value
+    ).toBe(expected);
+  }
+});
+
+test("database engine picker saves custom engines", async () => {
+  const user = userEvent.setup();
+  renderPage();
+  await user.click(screen.getByRole("button", { name: "Add entry" }));
+  const drawer = await screen.findByRole("dialog");
+  await user.type(within(drawer).getByLabelText("Name"), "Database");
+  await user.type(within(drawer).getByLabelText("Host"), "192.0.2.80");
+  await user.click(
+    within(drawer).getByRole("combobox", { name: "Access type" })
+  );
+  await user.click(await screen.findByRole("option", { name: "DATABASE" }));
+  await user.click(
+    within(drawer).getByRole("combobox", { name: "Database engine" })
+  );
+  await user.type(
+    await screen.findByPlaceholderText("Find or create a database engine..."),
+    "firebird"
+  );
+  await user.click(
+    await screen.findByRole("option", { name: 'Create "FIREBIRD"' })
+  );
+  await user.click(within(drawer).getByRole("button", { name: "Save entry" }));
+  await waitFor(() => expect(lastSave?.databaseEngine).toBe("FIREBIRD"));
 });
