@@ -14,6 +14,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  ServerAccessIcon,
+  serverAccessTypes,
+} from "@/features/server-inventory/components/server-access-icon";
 import { formatMessage } from "@/lib/i18n";
 
 export function AccessTypePicker({
@@ -23,6 +27,7 @@ export function AccessTypePicker({
   value,
   types,
   onChange,
+  portalContainer,
 }: {
   id: string;
   invalid: boolean;
@@ -30,14 +35,13 @@ export function AccessTypePicker({
   value: string;
   types: string[];
   onChange: (value: string) => void;
+  portalContainer?: HTMLElement | null;
 }) {
   const { messages } = useI18n();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const options = [
-    ...new Set(
-      ["SSH", "RDP", "WEB", "DATABASE", ...types, value].filter(Boolean)
-    ),
+    ...new Set([...serverAccessTypes, ...types, value].filter(Boolean)),
   ].sort();
   const custom = search.trim().toUpperCase();
   const select = (type: string) => {
@@ -59,11 +63,21 @@ export function AccessTypePicker({
           type="button"
           variant="outline"
         >
-          {value || messages.servers.chooseType}
+          <span className="flex min-w-0 items-center gap-2">
+            {value && <ServerAccessIcon accessType={value} decorative />}
+            <span className="truncate">
+              {value || messages.servers.chooseType}
+            </span>
+          </span>
           <ChevronDown data-icon="inline-end" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-(--anchor-width)" size="none">
+      <PopoverContent
+        align="start"
+        className="w-(--anchor-width)"
+        portalContainer={portalContainer}
+        size="none"
+      >
         <Command>
           <CommandInput
             aria-label={messages.servers.typeSearch}
@@ -80,6 +94,7 @@ export function AccessTypePicker({
                   onSelect={() => select(type)}
                   value={type}
                 >
+                  <ServerAccessIcon accessType={type} decorative />
                   {type}
                   {value === type && <Check className="ml-auto" />}
                 </CommandItem>
