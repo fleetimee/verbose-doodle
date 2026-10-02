@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, RefreshCw, Server } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
@@ -25,9 +25,8 @@ import {
 } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/features/auth/context";
-import { ServerEntryDialog } from "@/features/server-inventory/components/server-entry-dialog";
+import { ServerEntryDrawer } from "@/features/server-inventory/components/server-entry-drawer";
 import { ServerInventoryTable } from "@/features/server-inventory/components/server-inventory-table";
-import { ServerPasswordDialog } from "@/features/server-inventory/components/server-password-dialog";
 import { useServerInventory } from "@/features/server-inventory/hooks/use-server-inventory";
 import type {
   ServerEntry,
@@ -69,8 +68,6 @@ export function ServerInventoryPage() {
   }, [entries.data, entries.isPlaceholderData, query.page]);
   const [editing, setEditing] = useState<ServerEntry | "new" | null>(null);
   const [deleting, setDeleting] = useState<ServerEntry | null>(null);
-  const [revealing, setRevealing] = useState<ServerEntry | null>(null);
-  const closePassword = useCallback(() => setRevealing(null), []);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   useDocumentMeta({
     description: copy.documentDescription,
@@ -106,8 +103,8 @@ export function ServerInventoryPage() {
   const data = entries.data?.servers ?? [];
 
   return (
-    <div className="flex min-w-0 flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex min-w-0 flex-col gap-6 lg:min-h-0 lg:flex-1 lg:overflow-hidden">
+      <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="font-bold text-3xl tracking-tight">{copy.title}</h1>
           <p className="text-muted-foreground">{copy.description}</p>
@@ -164,7 +161,6 @@ export function ServerInventoryPage() {
           }}
           onEdit={setEditing}
           onQueryChange={setQuery}
-          onReveal={setRevealing}
           query={query}
           totalElements={entries.data.totalElements}
           totalHosts={entries.data.totalHosts}
@@ -172,7 +168,7 @@ export function ServerInventoryPage() {
         />
       )}
       {isAdmin && editing && (
-        <ServerEntryDialog
+        <ServerEntryDrawer
           entry={editing === "new" ? undefined : editing}
           hosts={hosts.data ?? []}
           key={editing === "new" ? "new" : editing.id}
@@ -180,13 +176,6 @@ export function ServerInventoryPage() {
           onSave={saveEntry}
           saving={save.isPending}
           types={accessTypes.data ?? data.map((entry) => entry.accessType)}
-        />
-      )}
-      {isAdmin && revealing && (
-        <ServerPasswordDialog
-          entry={revealing}
-          key={revealing.id}
-          onClose={closePassword}
         />
       )}
       {isAdmin && deleting && (

@@ -8,21 +8,19 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowUpDown,
   ChevronDown,
   CopyIcon,
-  Eye,
-  MoreHorizontal,
   Pen,
   Server,
   Trash2,
 } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -38,7 +36,6 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -49,6 +46,7 @@ import {
 } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -68,7 +66,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { revealServerPassword } from "@/features/server-inventory/api";
-import { isWebUrl } from "@/features/server-inventory/server-form";
+import { ServerAccessIcon } from "@/features/server-inventory/components/server-access-icon";
+import { ServerEntryDetails } from "@/features/server-inventory/components/server-entry-details";
+import { ServerPasswordCell } from "@/features/server-inventory/components/server-password-cell";
 import type {
   ServerEntry,
   ServerInventoryQuery,
@@ -76,14 +76,10 @@ import type {
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage } from "@/lib/i18n";
 
-const databaseEngineLabels: Record<string, string> = {
-  ORACLE: "ORA",
-  POSTGRESQL: "PG",
-  MYSQL: "MYSQL",
-  MONGO: "MDB",
-  MONGODB: "MDB",
-  REDIS: "RDS",
-  SQLSERVER: "MSSQL",
+const AnimatedTableRow = motion.create(TableRow);
+const rowTransition = {
+  duration: 0.15,
+  ease: [0.23, 1, 0.32, 1] as const,
 };
 
 function formatServerHost(entry: ServerEntry) {
@@ -117,6 +113,7 @@ function SortHeader({
   return (
     <Button
       aria-label={formatMessage(messages.servers.sortBy, { column: label })}
+      className="-ml-3"
       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       size="sm"
       variant="ghost"
@@ -127,12 +124,29 @@ function SortHeader({
   );
 }
 
+function useTableMotion(search: string) {
+  const reducedMotion = useReducedMotion();
+  const [animateUpdates, setAnimateUpdates] = useState(true);
+  const animateLayout = animateUpdates && !reducedMotion && !search;
+  const layout = animateLayout ? ("position" as const) : false;
+  const layoutTransition = animateLayout ? rowTransition : { duration: 0 };
+  const entryTransition = animateUpdates
+    ? { ...rowTransition, duration: reducedMotion ? 0.1 : 0.15 }
+    : { duration: 0 };
+  return {
+    animateUpdates,
+    setAnimateUpdates,
+    layout,
+    layoutTransition,
+    entryTransition,
+  };
+}
+
 export function ServerInventoryTable({
   entries,
   isAdmin,
   onEdit,
   onDelete,
-  onReveal,
   query,
   onQueryChange,
   totalElements,
@@ -154,9 +168,15 @@ export function ServerInventoryTable({
   isAdmin: boolean;
   onEdit: (entry: ServerEntry) => void;
   onDelete: (entry: ServerEntry) => void;
-  onReveal: (entry: ServerEntry) => void;
 }) {
-  const { locale, messages } = useI18n();
+  const { messages } = useI18n();
+  const {
+    animateUpdates,
+    setAnimateUpdates,
+    layout,
+    layoutTransition,
+    entryTransition,
+  } = useTableMotion(query.search);
   const copy = messages.servers;
   const sorting: SortingState = [
     { id: query.sortBy, desc: query.direction === "desc" },
@@ -186,12 +206,40 @@ export function ServerInventoryTable({
   const pagination = { pageIndex: query.page, pageSize: query.size };
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     databaseEngine: false,
-    databaseName: false,
-    updatedAt: false,
-    url: false,
   });
   const [collapsedHosts, setCollapsedHosts] = useState<Set<string>>(new Set());
-  const [notesEntry, setNotesEntry] = useState<ServerEntry | null>(null);
+  const [animatedHost, setAnimatedHost] = useState<string | null>(null);
+  const toggleHost = (host: string, animate = true) => {
+    setAnimatedHost(animate ? host : null);
+    setCollapsedHosts((current) => {
+      const next = new Set(current);
+      if (next.has(host)) {
+        next.delete(host);
+      } else {
+        next.add(host);
+      }
+      return next;
+    });
+  };
+  const [detailsEntry, setDetailsEntry] = useState<ServerEntry | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsMounted, setDetailsMounted] = useState(false);
+  const drawerOpenRef = useRef(false);
+  const pendingDrawerAction = useRef<(() => void) | null>(null);
+  const openDetails = (entry: ServerEntry) => {
+    pendingDrawerAction.current = null;
+    setDetailsEntry(entry);
+    setDetailsMounted(true);
+    drawerOpenRef.current = true;
+    setDetailsOpen(true);
+  };
+  useEffect(() => {
+    if (!detailsMounted) {
+      const action = pendingDrawerAction.current;
+      pendingDrawerAction.current = null;
+      action?.();
+    }
+  }, [detailsMounted]);
   const [revealAll, setRevealAll] = useState(false);
   const [passwords, setPasswords] = useState<Record<string, string>>({});
   const [revealFailed, setRevealFailed] = useState(false);
@@ -249,34 +297,32 @@ export function ServerInventoryTable({
   const columns: ColumnDef<ServerEntry>[] = [
     {
       accessorKey: "name",
+      size: 288,
       enableHiding: false,
       header: ({ column }) => <SortHeader column={column} label={copy.name} />,
       cell: ({ row }) => (
-        <span className="whitespace-nowrap font-medium">
+        <span className="block truncate font-medium" title={row.original.name}>
           {row.original.name}
         </span>
       ),
     },
     {
       accessorKey: "accessType",
+      size: 144,
       header: ({ column }) => (
         <SortHeader column={column} label={copy.accessType} />
       ),
       filterFn: "equalsString",
       cell: ({ row }) => (
-        <Badge
-          title={row.original.databaseEngine ?? undefined}
-          variant="outline"
-        >
-          {row.original.accessType}
-          {row.original.accessType === "DATABASE" &&
-            row.original.databaseEngine &&
-            ` | ${databaseEngineLabels[row.original.databaseEngine.toUpperCase()] ?? row.original.databaseEngine.toUpperCase().slice(0, 3)}`}
-        </Badge>
+        <ServerAccessIcon
+          accessType={row.original.accessType}
+          databaseEngine={row.original.databaseEngine}
+        />
       ),
     },
     {
       accessorKey: "host",
+      size: 144,
       header: ({ column }) => (
         <SortHeader column={column} label={copy.hostPort} />
       ),
@@ -301,11 +347,17 @@ export function ServerInventoryTable({
     },
     {
       accessorKey: "username",
+      size: 192,
       header: copy.username,
       cell: ({ row }) =>
         row.original.username ? (
           <div className="flex items-center gap-1">
-            <span className="font-mono text-xs">{row.original.username}</span>
+            <span
+              className="min-w-0 truncate font-mono text-xs"
+              title={row.original.username}
+            >
+              {row.original.username}
+            </span>
             <Button
               aria-label={formatMessage(copy.copyUsername, {
                 name: row.original.name,
@@ -323,66 +375,8 @@ export function ServerInventoryTable({
     },
     {
       id: "password",
+      size: 192,
       header: copy.password,
-      cell: ({ row }) => {
-        if (!row.original.hasPassword) {
-          return <span className="text-muted-foreground">{copy.notSet}</span>;
-        }
-        if (isAdmin && revealAll && passwords[row.original.id] !== undefined) {
-          return (
-            <div className="flex items-center gap-1">
-              <span className="whitespace-pre font-mono text-xs">
-                {passwords[row.original.id]}
-              </span>
-              <Button
-                aria-label={formatMessage(copy.copyPasswordFor, {
-                  name: row.original.name,
-                })}
-                onClick={() => copyValue(passwords[row.original.id])}
-                size="icon-sm"
-                variant="ghost"
-              >
-                <CopyIcon />
-              </Button>
-            </div>
-          );
-        }
-        return isAdmin ? (
-          <Button
-            aria-label={formatMessage(copy.revealFor, {
-              name: row.original.name,
-            })}
-            onClick={() => onReveal(row.original)}
-            size="sm"
-            variant="ghost"
-          >
-            <span className="font-mono">••••••••</span>
-            <Eye data-icon="inline-end" />
-          </Button>
-        ) : (
-          <span className="font-mono">
-            <span aria-hidden="true">••••••••</span>
-            <span className="sr-only">{copy.passwordStored}</span>
-          </span>
-        );
-      },
-    },
-    {
-      accessorKey: "url",
-      header: copy.url,
-      cell: ({ row }) =>
-        row.original.url && isWebUrl(row.original.url) ? (
-          <a
-            className="inline-block max-w-64 truncate text-primary underline underline-offset-4"
-            href={row.original.url}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            {row.original.url}
-          </a>
-        ) : (
-          copy.notSet
-        ),
     },
     {
       accessorKey: "databaseEngine",
@@ -391,63 +385,15 @@ export function ServerInventoryTable({
       filterFn: "equalsString",
       cell: ({ row }) =>
         row.original.databaseEngine ? (
-          <Badge variant="outline">{row.original.databaseEngine}</Badge>
+          <ServerAccessIcon
+            accessType="DATABASE"
+            databaseEngine={row.original.databaseEngine}
+            engineOnly
+          />
         ) : (
           <span className="text-muted-foreground">{copy.notSet}</span>
         ),
     },
-    {
-      accessorKey: "databaseName",
-      header: copy.databaseName,
-      cell: ({ row }) => row.original.databaseName || copy.notSet,
-    },
-    {
-      accessorKey: "updatedAt",
-      header: ({ column }) => (
-        <SortHeader column={column} label={copy.updated} />
-      ),
-      cell: ({ row }) =>
-        new Date(row.original.updatedAt).toLocaleDateString(locale),
-    },
-    ...(isAdmin
-      ? [
-          {
-            id: "actions",
-            enableHiding: false,
-            header: () => <span className="sr-only">{copy.actions}</span>,
-            cell: ({ row }) => (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    aria-label={formatMessage(copy.actionsFor, {
-                      name: row.original.name,
-                    })}
-                    size="icon-sm"
-                    variant="ghost"
-                  >
-                    <MoreHorizontal />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={() => onEdit(row.original)}>
-                      <Pen />
-                      {copy.edit}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => onDelete(row.original)}
-                      variant="destructive"
-                    >
-                      <Trash2 />
-                      {copy.delete}
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ),
-          } satisfies ColumnDef<ServerEntry>,
-        ]
-      : []),
   ];
   const table = useReactTable({
     columns,
@@ -492,13 +438,10 @@ export function ServerInventoryTable({
   const labels: Record<string, string> = {
     accessType: copy.accessType,
     databaseEngine: copy.databaseEngine,
-    databaseName: copy.databaseName,
     host: copy.host,
     name: copy.name,
     notes: copy.notes,
     password: copy.password,
-    updatedAt: copy.updated,
-    url: copy.url,
     username: copy.username,
   };
   const hostGroups = new Map<
@@ -515,45 +458,84 @@ export function ServerInventoryTable({
   const pages = Math.max(1, table.getPageCount());
 
   return (
-    <div className="flex min-w-0 flex-col gap-4">
+    <div
+      className="server-inventory-table flex min-w-0 flex-col overflow-hidden rounded-md border bg-background lg:min-h-0 lg:flex-1"
+      data-motion={animateUpdates}
+      onKeyDownCapture={() => setAnimateUpdates(false)}
+      onPointerDownCapture={() => setAnimateUpdates(true)}
+    >
       <Drawer
         direction="right"
-        onOpenChange={(open) => {
-          if (!open) {
-            setNotesEntry(null);
+        onAnimationEnd={(open) => {
+          if (!(open || drawerOpenRef.current)) {
+            setDetailsMounted(false);
           }
         }}
-        open={notesEntry !== null}
+        onOpenChange={(open) => {
+          drawerOpenRef.current = open;
+          setDetailsOpen(open);
+        }}
+        open={detailsOpen}
         shouldScaleBackground={false}
       >
-        <DrawerContent
-          className="overflow-hidden data-[vaul-drawer-direction=right]:w-[calc(100%-1rem)] data-[vaul-drawer-direction=right]:sm:max-w-lg"
-          showSwipeHandle={false}
-        >
-          <DrawerHeader className="shrink-0" size="lg" variant="left">
-            <DrawerTitle>{copy.notes}</DrawerTitle>
-            <DrawerDescription>{notesEntry?.name}</DrawerDescription>
-          </DrawerHeader>
-          <div
-            className="min-h-0 flex-1 overflow-y-auto px-6 pb-6"
-            data-vaul-no-drag
+        {detailsMounted && (
+          <DrawerContent
+            className="overflow-hidden data-[vaul-drawer-direction=right]:w-[calc(100%-1rem)] data-[vaul-drawer-direction=right]:sm:max-w-lg"
+            showSwipeHandle={false}
           >
-            <p className="whitespace-pre-wrap break-words text-sm">
-              {notesEntry?.notes || copy.notSet}
-            </p>
-          </div>
-          <DrawerFooter className="shrink-0" size="lg" variant="bordered">
-            <DrawerClose asChild>
-              <Button variant="outline">{messages.common.close}</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
+            <DrawerHeader className="shrink-0" size="lg" variant="left">
+              <DrawerTitle>{copy.detailsTitle}</DrawerTitle>
+              <DrawerDescription>{detailsEntry?.name}</DrawerDescription>
+            </DrawerHeader>
+            <ScrollArea className="min-h-0 flex-1" contentClassName="px-6 pb-6">
+              {detailsEntry && <ServerEntryDetails entry={detailsEntry} />}
+            </ScrollArea>
+            <DrawerFooter className="shrink-0" size="lg" variant="bordered">
+              {isAdmin && detailsEntry && (
+                <div className="flex flex-wrap gap-2">
+                  <DrawerClose asChild>
+                    <Button
+                      className="flex-1"
+                      onClick={() => {
+                        pendingDrawerAction.current = () =>
+                          onEdit(detailsEntry);
+                      }}
+                      variant="outline"
+                    >
+                      <Pen data-icon="inline-start" />
+                      {copy.edit}
+                    </Button>
+                  </DrawerClose>
+                  <DrawerClose asChild>
+                    <Button
+                      className="flex-1"
+                      onClick={() => {
+                        pendingDrawerAction.current = () =>
+                          onDelete(detailsEntry);
+                      }}
+                      variant="destructive"
+                    >
+                      <Trash2 data-icon="inline-start" />
+                      {copy.delete}
+                    </Button>
+                  </DrawerClose>
+                </div>
+              )}
+              <DrawerClose asChild>
+                <Button variant="outline">{messages.common.close}</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        )}
       </Drawer>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b bg-muted/20 p-3">
         <Input
           aria-label={copy.search}
           className="min-w-48 flex-1 sm:max-w-sm"
-          onChange={(event) => table.setGlobalFilter(event.target.value)}
+          onChange={(event) => {
+            setAnimateUpdates(true);
+            table.setGlobalFilter(event.target.value);
+          }}
           placeholder={copy.search}
           value={search}
         />
@@ -634,7 +616,6 @@ export function ServerInventoryTable({
         {isAdmin && (
           <div className="flex items-center gap-2">
             <Switch
-              aria-describedby="reveal-all-description"
               checked={revealAll}
               id="reveal-all-passwords"
               onCheckedChange={setRevealAll}
@@ -670,27 +651,39 @@ export function ServerInventoryTable({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      {isAdmin && (
-        <p
-          className="text-muted-foreground text-xs"
-          id="reveal-all-description"
-        >
-          {copy.revealAllDescription}
-        </p>
-      )}
       {revealFailed && (
-        <Alert variant="destructive">
+        <Alert className="m-3 w-auto shrink-0" variant="destructive">
           <AlertDescription>{copy.revealAllError}</AlertDescription>
         </Alert>
       )}
-      <div className="min-w-0 overflow-hidden rounded-md border">
-        <Table aria-busy={loading} aria-label={copy.title}>
-          <TableHeader>
+      <ScrollArea
+        className="min-w-0 overflow-hidden lg:min-h-0 lg:flex-1 [&_[data-slot=table-container]]:overflow-visible"
+        contentClassName="w-full pb-2.5"
+        variant="fit"
+      >
+        <Table
+          aria-busy={loading}
+          aria-label={copy.title}
+          className="table-fixed"
+          style={{ minWidth: table.getTotalSize() }}
+        >
+          <colgroup>
+            {table.getVisibleLeafColumns().map((column) => (
+              <col
+                key={column.id}
+                style={{
+                  width: `${(column.getSize() / table.getTotalSize()) * 100}%`,
+                }}
+              />
+            ))}
+          </colgroup>
+          <TableHeader className="bg-background lg:sticky lg:top-0 lg:z-10">
             {table.getHeaderGroups().map((group) => (
               <TableRow key={group.id}>
                 {group.headers.map((header) => (
                   <TableHead
                     aria-sort={getAriaSort(header.column.getIsSorted())}
+                    className={header.column.id === "name" ? "pl-8" : undefined}
                     key={header.id}
                   >
                     {header.isPlaceholder
@@ -707,10 +700,20 @@ export function ServerInventoryTable({
           <TableBody>
             {table.getRowModel().rows.length ? (
               [...hostGroups].flatMap(([host, rows]) => [
-                <TableRow
+                <AnimatedTableRow
+                  animate={{ opacity: 1 }}
                   aria-label={formatMessage(copy.hostGroup, { host })}
-                  className="bg-muted hover:bg-muted"
+                  className="cursor-pointer bg-muted hover:bg-muted"
+                  initial={false}
                   key={`host:${host}`}
+                  layout={layout}
+                  onClick={(event) => {
+                    if ((event.target as HTMLElement).closest("button")) {
+                      return;
+                    }
+                    toggleHost(host);
+                  }}
+                  transition={layoutTransition}
                 >
                   <TableCell
                     className="border-primary/60 border-l-2 py-2"
@@ -725,28 +728,23 @@ export function ServerInventoryTable({
                             : copy.collapseHost,
                           { host }
                         )}
-                        onClick={() =>
-                          setCollapsedHosts((current) => {
-                            const next = new Set(current);
-                            if (next.has(host)) {
-                              next.delete(host);
-                            } else {
-                              next.add(host);
-                            }
-                            return next;
-                          })
-                        }
+                        onClick={(event) => toggleHost(host, event.detail > 0)}
                         size="sm"
                         variant="ghost"
                       >
-                        {collapsedHosts.has(host) ? (
-                          <ChevronDown
-                            className="-rotate-90"
-                            data-icon="inline-start"
-                          />
-                        ) : (
-                          <ChevronDown data-icon="inline-start" />
-                        )}
+                        <ChevronDown
+                          className={
+                            animatedHost === host
+                              ? "transition-transform duration-150 ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))] motion-reduce:transition-none"
+                              : undefined
+                          }
+                          data-icon="inline-start"
+                          style={{
+                            transform: collapsedHosts.has(host)
+                              ? "rotate(-90deg)"
+                              : "rotate(0deg)",
+                          }}
+                        />
                         <Server
                           aria-hidden="true"
                           className="size-4 text-muted-foreground"
@@ -766,23 +764,19 @@ export function ServerInventoryTable({
                       >
                         <CopyIcon />
                       </Button>
-                      <Badge className="ml-auto" variant="outline">
-                        {rows.length === 1
-                          ? copy.singleAccess
-                          : formatMessage(copy.accessCount, {
-                              count: rows.length,
-                            })}
-                      </Badge>
                     </div>
                   </TableCell>
-                </TableRow>,
+                </AnimatedTableRow>,
                 ...(collapsedHosts.has(host) ? [] : rows).map((row) => (
-                  <TableRow
-                    aria-label={formatMessage(copy.viewNotesFor, {
+                  <AnimatedTableRow
+                    animate={{ opacity: 1 }}
+                    aria-label={formatMessage(copy.viewDetailsFor, {
                       name: row.original.name,
                     })}
                     className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+                    initial={animateUpdates ? { opacity: 0.65 } : false}
                     key={row.id}
+                    layout={layout}
                     onClick={(event) => {
                       if (
                         (event.target as HTMLElement).closest(
@@ -791,7 +785,7 @@ export function ServerInventoryTable({
                       ) {
                         return;
                       }
-                      setNotesEntry(row.original);
+                      openDetails(row.original);
                     }}
                     onKeyDown={(event) => {
                       if (
@@ -799,25 +793,38 @@ export function ServerInventoryTable({
                         (event.key === "Enter" || event.key === " ")
                       ) {
                         event.preventDefault();
-                        setNotesEntry(row.original);
+                        openDetails(row.original);
                       }
                     }}
                     tabIndex={0}
+                    transition={entryTransition}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         className={
-                          cell.column.id === "name" ? "pl-8" : undefined
+                          cell.column.id === "name"
+                            ? "overflow-hidden text-ellipsis pl-8"
+                            : "overflow-hidden text-ellipsis"
                         }
                         key={cell.id}
                       >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+                        {cell.column.id === "password" ? (
+                          <ServerPasswordCell
+                            bulkPassword={passwords[row.original.id]}
+                            entry={row.original}
+                            isAdmin={isAdmin}
+                            loading={loading}
+                            revealAll={revealAll}
+                          />
+                        ) : (
+                          flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )
                         )}
                       </TableCell>
                     ))}
-                  </TableRow>
+                  </AnimatedTableRow>
                 )),
               ])
             ) : (
@@ -836,15 +843,16 @@ export function ServerInventoryTable({
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t bg-muted/20 px-3 py-2">
         <p aria-live="polite" className="text-muted-foreground text-sm">
           {formatMessage(copy.groupedEntryCount, {
             count: filteredCount,
             hosts: totalHosts,
           })}
         </p>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Select
             onValueChange={(value) => table.setPageSize(Number(value))}
             value={String(table.getState().pagination.pageSize)}
