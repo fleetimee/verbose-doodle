@@ -23,6 +23,7 @@ Fleetime Labs is an umbrella workspace, not a single-purpose API mocker. Its mod
 - **Biller Simulator** models billers, endpoints, response templates, and billing interactions.
 - **Socket Test** exercises TCP client, TCP server, and UDP workflows.
 - **SOCKS Relay** supports authorized inspection of REST API and ISO 8583 relay activity.
+- **Server Inventory** records server connection metadata with a separate entry for each access method.
 - **Developer Tools** provides focused conversion, validation, parsing, and inspection utilities.
 
 Internal integration teams can move between these related but separate jobs in one authenticated interface.
@@ -43,6 +44,7 @@ Within the Biller Simulator domain, a **Biller** is a billing service represente
 - Export endpoint configurations for integration workflows.
 - Test TCP client, TCP server, and UDP behavior.
 - Inspect authorized SOCKS relay activity for REST API and ISO 8583 traffic.
+- Browse and filter server access entries. `ADMIN` users can create, edit, delete, and temporarily reveal stored passwords; `USER` users have read-only access to metadata.
 - Use developer utilities for JSON/YAML conversion, JSON Schema validation, JWT inspection, cron parsing, number-base conversion, date conversion, and related integration tasks.
 - Preserve role-based access and the distinction between `ADMIN` and `USER` capabilities.
 - Treat each module as a distinct tool within Fleetime Labs rather than presenting every capability as part of the Biller Simulator module.
