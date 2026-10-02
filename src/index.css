@@ -3497,3 +3497,53 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     transition: none;
   }
 }
+
+/* QRIS tag colors deliberately use a separate, high-contrast data palette. */
+.qris-color-0 {
+  color: #164ed8;
+}
+.qris-color-1 {
+  color: #7430c8;
+}
+.qris-color-2 {
+  color: #00758a;
+}
+.qris-color-3 {
+  color: #b33b00;
+}
+.qris-color-4 {
+  color: #ae1765;
+}
+.qris-color-5 {
+  color: #08783e;
+}
+.qris-color-6 {
+  color: #924b00;
+}
+.qris-color-7 {
+  color: #be2637;
+}
+.dark .qris-color-0 {
+  color: #7eaeff;
+}
+.dark .qris-color-1 {
+  color: #c69aff;
+}
+.dark .qris-color-2 {
+  color: #39e5ff;
+}
+.dark .qris-color-3 {
+  color: #ffab63;
+}
+.dark .qris-color-4 {
+  color: #ff80c2;
+}
+.dark .qris-color-5 {
+  color: #4dff91;
+}
+.dark .qris-color-6 {
+  color: #ffdb52;
+}
+.dark .qris-color-7 {
+  color: #ff8895;
+}

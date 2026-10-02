@@ -22,6 +22,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { DeveloperToolLayout } from "@/features/developer-tools/components/developer-tool-layout";
 import {
+  qrisTlvColor,
+  TlvHexSegments,
+} from "@/features/developer-tools/components/qris-tlv-colors";
+import {
   CPM_SAMPLE,
   CPM_SAMPLE_HEX,
   type CpmEncoding,
@@ -273,7 +277,10 @@ function FieldTree({
       : messages.developerTools.qrisCpm;
   return nodes.map((node, index) => (
     <li
-      className="relative min-w-0 border-t py-3 pl-4"
+      className={cn(
+        "relative min-w-0 border-t py-3 pl-4",
+        qrisTlvColor(node.tag)
+      )}
       key={`${node.tag}-${index}`}
     >
       <Popover>
@@ -301,9 +308,7 @@ function FieldTree({
         <summary className="cursor-pointer rounded-sm pr-10 text-xs focus-visible:outline-2 focus-visible:outline-ring">
           <span className="ml-1 inline-grid min-h-8 w-[calc(100%-1.5rem)] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 align-middle">
             <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span className="font-medium font-mono text-primary">
-                {node.tag}
-              </span>
+              <span className="font-mono font-semibold">{node.tag}</span>
               <span className="min-w-0 break-words">
                 {node.name ?? copy.unknown}
               </span>
@@ -502,7 +507,11 @@ export function CpmParser({ mode = "cpm" }: { readonly mode?: "cpm" | "tap" }) {
             variant="fit"
           >
             {mode === "tap" ? (
-              <TapInspectionOutput encoding={encoding} source={source} />
+              <TapInspectionOutput
+                encoding={encoding}
+                nodes={result?.tlv}
+                source={source}
+              />
             ) : null}
             {result ? (
               <>
@@ -519,7 +528,7 @@ export function CpmParser({ mode = "cpm" }: { readonly mode?: "cpm" | "tap" }) {
                     </summary>
                     <div className="mt-2 flex items-start justify-between gap-2 rounded-md bg-muted/20 p-2.5">
                       <p className="min-w-0 select-text break-all font-mono">
-                        {result.hex}
+                        <TlvHexSegments hex={result.hex} nodes={result.tlv} />
                       </p>
                       <CopyButton label={copy.raw} value={result.hex} />
                     </div>

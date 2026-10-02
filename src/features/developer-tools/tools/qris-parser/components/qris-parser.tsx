@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Check, ClipboardCopy } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
@@ -126,13 +126,32 @@ function fieldLabel(field: QrisField): string {
   return copy.labels[field.id as keyof typeof copy.labels] ?? copy.unknownField;
 }
 
+function fieldColor(field: QrisField): string {
+  const tag = field.path.split(".")[0];
+  return `qris-color-${Number(tag) % 8}`;
+}
+
+function PayloadSegments({
+  fields,
+}: {
+  readonly fields: readonly QrisField[];
+}) {
+  return fields.map((field) => (
+    <span className={fieldColor(field)} key={field.path}>
+      <span className="font-bold">
+        {field.id}
+        {String(field.length).padStart(2, "0")}
+      </span>
+      {field.value}
+    </span>
+  ));
+}
+
 function FieldRows({ fields }: { readonly fields: readonly QrisField[] }) {
   return fields.map((field) => (
     <tbody className="border-t" key={field.path}>
-      <tr className="group/row">
-        <td className="px-3 py-2 font-mono text-muted-foreground">
-          {field.path}
-        </td>
+      <tr className={cn("group/row", fieldColor(field))}>
+        <td className="px-3 py-2 font-mono font-semibold">{field.path}</td>
         <td className="px-3 py-2">{fieldLabel(field)}</td>
         <td className="px-3 py-2 text-right font-mono text-muted-foreground">
           {field.length}
@@ -150,7 +169,7 @@ function FieldRows({ fields }: { readonly fields: readonly QrisField[] }) {
                     key={child.path}
                   >
                     <div className="min-w-0">
-                      <dt className="text-muted-foreground">
+                      <dt className="font-semibold">
                         {child.path} · {fieldLabel(child)}
                       </dt>
                       <dd className="select-text">{child.value}</dd>
@@ -311,6 +330,7 @@ function MerchantSummary({
 export function QrisParser() {
   useI18n();
   const copy = messages.developerTools.qris;
+  const payloadHighlight = useRef<HTMLPreElement>(null);
   const [source, setSource] = useState(QRIS_SAMPLE);
   const [imageBusy, setImageBusy] = useState(false);
   const [imageRevision, setImageRevision] = useState(0);
@@ -384,18 +404,43 @@ export function QrisParser() {
             onRemove={() => changeSource("")}
           />
           <Label htmlFor="qris-payload">{copy.input}</Label>
-          <Textarea
-            aria-busy={imageBusy}
-            aria-describedby={error ? "qris-error" : undefined}
-            aria-invalid={Boolean(error)}
-            className="field-sizing-fixed min-h-40 flex-1 resize-y lg:resize-none"
-            disabled={imageBusy}
-            id="qris-payload"
-            onChange={(event) => changeSource(event.target.value)}
-            placeholder={copy.placeholder}
-            value={source}
-            variant="mono-muted"
-          />
+          <div className="relative min-h-40 flex-1 overflow-hidden rounded-md bg-muted/10">
+            {result ? (
+              <pre
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 m-0 overflow-hidden whitespace-pre-wrap break-all border border-transparent px-3 py-2 font-mono text-xs leading-6"
+                ref={payloadHighlight}
+              >
+                {source.slice(0, source.length - source.trimStart().length)}
+                <PayloadSegments fields={result.fields} />
+                {source.slice(source.trimEnd().length)}
+              </pre>
+            ) : null}
+            <Textarea
+              aria-busy={imageBusy}
+              aria-describedby={error ? "qris-error" : undefined}
+              aria-invalid={Boolean(error)}
+              className={cn(
+                "field-sizing-fixed relative h-full min-h-40 w-full resize-none break-all bg-transparent text-xs md:text-xs dark:bg-transparent",
+                result &&
+                  "text-transparent caret-foreground selection:bg-blue-500/25 selection:text-transparent"
+              )}
+              disabled={imageBusy}
+              id="qris-payload"
+              onChange={(event) => changeSource(event.target.value)}
+              onScroll={(event) => {
+                if (payloadHighlight.current) {
+                  payloadHighlight.current.scrollTop =
+                    event.currentTarget.scrollTop;
+                  payloadHighlight.current.scrollLeft =
+                    event.currentTarget.scrollLeft;
+                }
+              }}
+              placeholder={copy.placeholder}
+              value={source}
+              variant="mono-muted"
+            />
+          </div>
           {errorText ? (
             <p
               className="text-destructive text-sm"
@@ -453,7 +498,7 @@ export function QrisParser() {
                 <p
                   className={
                     result.crcValid
-                      ? "font-medium"
+                      ? "font-semibold text-[#08783e] dark:text-[#4dff91]"
                       : "font-medium text-destructive"
                   }
                 >

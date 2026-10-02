@@ -1,7 +1,14 @@
-import { useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { Clipboard } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
-import type { CpmEncoding } from "@/features/developer-tools/tools/qris-cpm-parser/parse-cpm";
+import {
+  qrisTlvColor,
+  TlvHexSegments,
+} from "@/features/developer-tools/components/qris-tlv-colors";
+import type {
+  CpmEncoding,
+  TlvNode,
+} from "@/features/developer-tools/tools/qris-cpm-parser/parse-cpm";
 import { inspectTap } from "@/features/developer-tools/tools/qris-tap-parser/parse-tap";
 import { copyToClipboard } from "@/lib/clipboard";
 import { messages } from "@/lib/i18n";
@@ -9,7 +16,9 @@ import { messages } from "@/lib/i18n";
 function EvidenceOutput({
   title,
   value,
+  children,
 }: {
+  readonly children?: ReactNode;
   readonly title: string;
   readonly value: string | null;
 }) {
@@ -49,7 +58,7 @@ function EvidenceOutput({
             </Button>
           </div>
           <pre className="whitespace-pre-wrap break-all rounded-md bg-muted/20 p-3 font-mono text-xs leading-relaxed">
-            {value}
+            {children ?? value}
           </pre>
         </div>
       )}
@@ -60,7 +69,9 @@ function EvidenceOutput({
 export function TapInspectionOutput({
   source,
   encoding,
+  nodes,
 }: {
+  readonly nodes?: readonly TlvNode[];
   readonly source: string;
   readonly encoding: CpmEncoding;
 }) {
@@ -80,7 +91,7 @@ export function TapInspectionOutput({
         <p
           className={
             result.outcome === "SUCCESS"
-              ? "font-medium text-primary"
+              ? "font-semibold text-[#08783e] dark:text-[#4dff91]"
               : "font-medium text-destructive"
           }
         >
@@ -101,12 +112,26 @@ export function TapInspectionOutput({
         key={`hex-${result.hex}`}
         title={copy.decodedHex}
         value={result.hex}
-      />
+      >
+        {result.hex && nodes ? (
+          <TlvHexSegments hex={result.hex} nodes={nodes} />
+        ) : undefined}
+      </EvidenceOutput>
       <EvidenceOutput
         key={`tree-${result.tree}`}
         title={copy.textTree}
         value={result.tree}
-      />
+      >
+        {result.tree?.split("\n").map((line, index) => (
+          <span
+            className={qrisTlvColor(line.trimStart().split(" ")[0])}
+            key={`${index}-${line}`}
+          >
+            {line}
+            {"\n"}
+          </span>
+        ))}
+      </EvidenceOutput>
       <EvidenceOutput
         key={`log-${result.log}`}
         title={copy.executionLog}
