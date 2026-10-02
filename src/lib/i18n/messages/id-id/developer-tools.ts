@@ -5,7 +5,7 @@ export const developerToolsMessages = {
     unknownInfo:
       "Tag ini tidak memiliki definisi pada dekoder sumber. Byte dipertahankan sesuai input; maknanya bergantung pada issuer atau aplikasi.",
     tagInfo: {
-      "85": "Mengidentifikasi format payload. CPV01 adalah indikator format CPM yang digunakan qris-cpm-tap.",
+      "85": "Mengidentifikasi format payload. CPV01 adalah indikator format QRIS CPM.",
       "61": "Mengelompokkan field aplikasi pembayaran. Nilainya memuat tag TLV anak yang didekode secara rekursif.",
       "4F": "Application identifier (AID). Mengidentifikasi aplikasi pembayaran dan ditampilkan sebagai byte heksadesimal.",
       "50": "Label aplikasi pembayaran yang dapat dibaca. Ditampilkan sebagai ASCII jika byte dapat dicetak.",
@@ -85,7 +85,7 @@ export const developerToolsMessages = {
     unknownInfo:
       "Tag ini tidak memiliki definisi pada dekoder sumber. Byte dipertahankan sesuai input; maknanya bergantung pada issuer atau aplikasi.",
     tagInfo: {
-      "85": "Mengidentifikasi format payload. CPV01 adalah indikator format CPM yang digunakan qris-cpm-tap.",
+      "85": "Mengidentifikasi format payload. CPV01 adalah indikator format QRIS CPM/TAP.",
       "61": "Mengelompokkan field aplikasi pembayaran. Nilainya memuat tag TLV anak yang didekode secara rekursif.",
       "4F": "Application identifier (AID). Mengidentifikasi aplikasi pembayaran dan ditampilkan sebagai byte heksadesimal.",
       "50": "Label aplikasi pembayaran yang dapat dibaca. Ditampilkan sebagai ASCII jika byte dapat dicetak.",
@@ -109,7 +109,7 @@ export const developerToolsMessages = {
     menu: "TAP parser",
     title: "Parser QRIS TAP",
     description:
-      "Dekode Base64 gabungan record NFC atau hex menggunakan aturan BER-TLV nfc-reader-diy.",
+      "Dekode payload QRIS TAP (NFC) Base64 atau heksadesimal menjadi struktur BER-TLV.",
     input: "Payload TAP",
     encoding: "Encoding input",
     fields: "Field hasil dekode",

@@ -5,7 +5,7 @@ export const developerToolsMessages = {
     unknownInfo:
       "This tag has no definition in the source decoder. Its bytes are preserved as supplied; its meaning depends on the issuer or application.",
     tagInfo: {
-      "85": "Identifies the payload format. CPV01 is the CPM format indicator used by qris-cpm-tap.",
+      "85": "Identifies the payload format. CPV01 is the QRIS CPM format indicator.",
       "61": "Groups the fields for a payment application. Its value contains child TLV tags, which this parser decodes recursively.",
       "4F": "The application identifier (AID). Identifies the payment application; displayed as hexadecimal bytes.",
       "50": "The readable label of the payment application. Displayed as ASCII when its bytes are printable.",
@@ -85,7 +85,7 @@ export const developerToolsMessages = {
     unknownInfo:
       "This tag has no definition in the source decoder. Its bytes are preserved as supplied; its meaning depends on the issuer or application.",
     tagInfo: {
-      "85": "Identifies the payload format. CPV01 is the CPM format indicator used by qris-cpm-tap.",
+      "85": "Identifies the payload format. CPV01 is the QRIS CPM/TAP format indicator.",
       "61": "Groups the fields for a payment application. Its value contains child TLV tags, which this parser decodes recursively.",
       "4F": "The application identifier (AID). Identifies the payment application; displayed as hexadecimal bytes.",
       "50": "The readable label of the payment application. Displayed as ASCII when its bytes are printable.",
@@ -109,7 +109,7 @@ export const developerToolsMessages = {
     menu: "TAP parser",
     title: "QRIS TAP parser",
     description:
-      "Decode assembled NFC record Base64 or decoded hex using the nfc-reader-diy BER-TLV rules.",
+      "Decode Base64 or hexadecimal QRIS TAP (NFC) payloads into a BER-TLV tree.",
     input: "TAP payload",
     encoding: "Input encoding",
     fields: "Decoded fields",
