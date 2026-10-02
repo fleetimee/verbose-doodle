@@ -3547,3 +3547,22 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 .dark .qris-color-7 {
   color: #ff8895;
 }
+
+.server-inventory-table [data-slot="table-body"] {
+  opacity: 1;
+  transition: opacity 150ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.server-inventory-table [aria-busy="true"] [data-slot="table-body"] {
+  opacity: 0.65;
+}
+
+.server-inventory-table[data-motion="false"] [data-slot="table-body"] {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .server-inventory-table [data-slot="table-body"] {
+    transition-duration: 100ms;
+  }
+}

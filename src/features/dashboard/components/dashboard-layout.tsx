@@ -287,8 +287,9 @@ export function DashboardLayout() {
                 contentClassName={cn(
                   "flex flex-col",
                   isOverview ? "h-full min-h-0" : "min-h-full",
-                  (location.pathname ===
-                    "/dashboard/developer-tools/qris-creator" ||
+                  (location.pathname === "/dashboard/servers" ||
+                    location.pathname ===
+                      "/dashboard/developer-tools/qris-creator" ||
                     location.pathname ===
                       "/dashboard/developer-tools/qris-cpm-parser" ||
                     location.pathname ===
