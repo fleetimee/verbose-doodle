@@ -45,21 +45,23 @@ const decodeBcd = (bytes: Uint8Array): string => {
   return hex.replace(TRAILING_F_RE, "");
 };
 
-const TAG_NAMES: Record<string, string> = {
-  "85": "Payload Format Indicator",
-  "61": "Application Template",
-  "4F": "ADF Name (AID)",
-  "50": "Application Label",
-  "5A": "CPAN",
-  "5F20": "Cardholder Name",
-  "5F2D": "Language",
-  "5F50": "Issuer URL",
-  "9F25": "CPAN Last 4",
-  "63": "Application Specific Transparent Template",
-  "9F74": "Issuer Private Data",
-  "9F7A": "Issuer Public Key Certificate or Public Key Material",
-  "9F7B": "Issuer Authentication Signature",
-};
+const TAG_NAMES = new Map(
+  Object.entries({
+    "85": "Payload Format Indicator",
+    "61": "Application Template",
+    "4F": "ADF Name (AID)",
+    "50": "Application Label",
+    "5A": "CPAN",
+    "5F20": "Cardholder Name",
+    "5F2D": "Language",
+    "5F50": "Issuer URL",
+    "9F25": "CPAN Last 4",
+    "63": "Application Specific Transparent Template",
+    "9F74": "Issuer Private Data",
+    "9F7A": "Issuer Public Key Certificate or Public Key Material",
+    "9F7B": "Issuer Authentication Signature",
+  })
+);
 
 export type TlvNode = {
   tag: string;
@@ -72,10 +74,7 @@ export type TlvNode = {
   children?: TlvNode[];
 };
 
-const parseTag = (
-  buf: Uint8Array,
-  off: number
-): { tag: string; next: number } => {
+const parseTag = (buf: Uint8Array, off: number) => {
   let i = off;
   const first = buf[i];
   i += 1;
@@ -99,10 +98,7 @@ const parseTag = (
   return { tag, next: i };
 };
 
-const parseLength = (
-  buf: Uint8Array,
-  off: number
-): { len: number; next: number } => {
+const parseLength = (buf: Uint8Array, off: number) => {
   let i = off;
   if (i >= buf.length) {
     throw new Error("Unexpected end of buffer while reading length");
@@ -140,7 +136,7 @@ export const decodeTlvValue = (
   value: Uint8Array,
   length: number
 ): TlvNode => {
-  const name = TAG_NAMES[tag];
+  const name = TAG_NAMES.get(tag);
   const node: TlvNode = { tag, name, length };
   if (!isConstructed(tag)) {
     node.value_hex = bytesToHex(value);
@@ -176,7 +172,7 @@ const parseInner = (buf: Uint8Array, depth = 0): TlvNode[] => {
     i = i2 + len;
     if (isConstructed(tag)) {
       const children = parseInner(v, depth + 1);
-      items.push({ tag, name: TAG_NAMES[tag], length: len, children });
+      items.push({ tag, name: TAG_NAMES.get(tag), length: len, children });
       continue;
     }
     items.push(decodeTlvValue(tag, v, len));

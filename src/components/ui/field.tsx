@@ -5,13 +5,20 @@ import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 
-function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
+const fieldSetVariants = cva("", {
+  variants: { size: { default: "", compact: "gap-2" } },
+  defaultVariants: { size: "default" },
+})
+
+function FieldSet({ className, size = "default", ...props }: React.ComponentProps<"fieldset"> & VariantProps<typeof fieldSetVariants>) {
   return (
     <fieldset
       data-slot="field-set"
+      data-size={size}
       className={cn(
         "flex flex-col gap-6",
         "has-[>[data-slot=checkbox-group]]:gap-3 has-[>[data-slot=radio-group]]:gap-3",
+        fieldSetVariants({ size }),
         className
       )}
       {...props}
@@ -48,6 +55,9 @@ const fieldGroupVariants = cva(
         toolbar: "rounded-lg bg-muted/15 px-4 py-3 lg:px-5",
       },
       size: {
+        grid: "gap-x-5 gap-y-4",
+        backup: "gap-4 px-6 py-5",
+        "compact-padded": "gap-4 pt-5",
         default: "",
         compact: "gap-4",
         sm: "gap-3",

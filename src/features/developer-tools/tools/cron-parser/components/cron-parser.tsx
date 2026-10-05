@@ -285,7 +285,10 @@ export function CronParser() {
             {messages.cronParser.builder.scheduleMode}
           </ToggleGroupItem>
         </ToggleGroup>
-        <FieldGroup className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,0.65fr)] sm:items-end lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)_auto]">
+        <FieldGroup
+          className="grid sm:grid-cols-[minmax(0,1fr)_minmax(0,0.65fr)] sm:items-end lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)_auto]"
+          size="sm"
+        >
           {mode === "schedule" ? (
             <CronScheduleControls
               invalid={Boolean(error)}

@@ -17,7 +17,6 @@ import {
   type QrImageErrorCode,
 } from "@/features/developer-tools/tools/qris-parser/decode-qr-image";
 import { messages } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 
 type SelectedImage = { readonly name: string; readonly preview: string };
 
@@ -186,13 +185,12 @@ export function QrImageInput({
         {...getRootProps({ role: "button", tabIndex: 0 })}
         aria-describedby="qris-image-hint qris-image-status"
         aria-label={selected ? copy.replaceImage : copy.chooseImage}
-        className={cn(
-          "h-auto min-h-24 w-full justify-start gap-3 whitespace-normal px-4 py-3 text-left",
-          isDragActive && "ring-2 ring-ring"
-        )}
+        className="min-h-24 w-full justify-start whitespace-normal text-left"
+        data-drag-active={isDragActive}
         onClick={open}
+        size="upload"
         type="button"
-        variant="dashed"
+        variant="qr-upload"
       >
         {selected ? (
           <img

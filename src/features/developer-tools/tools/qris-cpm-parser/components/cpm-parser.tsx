@@ -84,14 +84,11 @@ function CopyButton({
       aria-label={
         label ? `Copy ${label}` : messages.developerTools.qrisCpm.copyValue
       }
-      className={cn(
-        "size-6 shrink-0 text-muted-foreground hover:text-foreground",
-        className
-      )}
+      className={cn("size-6 shrink-0", className)}
       onClick={handleCopy}
       size="icon-xs"
       type="button"
-      variant="ghost"
+      variant="ghost-slate"
     >
       {copied ? (
         <Check className="size-3 text-primary" />
@@ -166,7 +163,8 @@ function CpmSummary({
           <Dialog>
             <DialogTrigger
               aria-label={copy.viewQr}
-              className="group relative cursor-pointer rounded-md border bg-white p-1 transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-ring"
+              className="group relative cursor-pointer hover:scale-105"
+              variant="qr"
             >
               <img
                 alt={copy.scan}
@@ -177,17 +175,15 @@ function CpmSummary({
               />
             </DialogTrigger>
             <DialogContent
-              className="flex flex-col items-center gap-4 text-center"
+              className="flex flex-col items-center text-center"
               size="sm"
             >
               <DialogHeader className="items-center text-center">
-                <DialogTitle className="font-semibold text-base">
+                <DialogTitle size="sm">
                   {cardholder || appLabel || copy.title}
                 </DialogTitle>
                 {cpan ? (
-                  <DialogDescription className="font-mono text-xs">
-                    {cpan}
-                  </DialogDescription>
+                  <DialogDescription size="mono-xs">{cpan}</DialogDescription>
                 ) : null}
               </DialogHeader>
               <div className="rounded-lg border bg-white p-3 shadow-xs">
@@ -250,11 +246,9 @@ function CpmSummary({
             <dd className="mt-1 flex items-center justify-between gap-1 break-all font-medium">
               <span className="min-w-0">{value ?? "—"}</span>
               {value ? (
-                <CopyButton
-                  className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/item:opacity-100"
-                  label={label}
-                  value={value}
-                />
+                <span className="opacity-0 transition-opacity focus-within:opacity-100 group-hover/item:opacity-100">
+                  <CopyButton label={label} value={value} />
+                </span>
               ) : null}
             </dd>
           </div>
@@ -299,7 +293,7 @@ function FieldTree({
             {node.tag} · {node.name ?? copy.unknown}
           </p>
           <p className="mt-2 text-muted-foreground text-xs leading-relaxed">
-            {copy.tagInfo[node.tag as keyof typeof copy.tagInfo] ??
+            {new Map(Object.entries(copy.tagInfo)).get(node.tag) ??
               copy.unknownInfo}
           </p>
         </PopoverContent>
@@ -339,11 +333,12 @@ function FieldTree({
                     <dt className="text-muted-foreground">{label}</dt>
                     <dd className="select-text">{value}</dd>
                   </div>
-                  <CopyButton
-                    className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/item:opacity-100"
-                    label={`${node.name ?? node.tag} (${label})`}
-                    value={value}
-                  />
+                  <span className="opacity-0 transition-opacity focus-within:opacity-100 group-hover/item:opacity-100">
+                    <CopyButton
+                      label={`${node.name ?? node.tag} (${label})`}
+                      value={value}
+                    />
+                  </span>
                 </div>
               )
             )}

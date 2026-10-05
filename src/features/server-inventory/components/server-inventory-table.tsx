@@ -9,6 +9,7 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   flexRender,
+  functionalUpdate,
   getCoreRowModel,
   type SortingState,
   useReactTable,
@@ -91,6 +92,13 @@ import type {
 } from "@/features/server-inventory/types";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+
+type InventoryStyle = CSSProperties & {
+  "--table-min-width"?: string;
+  "--column-width"?: string;
+  "--fullscreen-origin"?: string;
+};
 
 const AnimatedTableRow = motion.create(TableRow);
 const rowTransition = {
@@ -454,7 +462,7 @@ export function ServerInventoryTable({
     manualFiltering: true,
     pageCount: totalPages,
     onPaginationChange: (update) => {
-      const next = typeof update === "function" ? update(pagination) : update;
+      const next = functionalUpdate(update, pagination);
       onQueryChange({
         ...query,
         page: next.pageSize === query.size ? next.pageIndex : 0,
@@ -462,13 +470,11 @@ export function ServerInventoryTable({
       });
     },
     onColumnFiltersChange: (update) =>
-      setColumnFilters(
-        typeof update === "function" ? update(columnFilters) : update
-      ),
+      setColumnFilters(functionalUpdate(update, columnFilters)),
     onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setSearch,
     onSortingChange: (update) => {
-      const next = (typeof update === "function" ? update(sorting) : update)[0];
+      const next = functionalUpdate(update, sorting)[0];
       onQueryChange({
         ...query,
         page: 0,
@@ -484,15 +490,17 @@ export function ServerInventoryTable({
       pagination,
     },
   });
-  const labels: Record<string, string> = {
-    accessType: copy.accessType,
-    databaseEngine: copy.databaseEngine,
-    host: copy.host,
-    name: copy.name,
-    notes: copy.notes,
-    password: copy.password,
-    username: copy.username,
-  };
+  const labels = new Map(
+    Object.entries({
+      accessType: copy.accessType,
+      databaseEngine: copy.databaseEngine,
+      host: copy.host,
+      name: copy.name,
+      notes: copy.notes,
+      password: copy.password,
+      username: copy.username,
+    })
+  );
   const hostGroups = new Map<
     string,
     ReturnType<typeof table.getRowModel>["rows"]
@@ -505,6 +513,13 @@ export function ServerInventoryTable({
   const filteredCount = totalElements;
   const page = table.getState().pagination.pageIndex + 1;
   const pages = Math.max(1, table.getPageCount());
+
+  const tableStyle: InventoryStyle = {
+    "--table-min-width": `${table.getTotalSize()}px`,
+  };
+  const fullscreenStyle: InventoryStyle = {
+    "--fullscreen-origin": fullscreenOrigin,
+  };
 
   const content = (
     <div
@@ -538,7 +553,7 @@ export function ServerInventoryTable({
               <DrawerTitle>{copy.detailsTitle}</DrawerTitle>
               <DrawerDescription>{detailsEntry?.name}</DrawerDescription>
             </DrawerHeader>
-            <ScrollArea className="min-h-0 flex-1" contentClassName="px-6 pb-6">
+            <ScrollArea className="min-h-0 flex-1" contentSize="drawer">
               {detailsEntry && <ServerEntryDetails entry={detailsEntry} />}
             </ScrollArea>
             <DrawerFooter className="shrink-0" size="lg" variant="bordered">
@@ -693,7 +708,7 @@ export function ServerInventoryTable({
                         column.toggleVisibility(!!checked)
                       }
                     >
-                      {labels[column.id]}
+                      {labels.get(column.id)}
                     </DropdownMenuCheckboxItem>
                   ))}
               </DropdownMenuGroup>
@@ -721,33 +736,38 @@ export function ServerInventoryTable({
       )}
       <ScrollArea
         className="min-w-0 overflow-hidden lg:min-h-0 lg:flex-1 [&_[data-slot=table-container]]:overflow-visible"
-        contentClassName="w-full pb-2.5"
+        contentClassName="w-full"
+        contentSize="table"
         variant="fit"
       >
         <Table
           aria-busy={loading}
           aria-label={copy.title}
-          className="table-fixed"
-          style={{ minWidth: table.getTotalSize() }}
+          className="min-w-(--table-min-width) table-fixed"
+          style={tableStyle}
         >
           <colgroup>
-            {table.getVisibleLeafColumns().map((column) => (
-              <col
-                key={column.id}
-                style={{
-                  width: `${(column.getSize() / table.getTotalSize()) * 100}%`,
-                }}
-              />
-            ))}
+            {table.getVisibleLeafColumns().map((column) => {
+              const style: InventoryStyle = {
+                "--column-width": `${(column.getSize() / table.getTotalSize()) * 100}%`,
+              };
+              return (
+                <col
+                  className="w-(--column-width)"
+                  key={column.id}
+                  style={style}
+                />
+              );
+            })}
           </colgroup>
-          <TableHeader className="bg-background lg:sticky lg:top-0 lg:z-10">
+          <TableHeader className="lg:sticky lg:top-0 lg:z-10" variant="sticky">
             {table.getHeaderGroups().map((group) => (
               <TableRow key={group.id}>
                 {group.headers.map((header) => (
                   <TableHead
                     aria-sort={getAriaSort(header.column.getIsSorted())}
-                    className={header.column.id === "name" ? "pl-8" : undefined}
                     key={header.id}
+                    size={header.column.id === "name" ? "indented" : "default"}
                   >
                     {header.isPlaceholder
                       ? null
@@ -771,7 +791,10 @@ export function ServerInventoryTable({
                   key={`host:${host}`}
                   layout={layout}
                   onClick={(event) => {
-                    if ((event.target as HTMLElement).closest("button")) {
+                    if (
+                      event.target instanceof Element &&
+                      event.target.closest("button")
+                    ) {
                       return;
                     }
                     toggleHost(host);
@@ -779,8 +802,8 @@ export function ServerInventoryTable({
                   transition={layoutTransition}
                 >
                   <TableCell
-                    className="border-primary/60 border-l-2 py-2"
                     colSpan={table.getVisibleLeafColumns().length}
+                    variant="host-group"
                   >
                     <div className="flex items-center gap-2">
                       <Button
@@ -796,17 +819,12 @@ export function ServerInventoryTable({
                         variant="ghost"
                       >
                         <ChevronDown
-                          className={
-                            animatedHost === host
-                              ? "transition-transform duration-150 ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))] motion-reduce:transition-none"
-                              : undefined
-                          }
+                          className={cn(
+                            animatedHost === host &&
+                              "transition-transform duration-150 ease-out motion-reduce:transition-none",
+                            collapsedHosts.has(host) ? "-rotate-90" : "rotate-0"
+                          )}
                           data-icon="inline-start"
-                          style={{
-                            transform: collapsedHosts.has(host)
-                              ? "rotate(-90deg)"
-                              : "rotate(0deg)",
-                          }}
                         />
                         <Server
                           aria-hidden="true"
@@ -820,7 +838,9 @@ export function ServerInventoryTable({
                         </span>
                       </Button>
                       <Button
-                        aria-label={formatMessage(copy.copyHostGroup, { host })}
+                        aria-label={formatMessage(copy.copyHostGroup, {
+                          host,
+                        })}
                         onClick={() => copyValue(host)}
                         size="icon-sm"
                         variant="ghost"
@@ -842,7 +862,8 @@ export function ServerInventoryTable({
                     layout={layout}
                     onClick={(event) => {
                       if (
-                        (event.target as HTMLElement).closest(
+                        event.target instanceof Element &&
+                        event.target.closest(
                           "button, a, input, [role='menuitem'], [role='switch']"
                         )
                       ) {
@@ -864,12 +885,11 @@ export function ServerInventoryTable({
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
-                        className={
-                          cell.column.id === "name"
-                            ? "overflow-hidden text-ellipsis pl-8"
-                            : "overflow-hidden text-ellipsis"
-                        }
                         key={cell.id}
+                        size={
+                          cell.column.id === "name" ? "indented" : "default"
+                        }
+                        variant="ellipsis"
                       >
                         {cell.column.id === "password" ? (
                           <ServerPasswordCell
@@ -968,17 +988,9 @@ export function ServerInventoryTable({
     >
       {fullscreenMounted ? (
         <DialogContent
-          className="inventory-fullscreen-dialog h-dvh w-screen max-w-none rounded-none border-0 p-0 sm:max-w-none"
           showCloseButton={false}
-          style={
-            {
-              "--fullscreen-origin": fullscreenOrigin,
-              top: 0,
-              left: 0,
-              translate: "none",
-              scale: 1,
-            } as CSSProperties
-          }
+          style={fullscreenStyle}
+          variant="fullscreen"
         >
           <DialogTitle className="sr-only">{copy.title}</DialogTitle>
           {content}

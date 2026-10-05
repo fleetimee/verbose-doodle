@@ -60,8 +60,8 @@ export async function saveServerEntry({
   return response.data.server;
 }
 
-export function deleteServerEntry(id: string): Promise<unknown> {
-  return apiDelete(endpoints.delete(id));
+export async function deleteServerEntry(id: string): Promise<void> {
+  await apiDelete(endpoints.delete(id));
 }
 
 export async function revealServerPassword(id: string): Promise<string> {

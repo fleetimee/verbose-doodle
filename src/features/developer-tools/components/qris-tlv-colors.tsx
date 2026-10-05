@@ -1,23 +1,25 @@
 import type { TlvNode } from "@/features/developer-tools/tools/qris-cpm-parser/parse-cpm";
 
-const QRIS_TLV_COLORS: Record<string, number> = {
-  "85": 0,
-  "61": 1,
-  "4F": 2,
-  "50": 3,
-  "5A": 4,
-  "5F20": 5,
-  "5F2D": 6,
-  "5F50": 7,
-  "9F25": 0,
-  "63": 2,
-  "9F74": 6,
-  "9F7A": 1,
-  "9F7B": 7,
-};
+const QRIS_TLV_COLORS = new Map(
+  Object.entries({
+    "85": 0,
+    "61": 1,
+    "4F": 2,
+    "50": 3,
+    "5A": 4,
+    "5F20": 5,
+    "5F2D": 6,
+    "5F50": 7,
+    "9F25": 0,
+    "63": 2,
+    "9F74": 6,
+    "9F7A": 1,
+    "9F7B": 7,
+  })
+);
 
 export function qrisTlvColor(tag: string): string {
-  return `qris-color-${QRIS_TLV_COLORS[tag] ?? Number.parseInt(tag, 16) % 8}`;
+  return `qris-color-${QRIS_TLV_COLORS.get(tag) ?? Number.parseInt(tag, 16) % 8}`;
 }
 
 export function TlvHexSegments({

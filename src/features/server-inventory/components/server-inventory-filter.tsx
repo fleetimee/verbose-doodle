@@ -60,10 +60,10 @@ export function ServerInventoryFilter({
         <Button
           aria-expanded={open}
           aria-label={label}
-          className="inventory-filter min-w-0 max-w-full"
+          className="min-w-0 max-w-full"
           data-active={!!value}
           role="combobox"
-          variant="outline"
+          variant="inventory-filter"
         >
           <span className="flex min-w-0 items-center gap-2">
             {icon(value)}

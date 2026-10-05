@@ -839,6 +839,8 @@ const sidebarMenuBadgeVariants = cva(
   {
     variants: {
       variant: {
+        shortcut: "navigation-shortcut-hint",
+        "shortcut-muted": "navigation-shortcut-hint text-sidebar-foreground/55",
         default: "",
         muted: "text-sidebar-foreground/55",
       },

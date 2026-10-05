@@ -250,7 +250,7 @@ export function QrisCreator() {
         >
           <ScrollArea
             className="min-h-0 flex-1"
-            contentClassName="p-4"
+            contentSize="padded"
             variant="fit"
           >
             <details
@@ -328,7 +328,7 @@ export function QrisCreator() {
                   </Button>
                 ))}
               </fieldset>
-              <FieldGroup className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <FieldGroup className="grid grid-cols-1 sm:grid-cols-2" size="sm">
                 {field("merchantName")}
                 {field("merchantCity")}
                 {field("merchantCategoryCode")}
@@ -342,7 +342,7 @@ export function QrisCreator() {
               <p className="mb-3 text-muted-foreground text-xs leading-relaxed">
                 {copy.hint}
               </p>
-              <FieldGroup className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <FieldGroup className="grid grid-cols-1 sm:grid-cols-2" size="sm">
                 {field("providerGuid")}
                 {field("merchantPan")}
                 {field("nationalMerchantId")}
@@ -352,7 +352,10 @@ export function QrisCreator() {
                 <summary className="cursor-pointer font-medium text-sm">
                   {copy.optional}
                 </summary>
-                <FieldGroup className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <FieldGroup
+                  className="mt-3 grid grid-cols-1 sm:grid-cols-2"
+                  size="sm"
+                >
                   {field("merchantId")}
                   {field("postalCode")}
                   {field("reference")}
@@ -400,7 +403,7 @@ export function QrisCreator() {
                   <div className="qris-creator-preview-frame aspect-square w-full max-w-80 shrink-0">
                     <img
                       alt={copy.scan}
-                      className="relative block size-full rounded-[inherit]"
+                      className="relative block size-full rounded-xl"
                       height={320}
                       src={qr.plainSrc}
                       width={320}
@@ -409,7 +412,7 @@ export function QrisCreator() {
                       <img
                         alt=""
                         aria-hidden="true"
-                        className="qris-creator-preview-branding size-full rounded-[inherit]"
+                        className="qris-creator-preview-branding size-full rounded-xl"
                         data-visible={branded}
                         height={320}
                         src={qr.brandedSrc}
@@ -478,7 +481,7 @@ export function QrisCreator() {
                       <PayloadSegments fields={payloadFields} />
                     </pre>
                     <Textarea
-                      className="field-sizing-fixed relative min-h-24 resize-y break-all md:text-xs"
+                      className="field-sizing-fixed relative min-h-24 resize-y break-all"
                       id="created-qris-payload"
                       onScroll={(event) => {
                         if (payloadHighlight.current) {

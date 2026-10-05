@@ -18,11 +18,16 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   )
 }
 
-function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
+const tableHeaderVariants = cva("[&_tr]:border-b", {
+  variants: { variant: { default: "", sticky: "bg-background" } },
+  defaultVariants: { variant: "default" },
+})
+
+function TableHeader({ className, variant = "default", ...props }: React.ComponentProps<"thead"> & VariantProps<typeof tableHeaderVariants>) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
+      className={cn(tableHeaderVariants({ variant }), className)}
       {...props}
     />
   )
@@ -82,12 +87,18 @@ function TableRow({
   )
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+const tableHeadVariants = cva("", {
+  variants: { size: { default: "", indented: "pl-8" } },
+  defaultVariants: { size: "default" },
+})
+
+function TableHead({ className, size = "default", ...props }: React.ComponentProps<"th"> & VariantProps<typeof tableHeadVariants>) {
   return (
     <th
       data-slot="table-head"
       className={cn(
         "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        tableHeadVariants({ size }),
         className
       )}
       {...props}
@@ -105,10 +116,13 @@ const tableCellVariants = cva(
         truncate: "truncate font-mono text-xs text-muted-foreground",
         medium: "font-medium text-xs",
         muted: "text-muted-foreground",
+        "host-group": "border-primary/60 border-l-2",
+        ellipsis: "overflow-hidden text-ellipsis",
       },
       size: {
         default: "",
         sm: "text-xs",
+        indented: "pl-8",
       },
     },
     defaultVariants: {

@@ -14,16 +14,29 @@ function Dialog({
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
+const dialogTriggerVariants = cva("", {
+  variants: {
+    variant: {
+      default: "",
+      qr: "rounded-md border bg-white p-1 transition-transform focus-visible:outline-2 focus-visible:outline-ring",
+    },
+  },
+  defaultVariants: { variant: "default" },
+})
+
 function DialogTrigger({
+  className,
+  variant = "default",
   asChild,
   children,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Trigger> & {
+}: React.ComponentProps<typeof DialogPrimitive.Trigger> & VariantProps<typeof dialogTriggerVariants> & {
   asChild?: boolean
 }) {
   return (
     <DialogPrimitive.Trigger
       data-slot="dialog-trigger"
+      className={cn(dialogTriggerVariants({ variant }), className)}
       render={
         // SAFETY: React.isValidElement below proves the child is a React element.
         asChild && React.isValidElement(children)
@@ -87,6 +100,7 @@ const dialogContentVariants = cva(
   {
     variants: {
       variant: {
+        fullscreen: "inventory-fullscreen-dialog top-0 left-0 h-dvh w-screen max-w-none translate-none scale-100 rounded-none border-0 p-0 sm:max-w-none",
         default: "",
         pane: "flex flex-col gap-0 overflow-hidden rounded-xl border p-0 shadow-2xl",
         "dark-pane":
@@ -277,6 +291,7 @@ function DialogTitle({
 const dialogDescriptionVariants = cva("text-muted-foreground", {
   variants: {
     size: {
+      "mono-xs": "font-mono text-xs",
       default: "text-sm",
       xs: "text-xs",
     },

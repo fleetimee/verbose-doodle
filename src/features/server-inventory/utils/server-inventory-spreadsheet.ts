@@ -10,6 +10,14 @@ import type {
 
 type ExportEntry = ServerEntry & { password?: string };
 export type ServerExportScope = "page" | "filtered" | "all";
+function isNumber(value: string | number | boolean): value is number {
+  return typeof value === "number";
+}
+
+function isBoolean(value: string | number | boolean): value is boolean {
+  return typeof value === "boolean";
+}
+
 const COLUMNS = [
   { key: "name", label: "Name", width: 30 },
   { key: "host", label: "Host", width: 25 },
@@ -48,10 +56,10 @@ export function getServerInventorySpreadsheet(
         if (value === null || value === undefined) {
           return null;
         }
-        if (typeof value === "number") {
+        if (isNumber(value)) {
           return { value, type: Number };
         }
-        if (typeof value === "boolean") {
+        if (isBoolean(value)) {
           return { value, type: Boolean };
         }
         return { value, type: String, wrap: true };

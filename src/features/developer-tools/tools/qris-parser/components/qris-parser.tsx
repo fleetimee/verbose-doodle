@@ -26,7 +26,7 @@ import {
   QRIS_DYNAMIC_SAMPLE,
   QRIS_SAMPLE,
   type QrisField,
-  type QrisParseError,
+  QrisParseError,
 } from "@/features/developer-tools/tools/qris-parser/parse-qris";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
@@ -69,14 +69,11 @@ function CopyButton({
       aria-label={
         label ? `Copy ${label}` : messages.developerTools.qris.copyValue
       }
-      className={cn(
-        "size-6 shrink-0 text-muted-foreground hover:text-foreground",
-        className
-      )}
+      className={cn("size-6 shrink-0", className)}
       onClick={handleCopy}
       size="icon-xs"
       type="button"
-      variant="ghost"
+      variant="ghost-slate"
     >
       {copied ? (
         <Check className="size-3 text-primary" />
@@ -100,13 +97,13 @@ function fieldLabel(field: QrisField): string {
   if (field.path.includes(".")) {
     if (parent === "62") {
       return (
-        copy.additionalLabels[field.id as keyof typeof copy.additionalLabels] ??
+        new Map(Object.entries(copy.additionalLabels)).get(field.id) ??
         copy.unknownField
       );
     }
     if (parent === "64") {
       return (
-        copy.languageLabels[field.id as keyof typeof copy.languageLabels] ??
+        new Map(Object.entries(copy.languageLabels)).get(field.id) ??
         copy.unknownField
       );
     }
@@ -124,7 +121,9 @@ function fieldLabel(field: QrisField): string {
   if (Number(field.id) >= 80) {
     return copy.unreserved;
   }
-  return copy.labels[field.id as keyof typeof copy.labels] ?? copy.unknownField;
+  return (
+    new Map(Object.entries(copy.labels)).get(field.id) ?? copy.unknownField
+  );
 }
 
 function fieldColor(field: QrisField): string {
@@ -159,11 +158,12 @@ function FieldRows({ fields }: { readonly fields: readonly QrisField[] }) {
                       </dt>
                       <dd className="select-text">{child.value}</dd>
                     </div>
-                    <CopyButton
-                      className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/child:opacity-100"
-                      label={`${fieldLabel(child)} (${child.path})`}
-                      value={child.value}
-                    />
+                    <span className="opacity-0 transition-opacity focus-within:opacity-100 group-hover/child:opacity-100">
+                      <CopyButton
+                        label={`${fieldLabel(child)} (${child.path})`}
+                        value={child.value}
+                      />
+                    </span>
                   </div>
                 ))}
               </dl>
@@ -171,11 +171,12 @@ function FieldRows({ fields }: { readonly fields: readonly QrisField[] }) {
           ) : (
             <div className="flex items-center justify-between gap-2">
               <span className="min-w-0 select-text">{field.value}</span>
-              <CopyButton
-                className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/row:opacity-100"
-                label={`${fieldLabel(field)} (${field.path})`}
-                value={field.value}
-              />
+              <span className="opacity-0 transition-opacity focus-within:opacity-100 group-hover/row:opacity-100">
+                <CopyButton
+                  label={`${fieldLabel(field)} (${field.path})`}
+                  value={field.value}
+                />
+              </span>
             </div>
           )}
         </td>
@@ -203,7 +204,8 @@ function MerchantSummary({
           <Dialog>
             <DialogTrigger
               aria-label={copy.viewQr}
-              className="group relative cursor-pointer rounded-md border bg-white p-1 transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-ring"
+              className="group relative cursor-pointer hover:scale-105"
+              variant="qr"
             >
               <img
                 alt={copy.scan}
@@ -214,17 +216,15 @@ function MerchantSummary({
               />
             </DialogTrigger>
             <DialogContent
-              className="flex flex-col items-center gap-4 text-center"
+              className="flex flex-col items-center text-center"
               size="sm"
             >
               <DialogHeader className="items-center text-center">
-                <DialogTitle className="font-semibold text-base">
+                <DialogTitle size="sm">
                   {result.merchant || copy.title}
                 </DialogTitle>
                 {result.city ? (
-                  <DialogDescription className="text-xs">
-                    {result.city}
-                  </DialogDescription>
+                  <DialogDescription size="xs">{result.city}</DialogDescription>
                 ) : null}
               </DialogHeader>
               <div className="rounded-lg border bg-white p-3 shadow-xs">
@@ -243,7 +243,7 @@ function MerchantSummary({
                     : copy.noAmount}
                 </p>
                 <p className="text-muted-foreground text-xs">
-                  {copy[result.mode as "static" | "dynamic" | "unknown"]}
+                  {copy[result.mode]}
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-2">
@@ -278,11 +278,7 @@ function MerchantSummary({
         {[
           [copy.merchant, result.merchant, result.merchant],
           [copy.city, result.city, result.city],
-          [
-            copy.mode,
-            copy[result.mode as "static" | "dynamic" | "unknown"],
-            copy[result.mode as "static" | "dynamic" | "unknown"],
-          ],
+          [copy.mode, copy[result.mode], copy[result.mode]],
           [
             copy.amount,
             result.amount
@@ -298,11 +294,9 @@ function MerchantSummary({
             <dd className="mt-1 flex items-center justify-between gap-1 break-all font-medium">
               <span className="min-w-0">{displayText ?? "—"}</span>
               {copyValue ? (
-                <CopyButton
-                  className="opacity-0 transition-opacity focus-visible:opacity-100 group-hover/item:opacity-100"
-                  label={label}
-                  value={copyValue}
-                />
+                <span className="opacity-0 transition-opacity focus-within:opacity-100 group-hover/item:opacity-100">
+                  <CopyButton label={label} value={copyValue} />
+                </span>
               ) : null}
             </dd>
           </div>
@@ -331,7 +325,10 @@ export function QrisParser() {
     try {
       return { result: parseQris(source), error: null };
     } catch (error) {
-      return { result: null, error: error as QrisParseError };
+      if (!(error instanceof QrisParseError)) {
+        throw error;
+      }
+      return { result: null, error };
     }
   }, [source]);
   const qr = useMemo(() => {
@@ -405,11 +402,7 @@ export function QrisParser() {
               aria-busy={imageBusy}
               aria-describedby={error ? "qris-error" : undefined}
               aria-invalid={Boolean(error)}
-              className={cn(
-                "field-sizing-fixed relative h-full min-h-40 w-full resize-none break-all bg-transparent text-xs md:text-xs dark:bg-transparent",
-                result &&
-                  "text-transparent caret-foreground selection:bg-blue-500/25 selection:text-transparent"
-              )}
+              className="field-sizing-fixed relative h-full min-h-40 w-full resize-none break-all"
               disabled={imageBusy}
               id="qris-payload"
               onChange={(event) => changeSource(event.target.value)}
@@ -422,8 +415,9 @@ export function QrisParser() {
                 }
               }}
               placeholder={copy.placeholder}
+              size="xs"
               value={source}
-              variant="mono-muted"
+              variant={result ? "overlay" : "mono-muted"}
             />
           </div>
           {errorText ? (
@@ -483,7 +477,7 @@ export function QrisParser() {
                 <p
                   className={
                     result.crcValid
-                      ? "font-semibold text-[#08783e] dark:text-[#4dff91]"
+                      ? "font-semibold text-success"
                       : "font-medium text-destructive"
                   }
                 >

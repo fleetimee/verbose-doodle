@@ -19,7 +19,7 @@ const textareaVariants = cva(
       },
       size: {
         default: "",
-        xs: "text-xs",
+        xs: "text-xs md:text-xs",
         sm: "text-sm",
       },
     },

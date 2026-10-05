@@ -1,6 +1,12 @@
+import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
-function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {
+const kbdVariants = cva("", {
+  variants: { variant: { default: "", shortcut: "navigation-shortcut-hint" } },
+  defaultVariants: { variant: "default" },
+})
+
+function Kbd({ className, variant = "default", ...props }: React.ComponentProps<"kbd"> & VariantProps<typeof kbdVariants>) {
   return (
     <kbd
       data-slot="kbd"
@@ -8,6 +14,7 @@ function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {
         "bg-muted text-muted-foreground pointer-events-none inline-flex h-5 w-fit min-w-5 items-center justify-center gap-1 rounded-sm px-1 font-sans text-xs font-medium select-none",
         "[&_svg:not([class*='size-'])]:size-3",
         "[[data-slot=tooltip-content]_&]:bg-background/20 [[data-slot=tooltip-content]_&]:text-background dark:[[data-slot=tooltip-content]_&]:bg-background/10",
+        kbdVariants({ variant }),
         className
       )}
       {...props}

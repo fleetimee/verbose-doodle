@@ -440,8 +440,8 @@ export function EndpointTrafficLogViewer({
   } else {
     logContent = (
       <ScrollArea
-        className="h-[560px] w-full max-w-full border-border bg-background text-foreground dark:border-[#2f2f2f] dark:bg-[#151515]"
-        variant="terminal"
+        className="h-[560px] w-full max-w-full"
+        variant="traffic"
         viewportRef={trafficLogViewportRef}
       >
         <div
@@ -461,9 +461,9 @@ export function EndpointTrafficLogViewer({
                   { requestId: log.requestId }
                 )}
                 checked={selectedIds.has(log.id)}
-                className="mt-0.5 border-input bg-background dark:border-[#5b5b5b] dark:bg-[#1f1f1f]"
+                className="mt-0.5"
                 onCheckedChange={() => handleToggleSelected(log.id)}
-                variant="terminal-blue"
+                variant="traffic"
               />
               <button
                 className="text-left"

@@ -1,5 +1,6 @@
 import { useId, useRef, useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { GameFullscreenButton } from "@/components/game-fullscreen-button";
 import { FileJson, Globe, Info, Users } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
@@ -52,6 +53,8 @@ type BackupPicker = {
   fileName?: string;
 };
 
+const backupErrorSchema = z.object({ message: z.string() });
+
 const MAX_BACKUP_BYTES = 50 * 1024 * 1024;
 
 export function TerrabrowserPage() {
@@ -75,6 +78,7 @@ export function TerrabrowserPage() {
   const pendingLabel = importing ? copy.backupImporting : copy.backupExporting;
 
   function getBridge() {
+    // SAFETY: The same-origin bundled game installs the BackupBridge API on its window.
     const frame = frameRef.current?.contentWindow as
       | (Window & { terrabrowserBackup?: BackupBridge })
       | null;
@@ -84,24 +88,18 @@ export function TerrabrowserPage() {
     return frame.terrabrowserBackup;
   }
 
-  function showError(error: unknown) {
-    const errors: Record<string, string> = {
-      backupBusy: copy.backupBusy,
-      backupMenuRequired: copy.backupMenuRequired,
-      backupInvalid: copy.backupInvalid,
-      backupStorageFailed: copy.backupStorageFailed,
-      backupSaveFailed: copy.backupSaveFailed,
-      backupSelectionRequired: copy.backupSelectHint,
-    };
-    // Errors from the game iframe belong to a different JavaScript realm.
-    const message =
-      typeof error === "object" &&
-      error !== null &&
-      "message" in error &&
-      typeof error.message === "string"
-        ? error.message
-        : "";
-    toast.error(errors[message] ?? copy.backupFailed);
+  function showError(message: string) {
+    const errors = new Map(
+      Object.entries({
+        backupBusy: copy.backupBusy,
+        backupMenuRequired: copy.backupMenuRequired,
+        backupInvalid: copy.backupInvalid,
+        backupStorageFailed: copy.backupStorageFailed,
+        backupSaveFailed: copy.backupSaveFailed,
+        backupSelectionRequired: copy.backupSelectHint,
+      })
+    );
+    toast.error(errors.get(message) ?? copy.backupFailed);
   }
 
   async function openExport() {
@@ -111,7 +109,8 @@ export function TerrabrowserPage() {
       setSelection({ characters: [], worlds: [] });
       setPicker({ mode: "export", catalog });
     } catch (error) {
-      showError(error);
+      const parsed = backupErrorSchema.safeParse(error);
+      showError(parsed.success ? parsed.data.message : "");
     } finally {
       setBusy(false);
     }
@@ -145,7 +144,8 @@ export function TerrabrowserPage() {
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       setPicker(null);
     } catch (error) {
-      showError(error);
+      const parsed = backupErrorSchema.safeParse(error);
+      showError(parsed.success ? parsed.data.message : "");
     } finally {
       setBusy(false);
     }
@@ -162,7 +162,8 @@ export function TerrabrowserPage() {
       setSelection({ characters: [], worlds: [] });
       setPicker({ mode: "import", catalog, text, fileName: file.name });
     } catch (error) {
-      showError(error);
+      const parsed = backupErrorSchema.safeParse(error);
+      showError(parsed.success ? parsed.data.message : "");
     } finally {
       setBusy(false);
     }
@@ -267,8 +268,8 @@ export function TerrabrowserPage() {
             </span>
           </div>
           <FieldGroup
-            className="max-h-[50dvh] min-h-0 overflow-y-auto px-6 py-5"
-            size="compact"
+            className="max-h-[50dvh] min-h-0 overflow-y-auto"
+            size="backup"
           >
             {(["characters", "worlds"] as const).map((kind) => {
               const saves = picker?.catalog[kind] ?? [];
@@ -280,12 +281,12 @@ export function TerrabrowserPage() {
               const allSelected =
                 saves.length > 0 && selection[kind].length === saves.length;
               return (
-                <FieldSet className="gap-2" disabled={busy} key={kind}>
+                <FieldSet disabled={busy} key={kind} size="compact">
                   <FieldLegend
-                    className="mb-2 flex w-full items-center justify-between gap-3"
+                    className="mb-2 flex w-full items-center justify-between"
                     variant="label"
                   >
-                    <span className="flex items-center gap-2">
+                    <span className="mr-3 flex items-center gap-2">
                       <Icon
                         aria-hidden="true"
                         className="size-4 text-muted-foreground"
@@ -319,9 +320,11 @@ export function TerrabrowserPage() {
                   </FieldLegend>
                   <FieldGroup size="sm">
                     {saves.length === 0 ? (
-                      <FieldDescription className="py-2">
-                        {copy.backupNoSaves}
-                      </FieldDescription>
+                      <div className="py-2">
+                        <FieldDescription>
+                          {copy.backupNoSaves}
+                        </FieldDescription>
+                      </div>
                     ) : null}
                     {saves.map((save, index) => (
                       <Field

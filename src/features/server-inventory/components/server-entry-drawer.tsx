@@ -53,19 +53,21 @@ import type {
 } from "@/features/server-inventory/types";
 import { getErrorMessage } from "@/lib/error-handler";
 
-const defaultPorts: Record<string, string> = {
-  SSH: "22",
-  RDP: "3389",
-  FTP: "21",
-  FTPS: "990",
-  SFTP: "22",
-  HTTP: "80",
-  HTTPS: "443",
-  VNC: "5900",
-  TELNET: "23",
-  WINRM: "5985",
-  SMB: "445",
-};
+const defaultPorts = new Map(
+  Object.entries({
+    SSH: "22",
+    RDP: "3389",
+    FTP: "21",
+    FTPS: "990",
+    SFTP: "22",
+    HTTP: "80",
+    HTTPS: "443",
+    VNC: "5900",
+    TELNET: "23",
+    WINRM: "5985",
+    SMB: "445",
+  })
+);
 
 export function ServerEntryDrawer({
   entry,
@@ -79,7 +81,7 @@ export function ServerEntryDrawer({
   types: string[];
   hosts: string[];
   saving: boolean;
-  onSave: (request: ServerEntryRequest, id?: string) => Promise<unknown>;
+  onSave: (request: ServerEntryRequest, id?: string) => Promise<ServerEntry>;
   onClose: () => void;
 }) {
   const { messages } = useI18n();
@@ -112,8 +114,8 @@ export function ServerEntryDrawer({
   const accessType = form.watch("accessType").toUpperCase();
   const values = form.watch();
   const showCredentials = ["SSH", "RDP", "FTP"].includes(accessType);
-  const contextualFields = (
-    {
+  const contextualFields = new Map(
+    Object.entries({
       SSH: ["port", "username"],
       RDP: ["port", "username"],
       FTP: ["port", "username"],
@@ -121,8 +123,8 @@ export function ServerEntryDrawer({
       WEB: ["port", "url"],
       HTTP: ["port", "url"],
       HTTPS: ["port", "url"],
-    } as Record<string, string[]>
-  )[accessType] ?? ["port"];
+    })
+  ).get(accessType) ?? ["port"];
   const knownType = serverAccessTypes.includes(accessType);
   const fields = [
     { name: "name", label: copy.name, placeholder: copy.namePlaceholder },
@@ -332,7 +334,7 @@ export function ServerEntryDrawer({
                           form.getFieldState("port").isDirty;
                         const canUpdateDefault = !(entry || portWasEdited);
                         if (canUpdateDefault || !form.getValues("port")) {
-                          form.setValue("port", defaultPorts[type] ?? "");
+                          form.setValue("port", defaultPorts.get(type) ?? "");
                         }
                       }}
                       portalContainer={drawerContent}
@@ -344,76 +346,9 @@ export function ServerEntryDrawer({
                   </Field>
                 )}
               />
-              {fields
-                .filter(({ name }) => contextualFields.includes(name))
-                .map(({ name, label, placeholder }) => (
-                  <Field
-                    data-disabled={saving}
-                    data-invalid={!!form.formState.errors[name]}
-                    key={name}
-                  >
-                    <FieldLabel htmlFor={`server-${name}`}>{label}</FieldLabel>
-                    {name === "databaseEngine" ? (
-                      <Controller
-                        control={form.control}
-                        name="databaseEngine"
-                        render={({ field, fieldState }) => (
-                          <DatabaseEnginePicker
-                            disabled={saving}
-                            id="server-databaseEngine"
-                            invalid={fieldState.invalid}
-                            onChange={field.onChange}
-                            portalContainer={drawerContent}
-                            value={field.value}
-                          />
-                        )}
-                      />
-                    ) : (
-                      <Input
-                        {...form.register(name)}
-                        aria-invalid={!!form.formState.errors[name]}
-                        autoComplete="off"
-                        disabled={saving}
-                        id={`server-${name}`}
-                        inputMode={name === "port" ? "numeric" : undefined}
-                        placeholder={
-                          name === "port" && defaultPorts[accessType]
-                            ? defaultPorts[accessType]
-                            : placeholder
-                        }
-                      />
-                    )}
-                    <FieldError errors={[form.formState.errors[name]]} />
-                  </Field>
-                ))}
-              {showCredentials && passwordFields}
-            </FieldGroup>
-            <Collapsible onOpenChange={setOptionalOpen} open={optionalOpen}>
-              <CollapsibleTrigger type="button" variant="header">
-                {copy.optionalFields}
-                <ChevronDown
-                  className={optionalOpen ? "size-4 rotate-180" : "size-4"}
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent keepMounted>
-                <FieldGroup className="pt-5" size="compact">
-                  {fields
-                    .filter(({ name }) => {
-                      if (
-                        name === "name" ||
-                        name === "host" ||
-                        contextualFields.includes(name)
-                      ) {
-                        return false;
-                      }
-                      return (
-                        name === "port" ||
-                        name === "username" ||
-                        !knownType ||
-                        Boolean(values[name])
-                      );
-                    })
-                    .map(({ name, label, placeholder }) => (
+              {fields.flatMap(({ name, label, placeholder }) =>
+                contextualFields.includes(name)
+                  ? [
                       <Field
                         data-disabled={saving}
                         data-invalid={!!form.formState.errors[name]}
@@ -445,12 +380,87 @@ export function ServerEntryDrawer({
                             disabled={saving}
                             id={`server-${name}`}
                             inputMode={name === "port" ? "numeric" : undefined}
-                            placeholder={placeholder}
+                            placeholder={
+                              name === "port" && defaultPorts.get(accessType)
+                                ? defaultPorts.get(accessType)
+                                : placeholder
+                            }
                           />
                         )}
                         <FieldError errors={[form.formState.errors[name]]} />
-                      </Field>
-                    ))}
+                      </Field>,
+                    ]
+                  : []
+              )}
+              {showCredentials && passwordFields}
+            </FieldGroup>
+            <Collapsible onOpenChange={setOptionalOpen} open={optionalOpen}>
+              <CollapsibleTrigger type="button" variant="header">
+                {copy.optionalFields}
+                <ChevronDown
+                  className={optionalOpen ? "size-4 rotate-180" : "size-4"}
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent keepMounted>
+                <FieldGroup size="compact-padded">
+                  {fields.flatMap(({ name, label, placeholder }) => {
+                    if (
+                      name === "name" ||
+                      name === "host" ||
+                      contextualFields.includes(name)
+                    ) {
+                      return [];
+                    }
+                    const visible =
+                      name === "port" ||
+                      name === "username" ||
+                      !knownType ||
+                      Boolean(values[name]);
+                    return visible
+                      ? [
+                          <Field
+                            data-disabled={saving}
+                            data-invalid={!!form.formState.errors[name]}
+                            key={name}
+                          >
+                            <FieldLabel htmlFor={`server-${name}`}>
+                              {label}
+                            </FieldLabel>
+                            {name === "databaseEngine" ? (
+                              <Controller
+                                control={form.control}
+                                name="databaseEngine"
+                                render={({ field, fieldState }) => (
+                                  <DatabaseEnginePicker
+                                    disabled={saving}
+                                    id="server-databaseEngine"
+                                    invalid={fieldState.invalid}
+                                    onChange={field.onChange}
+                                    portalContainer={drawerContent}
+                                    value={field.value}
+                                  />
+                                )}
+                              />
+                            ) : (
+                              <Input
+                                {...form.register(name)}
+                                aria-invalid={!!form.formState.errors[name]}
+                                autoComplete="off"
+                                disabled={saving}
+                                id={`server-${name}`}
+                                inputMode={
+                                  name === "port" ? "numeric" : undefined
+                                }
+                                placeholder={placeholder}
+                              />
+                            )}
+                            <FieldError
+                              errors={[form.formState.errors[name]]}
+                            />
+                          </Field>,
+                        ]
+                      : [];
+                  })}
                   {!showCredentials && passwordFields}
                   <Field
                     data-disabled={saving}

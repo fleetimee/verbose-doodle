@@ -162,10 +162,10 @@ export function QrisMdrCalculator() {
         >
           <ScrollArea
             className="min-h-0 flex-1"
-            contentClassName="space-y-4 p-4"
+            contentSize="stack"
             variant="fit"
           >
-            <FieldGroup className="space-y-4">
+            <FieldGroup size="compact">
               {/* Transaction Amount */}
               <Field size="sm">
                 <FieldLabel htmlFor="mdr-amount">
@@ -173,15 +173,15 @@ export function QrisMdrCalculator() {
                 </FieldLabel>
                 <div className="relative">
                   <Input
-                    className="font-mono font-semibold text-base"
                     id="mdr-amount"
                     inputMode="numeric"
                     onChange={(e) =>
                       handleFieldChange("transactionAmount", e.target.value)
                     }
                     placeholder={copy.transactionAmountPlaceholder}
-                    size="sm"
+                    size="amount"
                     value={input.transactionAmount}
+                    variant="mono-amount"
                   />
                 </div>
                 {result.transactionAmount > 0 && (
@@ -197,13 +197,13 @@ export function QrisMdrCalculator() {
                   <FieldLabel htmlFor="mdr-rate">{copy.mdrRate}</FieldLabel>
                 </div>
                 <Input
-                  className="font-mono"
                   id="mdr-rate"
                   inputMode="decimal"
                   onChange={(e) => handleFieldChange("mdrRate", e.target.value)}
                   placeholder={copy.mdrRatePlaceholder}
                   size="sm"
                   value={input.mdrRate}
+                  variant="mono"
                 />
                 <div className="space-y-1.5 pt-1">
                   <span className="text-muted-foreground text-xs">
@@ -215,7 +215,7 @@ export function QrisMdrCalculator() {
                       return (
                         <Button
                           aria-pressed={isActive}
-                          className="h-7 text-xs"
+                          className="h-7"
                           key={preset.id}
                           onClick={() => applyPreset(preset.rate)}
                           size="xs"
@@ -259,7 +259,6 @@ export function QrisMdrCalculator() {
                       {copy.switchShare}
                     </FieldLabel>
                     <Input
-                      className="font-mono text-xs"
                       id="mdr-switch"
                       inputMode="decimal"
                       onChange={(e) =>
@@ -267,6 +266,7 @@ export function QrisMdrCalculator() {
                       }
                       size="sm"
                       value={input.switchShare}
+                      variant="mono"
                     />
                   </Field>
                   <Field size="sm">
@@ -274,7 +274,6 @@ export function QrisMdrCalculator() {
                       {copy.issuerShare}
                     </FieldLabel>
                     <Input
-                      className="font-mono text-xs"
                       id="mdr-issuer"
                       inputMode="decimal"
                       onChange={(e) =>
@@ -282,6 +281,7 @@ export function QrisMdrCalculator() {
                       }
                       size="sm"
                       value={input.issuerShare}
+                      variant="mono"
                     />
                   </Field>
                   <Field size="sm">
@@ -289,7 +289,6 @@ export function QrisMdrCalculator() {
                       {copy.acquirerShare}
                     </FieldLabel>
                     <Input
-                      className="font-mono text-xs"
                       id="mdr-acquirer"
                       inputMode="decimal"
                       onChange={(e) =>
@@ -297,6 +296,7 @@ export function QrisMdrCalculator() {
                       }
                       size="sm"
                       value={input.acquirerShare}
+                      variant="mono"
                     />
                   </Field>
                 </div>
@@ -350,7 +350,7 @@ export function QrisMdrCalculator() {
 
           <ScrollArea
             className="min-h-0 flex-1"
-            contentClassName="space-y-4 p-4"
+            contentSize="stack"
             variant="fit"
           >
             {/* Top Stat Cards */}
@@ -437,7 +437,7 @@ export function QrisMdrCalculator() {
                                   {result.mdrRate}%
                                 </tspan>
                                 <tspan
-                                  className="fill-muted-foreground text-[10px]"
+                                  className="fill-muted-foreground text-xs"
                                   x={viewBox.cx}
                                   y={(viewBox.cy ?? 0) + 14}
                                 >
@@ -457,7 +457,7 @@ export function QrisMdrCalculator() {
                 <div className="flex w-full flex-col justify-center gap-2.5 sm:w-auto sm:min-w-[180px]">
                   <div className="flex items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="size-2.5 shrink-0 rounded-full bg-[var(--chart-1)]" />
+                      <span className="size-2.5 shrink-0 rounded-full bg-chart-1" />
                       <span className="text-muted-foreground">
                         {copy.switchFee}
                       </span>
@@ -468,7 +468,7 @@ export function QrisMdrCalculator() {
                   </div>
                   <div className="flex items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="size-2.5 shrink-0 rounded-full bg-[var(--chart-2)]" />
+                      <span className="size-2.5 shrink-0 rounded-full bg-chart-2" />
                       <span className="text-muted-foreground">
                         {copy.issuerFee}
                       </span>
@@ -479,7 +479,7 @@ export function QrisMdrCalculator() {
                   </div>
                   <div className="flex items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="size-2.5 shrink-0 rounded-full bg-[var(--chart-3)]" />
+                      <span className="size-2.5 shrink-0 rounded-full bg-chart-3" />
                       <span className="text-muted-foreground">
                         {copy.acquirerFee}
                       </span>
@@ -509,7 +509,7 @@ export function QrisMdrCalculator() {
                 <tbody className="divide-y divide-border">
                   <tr>
                     <td className="flex items-center gap-2 px-3.5 py-2.5 font-medium">
-                      <span className="size-2 rounded-full bg-[var(--chart-1)]" />
+                      <span className="size-2 rounded-full bg-chart-1" />
                       {copy.switchFee}
                     </td>
                     <td className="px-3.5 py-2.5 text-right font-mono">
@@ -521,7 +521,7 @@ export function QrisMdrCalculator() {
                   </tr>
                   <tr>
                     <td className="flex items-center gap-2 px-3.5 py-2.5 font-medium">
-                      <span className="size-2 rounded-full bg-[var(--chart-2)]" />
+                      <span className="size-2 rounded-full bg-chart-2" />
                       {copy.issuerFee}
                     </td>
                     <td className="px-3.5 py-2.5 text-right font-mono">
@@ -533,7 +533,7 @@ export function QrisMdrCalculator() {
                   </tr>
                   <tr>
                     <td className="flex items-center gap-2 px-3.5 py-2.5 font-medium">
-                      <span className="size-2 rounded-full bg-[var(--chart-3)]" />
+                      <span className="size-2 rounded-full bg-chart-3" />
                       {copy.acquirerFee}
                     </td>
                     <td className="px-3.5 py-2.5 text-right font-mono">

@@ -1194,12 +1194,11 @@ export function Iso8583Generator() {
       </motion.section>
 
       <GeneratorActionBar>
-        <FieldSet className="min-w-0 gap-2">
-          <FieldLegend
-            className="mb-2 text-muted-foreground text-xs"
-            variant="label"
-          >
-            {copy.onGenerate}
+        <FieldSet className="min-w-0" size="compact">
+          <FieldLegend className="mb-2" variant="label">
+            <span className="text-muted-foreground text-xs">
+              {copy.onGenerate}
+            </span>
           </FieldLegend>
           <div className="flex flex-row flex-wrap gap-x-4 gap-y-2">
             <label

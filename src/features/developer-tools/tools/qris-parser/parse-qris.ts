@@ -102,11 +102,12 @@ export function parseQris(source: string) {
     get("58") === "ID" &&
     get("53") === "360" &&
     hasAccount;
-  const modes: Record<string, "static" | "dynamic"> = {
-    "11": "static",
-    "12": "dynamic",
-  };
-  const mode = modes[get("01") ?? ""] ?? "unknown";
+  let mode: "static" | "dynamic" | "unknown" = "unknown";
+  if (get("01") === "11") {
+    mode = "static";
+  } else if (get("01") === "12") {
+    mode = "dynamic";
+  }
   return {
     fields,
     crcValid,

@@ -12,6 +12,7 @@ const checkboxVariants = cva(
   {
     variants: {
       variant: {
+        "traffic": "border-input bg-background dark:border-[#5b5b5b] dark:bg-[#1f1f1f] data-checked:border-info data-checked:bg-info data-checked:text-white",
         default:
           "border-input dark:bg-input/30 data-checked:bg-primary data-checked:text-primary-foreground dark:data-checked:bg-primary data-checked:border-primary data-indeterminate:bg-primary data-indeterminate:text-primary-foreground data-indeterminate:border-primary",
         terminal:

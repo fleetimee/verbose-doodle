@@ -44,6 +44,7 @@ export const QRIS_CREATOR_SAMPLE: QrisCreatorInput = {
   reference: "",
   terminal: "A01",
 };
+// SAFETY: Every sample key is retained; mode is static and all other input fields are strings.
 export const QRIS_CREATOR_EMPTY: QrisCreatorInput = Object.fromEntries(
   Object.keys(QRIS_CREATOR_SAMPLE).map((key) => [
     key,
@@ -57,6 +58,7 @@ function tlv(tag: string, value: string): string {
 
 export function createQris(input: QrisCreatorInput, imported?: ImportedQris) {
   const values = { ...input };
+  // SAFETY: values is a local copy of QrisCreatorInput with no additional keys.
   for (const key of Object.keys(values) as (keyof QrisCreatorInput)[]) {
     if (key !== "mode") {
       values[key] = values[key].trim();
@@ -135,6 +137,7 @@ function validate(values: QrisCreatorInput, imported?: ImportedQris) {
     "terminal",
   ]);
   for (const [key, rule] of Object.entries(rules)) {
+    // SAFETY: rules contains only keys declared in QrisCreatorInput.
     const field = key as keyof QrisCreatorInput;
     if (!(values[field] || optional.has(field))) {
       errors[field] = "required";
@@ -155,6 +158,7 @@ function validate(values: QrisCreatorInput, imported?: ImportedQris) {
   }
 
   if (imported) {
+    // SAFETY: errors is populated only with QrisCreatorInput keys above.
     for (const key of Object.keys(errors) as (keyof QrisCreatorInput)[]) {
       const amountModeChanged =
         key === "amount" && values.mode !== imported.input.mode;

@@ -8,6 +8,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        "qr-upload": "rounded-xl border border-dashed font-medium text-xs hover:border-primary/50 hover:bg-muted/50 data-[drag-active=true]:ring-2 data-[drag-active=true]:ring-ring",
+        "inventory-filter": "inventory-filter border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
@@ -76,6 +78,7 @@ const buttonVariants = cva(
           "text-muted-foreground underline-offset-4 hover:text-foreground hover:underline",
       },
       size: {
+        "upload": "h-auto gap-3 px-4 py-3",
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         "toggle-xs": "h-6 w-full gap-1 px-1.5 text-xs [&_svg:not([class*='size-'])]:size-3",

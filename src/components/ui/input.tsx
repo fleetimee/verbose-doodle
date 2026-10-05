@@ -8,6 +8,7 @@ const inputVariants = cva(
   {
     variants: {
       variant: {
+        "mono-amount": "font-mono font-semibold text-base md:text-base",
         default: "",
         mono: "font-mono",
         muted: "bg-muted/20 border-border/80 shadow-none",
@@ -25,6 +26,7 @@ const inputVariants = cva(
         sm: "h-8 px-2 text-xs",
         xs: "h-7 px-2 text-xs",
         time: "h-8 px-1 text-xs",
+        amount: "h-8 px-2 text-base md:text-base",
         compact: "h-9 px-3 text-xs",
         search: "h-9 pl-9",
         md: "h-11",

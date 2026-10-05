@@ -1,6 +1,14 @@
 import type { SheetData } from "write-excel-file/browser";
 import type { EndpointTrafficLog } from "@/features/endpoints/types";
 
+function isNumber(value: string | number | boolean): value is number {
+  return typeof value === "number";
+}
+
+function isBoolean(value: string | number | boolean): value is boolean {
+  return typeof value === "boolean";
+}
+
 const COLUMNS = [
   { key: "occurredAt", label: "Timestamp (UTC)", width: 28 },
   { key: "requestId", label: "Request ID", width: 38 },
@@ -44,10 +52,10 @@ export function getTrafficLogSpreadsheet(logs: readonly EndpointTrafficLog[]) {
         if (value === null) {
           return null;
         }
-        if (typeof value === "number") {
+        if (isNumber(value)) {
           return { value, type: Number };
         }
-        if (typeof value === "boolean") {
+        if (isBoolean(value)) {
           return { value, type: Boolean };
         }
         return { value, type: String, wrap: true };

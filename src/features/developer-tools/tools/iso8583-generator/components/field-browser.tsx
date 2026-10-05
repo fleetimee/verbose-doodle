@@ -251,10 +251,7 @@ export function Iso8583FieldBrowser({
         ) : null}
         {groups.map((group) => {
           const grid = (
-            <FieldGroup
-              className="grid gap-x-5 gap-y-4 sm:grid-cols-2"
-              size="compact"
-            >
+            <FieldGroup className="grid sm:grid-cols-2" size="grid">
               {group.fields.map(renderField)}
             </FieldGroup>
           );

@@ -19,8 +19,8 @@ import { formatMessage } from "@/lib/i18n";
 
 function engineLabel(engine: string) {
   return (
-    (
-      {
+    new Map(
+      Object.entries({
         POSTGRESQL: "PostgreSQL",
         REDIS: "Redis",
         SQLSERVER: "MSSQL",
@@ -35,8 +35,8 @@ function engineLabel(engine: string) {
         COCKROACHDB: "CockroachDB",
         COUCHDB: "CouchDB",
         ELASTICSEARCH: "Elasticsearch",
-      } as Record<string, string>
-    )[engine] ?? engine
+      })
+    ).get(engine) ?? engine
   );
 }
 

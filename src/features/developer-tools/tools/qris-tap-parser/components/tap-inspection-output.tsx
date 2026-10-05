@@ -91,7 +91,7 @@ export function TapInspectionOutput({
         <p
           className={
             result.outcome === "SUCCESS"
-              ? "font-semibold text-[#08783e] dark:text-[#4dff91]"
+              ? "font-semibold text-success"
               : "font-medium text-destructive"
           }
         >

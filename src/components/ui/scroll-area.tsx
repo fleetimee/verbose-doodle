@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 const scrollAreaVariants = cva("relative group/scroll-area", {
   variants: {
     variant: {
+        "traffic": "rounded-lg border border-border bg-background text-foreground shadow-inner dark:border-[#2f2f2f] dark:bg-[#151515]",
       default: "",
       terminal: "rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner",
       bordered: "rounded-lg border border-border/70",
@@ -25,16 +26,30 @@ const scrollAreaVariants = cva("relative group/scroll-area", {
   },
 })
 
+const scrollAreaContentVariants = cva("", {
+  variants: {
+    contentSize: {
+      default: "",
+      padded: "p-4",
+      stack: "space-y-4 p-4",
+      drawer: "px-6 pb-6",
+      table: "pb-2.5",
+    },
+  },
+  defaultVariants: { contentSize: "default" },
+})
+
 function ScrollArea({
   className,
   variant = "default",
   children,
   contentClassName,
+  contentSize = "default",
   viewportRef,
   viewportClassName,
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitive.Root> &
-  VariantProps<typeof scrollAreaVariants> & {
+  VariantProps<typeof scrollAreaVariants> & VariantProps<typeof scrollAreaContentVariants> & {
     viewportClassName?: string;
     contentClassName?: string;
     viewportRef?: React.ComponentProps<typeof ScrollAreaPrimitive.Viewport>["ref"];
@@ -53,7 +68,7 @@ function ScrollArea({
         className={cn("focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1", viewportClassName)}
         ref={viewportRef}
       >
-        <ScrollAreaPrimitive.Content className={cn(contentClassName)}>
+        <ScrollAreaPrimitive.Content className={cn(scrollAreaContentVariants({ contentSize }), contentClassName)}>
           {children}
         </ScrollAreaPrimitive.Content>
       </ScrollAreaPrimitive.Viewport>

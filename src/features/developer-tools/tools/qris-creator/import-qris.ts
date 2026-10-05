@@ -18,7 +18,7 @@ export function importQris(payload: string): ImportedQris {
   if (
     !(parsed.crcValid && parsed.profileMatches) ||
     parsed.missing.length ||
-    !["static", "dynamic"].includes(parsed.mode)
+    (parsed.mode !== "static" && parsed.mode !== "dynamic")
   ) {
     throw new Error("Invalid QRIS MPM payload");
   }
@@ -108,6 +108,7 @@ export function editImportedQris(
     postalCode: "61",
   } as const;
   for (const [key, tag] of Object.entries(root)) {
+    // SAFETY: Object.entries enumerates the locally declared root mapping keys.
     const name = key as keyof typeof root;
     if (changed(name)) {
       fields = update(fields, tag, input[name].trim());
@@ -160,6 +161,7 @@ function updateTemplate(
   let children = existing?.children ?? [];
   let modified = false;
   for (const [key, child] of Object.entries(keys)) {
+    // SAFETY: keys comes from the closed QRIS template mappings declared above.
     const name = key as keyof QrisCreatorInput;
     if (input[name].trim() !== original[name].trim()) {
       if (tag !== "62" && !existing) {

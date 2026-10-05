@@ -190,20 +190,13 @@ function NavMenuItem({
           <item.icon />
           <span>{item.title}</span>
         </SidebarMenuButton>
-        <SidebarMenuBadge
-          className="navigation-shortcut-hint"
-          hidden={!isAltHeld}
-        >
+        <SidebarMenuBadge hidden={!isAltHeld} variant="shortcut">
           <Kbd aria-hidden="true">
             {formatOptionShortcut(shortcutKey.toUpperCase())}
           </Kbd>
         </SidebarMenuBadge>
         {item.badge ? (
-          <SidebarMenuBadge
-            className="navigation-shortcut-hint"
-            hidden={isAltHeld}
-            variant="muted"
-          >
+          <SidebarMenuBadge hidden={isAltHeld} variant="shortcut-muted">
             {item.badge}
           </SidebarMenuBadge>
         ) : null}
@@ -346,8 +339,9 @@ function NavMenuItem({
                     {childShortcutKey ? (
                       <Kbd
                         aria-hidden="true"
-                        className="navigation-shortcut-hint ml-auto"
+                        className="ml-auto"
                         hidden={!isAltHeld}
+                        variant="shortcut"
                       >
                         {formatOptionShortcut(childShortcutKey.toUpperCase())}
                       </Kbd>

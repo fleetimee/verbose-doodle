@@ -36,6 +36,7 @@ export function GamePreviewMedia({
   const screenshots = (media.screenshots ?? []).filter(
     (src) => !failedImages.includes(src)
   );
+  // SAFETY: Browser NetworkInformation exposes an optional boolean saveData preference.
   const saveData =
     "connection" in navigator &&
     Boolean((navigator.connection as { saveData?: boolean }).saveData);
@@ -155,7 +156,7 @@ export function GamePreviewCard({
       </HoverCardTrigger>
       <HoverCardContent
         align="start"
-        className="max-h-[calc(100dvh-2rem)] w-[min(25rem,calc(100vw-2rem))] overflow-y-auto duration-200 motion-reduce:transition-none"
+        className="max-h-[calc(100dvh-2rem)] w-[min(25rem,calc(100vw-2rem))] overflow-y-auto"
         collisionPadding={{ top: 80, bottom: 16, left: 16, right: 16 }}
         side="right"
         sideOffset={12}

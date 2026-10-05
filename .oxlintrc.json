@@ -11,7 +11,20 @@
     ".pi/**",
     ".roo/**",
     ".windsurf/**",
-    "tools/oxlint/anti-slop/**"
+    "tools/oxlint/anti-slop/**",
+    "public/games/terrabrowser/**",
+    "public/games/ponpoko-kart/**",
+    "public/games/emberwake/**",
+    "public/games/build-your-town/**",
+    "public/games/chess-3d/**",
+    "public/games/nova-lancer/**",
+    "public/games/sunbreak/**",
+    "public/games/arkanoid-neon/**",
+    "public/games/hearthvale/**",
+    "public/games/gravewake/**",
+    "public/games/dynamite-mole/**",
+    "public/games/yet-another-voxelcraft/**",
+    "public/games/pokemon-claude-red/**"
   ],
   "jsPlugins": [
     "@shadcn/lint",
@@ -31,7 +44,12 @@
     "anti-slop/no-object-parameters": "error",
     "anti-slop/no-reflect-apply": "error",
     "anti-slop/no-reflect-get": "error",
-    "anti-slop/no-runtime-typeof": ["error", { "allowInTypeGuards": true }],
+    "anti-slop/no-runtime-typeof": [
+      "error",
+      {
+        "allowInTypeGuards": true
+      }
+    ],
     "anti-slop/no-shape-in-symbol-names": "error",
     "anti-slop/no-unknown-parameters": "error",
     "anti-slop/no-unknown-returns": "error",
@@ -40,9 +58,19 @@
     "anti-slop/no-widen-then-assert": "error",
     "anti-slop/require-readable-spacing": "off",
     "anti-slop/require-safety-comment-for-type-assertion": "error",
-    "shadcn/no-restyle": ["error", { "allow": ["layout"] }],
+    "shadcn/no-restyle": [
+      "error",
+      {
+        "allow": ["layout"]
+      }
+    ],
     "shadcn/no-raw-colors": "error",
-    "shadcn/no-arbitrary-values": ["error", { "allow": ["layout"] }],
+    "shadcn/no-arbitrary-values": [
+      "error",
+      {
+        "allow": ["layout"]
+      }
+    ],
     "shadcn/no-inline-styles": "error",
     "shadcn/require-static-classes": "error"
   },

@@ -36,7 +36,7 @@ function HoverCardTrigger({
 }
 
 const hoverCardContentVariants = cva(
-  "z-50 w-64 origin-(--transform-origin) rounded-md border bg-popover text-popover-foreground shadow-md outline-hidden transition-[opacity,transform] data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
+  "z-50 w-64 origin-(--transform-origin) rounded-md border bg-popover text-popover-foreground shadow-md outline-hidden transition-[opacity,transform] duration-200 motion-reduce:transition-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
   {
     variants: {
       size: {

@@ -797,9 +797,14 @@ export function Iso8583Parser() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <Tabs
                   onValueChange={(val) => {
-                    setActiveTab(
-                      val as "fields" | "pretty" | "json" | "slices"
-                    );
+                    if (
+                      val === "fields" ||
+                      val === "pretty" ||
+                      val === "json" ||
+                      val === "slices"
+                    ) {
+                      setActiveTab(val);
+                    }
                   }}
                   value={activeTab}
                 >
