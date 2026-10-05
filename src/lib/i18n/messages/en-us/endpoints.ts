@@ -495,6 +495,9 @@ export const endpointsMessages = {
     one: "{count} log",
     other: "{count} logs",
   },
+  trafficLogsExcelButton: "Excel (.xlsx)",
+  trafficLogsSpreadsheetScope:
+    "Exports the currently visible, filtered logs, including body previews.",
   trafficLogsCsvButton: "CSV",
   trafficLogsDescription: "Inspect requests that hit this simulator endpoint.",
   trafficLogsDisplayTimestampsLabel: "Display timestamps",

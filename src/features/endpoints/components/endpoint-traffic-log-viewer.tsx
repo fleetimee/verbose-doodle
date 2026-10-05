@@ -71,6 +71,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/features/auth/context";
+import { TrafficLogSpreadsheetExport } from "@/features/endpoints/components/traffic-log-spreadsheet-export";
 import { UserAgentClientBadge } from "@/features/endpoints/components/user-agent-client-badge";
 import { useEndpointTelemetry } from "@/features/endpoints/hooks/use-endpoint-telemetry";
 import { useTrafficLogScroll } from "@/features/endpoints/hooks/use-traffic-log-scroll";
@@ -118,12 +119,12 @@ const STATUS_FILTER_LABELS: Record<EndpointTrafficLogStatusFilter, string> = {
 };
 
 const STATUS_TONE_CLASS_NAMES: Record<EndpointTrafficLogStatus, string> = {
-  backend_error: "text-red-300",
-  matched_delayed: "text-amber-200",
-  matched_empty: "text-slate-300",
-  matched_success: "text-emerald-300",
-  matched_timeout: "text-amber-300",
-  unmatched_endpoint: "text-rose-300",
+  backend_error: "text-red-700 dark:text-red-300",
+  matched_delayed: "text-amber-800 dark:text-amber-200",
+  matched_empty: "text-slate-600 dark:text-slate-300",
+  matched_success: "text-emerald-700 dark:text-emerald-300",
+  matched_timeout: "text-amber-700 dark:text-amber-300",
+  unmatched_endpoint: "text-rose-700 dark:text-rose-300",
 };
 
 const STATUS_DOT_CLASS_NAMES: Record<EndpointTrafficLogStatus, string> = {
@@ -439,7 +440,7 @@ export function EndpointTrafficLogViewer({
   } else {
     logContent = (
       <ScrollArea
-        className="h-[560px] w-full max-w-full"
+        className="h-[560px] w-full max-w-full border-border bg-background text-foreground dark:border-[#2f2f2f] dark:bg-[#151515]"
         variant="terminal"
         viewportRef={trafficLogViewportRef}
       >
@@ -451,7 +452,7 @@ export function EndpointTrafficLogViewer({
         >
           {logs.map((log) => (
             <div
-              className="group grid min-w-0 grid-cols-[24px_116px_minmax(0,1fr)] items-start gap-2 rounded px-2 py-1 transition-colors duration-150 ease-out hover:bg-white/7 active:scale-[0.997]"
+              className="group grid min-w-0 grid-cols-[24px_116px_minmax(0,1fr)] items-start gap-2 rounded px-2 py-1 transition-colors duration-150 ease-out hover:bg-muted active:scale-[0.997] dark:hover:bg-white/7"
               key={log.id}
             >
               <Checkbox
@@ -460,7 +461,7 @@ export function EndpointTrafficLogViewer({
                   { requestId: log.requestId }
                 )}
                 checked={selectedIds.has(log.id)}
-                className="mt-0.5"
+                className="mt-0.5 border-input bg-background dark:border-[#5b5b5b] dark:bg-[#1f1f1f]"
                 onCheckedChange={() => handleToggleSelected(log.id)}
                 variant="terminal-blue"
               />
@@ -902,6 +903,11 @@ export function EndpointTrafficLogViewer({
                 >
                   {messages.endpoints.trafficLogsCsvButton}
                 </Button>
+                <TrafficLogSpreadsheetExport
+                  endpointId={endpointId}
+                  isPending={isPending}
+                  logs={logs}
+                />
                 <Button
                   disabled={logs.length === 0 || isClearingTrafficLogs}
                   onClick={() => setShowClearLogsDialog(true)}
@@ -1048,7 +1054,7 @@ function TerminalState({
     >
       <div
         className={cn(
-          "w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner",
+          "w-full max-w-xl rounded-md border border-border bg-background p-5 font-mono text-sm shadow-inner dark:border-white/10 dark:bg-black/20",
           isEmergency && "border-destructive/40 bg-destructive/15"
         )}
       >
