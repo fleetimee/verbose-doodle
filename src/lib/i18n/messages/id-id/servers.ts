@@ -46,6 +46,48 @@ export const serversMessages = {
   viewDetails: "Lihat detail",
   viewDetailsFor: "Lihat detail untuk {name}",
   notes: "Keterangan",
+  rdpTitle: "Hubungkan dengan RDP",
+  rdpPlatform: "Sistem operasi Anda",
+  rdpWindowsIntro:
+    "Buka PowerShell dan jalankan perintah ini untuk membuka Remote Desktop Connection.",
+  rdpWindowsConnect:
+    "Pilih Connect. Jika diminta alamat komputer, gunakan host dan port yang ditampilkan di atas.",
+  rdpLinuxIntro:
+    "Instal dan buka Remmina dengan plugin RDP. Gunakan alamat server ini.",
+  rdpLinuxProfile:
+    "Buat profil koneksi dan pilih RDP sebagai protokol. Tempel alamat ke kolom Server.",
+  rdpLinuxConnect:
+    "Masukkan nama pengguna yang ditampilkan di atas, lalu pilih Connect. Jika belum disimpan, tanyakan akun Anda kepada administrator server.",
+  rdpMacIntro:
+    "Instal Windows App dari Mac App Store, lalu buka aplikasinya. Gunakan alamat PC ini.",
+  rdpMacProfile:
+    "Pilih Add PC dan tempel alamat ke PC name. Biarkan kredensial diminta saat diperlukan, atau pilih akun tersimpan.",
+  rdpMacConnect: "Tambahkan PC, lalu klik dua kali pada tile untuk terhubung.",
+  rdpNetwork:
+    "Hubungkan ke jaringan server atau VPN jika diperlukan. Remote Desktop harus diaktifkan di server.",
+  rdpAuthenticate:
+    "Masuk dengan akun dan kata sandi server. Verifikasi peringatan sertifikat dengan administrator server sebelum melanjutkan.",
+  rdpCopyAddress: "Salin alamat RDP",
+  rdpCopyCommand: "Salin perintah RDP",
+  rdpReference: "Referensi pengaturan koneksi",
+  sshWindowsIntro:
+    "Buka PowerShell atau Windows Terminal dan jalankan perintah ini. Jika ssh tidak tersedia, instal OpenSSH Client dari Optional features Windows.",
+  sshLinuxIntro:
+    "Buka terminal dan jalankan perintah ini. Instal klien OpenSSH dari pengelola paket distribusi Anda jika diperlukan.",
+  sshMacIntro:
+    "Buka Terminal dan jalankan perintah ini menggunakan klien SSH bawaan.",
+  sshTitle: "Hubungkan dengan SSH",
+  sshTerminal:
+    "Buka Terminal di macOS atau Linux, atau Git Bash / WSL di Windows, lalu jalankan perintah ini.",
+  sshCopyCommand: "Salin perintah SSH",
+  sshMissingUsername:
+    "Nama pengguna belum disimpan. Perintah ini memakai nama pengguna lokal Anda. Tambahkan -l diikuti nama akun server jika berbeda.",
+  sshNetwork: "Hubungkan ke jaringan server atau VPN jika diperlukan.",
+  sshFingerprint:
+    "Pada koneksi pertama, verifikasi sidik jari host yang ditampilkan dengan administrator server sebelum menerimanya.",
+  sshAuthenticate:
+    "Masukkan kata sandi saat diminta, atau gunakan kunci SSH yang telah dikonfigurasi. Karakter kata sandi tidak ditampilkan saat diketik.",
+  sshReference: "Referensi perintah OpenSSH",
   detailsTitle: "Detail koneksi",
   createdAt: "Dibuat pada",
   updatedAt: "Diperbarui pada",

@@ -47,6 +47,48 @@ export const serversMessages = {
   viewDetails: "View details",
   viewDetailsFor: "View details for {name}",
   notes: "Notes",
+  rdpTitle: "Connect with RDP",
+  rdpPlatform: "Your operating system",
+  rdpWindowsIntro:
+    "Open PowerShell and run this command to launch Remote Desktop Connection.",
+  rdpWindowsConnect:
+    "Select Connect. If asked for the computer address, use the host and port shown above.",
+  rdpLinuxIntro:
+    "Install and open Remmina with its RDP plugin. Use this server address.",
+  rdpLinuxProfile:
+    "Create a connection profile and select RDP as the protocol. Paste the address into Server.",
+  rdpLinuxConnect:
+    "Enter the username shown above, then select Connect. If no username is saved, ask the server administrator for your account.",
+  rdpMacIntro:
+    "Install Windows App from the Mac App Store, then open it. Use this PC address.",
+  rdpMacProfile:
+    "Select Add PC and paste the address into PC name. Leave credentials set to ask when required, or select your saved account.",
+  rdpMacConnect: "Add the PC, then double-click its tile to connect.",
+  rdpNetwork:
+    "Connect to the server network or VPN if required. Remote Desktop must be enabled on the server.",
+  rdpAuthenticate:
+    "Sign in with the server account and password. Verify any certificate warning with the server administrator before continuing.",
+  rdpCopyAddress: "Copy RDP address",
+  rdpCopyCommand: "Copy RDP command",
+  rdpReference: "Connection setup reference",
+  sshWindowsIntro:
+    "Open PowerShell or Windows Terminal and run this command. If ssh is unavailable, install OpenSSH Client from Windows Optional features.",
+  sshLinuxIntro:
+    "Open your terminal and run this command. Install the OpenSSH client from your distribution’s package manager if needed.",
+  sshMacIntro:
+    "Open Terminal and run this command using the built-in SSH client.",
+  sshTitle: "Connect with SSH",
+  sshTerminal:
+    "Open Terminal on macOS or Linux, or Git Bash / WSL on Windows, and run this command.",
+  sshCopyCommand: "Copy SSH command",
+  sshMissingUsername:
+    "No username is saved. This command uses your local username. Add -l followed by the server account name if it differs.",
+  sshNetwork: "Connect to the server network or VPN if required.",
+  sshFingerprint:
+    "On your first connection, verify the displayed host fingerprint with the server administrator before accepting it.",
+  sshAuthenticate:
+    "Enter your password when prompted, or use your configured SSH key. Password characters will not appear as you type.",
+  sshReference: "OpenSSH command reference",
   detailsTitle: "Connection details",
   createdAt: "Created at",
   updatedAt: "Updated at",

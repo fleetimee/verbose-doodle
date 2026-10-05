@@ -1,4 +1,5 @@
 import {
+  Cancel01Icon,
   FullScreenIcon,
   MinimizeScreenIcon,
   SearchIcon,
@@ -548,12 +549,54 @@ export function ServerInventoryTable({
             className="overflow-hidden data-[vaul-drawer-direction=right]:w-[calc(100%-1rem)] data-[vaul-drawer-direction=right]:sm:max-w-lg"
             showSwipeHandle={false}
           >
-            <DrawerHeader className="shrink-0" size="lg" variant="left">
-              <DrawerTitle>{copy.detailsTitle}</DrawerTitle>
-              <DrawerDescription>{detailsEntry?.name}</DrawerDescription>
+            <DrawerHeader
+              className="relative mb-4 shrink-0"
+              size="lg"
+              variant="left"
+            >
+              <DrawerClose asChild>
+                <Button
+                  aria-label={messages.common.close}
+                  className="absolute top-4 right-4"
+                  size="icon-lg"
+                  variant="secondary"
+                >
+                  <HugeiconsIcon
+                    icon={Cancel01Icon}
+                    size={18}
+                    strokeWidth={1.8}
+                  />
+                </Button>
+              </DrawerClose>
+              <div className="pr-12">
+                <DrawerTitle className="break-words" size="xl">
+                  {detailsEntry?.name}
+                </DrawerTitle>
+              </div>
+              <DrawerDescription>{copy.detailsTitle}</DrawerDescription>
+              {detailsEntry && (
+                <div className="mt-3 flex items-center gap-2 text-muted-foreground text-sm">
+                  <ServerAccessIcon
+                    accessType={detailsEntry.accessType}
+                    databaseEngine={detailsEntry.databaseEngine}
+                    decorative
+                  />
+                  <span className="min-w-0 break-words">
+                    {[detailsEntry.accessType, detailsEntry.databaseEngine]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                </div>
+              )}
             </DrawerHeader>
             <ScrollArea className="min-h-0 flex-1" contentSize="drawer">
-              {detailsEntry && <ServerEntryDetails entry={detailsEntry} />}
+              {detailsEntry && (
+                <ServerEntryDetails
+                  entry={detailsEntry}
+                  isAdmin={isAdmin}
+                  open={detailsOpen}
+                />
+              )}
             </ScrollArea>
             <DrawerFooter className="shrink-0" size="lg" variant="bordered">
               {isAdmin && detailsEntry && (
