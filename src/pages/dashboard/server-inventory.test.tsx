@@ -192,6 +192,26 @@ test("metadata edits omit passwords and keep failed saves editable", async () =>
   const user = userEvent.setup();
   renderPage();
   const dialog = await editEntry(user);
+  await user.click(
+    within(dialog).getByRole("button", { name: "Reveal password for Linux" })
+  );
+  expect(await within(dialog).findByText("fake-revealed-secret")).toBeDefined();
+  expect(lastSave).toBeNull();
+  expect(
+    (within(dialog).getByLabelText("Password") as HTMLInputElement).value
+  ).toBe("");
+  expect(
+    JSON.stringify(
+      queryClient
+        .getQueryCache()
+        .getAll()
+        .map((query) => query.state.data)
+    )
+  ).not.toContain("fake-revealed-secret");
+  await user.click(
+    within(dialog).getByRole("button", { name: "Hide password for Linux" })
+  );
+  expect(within(dialog).queryByText("fake-revealed-secret")).toBeNull();
   await user.clear(within(dialog).getByLabelText("Name"));
   await user.type(within(dialog).getByLabelText("Name"), "Edited Linux");
   failSave = true;
@@ -784,4 +804,28 @@ test("database engine picker saves custom engines", async () => {
   );
   await user.click(within(drawer).getByRole("button", { name: "Save entry" }));
   await waitFor(() => expect(lastSave?.databaseEngine).toBe("FIREBIRD"));
+});
+
+test("fullscreen table preserves filters and exits with Escape", async () => {
+  const user = userEvent.setup();
+  renderPage("USER");
+  await screen.findByText("Linux");
+  const searchLabel = "Search name, host, account, or notes...";
+  await user.type(screen.getByRole("textbox", { name: searchLabel }), "Linux");
+  await user.click(screen.getByRole("button", { name: "Fullscreen table" }));
+  const dialog = await screen.findByRole("dialog", { name: "List Server" });
+  expect(
+    (
+      within(dialog).getByRole("textbox", {
+        name: searchLabel,
+      }) as HTMLInputElement
+    ).value
+  ).toBe("Linux");
+  expect(within(dialog).getByText("Linux")).toBeDefined();
+  await user.keyboard("{Escape}");
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  expect(
+    (screen.getByRole("textbox", { name: searchLabel }) as HTMLInputElement)
+      .value
+  ).toBe("Linux");
 });

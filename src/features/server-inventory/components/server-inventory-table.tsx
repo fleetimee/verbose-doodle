@@ -1,4 +1,8 @@
-import { SearchIcon } from "@hugeicons/core-free-icons";
+import {
+  FullScreenIcon,
+  MinimizeScreenIcon,
+  SearchIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   type Column,
@@ -11,7 +15,7 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 import { motion, useReducedMotion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowUpDown,
@@ -26,6 +30,7 @@ import {
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerClose,
@@ -78,6 +83,7 @@ import { ServerAccessIcon } from "@/features/server-inventory/components/server-
 import { ServerEntryDetails } from "@/features/server-inventory/components/server-entry-details";
 import { ServerInventoryFilter } from "@/features/server-inventory/components/server-inventory-filter";
 import { ServerPasswordCell } from "@/features/server-inventory/components/server-password-cell";
+import { isWebUrl } from "@/features/server-inventory/server-form";
 import type {
   ServerEntry,
   ServerInventoryQuery,
@@ -187,6 +193,22 @@ export function ServerInventoryTable({
     entryTransition,
   } = useTableMotion(query.search);
   const copy = messages.servers;
+  const [fullscreen, setFullscreen] = useState(false);
+  const [fullscreenMounted, setFullscreenMounted] = useState(false);
+  const tablePanelRef = useRef<HTMLDivElement>(null);
+  const [fullscreenOrigin, setFullscreenOrigin] = useState("none");
+  const changeFullscreen = (open: boolean) => {
+    if (open) {
+      const bounds = tablePanelRef.current?.getBoundingClientRect();
+      if (bounds) {
+        setFullscreenOrigin(
+          `translate(${bounds.left}px, ${bounds.top}px) scale(${bounds.width / window.innerWidth}, ${bounds.height / window.innerHeight})`
+        );
+      }
+      setFullscreenMounted(true);
+    }
+    setFullscreen(open);
+  };
   const sorting: SortingState = [
     { id: query.sortBy, desc: query.direction === "desc" },
   ];
@@ -310,9 +332,26 @@ export function ServerInventoryTable({
       enableHiding: false,
       header: ({ column }) => <SortHeader column={column} label={copy.name} />,
       cell: ({ row }) => (
-        <span className="block truncate font-medium" title={row.original.name}>
-          {row.original.name}
-        </span>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="truncate font-medium" title={row.original.name}>
+            {row.original.name}
+          </span>
+          {row.original.accessType.toUpperCase() === "WEB" &&
+            row.original.url &&
+            isWebUrl(row.original.url) && (
+              <a
+                aria-label={formatMessage(copy.openWebUrl, {
+                  name: row.original.name,
+                })}
+                className="shrink-0 rounded-sm text-primary text-xs underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                href={row.original.url}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                [{copy.link}]
+              </a>
+            )}
+        </div>
       ),
     },
     {
@@ -466,12 +505,14 @@ export function ServerInventoryTable({
   const page = table.getState().pagination.pageIndex + 1;
   const pages = Math.max(1, table.getPageCount());
 
-  return (
+  const content = (
     <div
       className="server-inventory-table flex min-w-0 flex-col overflow-hidden rounded-md border bg-background lg:min-h-0 lg:flex-1"
+      data-fullscreen={fullscreenMounted}
       data-motion={animateUpdates}
       onKeyDownCapture={() => setAnimateUpdates(false)}
       onPointerDownCapture={() => setAnimateUpdates(true)}
+      ref={tablePanelRef}
     >
       <Drawer
         direction="right"
@@ -651,6 +692,19 @@ export function ServerInventoryTable({
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button
+            aria-label={fullscreen ? copy.exitFullscreen : copy.fullscreen}
+            aria-pressed={fullscreen}
+            onClick={() => changeFullscreen(!fullscreen)}
+            size="icon"
+            title={fullscreen ? copy.exitFullscreen : copy.fullscreen}
+            variant="ghost"
+          >
+            <HugeiconsIcon
+              icon={fullscreen ? MinimizeScreenIcon : FullScreenIcon}
+              strokeWidth={2}
+            />
+          </Button>
         </div>
       </div>
       {revealFailed && (
@@ -894,5 +948,29 @@ export function ServerInventoryTable({
         </div>
       </div>
     </div>
+  );
+  return (
+    <Dialog
+      onOpenChange={changeFullscreen}
+      onOpenChangeComplete={(open) => {
+        if (!open) {
+          setFullscreenMounted(false);
+        }
+      }}
+      open={fullscreen}
+    >
+      {fullscreenMounted ? (
+        <DialogContent
+          className="inventory-fullscreen-dialog h-dvh w-screen max-w-none rounded-none border-0 p-0 sm:max-w-none"
+          showCloseButton={false}
+          style={{ "--fullscreen-origin": fullscreenOrigin } as CSSProperties}
+        >
+          <DialogTitle className="sr-only">{copy.title}</DialogTitle>
+          {content}
+        </DialogContent>
+      ) : (
+        content
+      )}
+    </Dialog>
   );
 }

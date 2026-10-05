@@ -40,6 +40,7 @@ import { AccessTypePicker } from "@/features/server-inventory/components/access-
 import { DatabaseEnginePicker } from "@/features/server-inventory/components/database-engine-picker";
 import { serverAccessTypes } from "@/features/server-inventory/components/server-access-icon";
 import { ServerHostPicker } from "@/features/server-inventory/components/server-host-picker";
+import { ServerPasswordCell } from "@/features/server-inventory/components/server-password-cell";
 import {
   buildServerEntryRequest,
   createServerFormSchema,
@@ -110,9 +111,12 @@ export function ServerEntryDrawer({
   const clearPassword = form.watch("clearPassword");
   const accessType = form.watch("accessType").toUpperCase();
   const values = form.watch();
+  const showCredentials = ["SSH", "RDP", "FTP"].includes(accessType);
   const contextualFields = (
     {
-      SSH: ["port"],
+      SSH: ["port", "username"],
+      RDP: ["port", "username"],
+      FTP: ["port", "username"],
       DATABASE: ["port", "databaseEngine", "databaseName"],
       WEB: ["port", "url"],
       HTTP: ["port", "url"],
@@ -141,6 +145,77 @@ export function ServerEntryDrawer({
       placeholder: copy.databasePlaceholder,
     },
   ] as const;
+
+  const passwordFields = (
+    <>
+      <Field
+        data-disabled={saving || clearPassword}
+        data-invalid={!!form.formState.errors.password}
+      >
+        <FieldLabel htmlFor="server-password">{copy.password}</FieldLabel>
+        {entry?.hasPassword && !clearPassword && (
+          <div className="flex flex-col gap-1">
+            <span className="text-muted-foreground text-xs">
+              {copy.passwordStored}
+            </span>
+            <ServerPasswordCell
+              entry={entry}
+              isAdmin
+              loading={saving}
+              revealAll={false}
+            />
+          </div>
+        )}
+        <InputGroup>
+          <InputGroupInput
+            {...form.register("password")}
+            aria-invalid={!!form.formState.errors.password}
+            autoComplete="new-password"
+            disabled={saving || clearPassword}
+            id="server-password"
+            placeholder={
+              entry ? copy.keepPasswordPlaceholder : copy.passwordPlaceholder
+            }
+            type={showPassword ? "text" : "password"}
+          />
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              aria-label={showPassword ? copy.hidePassword : copy.showPassword}
+              disabled={saving || clearPassword}
+              onClick={() => setShowPassword(!showPassword)}
+              size="icon-xs"
+              type="button"
+            >
+              <Eye />
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
+        <FieldDescription>
+          {entry ? copy.keepPasswordDescription : copy.passwordDescription}
+        </FieldDescription>
+        <FieldError errors={[form.formState.errors.password]} />
+      </Field>
+      {entry?.hasPassword && (
+        <Controller
+          control={form.control}
+          name="clearPassword"
+          render={({ field }) => (
+            <Field orientation="horizontal">
+              <Checkbox
+                checked={field.value}
+                disabled={saving}
+                id="server-clear-password"
+                onCheckedChange={(checked) => field.onChange(checked === true)}
+              />
+              <FieldLabel htmlFor="server-clear-password">
+                {copy.removePassword}
+              </FieldLabel>
+            </Field>
+          )}
+        />
+      )}
+    </>
+  );
 
   const submit = async (values: ServerFormValues) => {
     setError(null);
@@ -311,6 +386,7 @@ export function ServerEntryDrawer({
                     <FieldError errors={[form.formState.errors[name]]} />
                   </Field>
                 ))}
+              {showCredentials && passwordFields}
             </FieldGroup>
             <Collapsible onOpenChange={setOptionalOpen} open={optionalOpen}>
               <CollapsibleTrigger type="button" variant="header">
@@ -375,69 +451,7 @@ export function ServerEntryDrawer({
                         <FieldError errors={[form.formState.errors[name]]} />
                       </Field>
                     ))}
-                  <Field
-                    data-disabled={saving || clearPassword}
-                    data-invalid={!!form.formState.errors.password}
-                  >
-                    <FieldLabel htmlFor="server-password">
-                      {copy.password}
-                    </FieldLabel>
-                    <InputGroup>
-                      <InputGroupInput
-                        {...form.register("password")}
-                        aria-invalid={!!form.formState.errors.password}
-                        autoComplete="new-password"
-                        disabled={saving || clearPassword}
-                        id="server-password"
-                        placeholder={
-                          entry
-                            ? copy.keepPasswordPlaceholder
-                            : copy.passwordPlaceholder
-                        }
-                        type={showPassword ? "text" : "password"}
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <InputGroupButton
-                          aria-label={
-                            showPassword ? copy.hidePassword : copy.showPassword
-                          }
-                          disabled={saving || clearPassword}
-                          onClick={() => setShowPassword(!showPassword)}
-                          size="icon-xs"
-                          type="button"
-                        >
-                          <Eye />
-                        </InputGroupButton>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    <FieldDescription>
-                      {entry
-                        ? copy.keepPasswordDescription
-                        : copy.passwordDescription}
-                    </FieldDescription>
-                    <FieldError errors={[form.formState.errors.password]} />
-                  </Field>
-                  {entry?.hasPassword && (
-                    <Controller
-                      control={form.control}
-                      name="clearPassword"
-                      render={({ field }) => (
-                        <Field orientation="horizontal">
-                          <Checkbox
-                            checked={field.value}
-                            disabled={saving}
-                            id="server-clear-password"
-                            onCheckedChange={(checked) =>
-                              field.onChange(checked === true)
-                            }
-                          />
-                          <FieldLabel htmlFor="server-clear-password">
-                            {copy.removePassword}
-                          </FieldLabel>
-                        </Field>
-                      )}
-                    />
-                  )}
+                  {!showCredentials && passwordFields}
                   <Field
                     data-disabled={saving}
                     data-invalid={!!form.formState.errors.notes}

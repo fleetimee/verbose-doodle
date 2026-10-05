@@ -119,6 +119,7 @@ export function ServerPasswordCell({
           className="shrink-0"
           onClick={copyPassword}
           size="icon-sm"
+          type="button"
           variant="ghost"
         >
           <CopyIcon />
@@ -128,6 +129,7 @@ export function ServerPasswordCell({
           className="shrink-0"
           onClick={hide}
           size="icon-sm"
+          type="button"
           variant="ghost"
         >
           <Eye />
@@ -161,6 +163,7 @@ export function ServerPasswordCell({
               }
         }
         size="icon-sm"
+        type="button"
         variant="ghost"
       >
         {requested ? <Spinner /> : <Eye />}

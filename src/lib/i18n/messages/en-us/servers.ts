@@ -1,5 +1,5 @@
 export const serversMessages = {
-  title: "Server inventory",
+  title: "List Server",
   description:
     "Find server addresses, access accounts, and connection details.",
   documentTitle: "Server inventory",
@@ -24,6 +24,8 @@ export const serversMessages = {
   port: "Port",
   username: "Username",
   password: "Password",
+  link: "Link",
+  openWebUrl: "Open website for {name} in a new tab",
   url: "Web URL",
   databaseEngine: "Database engine",
   databaseName: "Database name",
@@ -49,6 +51,8 @@ export const serversMessages = {
   allEngines: "All database engines",
   filterType: "Filter by access type",
   allTypes: "All access types",
+  fullscreen: "Fullscreen table",
+  exitFullscreen: "Exit fullscreen",
   clearFilters: "Clear filters",
   chooseType: "Choose an access type",
   typeSearch: "Find or create an access type...",

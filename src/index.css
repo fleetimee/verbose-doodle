@@ -3581,3 +3581,51 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 .inventory-filter:hover {
   background: var(--accent);
 }
+
+.server-inventory-table[data-fullscreen="true"] {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.server-inventory-table[data-fullscreen="true"] > [data-slot="scroll-area"] {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Grow the focused table from its original position in the dashboard. */
+.inventory-fullscreen-dialog {
+  top: 0;
+  left: 0;
+  transform: none;
+  transform-origin: top left;
+  scale: 1;
+  translate: none;
+  transition-timing-function: var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  transition-duration: 280ms;
+  transition-property: opacity, transform;
+}
+
+.inventory-fullscreen-dialog[data-starting-style],
+.inventory-fullscreen-dialog[data-ending-style] {
+  opacity: 0.5;
+  transform: var(--fullscreen-origin);
+  scale: 1;
+  translate: none;
+}
+
+.inventory-fullscreen-dialog[data-ending-style] {
+  transition-duration: 250ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inventory-fullscreen-dialog,
+  .inventory-fullscreen-dialog[data-starting-style],
+  .inventory-fullscreen-dialog[data-ending-style] {
+    transform: none;
+    transition-duration: 100ms;
+    transition-property: opacity;
+  }
+}
