@@ -45,7 +45,7 @@ const accessIcons = new Map(
 
 export const serverAccessTypes = [...accessIcons.keys()].sort();
 
-const engineIcons = new Map(
+export const engineIcons = new Map(
   Object.entries({
     MARIADB: MariaDB,
     CASSANDRA: CassandraDB,

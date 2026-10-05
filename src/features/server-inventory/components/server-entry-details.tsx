@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { CopyIcon } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
+import { ServerDatabaseGuide } from "@/features/server-inventory/components/server-database-guide";
 import { ServerPasswordCell } from "@/features/server-inventory/components/server-password-cell";
 import { ServerRdpGuide } from "@/features/server-inventory/components/server-rdp-guide";
 import { ServerSshGuide } from "@/features/server-inventory/components/server-ssh-guide";
@@ -133,6 +134,7 @@ export function ServerEntryDetails({
       </dl>
       {accessType === "SSH" && <ServerSshGuide entry={entry} />}
       {accessType === "RDP" && <ServerRdpGuide entry={entry} />}
+      {accessType === "DATABASE" && <ServerDatabaseGuide entry={entry} />}
       <section aria-labelledby="server-detail-notes" className="space-y-2">
         <h3 className="font-medium" id="server-detail-notes">
           {copy.notes}

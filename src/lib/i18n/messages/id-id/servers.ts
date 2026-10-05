@@ -70,6 +70,16 @@ export const serversMessages = {
   rdpCopyAddress: "Salin alamat RDP",
   rdpCopyCommand: "Salin perintah RDP",
   rdpReference: "Referensi pengaturan koneksi",
+  databaseTitle: "Hubungkan ke {engine}",
+  databaseTitleGeneric: "Hubungkan ke database",
+  databaseCommandIntro:
+    "Jalankan perintah ini dari komputer yang sudah memiliki klien database.",
+  databaseAddressIntro: "Gunakan alamat ini di klien database pilihan Anda.",
+  databaseNetwork: "Hubungkan ke jaringan server atau VPN jika diperlukan.",
+  databaseAuthenticate:
+    "Masukkan kata sandi akun saat diminta. Kata sandi tidak disertakan dalam perintah.",
+  databaseCopyCommand: "Salin perintah database",
+  databaseCopyAddress: "Salin alamat database",
   sshWindowsIntro:
     "Buka PowerShell atau Windows Terminal dan jalankan perintah ini. Jika ssh tidak tersedia, instal OpenSSH Client dari Optional features Windows.",
   sshLinuxIntro:

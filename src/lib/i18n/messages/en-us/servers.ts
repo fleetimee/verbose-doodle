@@ -71,6 +71,16 @@ export const serversMessages = {
   rdpCopyAddress: "Copy RDP address",
   rdpCopyCommand: "Copy RDP command",
   rdpReference: "Connection setup reference",
+  databaseTitle: "Connect to {engine}",
+  databaseTitleGeneric: "Connect to database",
+  databaseCommandIntro:
+    "Run this command from a machine that has the database client installed.",
+  databaseAddressIntro: "Use this address in your database client of choice.",
+  databaseNetwork: "Connect to the server network or VPN if required.",
+  databaseAuthenticate:
+    "Enter the account password when prompted. It is not included in the command.",
+  databaseCopyCommand: "Copy database command",
+  databaseCopyAddress: "Copy database address",
   sshWindowsIntro:
     "Open PowerShell or Windows Terminal and run this command. If ssh is unavailable, install OpenSSH Client from Windows Optional features.",
   sshLinuxIntro:
