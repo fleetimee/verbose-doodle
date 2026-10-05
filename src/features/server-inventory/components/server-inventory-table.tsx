@@ -82,6 +82,7 @@ import { revealServerPassword } from "@/features/server-inventory/api";
 import { ServerAccessIcon } from "@/features/server-inventory/components/server-access-icon";
 import { ServerEntryDetails } from "@/features/server-inventory/components/server-entry-details";
 import { ServerInventoryFilter } from "@/features/server-inventory/components/server-inventory-filter";
+import { ServerInventorySpreadsheetExport } from "@/features/server-inventory/components/server-inventory-spreadsheet-export";
 import { ServerPasswordCell } from "@/features/server-inventory/components/server-password-cell";
 import { isWebUrl } from "@/features/server-inventory/server-form";
 import type {
@@ -665,6 +666,12 @@ export function ServerInventoryTable({
               )}
             </div>
           )}
+          <ServerInventorySpreadsheetExport
+            entries={entries}
+            isAdmin={isAdmin}
+            loading={loading}
+            query={query}
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="ml-auto" variant="ghost">
@@ -963,7 +970,15 @@ export function ServerInventoryTable({
         <DialogContent
           className="inventory-fullscreen-dialog h-dvh w-screen max-w-none rounded-none border-0 p-0 sm:max-w-none"
           showCloseButton={false}
-          style={{ "--fullscreen-origin": fullscreenOrigin } as CSSProperties}
+          style={
+            {
+              "--fullscreen-origin": fullscreenOrigin,
+              top: 0,
+              left: 0,
+              translate: "none",
+              scale: 1,
+            } as CSSProperties
+          }
         >
           <DialogTitle className="sr-only">{copy.title}</DialogTitle>
           {content}

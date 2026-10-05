@@ -1,4 +1,15 @@
 export const serversMessages = {
+  exportExcel: "Excel (.xlsx)",
+  exportDescription:
+    "Ekspor detail koneksi dan catatan. Pilih entri yang akan disertakan.",
+  exportScope: "Cakupan ekspor",
+  exportPage: "Halaman saat ini",
+  exportFiltered: "Semua entri sesuai filter",
+  exportAll: "Seluruh inventaris (abaikan filter)",
+  exportPasswords: "Sertakan kata sandi",
+  exporting: "Mengekspor…",
+  exportDownload: "Unduh Excel",
+  exportFailed: "Gagal mengekspor inventaris server",
   title: "Inventaris server",
   description: "Temukan alamat server, akun akses, dan detail koneksi.",
   documentTitle: "Inventaris server",
@@ -61,6 +72,8 @@ export const serversMessages = {
   optionalFields: "Detail opsional",
   hostDescription:
     "Pilih host yang tersedia atau masukkan alamat IP atau nama host baru.",
+  hostSearch: "Cari atau masukkan host...",
+  useHost: 'Gunakan "{host}"',
   hostPlaceholder: "Alamat IP atau nama host",
   portPlaceholder: "Port koneksi opsional",
   usernamePlaceholder: "Akun akses opsional",

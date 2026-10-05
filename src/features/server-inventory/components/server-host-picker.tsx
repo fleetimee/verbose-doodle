@@ -1,12 +1,20 @@
 import { useState } from "react";
-import { ChevronDown } from "@/components/hugeicons";
+import { Check, ChevronDown, Plus } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { formatMessage } from "@/lib/i18n";
 
 export function ServerHostPicker({
   value,
@@ -21,7 +29,7 @@ export function ServerHostPicker({
   value: string;
   onChange: (value: string) => void;
   onBlur: () => void;
-  inputRef: (element: HTMLInputElement | null) => void;
+  inputRef: (element: HTMLButtonElement | null) => void;
   hosts: string[];
   disabled: boolean;
   invalid: boolean;
@@ -29,65 +37,72 @@ export function ServerHostPicker({
 }) {
   const { messages } = useI18n();
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const options = [...new Set([...hosts, value].filter(Boolean))].sort();
+  const custom = search.trim();
+  const select = (host: string) => {
+    onChange(host);
+    onBlur();
+    setOpen(false);
+    setSearch("");
+  };
+
   return (
     <Popover onOpenChange={setOpen} open={open}>
-      <div className="flex items-center gap-2">
-        <Input
+      <PopoverTrigger asChild>
+        <Button
           aria-describedby="server-host-description"
+          aria-expanded={open}
           aria-invalid={invalid}
-          autoComplete="off"
+          className="w-full justify-between"
           disabled={disabled}
           id="server-host"
           onBlur={onBlur}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={messages.servers.hostPlaceholder}
           ref={inputRef}
-          value={value}
-        />
-        <PopoverTrigger asChild>
-          <button
-            aria-label={messages.servers.hostDescription}
-            className="flex size-9 shrink-0 items-center justify-center rounded-md border border-input hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
-            disabled={disabled}
-            type="button"
-          >
-            <ChevronDown className="size-4" />
-          </button>
-        </PopoverTrigger>
-      </div>
+          role="combobox"
+          type="button"
+          variant="outline"
+        >
+          <span className="truncate">
+            {value || messages.servers.hostPlaceholder}
+          </span>
+          <ChevronDown data-icon="inline-end" />
+        </Button>
+      </PopoverTrigger>
       <PopoverContent
-        align="end"
-        className="w-72"
-        onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            event.stopPropagation();
-            setOpen(false);
-          }
-        }}
+        align="start"
+        className="w-(--anchor-width)"
         portalContainer={portalContainer}
         size="none"
       >
-        <div
-          aria-label={messages.servers.host}
-          className="max-h-60 overflow-y-auto p-1"
-          role="listbox"
-        >
-          {hosts.map((host) => (
-            <button
-              aria-selected={value === host}
-              className="flex w-full rounded-sm px-3 py-2 text-left font-mono text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
-              key={host}
-              onClick={() => {
-                onChange(host);
-                setOpen(false);
-              }}
-              role="option"
-              type="button"
-            >
-              {host}
-            </button>
-          ))}
-        </div>
+        <Command>
+          <CommandInput
+            aria-label={messages.servers.hostSearch}
+            onValueChange={setSearch}
+            placeholder={messages.servers.hostSearch}
+            value={search}
+          />
+          <CommandList>
+            <CommandGroup>
+              {options.map((host) => (
+                <CommandItem
+                  key={host}
+                  onSelect={() => select(host)}
+                  value={host}
+                >
+                  {host}
+                  {value === host && <Check className="ml-auto" />}
+                </CommandItem>
+              ))}
+              {custom && !options.includes(custom) && (
+                <CommandItem onSelect={() => select(custom)} value={custom}>
+                  <Plus />
+                  {formatMessage(messages.servers.useHost, { host: custom })}
+                </CommandItem>
+              )}
+            </CommandGroup>
+          </CommandList>
+        </Command>
       </PopoverContent>
     </Popover>
   );

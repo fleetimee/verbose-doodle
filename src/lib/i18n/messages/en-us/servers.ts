@@ -1,4 +1,15 @@
 export const serversMessages = {
+  exportExcel: "Excel (.xlsx)",
+  exportDescription:
+    "Export connection details and notes. Choose which entries to include.",
+  exportScope: "Export scope",
+  exportPage: "Current page",
+  exportFiltered: "All matching entries",
+  exportAll: "Entire inventory (ignore filters)",
+  exportPasswords: "Include passwords",
+  exporting: "Exporting…",
+  exportDownload: "Download Excel",
+  exportFailed: "Failed to export server inventory",
   title: "List Server",
   description:
     "Find server addresses, access accounts, and connection details.",
@@ -62,6 +73,8 @@ export const serversMessages = {
   optionalFields: "Optional details",
   hostDescription:
     "Choose an existing host or enter a new IP address or hostname.",
+  hostSearch: "Find or enter a host...",
+  useHost: 'Use "{host}"',
   hostPlaceholder: "IP address or hostname",
   portPlaceholder: "Optional connection port",
   usernamePlaceholder: "Optional access account",
