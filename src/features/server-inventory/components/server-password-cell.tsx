@@ -108,12 +108,28 @@ export function ServerPasswordCell({
   if (!entry.hasPassword) {
     return <span className="text-muted-foreground">{copy.notSet}</span>;
   }
+  const passwordContent = (
+    <span
+      className="server-password-spoiler min-w-0 flex-1 font-mono text-xs"
+      data-revealed={visiblePassword !== null}
+    >
+      <span className="server-password-spoiler-text block truncate whitespace-pre">
+        {visiblePassword}
+      </span>
+      <span aria-hidden="true" className="server-password-spoiler-dust">
+        <span />
+        <span />
+        <span />
+      </span>
+      {visiblePassword === null && (
+        <span className="sr-only">{copy.passwordStored}</span>
+      )}
+    </span>
+  );
   if (visiblePassword !== null) {
     return (
       <div className="flex items-center gap-1">
-        <span className="min-w-0 flex-1 truncate whitespace-pre font-mono text-xs">
-          {visiblePassword}
-        </span>
+        {passwordContent}
         <Button
           aria-label={formatMessage(copy.copyPasswordFor, { name: entry.name })}
           className="shrink-0"
@@ -139,7 +155,7 @@ export function ServerPasswordCell({
   }
   return isAdmin ? (
     <div className="flex items-center gap-1">
-      <span className="min-w-0 flex-1 font-mono">••••••••</span>
+      {passwordContent}
       <Button
         aria-label={
           requested
@@ -170,9 +186,6 @@ export function ServerPasswordCell({
       </Button>
     </div>
   ) : (
-    <span className="font-mono">
-      <span aria-hidden="true">••••••••</span>
-      <span className="sr-only">{copy.passwordStored}</span>
-    </span>
+    passwordContent
   );
 }

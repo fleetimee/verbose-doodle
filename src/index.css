@@ -3633,3 +3633,114 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     transition-property: opacity;
   }
 }
+
+/* Password dust mirrors Telegram's invisible ink without retaining hidden secrets. */
+.server-password-spoiler {
+  position: relative;
+  display: block;
+  min-height: 1.25rem;
+  overflow: hidden;
+}
+
+.server-password-spoiler-text {
+  opacity: 0;
+  clip-path: circle(0% at 100% 50%);
+  transition:
+    clip-path 250ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
+    opacity 150ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.server-password-spoiler-dust {
+  position: absolute;
+  inset: 0;
+  max-width: 6rem;
+  overflow: hidden;
+  color: var(--muted-foreground);
+  pointer-events: none;
+  border-radius: var(--radius-sm);
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 200ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
+    transform 250ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.server-password-spoiler-dust > span {
+  position: absolute;
+  inset: -6px;
+  background-image:
+    radial-gradient(circle, currentColor 0.7px, transparent 1px),
+    radial-gradient(circle, currentColor 0.5px, transparent 0.8px);
+  background-position:
+    0 0,
+    3px 2px;
+  background-size:
+    7px 5px,
+    9px 7px;
+  opacity: 0.65;
+  animation: server-password-dust-drift 1800ms linear infinite alternate;
+}
+
+.server-password-spoiler-dust > span:nth-child(2) {
+  background-position:
+    2px 3px,
+    5px 1px;
+  animation-duration: 2300ms;
+  animation-delay: -900ms;
+  animation-direction: alternate-reverse;
+}
+
+.server-password-spoiler-dust > span:nth-child(3) {
+  background-position:
+    4px 1px,
+    1px 4px;
+  animation-duration: 2700ms;
+  animation-delay: -1700ms;
+}
+
+.server-password-spoiler[data-revealed="true"] .server-password-spoiler-text {
+  opacity: 1;
+  clip-path: circle(150% at 100% 50%);
+}
+
+.server-password-spoiler[data-revealed="true"] .server-password-spoiler-dust {
+  opacity: 0;
+  transform: scale(1.12);
+}
+
+.server-password-spoiler[data-revealed="true"]
+  .server-password-spoiler-dust
+  > span {
+  animation-play-state: paused;
+}
+
+@keyframes server-password-dust-drift {
+  from {
+    transform: translate(-2px, 1px);
+    opacity: 0.45;
+  }
+  to {
+    transform: translate(3px, -2px);
+    opacity: 0.8;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .server-password-spoiler-text {
+    clip-path: none;
+    transition: opacity 100ms linear;
+  }
+
+  .server-password-spoiler-dust {
+    transform: none;
+    transition: opacity 100ms linear;
+  }
+
+  .server-password-spoiler[data-revealed="true"] .server-password-spoiler-dust {
+    transform: none;
+  }
+
+  .server-password-spoiler-dust > span {
+    animation: none;
+  }
+}
