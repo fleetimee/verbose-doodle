@@ -119,6 +119,12 @@ const dialogContentVariants = cva(
         "5xl": "sm:max-w-5xl",
       },
     },
+    compoundVariants: [
+      {
+        variant: "fullscreen",
+        className: "flex flex-col gap-0 overflow-hidden sm:max-w-none",
+      },
+    ],
     defaultVariants: {
       variant: "default",
       size: "default",
