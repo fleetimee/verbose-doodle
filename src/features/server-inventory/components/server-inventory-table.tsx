@@ -1,3 +1,5 @@
+import { SearchIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   type Column,
   type ColumnDef,
@@ -15,8 +17,10 @@ import {
   ArrowUpDown,
   ChevronDown,
   CopyIcon,
+  ListFilter,
   Pen,
   Server,
+  SlidersHorizontal,
   Trash2,
 } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
@@ -44,7 +48,11 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
@@ -68,6 +76,7 @@ import {
 import { revealServerPassword } from "@/features/server-inventory/api";
 import { ServerAccessIcon } from "@/features/server-inventory/components/server-access-icon";
 import { ServerEntryDetails } from "@/features/server-inventory/components/server-entry-details";
+import { ServerInventoryFilter } from "@/features/server-inventory/components/server-inventory-filter";
 import { ServerPasswordCell } from "@/features/server-inventory/components/server-password-cell";
 import type {
   ServerEntry,
@@ -528,76 +537,59 @@ export function ServerInventoryTable({
           </DrawerContent>
         )}
       </Drawer>
-      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b bg-muted/20 p-3">
-        <Input
-          aria-label={copy.search}
-          className="min-w-48 flex-1 sm:max-w-sm"
-          onChange={(event) => {
-            setAnimateUpdates(true);
-            table.setGlobalFilter(event.target.value);
-          }}
-          placeholder={copy.search}
-          value={search}
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b bg-background p-3">
+        <InputGroup className="w-full min-w-0 sm:w-64 sm:shrink-0 xl:w-72">
+          <InputGroupInput
+            aria-label={copy.search}
+            onChange={(event) => {
+              setAnimateUpdates(true);
+              table.setGlobalFilter(event.target.value);
+            }}
+            placeholder={copy.searchCompact}
+            value={search}
+          />
+          <InputGroupAddon>
+            <HugeiconsIcon
+              aria-hidden="true"
+              icon={SearchIcon}
+              strokeWidth={2}
+            />
+          </InputGroupAddon>
+        </InputGroup>
+        <ServerInventoryFilter
+          allLabel={copy.allTypesCompact}
+          emptyLabel={copy.noMatches}
+          label={copy.filterType}
+          onChange={(value) =>
+            onQueryChange({
+              ...query,
+              accessType: value,
+              databaseEngine:
+                value.toUpperCase() === "DATABASE" ? query.databaseEngine : "",
+              page: 0,
+            })
+          }
+          options={types}
+          value={query.accessType}
         />
-        <Select
-          onValueChange={(value) =>
-            table
-              .getColumn("accessType")
-              ?.setFilterValue(value === "all" ? undefined : value)
-          }
-          value={String(
-            table.getColumn("accessType")?.getFilterValue() ?? "all"
-          )}
-        >
-          <SelectTrigger aria-label={copy.filterType} className="min-w-36">
-            <SelectValue>
-              {String(
-                table.getColumn("accessType")?.getFilterValue() ?? copy.allTypes
-              )}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="all">{copy.allTypes}</SelectItem>
-              {types.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Select
-          onValueChange={(value) =>
-            table
-              .getColumn("databaseEngine")
-              ?.setFilterValue(value === "all" ? undefined : value)
-          }
-          value={String(
-            table.getColumn("databaseEngine")?.getFilterValue() ?? "all"
-          )}
-        >
-          <SelectTrigger aria-label={copy.filterEngine} className="min-w-36">
-            <SelectValue>
-              {String(
-                table.getColumn("databaseEngine")?.getFilterValue() ??
-                  copy.allEngines
-              )}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="all">{copy.allEngines}</SelectItem>
-              {engines.map((engine) => (
-                <SelectItem key={engine} value={engine}>
-                  {engine}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        {query.accessType.toUpperCase() === "DATABASE" && (
+          <ServerInventoryFilter
+            allLabel={copy.allEnginesCompact}
+            emptyLabel={copy.noMatches}
+            engine
+            label={copy.filterEngine}
+            onChange={(value) =>
+              table
+                .getColumn("databaseEngine")
+                ?.setFilterValue(value || undefined)
+            }
+            options={engines}
+            value={query.databaseEngine}
+          />
+        )}
         {(search || columnFilters.length > 0) && (
           <Button
+            aria-label={copy.clearFilters}
             onClick={() => {
               onQueryChange({
                 ...query,
@@ -610,46 +602,56 @@ export function ServerInventoryTable({
             size="sm"
             variant="ghost"
           >
-            {copy.clearFilters}
+            <ListFilter data-icon="inline-start" />
+            {copy.clearFiltersCompact}
           </Button>
         )}
-        {isAdmin && (
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={revealAll}
-              id="reveal-all-passwords"
-              onCheckedChange={setRevealAll}
-            />
-            <Label htmlFor="reveal-all-passwords">{copy.revealAll}</Label>
-            {revealPending && <Spinner aria-label={copy.revealingPasswords} />}
-          </div>
-        )}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="sm:ml-auto" variant="outline">
-              {messages.common.columns}
-              <ChevronDown data-icon="inline-end" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuGroup>
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => (
-                  <DropdownMenuCheckboxItem
-                    checked={column.getIsVisible()}
-                    key={column.id}
-                    onCheckedChange={(checked) =>
-                      column.toggleVisibility(!!checked)
-                    }
-                  >
-                    {labels[column.id]}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex w-full flex-wrap items-center gap-3 border-t pt-2 sm:ml-auto sm:w-auto sm:border-t-0 sm:pt-0">
+          {isAdmin && (
+            <div className="flex min-h-9 items-center gap-2">
+              <Switch
+                aria-label={copy.revealAll}
+                checked={revealAll}
+                id="reveal-all-passwords"
+                onCheckedChange={setRevealAll}
+              />
+              <Label className="cursor-pointer" htmlFor="reveal-all-passwords">
+                <span aria-hidden="true">{copy.revealAllCompact}</span>
+                <span className="sr-only">{copy.revealAll}</span>
+              </Label>
+              {revealPending && (
+                <Spinner aria-label={copy.revealingPasswords} />
+              )}
+            </div>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="ml-auto" variant="ghost">
+                <SlidersHorizontal data-icon="inline-start" />
+                {messages.common.columns}
+                <ChevronDown data-icon="inline-end" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuGroup>
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => (
+                    <DropdownMenuCheckboxItem
+                      checked={column.getIsVisible()}
+                      key={column.id}
+                      onCheckedChange={(checked) =>
+                        column.toggleVisibility(!!checked)
+                      }
+                    >
+                      {labels[column.id]}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       {revealFailed && (
         <Alert className="m-3 w-auto shrink-0" variant="destructive">

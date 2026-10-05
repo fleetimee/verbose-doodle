@@ -504,13 +504,37 @@ test("database engine icons and filtering distinguish database entries", async (
   expect(
     screen.getByRole("button", { name: "DATABASE · ORACLE" })
   ).toBeDefined();
+  expect(
+    screen.queryByRole("combobox", { name: "Filter by database engine" })
+  ).toBeNull();
+  await user.click(
+    screen.getByRole("combobox", { name: "Filter by access type" })
+  );
+  await user.click(await screen.findByRole("option", { name: "DATABASE" }));
   await user.click(
     screen.getByRole("combobox", { name: "Filter by database engine" })
   );
+  await user.type(
+    screen.getByPlaceholderText("Filter by database engine"),
+    "ora"
+  );
+  expect(screen.queryByRole("option", { name: "POSTGRESQL" })).toBeNull();
   await user.click(await screen.findByRole("option", { name: "ORACLE" }));
   await waitFor(() => expect(screen.queryByText("Postgres server")).toBeNull());
   expect(screen.getByText("Oracle server")).toBeDefined();
   expect(screen.queryByText("Linux")).toBeNull();
+  await user.click(
+    screen.getByRole("combobox", { name: "Filter by access type" })
+  );
+  await user.click(await screen.findByRole("option", { name: "SSH" }));
+  expect(await screen.findByText("Linux")).toBeDefined();
+  expect(
+    screen.queryByRole("combobox", { name: "Filter by database engine" })
+  ).toBeNull();
+  await waitFor(() => {
+    expect(listRequests.at(-1)?.get("accessType")).toBe("SSH");
+    expect(listRequests.at(-1)?.get("databaseEngine")).toBe("");
+  });
   await user.click(screen.getByRole("button", { name: "Clear filters" }));
   expect(await screen.findByText("Postgres server")).toBeDefined();
   expect(screen.getByText("Linux")).toBeDefined();

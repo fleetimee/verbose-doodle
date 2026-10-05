@@ -3566,3 +3566,18 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     transition-duration: 100ms;
   }
 }
+
+/* Selected inventory filters stay visible in either theme. */
+.inventory-filter[data-active="true"] {
+  color: var(--primary);
+  background: color-mix(in oklch, var(--primary) 8%, var(--background));
+  border-color: color-mix(in oklch, var(--primary) 35%, var(--border));
+}
+
+.inventory-filter[data-active="true"] svg {
+  color: inherit;
+}
+
+.inventory-filter:hover {
+  background: var(--accent);
+}
