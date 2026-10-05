@@ -30,19 +30,15 @@
 
 ## Validation
 
-- Run relevant tests with `rtk bun test --isolate <path>`.
-- For code changes, run `rtk bun run lint` and `rtk bun run build`.
+- For code changes, run `rtk bun run lint` for Ultracite/Biome,
+  `rtk bun run lint:oxlint` for Oxlint, and `rtk bun run build`.
   Build checks TypeScript project references; the current `type-check` script
   alone does not check those referenced projects.
-- For docs-only changes, check links and `rtk git diff --check`; skip app tests.
+- For docs-only changes, check links and `rtk git diff --check`.
 - Report what changed, checks run, and any failures or checks left unrun.
 
 ## Tests
 
-Keep the suite thin. Add or update tests for meaningful failure modes: business
-rules, protocol handling, authentication, data loss, async state transitions,
-or a reproduced bug. Keep boundary and error cases for distinct behavior.
-
-Skip static copy, CSS classes, simple prop rendering, trivial wrappers,
-third-party behavior, and runtime checks of TypeScript types. Prefer an existing
-behavior test over duplicate coverage across layers.
+Do not create, restore, or add automated test files in this repository.
+Do not add test suites, test scripts, test setup files, or test dependencies.
+Validate changes with lint, the production build, and relevant manual checks.

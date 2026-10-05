@@ -23,7 +23,6 @@ Set `VITE_ENDPOINT_URL` in `.env` to the backend URL. The default development se
 bun run build       # Type-check and build for production
 bun run type-check  # Run TypeScript without emitting files
 bun run lint        # Check formatting and lint rules
-bun run test        # Run the test suite with isolation
 bun run preview     # Serve the production build locally
 ```
 

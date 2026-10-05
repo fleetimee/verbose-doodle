@@ -10,9 +10,6 @@
     "lint": "ultracite check",
     "lint:oxlint": "oxlint",
     "preview": "vite preview",
-    "test": "bun test --isolate",
-    "test:coverage": "bun test --isolate --coverage",
-    "test:watch": "bun test --isolate --watch",
     "type-check": "tsc --noEmit"
   },
   "resolutions": {
@@ -74,12 +71,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
-    "@happy-dom/global-registrator": "^20.14.5",
     "@oxlint/plugins": "1.86.0",
     "@shadcn/lint": "^0.2.0",
     "@tanstack/react-query-devtools": "^5.104.0",
-    "@testing-library/react": "^16.3.3",
-    "@testing-library/user-event": "^14.6.7",
     "@types/bun": "^1.4.2",
     "@types/node": "26.6.3",
     "@types/qrcode": "^1.5.6",
