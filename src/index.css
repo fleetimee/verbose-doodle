@@ -144,7 +144,11 @@
 }
 
 .navigation-search-dialog [data-slot="command-list"] {
-  max-height: min(400px, calc(100dvh - min(18vh, 144px) - 184px));
+  --command-list-max-height: min(
+    400px,
+    calc(100dvh - min(18vh, 144px) - 184px)
+  );
+  max-height: var(--command-list-max-height);
   padding-block: 8px;
   overscroll-behavior: contain;
   scroll-padding-block: 8px;

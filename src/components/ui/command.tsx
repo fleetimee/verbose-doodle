@@ -3,6 +3,7 @@ import { Command as CommandPrimitive } from "cmdk"
 import { cva, type VariantProps } from "class-variance-authority"
 import { messages } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Dialog,
   DialogContent,
@@ -102,7 +103,7 @@ function CommandInput({
 }
 
 const commandListVariants = cva(
-  "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto",
+  "max-h-[var(--command-list-max-height,300px)] overflow-hidden",
   {
     variants: {
       variant: {
@@ -125,6 +126,7 @@ function CommandList({
   className,
   variant = "default",
   size = "default",
+  children,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.List> &
   VariantProps<typeof commandListVariants>) {
@@ -135,7 +137,13 @@ function CommandList({
       data-size={size}
       className={cn(commandListVariants({ variant, size }), className)}
       {...props}
-    />
+    >
+      {variant === "scrollable" ? children : (
+        <ScrollArea className="max-h-[var(--command-list-max-height,300px)]" viewportClassName="max-h-[var(--command-list-max-height,300px)] scroll-py-1" >
+          {children}
+        </ScrollArea>
+      )}
+    </CommandPrimitive.List>
   )
 }
 
