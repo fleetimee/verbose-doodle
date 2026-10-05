@@ -37,6 +37,10 @@ export const serversMessages = {
   password: "Password",
   link: "Link",
   openWebUrl: "Open website for {name} in a new tab",
+  previewWebUrl: "Preview website for {name}",
+  openInNewTab: "Open in new tab",
+  webPreviewHint:
+    "If the preview is blank or blocked, open the website in a new tab.",
   url: "Web URL",
   databaseEngine: "Database engine",
   databaseName: "Database name",

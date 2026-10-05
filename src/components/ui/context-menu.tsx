@@ -99,6 +99,7 @@ const contextMenuContentVariants = cva(
     variants: {
       variant: {
         default: "",
+        macos: "macos-context-menu",
         subtle:
           "rounded-lg border-border/70 bg-popover/95 shadow-lg backdrop-blur-xl",
       },

@@ -34,6 +34,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { AccessTypePicker } from "@/features/server-inventory/components/access-type-picker";
@@ -265,222 +266,230 @@ export function ServerEntryDrawer({
             }
           })}
         >
-          <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-6">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <FieldGroup className="grid grid-cols-1" size="compact">
-              <Field
-                data-disabled={saving}
-                data-invalid={!!form.formState.errors.name}
-              >
-                <FieldLabel htmlFor="server-name">{copy.name}</FieldLabel>
-                <Input
-                  {...form.register("name")}
-                  aria-invalid={!!form.formState.errors.name}
-                  autoComplete="off"
-                  disabled={saving}
-                  id="server-name"
-                  placeholder={copy.namePlaceholder}
-                />
-                <FieldError errors={[form.formState.errors.name]} />
-              </Field>
-              <Controller
-                control={form.control}
-                name="host"
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-disabled={saving}
-                    data-invalid={fieldState.invalid}
-                  >
-                    <FieldLabel htmlFor="server-host">{copy.host}</FieldLabel>
-                    <ServerHostPicker
-                      disabled={saving}
-                      hosts={hosts}
-                      inputRef={field.ref}
-                      invalid={fieldState.invalid}
-                      onBlur={field.onBlur}
-                      onChange={field.onChange}
-                      portalContainer={drawerContent}
-                      value={field.value}
-                    />
-                    <FieldDescription id="server-host-description">
-                      {copy.hostDescription}
-                    </FieldDescription>
-                    <FieldError errors={[fieldState.error]} />
-                  </Field>
-                )}
-              />
-              <Controller
-                control={form.control}
-                name="accessType"
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-disabled={saving}
-                    data-invalid={fieldState.invalid}
-                  >
-                    <FieldLabel htmlFor="server-access-type">
-                      {copy.accessType}
-                    </FieldLabel>
-                    <AccessTypePicker
-                      disabled={saving}
-                      id="server-access-type"
-                      invalid={fieldState.invalid}
-                      onChange={(type) => {
-                        field.onChange(type);
-                        const portWasEdited =
-                          form.getFieldState("port").isDirty;
-                        const canUpdateDefault = !(entry || portWasEdited);
-                        if (canUpdateDefault || !form.getValues("port")) {
-                          form.setValue("port", defaultPorts.get(type) ?? "");
-                        }
-                      }}
-                      portalContainer={drawerContent}
-                      types={types}
-                      value={field.value}
-                    />
-                    <FieldDescription>{copy.typeDescription}</FieldDescription>
-                    <FieldError errors={[fieldState.error]} />
-                  </Field>
-                )}
-              />
-              {fields.flatMap(({ name, label, placeholder }) =>
-                contextualFields.includes(name)
-                  ? [
-                      <Field
-                        data-disabled={saving}
-                        data-invalid={!!form.formState.errors[name]}
-                        key={name}
-                      >
-                        <FieldLabel htmlFor={`server-${name}`}>
-                          {label}
-                        </FieldLabel>
-                        {name === "databaseEngine" ? (
-                          <Controller
-                            control={form.control}
-                            name="databaseEngine"
-                            render={({ field, fieldState }) => (
-                              <DatabaseEnginePicker
-                                disabled={saving}
-                                id="server-databaseEngine"
-                                invalid={fieldState.invalid}
-                                onChange={field.onChange}
-                                portalContainer={drawerContent}
-                                value={field.value}
-                              />
-                            )}
-                          />
-                        ) : (
-                          <Input
-                            {...form.register(name)}
-                            aria-invalid={!!form.formState.errors[name]}
-                            autoComplete="off"
-                            disabled={saving}
-                            id={`server-${name}`}
-                            inputMode={name === "port" ? "numeric" : undefined}
-                            placeholder={
-                              name === "port" && defaultPorts.get(accessType)
-                                ? defaultPorts.get(accessType)
-                                : placeholder
-                            }
-                          />
-                        )}
-                        <FieldError errors={[form.formState.errors[name]]} />
-                      </Field>,
-                    ]
-                  : []
+          <ScrollArea className="min-h-0 flex-1">
+            <div className="flex flex-col gap-6 px-6 py-6">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
-              {showCredentials && passwordFields}
-            </FieldGroup>
-            <Collapsible onOpenChange={setOptionalOpen} open={optionalOpen}>
-              <CollapsibleTrigger type="button" variant="header">
-                {copy.optionalFields}
-                <ChevronDown
-                  className={optionalOpen ? "size-4 rotate-180" : "size-4"}
+              <FieldGroup className="grid grid-cols-1" size="compact">
+                <Field
+                  data-disabled={saving}
+                  data-invalid={!!form.formState.errors.name}
+                >
+                  <FieldLabel htmlFor="server-name">{copy.name}</FieldLabel>
+                  <Input
+                    {...form.register("name")}
+                    aria-invalid={!!form.formState.errors.name}
+                    autoComplete="off"
+                    disabled={saving}
+                    id="server-name"
+                    placeholder={copy.namePlaceholder}
+                  />
+                  <FieldError errors={[form.formState.errors.name]} />
+                </Field>
+                <Controller
+                  control={form.control}
+                  name="host"
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-disabled={saving}
+                      data-invalid={fieldState.invalid}
+                    >
+                      <FieldLabel htmlFor="server-host">{copy.host}</FieldLabel>
+                      <ServerHostPicker
+                        disabled={saving}
+                        hosts={hosts}
+                        inputRef={field.ref}
+                        invalid={fieldState.invalid}
+                        onBlur={field.onBlur}
+                        onChange={field.onChange}
+                        portalContainer={drawerContent}
+                        value={field.value}
+                      />
+                      <FieldDescription id="server-host-description">
+                        {copy.hostDescription}
+                      </FieldDescription>
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
                 />
-              </CollapsibleTrigger>
-              <CollapsibleContent keepMounted>
-                <FieldGroup size="compact-padded">
-                  {fields.flatMap(({ name, label, placeholder }) => {
-                    if (
-                      name === "name" ||
-                      name === "host" ||
-                      contextualFields.includes(name)
-                    ) {
-                      return [];
-                    }
-                    const visible =
-                      name === "port" ||
-                      name === "username" ||
-                      !knownType ||
-                      Boolean(values[name]);
-                    return visible
-                      ? [
-                          <Field
-                            data-disabled={saving}
-                            data-invalid={!!form.formState.errors[name]}
-                            key={name}
-                          >
-                            <FieldLabel htmlFor={`server-${name}`}>
-                              {label}
-                            </FieldLabel>
-                            {name === "databaseEngine" ? (
-                              <Controller
-                                control={form.control}
-                                name="databaseEngine"
-                                render={({ field, fieldState }) => (
-                                  <DatabaseEnginePicker
-                                    disabled={saving}
-                                    id="server-databaseEngine"
-                                    invalid={fieldState.invalid}
-                                    onChange={field.onChange}
-                                    portalContainer={drawerContent}
-                                    value={field.value}
-                                  />
-                                )}
-                              />
-                            ) : (
-                              <Input
-                                {...form.register(name)}
-                                aria-invalid={!!form.formState.errors[name]}
-                                autoComplete="off"
-                                disabled={saving}
-                                id={`server-${name}`}
-                                inputMode={
-                                  name === "port" ? "numeric" : undefined
-                                }
-                                placeholder={placeholder}
-                              />
-                            )}
-                            <FieldError
-                              errors={[form.formState.errors[name]]}
+                <Controller
+                  control={form.control}
+                  name="accessType"
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-disabled={saving}
+                      data-invalid={fieldState.invalid}
+                    >
+                      <FieldLabel htmlFor="server-access-type">
+                        {copy.accessType}
+                      </FieldLabel>
+                      <AccessTypePicker
+                        disabled={saving}
+                        id="server-access-type"
+                        invalid={fieldState.invalid}
+                        onChange={(type) => {
+                          field.onChange(type);
+                          const portWasEdited =
+                            form.getFieldState("port").isDirty;
+                          const canUpdateDefault = !(entry || portWasEdited);
+                          if (canUpdateDefault || !form.getValues("port")) {
+                            form.setValue("port", defaultPorts.get(type) ?? "");
+                          }
+                        }}
+                        portalContainer={drawerContent}
+                        types={types}
+                        value={field.value}
+                      />
+                      <FieldDescription>
+                        {copy.typeDescription}
+                      </FieldDescription>
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
+                />
+                {fields.flatMap(({ name, label, placeholder }) =>
+                  contextualFields.includes(name)
+                    ? [
+                        <Field
+                          data-disabled={saving}
+                          data-invalid={!!form.formState.errors[name]}
+                          key={name}
+                        >
+                          <FieldLabel htmlFor={`server-${name}`}>
+                            {label}
+                          </FieldLabel>
+                          {name === "databaseEngine" ? (
+                            <Controller
+                              control={form.control}
+                              name="databaseEngine"
+                              render={({ field, fieldState }) => (
+                                <DatabaseEnginePicker
+                                  disabled={saving}
+                                  id="server-databaseEngine"
+                                  invalid={fieldState.invalid}
+                                  onChange={field.onChange}
+                                  portalContainer={drawerContent}
+                                  value={field.value}
+                                />
+                              )}
                             />
-                          </Field>,
-                        ]
-                      : [];
-                  })}
-                  {!showCredentials && passwordFields}
-                  <Field
-                    data-disabled={saving}
-                    data-invalid={!!form.formState.errors.notes}
-                  >
-                    <FieldLabel htmlFor="server-notes">{copy.notes}</FieldLabel>
-                    <Textarea
-                      {...form.register("notes")}
-                      aria-invalid={!!form.formState.errors.notes}
-                      disabled={saving}
-                      id="server-notes"
-                      placeholder={copy.notesPlaceholder}
-                      rows={3}
-                    />
-                    <FieldError errors={[form.formState.errors.notes]} />
-                  </Field>
-                </FieldGroup>
-              </CollapsibleContent>
-            </Collapsible>
-          </div>
+                          ) : (
+                            <Input
+                              {...form.register(name)}
+                              aria-invalid={!!form.formState.errors[name]}
+                              autoComplete="off"
+                              disabled={saving}
+                              id={`server-${name}`}
+                              inputMode={
+                                name === "port" ? "numeric" : undefined
+                              }
+                              placeholder={
+                                name === "port" && defaultPorts.get(accessType)
+                                  ? defaultPorts.get(accessType)
+                                  : placeholder
+                              }
+                            />
+                          )}
+                          <FieldError errors={[form.formState.errors[name]]} />
+                        </Field>,
+                      ]
+                    : []
+                )}
+                {showCredentials && passwordFields}
+              </FieldGroup>
+              <Collapsible onOpenChange={setOptionalOpen} open={optionalOpen}>
+                <CollapsibleTrigger type="button" variant="header">
+                  {copy.optionalFields}
+                  <ChevronDown
+                    className={optionalOpen ? "size-4 rotate-180" : "size-4"}
+                  />
+                </CollapsibleTrigger>
+                <CollapsibleContent keepMounted>
+                  <FieldGroup size="compact-padded">
+                    {fields.flatMap(({ name, label, placeholder }) => {
+                      if (
+                        name === "name" ||
+                        name === "host" ||
+                        contextualFields.includes(name)
+                      ) {
+                        return [];
+                      }
+                      const visible =
+                        name === "port" ||
+                        name === "username" ||
+                        !knownType ||
+                        Boolean(values[name]);
+                      return visible
+                        ? [
+                            <Field
+                              data-disabled={saving}
+                              data-invalid={!!form.formState.errors[name]}
+                              key={name}
+                            >
+                              <FieldLabel htmlFor={`server-${name}`}>
+                                {label}
+                              </FieldLabel>
+                              {name === "databaseEngine" ? (
+                                <Controller
+                                  control={form.control}
+                                  name="databaseEngine"
+                                  render={({ field, fieldState }) => (
+                                    <DatabaseEnginePicker
+                                      disabled={saving}
+                                      id="server-databaseEngine"
+                                      invalid={fieldState.invalid}
+                                      onChange={field.onChange}
+                                      portalContainer={drawerContent}
+                                      value={field.value}
+                                    />
+                                  )}
+                                />
+                              ) : (
+                                <Input
+                                  {...form.register(name)}
+                                  aria-invalid={!!form.formState.errors[name]}
+                                  autoComplete="off"
+                                  disabled={saving}
+                                  id={`server-${name}`}
+                                  inputMode={
+                                    name === "port" ? "numeric" : undefined
+                                  }
+                                  placeholder={placeholder}
+                                />
+                              )}
+                              <FieldError
+                                errors={[form.formState.errors[name]]}
+                              />
+                            </Field>,
+                          ]
+                        : [];
+                    })}
+                    {!showCredentials && passwordFields}
+                    <Field
+                      data-disabled={saving}
+                      data-invalid={!!form.formState.errors.notes}
+                    >
+                      <FieldLabel htmlFor="server-notes">
+                        {copy.notes}
+                      </FieldLabel>
+                      <Textarea
+                        {...form.register("notes")}
+                        aria-invalid={!!form.formState.errors.notes}
+                        disabled={saving}
+                        id="server-notes"
+                        placeholder={copy.notesPlaceholder}
+                        rows={3}
+                      />
+                      <FieldError errors={[form.formState.errors.notes]} />
+                    </Field>
+                  </FieldGroup>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          </ScrollArea>
           <DrawerFooter className="shrink-0" size="lg" variant="bordered">
             <Button disabled={saving} type="submit">
               {saving && <Spinner data-icon="inline-start" />}

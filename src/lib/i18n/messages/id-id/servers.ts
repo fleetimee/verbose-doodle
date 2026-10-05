@@ -36,6 +36,10 @@ export const serversMessages = {
   password: "Kata sandi",
   link: "Tautan",
   openWebUrl: "Buka situs untuk {name} di tab baru",
+  previewWebUrl: "Pratinjau situs untuk {name}",
+  openInNewTab: "Buka di tab baru",
+  webPreviewHint:
+    "Jika pratinjau kosong atau diblokir, buka situs di tab baru.",
   url: "URL web",
   databaseEngine: "Mesin database",
   databaseName: "Nama database",

@@ -31,6 +31,14 @@ import {
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Drawer,
@@ -85,6 +93,7 @@ import { ServerEntryDetails } from "@/features/server-inventory/components/serve
 import { ServerInventoryFilter } from "@/features/server-inventory/components/server-inventory-filter";
 import { ServerInventorySpreadsheetExport } from "@/features/server-inventory/components/server-inventory-spreadsheet-export";
 import { ServerPasswordCell } from "@/features/server-inventory/components/server-password-cell";
+import { ServerWebLink } from "@/features/server-inventory/components/server-web-link";
 import { isWebUrl } from "@/features/server-inventory/server-form";
 import type {
   ServerEntry,
@@ -348,17 +357,7 @@ export function ServerInventoryTable({
           {row.original.accessType.toUpperCase() === "WEB" &&
             row.original.url &&
             isWebUrl(row.original.url) && (
-              <a
-                aria-label={formatMessage(copy.openWebUrl, {
-                  name: row.original.name,
-                })}
-                className="shrink-0 rounded-sm text-primary text-xs underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                href={row.original.url}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                [{copy.link}]
-              </a>
+              <ServerWebLink name={row.original.name} url={row.original.url} />
             )}
         </div>
       ),
@@ -851,63 +850,95 @@ export function ServerInventoryTable({
                   </TableCell>
                 </AnimatedTableRow>,
                 ...(collapsedHosts.has(host) ? [] : rows).map((row) => (
-                  <AnimatedTableRow
-                    animate={{ opacity: 1 }}
-                    aria-label={formatMessage(copy.viewDetailsFor, {
-                      name: row.original.name,
-                    })}
-                    className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
-                    initial={animateUpdates ? { opacity: 0.65 } : false}
-                    key={row.id}
-                    layout={layout}
-                    onClick={(event) => {
-                      if (
-                        event.target instanceof Element &&
-                        event.target.closest(
-                          "button, a, input, [role='menuitem'], [role='switch']"
-                        )
-                      ) {
-                        return;
-                      }
-                      openDetails(row.original);
-                    }}
-                    onKeyDown={(event) => {
-                      if (
-                        event.target === event.currentTarget &&
-                        (event.key === "Enter" || event.key === " ")
-                      ) {
-                        event.preventDefault();
-                        openDetails(row.original);
-                      }
-                    }}
-                    tabIndex={0}
-                    transition={entryTransition}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        size={
-                          cell.column.id === "name" ? "indented" : "default"
-                        }
-                        variant="ellipsis"
+                  <ContextMenu key={row.id}>
+                    <ContextMenuTrigger asChild>
+                      <AnimatedTableRow
+                        animate={{ opacity: 1 }}
+                        aria-label={formatMessage(copy.viewDetailsFor, {
+                          name: row.original.name,
+                        })}
+                        className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+                        initial={animateUpdates ? { opacity: 0.65 } : false}
+                        layout={layout}
+                        onClick={(event) => {
+                          if (
+                            event.target instanceof Element &&
+                            event.target.closest(
+                              "button, a, input, [role='menuitem'], [role='switch'], [data-slot='hover-card-content']"
+                            )
+                          ) {
+                            return;
+                          }
+                          openDetails(row.original);
+                        }}
+                        onKeyDown={(event) => {
+                          if (
+                            event.target === event.currentTarget &&
+                            (event.key === "Enter" || event.key === " ")
+                          ) {
+                            event.preventDefault();
+                            openDetails(row.original);
+                          }
+                        }}
+                        tabIndex={0}
+                        transition={entryTransition}
                       >
-                        {cell.column.id === "password" ? (
-                          <ServerPasswordCell
-                            bulkPassword={passwords[row.original.id]}
-                            entry={row.original}
-                            isAdmin={isAdmin}
-                            loading={loading}
-                            revealAll={revealAll}
-                          />
-                        ) : (
-                          flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )
-                        )}
-                      </TableCell>
-                    ))}
-                  </AnimatedTableRow>
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell
+                            key={cell.id}
+                            size={
+                              cell.column.id === "name" ? "indented" : "default"
+                            }
+                            variant="ellipsis"
+                          >
+                            {cell.column.id === "password" ? (
+                              <ServerPasswordCell
+                                bulkPassword={passwords[row.original.id]}
+                                entry={row.original}
+                                isAdmin={isAdmin}
+                                loading={loading}
+                                revealAll={revealAll}
+                              />
+                            ) : (
+                              flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )
+                            )}
+                          </TableCell>
+                        ))}
+                      </AnimatedTableRow>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent variant="macos">
+                      <ContextMenuGroup>
+                        <ContextMenuItem
+                          onClick={() => openDetails(row.original)}
+                        >
+                          {copy.viewDetails}
+                        </ContextMenuItem>
+                      </ContextMenuGroup>
+                      {isAdmin && (
+                        <>
+                          <ContextMenuSeparator />
+                          <ContextMenuGroup>
+                            <ContextMenuItem
+                              disabled={loading}
+                              onClick={() => onEdit(row.original)}
+                            >
+                              {copy.edit}
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              disabled={loading}
+                              onClick={() => onDelete(row.original)}
+                              variant="destructive"
+                            >
+                              {copy.delete}
+                            </ContextMenuItem>
+                          </ContextMenuGroup>
+                        </>
+                      )}
+                    </ContextMenuContent>
+                  </ContextMenu>
                 )),
               ])
             ) : (

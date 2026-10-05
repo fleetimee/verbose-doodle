@@ -3744,3 +3744,74 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     animation: none;
   }
 }
+
+:root {
+  --macos-menu-selection: oklch(0.54 0.2 258);
+  --macos-menu-selection-foreground: oklch(0.99 0 0);
+}
+
+.macos-context-menu[data-slot="context-menu-content"] {
+  min-width: 12rem;
+  padding: 0.3rem;
+  background: color-mix(in oklch, var(--popover) 85%, transparent);
+  border: 1px solid color-mix(in oklch, var(--foreground) 14%, transparent);
+  border-radius: 0.75rem;
+  box-shadow:
+    0 12px 32px -8px color-mix(in oklch, var(--foreground) 24%, transparent),
+    0 2px 8px color-mix(in oklch, var(--foreground) 8%, transparent),
+    inset 0 1px 0 color-mix(in oklch, var(--background) 50%, transparent);
+  backdrop-filter: blur(24px) saturate(1.35);
+}
+
+.macos-context-menu [data-slot="context-menu-item"] {
+  min-height: 1.75rem;
+  padding: 0.25rem 0.65rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  border-radius: 0.4rem;
+}
+
+.macos-context-menu [data-slot="context-menu-item"]:focus,
+.macos-context-menu [data-slot="context-menu-item"][data-highlighted] {
+  color: var(--macos-menu-selection-foreground);
+  background: var(--macos-menu-selection);
+}
+
+.macos-context-menu [data-slot="context-menu-separator"] {
+  height: 1px;
+  margin: 0.3rem 0.65rem;
+  background: color-mix(in oklch, var(--foreground) 12%, transparent);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .macos-context-menu[data-slot="context-menu-content"] {
+    background: var(--popover);
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .macos-context-menu[data-slot="context-menu-content"] {
+    transform: none;
+    scale: 1;
+    transition-duration: 100ms;
+    transition-property: opacity;
+  }
+}
+
+.server-web-preview-viewport {
+  position: relative;
+  height: min(14rem, 35dvh);
+  overflow: hidden;
+}
+
+.server-web-preview-frame {
+  display: block;
+  width: 250%;
+  height: 250%;
+  pointer-events: none;
+  border: 0;
+  transform: scale(0.4);
+  transform-origin: top left;
+}
