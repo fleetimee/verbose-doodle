@@ -18,6 +18,7 @@ import {
   renderQrisPng,
   renderQrisQr,
 } from "@/features/developer-tools/tools/qris-creator/render-qris-qr";
+import { PayloadSegments } from "@/features/developer-tools/tools/qris-parser/components/payload-segments";
 import { QrImageInput } from "@/features/developer-tools/tools/qris-parser/components/qr-image-input";
 import { formatQrisAmount } from "@/features/developer-tools/tools/qris-parser/format-qris-amount";
 import {
@@ -129,22 +130,6 @@ function fieldLabel(field: QrisField): string {
 function fieldColor(field: QrisField): string {
   const tag = field.path.split(".")[0];
   return `qris-color-${Number(tag) % 8}`;
-}
-
-function PayloadSegments({
-  fields,
-}: {
-  readonly fields: readonly QrisField[];
-}) {
-  return fields.map((field) => (
-    <span className={fieldColor(field)} key={field.path}>
-      <span className="font-bold">
-        {field.id}
-        {String(field.length).padStart(2, "0")}
-      </span>
-      {field.value}
-    </span>
-  ));
 }
 
 function FieldRows({ fields }: { readonly fields: readonly QrisField[] }) {

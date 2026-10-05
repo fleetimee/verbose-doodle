@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -23,8 +23,10 @@ import {
   renderQrisPng,
   renderQrisQr,
 } from "@/features/developer-tools/tools/qris-creator/render-qris-qr";
+import { PayloadSegments } from "@/features/developer-tools/tools/qris-parser/components/payload-segments";
 import { QrImageInput } from "@/features/developer-tools/tools/qris-parser/components/qr-image-input";
 import { formatQrisAmount } from "@/features/developer-tools/tools/qris-parser/format-qris-amount";
+import { parseQris } from "@/features/developer-tools/tools/qris-parser/parse-qris";
 import { copyToClipboard } from "@/lib/clipboard";
 import { messages } from "@/lib/i18n";
 
@@ -108,6 +110,11 @@ export function QrisCreator() {
     };
   }, []);
   const result = useMemo(() => createQris(input, imported), [input, imported]);
+  const payloadHighlight = useRef<HTMLPreElement>(null);
+  const payloadFields = useMemo(
+    () => (result.payload ? parseQris(result.payload).fields : []),
+    [result.payload]
+  );
   const previewLogo = branded ? logo : undefined;
   const exportBlocked = imageBusy || (branded && !logo);
   const qr = useMemo(() => {
@@ -462,12 +469,31 @@ export function QrisCreator() {
                       {copy.copy}
                     </Button>
                   </div>
-                  <Textarea
-                    className="field-sizing-fixed min-h-24 resize-y font-mono text-xs"
-                    id="created-qris-payload"
-                    readOnly
-                    value={result.payload ?? ""}
-                  />
+                  <div className="relative overflow-hidden rounded-md">
+                    <pre
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 m-0 overflow-hidden whitespace-pre-wrap break-all border border-transparent px-3 py-2 font-mono text-xs leading-6"
+                      ref={payloadHighlight}
+                    >
+                      <PayloadSegments fields={payloadFields} />
+                    </pre>
+                    <Textarea
+                      className="field-sizing-fixed relative min-h-24 resize-y break-all md:text-xs"
+                      id="created-qris-payload"
+                      onScroll={(event) => {
+                        if (payloadHighlight.current) {
+                          payloadHighlight.current.scrollTop =
+                            event.currentTarget.scrollTop;
+                          payloadHighlight.current.scrollLeft =
+                            event.currentTarget.scrollLeft;
+                        }
+                      }}
+                      readOnly
+                      size="xs"
+                      value={result.payload ?? ""}
+                      variant="overlay"
+                    />
+                  </div>
                 </div>
               </>
             ) : (
