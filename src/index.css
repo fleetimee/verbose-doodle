@@ -3634,6 +3634,41 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   }
 }
 
+.endpoint-console-panel {
+  opacity: 0;
+  transform: translateY(100%);
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out);
+}
+
+.endpoint-console-panel[data-open="true"] {
+  opacity: 1;
+  transform: translateY(0%);
+  transition-duration: 280ms;
+}
+
+@starting-style {
+  .endpoint-console-panel[data-open="true"] {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .endpoint-console-panel,
+  .endpoint-console-panel[data-open="true"] {
+    transform: none;
+    transition-duration: 150ms;
+  }
+
+  @starting-style {
+    .endpoint-console-panel[data-open="true"] {
+      transform: none;
+    }
+  }
+}
+
 /* Password dust mirrors Telegram's invisible ink without retaining hidden secrets. */
 .server-password-spoiler {
   position: relative;

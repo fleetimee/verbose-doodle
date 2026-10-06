@@ -1,6 +1,5 @@
 import { ActivityIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { motion, useReducedMotion } from "motion/react";
 import {
   type CSSProperties,
   lazy,
@@ -14,7 +13,11 @@ import { createPortal } from "react-dom";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const EndpointTrafficLogViewer = lazy(() =>
   import("@/features/endpoints/components/endpoint-traffic-log-viewer").then(
@@ -29,19 +32,41 @@ export function GlobalEndpointConsole() {
   const previousHeightRef = useRef(65);
   const [hasOpened, setHasOpened] = useState(false);
   const [hidden, setHidden] = useState(true);
-  const reduceMotion = useReducedMotion();
-  const panelDuration = open ? MOTION_DURATION.panel : MOTION_DURATION.standard;
   const panelStyle: CSSProperties & { "--console-height": string } = {
     "--console-height": `${height}dvh`,
   };
   const panelId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
   const resizeRef = useRef<{
     pointerId: number;
     startY: number;
     startHeight: number;
     viewportHeight: number;
   } | null>(null);
+
+  useEffect(() => {
+    const handleToggle = (event: KeyboardEvent) => {
+      if (
+        event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        !event.shiftKey &&
+        (event.code === "Backquote" || event.key === "`") &&
+        !event.repeat &&
+        !event.defaultPrevented &&
+        !document.querySelector('[role="dialog"], dialog[open]')
+      ) {
+        event.preventDefault();
+        setHidden(false);
+        setHasOpened(true);
+        setOpen((current) => !current);
+        triggerRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleToggle);
+    return () => window.removeEventListener("keydown", handleToggle);
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -51,7 +76,7 @@ export function GlobalEndpointConsole() {
       if (
         event.target instanceof Element &&
         event.target.closest(
-          '[data-slot="menubar-content"], [data-slot="combobox-content"], [data-slot="select-content"], [data-slot="dialog-content"]'
+          '[data-slot="drawer-content"], [data-slot="popover-content"], [data-slot="menubar-content"], [data-slot="combobox-content"], [data-slot="select-content"], [data-slot="dialog-content"]'
         )
       ) {
         return;
@@ -59,69 +84,88 @@ export function GlobalEndpointConsole() {
       if (
         event.key === "Escape" &&
         !event.defaultPrevented &&
-        !document.querySelector('[data-slot="dialog-content"]')
+        !document.querySelector(
+          '[data-slot="dialog-content"], [data-slot="drawer-content"]'
+        )
       ) {
         setOpen(false);
         triggerRef.current?.focus();
       }
     };
+    const handlePointerDown = (event: PointerEvent) => {
+      if (
+        !(event.target instanceof Element) ||
+        panelRef.current?.contains(event.target) ||
+        triggerRef.current?.contains(event.target) ||
+        event.target.closest(
+          '[data-slot="drawer-content"], [data-slot="popover-content"], [data-slot="menubar-content"], [data-slot="combobox-content"], [data-slot="select-content"], [data-slot="dialog-content"]'
+        ) ||
+        document.querySelector(
+          '[data-slot="dialog-content"], [data-slot="drawer-content"]'
+        )
+      ) {
+        return;
+      }
+      setOpen(false);
+      triggerRef.current?.focus();
+    };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("pointerdown", handlePointerDown, true);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("pointerdown", handlePointerDown, true);
+    };
   }, [open]);
 
   return (
     <>
-      <Button
-        aria-controls={panelId}
-        aria-expanded={open}
-        aria-label={messages.endpoints.globalConsole.title}
-        onClick={() => {
-          setHidden(false);
-          setOpen(!open);
-          setHasOpened(true);
-        }}
-        ref={triggerRef}
-        size="sm"
-        variant={open ? "secondary" : "outline"}
-      >
-        <HugeiconsIcon
-          data-icon="inline-start"
-          icon={ActivityIcon}
-          strokeWidth={2}
-        />
-        <span className="hidden sm:inline">
-          {messages.endpoints.globalConsole.title}
-        </span>
-      </Button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              aria-controls={panelId}
+              aria-expanded={open}
+              aria-keyshortcuts="Control+`"
+              aria-label={messages.endpoints.globalConsole.title}
+              aria-pressed={open}
+              onClick={() => {
+                setHidden(false);
+                setOpen(!open);
+                setHasOpened(true);
+              }}
+              ref={triggerRef}
+              size="icon-sm"
+              variant={open ? "secondary" : "ghost"}
+            />
+          }
+        >
+          <HugeiconsIcon icon={ActivityIcon} strokeWidth={2} />
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          {messages.endpoints.globalConsole.title} · Ctrl + `
+        </TooltipContent>
+      </Tooltip>
       {hasOpened &&
         createPortal(
-          <motion.aside
-            animate={open ? "open" : "closed"}
+          <aside
             aria-hidden={!open}
             aria-label={messages.endpoints.globalConsole.title}
-            className="fixed inset-x-0 bottom-0 z-40 flex h-[var(--console-height)] flex-col border-t bg-background shadow-lg data-[open=false]:pointer-events-none data-[hidden=true]:hidden"
+            className="endpoint-console-panel fixed inset-x-0 bottom-0 z-40 flex h-[var(--console-height)] flex-col border-t bg-background shadow-lg data-[open=false]:pointer-events-none data-[hidden=true]:hidden"
             data-hidden={hidden}
             data-open={open}
             id={panelId}
             inert={!open}
-            initial="closed"
-            onAnimationComplete={(definition) => {
-              if (definition === "closed" && !open) {
+            onTransitionEnd={(event) => {
+              if (
+                event.target === event.currentTarget &&
+                event.propertyName === "opacity" &&
+                !open
+              ) {
                 setHidden(true);
               }
             }}
+            ref={panelRef}
             style={panelStyle}
-            transition={{
-              duration: reduceMotion ? MOTION_DURATION.fast : panelDuration,
-              ease: MOTION_EASE.out,
-            }}
-            variants={{
-              open: { opacity: 1, transform: "translateY(0%)" },
-              closed: {
-                opacity: 0,
-                transform: reduceMotion ? "translateY(0%)" : "translateY(100%)",
-              },
-            }}
           >
             <hr
               aria-label={messages.endpoints.globalConsole.height}
@@ -262,7 +306,7 @@ export function GlobalEndpointConsole() {
                 />
               </Suspense>
             </div>
-          </motion.aside>,
+          </aside>,
           document.body
         )}
     </>
