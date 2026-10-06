@@ -46,6 +46,48 @@ export const serversMessages = {
   viewDetails: "Lihat detail",
   viewDetailsFor: "Lihat detail untuk {name}",
   notes: "Keterangan",
+  transferTitle: "Hubungkan dengan {type}",
+  transferWindowsIntro:
+    "Buka WinSCP dan pilih New Site. Masukkan pengaturan koneksi berikut.",
+  transferLinuxIntro:
+    "Buka FileZilla Client, pilih File > Site Manager, lalu New site. Masukkan pengaturan berikut.",
+  transferMacIntro:
+    "Buka FileZilla Client di macOS, pilih File > Site Manager, lalu New site. Masukkan pengaturan berikut.",
+  transferSftp:
+    "Pilih SFTP sebagai protokol. SFTP mentransfer file melalui SSH dan berbeda dari FTPS.",
+  transferFtp: "Pilih FTP sebagai protokol.",
+  transferFtps:
+    "Aktifkan FTP melalui TLS. Konfirmasikan kepada administrator apakah server memakai TLS eksplisit atau implisit dan port yang digunakan.",
+  transferPlainFtp:
+    "Entri ini memakai FTP biasa yang tidak mengenkripsi kredensial atau file. Gunakan hanya pada jaringan tepercaya yang ditentukan.",
+  transferAuthenticate:
+    "Masukkan kata sandi akun server saat diminta, lalu hubungkan. Admin dapat menampilkan dan menyalin kata sandi tersimpan di atas.",
+  transferSftpVerify:
+    "Verifikasi sidik jari kunci host server dengan administrator sebelum menerimanya. Jika memakai autentikasi kunci, pilih kunci privat di klien.",
+  transferFtpsHint:
+    "FTPS eksplisit biasanya memakai port 21; FTPS implisit biasanya memakai 990. Port tersimpan diutamakan. Verifikasi peringatan sertifikat dengan administrator.",
+  smbTitle: "Hubungkan ke folder bersama",
+  smbShare: "Nama share atau path folder (opsional)",
+  smbSharePlaceholder: "contoh: shared/documents",
+  smbShareHint:
+    "Kosongkan untuk melihat share yang tersedia. Input ini hanya membentuk path koneksi dan tidak disimpan.",
+  smbCopyPath: "Salin path SMB",
+  smbWindowsIntro:
+    "Buka File Explorer. Tempel path ini ke bilah alamat lalu tekan Enter.",
+  smbWindowsConnect:
+    "Buka folder bersama. Untuk menyimpannya sebagai drive, gunakan This PC > Map network drive dan masukkan path share lengkap.",
+  smbLinuxIntro:
+    "Buka Files di GNOME atau Dolphin di KDE. Tempel alamat ini ke bilah lokasi.",
+  smbLinuxConnect:
+    "Di Files, Anda juga dapat memakai Other Locations > Connect to Server. Hubungkan, lalu pilih folder bersama jika belum ditentukan.",
+  smbMacIntro:
+    "Di Finder, pilih Go > Connect to Server, atau tekan Command+K. Tempel alamat server ini.",
+  smbMacConnect:
+    "Pilih Connect, lalu Registered User. Pilih folder bersama jika belum ditentukan.",
+  smbAuthenticate:
+    "Masuk dengan akun dan kata sandi server yang ditampilkan di atas. Gunakan akun beserta domain jika diwajibkan administrator. Admin dapat menampilkan dan menyalin kata sandi tersimpan.",
+  smbPortHint:
+    "Entri ini memakai port SMB nonstandar. Path desktop ini memakai layanan SMB standar pada port 445; tanyakan klien atau konfigurasi jaringan yang diperlukan kepada administrator.",
   rdpTitle: "Hubungkan dengan RDP",
   rdpPlatform: "Sistem operasi Anda",
   rdpWindowsIntro:
@@ -70,6 +112,21 @@ export const serversMessages = {
   rdpCopyAddress: "Salin alamat RDP",
   rdpCopyCommand: "Salin perintah RDP",
   rdpReference: "Referensi pengaturan koneksi",
+  databaseClient: "Klien database",
+  databaseCommandTab: "Perintah",
+  databaseDataGripStart:
+    "Di DataGrip, buka Data Sources and Drivers, pilih + lalu Data Source, dan pilih {engine}. Isi pengaturan koneksi berikut.",
+  databaseDataGripFinish:
+    "Unduh file driver yang belum tersedia jika diminta, pilih Test Connection, lalu terapkan pengaturan.",
+  databaseDBeaverStart:
+    "Di DBeaver, pilih Database > New Database Connection, pilih {engine}, lalu isi pengaturan koneksi berikut.",
+  databaseDBeaverFinish:
+    "Pilih Test Connection, unduh driver jika diminta, lalu pilih Finish.",
+  databaseGuiCredentials:
+    "Masukkan kata sandi akun di klien. Admin dapat menampilkan dan menyalin kata sandi tersimpan di atas.",
+  databaseGuiEngineHint:
+    "Kolom yang tersedia bergantung pada driver. Untuk Oracle, pastikan nama database adalah service name atau SID. Autentikasi MongoDB mungkin memerlukan database autentikasi terpisah. Beberapa mesin memerlukan edisi klien atau driver tambahan.",
+  databaseCopyField: "Salin {field}",
   databaseTitle: "Hubungkan ke {engine}",
   databaseTitleGeneric: "Hubungkan ke database",
   databaseCommandIntro:

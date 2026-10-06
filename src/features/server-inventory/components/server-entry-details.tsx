@@ -4,8 +4,10 @@ import { CopyIcon } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { ServerDatabaseGuide } from "@/features/server-inventory/components/server-database-guide";
+import { ServerFileTransferGuide } from "@/features/server-inventory/components/server-file-transfer-guide";
 import { ServerPasswordCell } from "@/features/server-inventory/components/server-password-cell";
 import { ServerRdpGuide } from "@/features/server-inventory/components/server-rdp-guide";
+import { ServerSmbGuide } from "@/features/server-inventory/components/server-smb-guide";
 import { ServerSshGuide } from "@/features/server-inventory/components/server-ssh-guide";
 import { isWebUrl } from "@/features/server-inventory/server-form";
 import type { ServerEntry } from "@/features/server-inventory/types";
@@ -132,9 +134,13 @@ export function ServerEntryDetails({
           </DetailRow>
         )}
       </dl>
+      {accessType === "SMB" && <ServerSmbGuide entry={entry} />}
       {accessType === "SSH" && <ServerSshGuide entry={entry} />}
       {accessType === "RDP" && <ServerRdpGuide entry={entry} />}
       {accessType === "DATABASE" && <ServerDatabaseGuide entry={entry} />}
+      {["FTP", "SFTP", "FTPS"].includes(accessType) && (
+        <ServerFileTransferGuide entry={entry} />
+      )}
       <section aria-labelledby="server-detail-notes" className="space-y-2">
         <h3 className="font-medium" id="server-detail-notes">
           {copy.notes}

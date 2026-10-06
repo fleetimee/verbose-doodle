@@ -47,6 +47,48 @@ export const serversMessages = {
   viewDetails: "View details",
   viewDetailsFor: "View details for {name}",
   notes: "Notes",
+  transferTitle: "Connect with {type}",
+  transferWindowsIntro:
+    "Open WinSCP and choose New Site. Enter the connection settings below.",
+  transferLinuxIntro:
+    "Open FileZilla Client, choose File > Site Manager, then New site. Enter these settings.",
+  transferMacIntro:
+    "Open FileZilla Client on macOS, choose File > Site Manager, then New site. Enter these settings.",
+  transferSftp:
+    "Select SFTP as the protocol. SFTP transfers files over SSH; it is different from FTPS.",
+  transferFtp: "Select FTP as the protocol.",
+  transferFtps:
+    "Enable FTP over TLS. Confirm with the administrator whether the server uses explicit or implicit TLS and which port to use.",
+  transferPlainFtp:
+    "This entry uses plain FTP, which does not encrypt credentials or files. Use it only on the intended trusted network.",
+  transferAuthenticate:
+    "Enter the server account password when prompted, then connect. Admins can reveal and copy the stored password above.",
+  transferSftpVerify:
+    "Verify the server host-key fingerprint with the administrator before accepting it. If using key authentication, select your private key in the client.",
+  transferFtpsHint:
+    "Explicit FTPS usually uses port 21; implicit FTPS usually uses 990. A saved port takes precedence. Verify certificate warnings with the administrator.",
+  smbTitle: "Connect to a shared folder",
+  smbShare: "Share name or folder path (optional)",
+  smbSharePlaceholder: "e.g. shared/documents",
+  smbShareHint:
+    "Leave blank to browse available shares. This input is only used to build the connection path and is not saved.",
+  smbCopyPath: "Copy SMB path",
+  smbWindowsIntro:
+    "Open File Explorer. Paste this path into the address bar and press Enter.",
+  smbWindowsConnect:
+    "Open the shared folder. To keep it as a drive, use This PC > Map network drive and enter the full share path.",
+  smbLinuxIntro:
+    "Open Files on GNOME or Dolphin on KDE. Paste this address into the location bar.",
+  smbLinuxConnect:
+    "In Files, you can also use Other Locations > Connect to Server. Connect, then select the shared folder if none was specified.",
+  smbMacIntro:
+    "In Finder, choose Go > Connect to Server, or press Command+K. Paste this server address.",
+  smbMacConnect:
+    "Select Connect, then Registered User. Choose a shared folder if none was specified.",
+  smbAuthenticate:
+    "Sign in with the server account and password shown above. Use the domain-qualified account if your administrator requires it. Admins can reveal and copy the stored password.",
+  smbPortHint:
+    "This entry has a nonstandard SMB port. These desktop paths use the standard SMB service on port 445; ask the administrator for the required client or network configuration.",
   rdpTitle: "Connect with RDP",
   rdpPlatform: "Your operating system",
   rdpWindowsIntro:
@@ -71,6 +113,21 @@ export const serversMessages = {
   rdpCopyAddress: "Copy RDP address",
   rdpCopyCommand: "Copy RDP command",
   rdpReference: "Connection setup reference",
+  databaseClient: "Database client",
+  databaseCommandTab: "Command",
+  databaseDataGripStart:
+    "In DataGrip, open Data Sources and Drivers, select + then Data Source, and choose {engine}. Fill in these connection settings.",
+  databaseDataGripFinish:
+    "Download missing driver files if prompted, select Test Connection, then apply the settings.",
+  databaseDBeaverStart:
+    "In DBeaver, choose Database > New Database Connection, select {engine}, then enter these connection settings.",
+  databaseDBeaverFinish:
+    "Select Test Connection, download the driver if prompted, then select Finish.",
+  databaseGuiCredentials:
+    "Enter your account password in the client. Admins can reveal and copy the stored password above.",
+  databaseGuiEngineHint:
+    "Available fields depend on the driver. For Oracle, confirm whether the database name is a service name or SID. MongoDB authentication may require a separate authentication database. Some engines require a client edition or additional driver.",
+  databaseCopyField: "Copy {field}",
   databaseTitle: "Connect to {engine}",
   databaseTitleGeneric: "Connect to database",
   databaseCommandIntro:
