@@ -57,7 +57,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
@@ -87,6 +86,7 @@ import {
 import { TrafficConsoleMenubar } from "@/features/endpoints/components/traffic-console-menubar";
 import { TrafficJsonPreview } from "@/features/endpoints/components/traffic-json-preview";
 import { TrafficLogSpreadsheetExport } from "@/features/endpoints/components/traffic-log-spreadsheet-export";
+import { TrafficSincePicker } from "@/features/endpoints/components/traffic-since-picker";
 import { UserAgentClientBadge } from "@/features/endpoints/components/user-agent-client-badge";
 import {
   globalTrafficAdapter,
@@ -706,20 +706,7 @@ export function EndpointTrafficLogViewer({
               onEndpointChange={setEndpointFilter}
               onMethodChange={setMethod}
             />
-            <label
-              className="grid gap-1 text-xs"
-              htmlFor={`${controlId}-since`}
-            >
-              <span className="sr-only">
-                {messages.endpoints.globalConsole.since}
-              </span>
-              <Input
-                id={`${controlId}-since`}
-                onChange={(event) => setSince(event.target.value)}
-                type="datetime-local"
-                value={since}
-              />
-            </label>
+            <TrafficSincePicker onChange={setSince} value={since} />
             <div className="flex items-end gap-2">
               <Button
                 onClick={() => {

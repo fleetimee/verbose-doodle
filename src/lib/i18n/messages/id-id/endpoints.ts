@@ -17,6 +17,8 @@ export const endpointsMessages = {
     allEndpoints: "Semua endpoint",
     billerId: "ID biller",
     since: "Sejak (waktu lokal)",
+    time: "Waktu",
+    clearDate: "Hapus tanggal",
     older: "Log lebih lama",
     latest: "Log terbaru",
     reset: "Reset filter",
