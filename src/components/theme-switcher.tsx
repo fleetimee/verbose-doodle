@@ -1,25 +1,16 @@
 "use client";
 
 import { useControlled } from "@base-ui/utils/useControlled";
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Moon, Sun } from "@/components/hugeicons";
-import { messages } from "@/lib/i18n";
-import { MOTION_DURATION } from "@/lib/motion";
-import { cn } from "@/lib/utils";
-
-const themes = [
-  {
-    icon: Sun,
-    key: "light",
-    label: messages.theme.lightTheme,
-  },
-  {
-    icon: Moon,
-    key: "dark",
-    label: messages.theme.darkTheme,
-  },
-] as const;
+import { useI18n } from "@/components/i18n-provider";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type ThemeSwitcherProps = {
   value?: "light" | "dark";
@@ -34,6 +25,7 @@ export const ThemeSwitcher = ({
   defaultValue = "light",
   className,
 }: ThemeSwitcherProps) => {
+  const { messages } = useI18n();
   const [theme, setThemeState] = useControlled({
     controlled: value,
     default: defaultValue,
@@ -73,53 +65,27 @@ export const ThemeSwitcher = ({
     return null;
   }
 
-  return (
-    <div
-      className={cn(
-        "relative isolate flex h-8 rounded-full bg-background p-1 ring-1 ring-border",
-        className
-      )}
-    >
-      {themes.map(({ key, icon: Icon, label }) => {
-        const isActive = theme === key;
+  const nextTheme = theme === "light" ? "dark" : "light";
+  const label =
+    nextTheme === "dark" ? messages.theme.darkTheme : messages.theme.lightTheme;
+  const Icon = theme === "light" ? Sun : Moon;
 
-        return (
-          <motion.button
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
             aria-label={label}
-            className="relative h-6 w-6 rounded-full"
-            key={key}
-            onClick={() => handleThemeClick(key)}
-            type="button"
-            whileHover={shouldReduceMotion ? undefined : { scale: 1.05 }}
-            whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
-          >
-            {isActive && (
-              <motion.div
-                className="absolute inset-0 rounded-full bg-secondary"
-                layoutId={shouldReduceMotion ? undefined : "activeTheme"}
-                transition={
-                  shouldReduceMotion
-                    ? { duration: MOTION_DURATION.instant }
-                    : { damping: 30, stiffness: 300, type: "spring" }
-                }
-              />
-            )}
-            <div
-              className={cn(
-                "transition-all duration-200 ease-in-out motion-reduce:transition-none",
-                isActive ? "scale-110 opacity-100" : "scale-100 opacity-60"
-              )}
-            >
-              <Icon
-                className={cn(
-                  "relative z-10 m-auto h-4 w-4",
-                  isActive ? "text-foreground" : "text-muted-foreground"
-                )}
-              />
-            </div>
-          </motion.button>
-        );
-      })}
-    </div>
+            className={className}
+            onClick={() => handleThemeClick(nextTheme)}
+            size="icon-sm"
+            variant="ghost"
+          />
+        }
+      >
+        <Icon className="size-4" />
+      </TooltipTrigger>
+      <TooltipContent side="bottom">{label}</TooltipContent>
+    </Tooltip>
   );
 };

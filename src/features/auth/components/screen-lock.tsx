@@ -131,7 +131,7 @@ export function LockScreenButton() {
     <Button
       aria-label={messages.auth.lockScreen}
       onClick={() => lock?.()}
-      size="icon"
+      size="icon-sm"
       title={messages.auth.lockScreen}
       variant="ghost"
     >

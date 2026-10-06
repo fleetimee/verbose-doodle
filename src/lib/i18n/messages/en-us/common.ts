@@ -1,4 +1,36 @@
 export const commonMessages = {
+  headerLanguage: "Language",
+  headerAppearance: "Appearance",
+  jakartaTime: "Jakarta time (UTC+7)",
+  keyboardShortcuts: {
+    title: "Keyboard shortcuts",
+    description:
+      "Shortcuts available across the workspace and within specific tools.",
+    workspace: "Workspace",
+    navigation: "Sidebar navigation",
+    navigationHint:
+      "Hold Alt or Option to reveal navigation keys. Open a group before using its child shortcuts.",
+    context: "Within tools",
+    search: "Search modules and menus",
+    sidebar: "Toggle sidebar",
+    console: "Toggle endpoint console (administrators)",
+    close: "Close the current popup, drawer, or console",
+    tools:
+      "Run conversion, cron parsing, or JSON Schema validation in the corresponding tool",
+    send: "Send an overview message / advance a response form",
+    newline: "Insert a new line in the overview composer",
+    commands: "Open slash commands in the overview composer",
+    commandSelect: "Choose a slash command",
+    commandMove: "Move through slash commands",
+    resize: "Resize the focused console edge",
+    resizeLarge: "Resize the console edge in larger steps",
+    bounds: "Set console height to minimum / fullscreen",
+    tour: "Previous / next guided-tour step",
+    rename: "Save / cancel endpoint name editing",
+    unlock: "Unlock the screen",
+    other:
+      "Editors and games also provide their own contextual keyboard controls.",
+  },
   gamesBrowse: "Browse games",
   gamesDescription: "Pick a game and jump straight in.",
   gamesFeatured: "Featured game",

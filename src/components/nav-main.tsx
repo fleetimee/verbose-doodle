@@ -357,38 +357,43 @@ function NavMenuItem({
   );
 }
 
+export function getNavigationShortcuts(items: NavMainItem[]) {
+  const usedKeys = new Set<string>();
+  const findAvailableKey = (title: string) => {
+    const availableKey = title
+      .toLowerCase()
+      .replaceAll(/[^a-z0-9]/g, "")
+      .split("")
+      .find((character) => !usedKeys.has(character));
+    const fallbackKey = "1234567890abcdefghijklmnopqrstuvwxyz"
+      .split("")
+      .find((character) => !usedKeys.has(character));
+    const shortcutKey = availableKey ?? fallbackKey ?? "0";
+    usedKeys.add(shortcutKey);
+    return shortcutKey;
+  };
+  const itemKeys = items.map((item) =>
+    item.deferShortcut ? null : findAvailableKey(item.title)
+  );
+  const childKeys = items.map((item) =>
+    (item.items ?? []).map((child) => findAvailableKey(child.title))
+  );
+
+  return {
+    childKeys,
+    itemKeys: itemKeys.map(
+      (key, index) => key ?? findAvailableKey(items[index].title)
+    ),
+  };
+}
+
 export function NavMain({ items }: { items: NavMainItem[] }) {
   const location = useLocation();
   const [isAltHeld, setIsAltHeld] = useState(false);
-  const shortcutAssignments = useMemo(() => {
-    const usedKeys = new Set<string>();
-    const findAvailableKey = (title: string) => {
-      const availableKey = title
-        .toLowerCase()
-        .replaceAll(/[^a-z0-9]/g, "")
-        .split("")
-        .find((character) => !usedKeys.has(character));
-      const fallbackKey = "1234567890abcdefghijklmnopqrstuvwxyz"
-        .split("")
-        .find((character) => !usedKeys.has(character));
-      const shortcutKey = availableKey ?? fallbackKey ?? "0";
-      usedKeys.add(shortcutKey);
-      return shortcutKey;
-    };
-    const itemKeys = items.map((item) =>
-      item.deferShortcut ? null : findAvailableKey(item.title)
-    );
-    const childKeys = items.map((item) =>
-      (item.items ?? []).map((child) => findAvailableKey(child.title))
-    );
-
-    return {
-      childKeys,
-      itemKeys: itemKeys.map(
-        (key, index) => key ?? findAvailableKey(items[index].title)
-      ),
-    };
-  }, [items]);
+  const shortcutAssignments = useMemo(
+    () => getNavigationShortcuts(items),
+    [items]
+  );
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

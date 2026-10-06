@@ -7,6 +7,24 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: "Bangers";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/bangers/bangers-regular.ttf") format("truetype");
+}
+
+.jakarta-clock-digits {
+  display: inline-block;
+  width: 8ch;
+  font-family: "Bangers", var(--font-mono);
+  font-size: 1rem;
+  font-weight: 400;
+  text-align: center;
+  letter-spacing: 0.06em;
+}
+
 .qris-creator-preview-frame {
   position: relative;
   background: white;

@@ -23,6 +23,11 @@ colors:
   chart-indigo: "oklch(0.58 0.038 245)"
   chart-olive: "oklch(0.68 0.045 92)"
 typography:
+  clock:
+    fontFamily: "Bangers, monospace"
+    fontSize: "1rem"
+    fontWeight: 400
+    letterSpacing: "0.06em"
   display:
     fontFamily: "Mona Sans, sans-serif"
     fontSize: "clamp(2.25rem, 4vw, 3rem)"

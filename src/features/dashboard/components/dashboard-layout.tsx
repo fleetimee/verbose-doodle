@@ -9,10 +9,10 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useOutlet, useParams } from "react-router";
 import { AppSidebar } from "@/components/app-sidebar";
+import { HeaderActions } from "@/components/header-actions";
 import { useI18n } from "@/components/i18n-provider";
-import { LanguageSwitcher } from "@/components/language-switcher";
+import { JakartaClock } from "@/components/jakarta-clock";
 import { useTheme } from "@/components/theme-provider";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { TourProvider } from "@/components/tour";
 import {
   Breadcrumb,
@@ -44,7 +44,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ProtectedAction } from "@/features/auth/components/protected-action";
-import { LockScreenButton } from "@/features/auth/components/screen-lock";
 import { AddBillerSheet } from "@/features/billers/components/add-biller-sheet";
 import { useCreateBiller } from "@/features/billers/hooks/use-create-biller";
 import { useGetBillers } from "@/features/billers/hooks/use-get-billers";
@@ -351,15 +350,14 @@ export function DashboardLayout() {
                       </span>
                     </span>
                   )}
-                  <div className="ml-auto flex shrink-0 items-center gap-2">
+                  <div className="ml-auto flex shrink-0 items-center gap-1">
+                    <JakartaClock />
                     <ProtectedAction ability="canEditEndpoint">
                       <GlobalEndpointConsole />
                     </ProtectedAction>
-                    <LockScreenButton />
-                    <LanguageSwitcher />
-                    <ThemeSwitcher
-                      onChange={setTheme}
-                      value={themeSwitcherValue}
+                    <HeaderActions
+                      onThemeChange={setTheme}
+                      theme={themeSwitcherValue}
                     />
                   </div>
                 </header>

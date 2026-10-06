@@ -92,7 +92,9 @@ type SidebarData = {
   readonly navSecondary: SecondaryNavigationItem[];
 };
 
-function getSidebarData(messages: import("@/lib/i18n").Messages): SidebarData {
+export function getSidebarData(
+  messages: import("@/lib/i18n").Messages
+): SidebarData {
   return {
     navMain: [
       {
