@@ -53,6 +53,7 @@ import {
   useDashboardNavigation,
 } from "@/features/dashboard/dashboard-navigation-context";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
+import { GlobalEndpointConsole } from "@/features/endpoints/components/global-endpoint-console";
 import { HttpMethodBadge } from "@/features/endpoints/components/http-method-badge";
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
 import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-workspace";
@@ -351,6 +352,9 @@ export function DashboardLayout() {
                     </span>
                   )}
                   <div className="ml-auto flex shrink-0 items-center gap-2">
+                    <ProtectedAction ability="canEditEndpoint">
+                      <GlobalEndpointConsole />
+                    </ProtectedAction>
                     <LockScreenButton />
                     <LanguageSwitcher />
                     <ThemeSwitcher

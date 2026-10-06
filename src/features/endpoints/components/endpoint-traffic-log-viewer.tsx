@@ -10,7 +10,14 @@ import {
   SearchIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import {
   CircleAlert,
@@ -40,6 +47,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -49,6 +57,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
@@ -71,29 +80,44 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/features/auth/context";
+import {
+  GlobalTrafficScopeFilters,
+  TrafficFilterCombobox,
+} from "@/features/endpoints/components/global-traffic-scope-filters";
+import { TrafficConsoleMenubar } from "@/features/endpoints/components/traffic-console-menubar";
+import { TrafficJsonPreview } from "@/features/endpoints/components/traffic-json-preview";
 import { TrafficLogSpreadsheetExport } from "@/features/endpoints/components/traffic-log-spreadsheet-export";
 import { UserAgentClientBadge } from "@/features/endpoints/components/user-agent-client-badge";
+import {
+  globalTrafficAdapter,
+  httpEndpointAdapter,
+} from "@/features/endpoints/data/http-endpoint-adapter";
 import { useEndpointTelemetry } from "@/features/endpoints/hooks/use-endpoint-telemetry";
 import { useTrafficLogScroll } from "@/features/endpoints/hooks/use-traffic-log-scroll";
 import type {
   EndpointHttpHeaders,
   EndpointTrafficLog,
+  EndpointTrafficLogDetail,
   EndpointTrafficLogStatus,
   EndpointTrafficLogStatusFilter,
   EndpointTrafficLogsFilters,
   EndpointTrafficPayload,
 } from "@/features/endpoints/types";
 import { formatJakartaTimestamp } from "@/features/endpoints/utils/endpoint-time";
+import { getMethodColor } from "@/features/endpoints/utils/http-method-colors";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, formatPluralMessage, messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
+const CSV_FORMULA_PREFIX = /^[=+@\-\t\r\n]/;
 const LOG_LINE_LIMITS = [50, 100, 250, 500, 1000] as const;
 const TRAFFIC_LOG_POLL_INTERVAL_MS = 2000;
 
 type EndpointTrafficLogViewerProps = {
   readonly endpointId: string;
+  readonly global?: boolean;
+  readonly enabled?: boolean;
   readonly hasActiveResponse: boolean;
   readonly responseCount: number;
   readonly tourId?: string;
@@ -111,6 +135,15 @@ const STATUS_LABELS: Record<EndpointTrafficLogStatus, string> = {
   matched_timeout: messages.endpoints.trafficLogStatusLabels.matchedTimeout,
   unmatched_endpoint:
     messages.endpoints.trafficLogStatusLabels.unmatchedEndpoint,
+};
+
+const STATUS_CODES: Record<EndpointTrafficLogStatus, string> = {
+  matched_success: "SUC",
+  backend_error: "ERR",
+  matched_delayed: "DLY",
+  matched_empty: "EMP",
+  matched_timeout: "TMO",
+  unmatched_endpoint: "MIS",
 };
 
 const STATUS_FILTER_LABELS: Record<EndpointTrafficLogStatusFilter, string> = {
@@ -161,25 +194,41 @@ function getLatestDurationLabel(log: EndpointTrafficLog | undefined) {
   return `${log.durationMs} ms`;
 }
 
-function formatLogLine(log: EndpointTrafficLog, showTimestamp: boolean) {
-  const parts = [
+function formatRequestMetadata(
+  log: EndpointTrafficLog,
+  showTimestamp: boolean
+) {
+  return [
     showTimestamp ? formatJakartaTimestamp(log.occurredAt) : null,
     `request_id:${log.requestId || "-"}`,
+    `endpoint_id:${log.endpointId ?? "-"}`,
+    `biller_id:${log.billerId ?? "-"}`,
     `source_ip:${formatIp(log.sourceIp, log.sourcePort)}`,
     `destination_ip:${formatIp(log.destinationIp, log.destinationPort)}`,
-    `method:${log.method}`,
     `path:${log.path}`,
+  ]
+    .filter(Boolean)
+    .join("  ");
+}
+
+function formatResponseMetadata(log: EndpointTrafficLog) {
+  return [
+    `request_id:${log.requestId || "-"}`,
     `hit_status:${log.hitStatus}`,
     `http_status:${log.httpStatusCode ?? "-"}`,
     `response:${log.responseName ?? "-"}`,
     `duration_ms:${log.durationMs ?? "-"}`,
     log.delayMs ? `delay_ms:${log.delayMs}` : null,
     log.simulateTimeout ? "simulate_timeout:true" : null,
-    log.requestBodyPreview ? `request:${log.requestBodyPreview}` : null,
-    log.responseBodyPreview ? `response_body:${log.responseBodyPreview}` : null,
-  ];
+  ]
+    .filter(Boolean)
+    .join("  ");
+}
 
-  return parts.filter(Boolean).join("  ");
+function formatLogLine(log: EndpointTrafficLog, showTimestamp: boolean) {
+  const request = `R method:${log.method}  ${formatRequestMetadata(log, showTimestamp)}  request:${log.requestBodyPreview ?? "-"}`;
+  const response = `S ${formatResponseMetadata(log)}  response_body:${log.responseBodyPreview ?? "-"}`;
+  return `${request}\n${response}`;
 }
 
 function getLogTime(log: EndpointTrafficLog): number {
@@ -263,11 +312,19 @@ function getEmptyTrafficLogState(
 
 export function EndpointTrafficLogViewer({
   endpointId,
+  global = false,
+  enabled = true,
   hasActiveResponse,
   responseCount,
   tourId,
 }: EndpointTrafficLogViewerProps) {
   const { snapshot } = useAuth();
+  const controlId = useId();
+  const [endpointFilter, setEndpointFilter] = useState("");
+  const [billerFilter, setBillerFilter] = useState("");
+  const [method, setMethod] = useState("");
+  const [since, setSince] = useState("");
+  const [cursor, setCursor] = useState<string | undefined>();
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [wrapLines, setWrapLines] = useState(false);
   const [showTimestamps, setShowTimestamps] = useState(true);
@@ -286,26 +343,53 @@ export function EndpointTrafficLogViewer({
     setShowClearLogsDialog(false);
   }, [endpointId]);
 
+  useEffect(() => {
+    setCursor(undefined);
+    setSelectedIds(new Set());
+    setSelectedLogId(null);
+  }, [endpointFilter, billerFilter, method, since, lineLimit, search, status]);
+
+  const sinceIso = toSinceIso(since);
   const filters = useMemo<EndpointTrafficLogsFilters>(
     () => ({
+      endpointId: global ? endpointFilter : undefined,
+      billerSlug: global ? billerFilter : undefined,
+      method,
+      since: sinceIso,
+      cursor,
       includeBody: true,
       limit: lineLimit,
       search,
       status,
     }),
-    [lineLimit, search, status]
+    [
+      global,
+      endpointFilter,
+      billerFilter,
+      method,
+      sinceIso,
+      cursor,
+      lineLimit,
+      search,
+      status,
+    ]
   );
 
   const {
     trafficLogs,
     trafficLogDetail,
     clearTrafficLogs: clearTrafficLogsMutation,
-  } = useEndpointTelemetry(endpointId, filters, {
-    enabled: autoRefresh,
-    includeMetrics: false,
-    refetchInterval: autoRefresh ? TRAFFIC_LOG_POLL_INTERVAL_MS : false,
-    selectedLogId,
-  });
+  } = useEndpointTelemetry(
+    endpointId,
+    filters,
+    {
+      enabled,
+      includeMetrics: false,
+      refetchInterval: trafficPollInterval(enabled, autoRefresh, cursor),
+      selectedLogId,
+    },
+    global ? globalTrafficAdapter : httpEndpointAdapter
+  );
   const {
     data,
     error,
@@ -380,6 +464,10 @@ export function EndpointTrafficLogViewer({
       params.set("search", search.trim());
     }
 
+    if (global) {
+      downloadVisibleTraffic(format, logs, visibleLines);
+      return;
+    }
     const token = snapshot.accessToken;
     const response = await fetch(
       `${API_ENDPOINTS.admin.endpoints.trafficLogs.download(endpointId)}?${params.toString()}`,
@@ -407,7 +495,7 @@ export function EndpointTrafficLogViewer({
   let logContent: ReactNode = null;
   if (isPending) {
     logContent = (
-      <div className="flex h-[560px] flex-col gap-2 bg-muted/30 p-4">
+      <div className="flex h-[560px] flex-col gap-2 bg-muted/30 p-4 group-data-[global=true]/traffic:h-full">
         {Array.from({ length: 10 }).map((_, index) => (
           <Skeleton
             className="h-5 w-full"
@@ -432,7 +520,9 @@ export function EndpointTrafficLogViewer({
     );
     logContent = (
       <TerminalState
-        message={emptyState.message}
+        message={
+          global ? messages.endpoints.globalConsole.empty : emptyState.message
+        }
         title={emptyState.title}
         tone={emptyState.tone}
       />
@@ -440,19 +530,19 @@ export function EndpointTrafficLogViewer({
   } else {
     logContent = (
       <ScrollArea
-        className="h-[560px] w-full max-w-full"
+        className="h-[560px] w-full max-w-full group-data-[global=true]/traffic:h-full"
         variant="traffic"
         viewportRef={trafficLogViewportRef}
       >
         <div
           className={cn(
-            "p-4 font-mono text-foreground text-xs leading-4",
+            "flex flex-col gap-1 p-4 font-mono text-foreground text-xs leading-4",
             wrapLines ? "w-full" : "min-w-max"
           )}
         >
           {logs.map((log) => (
             <div
-              className="group grid min-w-0 grid-cols-[24px_116px_minmax(0,1fr)] items-start gap-2 rounded px-2 py-1 transition-colors duration-150 ease-out hover:bg-muted active:scale-[0.997] dark:hover:bg-white/7"
+              className="group grid min-w-0 grid-cols-[20px_56px_minmax(0,1fr)] items-start gap-2 rounded px-1 py-1 transition-colors duration-150 ease-out hover:bg-muted active:scale-[0.997] dark:hover:bg-white/7"
               key={log.id}
             >
               <Checkbox
@@ -480,7 +570,7 @@ export function EndpointTrafficLogViewer({
                 onClick={() => setSelectedLogId(log.id)}
                 type="button"
               >
-                {formatLogLine(log, showTimestamps)}
+                <TrafficLogLine log={log} showTimestamps={showTimestamps} />
               </button>
             </div>
           ))}
@@ -490,6 +580,745 @@ export function EndpointTrafficLogViewer({
     );
   }
 
+  return (
+    <section
+      className="group/traffic flex min-w-0 flex-col gap-3 data-[global=true]:min-h-0 data-[global=true]:flex-1 data-[global=true]:overflow-hidden"
+      data-global={global}
+      id={tourId}
+    >
+      <div className="flex flex-col gap-4 rounded-2xl border-2 border-border/80 border-b-4 bg-card p-4 shadow-sm group-data-[global=true]/traffic:shrink-0 group-data-[global=true]/traffic:gap-2 group-data-[global=true]/traffic:rounded-none group-data-[global=true]/traffic:border-0 group-data-[global=true]/traffic:bg-transparent group-data-[global=true]/traffic:p-0 group-data-[global=true]/traffic:shadow-none">
+        <div className="flex flex-col gap-3 group-data-[global=true]/traffic:flex-row group-data-[global=true]/traffic:items-center lg:flex-row lg:items-start lg:justify-between">
+          <div className="group-data-[global=true]/traffic:hidden">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-xl border-2 border-border/80 border-b-2 bg-background text-primary shadow-xs">
+                <HugeiconsIcon
+                  aria-hidden="true"
+                  className="size-5"
+                  icon={ActivityIcon}
+                  strokeWidth={2.5}
+                />
+              </div>
+              <div>
+                <h2 className="font-bold text-lg">
+                  {global
+                    ? messages.endpoints.globalConsole.title
+                    : messages.endpoints.trafficLogsTitle}
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  {global
+                    ? messages.endpoints.globalConsole.description
+                    : messages.endpoints.trafficLogsDescription}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="hidden flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-xs group-data-[global=true]/traffic:flex">
+            <span className="text-info">
+              R · {messages.endpoints.trafficLogRequestTitle}
+            </span>
+            <span className="text-success">
+              S · {messages.endpoints.trafficLogResponseTitle}
+            </span>
+            <span className="font-mono text-foreground">{totalLogsLabel}</span>
+            <span>
+              {messages.endpoints.trafficLogsSuccessMetric}: {successRate}
+            </span>
+            <span>{selectedLogsLabel}</span>
+            <span>
+              {messages.endpoints.trafficLogsLatestMetric}:{" "}
+              {getLatestDurationLabel(latestLog)}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="hidden group-data-[global=true]/traffic:block">
+              <TrafficConsoleMenubar
+                autoRefresh={autoRefresh}
+                isPending={isPending}
+                logs={logs}
+                onAutoRefreshChange={setAutoRefresh}
+                onCsvExport={() => handleDownload("csv")}
+                onTextExport={() => handleDownload("text")}
+                onTimestampsChange={setShowTimestamps}
+                onWrapLinesChange={setWrapLines}
+                showTimestamps={showTimestamps}
+                wrapLines={wrapLines}
+              />
+            </div>
+            <Button
+              disabled={isFetching}
+              onClick={() => refetchLogs()}
+              size="sm"
+              type="button"
+              variant="panel"
+            >
+              <HugeiconsIcon
+                data-icon="inline-start"
+                icon={RepeatIcon}
+                strokeWidth={2.5}
+              />
+              {messages.endpoints.trafficLogsRefreshButton}
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid gap-2 group-data-[global=true]/traffic:hidden sm:grid-cols-4">
+          <TrafficMetric
+            icon={
+              <HugeiconsIcon
+                className="size-3.5"
+                icon={DashedLineCircleIcon}
+                strokeWidth={2}
+              />
+            }
+            label={messages.endpoints.trafficLogsVisibleMetric}
+            value={totalLogsLabel}
+          />
+          <TrafficMetric
+            icon={
+              <HugeiconsIcon
+                className="size-3.5"
+                icon={CheckmarkCircle01Icon}
+                strokeWidth={2}
+              />
+            }
+            label={messages.endpoints.trafficLogsSuccessMetric}
+            value={successRate}
+          />
+          <TrafficMetric
+            icon={<Clipboard className="size-3.5" />}
+            label={messages.endpoints.trafficLogsSelectionMetric}
+            value={selectedLogsLabel}
+          />
+          <TrafficMetric
+            icon={<TimerReset className="size-3.5" />}
+            label={messages.endpoints.trafficLogsLatestMetric}
+            value={getLatestDurationLabel(latestLog)}
+          />
+        </div>
+
+        {global && (
+          <div className="grid items-end gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_160px_minmax(0,1.3fr)_210px_auto]">
+            <GlobalTrafficScopeFilters
+              billerSlug={billerFilter}
+              endpointId={endpointFilter}
+              method={method}
+              onBillerChange={setBillerFilter}
+              onEndpointChange={setEndpointFilter}
+              onMethodChange={setMethod}
+            />
+            <label
+              className="grid gap-1 text-xs"
+              htmlFor={`${controlId}-since`}
+            >
+              <span className="sr-only">
+                {messages.endpoints.globalConsole.since}
+              </span>
+              <Input
+                id={`${controlId}-since`}
+                onChange={(event) => setSince(event.target.value)}
+                type="datetime-local"
+                value={since}
+              />
+            </label>
+            <div className="flex items-end gap-2">
+              <Button
+                onClick={() => {
+                  setEndpointFilter("");
+                  setBillerFilter("");
+                  setMethod("");
+                  setSince("");
+                  setSearch("");
+                  setStatus("all");
+                  setLineLimit(100);
+                  setCursor(undefined);
+                }}
+                variant="outline"
+              >
+                {messages.endpoints.globalConsole.reset}
+              </Button>
+            </div>
+          </div>
+        )}
+        <div className="grid gap-4 group-data-[global=true]/traffic:gap-2 lg:grid-cols-[280px_1fr] group-data-[global=true]/traffic:lg:grid-cols-1">
+          <div className="flex flex-col gap-2 rounded-md border bg-muted/20 p-3 group-data-[global=true]/traffic:hidden group-data-[global=true]/traffic:rounded-none group-data-[global=true]/traffic:border-0 group-data-[global=true]/traffic:bg-transparent group-data-[global=true]/traffic:p-0">
+            <label
+              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm group-data-[global=true]/traffic:gap-2 group-data-[global=true]/traffic:text-xs"
+              htmlFor={`${controlId}-auto-refresh`}
+            >
+              <HugeiconsIcon
+                className="size-4 text-muted-foreground"
+                icon={RepeatIcon}
+                strokeWidth={2}
+              />
+              <span className="font-medium">
+                {messages.endpoints.trafficLogsAutoRefreshLabel}
+              </span>
+              <Switch
+                checked={autoRefresh}
+                id={`${controlId}-auto-refresh`}
+                onCheckedChange={setAutoRefresh}
+              />
+            </label>
+            <label
+              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm group-data-[global=true]/traffic:gap-2 group-data-[global=true]/traffic:text-xs"
+              htmlFor={`${controlId}-wrap-lines`}
+            >
+              <ListFilter className="size-4 text-muted-foreground" />
+              <span className="font-medium">
+                {messages.endpoints.trafficLogsWrapLinesLabel}
+              </span>
+              <Switch
+                checked={wrapLines}
+                id={`${controlId}-wrap-lines`}
+                onCheckedChange={setWrapLines}
+              />
+            </label>
+            <label
+              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm group-data-[global=true]/traffic:gap-2 group-data-[global=true]/traffic:text-xs"
+              htmlFor={`${controlId}-timestamps`}
+            >
+              <FileClock className="size-4 text-muted-foreground" />
+              <span className="font-medium">
+                {messages.endpoints.trafficLogsDisplayTimestampsLabel}
+              </span>
+              <Switch
+                checked={showTimestamps}
+                id={`${controlId}-timestamps`}
+                onCheckedChange={setShowTimestamps}
+              />
+            </label>
+          </div>
+
+          <div className="grid gap-3 group-data-[global=true]/traffic:gap-2">
+            <div className="grid items-center gap-3 group-data-[global=true]/traffic:gap-2 sm:grid-cols-[280px_1fr] group-data-[global=true]/traffic:sm:grid-cols-[130px_minmax(0,1fr)]">
+              <TrafficFilterCombobox
+                disabled={false}
+                id={`${controlId}-status`}
+                label={messages.common.status}
+                onChange={(value) => {
+                  // SAFETY: Options contain only the supported traffic status keys.
+                  setStatus((value || "all") as EndpointTrafficLogStatusFilter);
+                }}
+                options={Object.entries(STATUS_FILTER_LABELS).map(
+                  ([id, label]) => ({ id, label })
+                )}
+                placeholder={STATUS_FILTER_LABELS.all}
+                value={status}
+              />
+
+              <InputGroup>
+                <InputGroupAddon align="inline-start">
+                  <HugeiconsIcon
+                    className="text-muted-foreground"
+                    icon={SearchIcon}
+                    strokeWidth={2}
+                  />
+                </InputGroupAddon>
+                <InputGroupInput
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={messages.endpoints.trafficLogsSearchPlaceholder}
+                  value={search}
+                />
+              </InputGroup>
+            </div>
+
+            <div className="grid items-center gap-3 group-data-[global=true]/traffic:gap-2 sm:grid-cols-[180px_1fr] group-data-[global=true]/traffic:sm:grid-cols-[130px_minmax(0,1fr)]">
+              <Select
+                onValueChange={(value) =>
+                  setLineLimit(
+                    // SAFETY: The select options are the supported log-line limits.
+                    Number(value) as (typeof LOG_LINE_LIMITS)[number]
+                  )
+                }
+                value={lineLimit.toString()}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {LOG_LINE_LIMITS.map((limit) => (
+                      <SelectItem key={limit} value={limit.toString()}>
+                        {formatMessage(
+                          messages.endpoints.trafficLogsLineCount,
+                          { count: limit }
+                        )}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
+              <div className="flex flex-wrap gap-2">
+                <ButtonGroup
+                  aria-label={messages.endpoints.trafficLogsCopyButton}
+                >
+                  <Button
+                    onClick={() =>
+                      copyText(
+                        visibleLines.join("\n"),
+                        messages.endpoints.trafficLogsVisibleCopied
+                      )
+                    }
+                    size="sm"
+                    type="button"
+                    variant="subtle"
+                  >
+                    <HugeiconsIcon
+                      data-icon="inline-start"
+                      icon={Copy01Icon}
+                      strokeWidth={2}
+                    />
+                    {messages.endpoints.trafficLogsCopyButton}
+                  </Button>
+                  <Button
+                    disabled={selectedIds.size === 0}
+                    onClick={() =>
+                      copyText(
+                        selectedLines.join("\n"),
+                        messages.endpoints.trafficLogsSelectedCopied
+                      )
+                    }
+                    size="sm"
+                    type="button"
+                    variant="subtle"
+                  >
+                    <Clipboard data-icon="inline-start" />
+                    {messages.endpoints.trafficLogsCopySelectedButton}
+                  </Button>
+                  <Button
+                    disabled={selectedIds.size === 0}
+                    onClick={handleClearSelection}
+                    size="sm"
+                    type="button"
+                    variant="subtle"
+                  >
+                    <HugeiconsIcon
+                      data-icon="inline-start"
+                      icon={Cancel01Icon}
+                      strokeWidth={2}
+                    />
+                    {messages.endpoints.trafficLogsUnselectButton}
+                  </Button>
+                </ButtonGroup>
+                <div className="group-data-[global=true]/traffic:hidden">
+                  <ButtonGroup
+                    aria-label={messages.endpoints.trafficLogsDownloadButton}
+                  >
+                    <Button
+                      onClick={() => handleDownload("text")}
+                      size="sm"
+                      type="button"
+                      variant="subtle"
+                    >
+                      <HugeiconsIcon
+                        data-icon="inline-start"
+                        icon={DownloadIcon}
+                        strokeWidth={2}
+                      />
+                      {messages.endpoints.trafficLogsDownloadButton}
+                    </Button>
+                    <Button
+                      onClick={() => handleDownload("csv")}
+                      size="sm"
+                      type="button"
+                      variant="subtle"
+                    >
+                      {messages.endpoints.trafficLogsCsvButton}
+                    </Button>
+                    <TrafficLogSpreadsheetExport
+                      endpointId={endpointId}
+                      isPending={isPending}
+                      logs={logs}
+                    />
+                  </ButtonGroup>
+                </div>
+                {!global && (
+                  <Button
+                    disabled={logs.length === 0 || isClearingTrafficLogs}
+                    onClick={() => setShowClearLogsDialog(true)}
+                    size="sm"
+                    type="button"
+                    variant="destructive-subtle"
+                  >
+                    <HugeiconsIcon
+                      data-icon="inline-start"
+                      icon={Delete02Icon}
+                      strokeWidth={2}
+                    />
+                    {messages.endpoints.trafficLogsClearButton}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="min-h-[420px] min-w-0 overflow-hidden rounded-2xl border-2 border-border/80 border-b-4 bg-muted/30 shadow-inner group-data-[global=true]/traffic:min-h-0 group-data-[global=true]/traffic:flex-1 group-data-[global=true]/traffic:rounded-md group-data-[global=true]/traffic:border group-data-[global=true]/traffic:shadow-none">
+        {logContent}
+      </div>
+
+      {global && (
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t pt-2">
+          <Button
+            disabled={!cursor || isFetching}
+            onClick={() => setCursor(undefined)}
+            variant="outline"
+          >
+            {messages.endpoints.globalConsole.latest}
+          </Button>
+          <Button
+            disabled={!(data?.hasMore && data.nextCursor) || isFetching}
+            onClick={() => {
+              setCursor(data?.nextCursor ?? undefined);
+              setSelectedIds(new Set());
+            }}
+            variant="outline"
+          >
+            {messages.endpoints.globalConsole.older}
+          </Button>
+        </div>
+      )}
+      <Dialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedLogId(null);
+          }
+        }}
+        open={!!selectedLogId}
+      >
+        <DialogContent
+          className="flex h-[90vh] sm:max-w-[min(1400px,96vw)]"
+          showCloseButton={false}
+          variant="dark-pane"
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>
+              {messages.endpoints.trafficLogDetailTitle}
+            </DialogTitle>
+            <DialogDescription>
+              {messages.endpoints.trafficLogDetailDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <TrafficLogDetailContent
+            detailError={trafficLogDetail.error}
+            isLoadingDetail={isLoadingDetail}
+            selectedLogDetail={selectedLogDetail}
+            wrapLines={wrapLines}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog
+        onOpenChange={setShowClearLogsDialog}
+        open={showClearLogsDialog}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {messages.endpoints.trafficLogClearTitle}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {messages.endpoints.trafficLogClearDescription}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isClearingTrafficLogs}>
+              {messages.common.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isClearingTrafficLogs}
+              onClick={handleClearTrafficLogs}
+            >
+              {messages.endpoints.trafficLogClearConfirmButton}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </section>
+  );
+}
+
+function TerminalStatus({
+  status,
+}: {
+  readonly status: EndpointTrafficLogStatus;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 font-mono font-semibold text-xs",
+        STATUS_TONE_CLASS_NAMES[status]
+      )}
+      title={STATUS_LABELS[status]}
+    >
+      <span
+        aria-hidden="true"
+        className={cn(
+          "size-1.5 rounded-full motion-safe:animate-pulse",
+          STATUS_DOT_CLASS_NAMES[status]
+        )}
+      />
+      <span aria-hidden="true">{STATUS_CODES[status]}</span>
+      <span className="sr-only">{STATUS_LABELS[status]}</span>
+    </span>
+  );
+}
+
+function TrafficMetric({
+  icon,
+  label,
+  value,
+}: {
+  readonly icon: ReactNode;
+  readonly label: string;
+  readonly value: string;
+}) {
+  return (
+    <div className="flex min-w-0 items-center gap-2.5 rounded-2xl border-2 border-border/80 border-b-2 bg-card/90 px-3 py-2 shadow-xs">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border-2 border-border/70 border-b-2 bg-muted/60 text-muted-foreground">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="font-bold text-muted-foreground text-xs uppercase tracking-wider">
+          {label}
+        </p>
+        <p className="truncate font-bold font-mono text-sm">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function TerminalState({
+  message,
+  title,
+  tone = "empty",
+}: {
+  readonly message: string;
+  readonly title: string;
+  readonly tone?: TerminalTone;
+}) {
+  const promptColor = tone === "error" ? "text-destructive" : "text-primary";
+  const isEmergency = tone === "emergency";
+  const Icon = isEmergency ? CircleAlert : FileClock;
+
+  return (
+    <div
+      className={cn(
+        "flex h-[560px] items-center justify-center bg-muted/30 px-6 group-data-[global=true]/traffic:h-full",
+        isEmergency && "bg-destructive/10"
+      )}
+    >
+      <div
+        className={cn(
+          "w-full max-w-xl rounded-md border border-border bg-background p-5 font-mono text-sm shadow-inner dark:border-white/10 dark:bg-black/20",
+          isEmergency && "border-destructive/40 bg-destructive/15"
+        )}
+      >
+        <div
+          className={cn(
+            "mb-3 flex items-center gap-2 text-foreground",
+            isEmergency && "text-destructive"
+          )}
+        >
+          <Icon />
+          <span className="font-semibold">{title}</span>
+        </div>
+        <div className="grid gap-1 text-muted-foreground">
+          <p>
+            <span className={promptColor}>simulator@traffic</span>
+            <span className="text-muted-foreground">:~$</span> tail -f
+            endpoint.log
+          </p>
+          <p className="pl-0 text-muted-foreground">{message}</p>
+          {tone === "empty" && (
+            <p className="flex items-center gap-1.5 text-muted-foreground">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-success/60 opacity-75 motion-safe:animate-ping" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+              </span>
+              <span>{messages.endpoints.trafficLogsWaiting}</span>
+              <span className="loading-dots inline-flex gap-0.25">
+                <span>.</span>
+                <span>.</span>
+                <span>.</span>
+              </span>
+            </p>
+          )}
+          {isEmergency && (
+            <p className="text-destructive/80">
+              {messages.endpoints.trafficLogsEmergencyFooter}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LogExchangePane({
+  body,
+  headers,
+  icon,
+  meta,
+  title,
+  tone,
+  wrapLines,
+}: {
+  readonly body: EndpointTrafficPayload;
+  readonly headers: EndpointHttpHeaders | null;
+  readonly icon: ReactNode;
+  readonly meta: readonly {
+    readonly label: string;
+    readonly value: string | number;
+  }[];
+  readonly title: string;
+  readonly tone: ExchangeTone;
+  readonly wrapLines: boolean;
+}) {
+  const accentClass =
+    tone === "request"
+      ? "border-info/45 bg-info/10 text-info dark:bg-info/15"
+      : "border-success/45 bg-success/10 text-success dark:bg-success/15";
+
+  return (
+    <div className="flex h-full min-h-0 flex-col bg-card">
+      <div className="flex items-center justify-between gap-3 border-b px-4 py-3 dark:border-border">
+        <div className="flex items-center gap-2">
+          <span className={cn("rounded border p-1.5", accentClass)}>
+            {icon}
+          </span>
+          <div>
+            <h4 className="font-semibold text-sm">
+              {tone === "request" ? "R" : "S"} · {title}
+            </h4>
+            <p className="text-muted-foreground text-xs">
+              {messages.endpoints.trafficLogHeadersAndBody}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-px border-b bg-border md:grid-cols-4">
+        {meta.map((item) => (
+          <div className="min-w-0 bg-card px-3 py-2" key={item.label}>
+            <p className="font-mono text-muted-foreground text-xs uppercase">
+              {item.label}
+            </p>
+            <p className="truncate font-mono text-foreground text-xs">
+              {item.value}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="grid gap-4 p-4">
+          <ShikiJsonBlock
+            defaultWrapLines={wrapLines}
+            filename={`${title.toLowerCase()}-headers.json`}
+            title={messages.endpoints.trafficLogHeadersTitle}
+            value={headers}
+          />
+          <ShikiJsonBlock
+            defaultWrapLines={wrapLines}
+            filename={`${title.toLowerCase()}-body.json`}
+            title={messages.endpoints.trafficLogBodyTitle}
+            value={body}
+          />
+        </div>
+      </ScrollArea>
+    </div>
+  );
+}
+
+function ShikiJsonBlock({
+  defaultWrapLines,
+  filename,
+  title,
+  value,
+}: {
+  readonly defaultWrapLines: boolean;
+  readonly filename: string;
+  readonly title: string;
+  readonly value:
+    | EndpointTrafficPayload
+    | EndpointHttpHeaders
+    | null
+    | undefined;
+}) {
+  const [wrapLines, setWrapLines] = useState(defaultWrapLines);
+  const code = formatJson(value);
+
+  return (
+    <CodeBlock
+      className="overflow-hidden rounded-md border-border bg-card shadow-md"
+      data={[{ code, filename, language: "json" }]}
+      defaultDarkTheme="github-dark-high-contrast"
+      defaultLightTheme="github-light-high-contrast"
+      defaultValue="json"
+      storageKey={`traffic-log-detail-${filename}`}
+    >
+      <CodeBlockHeader className="border-border bg-muted/60 px-3 py-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-success" />
+          <span className="truncate font-medium text-foreground text-xs">
+            {title}
+          </span>
+          <span className="truncate font-mono text-muted-foreground text-xs">
+            {filename}
+          </span>
+        </div>
+        <CodeBlockCopyButton size="icon-7" variant="ghost-slate" />
+        <label
+          className="ml-1 inline-flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1 font-medium text-foreground text-xs"
+          htmlFor={`wrap-lines-${filename}`}
+        >
+          <span>{messages.endpoints.trafficLogWrapLabel}</span>
+          <Switch
+            checked={wrapLines}
+            className="scale-75"
+            id={`wrap-lines-${filename}`}
+            onCheckedChange={setWrapLines}
+          />
+        </label>
+      </CodeBlockHeader>
+      <div className="h-80 overflow-y-auto overflow-x-hidden">
+        <div className="overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <CodeBlockBody>
+            {(item) => (
+              <CodeBlockItem
+                className={cn(
+                  "bg-card text-foreground text-xs [&_.line]:min-h-5 [&_.line]:text-foreground [&_.line]:before:text-muted-foreground [&_.shiki_span]:font-medium",
+                  wrapLines
+                    ? "[&_code]:!overflow-visible [&_code]:!whitespace-pre-wrap [&_pre]:!whitespace-pre-wrap [&_.line]:!whitespace-pre-wrap [&_.line]:break-all"
+                    : "[&_code]:!w-max [&_code]:!overflow-visible [&_code]:!whitespace-pre [&_pre]:!w-max [&_pre]:!whitespace-pre [&_.line]:!w-max [&_.line]:!whitespace-pre [&_.line]:!break-normal [&_.line]:min-w-full [&_code]:min-w-full [&_pre]:min-w-full"
+                )}
+                key={item.language}
+                value={item.language}
+              >
+                <CodeBlockContent language="json">{item.code}</CodeBlockContent>
+              </CodeBlockItem>
+            )}
+          </CodeBlockBody>
+        </div>
+      </div>
+    </CodeBlock>
+  );
+}
+
+function TrafficLogDetailContent({
+  selectedLogDetail,
+  isLoadingDetail,
+  detailError,
+  wrapLines,
+}: {
+  readonly selectedLogDetail?: EndpointTrafficLogDetail;
+  readonly isLoadingDetail: boolean;
+  readonly detailError: { message: string } | null;
+  readonly wrapLines: boolean;
+}) {
   let detailContent: ReactNode = null;
   if (isLoadingDetail) {
     detailContent = (
@@ -498,6 +1327,14 @@ export function EndpointTrafficLogViewer({
           <Skeleton className="h-6 w-full" key={`log-detail-${index}`} />
         ))}
       </div>
+    );
+  } else if (detailError) {
+    detailContent = (
+      <TerminalState
+        message={detailError.message}
+        title={messages.endpoints.globalConsole.detailError}
+        tone="error"
+      />
     );
   } else if (selectedLogDetail) {
     const requestMeta = [
@@ -640,610 +1477,124 @@ export function EndpointTrafficLogViewer({
     );
   }
 
+  return detailContent;
+}
+
+function downloadVisibleTraffic(
+  format: LogDownloadFormat,
+  logs: EndpointTrafficLog[],
+  visibleLines: string[]
+) {
+  const content =
+    format === "csv"
+      ? [
+          [
+            "id",
+            "requestId",
+            "occurredAt",
+            "endpointId",
+            "billerId",
+            "method",
+            "path",
+            "httpStatusCode",
+            "hitStatus",
+            "durationMs",
+          ],
+          ...logs.map((log) => [
+            log.id,
+            log.requestId,
+            log.occurredAt,
+            log.endpointId,
+            log.billerId,
+            log.method,
+            log.path,
+            log.httpStatusCode,
+            log.hitStatus,
+            log.durationMs,
+          ]),
+        ]
+          .map((row) => row.map((cell) => `"${csvValue(cell)}"`).join(","))
+          .join("\n")
+      : visibleLines.join("\n");
+  const url = URL.createObjectURL(
+    new Blob([content], {
+      type:
+        format === "csv"
+          ? "text/csv;charset=utf-8"
+          : "text/plain;charset=utf-8",
+    })
+  );
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `traffic-logs.${format === "csv" ? "csv" : "log"}`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function toSinceIso(since: string) {
+  if (!since) {
+    return;
+  }
+  const date = new Date(since);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+}
+
+function trafficPollInterval(
+  enabled: boolean,
+  autoRefresh: boolean,
+  cursor?: string
+) {
+  return enabled && autoRefresh && !cursor
+    ? TRAFFIC_LOG_POLL_INTERVAL_MS
+    : false;
+}
+
+function csvValue(cell: string | number | null | undefined) {
+  const text = String(cell ?? "");
+  const safe = CSV_FORMULA_PREFIX.test(text) ? `'${text}` : text;
+  return safe.replaceAll('"', '""');
+}
+
+function TrafficLogLine({
+  log,
+  showTimestamps,
+}: {
+  readonly log: EndpointTrafficLog;
+  readonly showTimestamps: boolean;
+}) {
   return (
-    <section className="flex min-w-0 flex-col gap-3" id={tourId}>
-      <div className="flex flex-col gap-4 rounded-2xl border-2 border-border/80 border-b-4 bg-card p-4 shadow-sm">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-xl border-2 border-border/80 border-b-2 bg-background text-primary shadow-xs">
-                <HugeiconsIcon
-                  aria-hidden="true"
-                  className="size-5"
-                  icon={ActivityIcon}
-                  strokeWidth={2.5}
-                />
-              </div>
-              <div>
-                <h2 className="font-bold text-lg">
-                  {messages.endpoints.trafficLogsTitle}
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  {messages.endpoints.trafficLogsDescription}
-                </p>
-              </div>
-            </div>
-          </div>
-          <Button
-            disabled={isFetching}
-            onClick={() => refetchLogs()}
-            size="sm"
-            type="button"
-            variant="panel"
-          >
-            <HugeiconsIcon
-              data-icon="inline-start"
-              icon={RepeatIcon}
-              strokeWidth={2.5}
-            />
-            {messages.endpoints.trafficLogsRefreshButton}
-          </Button>
-        </div>
-
-        <div className="grid gap-2 sm:grid-cols-4">
-          <TrafficMetric
-            icon={
-              <HugeiconsIcon
-                className="size-3.5"
-                icon={DashedLineCircleIcon}
-                strokeWidth={2}
-              />
-            }
-            label={messages.endpoints.trafficLogsVisibleMetric}
-            value={totalLogsLabel}
-          />
-          <TrafficMetric
-            icon={
-              <HugeiconsIcon
-                className="size-3.5"
-                icon={CheckmarkCircle01Icon}
-                strokeWidth={2}
-              />
-            }
-            label={messages.endpoints.trafficLogsSuccessMetric}
-            value={successRate}
-          />
-          <TrafficMetric
-            icon={<Clipboard className="size-3.5" />}
-            label={messages.endpoints.trafficLogsSelectionMetric}
-            value={selectedLogsLabel}
-          />
-          <TrafficMetric
-            icon={<TimerReset className="size-3.5" />}
-            label={messages.endpoints.trafficLogsLatestMetric}
-            value={getLatestDurationLabel(latestLog)}
-          />
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
-          <div className="flex flex-col gap-2 rounded-md border bg-muted/20 p-3">
-            <label
-              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm"
-              htmlFor="traffic-log-auto-refresh"
-            >
-              <HugeiconsIcon
-                className="size-4 text-muted-foreground"
-                icon={RepeatIcon}
-                strokeWidth={2}
-              />
-              <span className="font-medium">
-                {messages.endpoints.trafficLogsAutoRefreshLabel}
-              </span>
-              <Switch
-                checked={autoRefresh}
-                id="traffic-log-auto-refresh"
-                onCheckedChange={setAutoRefresh}
-              />
-            </label>
-            <label
-              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm"
-              htmlFor="traffic-log-wrap-lines"
-            >
-              <ListFilter className="size-4 text-muted-foreground" />
-              <span className="font-medium">
-                {messages.endpoints.trafficLogsWrapLinesLabel}
-              </span>
-              <Switch
-                checked={wrapLines}
-                id="traffic-log-wrap-lines"
-                onCheckedChange={setWrapLines}
-              />
-            </label>
-            <label
-              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm"
-              htmlFor="traffic-log-timestamps"
-            >
-              <FileClock className="size-4 text-muted-foreground" />
-              <span className="font-medium">
-                {messages.endpoints.trafficLogsDisplayTimestampsLabel}
-              </span>
-              <Switch
-                checked={showTimestamps}
-                id="traffic-log-timestamps"
-                onCheckedChange={setShowTimestamps}
-              />
-            </label>
-          </div>
-
-          <div className="grid gap-3">
-            <div className="grid items-center gap-3 sm:grid-cols-[280px_1fr]">
-              <Select
-                onValueChange={(value) =>
-                  // SAFETY: The select options are the supported traffic-log filters.
-                  setStatus(value as EndpointTrafficLogStatusFilter)
-                }
-                value={status}
-              >
-                <SelectTrigger className="w-full">
-                  <ListFilter data-icon="inline-start" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {Object.entries(STATUS_FILTER_LABELS).map(
-                      ([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      )
-                    )}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-
-              <InputGroup>
-                <InputGroupAddon align="inline-start">
-                  <HugeiconsIcon
-                    className="text-muted-foreground"
-                    icon={SearchIcon}
-                    strokeWidth={2}
-                  />
-                </InputGroupAddon>
-                <InputGroupInput
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder={messages.endpoints.trafficLogsSearchPlaceholder}
-                  value={search}
-                />
-              </InputGroup>
-            </div>
-
-            <div className="grid items-center gap-3 sm:grid-cols-[180px_1fr]">
-              <Select
-                onValueChange={(value) =>
-                  setLineLimit(
-                    // SAFETY: The select options are the supported log-line limits.
-                    Number(value) as (typeof LOG_LINE_LIMITS)[number]
-                  )
-                }
-                value={lineLimit.toString()}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {LOG_LINE_LIMITS.map((limit) => (
-                      <SelectItem key={limit} value={limit.toString()}>
-                        {formatMessage(
-                          messages.endpoints.trafficLogsLineCount,
-                          { count: limit }
-                        )}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={() =>
-                    copyText(
-                      visibleLines.join("\n"),
-                      messages.endpoints.trafficLogsVisibleCopied
-                    )
-                  }
-                  size="sm"
-                  type="button"
-                  variant="subtle"
-                >
-                  <HugeiconsIcon
-                    data-icon="inline-start"
-                    icon={Copy01Icon}
-                    strokeWidth={2}
-                  />
-                  {messages.endpoints.trafficLogsCopyButton}
-                </Button>
-                <Button
-                  disabled={selectedIds.size === 0}
-                  onClick={() =>
-                    copyText(
-                      selectedLines.join("\n"),
-                      messages.endpoints.trafficLogsSelectedCopied
-                    )
-                  }
-                  size="sm"
-                  type="button"
-                  variant="subtle"
-                >
-                  <Clipboard data-icon="inline-start" />
-                  {messages.endpoints.trafficLogsCopySelectedButton}
-                </Button>
-                <Button
-                  disabled={selectedIds.size === 0}
-                  onClick={handleClearSelection}
-                  size="sm"
-                  type="button"
-                  variant="subtle"
-                >
-                  <HugeiconsIcon
-                    data-icon="inline-start"
-                    icon={Cancel01Icon}
-                    strokeWidth={2}
-                  />
-                  {messages.endpoints.trafficLogsUnselectButton}
-                </Button>
-                <Button
-                  onClick={() => handleDownload("text")}
-                  size="sm"
-                  type="button"
-                  variant="subtle"
-                >
-                  <HugeiconsIcon
-                    data-icon="inline-start"
-                    icon={DownloadIcon}
-                    strokeWidth={2}
-                  />
-                  {messages.endpoints.trafficLogsDownloadButton}
-                </Button>
-                <Button
-                  onClick={() => handleDownload("csv")}
-                  size="sm"
-                  type="button"
-                  variant="subtle"
-                >
-                  {messages.endpoints.trafficLogsCsvButton}
-                </Button>
-                <TrafficLogSpreadsheetExport
-                  endpointId={endpointId}
-                  isPending={isPending}
-                  logs={logs}
-                />
-                <Button
-                  disabled={logs.length === 0 || isClearingTrafficLogs}
-                  onClick={() => setShowClearLogsDialog(true)}
-                  size="sm"
-                  type="button"
-                  variant="destructive-subtle"
-                >
-                  <HugeiconsIcon
-                    data-icon="inline-start"
-                    icon={Delete02Icon}
-                    strokeWidth={2}
-                  />
-                  {messages.endpoints.trafficLogsClearButton}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="min-h-[420px] min-w-0 overflow-hidden rounded-2xl border-2 border-border/80 border-b-4 bg-muted/30 shadow-inner">
-        {logContent}
-      </div>
-
-      <Dialog
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedLogId(null);
-          }
-        }}
-        open={!!selectedLogId}
-      >
-        <DialogContent
-          className="flex h-[90vh] sm:max-w-[min(1400px,96vw)]"
-          showCloseButton={false}
-          variant="dark-pane"
+    <span className="flex flex-col gap-0.5">
+      <span>
+        <span
+          className="font-semibold text-info"
+          title={messages.endpoints.trafficLogRequestTitle}
         >
-          <DialogHeader className="sr-only">
-            <DialogTitle>
-              {messages.endpoints.trafficLogDetailTitle}
-            </DialogTitle>
-            <DialogDescription>
-              {messages.endpoints.trafficLogDetailDescription}
-            </DialogDescription>
-          </DialogHeader>
-          {detailContent}
-        </DialogContent>
-      </Dialog>
-
-      <AlertDialog
-        onOpenChange={setShowClearLogsDialog}
-        open={showClearLogsDialog}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {messages.endpoints.trafficLogClearTitle}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {messages.endpoints.trafficLogClearDescription}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isClearingTrafficLogs}>
-              {messages.common.cancel}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isClearingTrafficLogs}
-              onClick={handleClearTrafficLogs}
-            >
-              {messages.endpoints.trafficLogClearConfirmButton}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </section>
-  );
-}
-
-function TerminalStatus({
-  status,
-}: {
-  readonly status: EndpointTrafficLogStatus;
-}) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-2 font-semibold text-xs",
-        STATUS_TONE_CLASS_NAMES[status]
-      )}
-    >
-      <span
-        aria-hidden="true"
-        className={cn("size-1.5 rounded-full", STATUS_DOT_CLASS_NAMES[status])}
-      />
-      {STATUS_LABELS[status]}
-    </span>
-  );
-}
-
-function TrafficMetric({
-  icon,
-  label,
-  value,
-}: {
-  readonly icon: ReactNode;
-  readonly label: string;
-  readonly value: string;
-}) {
-  return (
-    <div className="flex min-w-0 items-center gap-2.5 rounded-2xl border-2 border-border/80 border-b-2 bg-card/90 px-3 py-2 shadow-xs">
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border-2 border-border/70 border-b-2 bg-muted/60 text-muted-foreground">
-        {icon}
+          R
+        </span>
+        {"  "}
+        <span className={getMethodColor(log.method).text}>
+          method:{log.method}
+        </span>
+        {"  "}
+        {formatRequestMetadata(log, showTimestamps)}
+        <span className="text-info">
+          {"  "}request:{log.requestBodyPreview ?? "-"}
+        </span>
       </span>
-      <div className="min-w-0">
-        <p className="font-bold text-muted-foreground text-xs uppercase tracking-wider">
-          {label}
-        </p>
-        <p className="truncate font-bold font-mono text-sm">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function TerminalState({
-  message,
-  title,
-  tone = "empty",
-}: {
-  readonly message: string;
-  readonly title: string;
-  readonly tone?: TerminalTone;
-}) {
-  const promptColor = tone === "error" ? "text-destructive" : "text-primary";
-  const isEmergency = tone === "emergency";
-  const Icon = isEmergency ? CircleAlert : FileClock;
-
-  return (
-    <div
-      className={cn(
-        "flex h-[560px] items-center justify-center bg-muted/30 px-6",
-        isEmergency && "bg-destructive/10"
-      )}
-    >
-      <div
-        className={cn(
-          "w-full max-w-xl rounded-md border border-border bg-background p-5 font-mono text-sm shadow-inner dark:border-white/10 dark:bg-black/20",
-          isEmergency && "border-destructive/40 bg-destructive/15"
-        )}
-      >
-        <div
-          className={cn(
-            "mb-3 flex items-center gap-2 text-foreground",
-            isEmergency && "text-destructive"
-          )}
+      <span>
+        <span
+          className="font-semibold text-success"
+          title={messages.endpoints.trafficLogResponseTitle}
         >
-          <Icon />
-          <span className="font-semibold">{title}</span>
-        </div>
-        <div className="grid gap-1 text-muted-foreground">
-          <p>
-            <span className={promptColor}>simulator@traffic</span>
-            <span className="text-muted-foreground">:~$</span> tail -f
-            endpoint.log
-          </p>
-          <p className="pl-0 text-muted-foreground">{message}</p>
-          {tone === "empty" && (
-            <p className="flex items-center gap-1.5 text-muted-foreground">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-success/60 opacity-75 motion-safe:animate-ping" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
-              </span>
-              <span>{messages.endpoints.trafficLogsWaiting}</span>
-              <span className="loading-dots inline-flex gap-0.25">
-                <span>.</span>
-                <span>.</span>
-                <span>.</span>
-              </span>
-            </p>
-          )}
-          {isEmergency && (
-            <p className="text-destructive/80">
-              {messages.endpoints.trafficLogsEmergencyFooter}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LogExchangePane({
-  body,
-  headers,
-  icon,
-  meta,
-  title,
-  tone,
-  wrapLines,
-}: {
-  readonly body: EndpointTrafficPayload;
-  readonly headers: EndpointHttpHeaders | null;
-  readonly icon: ReactNode;
-  readonly meta: readonly {
-    readonly label: string;
-    readonly value: string | number;
-  }[];
-  readonly title: string;
-  readonly tone: ExchangeTone;
-  readonly wrapLines: boolean;
-}) {
-  const accentClass =
-    tone === "request"
-      ? "border-info/45 bg-info/10 text-info dark:bg-info/15"
-      : "border-success/45 bg-success/10 text-success dark:bg-success/15";
-
-  return (
-    <div className="flex h-full min-h-0 flex-col bg-card">
-      <div className="flex items-center justify-between gap-3 border-b px-4 py-3 dark:border-border">
-        <div className="flex items-center gap-2">
-          <span className={cn("rounded border p-1.5", accentClass)}>
-            {icon}
-          </span>
-          <div>
-            <h4 className="font-semibold text-sm">{title}</h4>
-            <p className="text-muted-foreground text-xs">
-              {messages.endpoints.trafficLogHeadersAndBody}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-px border-b bg-border md:grid-cols-4">
-        {meta.map((item) => (
-          <div className="min-w-0 bg-card px-3 py-2" key={item.label}>
-            <p className="font-mono text-muted-foreground text-xs uppercase">
-              {item.label}
-            </p>
-            <p className="truncate font-mono text-foreground text-xs">
-              {item.value}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="grid gap-4 p-4">
-          <ShikiJsonBlock
-            defaultWrapLines={wrapLines}
-            filename={`${title.toLowerCase()}-headers.json`}
-            title={messages.endpoints.trafficLogHeadersTitle}
-            value={headers}
-          />
-          <ShikiJsonBlock
-            defaultWrapLines={wrapLines}
-            filename={`${title.toLowerCase()}-body.json`}
-            title={messages.endpoints.trafficLogBodyTitle}
-            value={body}
-          />
-        </div>
-      </ScrollArea>
-    </div>
-  );
-}
-
-function ShikiJsonBlock({
-  defaultWrapLines,
-  filename,
-  title,
-  value,
-}: {
-  readonly defaultWrapLines: boolean;
-  readonly filename: string;
-  readonly title: string;
-  readonly value:
-    | EndpointTrafficPayload
-    | EndpointHttpHeaders
-    | null
-    | undefined;
-}) {
-  const [wrapLines, setWrapLines] = useState(defaultWrapLines);
-  const code = formatJson(value);
-
-  return (
-    <CodeBlock
-      className="overflow-hidden rounded-md border-border bg-card shadow-md"
-      data={[{ code, filename, language: "json" }]}
-      defaultDarkTheme="github-dark-high-contrast"
-      defaultLightTheme="github-light-high-contrast"
-      defaultValue="json"
-      storageKey={`traffic-log-detail-${filename}`}
-    >
-      <CodeBlockHeader className="border-border bg-muted/60 px-3 py-2">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-success" />
-          <span className="truncate font-medium text-foreground text-xs">
-            {title}
-          </span>
-          <span className="truncate font-mono text-muted-foreground text-xs">
-            {filename}
-          </span>
-        </div>
-        <CodeBlockCopyButton size="icon-7" variant="ghost-slate" />
-        <label
-          className="ml-1 inline-flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1 font-medium text-foreground text-xs"
-          htmlFor={`wrap-lines-${filename}`}
-        >
-          <span>{messages.endpoints.trafficLogWrapLabel}</span>
-          <Switch
-            checked={wrapLines}
-            className="scale-75"
-            id={`wrap-lines-${filename}`}
-            onCheckedChange={setWrapLines}
-          />
-        </label>
-      </CodeBlockHeader>
-      <div className="h-80 overflow-y-auto overflow-x-hidden">
-        <div className="overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <CodeBlockBody>
-            {(item) => (
-              <CodeBlockItem
-                className={cn(
-                  "bg-card text-foreground text-xs [&_.line]:min-h-5 [&_.line]:text-foreground [&_.line]:before:text-muted-foreground [&_.shiki_span]:font-medium",
-                  wrapLines
-                    ? "[&_code]:!overflow-visible [&_code]:!whitespace-pre-wrap [&_pre]:!whitespace-pre-wrap [&_.line]:!whitespace-pre-wrap [&_.line]:break-all"
-                    : "[&_code]:!w-max [&_code]:!overflow-visible [&_code]:!whitespace-pre [&_pre]:!w-max [&_pre]:!whitespace-pre [&_.line]:!w-max [&_.line]:!whitespace-pre [&_.line]:!break-normal [&_.line]:min-w-full [&_code]:min-w-full [&_pre]:min-w-full"
-                )}
-                key={item.language}
-                value={item.language}
-              >
-                <CodeBlockContent language="json">{item.code}</CodeBlockContent>
-              </CodeBlockItem>
-            )}
-          </CodeBlockBody>
-        </div>
-      </div>
-    </CodeBlock>
+          S
+        </span>
+        {"  "}
+        {formatResponseMetadata(log)}
+        <span className="text-success">
+          {"  "}response_body:
+          <TrafficJsonPreview value={log.responseBodyPreview} />
+        </span>
+      </span>
+    </span>
   );
 }

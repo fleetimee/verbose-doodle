@@ -59,6 +59,10 @@ export const API_ENDPOINTS = {
       },
       update: (slug: string) => `/api/endpoint/${slug}`,
     },
+    trafficLogs: {
+      list: "/api/traffic-logs",
+      detail: (logId: string) => `/api/traffic-logs/${logId}`,
+    },
     overview: "/api/overview",
     responses: {
       activate: (endpointId: string | number, responseId: string | number) =>

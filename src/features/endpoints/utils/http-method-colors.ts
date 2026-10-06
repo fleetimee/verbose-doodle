@@ -15,7 +15,7 @@ export type MethodColorConfig = {
  * Get color classes for an HTTP method
  * Uses Tailwind CSS color classes
  */
-export function getMethodColor(method: HttpMethod): MethodColorConfig {
+export function getMethodColor(method: string): MethodColorConfig {
   switch (method) {
     case "GET":
       return {

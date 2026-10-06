@@ -160,6 +160,12 @@ export type EndpointTrafficLogDetail = EndpointTrafficLog & {
 export type EndpointTrafficLogStatusFilter = "all" | EndpointTrafficLogStatus;
 
 export type EndpointTrafficLogsFilters = {
+  readonly method?: string;
+  readonly endpointId?: string;
+  readonly billerId?: string;
+  readonly billerSlug?: string;
+  readonly since?: string;
+  readonly cursor?: string;
   readonly limit: number;
   readonly status: EndpointTrafficLogStatusFilter;
   readonly search: string;

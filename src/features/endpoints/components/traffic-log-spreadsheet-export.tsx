@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { MenubarItem } from "@/components/ui/menubar";
 import type { EndpointTrafficLog } from "@/features/endpoints/types";
 import { downloadTrafficLogSpreadsheet } from "@/features/endpoints/utils/traffic-log-spreadsheet";
 import { messages } from "@/lib/i18n";
 
 export function TrafficLogSpreadsheetExport({
   endpointId,
+  asMenuItem = false,
   isPending,
   logs,
 }: {
   readonly endpointId: string;
+  readonly asMenuItem?: boolean;
   readonly isPending: boolean;
   readonly logs: readonly EndpointTrafficLog[];
 }) {
@@ -25,6 +28,17 @@ export function TrafficLogSpreadsheetExport({
       setIsExportingSpreadsheet(false);
     }
   };
+
+  if (asMenuItem) {
+    return (
+      <MenubarItem
+        disabled={logs.length === 0 || isExportingSpreadsheet || isPending}
+        onClick={handleSpreadsheetDownload}
+      >
+        {messages.endpoints.trafficLogsExcelButton}
+      </MenubarItem>
+    );
+  }
 
   return (
     <Button

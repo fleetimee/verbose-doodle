@@ -374,7 +374,8 @@ function errorStatus(cause: unknown): number | undefined {
 }
 
 export function createHttpEndpointAdapter(
-  transport: EndpointDataTransport = defaultTransport
+  transport: EndpointDataTransport = defaultTransport,
+  globalTraffic = false
 ): EndpointDataAdapter {
   return {
     async activateResponse(input) {
@@ -506,7 +507,9 @@ export function createHttpEndpointAdapter(
     },
     async getTrafficLogDetail(endpointId, logId) {
       const response = await transport.get<RawApiInput>(
-        API_ENDPOINTS.admin.endpoints.trafficLogs.detail(endpointId, logId)
+        globalTraffic
+          ? API_ENDPOINTS.admin.trafficLogs.detail(logId)
+          : API_ENDPOINTS.admin.endpoints.trafficLogs.detail(endpointId, logId)
       );
       const data = payload(response);
       return mapTrafficLogDetail(
@@ -535,8 +538,24 @@ export function createHttpEndpointAdapter(
       if (input.filters.includeBody) {
         params.set("includeBody", "true");
       }
+      for (const key of [
+        "endpointId",
+        "billerId",
+        "billerSlug",
+        "method",
+        "since",
+        "cursor",
+      ] as const) {
+        const filter = input.filters[key];
+        if (filter) {
+          params.set(key, filter);
+        }
+      }
+      const url = globalTraffic
+        ? API_ENDPOINTS.admin.trafficLogs.list
+        : API_ENDPOINTS.admin.endpoints.trafficLogs.list(input.endpointId);
       const response = await transport.get<RawApiInput>(
-        `${API_ENDPOINTS.admin.endpoints.trafficLogs.list(input.endpointId)}?${params.toString()}`
+        `${url}?${params.toString()}`
       );
       const data = trafficPayload(response);
       const items = listValue(data, "items", "logs").map((item) => {
@@ -606,3 +625,5 @@ export function createHttpEndpointAdapter(
 }
 
 export const httpEndpointAdapter = createHttpEndpointAdapter();
+
+export const globalTrafficAdapter = createHttpEndpointAdapter(undefined, true);

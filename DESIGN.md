@@ -313,3 +313,82 @@ The lock screen enters with a 450ms downward transform, like a shutter closing, 
 - **Don't** round every container into a pill or stack several large-radius boxes without structural need.
 - **Don't** add decorative animation. Motion must explain state, continuity, or direct manipulation.
 - **Don't** turn semantic HTTP, success, warning, or error colors into general accents.
+
+
+### Global endpoint console
+
+Administrators open the endpoint console from the dashboard header. It docks at
+the bottom without blocking page navigation, and its height is adjustable from
+35% to 100% of the viewport. Filters and selections remain mounted across dashboard
+navigation and closing/reopening the console.
+
+Reuse the endpoint traffic viewer for status, search, page size, timestamps,
+wrapping, copy, export, and request/response inspection. Global traffic adds
+searchable biller-name and endpoint path comboboxes, a separate HTTP method select, a local-time "since" input, reset, older-page navigation,
+and return to latest. Biller selection narrows endpoint choices and resets the
+endpoint selection. Method selection also narrows endpoint choices and resets the
+endpoint selection. Biller slugs and endpoint IDs remain internal to API filtering.
+Polling runs every two seconds while the console is open, auto-refresh is enabled,
+and the latest page is selected. Exports contain the displayed page; global clear
+is unavailable. Closing restores focus to the console button. Copy and controls
+support English and Indonesian.
+
+The global console uses a compact toolbar above the logs: inline summary and
+refresh, biller/method/endpoint/date filters on one desktop row, then display,
+search, and export controls. It omits the endpoint viewer's duplicate heading and
+summary cards. Toolbar rows wrap on smaller screens.
+
+The compact console includes a shadcn Menubar with View checkbox items for
+auto-refresh, wrapping, and timestamps, and Export actions for text, CSV, and
+Excel. Filters and search remain visible. Escape dismisses a nested popup before
+closing the console.
+
+Choice filters use compact searchable shadcn comboboxes for biller, method,
+endpoint, and status. Visible field labels are removed from the console toolbar,
+with accessible labels retained. Scope filters occupy their own full-width row, with status and search beneath
+them. Narrower screens wrap controls. Filter popups are at least 16rem wide,
+independently of the compact trigger width.
+
+The docked console keeps its title, filter toolbar, and latest/older pagination
+fixed within the panel. Only the log pane scrolls, horizontally and vertically;
+it fills the height remaining below the toolbar and above pagination.
+
+The console slides upward and fades in over 280ms, then slides down and fades
+out over 200ms, using the shared ease-out curve. Reduced motion uses a 150ms
+fade. Closing immediately disables interaction and polling while retaining the
+viewer state; the panel hides after its exit finishes. Rapid toggles reverse
+the animation from its current position.
+
+Traffic direction uses explicit R for the received request in the info color and
+S for the sent response in the success color, matching the exchange inspector.
+The toolbar includes a direction legend; status remains a separate indicator.
+Copied and text-exported log lines retain the R/S labels.
+
+Traffic rows highlight the HTTP method using the shared endpoint method colors:
+GET blue, POST green, PUT amber, PATCH purple, and DELETE red. Other captured
+methods use a neutral fallback. Plain-text copying retains the method label.
+
+Each exchange has two stacked lines: a blue R request line with a colored HTTP
+method and request metadata, and a green S response line with HTTP status,
+duration, response metadata, and body preview. Both retain the request ID for
+correlation. Selection and detail inspection apply to the complete exchange.
+Copied and text-exported exchanges use the same two-line format.
+
+Inline response-body previews highlight JSON keys, strings, numbers, literals,
+and punctuation using theme-aware colors. Highlighting preserves whitespace and
+truncated previews and renders payloads as escaped React text. Copy and export
+continue to use the original preview text.
+
+Traffic status uses compact colored codes: SUC, ERR, DLY, EMP, TMO, and MIS.
+Full localized labels remain available through accessible labels and hover titles.
+Only the small status dot pulses gently; reduced motion keeps it static. The
+selection/status columns are narrowed and exchange lines use tighter spacing.
+
+The console's top edge is a draggable resize handle with a row-resize cursor and
+pointer capture for mouse, pen, and touch. It shares the slider's 35–100% bounds.
+Keyboard users can focus the handle and use Up/Down, Shift for larger steps, or
+Home/End for the bounds. Resizing changes height directly without animation.
+
+The console header includes Fullscreen and Restore controls. Fullscreen fills
+the app viewport and Restore returns to the height used before maximizing. The
+slider, draggable edge, and keyboard End key can also reach 100%.
