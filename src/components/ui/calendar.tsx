@@ -14,11 +14,13 @@ function Calendar({
   showOutsideDays = true,
   captionLayout = "label",
   buttonVariant = "ghost",
+  dayVariant = "default",
   formatters,
   components,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
+  dayVariant?: "default" | "circle"
 }) {
   const defaultClassNames = getDefaultClassNames()
 
@@ -97,10 +99,11 @@ function Calendar({
           defaultClassNames.week_number
         ),
         day: cn(
-          "relative w-full h-full p-0 text-center [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none",
-          props.showWeekNumber
+          "relative w-full h-full p-0 text-center group/day aspect-square select-none",
+          dayVariant === "default" && "[&:last-child[data-selected=true]_button]:rounded-r-md",
+          dayVariant === "default" && (props.showWeekNumber
             ? "[&:nth-child(2)[data-selected=true]_button]:rounded-l-md"
-            : "[&:first-child[data-selected=true]_button]:rounded-l-md",
+            : "[&:first-child[data-selected=true]_button]:rounded-l-md"),
           defaultClassNames.day
         ),
         range_start: cn(
@@ -110,7 +113,7 @@ function Calendar({
         range_middle: cn("rounded-none", defaultClassNames.range_middle),
         range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
         today: cn(
-          "bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none",
+          dayVariant === "default" && "bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none",
           defaultClassNames.today
         ),
         outside: cn(
@@ -150,7 +153,16 @@ function Calendar({
             <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} className={cn("size-4", className)} {...props} />
           )
         },
-        DayButton: CalendarDayButton,
+        DayButton: (buttonProps) => (
+          <CalendarDayButton
+            {...buttonProps}
+            className={cn(
+              buttonProps.className,
+              dayVariant === "circle" && "mx-auto size-(--cell-size) min-w-0 rounded-full",
+              dayVariant === "circle" && buttonProps.modifiers.today && "bg-accent text-accent-foreground"
+            )}
+          />
+        ),
         WeekNumber: ({ children, ...props }) => (
             <td {...props}>
               <div className="flex size-(--cell-size) items-center justify-center text-center">

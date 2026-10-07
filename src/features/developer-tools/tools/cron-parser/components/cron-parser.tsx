@@ -3,13 +3,20 @@ import {
   ComputerTerminalIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, ClipboardCopy, Clock3 } from "@/components/hugeicons";
+import { Check, ClipboardCopy } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   developerToolChildVariants as childVariants,
@@ -29,11 +36,14 @@ import {
   type CronSchedule,
   DEFAULT_CRON_SCHEDULE,
 } from "@/features/developer-tools/tools/cron-parser/build-cron-expression";
+import { CronPreviewDatePicker } from "@/features/developer-tools/tools/cron-parser/components/cron-preview-date-picker";
+import { CronPreviewResults } from "@/features/developer-tools/tools/cron-parser/components/cron-preview-results";
 import { CronScheduleControls } from "@/features/developer-tools/tools/cron-parser/components/cron-schedule-controls";
 import {
-  type CronParseResult,
-  parseCronExpression,
-} from "@/features/developer-tools/tools/cron-parser/parse-cron-expression";
+  type CronPreview,
+  parseCronPreview,
+  readPreviewDate,
+} from "@/features/developer-tools/tools/cron-parser/cron-preview";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, getActiveLocale, messages } from "@/lib/i18n";
@@ -71,9 +81,9 @@ const getCronParserTourSteps = (): readonly DeveloperToolTourStep[] => [
 function formatExecution(date: Date, timeZone: string) {
   const locale = getActiveLocale();
   const dateTime = new Intl.DateTimeFormat(locale, {
-    dateStyle: "full",
+    dateStyle: "medium",
     hour12: false,
-    timeStyle: "medium",
+    timeStyle: "short",
     timeZone,
   }).format(date);
   const zoneName = getTimeZoneName(date, timeZone, "short", locale);
@@ -111,8 +121,10 @@ export function CronParser() {
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState<string | null>(null);
   const [expression, setExpression] = useState(EXAMPLE_EXPRESSION);
-  const [result, setResult] = useState<CronParseResult | null>(() =>
-    parseCronExpression({ expression: EXAMPLE_EXPRESSION, timeZone })
+  const [previewFrom, setPreviewFrom] = useState("");
+  const [runCount, setRunCount] = useState(5);
+  const [result, setResult] = useState<CronPreview | null>(() =>
+    parseCronPreview({ expression: EXAMPLE_EXPRESSION, timeZone })
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -126,10 +138,12 @@ export function CronParser() {
     (selectedTimeZone = timeZone) => {
       try {
         setResult(
-          parseCronExpression({
+          parseCronPreview({
             expression:
               mode === "schedule" ? buildCronExpression(schedule) : expression,
             timeZone: selectedTimeZone,
+            currentDate: readPreviewDate(previewFrom, selectedTimeZone),
+            runCount,
           })
         );
         setError(null);
@@ -142,27 +156,20 @@ export function CronParser() {
         );
       }
     },
-    [expression, mode, schedule, timeZone]
+    [expression, mode, schedule, timeZone, previewFrom, runCount, locale]
   );
+
+  useEffect(() => {
+    if (mode === "expression" && !expression.trim()) {
+      setResult(null);
+      setError(null);
+      return;
+    }
+    parse();
+  }, [parse, mode, expression]);
 
   const changeSchedule = (nextSchedule: CronSchedule) => {
     setSchedule(nextSchedule);
-    try {
-      setResult(
-        parseCronExpression({
-          expression: buildCronExpression(nextSchedule),
-          timeZone,
-        })
-      );
-      setError(null);
-    } catch (scheduleError) {
-      setResult(null);
-      setError(
-        scheduleError instanceof Error
-          ? scheduleError.message
-          : messages.cronParser.parseFailed
-      );
-    }
   };
 
   const changeMode = (values: readonly unknown[]) => {
@@ -222,11 +229,13 @@ export function CronParser() {
   };
 
   const resetExample = () => {
+    setPreviewFrom("");
+    setRunCount(5);
     setExpression(EXAMPLE_EXPRESSION);
     setSchedule(DEFAULT_CRON_SCHEDULE);
     setSavedTimeZone(DEFAULT_TIME_ZONE);
     setResult(
-      parseCronExpression({
+      parseCronPreview({
         expression: EXAMPLE_EXPRESSION,
         timeZone: DEFAULT_TIME_ZONE,
       })
@@ -248,10 +257,10 @@ export function CronParser() {
 
   return (
     <DeveloperToolLayout
-      className="min-h-0 flex-1 gap-4 pb-4 [&>header]:border-b-0 [&>header]:pb-2"
+      className="min-h-0 flex-1 gap-3 pb-0 lg:overflow-hidden [&>header]:shrink-0 [&>header]:border-b-0 [&>header]:pb-0"
       clearLabel={messages.cronParser.clear}
       description={messages.cronParser.description}
-      mainClassName="flex min-h-0 flex-1 flex-col"
+      mainClassName="flex min-h-0 flex-1 flex-col gap-3"
       onClear={clear}
       onReset={resetExample}
       resetLabel={messages.cronParser.resetExample}
@@ -270,50 +279,113 @@ export function CronParser() {
         id={CRON_PARSER_TOUR_TARGETS.controls}
         variants={childVariants}
       >
-        <ToggleGroup
-          aria-label={messages.cronParser.builder.modeLabel}
-          className="mb-3"
-          onValueChange={changeMode}
-          size="sm"
-          value={[mode]}
-          variant="outline"
-        >
-          <ToggleGroupItem value="expression">
-            {messages.cronParser.builder.expressionMode}
-          </ToggleGroupItem>
-          <ToggleGroupItem value="schedule">
-            {messages.cronParser.builder.scheduleMode}
-          </ToggleGroupItem>
-        </ToggleGroup>
-        <FieldGroup
-          className="grid sm:grid-cols-[minmax(0,1fr)_minmax(0,0.65fr)] sm:items-end lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)_auto]"
-          size="sm"
-        >
-          {mode === "schedule" ? (
-            <CronScheduleControls
-              invalid={Boolean(error)}
-              onChange={changeSchedule}
-              schedule={schedule}
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <ToggleGroup
+            aria-label={messages.cronParser.builder.modeLabel}
+            onValueChange={changeMode}
+            size="sm"
+            value={[mode]}
+            variant="outline"
+          >
+            <ToggleGroupItem value="expression">
+              {messages.cronParser.builder.expressionMode}
+            </ToggleGroupItem>
+            <ToggleGroupItem value="schedule">
+              {messages.cronParser.builder.scheduleMode}
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <Button onClick={() => parse()} size="sm" type="button">
+            <HugeiconsIcon
+              data-icon="inline-start"
+              icon={ComputerTerminalIcon}
+              strokeWidth={2}
             />
-          ) : (
-            <Field className="min-w-0" data-invalid={Boolean(error)} size="sm">
-              <FieldLabel htmlFor="cron-expression" size="sm">
-                {messages.cronParser.expressionLabel}
-              </FieldLabel>
-              <Input
-                aria-describedby="cron-expression-help"
-                aria-invalid={error ? true : undefined}
-                autoComplete="off"
-                id="cron-expression"
-                onChange={(event) => setExpression(event.currentTarget.value)}
-                placeholder={messages.cronParser.expressionPlaceholder}
-                size="default"
-                spellCheck={false}
-                value={expression}
-                variant="mono-flat"
-              />
-            </Field>
-          )}
+            {mode === "schedule"
+              ? messages.cronParser.builder.preview
+              : messages.cronParser.parse}
+          </Button>
+        </div>
+        <FieldGroup
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)_minmax(0,0.75fr)_auto]"
+          size="sm"
+        >
+          <Field className="min-w-0" data-invalid={Boolean(error)} size="sm">
+            <FieldLabel
+              htmlFor={
+                mode === "expression" ? "cron-expression" : "cron-configure"
+              }
+              size="sm"
+            >
+              {mode === "expression"
+                ? messages.cronParser.expressionLabel
+                : messages.cronParser.builder.frequencyLabel}
+            </FieldLabel>
+            <div className="flex h-16 min-w-0 flex-col gap-2">
+              {mode === "expression" ? (
+                <Textarea
+                  aria-describedby="cron-expression-help"
+                  aria-invalid={error ? true : undefined}
+                  autoComplete="off"
+                  className="h-full resize-none [field-sizing:fixed]"
+                  id="cron-expression"
+                  onChange={(event) => setExpression(event.currentTarget.value)}
+                  placeholder={messages.cronParser.expressionPlaceholder}
+                  rows={2}
+                  size="xs"
+                  spellCheck={false}
+                  value={expression}
+                  variant="mono"
+                />
+              ) : (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      className="w-full justify-between"
+                      id="cron-configure"
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                    >
+                      <span>
+                        {
+                          messages.cronParser.builder.frequencies[
+                            schedule.frequency
+                          ]
+                        }
+                      </span>
+                      <span>{messages.cronParser.enhancements.configure}</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    className="w-[min(32rem,calc(100vw-2rem))]"
+                  >
+                    <ScrollArea
+                      className="max-h-[60dvh]"
+                      viewportClassName="max-h-[60dvh]"
+                    >
+                      <CronScheduleControls
+                        invalid={Boolean(error)}
+                        onChange={changeSchedule}
+                        schedule={schedule}
+                      />
+                      <p className="mt-3 text-muted-foreground text-xs">
+                        {scheduleHelp}
+                      </p>
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>
+              )}
+              {mode === "schedule" && result ? (
+                <code
+                  className="truncate font-mono text-muted-foreground text-xs"
+                  title={result.normalizedExpression}
+                >
+                  {result.normalizedExpression.replaceAll("\n", "; ")}
+                </code>
+              ) : null}
+            </div>
+          </Field>
           <Field className="min-w-0" size="sm">
             <FieldLabel htmlFor="cron-timezone" size="sm">
               {messages.cronParser.timezoneLabel}
@@ -330,181 +402,138 @@ export function CronParser() {
               value={timeZone}
             />
           </Field>
-          <Button
-            className="min-w-28 sm:col-span-2 lg:col-span-1"
-            onClick={() => parse()}
-            size="default"
-            type="button"
-          >
-            <HugeiconsIcon
-              data-icon="inline-start"
-              icon={ComputerTerminalIcon}
-              strokeWidth={2}
+          <Field className="min-w-0" size="sm">
+            <FieldLabel htmlFor="cron-preview-from" size="sm">
+              {messages.cronParser.enhancements.previewFrom}
+            </FieldLabel>
+            <CronPreviewDatePicker
+              onChange={setPreviewFrom}
+              timeZone={timeZone}
+              value={previewFrom}
             />
-            {mode === "schedule"
-              ? messages.cronParser.builder.preview
-              : messages.cronParser.parse}
-          </Button>
+          </Field>
+          <Field size="sm">
+            <FieldLabel size="sm">
+              {messages.cronParser.enhancements.runCount}
+            </FieldLabel>
+            <ToggleGroup
+              aria-label={messages.cronParser.enhancements.runCount}
+              onValueChange={(values) => {
+                const count = Number(values.at(-1));
+                if ([5, 10, 20].includes(count)) {
+                  setRunCount(count);
+                }
+              }}
+              size="sm"
+              value={[String(runCount)]}
+              variant="outline"
+            >
+              {[5, 10, 20].map((count) => (
+                <ToggleGroupItem
+                  aria-label={formatMessage(
+                    messages.cronParser.enhancements.runOption,
+                    { count }
+                  )}
+                  key={count}
+                  value={String(count)}
+                >
+                  {count}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </Field>
         </FieldGroup>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="mt-2 flex items-center justify-between gap-3">
           <p
-            className="text-muted-foreground text-xs leading-5"
+            className="truncate text-muted-foreground text-xs"
             id="cron-expression-help"
+            title={
+              mode === "expression"
+                ? messages.cronParser.expressionHelp
+                : scheduleHelp
+            }
           >
             {mode === "expression"
               ? messages.cronParser.expressionHelp
               : scheduleHelp}
           </p>
-          <span className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
+          <span className="hidden shrink-0 font-mono text-muted-foreground text-xs xl:block">
             {messages.cronParser.shortcutLabel}
           </span>
         </div>
       </motion.section>
       {error ? (
-        <div
-          className="mt-4 border border-destructive/40 bg-destructive/5 px-4 py-3"
-          role="alert"
-        >
-          <p className="font-medium text-destructive text-sm">
-            {messages.cronParser.invalidExpression}
-          </p>
-          <p className="mt-1 text-muted-foreground text-xs leading-5">
-            {error}
-          </p>
-        </div>
+        <Alert variant="destructive">
+          <AlertTitle>{messages.cronParser.invalidExpression}</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       ) : null}
       {copyError ? (
-        <p className="mt-2 text-destructive text-xs" role="alert">
+        <p className="text-destructive text-xs" role="alert">
           {copyError}
         </p>
       ) : null}
-      <AnimatePresence>
-        {result ? (
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-4 flex min-h-0 flex-1 flex-col gap-4"
-            exit={{ opacity: 0, y: -10 }}
-            initial={{ opacity: 0, y: 10 }}
-            key="cron-results"
-            transition={{ duration: 0.2 }}
-          >
-            <section className="flex flex-wrap items-center justify-between gap-3 pb-2">
-              <div className="flex min-w-0 items-start gap-3">
-                <HugeiconsIcon
-                  className="mt-0.5 size-5 shrink-0 text-success"
-                  icon={CheckmarkCircle02Icon}
-                  strokeWidth={2}
-                />
-                <div className="min-w-0">
-                  <h2 className="font-semibold text-lg tracking-tight sm:text-xl">
-                    {result.description}
-                  </h2>
-                  <p className="mt-1 text-success text-xs">
-                    {messages.cronParser.validExpression}
-                  </p>
-                </div>
-              </div>
-              <div className="flex min-w-0 items-center gap-2">
-                <code className="break-all rounded-md bg-muted/40 px-2.5 py-1.5 font-mono text-xs">
-                  {result.normalizedExpression}
-                </code>
-                <Button
-                  aria-label={
-                    copied
-                      ? messages.cronParser.builder.copied
-                      : messages.cronParser.builder.copyExpression
+      {result ? (
+        <section className="flex shrink-0 items-center justify-between gap-3 px-1">
+          <div className="flex min-w-0 items-center gap-2">
+            <HugeiconsIcon
+              className="size-4 shrink-0 text-success"
+              icon={CheckmarkCircle02Icon}
+              strokeWidth={2}
+            />
+            <div className="min-w-0">
+              <h2
+                className="truncate font-semibold text-sm"
+                title={result.entries
+                  .map((entry) => entry.description)
+                  .join("; ")}
+              >
+                {result.entries.length === 1
+                  ? result.entries[0]?.description
+                  : formatMessage(
+                      messages.cronParser.enhancements.combinedSchedule,
+                      { count: result.entries.length }
+                    )}
+              </h2>
+              <p
+                className="truncate text-muted-foreground text-xs"
+                title={formatExecution(result.currentDate, result.timeZone)}
+              >
+                {formatMessage(
+                  messages.cronParser.enhancements.upcomingDescription,
+                  {
+                    count: result.nextRuns.length,
+                    date: formatExecution(result.currentDate, result.timeZone),
                   }
-                  onClick={copyExpression}
-                  size="icon-sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  {copied ? <Check /> : <ClipboardCopy />}
-                </Button>
-              </div>
-            </section>
-
-            <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-              <section
-                className="flex min-w-0 flex-col"
-                id={CRON_PARSER_TOUR_TARGETS.fields}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-3">
-                  <h2 className="font-semibold text-sm">
-                    {messages.cronParser.fieldBreakdown}
-                  </h2>
-                  <span className="text-muted-foreground text-xs">
-                    {result.mode === "five-field"
-                      ? messages.cronParser.fiveFields
-                      : messages.cronParser.sixFields}
-                  </span>
-                </div>
-                <p className="mb-3 text-muted-foreground text-xs">
-                  {messages.cronParser.fieldBreakdownDescription}
-                </p>
-                <div className="flex flex-1 flex-col divide-y rounded-lg border bg-background/50">
-                  {result.fields.map((field) => (
-                    <article
-                      className="flex min-w-0 flex-1 items-center justify-between gap-3 px-4 py-2.5"
-                      key={field.key}
-                    >
-                      <div className="min-w-0">
-                        <h3 className="font-medium text-sm">
-                          {messages.cronParser.fieldLabels[field.key]}
-                        </h3>
-                        <p className="mt-0.5 text-muted-foreground text-xs">
-                          {formatMessage(messages.cronParser.allowedRange, {
-                            range: field.range,
-                          })}
-                        </p>
-                      </div>
-                      <code className="max-w-[50%] break-all rounded-md bg-muted/50 px-2 py-1 font-mono text-sm">
-                        {field.token}
-                      </code>
-                    </article>
-                  ))}
-                </div>
-              </section>
-
-              <section
-                className="flex min-w-0 flex-col"
-                id={CRON_PARSER_TOUR_TARGETS.runs}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-3">
-                  <h2 className="font-semibold text-sm">
-                    {messages.cronParser.upcomingRuns}
-                  </h2>
-                  <span className="font-mono text-muted-foreground text-xs">
-                    {timeZone}
-                  </span>
-                </div>
-                <p className="mb-3 text-muted-foreground text-xs">
-                  {messages.cronParser.upcomingRunsDescription}
-                </p>
-                <ol className="flex flex-1 flex-col divide-y rounded-lg border bg-background/50">
-                  {result.nextRuns.map((date, index) => (
-                    <li
-                      className="flex flex-1 items-center gap-3 px-4 py-3"
-                      key={date.toISOString()}
-                    >
-                      <span className="font-mono text-muted-foreground text-xs">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <time
-                        className="min-w-0 flex-1 break-words font-mono text-xs leading-5"
-                        dateTime={date.toISOString()}
-                      >
-                        {formatExecution(date, timeZone)}
-                      </time>
-                      <Clock3 className="hidden size-4 shrink-0 text-muted-foreground sm:block" />
-                    </li>
-                  ))}
-                </ol>
-              </section>
+                )}
+              </p>
             </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+          </div>
+          <Button
+            aria-label={
+              copied
+                ? messages.cronParser.builder.copied
+                : messages.cronParser.builder.copyExpression
+            }
+            onClick={copyExpression}
+            size="icon-sm"
+            type="button"
+            variant="ghost"
+          >
+            {copied ? <Check /> : <ClipboardCopy />}
+          </Button>
+        </section>
+      ) : null}
+      <CronPreviewResults
+        fieldsId={CRON_PARSER_TOUR_TARGETS.fields}
+        onLoad={(nextExpression, nextTimeZone) => {
+          setMode("expression");
+          setExpression(nextExpression);
+          setSavedTimeZone(nextTimeZone);
+        }}
+        preview={result}
+        runsId={CRON_PARSER_TOUR_TARGETS.runs}
+      />
     </DeveloperToolLayout>
   );
 }

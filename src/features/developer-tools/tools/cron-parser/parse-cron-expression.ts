@@ -20,6 +20,7 @@ export type CronFieldResult = {
 export type CronParseRequest = {
   readonly currentDate?: Date;
   readonly expression: string;
+  readonly runCount?: number;
   readonly timeZone: string;
 };
 
@@ -184,6 +185,7 @@ export function parseCronExpression({
   currentDate = new Date(),
   expression,
   timeZone,
+  runCount = 5,
 }: CronParseRequest): CronParseResult {
   const normalizedExpression = expression.trim().replace(/\s+/g, " ");
   if (!normalizedExpression) {
@@ -211,8 +213,10 @@ export function parseCronExpression({
       currentDate,
       tz: timeZone,
     });
-    const nextRuns = interval.take(5).map((cronDate) => cronDate.toDate());
-    if (nextRuns.length !== 5) {
+    const nextRuns = interval
+      .take(runCount)
+      .map((cronDate) => cronDate.toDate());
+    if (nextRuns.length !== runCount) {
       throw new CronParseError(
         "no-occurrences",
         messages.cronParser.errors.noOccurrences

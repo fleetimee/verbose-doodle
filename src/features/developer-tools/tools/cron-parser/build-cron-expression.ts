@@ -15,8 +15,8 @@ export type CronSchedule = {
   readonly frequency: (typeof SCHEDULE_FREQUENCIES)[number];
   readonly interval: string;
   readonly minute: string;
-  readonly time: string;
-  readonly weekday: string;
+  readonly times: readonly string[];
+  readonly weekdays: readonly string[];
   readonly day: string;
 };
 
@@ -24,8 +24,8 @@ export const DEFAULT_CRON_SCHEDULE: CronSchedule = {
   frequency: "minutes",
   interval: "15",
   minute: "0",
-  time: "09:00",
-  weekday: "1",
+  times: ["09:00"],
+  weekdays: ["1"],
   day: "1",
 };
 
@@ -44,7 +44,7 @@ function readInteger(value: string, min: number, max: number) {
   return number;
 }
 
-export function buildCronExpression(schedule: CronSchedule): string {
+function buildExpression(schedule: CronSchedule, time: string): string {
   if (schedule.frequency === "minutes") {
     const interval = readInteger(schedule.interval, 1, 30);
     if (!MINUTE_INTERVALS.some((value) => value === interval)) {
@@ -55,19 +55,32 @@ export function buildCronExpression(schedule: CronSchedule): string {
   if (schedule.frequency === "hourly") {
     return `${readInteger(schedule.minute, 0, 59)} * * * *`;
   }
-  if (!TIME_PATTERN.test(schedule.time)) {
+  if (!TIME_PATTERN.test(time)) {
     throw new Error(messages.cronParser.builder.invalidSchedule);
   }
-  const [hour, minute] = schedule.time.split(":");
+  const [hour, minute] = time.split(":");
   const prefix = `${readInteger(minute ?? "", 0, 59)} ${readInteger(hour ?? "", 0, 23)}`;
   switch (schedule.frequency) {
     case "weekdays":
       return `${prefix} * * 1-5`;
     case "weekly":
-      return `${prefix} * * ${readInteger(schedule.weekday, 0, 6)}`;
+      return `${prefix} * * ${[...new Set(schedule.weekdays.map((day) => readInteger(day, 0, 6)))].sort().join(",")}`;
     case "monthly":
       return `${prefix} ${readInteger(schedule.day, 1, 31)} * *`;
     default:
       return `${prefix} * * *`;
   }
+}
+
+export function buildCronExpression(schedule: CronSchedule): string {
+  if (
+    !schedule.times.length ||
+    (schedule.frequency === "weekly" && !schedule.weekdays.length) ||
+    schedule.times.length > 12
+  ) {
+    throw new Error(messages.cronParser.builder.invalidSchedule);
+  }
+  return [
+    ...new Set(schedule.times.map((time) => buildExpression(schedule, time))),
+  ].join("\n");
 }

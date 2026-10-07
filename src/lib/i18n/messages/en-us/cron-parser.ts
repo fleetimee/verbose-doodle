@@ -1,5 +1,68 @@
 export const cronParserMessages = {
+  enhancements: {
+    now: "Now",
+    useNow: "Use current time",
+    done: "Done",
+    hours: "Hour",
+    minutes: "Minute",
+    calendarCount: "Execution days this month: {count}",
+    notesCount: "Schedule notes · {count}",
+    configure: "Configure schedule",
+    previous: "Previous",
+    next: "Next",
+    page: "Page {page} of {pages}",
+    emptyPreview: "Enter an expression or build a schedule to see its preview.",
+    savedTab: "Saved schedules",
+    runsTab: "Upcoming runs",
+    fieldsTab: "Fields",
+    calendarTab: "Calendar",
+    previewSettings: "Preview settings",
+
+    combinedSchedule: "Combined schedule · {count} expressions",
+    previewFrom: "Preview after",
+    previewFromHelp:
+      "Uses the selected timezone. Leave empty to start from now.",
+    runCount: "Upcoming runs",
+    calendar: "Execution calendar",
+    calendarHelp:
+      "Highlighted days have at least one execution after the preview start, in {timezone}.",
+    calendarEmpty: "No executions in this month after the preview start.",
+    warnings: "Schedule notes",
+    monthWarning:
+      "Dates 29–31 do not exist in every month. Check the calendar for months that skip those dates.",
+    frequencyWarning:
+      "Some executions are less than one minute apart. Check the expected request volume before using this schedule.",
+    offsetWarning:
+      "The UTC offset changes within a year of the preview start. Review transition dates; scheduler handling of missing or repeated local times may differ.",
+    expressionLimit: "Enter between 1 and 12 cron expressions, one per line.",
+    savedTitle: "Saved schedules",
+    savedHelp: "Stored in this browser. Export a JSON file to share schedules.",
+    name: "Schedule name",
+    save: "Save schedule",
+    load: "Load",
+    remove: "Delete",
+    export: "Export JSON",
+    import: "Import JSON",
+    savedEmpty: "No saved schedules yet.",
+    invalidImport:
+      "Could not import. Use a schedules JSON export with valid names, expressions, and timezones. Maximum 100 schedules and 256 KB.",
+    imported: "Imported {count} schedules.",
+    saved: "Schedule saved.",
+    saveFailed:
+      "Enter a name and preview a valid schedule. Maximum 100 schedules.",
+    storageFailed:
+      "Could not save schedules in this browser. Export them to keep a copy.",
+    multipleHelp:
+      "Each line is a separate expression. Upcoming runs combine all expressions; matching times appear once.",
+    upcomingDescription: "Next {count} executions after {date}.",
+    runOption: "{count} runs",
+  },
   builder: {
+    timeNumber: "Time {number}",
+    removeTimeNumber: "Remove time {number}",
+    addTime: "Add time",
+    removeTime: "Remove",
+
     preview: "Preview",
     modeLabel: "Input mode",
     expressionMode: "Read expression",
@@ -28,7 +91,7 @@ export const cronParserMessages = {
       "Friday",
       "Saturday",
     ],
-    help: "Choose a schedule. The expression and next five runs update automatically.",
+    help: "Choose a schedule. Expressions and upcoming runs update automatically.",
     monthlyHelp: "Days 29–31 only run in months that contain that day.",
     invalidSchedule:
       "Enter a valid time and a whole number within the allowed range.",
@@ -41,7 +104,7 @@ export const cronParserMessages = {
   description:
     "Build or inspect a Unix schedule and preview its next runs. Everything stays in this browser.",
   expressionHelp:
-    "Minute, hour, day of month, month, weekday. Add seconds as the first field when needed.",
+    "Minute, hour, day of month, month, weekday. Optional seconds first. Use one expression per line.",
   expressionLabel: "Cron expression",
   expressionPlaceholder: "*/15 * * * *",
   eyebrow: "Developer tools / 03",
@@ -70,7 +133,7 @@ export const cronParserMessages = {
   invalidExpression: "Could not parse expression",
   navigationGroup: "Developer Tools",
   outputLabel: "Preview",
-  outputValue: "Next 5 runs",
+  outputValue: "Upcoming runs",
   pageDescription:
     "Build Unix cron schedules, explain expressions, and preview executions by timezone.",
   pageKeywords: ["cron", "parser", "scheduler", "developer tools"],
@@ -81,7 +144,7 @@ export const cronParserMessages = {
   runNumber: "Run {number}",
   shortcutLabel: "Ctrl / Cmd + Enter",
   storageLabel: "Storage",
-  storageValue: "Timezone only",
+  storageValue: "Timezone and saved schedules",
   timezoneEmpty: "No timezone found.",
   timezoneLabel: "Timezone",
   timezoneSearch: "Search timezones...",
@@ -95,7 +158,7 @@ export const cronParserMessages = {
       "The breakdown keeps the original tokens beside their names and valid ranges.",
     fieldsTitle: "Check how each field was read",
     runsDescription:
-      "Use the next five executions to catch timezone and calendar mistakes before deployment.",
+      "Use upcoming executions to catch timezone and calendar mistakes before deployment.",
     runsTitle: "Verify the actual dates",
     startButton: "Start tour",
   },

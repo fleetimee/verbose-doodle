@@ -1,5 +1,69 @@
 export const cronParserMessages = {
+  enhancements: {
+    now: "Sekarang",
+    useNow: "Gunakan waktu sekarang",
+    done: "Selesai",
+    hours: "Jam",
+    minutes: "Menit",
+    calendarCount: "Hari eksekusi bulan ini: {count}",
+    notesCount: "Catatan jadwal · {count}",
+    configure: "Atur jadwal",
+    previous: "Sebelumnya",
+    next: "Berikutnya",
+    page: "Halaman {page} dari {pages}",
+    emptyPreview: "Masukkan ekspresi atau buat jadwal untuk melihat pratinjau.",
+    savedTab: "Jadwal tersimpan",
+    runsTab: "Eksekusi mendatang",
+    fieldsTab: "Field",
+    calendarTab: "Kalender",
+    previewSettings: "Pengaturan pratinjau",
+
+    combinedSchedule: "Jadwal gabungan · {count} ekspresi",
+    previewFrom: "Pratinjau setelah",
+    previewFromHelp:
+      "Menggunakan zona waktu yang dipilih. Kosongkan untuk mulai dari sekarang.",
+    runCount: "Jumlah eksekusi",
+    calendar: "Kalender eksekusi",
+    calendarHelp:
+      "Tanggal yang ditandai memiliki eksekusi setelah awal pratinjau, dalam {timezone}.",
+    calendarEmpty: "Tidak ada eksekusi bulan ini setelah awal pratinjau.",
+    warnings: "Catatan jadwal",
+    monthWarning:
+      "Tanggal 29–31 tidak ada di setiap bulan. Periksa kalender untuk bulan yang melewati tanggal tersebut.",
+    frequencyWarning:
+      "Beberapa eksekusi berjarak kurang dari satu menit. Periksa perkiraan jumlah permintaan sebelum menggunakan jadwal ini.",
+    offsetWarning:
+      "Offset UTC berubah dalam satu tahun sejak awal pratinjau. Periksa tanggal perubahan; penanganan waktu lokal yang hilang atau berulang dapat berbeda antar scheduler.",
+    expressionLimit: "Masukkan 1 hingga 12 ekspresi cron, satu per baris.",
+    savedTitle: "Jadwal tersimpan",
+    savedHelp:
+      "Disimpan di browser ini. Ekspor file JSON untuk berbagi jadwal.",
+    name: "Nama jadwal",
+    save: "Simpan jadwal",
+    load: "Muat",
+    remove: "Hapus",
+    export: "Ekspor JSON",
+    import: "Impor JSON",
+    savedEmpty: "Belum ada jadwal tersimpan.",
+    invalidImport:
+      "Tidak dapat mengimpor. Gunakan ekspor JSON jadwal dengan nama, ekspresi, dan zona waktu yang valid. Maksimal 100 jadwal dan 256 KB.",
+    imported: "Berhasil mengimpor {count} jadwal.",
+    saved: "Jadwal disimpan.",
+    saveFailed:
+      "Masukkan nama dan buat pratinjau jadwal yang valid. Maksimal 100 jadwal.",
+    storageFailed:
+      "Tidak dapat menyimpan jadwal di browser ini. Ekspor untuk menyimpan salinan.",
+    multipleHelp:
+      "Setiap baris adalah ekspresi terpisah. Eksekusi mendatang menggabungkan semua ekspresi; waktu yang sama muncul sekali.",
+    upcomingDescription: "{count} eksekusi berikutnya setelah {date}.",
+    runOption: "{count} eksekusi",
+  },
   builder: {
+    timeNumber: "Waktu {number}",
+    removeTimeNumber: "Hapus waktu {number}",
+    addTime: "Tambah waktu",
+    removeTime: "Hapus",
+
     preview: "Pratinjau",
     modeLabel: "Mode input",
     expressionMode: "Baca ekspresi",
@@ -20,7 +84,7 @@ export const cronParserMessages = {
     weekdayLabel: "Pada hari",
     dayLabel: "Pada tanggal",
     weekdays: ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
-    help: "Pilih jadwal. Ekspresi dan lima eksekusi berikutnya diperbarui otomatis.",
+    help: "Pilih jadwal. Ekspresi dan eksekusi berikutnya diperbarui otomatis.",
     monthlyHelp:
       "Tanggal 29–31 hanya berjalan pada bulan yang memiliki tanggal tersebut.",
     invalidSchedule:
@@ -34,7 +98,7 @@ export const cronParserMessages = {
   description:
     "Buat atau periksa jadwal Unix dan lihat eksekusi berikutnya. Semua tetap di browser ini.",
   expressionHelp:
-    "Menit, jam, hari dalam bulan, bulan, hari dalam minggu. Tambahkan detik sebagai field pertama bila diperlukan.",
+    "Menit, jam, hari dalam bulan, bulan, hari dalam minggu. Tambahkan detik sebagai field pertama bila diperlukan. Gunakan satu ekspresi per baris.",
   expressionLabel: "Ekspresi Cron",
   expressionPlaceholder: "*/15 * * * *",
   eyebrow: "Alat pengembang / 03",
@@ -63,7 +127,7 @@ export const cronParserMessages = {
   invalidExpression: "Tidak dapat mengurai ekspresi",
   navigationGroup: "Developer Tools",
   outputLabel: "Pratinjau",
-  outputValue: "5 eksekusi berikutnya",
+  outputValue: "Eksekusi mendatang",
   pageDescription:
     "Buat jadwal Unix cron, jelaskan ekspresi, dan lihat eksekusi berdasarkan zona waktu.",
   pageKeywords: ["cron", "parser", "scheduler", "alat pengembang"],
@@ -74,7 +138,7 @@ export const cronParserMessages = {
   runNumber: "Eksekusi {number}",
   shortcutLabel: "Ctrl / Cmd + Enter",
   storageLabel: "Penyimpanan",
-  storageValue: "Hanya zona waktu",
+  storageValue: "Zona waktu dan jadwal tersimpan",
   timezoneEmpty: "Zona waktu tidak ditemukan.",
   timezoneLabel: "Zona waktu",
   timezoneSearch: "Cari zona waktu...",
@@ -88,7 +152,7 @@ export const cronParserMessages = {
       "Rincian mempertahankan token asli di samping nama dan rentang validnya.",
     fieldsTitle: "Periksa bagaimana setiap field dibaca",
     runsDescription:
-      "Gunakan lima eksekusi berikutnya untuk memeriksa kesalahan zona waktu dan kalender sebelum penerapan.",
+      "Gunakan eksekusi mendatang untuk memeriksa kesalahan zona waktu dan kalender sebelum penerapan.",
     runsTitle: "Verifikasi tanggal sebenarnya",
     startButton: "Mulai tour",
   },

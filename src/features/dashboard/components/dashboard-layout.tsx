@@ -293,7 +293,9 @@ export function DashboardLayout() {
                     location.pathname ===
                       "/dashboard/developer-tools/qris-cpm-parser" ||
                     location.pathname ===
-                      "/dashboard/developer-tools/qris-tap-parser") &&
+                      "/dashboard/developer-tools/qris-tap-parser" ||
+                    location.pathname ===
+                      "/dashboard/developer-tools/cron-parser") &&
                     "lg:h-full lg:min-h-0"
                 )}
                 variant={isOverview ? "overview" : "fit"}

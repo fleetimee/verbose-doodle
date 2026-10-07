@@ -3868,3 +3868,27 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   transform: scale(0.4);
   transform-origin: top left;
 }
+
+.cron-preview-tab-panels > [data-slot="tabs-content"] {
+  opacity: 1;
+  transition-timing-function: var(--cron-tab-ease);
+  transition-duration: 0ms;
+  transition-property: opacity;
+}
+
+.cron-preview-tab-panels[data-animate-tabs="true"]
+  > [data-slot="tabs-content"] {
+  transition-duration: var(--cron-tab-duration);
+}
+
+.cron-preview-tab-panels > [data-slot="tabs-content"][data-starting-style],
+.cron-preview-tab-panels > [data-slot="tabs-content"][data-ending-style] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cron-preview-tab-panels[data-animate-tabs="true"]
+    > [data-slot="tabs-content"] {
+    transition-duration: 0ms;
+  }
+}

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,13 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   type CronSchedule,
   MINUTE_INTERVALS,
   SCHEDULE_FREQUENCIES,
 } from "@/features/developer-tools/tools/cron-parser/build-cron-expression";
 import { formatMessage, messages } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 
 function ScheduleSelect({
   id,
@@ -35,7 +36,7 @@ function ScheduleSelect({
         {label}
       </FieldLabel>
       <Select onValueChange={onChange} value={value}>
-        <SelectTrigger id={id} variant="surface">
+        <SelectTrigger className="w-full" id={id} size="sm" variant="surface">
           <SelectValue>
             {options.find((option) => option.value === value)?.label}
           </SelectValue>
@@ -65,14 +66,7 @@ export function CronScheduleControls({
 }) {
   const copy = messages.cronParser.builder;
   return (
-    <FieldGroup
-      className={cn(
-        "grid min-w-0 grid-cols-2",
-        (schedule.frequency === "weekly" || schedule.frequency === "monthly") &&
-          "sm:grid-cols-3"
-      )}
-      size="sm"
-    >
+    <FieldGroup className="grid min-w-0 grid-cols-2" size="sm">
       <ScheduleSelect
         id="cron-frequency"
         label={copy.frequencyLabel}
@@ -119,34 +113,35 @@ export function CronScheduleControls({
           />
         </Field>
       ) : null}
-      {schedule.frequency !== "minutes" && schedule.frequency !== "hourly" ? (
-        <Field data-invalid={invalid || undefined} size="sm">
-          <FieldLabel htmlFor="cron-time" size="sm">
-            {copy.timeLabel}
-          </FieldLabel>
-          <Input
-            aria-invalid={invalid || undefined}
-            id="cron-time"
-            onChange={(event) =>
-              onChange({ ...schedule, time: event.currentTarget.value })
-            }
-            type="time"
-            value={schedule.time}
-            variant="mono-flat"
-          />
-        </Field>
-      ) : null}
       {schedule.frequency === "weekly" ? (
-        <ScheduleSelect
-          id="cron-weekday"
-          label={copy.weekdayLabel}
-          onChange={(weekday) => onChange({ ...schedule, weekday })}
-          options={copy.weekdays.map((label, day) => ({
-            value: String(day),
-            label,
-          }))}
-          value={schedule.weekday}
-        />
+        <Field
+          className="col-span-2"
+          data-invalid={invalid || undefined}
+          size="sm"
+        >
+          <FieldLabel size="sm">{copy.weekdayLabel}</FieldLabel>
+          <ToggleGroup
+            aria-label={copy.weekdayLabel}
+            className="flex-wrap"
+            multiple
+            onValueChange={(values) =>
+              onChange({ ...schedule, weekdays: values.map(String) })
+            }
+            size="sm"
+            value={[...schedule.weekdays]}
+            variant="outline"
+          >
+            {copy.weekdays.map((label, day) => (
+              <ToggleGroupItem
+                aria-label={label}
+                key={label}
+                value={String(day)}
+              >
+                {label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </Field>
       ) : null}
       {schedule.frequency === "monthly" ? (
         <Field data-invalid={invalid || undefined} size="sm">
@@ -165,6 +160,91 @@ export function CronScheduleControls({
             value={schedule.day}
             variant="mono-flat"
           />
+        </Field>
+      ) : null}
+      {schedule.frequency !== "minutes" && schedule.frequency !== "hourly" ? (
+        <Field
+          className="col-span-2"
+          data-invalid={invalid || undefined}
+          size="sm"
+        >
+          <FieldLabel size="sm">{copy.timeLabel}</FieldLabel>
+          <div className="flex flex-col gap-3">
+            {schedule.times.map((time, index) => (
+              <FieldGroup
+                className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-end"
+                key={`time-${index}`}
+                size="sm"
+              >
+                <ScheduleSelect
+                  id={`cron-hour-${index}`}
+                  label={messages.cronParser.enhancements.hours}
+                  onChange={(hour) =>
+                    onChange({
+                      ...schedule,
+                      times: schedule.times.map((value, position) =>
+                        position === index ? `${hour}:${time.slice(3)}` : value
+                      ),
+                    })
+                  }
+                  options={Array.from({ length: 24 }, (_, hour) => ({
+                    value: String(hour).padStart(2, "0"),
+                    label: String(hour).padStart(2, "0"),
+                  }))}
+                  value={time.slice(0, 2)}
+                />
+                <ScheduleSelect
+                  id={`cron-time-minute-${index}`}
+                  label={messages.cronParser.enhancements.minutes}
+                  onChange={(minute) =>
+                    onChange({
+                      ...schedule,
+                      times: schedule.times.map((value, position) =>
+                        position === index
+                          ? `${time.slice(0, 2)}:${minute}`
+                          : value
+                      ),
+                    })
+                  }
+                  options={Array.from({ length: 60 }, (_, minute) => ({
+                    value: String(minute).padStart(2, "0"),
+                    label: String(minute).padStart(2, "0"),
+                  }))}
+                  value={time.slice(3)}
+                />
+                <Button
+                  aria-label={formatMessage(copy.removeTimeNumber, {
+                    number: index + 1,
+                  })}
+                  disabled={schedule.times.length === 1}
+                  onClick={() =>
+                    onChange({
+                      ...schedule,
+                      times: schedule.times.filter(
+                        (_, position) => position !== index
+                      ),
+                    })
+                  }
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  {copy.removeTime}
+                </Button>
+              </FieldGroup>
+            ))}
+            <Button
+              disabled={schedule.times.length >= 12}
+              onClick={() =>
+                onChange({ ...schedule, times: [...schedule.times, "12:00"] })
+              }
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              {copy.addTime}
+            </Button>
+          </div>
         </Field>
       ) : null}
     </FieldGroup>
