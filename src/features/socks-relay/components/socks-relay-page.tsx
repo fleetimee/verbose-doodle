@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Database01Icon,
   HelpCircleIcon,
   RepeatIcon,
   StopCircleIcon,
@@ -21,7 +20,6 @@ import { toast } from "sonner";
 import {
   Activity,
   Cable,
-  CircleAlert,
   CircleDashed,
   CircleOff,
   Eraser,
@@ -30,10 +28,8 @@ import {
   Network,
   Play,
   Radio,
-  Route,
   ShieldAlert,
   SlidersHorizontal,
-  TimerReset,
 } from "@/components/hugeicons";
 import { type TourStep, useTour } from "@/components/tour";
 import { Badge } from "@/components/ui/badge";
@@ -66,7 +62,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SocketStatusCard } from "@/features/socket-tester/components/socket-status-card";
 import { useSocksRelayContext } from "@/features/socks-relay/context/socks-relay-context";
 import {
   useGetRelayLogs,
@@ -142,35 +137,30 @@ const SOCKS_RELAY_TOUR_CONFIG = {
 const HOLD_DROP_CONTROLS: {
   readonly key: HoldDropKey;
   readonly label: string;
-  readonly shortLabel: string;
 }[] = [
   {
     key: "holdClient",
     get label() {
       return messages.socksRelay.holdClientLabel;
     },
-    shortLabel: "HC",
   },
   {
     key: "holdHost",
     get label() {
       return messages.socksRelay.holdHostLabel;
     },
-    shortLabel: "HH",
   },
   {
     key: "dropClient",
     get label() {
       return messages.socksRelay.dropClientLabel;
     },
-    shortLabel: "DC",
   },
   {
     key: "dropHost",
     get label() {
       return messages.socksRelay.dropHostLabel;
     },
-    shortLabel: "DH",
   },
 ];
 
@@ -297,7 +287,7 @@ function TourStepContent({
 export function SocksRelayPage({ mode }: SocksRelayPageProps) {
   const modeLabel = getModeLabel(mode);
   const relaysQuery = useGetRelays();
-  const { events, malformedEventCount } = useSocksRelayContext();
+  const { events } = useSocksRelayContext();
   const shouldReduceMotion = useReducedMotion();
   const [selectedRelayId, setSelectedRelayId] = useState<string | null>(null);
   const [showAllLogs, setShowAllLogs] = useState(false);
@@ -475,14 +465,14 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
   return (
     <motion.div
       animate={pageAnimate}
-      className="mx-auto grid w-full max-w-[1500px] gap-4 will-change-transform md:gap-6"
+      className="mx-auto flex min-h-0 w-full max-w-[1500px] flex-1 flex-col gap-3 will-change-transform"
       initial={pageInitial}
       key={mode}
       transition={pageTransition}
     >
       <motion.header
         animate={sectionAnimate}
-        className="relative grid gap-4 border-border/70 border-b pb-5 will-change-transform"
+        className="relative grid shrink-0 gap-2 border-border/70 border-b pb-3 will-change-transform"
         id={tourConfig.targets.header}
         initial={sectionInitial}
         transition={{
@@ -501,30 +491,32 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
               : { delay: 0.18, duration: 0.72, ease: "easeOut" }
           }
         />
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-              {messages.socksRelay.pageEyebrow}
-            </p>
-            <h1 className="font-bold text-3xl tracking-tight">{modeLabel}</h1>
-            <p className="mt-3 max-w-[72ch] text-muted-foreground text-sm leading-relaxed md:text-base">
-              {messages.socksRelay.pageDescription}
-            </p>
+            <h1 className="font-semibold text-xl tracking-tight">
+              {modeLabel}
+            </h1>
           </div>
-          <div className="flex flex-wrap items-end gap-2 lg:justify-end">
-            <Button onClick={handleStartTour} type="button" variant="outline">
+          <div className="flex items-center gap-3">
+            <Button
+              aria-label={tourCopy.startButton}
+              onClick={handleStartTour}
+              size="icon-sm"
+              title={tourCopy.startButton}
+              type="button"
+              variant="ghost"
+            >
               <HugeiconsIcon
                 data-icon="inline-start"
                 icon={HelpCircleIcon}
                 strokeWidth={2}
               />
-              {tourCopy.startButton}
             </Button>
             <RelayConnectionBadge tourId={tourConfig.targets.connection} />
           </div>
         </div>
         <section
-          className="flex flex-wrap gap-2"
+          className="flex flex-wrap gap-x-4 gap-y-1"
           id={tourConfig.targets.metrics}
         >
           {[
@@ -548,11 +540,6 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
               label: messages.socksRelay.metrics.lifecycle,
               value: lifecycleEventCount,
             },
-            {
-              icon: CircleAlert,
-              label: messages.socksRelay.metrics.malformed,
-              value: malformedEventCount,
-            },
           ].map((metric, index) => (
             <motion.div
               animate={metricAnimate}
@@ -566,11 +553,13 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
                 type: "spring",
               }}
             >
-              <SocketStatusCard
-                icon={metric.icon}
-                label={metric.label}
-                value={metric.value}
-              />
+              <span className="inline-flex items-center gap-1.5 text-muted-foreground text-xs">
+                <metric.icon className="size-3.5" />
+                {metric.label}
+                <span className="font-mono font-semibold text-foreground">
+                  {metric.value}
+                </span>
+              </span>
             </motion.div>
           ))}
         </section>
@@ -578,7 +567,7 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
 
       <motion.div
         animate={sectionAnimate}
-        className="grid gap-4 will-change-transform xl:grid-cols-[420px_minmax(0,1fr)]"
+        className="grid min-h-0 flex-1 gap-3 will-change-transform lg:grid-cols-[360px_minmax(0,1fr)] lg:grid-rows-[minmax(130px,0.3fr)_minmax(0,0.7fr)]"
         initial={sectionInitial}
         transition={{
           ...sectionTransition,
@@ -600,17 +589,6 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
           selectedRelayId={focusedRelayId}
           tourId={tourConfig.targets.relays}
         />
-      </motion.div>
-
-      <motion.div
-        animate={sectionAnimate}
-        className="will-change-transform"
-        initial={sectionInitial}
-        transition={{
-          ...sectionTransition,
-          delay: shouldReduceMotion ? 0 : 0.18,
-        }}
-      >
         <RelayLogConsole
           focusedRelayId={focusedRelayId}
           mode={mode}
@@ -624,29 +602,22 @@ export function SocksRelayPage({ mode }: SocksRelayPageProps) {
 }
 
 function RelayConnectionBadge({ tourId }: { readonly tourId?: string }) {
-  const { connectionStatus, malformedEventCount } = useSocksRelayContext();
+  const { connectionStatus } = useSocksRelayContext();
   const isConnected = connectionStatus === "connected";
 
   return (
-    <div className="flex items-end lg:justify-end" id={tourId}>
-      <div className="inline-flex h-9 items-center gap-2 rounded-md border border-border/70 bg-background/70 px-3 font-medium text-muted-foreground text-sm shadow-xs">
+    <div className="flex items-center" id={tourId}>
+      <div className="inline-flex items-center gap-2 text-muted-foreground text-xs">
         <span
           className={cn(
             "size-2 rounded-full",
             isConnected ? "bg-success" : "bg-warning"
           )}
         />
-        <span className="text-foreground">
-          {messages.socksRelay.relayEventsLabel}
-        </span>
+
         <span className="text-muted-foreground capitalize">
           {connectionStatus}
         </span>
-        {malformedEventCount > 0 ? (
-          <span className="text-muted-foreground text-xs">
-            {malformedEventCount} malformed
-          </span>
-        ) : null}
       </div>
     </div>
   );
@@ -666,7 +637,9 @@ function RelayStartForm({
     defaultValues: EMPTY_FORM,
     resolver: zodResolver(relayStartFormSchema),
   });
-  const optionError = form.formState.errors.holdClient?.message;
+  const validationMessages = Object.values(form.formState.errors)
+    .map((error) => error.message)
+    .filter((message): message is string => Boolean(message));
 
   const updateHoldDrop = (key: HoldDropKey, checked: boolean) => {
     for (const { key: optionKey } of HOLD_DROP_CONTROLS) {
@@ -694,63 +667,73 @@ function RelayStartForm({
 
   return (
     <Card
-      className="flex h-full flex-col overflow-hidden"
+      className="flex min-h-0 flex-col overflow-hidden lg:row-span-2"
       id={tourId}
       size="panel"
-      variant="panel"
+      variant="subtle"
     >
-      <CardHeader size="panel" variant="panel">
+      <CardHeader className="shrink-0" size="sm" variant="subtle">
         <CardTitle size="sm" variant="inline">
-          <span className="grid size-8 place-items-center rounded-md border border-primary/25 bg-primary/10 text-primary shadow-xs">
+          <span className="grid size-5 place-items-center text-primary">
             <Play className="size-4" />
           </span>
           {messages.socksRelay.startRelayTitle}
         </CardTitle>
-        <CardDescription>
-          {formatMessage(messages.socksRelay.startRelayDescription, {
-            modeLabel: getModeLabel(mode),
-          })}
-        </CardDescription>
       </CardHeader>
-      <CardContent size="panel">
-        <form className="grid gap-3" onSubmit={form.handleSubmit(submit)}>
-          <FieldError message={optionError} />
-          <div className="grid gap-2 rounded-lg border border-border/70 bg-background/75 p-2.5 shadow-xs">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="relay-id">
-                {messages.socksRelay.relayIdLabel}
-              </Label>
-              <Badge mono variant="outline">
-                ID
-              </Badge>
+      <CardContent className="min-h-0 overflow-y-auto" size="sm">
+        <form className="grid gap-2" onSubmit={form.handleSubmit(submit)}>
+          <div className="grid grid-cols-[minmax(0,1fr)_100px] gap-3">
+            <div className="grid content-start gap-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="relay-id">
+                  {messages.socksRelay.relayIdLabel}
+                </Label>
+              </div>
+              <Controller
+                control={form.control}
+                name="relayId"
+                render={({ field, fieldState }) => (
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    id="relay-id"
+                    placeholder={messages.socksRelay.relayIdPlaceholder}
+                    variant="muted-mono"
+                  />
+                )}
+              />
             </div>
-            <Controller
-              control={form.control}
-              name="relayId"
-              render={({ field, fieldState }) => (
-                <Input
-                  {...field}
-                  aria-invalid={fieldState.invalid}
-                  id="relay-id"
-                  placeholder={messages.socksRelay.relayIdPlaceholder}
-                  variant="muted-mono"
-                />
-              )}
-            />
-            <p className="text-muted-foreground text-xs">
-              {messages.socksRelay.relayIdDescription}
-            </p>
-            <FieldError message={form.formState.errors.relayId?.message} />
+            <div className="grid content-start gap-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="timer-ms">
+                  {messages.socksRelay.timerMsLabel}
+                </Label>
+              </div>
+              <Controller
+                control={form.control}
+                name="timerMs"
+                render={({ field, fieldState }) => (
+                  <Input
+                    aria-invalid={fieldState.invalid}
+                    id="timer-ms"
+                    inputMode="numeric"
+                    min={1000}
+                    onBlur={field.onBlur}
+                    onChange={(event) =>
+                      field.onChange(Number.parseInt(event.target.value, 10))
+                    }
+                    step={100}
+                    type="number"
+                    value={field.value}
+                    variant="muted-mono"
+                  />
+                )}
+              />
+            </div>
           </div>
-          <div className="overflow-hidden rounded-lg border border-border/70 bg-background/75 shadow-xs">
-            <div className="flex items-center gap-2 border-border/70 border-b bg-muted/25 px-3 py-2.5">
-              <Route className="size-4 text-primary" />
-              <p className="font-medium text-sm">
-                {messages.socksRelay.relayPath}
-              </p>
-            </div>
-            <div className="grid gap-0 sm:grid-cols-[135px_minmax(0,1fr)_96px]">
-              <div className="grid gap-2 p-2.5">
+          <div className="overflow-hidden rounded-md border border-border/70">
+            <div className="grid grid-cols-2 gap-0">
+              <div className="grid content-start gap-2 p-2">
                 <Label htmlFor="listening-port">
                   {messages.socksRelay.listeningPortLabel}
                 </Label>
@@ -774,11 +757,8 @@ function RelayStartForm({
                     />
                   )}
                 />
-                <FieldError
-                  message={form.formState.errors.listeningPort?.message}
-                />
               </div>
-              <div className="grid gap-2 border-border/70 border-t p-2.5 sm:border-t-0 sm:border-l">
+              <div className="order-3 col-span-2 grid content-start gap-2 border-border/70 border-t p-2">
                 <Label htmlFor="host-address">
                   {messages.socksRelay.hostAddressLabel}
                 </Label>
@@ -795,11 +775,8 @@ function RelayStartForm({
                     />
                   )}
                 />
-                <FieldError
-                  message={form.formState.errors.hostAddress?.message}
-                />
               </div>
-              <div className="grid gap-2 border-border/70 border-t p-2.5 sm:border-t-0 sm:border-l">
+              <div className="grid content-start gap-2 border-border/70 border-l p-2">
                 <Label htmlFor="host-port">
                   {messages.socksRelay.hostPortLabel}
                 </Label>
@@ -823,45 +800,8 @@ function RelayStartForm({
                     />
                   )}
                 />
-                <FieldError message={form.formState.errors.hostPort?.message} />
               </div>
             </div>
-            <div className="border-border/70 border-t px-3 py-2 text-muted-foreground text-xs leading-snug">
-              {messages.socksRelay.listeningPortDescription}{" "}
-              {messages.socksRelay.hostAddressDescription}
-            </div>
-          </div>
-          <div className="grid gap-2 rounded-lg border border-border/70 bg-background/75 p-2.5 shadow-xs">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="timer-ms">
-                {messages.socksRelay.timerMsLabel}
-              </Label>
-              <TimerReset className="size-4 text-primary" />
-            </div>
-            <Controller
-              control={form.control}
-              name="timerMs"
-              render={({ field, fieldState }) => (
-                <Input
-                  aria-invalid={fieldState.invalid}
-                  id="timer-ms"
-                  inputMode="numeric"
-                  min={1000}
-                  onBlur={field.onBlur}
-                  onChange={(event) =>
-                    field.onChange(Number.parseInt(event.target.value, 10))
-                  }
-                  step={100}
-                  type="number"
-                  value={field.value}
-                  variant="muted-mono"
-                />
-              )}
-            />
-            <p className="text-muted-foreground text-xs">
-              {messages.socksRelay.liveTimerHint}
-            </p>
-            <FieldError message={form.formState.errors.timerMs?.message} />
           </div>
           <RelayOptionsControls
             onHoldDropChange={updateHoldDrop}
@@ -874,10 +814,28 @@ function RelayStartForm({
             options={form.watch()}
             tourId={optionsTourId}
           />
+          <div
+            aria-atomic="true"
+            aria-live="polite"
+            className="h-12 overflow-y-auto"
+          >
+            {validationMessages.map((message) => (
+              <p
+                className="flex items-start gap-1 text-destructive text-xs"
+                key={message}
+              >
+                <ShieldAlert
+                  aria-hidden="true"
+                  className="mt-0.5 size-3 shrink-0"
+                />
+                <span>{message}</span>
+              </p>
+            ))}
+          </div>
           <Button
             className="w-full"
             disabled={startRelay.isPending}
-            size="lg"
+            size="sm"
             type="submit"
           >
             <Play className="size-4" />
@@ -906,21 +864,21 @@ function RelayOptionsControls({
 }) {
   return (
     <div
-      className="overflow-hidden rounded-lg border border-border/70 bg-background/75 shadow-xs"
+      className="overflow-hidden rounded-md border border-border/70"
       id={tourId}
     >
-      <div className="flex items-start justify-between gap-3 border-border/70 border-b bg-muted/25 px-3 py-2.5">
+      <div className="flex items-start justify-between gap-3 border-border/70 border-b bg-muted/20 px-3 py-2">
         <div>
-          <p className="font-medium text-sm">
+          <p
+            className="font-medium text-sm"
+            title={messages.socksRelay.relayOptionsDescription}
+          >
             {messages.socksRelay.optionsHeader}
-          </p>
-          <p className="mt-0.5 text-muted-foreground text-xs leading-snug">
-            {messages.socksRelay.relayOptionsDescription}
           </p>
         </div>
         <SlidersHorizontal className="mt-0.5 size-4 shrink-0 text-primary" />
       </div>
-      <div className="grid gap-2 p-3 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-1.5 p-2">
         {HOLD_DROP_CONTROLS.map((control) => (
           <SwitchRow
             checked={options[control.key]}
@@ -930,17 +888,15 @@ function RelayOptionsControls({
             onCheckedChange={(checked) =>
               onHoldDropChange(control.key, checked)
             }
-            shortLabel={control.shortLabel}
           />
         ))}
       </div>
-      <div className="border-border/70 border-t p-3">
+      <div className="border-border/70 border-t p-2">
         <SwitchRow
           checked={options.removeHeaders}
           disabled={disabled}
           label={messages.socksRelay.removeHeadersLabel}
           onCheckedChange={onRemoveHeadersChange}
-          shortLabel="REST"
         />
       </div>
     </div>
@@ -952,20 +908,18 @@ function SwitchRow({
   disabled = false,
   label,
   onCheckedChange,
-  shortLabel,
 }: {
   readonly checked: boolean;
   readonly disabled?: boolean;
   readonly label: string;
   readonly onCheckedChange: (checked: boolean) => void;
-  readonly shortLabel: string;
 }) {
   const switchId = useId();
 
   return (
     <div
       className={cn(
-        "flex min-h-11 items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm shadow-xs transition-colors",
+        "flex min-h-8 items-center justify-between gap-2 rounded-md border px-2 py-1 text-xs transition-colors",
         checked
           ? "border-primary/45 bg-primary/10 text-foreground"
           : "border-border/60 bg-muted/15 text-foreground"
@@ -977,10 +931,7 @@ function SwitchRow({
         title={label}
       >
         <span className="inline-flex min-w-0 flex-1 items-center gap-2 pr-2 leading-snug">
-          <Badge mono variant={checked ? "outline-primary" : "outline"}>
-            {shortLabel}
-          </Badge>
-          <span className="min-w-0 text-wrap">{label}</span>
+          <span className="min-w-0 text-xs leading-tight">{label}</span>
         </span>
       </Label>
       <Switch
@@ -1030,63 +981,19 @@ function RelayTable({
     );
   };
   let relayTableContent = (
-    <div className="min-h-56 flex-1 animate-pulse rounded-lg border border-border/70 bg-muted/20" />
+    <div className="min-h-24 flex-1 animate-pulse rounded-lg border border-border/70 bg-muted/20" />
   );
 
   if (!isLoading && relays.length === 0) {
     relayTableContent = (
-      <div className="relative grid min-h-[440px] flex-1 place-items-center overflow-hidden rounded-lg border border-border/70 bg-gradient-to-br from-muted/40 via-background to-background p-5">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-muted/10"
-        />
-        <div className="relative grid w-full max-w-3xl gap-5">
-          <div className="mx-auto grid size-14 place-items-center rounded-md border border-primary/25 bg-primary/10 text-primary shadow-xs">
-            <CircleOff className="size-7" />
-          </div>
-          <div className="text-center">
-            <p className="font-semibold text-foreground text-xl">
-              {formatMessage(messages.socksRelay.noRelaysTitle, {
-                modeLabel,
-              })}
-            </p>
-            <p className="mx-auto mt-2 max-w-[46ch] text-muted-foreground text-sm leading-relaxed">
-              {messages.socksRelay.noRelaysDescription}
-            </p>
-          </div>
-          <div className="mx-auto grid w-full max-w-md grid-cols-1 overflow-hidden rounded-md border border-border/70 bg-background/85 text-center shadow-xs sm:grid-cols-3">
-            <div className="grid gap-1 border-border/70 border-b px-3 py-3 sm:border-r sm:border-b-0">
-              <span className="font-medium text-muted-foreground text-xs uppercase tracking-widest">
-                {messages.socksRelay.noRelayDefaultListenLabel}
-              </span>
-              <span className="font-mono font-semibold text-sm">
-                {RELAY_LISTENING_PORT_MIN}
-              </span>
-            </div>
-            <div className="grid gap-1 border-border/70 border-b px-3 py-3 sm:border-r sm:border-b-0">
-              <span className="font-medium text-muted-foreground text-xs uppercase tracking-widest">
-                {messages.socksRelay.noRelayDefaultHostLabel}
-              </span>
-              <span className="truncate font-mono font-semibold text-sm">
-                127.0.0.1
-              </span>
-            </div>
-            <div className="grid gap-1 px-3 py-3">
-              <span className="font-medium text-muted-foreground text-xs uppercase tracking-widest">
-                {messages.socksRelay.noRelayDefaultPortLabel}
-              </span>
-              <span className="font-mono font-semibold text-sm">8085</span>
-            </div>
-          </div>
-          <div className="mx-auto inline-flex items-center justify-center gap-2 rounded-md border border-border/70 bg-background/70 px-3 py-2 text-muted-foreground text-xs shadow-xs">
-            <Play className="size-3.5 text-primary" />
-            <span>
-              {formatMessage(messages.socksRelay.noRelaysReadyHint, {
-                modeLabel,
-              })}
-            </span>
-          </div>
-        </div>
+      <div className="grid min-h-24 flex-1 content-center gap-2 rounded-md border border-dashed p-3 text-center">
+        <CircleOff className="mx-auto size-5 text-muted-foreground" />
+        <p className="font-medium text-sm">
+          {formatMessage(messages.socksRelay.noRelaysTitle, { modeLabel })}
+        </p>
+        <p className="text-muted-foreground text-xs">
+          {messages.socksRelay.noRelaysDescription}
+        </p>
       </div>
     );
   }
@@ -1119,7 +1026,7 @@ function RelayTable({
               </TableHeader>
             </Table>
             <ScrollArea className="min-h-0 flex-1" variant="subtle">
-              <div className="pr-3">
+              <div>
                 <Table className="w-full table-fixed">
                   <colgroup>
                     <col className="w-[30%]" />
@@ -1211,33 +1118,28 @@ function RelayTable({
 
   return (
     <Card
-      className="flex h-full min-w-0 flex-col"
+      className="flex min-h-0 min-w-0 flex-col overflow-hidden"
       id={tourId}
       size="panel"
       variant="subtle"
     >
-      <CardHeader className="md:grid-cols-[minmax(0,1fr)_auto]" size="panel">
+      <CardHeader
+        className="flex shrink-0 flex-wrap items-center justify-between"
+        size="sm"
+      >
         <div>
           <CardTitle size="sm" variant="inline">
-            <span className="grid size-8 place-items-center rounded-md border border-border/70 bg-background text-primary shadow-xs">
+            <span className="grid size-5 place-items-center text-muted-foreground">
               <Cable className="size-4" />
             </span>
             {messages.socksRelay.relayInstancesTitle}
           </CardTitle>
-          <CardDescription>
-            {formatMessage(messages.socksRelay.relayInstancesDescription, {
-              modeLabel,
-            })}
-          </CardDescription>
         </div>
-        <div
-          className="flex items-start md:justify-end"
-          id={liveControlsTourId}
-        >
+        <div className="flex items-center" id={liveControlsTourId}>
           <RelayLiveControls relay={selectedRelay} />
         </div>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col" size="panel">
+      <CardContent className="flex min-h-0 flex-1 flex-col" size="sm">
         {relayTableContent}
       </CardContent>
     </Card>
@@ -1335,14 +1237,11 @@ function RelayLiveControls({ relay }: { readonly relay?: RelayInstance }) {
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-wrap items-center gap-2 px-4">
-          <Badge variant={relay.running ? "default" : "secondary"}>
+          <span className="text-muted-foreground text-xs">
             {relay.running
               ? messages.socksRelay.runningStatus
               : messages.socksRelay.stoppedStatus}
-          </Badge>
-          <Badge variant="outline">
-            {messages.socksRelay.appliesToNewTrafficLabel}
-          </Badge>
+          </span>
         </div>
         <div className="grid gap-4 px-4">
           <RelayOptionsControls
@@ -1383,9 +1282,6 @@ function RelayLiveControls({ relay }: { readonly relay?: RelayInstance }) {
               {messages.socksRelay.liveTimerHint}
             </p>
           </div>
-          <p className="text-muted-foreground text-xs">
-            {messages.socksRelay.liveControlsEmptyDescription}
-          </p>
         </div>
       </SheetContent>
     </Sheet>
@@ -1406,6 +1302,7 @@ function RelayLogConsole({
   readonly tourId?: string;
 }) {
   const showAllLogsSwitchId = useId();
+  const [search, setSearch] = useState("");
   const { clearLogs, events } = useSocksRelayContext();
   const savedLogsQuery = useGetRelayLogs();
   const savedEvents = useMemo(
@@ -1429,8 +1326,13 @@ function RelayLogConsole({
       }),
     [allEvents, focusedRelayId, mode, showAllLogs]
   );
-  const messageEvents = scopedEvents.filter(isRelayMessageEvent);
-  const lifecycleEvents = scopedEvents.filter(
+  const filteredEvents = scopedEvents.filter((event) =>
+    JSON.stringify(event.payload)
+      .toLowerCase()
+      .includes(search.trim().toLowerCase())
+  );
+  const messageEvents = filteredEvents.filter(isRelayMessageEvent);
+  const lifecycleEvents = filteredEvents.filter(
     (event) => !isRelayMessageEvent(event)
   );
   let logScopeDescription: string = messages.socksRelay.selectedLogScope;
@@ -1449,39 +1351,27 @@ function RelayLogConsole({
 
   return (
     <Card
-      className="min-w-0 overflow-hidden"
+      className="flex min-h-80 min-w-0 flex-col overflow-hidden lg:min-h-0"
       id={tourId}
       size="panel"
-      variant="panel-subtle"
+      variant="subtle"
     >
       <CardHeader
-        className="md:grid-cols-[minmax(0,1fr)_auto]"
-        size="panel-lg"
-        variant="panel-subtle"
+        className="flex shrink-0 flex-wrap items-center justify-between"
+        size="sm"
+        variant="subtle"
       >
         <div>
           <CardTitle size="sm" variant="inline">
-            <span className="grid size-8 place-items-center rounded-md border border-border/70 bg-background text-primary shadow-xs">
+            <span className="grid size-5 place-items-center text-muted-foreground">
               <FileTerminal className="size-4" />
             </span>
             {messages.socksRelay.relayLogsTitle}
           </CardTitle>
           <CardDescription>{logScopeDescription}</CardDescription>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-info/30 bg-info/10 px-2.5 py-1 font-medium text-info text-xs uppercase tracking-wider">
-            <HugeiconsIcon
-              className="size-3.5"
-              icon={Database01Icon}
-              strokeWidth={2}
-            />
-            {messages.socksRelay.savedHistoryLabel}
-            <span className="h-3 border-info/30 border-l" />
-            <span className="normal-case tracking-normal">
-              {savedEvents.length} events
-            </span>
-          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex h-8 items-center gap-2 rounded-md border border-border/70 bg-background px-3 font-medium text-sm shadow-xs">
+          <div className="inline-flex items-center gap-2 text-sm">
             <ListFilter className="size-4" />
             <Label htmlFor={showAllLogsSwitchId}>
               {messages.socksRelay.allRelaysLabel}
@@ -1515,32 +1405,53 @@ function RelayLogConsole({
           </Button>
         </div>
       </CardHeader>
-      <CardContent size="panel">
-        <Tabs defaultValue="message">
-          <TabsList className="mb-3">
-            <TabsTrigger value="message">
-              {messages.socksRelay.messageTab}
-            </TabsTrigger>
-            <TabsTrigger value="event">
-              {messages.socksRelay.eventTab}
-            </TabsTrigger>
-            <TabsTrigger value="about">
-              {messages.socksRelay.aboutTab}
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="message">
+      <CardContent className="flex min-h-0 flex-1 flex-col" size="sm">
+        <Tabs className="min-h-0 flex-1" defaultValue="message">
+          <div className="flex flex-wrap items-center gap-2">
+            <TabsList className="shrink-0" size="sm">
+              <TabsTrigger value="message">
+                {messages.socksRelay.messageTab}
+              </TabsTrigger>
+              <TabsTrigger value="event">
+                {messages.socksRelay.eventTab}
+              </TabsTrigger>
+              <TabsTrigger value="about">
+                {messages.socksRelay.aboutTab}
+              </TabsTrigger>
+            </TabsList>
+            <div className="min-w-36 flex-1">
+              <Input
+                aria-label={messages.socksRelay.searchLogs}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={messages.socksRelay.searchLogs}
+                value={search}
+              />
+            </div>
+            <span className="text-muted-foreground text-xs">
+              {filteredEvents.length}
+            </span>
+          </div>
+          <TabsContent className="min-h-0 flex-1 overflow-auto" value="message">
             <RelayEventList
-              emptyLabel={messages.socksRelay.noRelayMessages}
+              emptyLabel={
+                search.trim()
+                  ? messages.socksRelay.noMatchingLogs
+                  : messages.socksRelay.noRelayMessages
+              }
               events={messageEvents}
             />
           </TabsContent>
-          <TabsContent value="event">
+          <TabsContent className="min-h-0 flex-1 overflow-auto" value="event">
             <RelayEventList
-              emptyLabel={messages.socksRelay.noLifecycleEvents}
+              emptyLabel={
+                search.trim()
+                  ? messages.socksRelay.noMatchingLogs
+                  : messages.socksRelay.noLifecycleEvents
+              }
               events={lifecycleEvents}
             />
           </TabsContent>
-          <TabsContent value="about">
+          <TabsContent className="min-h-0 flex-1 overflow-auto" value="about">
             <RelayLegend />
           </TabsContent>
         </Tabs>
@@ -1641,33 +1552,15 @@ function RelayEventList({
 }) {
   if (events.length === 0) {
     return (
-      <div className="flex h-[560px] items-center justify-center rounded-lg border border-border/80 bg-muted/30 px-6 shadow-inner">
-        <div className="w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner">
-          <div className="mb-3 flex items-center gap-2 text-foreground">
-            <TimerReset className="size-5" />
-            <span className="font-semibold">{emptyLabel}</span>
-          </div>
-          <div className="grid gap-1 text-muted-foreground">
-            <p>
-              <span className="text-primary">simulator@relay</span>
-              <span className="text-muted-foreground">:~$</span>{" "}
-              <span className="text-foreground">tail -f relay.log</span>
-            </p>
-            <p className="flex items-center gap-1.5 text-muted-foreground">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full rounded-full bg-success/60 opacity-75 motion-safe:animate-ping" />
-                <span className="relative inline-flex size-2 rounded-full bg-success" />
-              </span>
-              <span>{messages.socksRelay.waitingForRelayEvents}</span>
-            </p>
-          </div>
-        </div>
+      <div className="flex h-full min-h-32 flex-col items-center justify-center gap-2 rounded-md border border-border/70 bg-muted/20 p-4 text-center">
+        <FileTerminal className="size-5 text-muted-foreground" />
+        <p className="font-medium text-sm">{emptyLabel}</p>
       </div>
     );
   }
 
   return (
-    <ScrollArea className="h-[560px] min-w-0" variant="terminal">
+    <ScrollArea className="h-full min-h-0 min-w-0" variant="traffic">
       <div className="min-w-max p-3 font-mono text-foreground text-xs leading-5">
         <div className="grid gap-2">
           {events
@@ -1678,7 +1571,7 @@ function RelayEventList({
             ))}
         </div>
       </div>
-      <ScrollBar className="hidden" orientation="horizontal" />
+      <ScrollBar orientation="horizontal" />
     </ScrollArea>
   );
 }
@@ -1692,7 +1585,7 @@ function RelayEventLine({ event }: { readonly event: RelayEvent }) {
   const isMessage = isRelayMessageEvent(event);
 
   return (
-    <div className="grid gap-1 rounded-md border border-white/10 bg-white/[0.035] p-2 shadow-sm">
+    <div className="grid gap-1 rounded-md border border-border/70 bg-background/70 p-2">
       <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
         <span className="text-muted-foreground">{timestamp}</span>
         <span className="font-semibold text-foreground">
@@ -1730,18 +1623,5 @@ function RelayEventLine({ event }: { readonly event: RelayEvent }) {
         </pre>
       )}
     </div>
-  );
-}
-
-function FieldError({ message }: { readonly message?: string }) {
-  if (!message) {
-    return null;
-  }
-
-  return (
-    <p className="inline-flex items-center gap-1 text-destructive text-xs">
-      <ShieldAlert className="size-3" />
-      {message}
-    </p>
   );
 }

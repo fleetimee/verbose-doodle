@@ -1,4 +1,6 @@
 export const socksRelayMessages = {
+  searchLogs: "Cari log...",
+  noMatchingLogs: "Tidak ada log yang cocok.",
   aboutTab: "Tentang",
   actionsHeader: "Aksi",
   allRelaysLabel: "Semua relay",

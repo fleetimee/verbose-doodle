@@ -295,7 +295,8 @@ export function DashboardLayout() {
                     location.pathname ===
                       "/dashboard/developer-tools/qris-tap-parser" ||
                     location.pathname ===
-                      "/dashboard/developer-tools/cron-parser") &&
+                      "/dashboard/developer-tools/cron-parser" ||
+                    location.pathname.startsWith("/dashboard/socks-relay/")) &&
                     "lg:h-full lg:min-h-0"
                 )}
                 variant={isOverview ? "overview" : "fit"}

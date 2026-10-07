@@ -1,4 +1,6 @@
 export const socksRelayMessages = {
+  searchLogs: "Search logs...",
+  noMatchingLogs: "No matching logs.",
   aboutTab: "About",
   actionsHeader: "Actions",
   allRelaysLabel: "All relays",
