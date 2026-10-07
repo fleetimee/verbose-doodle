@@ -1,4 +1,4 @@
-import { SentIcon, StopCircleIcon } from "@hugeicons/core-free-icons";
+import { StopCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { RadioReceiver } from "@/components/hugeicons";
@@ -46,10 +46,13 @@ export function UdpPanel({
   const socketMessages = messages.socketTester;
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
-      <section className="grid content-start gap-4 border-border/70 border-b pb-4 xl:border-r xl:border-b-0 xl:pr-4 xl:pb-0">
+    <div className="grid gap-5">
+      <section className="grid content-start gap-4 border-border/70 border-b pb-5">
         <div className="grid gap-3">
-          <div className="grid gap-3" id={tourIds?.target}>
+          <div
+            className="grid grid-cols-[minmax(0,1fr)_100px] gap-3"
+            id={tourIds?.target}
+          >
             <label className="grid gap-1.5" htmlFor="udp-target-host">
               <span className="font-medium text-muted-foreground text-xs">
                 {socketMessages.targetHostLabel}
@@ -72,10 +75,7 @@ export function UdpPanel({
               />
             </label>
           </div>
-          <div
-            className="grid grid-cols-[1fr_auto] gap-2"
-            id={tourIds?.listener}
-          >
+          <div className="grid grid-cols-2 gap-3" id={tourIds?.listener}>
             <label className="grid gap-1.5" htmlFor="udp-listen-port">
               <span className="font-medium text-muted-foreground text-xs">
                 {socketMessages.listenPortLabel}
@@ -87,11 +87,12 @@ export function UdpPanel({
                 value={listenPort}
               />
             </label>
-            <div className="flex items-end">
+            <div className="flex min-w-0 items-end">
               {state.listening ? (
                 <Button
+                  className="w-full"
                   onClick={onStop}
-                  size="icon"
+                  size="default"
                   type="button"
                   variant="destructive"
                 >
@@ -100,39 +101,37 @@ export function UdpPanel({
                     icon={StopCircleIcon}
                     strokeWidth={2}
                   />
-                  <span className="sr-only">
-                    {socketMessages.stopUdpListenerSrLabel}
-                  </span>
+                  <span>{socketMessages.stopUdpListenerSrLabel}</span>
                 </Button>
               ) : (
                 <Button
+                  className="w-full"
                   disabled={
                     !(bridgeConnected && Number.isInteger(parsedListenPort))
                   }
                   onClick={() => onStart(parsedListenPort)}
-                  size="icon"
+                  size="default"
                   type="button"
                 >
                   <RadioReceiver className="size-4" />
-                  <span className="sr-only">
-                    {socketMessages.startUdpListenerSrLabel}
-                  </span>
+                  <span>{socketMessages.startUdpListenerSrLabel}</span>
                 </Button>
               )}
             </div>
           </div>
         </div>
         <div
-          className="rounded-md border border-border/70 bg-muted/35 px-3 py-2 font-mono text-xs"
+          className="flex min-h-10 items-center gap-2 rounded-md border border-border/70 bg-muted/30 px-3 py-2 font-mono text-xs"
           id={tourIds?.status}
         >
           <span
+            aria-hidden="true"
             className={
-              state.listening ? "text-success" : "text-muted-foreground"
+              state.listening
+                ? "size-1.5 shrink-0 rounded-full bg-success"
+                : "size-1.5 shrink-0 rounded-full bg-muted-foreground"
             }
-          >
-            ●
-          </span>{" "}
+          />
           {state.listening
             ? formatMessage(socketMessages.udpListeningStatus, {
                 port: state.port,
@@ -140,17 +139,7 @@ export function UdpPanel({
             : socketMessages.udpListenerOffStatus}
         </div>
       </section>
-      <div className="grid gap-4">
-        <div className="rounded-md border border-border/70 bg-muted/35 p-3 text-muted-foreground text-sm">
-          <div className="flex items-start gap-3">
-            <HugeiconsIcon
-              className="mt-0.5 size-4 shrink-0"
-              icon={SentIcon}
-              strokeWidth={2}
-            />
-            <p>{socketMessages.udpStatelessDescription}</p>
-          </div>
-        </div>
+      <div className="grid gap-5">
         <SendPanel
           disabled={
             !bridgeConnected ||

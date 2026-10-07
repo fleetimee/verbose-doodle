@@ -1,8 +1,5 @@
-import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
-import { Cable, CircleOff, Unplug } from "@/components/hugeicons";
-import { Badge } from "@/components/ui/badge";
+import { Cable, Unplug } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -56,45 +53,41 @@ export function TcpClientPanel({
   const socketMessages = messages.socketTester;
 
   return (
-    <div className="flex flex-col gap-4">
-      <section className="flex flex-col gap-4 border-border/70 border-b pb-4">
+    <div className="flex flex-col gap-5">
+      <section className="flex flex-col gap-5 border-border/70 border-b pb-5">
         <div
-          className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border/70 bg-muted/30 px-3 py-2"
+          className="flex min-h-10 flex-wrap items-center justify-between gap-3 rounded-md border border-border/70 bg-muted/30 px-3 py-2"
           id={tourIds?.status}
         >
           <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="font-medium text-muted-foreground text-xs">
-              {socketMessages.tcpClientStatusLabel}
-            </span>
             <span className="truncate font-mono text-sm">
               {state.connected ? endpoint : socketMessages.noActiveConnection}
             </span>
           </div>
-          <Badge
-            size="status"
-            variant={state.connected ? "default" : "secondary"}
-          >
-            {state.connected ? (
-              <HugeiconsIcon
-                data-icon="inline-start"
-                icon={CheckmarkCircle02Icon}
-                strokeWidth={2}
-              />
-            ) : (
-              <CircleOff data-icon="inline-start" />
-            )}
+          <span className="inline-flex items-center gap-1.5 text-muted-foreground text-xs">
+            <span
+              className={
+                state.connected
+                  ? "size-1.5 rounded-full bg-success"
+                  : "size-1.5 rounded-full bg-muted-foreground"
+              }
+            />
             {state.connected
               ? socketMessages.connectedStatus
               : socketMessages.disconnectedStatus}
-          </Badge>
+          </span>
         </div>
 
         <FieldGroup
-          className="md:grid md:grid-cols-[minmax(0,1fr)_140px_140px] md:items-start"
+          className="grid grid-cols-2 items-start"
           id={tourIds?.connection}
-          size="sm"
+          size="compact"
         >
-          <Field data-disabled={state.connected} data-invalid={!hostIsValid}>
+          <Field
+            className="col-span-2"
+            data-disabled={state.connected}
+            data-invalid={!hostIsValid}
+          >
             <FieldLabel htmlFor="tcp-client-host">
               {socketMessages.hostLabel}
             </FieldLabel>
@@ -106,11 +99,6 @@ export function TcpClientPanel({
               placeholder="127.0.0.1"
               value={host}
             />
-            {hostIsValid ? null : (
-              <FieldDescription>
-                {socketMessages.hostRequiredDescription}
-              </FieldDescription>
-            )}
           </Field>
           <Field data-disabled={state.connected} data-invalid={!portIsValid}>
             <FieldLabel htmlFor="tcp-client-port">
@@ -125,13 +113,8 @@ export function TcpClientPanel({
               placeholder="8080"
               value={port}
             />
-            <FieldDescription>
-              {portIsValid
-                ? socketMessages.tcpClientPortDescription
-                : socketMessages.portRangeDescription}
-            </FieldDescription>
           </Field>
-          <div className="flex items-end md:pt-6">
+          <div className="flex items-end self-end">
             {state.connected ? (
               <Button
                 className="w-full"
@@ -152,6 +135,18 @@ export function TcpClientPanel({
                 <Cable data-icon="inline-start" />
                 {socketMessages.connectButton}
               </Button>
+            )}
+          </div>
+          <div aria-live="polite" className="col-span-2">
+            {!hostIsValid && (
+              <FieldDescription>
+                {socketMessages.hostRequiredDescription}
+              </FieldDescription>
+            )}
+            {!portIsValid && (
+              <FieldDescription>
+                {socketMessages.portRangeDescription}
+              </FieldDescription>
             )}
           </div>
         </FieldGroup>

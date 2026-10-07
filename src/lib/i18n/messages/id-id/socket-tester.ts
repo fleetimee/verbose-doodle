@@ -1,4 +1,5 @@
 export const socketTesterMessages = {
+  wrapLabel: "Bungkus baris",
   activeMetric: "Aktif",
   appendAfterPayloadLabel: "Tambahkan setelah payload",
   asciiFormatLabel: "ASCII",

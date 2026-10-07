@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { RadioTower, UsersRound } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FieldDescription } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { SendPanel } from "@/features/socket-tester/components/send-panel";
 import type {
@@ -53,9 +52,12 @@ export function TcpServerPanel({
   );
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
-      <section className="grid content-start gap-4 border-border/70 border-b pb-4 xl:border-r xl:border-b-0 xl:pr-4 xl:pb-0">
-        <div className="grid gap-3" id={tourIds?.listener}>
+    <div className="grid gap-5">
+      <section className="grid content-start gap-4 border-border/70 border-b pb-5">
+        <div
+          className="grid grid-cols-2 items-end gap-3"
+          id={tourIds?.listener}
+        >
           <div className="grid gap-1.5">
             <label className="grid gap-1.5" htmlFor="tcp-server-port">
               <span className="font-medium text-muted-foreground text-xs">
@@ -65,15 +67,18 @@ export function TcpServerPanel({
                 id="tcp-server-port"
                 inputMode="numeric"
                 onChange={(event) => setPort(event.target.value)}
+                title={socketMessages.tcpServerPortDescription}
                 value={port}
               />
             </label>
-            <FieldDescription>
-              {socketMessages.tcpServerPortDescription}
-            </FieldDescription>
           </div>
           {state.listening ? (
-            <Button onClick={onStop} type="button" variant="destructive">
+            <Button
+              className="w-full"
+              onClick={onStop}
+              type="button"
+              variant="destructive"
+            >
               <HugeiconsIcon
                 className="size-4"
                 icon={StopCircleIcon}
@@ -83,6 +88,7 @@ export function TcpServerPanel({
             </Button>
           ) : (
             <Button
+              className="w-full"
               disabled={!(bridgeConnected && Number.isInteger(parsedPort))}
               onClick={() => onStart(parsedPort)}
               type="button"
@@ -93,16 +99,17 @@ export function TcpServerPanel({
           )}
         </div>
         <div
-          className="rounded-md border border-border/70 bg-muted/35 px-3 py-2 font-mono text-xs"
+          className="flex min-h-10 items-center gap-2 rounded-md border border-border/70 bg-muted/30 px-3 py-2 font-mono text-xs"
           id={tourIds?.status}
         >
           <span
+            aria-hidden="true"
             className={
-              state.listening ? "text-success" : "text-muted-foreground"
+              state.listening
+                ? "size-1.5 shrink-0 rounded-full bg-success"
+                : "size-1.5 shrink-0 rounded-full bg-muted-foreground"
             }
-          >
-            ●
-          </span>{" "}
+          />
           {state.listening
             ? formatMessage(socketMessages.tcpServerListeningStatus, {
                 port: state.port,
@@ -114,7 +121,7 @@ export function TcpServerPanel({
             <UsersRound className="size-4" />
             {socketMessages.activeClients}
           </div>
-          <div className="grid max-h-64 gap-2 overflow-auto">
+          <div className="grid max-h-24 gap-2 overflow-auto">
             {state.clients.length === 0 ? (
               <div className="rounded-md border border-dashed p-4 text-center text-muted-foreground text-xs">
                 {socketMessages.noTcpClients}
@@ -122,10 +129,11 @@ export function TcpServerPanel({
             ) : (
               state.clients.map((client) => (
                 <div
-                  className="flex items-center gap-3 rounded-md border border-border/70 bg-background/70 p-3 font-mono text-xs transition-all duration-150 ease-out hover:border-primary/25 hover:bg-accent/40 active:scale-[0.997]"
+                  className="flex items-center gap-3 rounded-md border border-border/70 bg-background/70 px-3 py-2 font-mono text-xs transition-colors hover:bg-accent/40"
                   key={client.id}
                 >
                   <Checkbox
+                    aria-label={client.address}
                     checked={selectedClients.includes(client.id)}
                     onCheckedChange={(checked) => {
                       setSelectedClients((current) =>

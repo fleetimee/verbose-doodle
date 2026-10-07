@@ -7,14 +7,13 @@ import {
   Activity,
   Cable,
   CircleAlert,
-  Network,
+  Plug,
   SendHorizontal,
   Unplug,
 } from "@/components/hugeicons";
 import { type TourStep, useTour } from "@/components/tour";
 import { Button } from "@/components/ui/button";
 import { HexInspector } from "@/features/socket-tester/components/hex-inspector";
-import { SocketStatusCard } from "@/features/socket-tester/components/socket-status-card";
 import { TcpClientPanel } from "@/features/socket-tester/components/tcp-client-panel";
 import { TcpServerPanel } from "@/features/socket-tester/components/tcp-server-panel";
 import { TrafficConsole } from "@/features/socket-tester/components/traffic-console";
@@ -378,14 +377,14 @@ export function SocketTesterLayout({
   return (
     <motion.div
       animate={pageAnimate}
-      className="mx-auto grid w-full max-w-[1500px] gap-4 will-change-transform md:gap-6"
+      className="mx-auto grid min-h-0 w-full max-w-[1500px] flex-1 gap-4 will-change-transform lg:grid-cols-[400px_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)]"
       initial={pageInitial}
       key={mode}
       transition={pageTransition}
     >
       <motion.header
         animate={sectionAnimate}
-        className="relative grid gap-4 border-border/70 border-b pb-5 will-change-transform"
+        className="relative grid shrink-0 gap-3 border-border/70 border-b pb-4 will-change-transform lg:col-span-2"
         id={tourConfig.targets.header}
         initial={sectionInitial}
         transition={{
@@ -404,25 +403,31 @@ export function SocketTesterLayout({
               : { delay: 0.18, duration: 0.72, ease: "easeOut" }
           }
         />
-        <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="font-bold text-3xl tracking-tight">{copy.title}</h1>
-            <p className="mt-3 max-w-[72ch] text-muted-foreground text-sm leading-relaxed md:text-base">
-              {copy.description}
-            </p>
+            <h1 className="font-semibold text-xl tracking-tight">
+              {copy.title}
+            </h1>
           </div>
-          <div className="flex flex-wrap gap-2 lg:justify-end">
-            <Button onClick={handleStartTour} type="button" variant="outline">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              aria-label={tourCopy.startButton}
+              onClick={handleStartTour}
+              size="icon-sm"
+              title={tourCopy.startButton}
+              type="button"
+              variant="ghost"
+            >
               <HugeiconsIcon
                 data-icon="inline-start"
                 icon={HelpCircleIcon}
                 strokeWidth={2}
               />
-              {tourCopy.startButton}
             </Button>
             {bridgeConnected ? (
               <Button
                 onClick={bridge.disconnectBridge}
+                size="sm"
                 type="button"
                 variant="outline"
               >
@@ -433,6 +438,7 @@ export function SocketTesterLayout({
               <Button
                 disabled={bridge.bridgeStatus === "connecting"}
                 onClick={bridge.connectBridge}
+                size="sm"
                 type="button"
               >
                 <Cable className="size-4" />
@@ -442,12 +448,12 @@ export function SocketTesterLayout({
           </div>
         </div>
         <section
-          className="flex flex-wrap gap-2"
+          className="flex flex-wrap gap-x-4 gap-y-1"
           id={tourConfig.targets.metrics}
         >
           {[
             {
-              icon: Network,
+              icon: Plug,
               label: messages.socketTester.activeMetric,
               value: bridge.metrics.activeConnections,
             },
@@ -479,11 +485,13 @@ export function SocketTesterLayout({
                 type: "spring",
               }}
             >
-              <SocketStatusCard
-                icon={metric.icon}
-                label={metric.label}
-                value={metric.value}
-              />
+              <span className="inline-flex items-center gap-1.5 text-muted-foreground text-xs">
+                <metric.icon className="size-3.5" />
+                {metric.label}
+                <span className="font-mono font-semibold text-foreground">
+                  {metric.value}
+                </span>
+              </span>
             </motion.div>
           ))}
         </section>
@@ -491,7 +499,7 @@ export function SocketTesterLayout({
 
       <motion.section
         animate={sectionAnimate}
-        className="overflow-hidden rounded-lg border border-border/70 bg-card p-4 shadow-sm will-change-transform"
+        className="min-h-0 overflow-y-auto rounded-lg border border-border/70 bg-card p-4 will-change-transform sm:p-5"
         id={tourConfig.targets.modePanel}
         initial={sectionInitial}
         transition={{
@@ -550,7 +558,7 @@ export function SocketTesterLayout({
 
       <motion.div
         animate={sectionAnimate}
-        className="min-w-0 will-change-transform"
+        className="min-h-0 min-w-0 will-change-transform"
         initial={sectionInitial}
         transition={{
           ...sectionTransition,

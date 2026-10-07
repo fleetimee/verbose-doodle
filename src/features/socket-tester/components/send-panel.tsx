@@ -23,6 +23,7 @@ import type {
   PayloadFormat,
 } from "@/features/socket-tester/types";
 import { messages } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 type SendPanelProps = {
   readonly disabled?: boolean;
@@ -55,29 +56,41 @@ export function SendPanel({
   const selectedDelimiter = delimiterByOption[delimiter];
   const socketMessages = messages.socketTester;
 
+  const formatLabels: Record<PayloadFormat, string> = {
+    ascii: socketMessages.asciiFormatLabel,
+    hex: socketMessages.hexFormatLabel,
+    base64: socketMessages.base64FormatLabel,
+  };
+  const delimiterLabels: Record<DelimiterOption, string> = {
+    crlf: socketMessages.crlfDelimiterLabel,
+    lf: socketMessages.lfDelimiterLabel,
+    none: socketMessages.noneDelimiterLabel,
+  };
+
   return (
-    <section className="flex flex-col gap-3" id={tourId}>
+    <section className="flex flex-col gap-4" id={tourId}>
       <div>
         <h2 className="font-semibold text-sm">
           {socketMessages.sendPanelTitle}
         </h2>
-        <p className="text-muted-foreground text-xs">
-          {socketMessages.sendPanelDescription}
-        </p>
       </div>
-      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="grid gap-4">
         <Textarea
-          className="h-40 min-h-40 resize-none overflow-y-auto [field-sizing:fixed]"
+          aria-label={socketMessages.rawPayloadTitle}
+          className="h-36 min-h-36 resize-y overflow-y-auto [field-sizing:fixed]"
           onChange={(event) => setData(event.target.value)}
           placeholder={socketMessages.payloadPlaceholder}
           value={data}
           variant="mono"
         />
-        <div className="flex flex-col gap-3 md:w-[184px]">
+        <div className={cn("grid gap-4", showDelimiter && "grid-cols-2")}>
           <div className="flex flex-col gap-1.5">
-            <span className="font-medium text-muted-foreground text-xs">
+            <label
+              className="flex h-5 items-center font-medium text-muted-foreground text-xs"
+              htmlFor="socket-payload-format"
+            >
               {socketMessages.payloadFormatLabel}
-            </span>
+            </label>
             <Select
               onValueChange={(value) =>
                 // SAFETY: The select options are the supported payload formats.
@@ -85,8 +98,12 @@ export function SendPanel({
               }
               value={format}
             >
-              <SelectTrigger className="w-full">
-                <SelectValue />
+              <SelectTrigger
+                className="w-full"
+                id="socket-payload-format"
+                variant="surface"
+              >
+                <SelectValue>{formatLabels[format]}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -107,19 +124,22 @@ export function SendPanel({
 
           {showDelimiter ? (
             <div className="flex flex-col gap-1.5">
-              <div className="flex items-center gap-1.5">
-                <span className="font-medium text-muted-foreground text-xs">
+              <div className="flex h-5 items-center gap-1.5">
+                <label
+                  className="font-medium text-muted-foreground text-xs"
+                  htmlFor="socket-line-ending"
+                >
                   {socketMessages.lineEndingLabel}
-                </span>
+                </label>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
                       aria-label={socketMessages.lineEndingHelpAriaLabel}
-                      className="text-muted-foreground transition-colors hover:text-foreground"
+                      className="inline-flex size-5 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       type="button"
                     >
                       <HugeiconsIcon
-                        data-icon="inline-start"
+                        className="size-3.5"
                         icon={HelpCircleIcon}
                         strokeWidth={2}
                       />
@@ -137,8 +157,12 @@ export function SendPanel({
                 }
                 value={delimiter}
               >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
+                <SelectTrigger
+                  className="w-full"
+                  id="socket-line-ending"
+                  variant="surface"
+                >
+                  <SelectValue>{delimiterLabels[delimiter]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -159,23 +183,24 @@ export function SendPanel({
               </Select>
             </div>
           ) : null}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="col-span-full flex items-center justify-end gap-2 border-border/70 border-t pt-3">
             <Button
-              className="h-10"
               disabled={data.length === 0}
               onClick={() => setData("")}
+              size="sm"
               type="button"
-              variant="outline"
+              variant="ghost"
             >
               <Eraser data-icon="inline-start" />
               {socketMessages.clearButton}
             </Button>
             <Button
-              className="h-10"
+              className="min-w-32"
               disabled={disabled || data.length === 0}
               onClick={() =>
                 onSend(data, format, showDelimiter ? selectedDelimiter : "")
               }
+              size="sm"
               type="button"
             >
               <SendHorizontal data-icon="inline-start" />

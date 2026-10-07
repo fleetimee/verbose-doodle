@@ -27,17 +27,17 @@ type TrafficConsoleProps = {
 };
 
 const directionStyles: Record<TrafficDirection, string> = {
-  err: "text-red-300",
-  in: "text-emerald-300",
-  out: "text-sky-300",
-  sys: "text-slate-300",
+  err: "text-destructive",
+  in: "text-success",
+  out: "text-info",
+  sys: "text-muted-foreground",
 };
 
 const directionDotStyles: Record<TrafficDirection, string> = {
-  err: "bg-red-400",
-  in: "bg-emerald-400",
-  out: "bg-sky-400",
-  sys: "bg-slate-400",
+  err: "bg-destructive",
+  in: "bg-success",
+  out: "bg-info",
+  sys: "bg-muted-foreground",
 };
 
 const directionLabels: Record<TrafficDirection, string> = {
@@ -84,15 +84,11 @@ function ConsoleMetric({
   readonly value: string | number;
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-md border bg-background px-3 py-2 shadow-xs">
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="text-muted-foreground text-xs uppercase">{label}</p>
-        <p className="truncate font-mono font-semibold text-sm">{value}</p>
-      </div>
-    </div>
+    <span className="inline-flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">
+      {icon}
+      {label}
+      <span className="font-mono text-foreground">{value}</span>
+    </span>
   );
 }
 
@@ -125,6 +121,7 @@ export function TrafficConsole({
 }: TrafficConsoleProps) {
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const [autoScroll, setAutoScroll] = useState(true);
+  const [wrapLines, setWrapLines] = useState(false);
   const inboundCount = getDirectionCount(logs, "in");
   const outboundCount = getDirectionCount(logs, "out");
   const errorCount = getDirectionCount(logs, "err");
@@ -146,11 +143,14 @@ export function TrafficConsole({
   }, [autoScroll, logs.length]);
 
   return (
-    <section className="flex min-w-0 flex-col gap-3" id={tourId}>
-      <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 shadow-sm">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+    <section
+      className="flex h-[480px] min-h-0 min-w-0 flex-col gap-4 rounded-lg border border-border/70 bg-card p-4 sm:p-5 lg:h-full"
+      id={tourId}
+    >
+      <div className="flex shrink-0 flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-md border bg-background text-primary shadow-xs">
+            <div className="flex size-5 items-center justify-center text-muted-foreground">
               <HugeiconsIcon
                 aria-hidden="true"
                 className="size-5"
@@ -159,17 +159,14 @@ export function TrafficConsole({
               />
             </div>
             <div>
-              <h2 className="font-semibold text-lg">
+              <h2 className="font-semibold text-base">
                 {socketMessages.trafficConsoleTitle}
               </h2>
-              <p className="text-muted-foreground text-sm">
-                {socketMessages.trafficConsoleDescription}
-              </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <label
-              className="inline-flex h-8 items-center gap-2 rounded-md border bg-muted/20 px-3 font-medium text-sm"
+              className="inline-flex items-center gap-2 text-muted-foreground text-xs"
               htmlFor="socket-traffic-auto-scroll"
             >
               <HugeiconsIcon
@@ -184,7 +181,19 @@ export function TrafficConsole({
                 onCheckedChange={setAutoScroll}
               />
             </label>
+            <label
+              className="inline-flex items-center gap-2 text-muted-foreground text-xs"
+              htmlFor="socket-traffic-wrap"
+            >
+              <span>{socketMessages.wrapLabel}</span>
+              <Switch
+                checked={wrapLines}
+                id="socket-traffic-wrap"
+                onCheckedChange={setWrapLines}
+              />
+            </label>
             <Button
+              disabled={logs.length === 0}
               onClick={() => exportLogs(logs)}
               size="sm"
               type="button"
@@ -197,14 +206,20 @@ export function TrafficConsole({
               />
               {socketMessages.saveButton}
             </Button>
-            <Button onClick={onClear} size="sm" type="button" variant="outline">
+            <Button
+              disabled={logs.length === 0}
+              onClick={onClear}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
               <Eraser className="size-3.5" />
               {socketMessages.clearButton}
             </Button>
           </div>
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-4">
+        <div className="flex flex-wrap gap-3">
           <ConsoleMetric
             icon={
               <HugeiconsIcon
@@ -262,45 +277,37 @@ export function TrafficConsole({
 
       {logs.length === 0 ? (
         <div
-          className="flex h-[560px] min-w-0 items-center justify-center rounded-lg border border-border/80 bg-muted/30 px-6 shadow-inner"
+          className="flex min-h-0 min-w-0 flex-1 items-center justify-center rounded-lg border border-border/80 bg-muted/30 px-4"
           data-testid="socket-console-empty"
         >
-          <div className="w-full max-w-xl rounded-md border border-white/10 bg-black/20 p-5 font-mono text-sm shadow-inner">
-            <div className="mb-3 flex items-center gap-2 text-foreground">
-              <MousePointerClick className="size-5" />
-              <span className="font-semibold">
-                {socketMessages.noFramesCapturedTitle}
-              </span>
-            </div>
-            <div className="grid gap-1 text-muted-foreground">
-              <p>
-                <span className="text-primary">simulator@socket</span>
-                <span className="text-muted-foreground">:~$</span>{" "}
-                <span className="text-foreground">tail -f socket.log</span>
-              </p>
-              <p className="text-muted-foreground">
-                {socketMessages.noFramesCapturedDescription}
-              </p>
-              <p className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex size-full rounded-full bg-success/60 opacity-75 motion-safe:animate-ping" />
-                  <span className="relative inline-flex size-2 rounded-full bg-success" />
-                </span>
-                <span>{socketMessages.waitingForFrames}</span>
-              </p>
-            </div>
+          <div className="flex flex-col items-center gap-2 text-center">
+            <MousePointerClick className="size-5 text-muted-foreground" />
+            <p className="text-muted-foreground text-sm">
+              {socketMessages.noFramesCapturedTitle}
+            </p>
+            <p className="max-w-64 text-muted-foreground text-xs leading-relaxed">
+              {socketMessages.noFramesCapturedDescription}
+            </p>
           </div>
         </div>
       ) : (
         <ScrollArea
-          className="h-[560px] min-w-0"
+          className="min-h-0 min-w-0 flex-1"
           ref={scrollAreaRef}
-          variant="terminal"
+          variant="traffic"
         >
-          <div className="w-full min-w-0 p-4 font-mono text-foreground text-xs leading-5">
+          <div
+            className={cn(
+              "w-full p-4 font-mono text-foreground text-xs leading-5",
+              wrapLines ? "min-w-0" : "min-w-max"
+            )}
+          >
             {logs.map((entry) => (
               <button
-                className="group grid w-full min-w-0 grid-cols-[76px_64px_92px_minmax(140px,1fr)] items-start gap-2 rounded px-2 py-1 text-left tabular-nums transition-colors duration-150 ease-out hover:bg-white/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 active:scale-[0.997]"
+                className={cn(
+                  "group grid w-full grid-cols-[76px_64px_92px_minmax(140px,1fr)] items-start gap-2 rounded px-2 py-1 text-left tabular-nums transition-colors duration-150 ease-out hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 active:scale-[0.997]",
+                  wrapLines ? "min-w-0" : "min-w-max"
+                )}
                 key={entry.id}
                 onClick={() => onInspect(entry)}
                 type="button"
@@ -310,7 +317,14 @@ export function TrafficConsole({
                 <span className="truncate text-muted-foreground">
                   {entry.scope}
                 </span>
-                <span className="whitespace-pre-wrap break-all text-foreground">
+                <span
+                  className={cn(
+                    "text-foreground",
+                    wrapLines
+                      ? "whitespace-pre-wrap break-all"
+                      : "whitespace-pre"
+                  )}
+                >
                   <span className="text-muted-foreground">
                     {entry.protocol}
                   </span>
@@ -320,7 +334,7 @@ export function TrafficConsole({
               </button>
             ))}
           </div>
-          <ScrollBar className="hidden" orientation="horizontal" />
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       )}
     </section>
