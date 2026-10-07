@@ -149,13 +149,16 @@ export function ResponseList({
   }, [responses]);
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="border-b px-4 py-3">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="shrink-0 border-b px-4 py-3">
         <h2 className="font-bold text-sm tracking-tight">
           {messages.endpoints.postmanExport.responsesLabel}
         </h2>
       </div>
-      <ScrollArea className="flex-1">
+      <ScrollArea
+        className="min-h-0 flex-1"
+        viewportClassName="overscroll-contain"
+      >
         {responses.length === 0 ? (
           <Empty className="min-h-[300px]" variant="plain">
             <EmptyHeader>

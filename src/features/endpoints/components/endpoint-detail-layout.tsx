@@ -62,12 +62,12 @@ export function EndpointDetailLayout({
     <>
       {/* Mobile: Tabs layout */}
       <Card
-        className="overflow-hidden lg:hidden"
+        className="h-[min(80dvh,64rem)] overflow-hidden lg:hidden"
         size="none"
         variant="elevated-subtle"
       >
-        <Tabs defaultValue="responses">
-          <div className="border-b px-4 py-2">
+        <Tabs className="h-full min-h-0" defaultValue="responses">
+          <div className="shrink-0 border-b px-4 py-2">
             <TabsList className="w-auto">
               <TabsTrigger value="responses">
                 {formatMessage(messages.endpoints.tabsResponses, {
@@ -79,7 +79,10 @@ export function EndpointDetailLayout({
               </TabsTrigger>
             </TabsList>
           </div>
-          <TabsContent className="mt-0" value="responses">
+          <TabsContent
+            className="mt-0 min-h-0 flex-1 overflow-hidden"
+            value="responses"
+          >
             <EndpointContentTransition
               transitionKey={`responses-${endpointId}`}
             >
@@ -98,7 +101,10 @@ export function EndpointDetailLayout({
               />
             </EndpointContentTransition>
           </TabsContent>
-          <TabsContent className="mt-0" value="preview">
+          <TabsContent
+            className="mt-0 min-h-0 flex-1 overflow-hidden"
+            value="preview"
+          >
             <EndpointContentTransition transitionKey={`preview-${endpointId}`}>
               <Suspense fallback={<ResponsePreviewFallback />}>
                 <ResponsePreview
@@ -114,7 +120,7 @@ export function EndpointDetailLayout({
 
       {/* Desktop: Resizable panels */}
       <Card
-        className="hidden overflow-hidden lg:block"
+        className="hidden h-[min(80dvh,64rem)] overflow-hidden lg:block"
         size="none"
         variant="elevated-subtle"
       >
@@ -172,7 +178,7 @@ function EndpointContentTransition({
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
-      className="h-full"
+      className="h-full min-h-0"
       initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 4 }}
       key={transitionKey}
       transition={{ duration: MOTION_DURATION.press, ease: MOTION_EASE.out }}
@@ -183,5 +189,5 @@ function EndpointContentTransition({
 }
 
 function ResponsePreviewFallback() {
-  return <div className="min-h-[480px] bg-background" />;
+  return <div className="h-full bg-background" />;
 }

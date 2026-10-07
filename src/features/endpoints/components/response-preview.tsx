@@ -24,7 +24,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -156,13 +155,13 @@ export function ResponsePreview({
   const endpointMessages = messages.endpoints;
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="border-b px-4 py-3">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="shrink-0 border-b px-4 py-3">
         <h2 className="font-semibold text-sm">
           {endpointMessages.responsePreviewTitle}
         </h2>
       </div>
-      <ScrollArea className="relative flex-1">
+      <div className="relative min-h-0 flex-1">
         {/* Server Settling Layer */}
         <AnimatePresence>
           {isServerSettling && (
@@ -172,7 +171,7 @@ export function ResponsePreview({
         {response ? (
           <motion.div
             animate={{ opacity: 1 }}
-            className="p-4"
+            className="flex h-full min-h-0 flex-col p-4"
             initial={{ opacity: 0 }}
             key={response.id}
             transition={{
@@ -180,7 +179,7 @@ export function ResponsePreview({
               ease: MOTION_EASE.out,
             }}
           >
-            <div className="mb-4 space-y-3">
+            <div className="mb-4 shrink-0 space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-lg">{response.name}</h3>
                 {response.activated ? (
@@ -306,13 +305,13 @@ export function ResponsePreview({
             </div>
 
             {/* Simulation Explanation Alert */}
-            <div className="mb-4">
+            <div className="mb-4 shrink-0">
               <ResponseSimulationAlert response={response} />
             </div>
 
-            <div>
+            <div className="min-h-0 flex-1">
               <CodeBlock
-                className="max-w-full"
+                className="flex max-w-full flex-col"
                 data={[
                   {
                     code: formattedResponseJson,
@@ -323,7 +322,7 @@ export function ResponsePreview({
                 defaultValue="json"
                 storageKey="response-preview-themes"
               >
-                <CodeBlockHeader>
+                <CodeBlockHeader className="shrink-0">
                   <div className="flex-1 px-3 py-1 text-muted-foreground text-xs">
                     {endpointMessages.responseBodyTitle}
                   </div>
@@ -337,7 +336,7 @@ export function ResponsePreview({
                   </div>
                   <CodeBlockCopyButton />
                 </CodeBlockHeader>
-                <CodeBlockBody>
+                <CodeBlockBody className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
                   {(item) => (
                     <CodeBlockItem key={item.language} value="json">
                       <CodeBlockContent
@@ -367,7 +366,7 @@ export function ResponsePreview({
             </Empty>
           </div>
         )}
-      </ScrollArea>
+      </div>
     </div>
   );
 }
