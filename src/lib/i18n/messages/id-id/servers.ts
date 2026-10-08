@@ -247,4 +247,36 @@ export const serversMessages = {
   deleteTitle: "Hapus entri server ini?",
   deleteDescription:
     "Hapus {name} di {host}? Kredensial tersimpan juga akan dihapus. Tindakan ini tidak dapat dibatalkan.",
+  sshCapacityExceeded:
+    "Batas terminal backend telah tercapai. Putuskan terminal lain atau coba lagi nanti.",
+  sshOpenTerminal: "Buka terminal",
+  sshPopupBlocked:
+    "Izinkan pop-up untuk situs ini, lalu buka terminal kembali.",
+  sshBrowserIntro:
+    "Buka terminal SSH interaktif di jendela baru. Backend terhubung menggunakan kredensial yang tersimpan.",
+  sshCredentialsRequired:
+    "Simpan nama pengguna dan kata sandi pada entri SSH ini untuk menggunakan terminal browser.",
+  sshConnecting: "Menghubungkan…",
+  sshConnected: "Terhubung",
+  sshDisconnected: "Terputus",
+  sshDisconnect: "Putuskan koneksi",
+  sshReconnect: "Hubungkan kembali",
+  sshBackToInventory: "Inventaris server",
+  sshLoading: "Memuat server…",
+  sshLoadFailed:
+    "Server tidak dapat dimuat. Kembali ke inventaris dan coba lagi.",
+  sshConnectionFailed:
+    "Tidak dapat terhubung. Periksa alamat server, port, dan akses jaringan backend, lalu hubungkan kembali.",
+  sshAuthFailed:
+    "Autentikasi SSH gagal. Periksa nama pengguna dan kata sandi yang tersimpan, lalu hubungkan kembali.",
+  sshKnownHostsMissing:
+    "File known_hosts backend tidak ditemukan. Minta administrator mengonfigurasinya, lalu hubungkan kembali.",
+  sshHostKeyRejected:
+    "Kunci host server tidak dikenal atau telah berubah. Minta administrator memverifikasinya dan memperbarui file known_hosts backend.",
+  sshSessionEnded:
+    "Sesi SSH berakhir. Hubungkan kembali untuk memulai shell baru.",
+  sshTerminalHelp:
+    "Menutup jendela ini memutuskan SSH. Sesi berakhir setelah 30 menit. Menghubungkan kembali memulai shell baru.",
+  sshOutputOverflow:
+    "Output terminal melebihi batas buffer. Hubungkan kembali untuk memulai shell baru.",
 } as const;

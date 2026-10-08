@@ -80,6 +80,7 @@ export const API_ENDPOINTS = {
     },
     servers: {
       accessTypes: "/api/servers/access-types",
+      detail: (id: string) => `/api/servers/${encodeURIComponent(id)}`,
       create: "/api/servers",
       delete: (id: string) => `/api/servers/${id}`,
       list: "/api/servers",

@@ -248,4 +248,34 @@ export const serversMessages = {
   deleteTitle: "Delete this server entry?",
   deleteDescription:
     "Delete {name} at {host}? Its stored credential will also be deleted. This cannot be undone.",
+  sshCapacityExceeded:
+    "The backend terminal limit has been reached. Disconnect another terminal or try again later.",
+  sshOpenTerminal: "Open terminal",
+  sshPopupBlocked: "Allow pop-ups for this site, then open the terminal again.",
+  sshBrowserIntro:
+    "Open an interactive SSH terminal in a new window. The backend connects using the stored credentials.",
+  sshCredentialsRequired:
+    "Save a username and password in this SSH entry to use the browser terminal.",
+  sshConnecting: "Connecting…",
+  sshConnected: "Connected",
+  sshDisconnected: "Disconnected",
+  sshDisconnect: "Disconnect",
+  sshReconnect: "Reconnect",
+  sshBackToInventory: "Server inventory",
+  sshLoading: "Loading server…",
+  sshLoadFailed:
+    "Could not load this server. Return to the inventory and try again.",
+  sshConnectionFailed:
+    "Could not connect. Check the server address, port, and backend network access, then reconnect.",
+  sshAuthFailed:
+    "SSH authentication failed. Check the stored username and password, then reconnect.",
+  sshKnownHostsMissing:
+    "The backend known_hosts file is missing. Ask an administrator to configure it, then reconnect.",
+  sshHostKeyRejected:
+    "The server host key is unknown or has changed. Ask an administrator to verify it and update the backend known_hosts file.",
+  sshSessionEnded: "The SSH session ended. Reconnect to start a new shell.",
+  sshTerminalHelp:
+    "Closing this window disconnects SSH. Sessions end after 30 minutes. Reconnect starts a new shell.",
+  sshOutputOverflow:
+    "Terminal output exceeded the buffer limit. Reconnect to start a new shell.",
 } as const;

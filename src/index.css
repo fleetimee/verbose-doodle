@@ -3892,3 +3892,12 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     transition-duration: 0ms;
   }
 }
+
+/* ANSI terminal colors stay consistent while the surrounding controls follow the app theme. */
+.server-ssh-terminal {
+  background: #182027;
+}
+
+.server-ssh-terminal > .xterm {
+  height: 100%;
+}

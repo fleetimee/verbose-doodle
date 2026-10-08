@@ -72,3 +72,10 @@ export async function revealServerPassword(id: string): Promise<string> {
   );
   return response.data.password;
 }
+
+export async function fetchServerEntry(id: string): Promise<ServerEntry> {
+  const response = await apiGet<{ data: { server: ServerEntry } }>(
+    endpoints.detail(id)
+  );
+  return response.data.server;
+}

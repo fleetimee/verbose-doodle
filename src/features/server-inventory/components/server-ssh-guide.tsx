@@ -20,7 +20,13 @@ function quoteShellArgument(value: string) {
   return `'${value.replaceAll("'", "'\"'\"'")}'`;
 }
 
-export function ServerSshGuide({ entry }: { entry: ServerEntry }) {
+export function ServerSshGuide({
+  entry,
+  isAdmin,
+}: {
+  entry: ServerEntry;
+  isAdmin: boolean;
+}) {
   const { messages } = useI18n();
   const copy = messages.servers;
   const [defaultPlatform] = useState(detectClientPlatform);
@@ -88,6 +94,33 @@ export function ServerSshGuide({ entry }: { entry: ServerEntry }) {
       <h3 className="font-medium" id="server-detail-ssh">
         {copy.sshTitle}
       </h3>
+      {isAdmin && (
+        <div className="space-y-2">
+          <Button
+            disabled={!(entry.username && entry.hasPassword)}
+            onClick={() => {
+              const terminalWindow = window.open(
+                `/servers/${encodeURIComponent(entry.id)}/terminal`,
+                "_blank",
+                "popup,width=1100,height=720"
+              );
+              if (terminalWindow) {
+                terminalWindow.opener = null;
+              } else {
+                toast.error(copy.sshPopupBlocked);
+              }
+            }}
+            size="sm"
+          >
+            {copy.sshOpenTerminal}
+          </Button>
+          <p className="text-muted-foreground text-xs leading-relaxed">
+            {entry.username && entry.hasPassword
+              ? copy.sshBrowserIntro
+              : copy.sshCredentialsRequired}
+          </p>
+        </div>
+      )}
       <Tabs defaultValue={defaultPlatform}>
         <TabsList aria-label={copy.rdpPlatform} className="w-full">
           {platforms.map((platform) => (
