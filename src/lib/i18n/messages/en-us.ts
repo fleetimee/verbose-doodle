@@ -14,6 +14,8 @@ import { jsonYamlConverterMessages } from "@/lib/i18n/messages/en-us/json-yaml-c
 import { jwtInspectorMessages } from "@/lib/i18n/messages/en-us/jwt-inspector";
 import { numberBaseConverterMessages } from "@/lib/i18n/messages/en-us/number-base-converter";
 import { overviewMessages } from "@/lib/i18n/messages/en-us/overview";
+import { retryBackoffCalculatorMessages } from "@/lib/i18n/messages/en-us/retry-backoff-calculator";
+import { scheduleOverlapCheckerMessages } from "@/lib/i18n/messages/en-us/schedule-overlap-checker";
 import { serversMessages } from "@/lib/i18n/messages/en-us/servers";
 import { socketTesterMessages } from "@/lib/i18n/messages/en-us/socket-tester";
 import { socksRelayMessages } from "@/lib/i18n/messages/en-us/socks-relay";
@@ -21,6 +23,8 @@ import { themeMessages } from "@/lib/i18n/messages/en-us/theme";
 import { usersMessages } from "@/lib/i18n/messages/en-us/users";
 
 export const enUsMessages = {
+  scheduleOverlapChecker: scheduleOverlapCheckerMessages,
+  retryBackoffCalculator: retryBackoffCalculatorMessages,
   about: aboutMessages,
   auth: authMessages,
   billers: billersMessages,

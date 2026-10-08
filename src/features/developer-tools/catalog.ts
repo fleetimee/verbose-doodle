@@ -157,7 +157,85 @@ const loadCronParser: DeveloperToolLoader = () =>
     default: CronParserPage,
   }));
 
+const loadRetryBackoffCalculator: DeveloperToolLoader = () =>
+  import("@/pages/dashboard/retry-backoff-calculator").then(
+    ({ RetryBackoffCalculatorPage }) => ({
+      default: RetryBackoffCalculatorPage,
+    })
+  );
+
+const loadScheduleOverlapChecker: DeveloperToolLoader = () =>
+  import("@/pages/dashboard/schedule-overlap-checker").then(
+    ({ ScheduleOverlapCheckerPage }) => ({
+      default: ScheduleOverlapCheckerPage,
+    })
+  );
+
 export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
+  {
+    categoryId: "scheduling",
+    id: "schedule-overlap-checker",
+    path: "developer-tools/schedule-overlap-checker",
+    icon: CalendarClock,
+    load: loadScheduleOverlapChecker,
+    get name() {
+      return messages.scheduleOverlapChecker.title;
+    },
+    get description() {
+      return messages.scheduleOverlapChecker.description;
+    },
+    get searchDescription() {
+      return messages.scheduleOverlapChecker.description;
+    },
+    get document() {
+      return {
+        title: messages.scheduleOverlapChecker.title,
+        description: messages.scheduleOverlapChecker.description,
+        keywords: messages.scheduleOverlapChecker.keywords,
+      };
+    },
+    get runtime() {
+      return messages.scheduleOverlapChecker.runtime;
+    },
+    get limit() {
+      return messages.scheduleOverlapChecker.limit;
+    },
+    get tags() {
+      return messages.scheduleOverlapChecker.tags;
+    },
+  },
+  {
+    categoryId: "scheduling",
+    id: "retry-backoff-calculator",
+    path: "developer-tools/retry-backoff-calculator",
+    icon: RefreshCw,
+    load: loadRetryBackoffCalculator,
+    get name() {
+      return messages.retryBackoffCalculator.title;
+    },
+    get description() {
+      return messages.retryBackoffCalculator.description;
+    },
+    get searchDescription() {
+      return messages.retryBackoffCalculator.description;
+    },
+    get document() {
+      return {
+        title: messages.retryBackoffCalculator.title,
+        description: messages.retryBackoffCalculator.description,
+        keywords: messages.retryBackoffCalculator.keywords,
+      };
+    },
+    get runtime() {
+      return messages.retryBackoffCalculator.runtime;
+    },
+    get limit() {
+      return messages.retryBackoffCalculator.limit;
+    },
+    get tags() {
+      return messages.retryBackoffCalculator.tags;
+    },
+  },
   {
     categoryId: "conversion",
     get description() {

@@ -73,6 +73,7 @@ function getRouteLabels(
 ): RouteLabelRegistry {
   return {
     "cron-parser": messages.cronParser.title,
+    "schedule-overlap-checker": messages.scheduleOverlapChecker.title,
     "date-converter": messages.dateConverter.title,
     "developer-tools": messages.developerTools.navigationGroup,
     endpoints: messages.common.navEndpoints,
@@ -296,6 +297,8 @@ export function DashboardLayout() {
                       "/dashboard/developer-tools/qris-tap-parser" ||
                     location.pathname ===
                       "/dashboard/developer-tools/cron-parser" ||
+                    location.pathname ===
+                      "/dashboard/developer-tools/schedule-overlap-checker" ||
                     location.pathname.startsWith("/dashboard/socks-relay/") ||
                     location.pathname.startsWith("/dashboard/socket-test/")) &&
                     "lg:h-full lg:min-h-0"

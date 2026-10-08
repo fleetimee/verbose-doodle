@@ -122,6 +122,7 @@ const tableCellVariants = cva(
       size: {
         default: "",
         sm: "text-xs",
+        compact: "py-1.5 text-xs",
         indented: "pl-8",
       },
     },
