@@ -7,9 +7,11 @@ import { dateConverterMessages } from "@/lib/i18n/messages/en-us/date-converter"
 import { developerToolsMessages } from "@/lib/i18n/messages/en-us/developer-tools";
 import { endpointsMessages } from "@/lib/i18n/messages/en-us/endpoints";
 import { errorsMessages } from "@/lib/i18n/messages/en-us/errors";
+import { hmacGeneratorMessages } from "@/lib/i18n/messages/en-us/hmac-generator";
 import { iso8583GeneratorMessages } from "@/lib/i18n/messages/en-us/iso8583-generator";
 import { iso8583ParserMessages } from "@/lib/i18n/messages/en-us/iso8583-parser";
 import { jsonSchemaValidatorMessages } from "@/lib/i18n/messages/en-us/json-schema-validator";
+import { jsonTextDiffMessages } from "@/lib/i18n/messages/en-us/json-text-diff";
 import { jsonYamlConverterMessages } from "@/lib/i18n/messages/en-us/json-yaml-converter";
 import { jwtInspectorMessages } from "@/lib/i18n/messages/en-us/jwt-inspector";
 import { numberBaseConverterMessages } from "@/lib/i18n/messages/en-us/number-base-converter";
@@ -23,6 +25,8 @@ import { themeMessages } from "@/lib/i18n/messages/en-us/theme";
 import { usersMessages } from "@/lib/i18n/messages/en-us/users";
 
 export const enUsMessages = {
+  hmacGenerator: hmacGeneratorMessages,
+  jsonTextDiff: jsonTextDiffMessages,
   scheduleOverlapChecker: scheduleOverlapCheckerMessages,
   retryBackoffCalculator: retryBackoffCalculatorMessages,
   about: aboutMessages,

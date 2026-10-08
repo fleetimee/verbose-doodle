@@ -18,7 +18,7 @@ type DocumentEditorProps = {
   readonly index?: string;
   readonly description?: string;
   readonly value: string;
-  readonly format: DocumentFormat;
+  readonly format: DocumentFormat | "text";
   readonly lineCountMessage?: string;
   readonly byteCountMessage?: string;
   readonly onChange?: (value: string) => void;
@@ -77,11 +77,16 @@ export function DocumentEditor({
 
   const byteCount = new TextEncoder().encode(value).length;
   const lineCount = value.length === 0 ? 0 : value.split("\n").length;
-  const language = format === "json" ? json() : yaml();
+  const language: Extension[] = [];
+  if (format === "json") {
+    language.push(json());
+  } else if (format === "yaml") {
+    language.push(yaml());
+  }
   const extensions = [
     ...(readOnly
-      ? [language, editorTheme, EditorView.editable.of(false)]
-      : [language, editorTheme]),
+      ? [...language, editorTheme, EditorView.editable.of(false)]
+      : [...language, editorTheme]),
     ...(customExtensions ?? []),
   ];
   if (compact) {

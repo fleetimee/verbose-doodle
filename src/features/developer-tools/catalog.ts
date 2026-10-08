@@ -173,6 +173,76 @@ const loadScheduleOverlapChecker: DeveloperToolLoader = () =>
 
 export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
   {
+    categoryId: "validation",
+    id: "hmac-generator",
+    path: "developer-tools/hmac-generator",
+    icon: Fingerprint,
+    load: () =>
+      import("@/pages/dashboard/hmac-generator").then(
+        ({ HmacGeneratorPage }) => ({ default: HmacGeneratorPage })
+      ),
+    get name() {
+      return messages.hmacGenerator.title;
+    },
+    get description() {
+      return messages.hmacGenerator.description;
+    },
+    get searchDescription() {
+      return messages.hmacGenerator.description;
+    },
+    get document() {
+      return {
+        title: messages.hmacGenerator.title,
+        description: messages.hmacGenerator.description,
+        keywords: messages.hmacGenerator.keywords,
+      };
+    },
+    get runtime() {
+      return messages.hmacGenerator.runtime;
+    },
+    get limit() {
+      return messages.hmacGenerator.limit;
+    },
+    get tags() {
+      return messages.hmacGenerator.tags;
+    },
+  },
+  {
+    categoryId: "inspection",
+    id: "json-text-diff",
+    path: "developer-tools/json-text-diff",
+    icon: Braces,
+    load: () =>
+      import("@/pages/dashboard/json-text-diff").then(
+        ({ JsonTextDiffPage }) => ({ default: JsonTextDiffPage })
+      ),
+    get name() {
+      return messages.jsonTextDiff.title;
+    },
+    get description() {
+      return messages.jsonTextDiff.description;
+    },
+    get searchDescription() {
+      return messages.jsonTextDiff.description;
+    },
+    get document() {
+      return {
+        title: messages.jsonTextDiff.title,
+        description: messages.jsonTextDiff.description,
+        keywords: messages.jsonTextDiff.keywords,
+      };
+    },
+    get runtime() {
+      return messages.jsonTextDiff.runtime;
+    },
+    get limit() {
+      return messages.jsonTextDiff.limit;
+    },
+    get tags() {
+      return messages.jsonTextDiff.tags;
+    },
+  },
+  {
     categoryId: "scheduling",
     id: "schedule-overlap-checker",
     path: "developer-tools/schedule-overlap-checker",

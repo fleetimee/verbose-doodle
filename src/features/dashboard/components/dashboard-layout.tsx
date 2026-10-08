@@ -72,6 +72,7 @@ function getRouteLabels(
   messages: import("@/lib/i18n").Messages
 ): RouteLabelRegistry {
   return {
+    "hmac-generator": messages.hmacGenerator.title,
     "cron-parser": messages.cronParser.title,
     "schedule-overlap-checker": messages.scheduleOverlapChecker.title,
     "date-converter": messages.dateConverter.title,
@@ -299,6 +300,10 @@ export function DashboardLayout() {
                       "/dashboard/developer-tools/cron-parser" ||
                     location.pathname ===
                       "/dashboard/developer-tools/schedule-overlap-checker" ||
+                    location.pathname ===
+                      "/dashboard/developer-tools/json-text-diff" ||
+                    location.pathname ===
+                      "/dashboard/developer-tools/hmac-generator" ||
                     location.pathname.startsWith("/dashboard/socks-relay/") ||
                     location.pathname.startsWith("/dashboard/socket-test/")) &&
                     "lg:h-full lg:min-h-0"
