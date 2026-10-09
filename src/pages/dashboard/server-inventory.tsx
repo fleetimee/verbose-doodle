@@ -14,7 +14,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
 import {
   Empty,
   EmptyContent,
@@ -100,6 +99,13 @@ export function ServerInventoryPage() {
       {copy.add}
     </Button>
   );
+  const tableData = entries.data ?? {
+    accessTypes: [],
+    databaseEngines: [],
+    totalElements: 0,
+    totalHosts: 0,
+    totalPages: 0,
+  };
   const data = entries.data?.servers ?? [];
 
   return (
@@ -131,7 +137,6 @@ export function ServerInventoryPage() {
           <AlertDescription>{getErrorMessage(entries.error)}</AlertDescription>
         </Alert>
       )}
-      {entries.isPending && <DataTableSkeleton columns={7} rows={8} />}
       {!(entries.isPending || entries.isError) &&
         data.length === 0 &&
         !query.search &&
@@ -148,10 +153,10 @@ export function ServerInventoryPage() {
             {isAdmin && <EmptyContent>{addButton}</EmptyContent>}
           </Empty>
         )}
-      {entries.data && (
+      {(entries.isPending || entries.data) && (
         <ServerInventoryTable
-          accessTypes={entries.data.accessTypes}
-          databaseEngines={entries.data.databaseEngines}
+          accessTypes={tableData.accessTypes}
+          databaseEngines={tableData.databaseEngines}
           entries={data}
           isAdmin={isAdmin}
           loading={entries.isFetching}
@@ -162,9 +167,9 @@ export function ServerInventoryPage() {
           onEdit={setEditing}
           onQueryChange={setQuery}
           query={query}
-          totalElements={entries.data.totalElements}
-          totalHosts={entries.data.totalHosts}
-          totalPages={entries.data.totalPages}
+          totalElements={tableData.totalElements}
+          totalHosts={tableData.totalHosts}
+          totalPages={tableData.totalPages}
         />
       )}
       {isAdmin && editing && (

@@ -85,6 +85,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -127,11 +128,61 @@ const serverTableFeatures = tableFeatures({
   filterFns: { equalsString: filterFn_equalsString },
 });
 
+const loadingGroups = ["first", "second"] as const;
+const loadingRows = ["first", "second", "third"] as const;
+
 const AnimatedTableRow = motion.create(TableRow);
 const rowTransition = {
   duration: 0.15,
   ease: [0.23, 1, 0.32, 1] as const,
 };
+
+function ServerTableLoadingRows({ columnIds }: { columnIds: string[] }) {
+  const { messages } = useI18n();
+  const copy = messages.servers;
+  return (
+    <>
+      {loadingGroups.flatMap((group) => [
+        <TableRow
+          aria-hidden="true"
+          key={`loading-host:${group}`}
+          variant="host-group"
+        >
+          <TableCell colSpan={columnIds.length} variant="host-group">
+            <div className="flex h-8 items-center gap-2 px-3">
+              <ChevronDown className="size-4 text-muted-foreground" />
+              <Server className="size-4 text-muted-foreground" />
+              <span className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                {copy.host}
+              </span>
+              <Skeleton className="h-4 w-32" variant="table" />
+            </div>
+          </TableCell>
+        </TableRow>,
+        ...loadingRows.map((row) => (
+          <TableRow aria-hidden="true" key={`loading-row:${group}:${row}`}>
+            {columnIds.map((columnId) => (
+              <TableCell
+                key={columnId}
+                size={columnId === "name" ? "indented" : "default"}
+              >
+                <div className="flex h-8 items-center">
+                  <Skeleton
+                    className={cn(
+                      "h-4 max-w-full",
+                      columnId === "name" ? "w-40" : "w-20"
+                    )}
+                    variant="table"
+                  />
+                </div>
+              </TableCell>
+            ))}
+          </TableRow>
+        )),
+      ])}
+    </>
+  );
+}
 
 function formatServerHost(entry: ServerEntry) {
   if (entry.port === null) {
@@ -528,6 +579,7 @@ export function ServerInventoryTable({
     group.push(row);
     hostGroups.set(row.original.host, group);
   }
+  const showSkeleton = loading && entries.length === 0;
   const filteredCount = totalElements;
   const page = table.state.pagination.pageIndex + 1;
   const pages = Math.max(1, table.getPageCount());
@@ -537,6 +589,180 @@ export function ServerInventoryTable({
   };
   const fullscreenStyle: InventoryStyle = {
     "--fullscreen-origin": fullscreenOrigin,
+  };
+
+  const renderTableRows = () => {
+    if (showSkeleton) {
+      return (
+        <ServerTableLoadingRows
+          columnIds={table.getVisibleLeafColumns().map((column) => column.id)}
+        />
+      );
+    }
+    return table.getRowModel().rows.length ? (
+      [...hostGroups].flatMap(([host, rows]) => [
+        <AnimatedTableRow
+          animate={{ opacity: 1 }}
+          aria-label={formatMessage(copy.hostGroup, { host })}
+          className="cursor-pointer bg-muted hover:bg-muted"
+          initial={false}
+          key={`host:${host}`}
+          layout={layout}
+          onClick={(event) => {
+            if (
+              event.target instanceof Element &&
+              event.target.closest("button")
+            ) {
+              return;
+            }
+            toggleHost(host);
+          }}
+          transition={layoutTransition}
+        >
+          <TableCell
+            colSpan={table.getVisibleLeafColumns().length}
+            variant="host-group"
+          >
+            <div className="flex items-center gap-2">
+              <Button
+                aria-expanded={!collapsedHosts.has(host)}
+                aria-label={formatMessage(
+                  collapsedHosts.has(host)
+                    ? copy.expandHost
+                    : copy.collapseHost,
+                  { host }
+                )}
+                onClick={(event) => toggleHost(host, event.detail > 0)}
+                size="sm"
+                variant="ghost"
+              >
+                <ChevronDown
+                  className={cn(
+                    animatedHost === host &&
+                      "transition-transform duration-150 ease-out motion-reduce:transition-none",
+                    collapsedHosts.has(host) ? "-rotate-90" : "rotate-0"
+                  )}
+                  data-icon="inline-start"
+                />
+                <Server
+                  aria-hidden="true"
+                  className="size-4 text-muted-foreground"
+                />
+                <span className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                  {copy.host}
+                </span>
+                <span className="font-medium font-mono text-sm">{host}</span>
+              </Button>
+              <Button
+                aria-label={formatMessage(copy.copyHostGroup, {
+                  host,
+                })}
+                onClick={() => copyValue(host)}
+                size="icon-sm"
+                variant="ghost"
+              >
+                <CopyIcon />
+              </Button>
+            </div>
+          </TableCell>
+        </AnimatedTableRow>,
+        ...(collapsedHosts.has(host) ? [] : rows).map((row) => (
+          <ContextMenu key={row.id}>
+            <ContextMenuTrigger asChild>
+              <AnimatedTableRow
+                animate={{ opacity: 1 }}
+                aria-label={formatMessage(copy.viewDetailsFor, {
+                  name: row.original.name,
+                })}
+                className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+                initial={animateUpdates ? { opacity: 0.65 } : false}
+                layout={layout}
+                onClick={(event) => {
+                  if (
+                    event.target instanceof Element &&
+                    event.target.closest(
+                      "button, a, input, [role='menuitem'], [role='switch'], [data-slot='hover-card-content']"
+                    )
+                  ) {
+                    return;
+                  }
+                  openDetails(row.original);
+                }}
+                onKeyDown={(event) => {
+                  if (
+                    event.target === event.currentTarget &&
+                    (event.key === "Enter" || event.key === " ")
+                  ) {
+                    event.preventDefault();
+                    openDetails(row.original);
+                  }
+                }}
+                tabIndex={0}
+                transition={entryTransition}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell
+                    key={cell.id}
+                    size={cell.column.id === "name" ? "indented" : "default"}
+                    variant="ellipsis"
+                  >
+                    {cell.column.id === "password" ? (
+                      <ServerPasswordCell
+                        bulkPassword={passwords[row.original.id]}
+                        entry={row.original}
+                        isAdmin={isAdmin}
+                        loading={loading}
+                        revealAll={revealAll}
+                      />
+                    ) : (
+                      flexRender(cell.column.columnDef.cell, cell.getContext())
+                    )}
+                  </TableCell>
+                ))}
+              </AnimatedTableRow>
+            </ContextMenuTrigger>
+            <ContextMenuContent variant="macos">
+              <ContextMenuGroup>
+                <ContextMenuItem onClick={() => openDetails(row.original)}>
+                  {copy.viewDetails}
+                </ContextMenuItem>
+              </ContextMenuGroup>
+              {isAdmin && (
+                <>
+                  <ContextMenuSeparator />
+                  <ContextMenuGroup>
+                    <ContextMenuItem
+                      disabled={loading}
+                      onClick={() => onEdit(row.original)}
+                    >
+                      {copy.edit}
+                    </ContextMenuItem>
+                    <ContextMenuItem
+                      disabled={loading}
+                      onClick={() => onDelete(row.original)}
+                      variant="destructive"
+                    >
+                      {copy.delete}
+                    </ContextMenuItem>
+                  </ContextMenuGroup>
+                </>
+              )}
+            </ContextMenuContent>
+          </ContextMenu>
+        )),
+      ])
+    ) : (
+      <TableRow>
+        <TableCell colSpan={table.getVisibleLeafColumns().length}>
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>{copy.noMatches}</EmptyTitle>
+              <EmptyDescription>{copy.noMatchesDescription}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </TableCell>
+      </TableRow>
+    );
   };
 
   const content = (
@@ -840,195 +1066,22 @@ export function ServerInventoryTable({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              [...hostGroups].flatMap(([host, rows]) => [
-                <AnimatedTableRow
-                  animate={{ opacity: 1 }}
-                  aria-label={formatMessage(copy.hostGroup, { host })}
-                  className="cursor-pointer bg-muted hover:bg-muted"
-                  initial={false}
-                  key={`host:${host}`}
-                  layout={layout}
-                  onClick={(event) => {
-                    if (
-                      event.target instanceof Element &&
-                      event.target.closest("button")
-                    ) {
-                      return;
-                    }
-                    toggleHost(host);
-                  }}
-                  transition={layoutTransition}
-                >
-                  <TableCell
-                    colSpan={table.getVisibleLeafColumns().length}
-                    variant="host-group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Button
-                        aria-expanded={!collapsedHosts.has(host)}
-                        aria-label={formatMessage(
-                          collapsedHosts.has(host)
-                            ? copy.expandHost
-                            : copy.collapseHost,
-                          { host }
-                        )}
-                        onClick={(event) => toggleHost(host, event.detail > 0)}
-                        size="sm"
-                        variant="ghost"
-                      >
-                        <ChevronDown
-                          className={cn(
-                            animatedHost === host &&
-                              "transition-transform duration-150 ease-out motion-reduce:transition-none",
-                            collapsedHosts.has(host) ? "-rotate-90" : "rotate-0"
-                          )}
-                          data-icon="inline-start"
-                        />
-                        <Server
-                          aria-hidden="true"
-                          className="size-4 text-muted-foreground"
-                        />
-                        <span className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                          {copy.host}
-                        </span>
-                        <span className="font-medium font-mono text-sm">
-                          {host}
-                        </span>
-                      </Button>
-                      <Button
-                        aria-label={formatMessage(copy.copyHostGroup, {
-                          host,
-                        })}
-                        onClick={() => copyValue(host)}
-                        size="icon-sm"
-                        variant="ghost"
-                      >
-                        <CopyIcon />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </AnimatedTableRow>,
-                ...(collapsedHosts.has(host) ? [] : rows).map((row) => (
-                  <ContextMenu key={row.id}>
-                    <ContextMenuTrigger asChild>
-                      <AnimatedTableRow
-                        animate={{ opacity: 1 }}
-                        aria-label={formatMessage(copy.viewDetailsFor, {
-                          name: row.original.name,
-                        })}
-                        className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
-                        initial={animateUpdates ? { opacity: 0.65 } : false}
-                        layout={layout}
-                        onClick={(event) => {
-                          if (
-                            event.target instanceof Element &&
-                            event.target.closest(
-                              "button, a, input, [role='menuitem'], [role='switch'], [data-slot='hover-card-content']"
-                            )
-                          ) {
-                            return;
-                          }
-                          openDetails(row.original);
-                        }}
-                        onKeyDown={(event) => {
-                          if (
-                            event.target === event.currentTarget &&
-                            (event.key === "Enter" || event.key === " ")
-                          ) {
-                            event.preventDefault();
-                            openDetails(row.original);
-                          }
-                        }}
-                        tabIndex={0}
-                        transition={entryTransition}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell
-                            key={cell.id}
-                            size={
-                              cell.column.id === "name" ? "indented" : "default"
-                            }
-                            variant="ellipsis"
-                          >
-                            {cell.column.id === "password" ? (
-                              <ServerPasswordCell
-                                bulkPassword={passwords[row.original.id]}
-                                entry={row.original}
-                                isAdmin={isAdmin}
-                                loading={loading}
-                                revealAll={revealAll}
-                              />
-                            ) : (
-                              flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )
-                            )}
-                          </TableCell>
-                        ))}
-                      </AnimatedTableRow>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent variant="macos">
-                      <ContextMenuGroup>
-                        <ContextMenuItem
-                          onClick={() => openDetails(row.original)}
-                        >
-                          {copy.viewDetails}
-                        </ContextMenuItem>
-                      </ContextMenuGroup>
-                      {isAdmin && (
-                        <>
-                          <ContextMenuSeparator />
-                          <ContextMenuGroup>
-                            <ContextMenuItem
-                              disabled={loading}
-                              onClick={() => onEdit(row.original)}
-                            >
-                              {copy.edit}
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                              disabled={loading}
-                              onClick={() => onDelete(row.original)}
-                              variant="destructive"
-                            >
-                              {copy.delete}
-                            </ContextMenuItem>
-                          </ContextMenuGroup>
-                        </>
-                      )}
-                    </ContextMenuContent>
-                  </ContextMenu>
-                )),
-              ])
-            ) : (
-              <TableRow>
-                <TableCell colSpan={table.getVisibleLeafColumns().length}>
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyTitle>{copy.noMatches}</EmptyTitle>
-                      <EmptyDescription>
-                        {copy.noMatchesDescription}
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
+          <TableBody>{renderTableRows()}</TableBody>
         </Table>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t bg-muted/20 px-3 py-2">
         <p aria-live="polite" className="text-muted-foreground text-sm">
-          {formatMessage(copy.groupedEntryCount, {
-            count: filteredCount,
-            hosts: totalHosts,
-          })}
+          {showSkeleton
+            ? messages.common.loading
+            : formatMessage(copy.groupedEntryCount, {
+                count: filteredCount,
+                hosts: totalHosts,
+              })}
         </p>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Select
+            disabled={showSkeleton}
             onValueChange={(value) => table.setPageSize(Number(value))}
             value={String(table.state.pagination.pageSize)}
           >

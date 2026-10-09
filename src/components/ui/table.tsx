@@ -64,6 +64,7 @@ const tableRowVariants = cva(
         default: "",
         subtle: "bg-muted/30",
         muted: "bg-muted/20",
+        "host-group": "bg-muted hover:bg-muted",
       },
     },
     defaultVariants: {

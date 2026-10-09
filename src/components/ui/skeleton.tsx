@@ -11,6 +11,7 @@ const skeletonVariants = cva("bg-accent animate-pulse", {
       xl: "rounded-xl",
       "2xl": "rounded-2xl",
       terminal: "rounded-md bg-white/10",
+      table: "rounded-md motion-reduce:animate-none",
     },
   },
   defaultVariants: {
