@@ -372,7 +372,16 @@ export const serversMessages = {
     "Koneksi desktop berakhir. Hubungkan kembali untuk membukanya lagi.",
   rdpUnstable: "Koneksi desktop merespons dengan lambat.",
   rdpDesktopHelp:
-    "Klik desktop untuk mengontrolnya. Tekan Shift+Escape untuk kembali ke kontrol. Menutup jendela ini memutuskan RDP.",
+    "Klik desktop untuk mengontrolnya. Tekan Shift+Escape untuk kembali ke kontrol. Untuk mengunduh file, salin ke This PC > Fleetime Downloads > Download di Windows. Menutup jendela ini memutuskan RDP.",
+  rdpDownloadReceiving: "Menerima file…",
+  rdpDownloadReady: "File siap. Periksa unduhan browser Anda.",
+  rdpDownloadSave: "Simpan file",
+  rdpDownloadFailed:
+    "File tidak dapat diunduh. Salin kembali ke folder Download.",
+  rdpDownloadInterrupted:
+    "Transfer file terputus. Hubungkan kembali dan salin lagi file ke folder Download.",
+  rdpDownloadLimit:
+    "Batas unduhan tercapai. Gunakan file hingga 100 MiB dan transfer maksimal tiga file sekaligus.",
   rdpCtrlAltDelete: "Kirim Ctrl+Alt+Delete",
   rdpFullscreen: "Desktop layar penuh",
   rdpExitFullscreen: "Keluar dari layar penuh",

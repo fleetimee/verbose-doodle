@@ -29,7 +29,27 @@ Established sessions have no fixed backend lifetime limit, with up to eight
 connections per backend instance. The frontend lock overlay is disabled on the
 desktop route. Closing the page, network failures, remote Windows policies, and
 backend restarts can still end the connection. Audio, clipboard, printing, and
-file transfers are outside this flow.
+file uploads are outside this flow.
+
+## Downloading files
+
+In remote Windows File Explorer, open **This PC > Fleetime Downloads > Download**.
+Copy a file into the special **Download** folder to receive it in your browser.
+The browser saves it to its configured download location or asks where to save it.
+The transfer notification reports bytes received and offers **Save file** for
+60 seconds if the browser blocked the automatic download. Allow multiple downloads
+for this site when the browser asks. Downloads work over HTTP as well as HTTPS.
+
+Each file is limited to 100 MiB, with up to three simultaneous transfers.
+Disconnecting interrupts unfinished transfers; reconnect and copy the file again.
+Downloads use a session-specific redirected drive, which is cleaned up after
+disconnect. Use **Copy**, rather than **Cut**, to preserve the original file.
+Folders must be compressed into a ZIP file first. Copying a file into the drive's
+root only stages it; the **Download** folder triggers the browser transfer.
+
+This requires the matching backend changes and Windows policy permitting RDP
+drive redirection. If **Fleetime Downloads** does not appear, reconnect after
+updating the backend and check the policy and gateway storage permissions.
 
 ## Backend setup
 
@@ -41,7 +61,8 @@ connect directly to guacd.
 For local development, start the gateway from the backend repository:
 
 ```bash
-docker compose -f docker-compose.rdp.yml up -d
+mkdir -p /tmp/fleetime-rdp
+RDP_DRIVE_UID=$(id -u) RDP_DRIVE_GID=$(id -g) docker compose -f docker-compose.rdp.yml up -d
 ```
 
 Run the Java backend with its usual PostgreSQL and Redis services. Defaults use
@@ -85,7 +106,11 @@ Using an administrator account and a disposable RDP entry:
    expand Show certificate and verify its fingerprint. Cancel must stop the
    connection. Reconnect and Continue must save approval; reconnecting again
    should skip the prompt. A changed certificate must prompt again.
-2. Click the display, type, move the mouse, click, and scroll.
+2. Click the display, type, move the mouse, click, scroll, and drag a window by
+   its title bar. Copy a small file into **Fleetime Downloads > Download**, check
+   the downloaded filename and contents, and try **Save file** from the toast.
+   Check an empty file, a filename with spaces/non-ASCII characters, the 100 MiB
+   limit, and disconnecting during a transfer. Confirm folders require a ZIP.
 3. Use Desktop > Task View and previous/next desktop with at least two Windows
    virtual desktops. Check Show Desktop, Task Manager, and Ctrl+Alt+Delete.
    Confirm actions affect the remote server and release modifiers afterward.

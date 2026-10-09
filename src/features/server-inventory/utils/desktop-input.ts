@@ -70,6 +70,8 @@ export function createDesktopInput(
     if (!(enabled && event instanceof Guacamole.Mouse.Event)) {
       return;
     }
+    event.preventDefault();
+    event.stopPropagation();
     if (event.type === "mousedown") {
       focus();
     }

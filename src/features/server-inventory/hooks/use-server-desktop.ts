@@ -11,6 +11,7 @@ import {
   reviewRdpSession,
   trustRdpCertificate,
 } from "@/features/server-inventory/api";
+import { createDesktopDownloads } from "@/features/server-inventory/utils/desktop-downloads";
 import {
   createDesktopInput,
   type DesktopShortcut,
@@ -91,6 +92,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
     let connected = false;
     let client: Guacamole.Client | null = null;
     let input: ReturnType<typeof createDesktopInput> | null = null;
+    let downloads: ReturnType<typeof createDesktopDownloads> | null = null;
     let lastWidth = 0;
     let lastHeight = 0;
     let resizeFrame = 0;
@@ -139,6 +141,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
       }
       window.clearTimeout(timeout);
       input?.disable();
+      downloads?.interrupt();
       connected = false;
       client?.disconnect();
       if (!disposed) {
@@ -243,6 +246,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
         tunnel.receiveTimeout = 35_000;
         tunnel.unstableThreshold = 5000;
         client = new Guacamole.Client(tunnel);
+        downloads = createDesktopDownloads(client, copy);
         const display = client.getDisplay();
         surface.append(display.getElement());
         input = createDesktopInput(client, surface, copy.rdpKeyboardLabel, () =>
@@ -300,6 +304,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
       observer.disconnect();
       window.removeEventListener("pagehide", disconnect);
       input?.dispose();
+      downloads?.dispose();
       keyboardInputRef.current = null;
       container.replaceChildren();
       controlsRef.current = {

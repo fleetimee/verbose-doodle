@@ -370,7 +370,16 @@ export const serversMessages = {
   rdpSessionEnded: "The desktop connection ended. Reconnect to open it again.",
   rdpUnstable: "The desktop connection is responding slowly.",
   rdpDesktopHelp:
-    "Click the desktop to control it. Press Shift+Escape to return to the controls. Closing this window disconnects RDP.",
+    "Click the desktop to control it. Press Shift+Escape to return to the controls. To download a file, copy it into This PC > Fleetime Downloads > Download in Windows. Closing this window disconnects RDP.",
+  rdpDownloadReceiving: "Receiving file…",
+  rdpDownloadReady: "File ready. Check your browser downloads.",
+  rdpDownloadSave: "Save file",
+  rdpDownloadFailed:
+    "Could not download the file. Copy it into the Download folder again.",
+  rdpDownloadInterrupted:
+    "File transfer interrupted. Reconnect and copy the file into the Download folder again.",
+  rdpDownloadLimit:
+    "Download limit reached. Use files up to 100 MiB and transfer no more than three at once.",
   rdpCtrlAltDelete: "Send Ctrl+Alt+Delete",
   rdpFullscreen: "Fullscreen desktop",
   rdpExitFullscreen: "Exit fullscreen",
