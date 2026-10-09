@@ -1,6 +1,6 @@
-import { cn as cnfast } from "cnfast";
+import { cn as mergeClasses } from "cn";
 
-export const cn = cnfast;
+export const cn = mergeClasses;
 
 /**
  * Generates a UUID using crypto.randomUUID() if available,
