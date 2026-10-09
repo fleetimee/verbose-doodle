@@ -3895,7 +3895,8 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 
 /* ANSI terminal colors stay consistent while the surrounding controls follow the app theme. */
 .server-ssh-frame,
-.server-ssh-terminal {
+.server-ssh-terminal,
+.server-ssh-terminal .xterm .xterm-viewport {
   background: #182027;
 }
 
