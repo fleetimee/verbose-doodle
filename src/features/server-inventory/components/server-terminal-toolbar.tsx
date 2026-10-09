@@ -84,7 +84,7 @@ export function ServerTerminalToolbar({
   );
 
   return (
-    <header className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b px-3 py-1.5">
+    <header className="flex min-w-0 shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b px-3 py-1.5">
       <div
         className="min-w-0 max-w-48"
         title={`${entry.name} — ${entry.username}@${entry.host}:${entry.port ?? 22}`}

@@ -130,7 +130,7 @@ function TerminalSession({ entry }: { entry: ServerEntry }) {
   }[status];
 
   return (
-    <main className="flex h-dvh flex-col bg-background">
+    <main className="flex h-dvh min-w-0 flex-col overflow-hidden bg-background">
       <ServerTerminalToolbar
         connected={status === "connected"}
         disconnected={status === "disconnected"}
@@ -179,20 +179,20 @@ function TerminalSession({ entry }: { entry: ServerEntry }) {
       )}
       {error && (
         <p
-          className="border-b bg-destructive/10 px-4 py-3 text-destructive text-sm"
+          className="shrink-0 border-b bg-destructive/10 px-4 py-3 text-destructive text-sm"
           role="alert"
         >
           {error}
         </p>
       )}
       {status === "disconnected" && !error && (
-        <p className="border-b px-4 py-3 text-muted-foreground text-sm">
+        <p className="shrink-0 border-b px-4 py-3 text-muted-foreground text-sm">
           {copy.sshSessionEnded}
         </p>
       )}
-      <div className="relative min-h-0 flex-1">
+      <div className="server-ssh-frame relative min-h-0 min-w-0 flex-1 overflow-hidden p-3">
         <div
-          className="server-ssh-terminal h-full w-full p-3"
+          className="server-ssh-terminal h-full w-full min-w-0"
           ref={containerRef}
         />
         {passwordPrompt && (
@@ -274,7 +274,7 @@ function TerminalSession({ entry }: { entry: ServerEntry }) {
           </div>
         )}
       </div>
-      <footer className="flex flex-wrap items-center justify-between gap-2 border-t px-4 py-2 text-muted-foreground text-xs">
+      <footer className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t px-4 py-2 text-muted-foreground text-xs">
         <p>{copy.sshTerminalHelp}</p>
         <Link
           className="text-primary underline underline-offset-4"

@@ -92,6 +92,9 @@ export function useServerTerminal(serverId: string, attempt: number) {
     let connected = false;
     let socket: WebSocket | null = null;
     let outputBytes = 0;
+    let resizeFrame = 0;
+    let lastCols = 0;
+    let lastRows = 0;
     const terminal = new Terminal({
       cursorBlink: false,
       fontFamily: '"Geist Mono", monospace',
@@ -133,22 +136,34 @@ export function useServerTerminal(serverId: string, attempt: number) {
         container.clientHeight > 0
       ) {
         fit.fit();
-        if (connected) {
+        const cols = Math.min(terminal.cols, 500);
+        const rows = Math.min(terminal.rows, 200);
+        if (connected && (cols !== lastCols || rows !== lastRows)) {
           send({
             type: "resize",
-            cols: Math.min(terminal.cols, 500),
-            rows: Math.min(terminal.rows, 200),
+            cols,
+            rows,
           });
+          lastCols = cols;
+          lastRows = rows;
         }
       }
     }
-    resizeRef.current = resize;
-    const observer = new ResizeObserver(resize);
+    function scheduleResize() {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => {
+        if (!disposed) {
+          resize();
+        }
+      });
+    }
+    resizeRef.current = scheduleResize;
+    const observer = new ResizeObserver(scheduleResize);
     observer.observe(container);
     resize();
     document.fonts.ready.then(() => {
       if (!disposed) {
-        resize();
+        scheduleResize();
       }
     });
     sendInputRef.current = (data: string) => {
@@ -377,6 +392,7 @@ export function useServerTerminal(serverId: string, attempt: number) {
       socket?.close();
       disconnectRef.current = () => undefined;
       observer.disconnect();
+      cancelAnimationFrame(resizeFrame);
       input.dispose();
       binaryInput.dispose();
       selection.dispose();
