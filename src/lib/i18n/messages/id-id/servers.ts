@@ -87,6 +87,7 @@ export const serversMessages = {
   collapseHost: "Tutup host {host}",
   hostGroup: "Host {host}",
   copyHostGroup: "Salin host {host}",
+  lastDefinitionUpdate: "Pembaruan definisi terakhir",
   groupedEntryCount: "{count} entri pada {hosts} host",
   hostsPerPage: "Host per halaman",
   hostsCount: "{count} host",
@@ -371,6 +372,7 @@ export const serversMessages = {
   rdpSessionEnded:
     "Koneksi desktop berakhir. Hubungkan kembali untuk membukanya lagi.",
   rdpUnstable: "Koneksi desktop merespons dengan lambat.",
+  rdpCopyClipboard: "Salin clipboard remote",
   rdpDesktopHelp:
     "Klik desktop untuk mengontrolnya. Tekan Shift+Escape untuk kembali ke kontrol. Gunakan File > Unggah file untuk mengirim file ke Windows. Untuk mengunduh file, salin ke This PC > Fleetime Downloads > Download di Windows. Menutup jendela ini memutuskan RDP.",
   rdpFilesMenu: "File",

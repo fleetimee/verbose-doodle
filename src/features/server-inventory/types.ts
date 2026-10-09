@@ -40,6 +40,7 @@ export interface ServerInventoryQuery {
 export interface ServerEntryPage {
   accessTypes: string[];
   databaseEngines: string[];
+  lastDefinitionUpdate: string | null;
   page: number;
   servers: ServerEntry[];
   size: number;

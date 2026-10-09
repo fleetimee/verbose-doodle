@@ -100,6 +100,7 @@ export function ServerInventoryPage() {
     </Button>
   );
   const tableData = entries.data ?? {
+    lastDefinitionUpdate: null,
     accessTypes: [],
     databaseEngines: [],
     totalElements: 0,
@@ -159,6 +160,7 @@ export function ServerInventoryPage() {
           databaseEngines={tableData.databaseEngines}
           entries={data}
           isAdmin={isAdmin}
+          lastDefinitionUpdate={tableData.lastDefinitionUpdate}
           loading={entries.isFetching}
           onDelete={(entry) => {
             setDeleteError(null);

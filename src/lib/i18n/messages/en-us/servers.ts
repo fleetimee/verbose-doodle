@@ -88,6 +88,7 @@ export const serversMessages = {
   collapseHost: "Collapse host {host}",
   hostGroup: "Host {host}",
   copyHostGroup: "Copy host {host}",
+  lastDefinitionUpdate: "Last definition update",
   groupedEntryCount: "{count} entries across {hosts} hosts",
   hostsPerPage: "Hosts per page",
   hostsCount: "{count} hosts",
@@ -369,6 +370,7 @@ export const serversMessages = {
     "The desktop session expired. Reconnect to start another connection.",
   rdpSessionEnded: "The desktop connection ended. Reconnect to open it again.",
   rdpUnstable: "The desktop connection is responding slowly.",
+  rdpCopyClipboard: "Copy remote clipboard",
   rdpDesktopHelp:
     "Click the desktop to control it. Press Shift+Escape to return to the controls. Use Files > Upload files to send files to Windows. To download a file, copy it into This PC > Fleetime Downloads > Download in Windows. Closing this window disconnects RDP.",
   rdpFilesMenu: "Files",

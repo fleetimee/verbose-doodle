@@ -17,6 +17,7 @@ import { ServerDesktopToolbar } from "@/features/server-inventory/components/ser
 import { useServerDesktop } from "@/features/server-inventory/hooks/use-server-desktop";
 import type { ServerEntry } from "@/features/server-inventory/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { copyToClipboard } from "@/lib/clipboard";
 
 function DesktopSession({ entry }: { entry: ServerEntry }) {
   const { messages } = useI18n();
@@ -25,6 +26,7 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
   const [attempt, setAttempt] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const {
+    clipboardText,
     sessionWarning,
     continueSession,
     certificate,
@@ -225,6 +227,27 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
       </div>
       <footer className="flex flex-wrap items-center justify-between gap-2 border-t px-4 py-2 text-muted-foreground text-xs">
         <p id="rdp-desktop-help">{copy.rdpDesktopHelp}</p>
+        <Button
+          disabled={status !== "connected" || clipboardText === null}
+          onClick={async () => {
+            try {
+              if (
+                clipboardText !== null &&
+                (await copyToClipboard(clipboardText))
+              ) {
+                toast.success(copy.copied);
+              } else {
+                toast.error(copy.copyFailed);
+              }
+            } catch {
+              toast.error(copy.copyFailed);
+            }
+          }}
+          size="sm-compact"
+          variant="outline"
+        >
+          {copy.rdpCopyClipboard}
+        </Button>
         <Link
           className="text-primary underline underline-offset-4"
           to="/dashboard/servers"

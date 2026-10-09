@@ -11,6 +11,7 @@ import {
   reviewRdpSession,
   trustRdpCertificate,
 } from "@/features/server-inventory/api";
+import { createDesktopClipboard } from "@/features/server-inventory/utils/desktop-clipboard";
 import { createDesktopDownloads } from "@/features/server-inventory/utils/desktop-downloads";
 import {
   createDesktopInput,
@@ -42,6 +43,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
   >("connecting");
   const [error, setError] = useState("");
   const [unstable, setUnstable] = useState(false);
+  const [clipboardText, setClipboardText] = useState<string | null>(null);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [certificate, setCertificate] = useState<RdpCertificateReview | null>(
     null
@@ -98,6 +100,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
     let connected = false;
     let client: Guacamole.Client | null = null;
     let input: ReturnType<typeof createDesktopInput> | null = null;
+    let clipboard: ReturnType<typeof createDesktopClipboard> | null = null;
     let downloads: ReturnType<typeof createDesktopDownloads> | null = null;
     let uploads: ReturnType<typeof createDesktopUploads> | null = null;
     let lastWidth = 0;
@@ -107,6 +110,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
     setError("");
     setUnstable(false);
     setUploadBusy(false);
+    setClipboardText(null);
 
     function size() {
       return {
@@ -148,6 +152,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
         setCertificate(null);
       }
       window.clearTimeout(timeout);
+      clipboard?.dispose();
       input?.disable();
       downloads?.interrupt();
       uploads?.interrupt();
@@ -269,6 +274,14 @@ export function useServerDesktop(serverId: string, attempt: number) {
           disconnectButtonRef.current?.focus()
         );
         keyboardInputRef.current = input.keyboardElement;
+        clipboard = createDesktopClipboard(
+          client,
+          input.keyboardElement,
+          (text) => {
+            setClipboardText(text);
+            navigator.clipboard?.writeText(text).catch(() => undefined);
+          }
+        );
         display.onresize = resize;
         client.onerror = (failure) => fail(failure.code);
         tunnel.onerror = (failure) => fail(failure.code);
@@ -333,6 +346,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
   }, [serverId, attempt, copy]);
 
   return {
+    clipboardText,
     cancelUpload: () => controlsRef.current.cancelUpload(),
     chooseUpload: () => controlsRef.current.chooseUpload(),
     uploadBusy,

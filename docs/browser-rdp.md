@@ -28,8 +28,14 @@ the Windows server controls whether an existing desktop session is resumed.
 Established sessions have no fixed backend lifetime limit, with up to eight
 connections per backend instance. The frontend lock overlay is disabled on the
 desktop route. Closing the page, network failures, remote Windows policies, and
-backend restarts can still end the connection. Audio, clipboard, and printing
-are outside this flow.
+backend restarts can still end the connection. Audio and printing are outside this flow.
+
+Text clipboard sharing is enabled. Copy text inside Windows with Ctrl+C; the
+viewer attempts to update your local clipboard. If the browser blocks this, click
+**Copy remote clipboard** in the footer. To paste local text into Windows, focus
+the desktop and press Ctrl+V or Command+V. Clipboard images and files are not
+supported; use the Files menu for file transfers. Reconnect after deploying the
+backend change. Windows clipboard redirection policies still apply.
 
 ## Downloading files
 

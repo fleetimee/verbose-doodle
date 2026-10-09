@@ -244,6 +244,33 @@ function useTableMotion(search: string) {
   };
 }
 
+function LastDefinitionUpdate({
+  value,
+  loading,
+}: {
+  value: string | null;
+  loading: boolean;
+}) {
+  const { locale, messages } = useI18n();
+  if (loading || !value) {
+    return null;
+  }
+  return (
+    <>
+      {" | "}
+      {messages.servers.lastDefinitionUpdate}:{" "}
+      <time dateTime={value}>
+        {new Intl.DateTimeFormat(locale, {
+          dateStyle: "medium",
+          timeStyle: "short",
+          timeZone: "Asia/Jakarta",
+          hourCycle: "h23",
+        }).format(new Date(value))}
+      </time>
+    </>
+  );
+}
+
 export function ServerInventoryTable({
   entries,
   isAdmin,
@@ -253,6 +280,7 @@ export function ServerInventoryTable({
   onQueryChange,
   totalElements,
   totalHosts,
+  lastDefinitionUpdate,
   totalPages,
   accessTypes,
   databaseEngines,
@@ -263,6 +291,7 @@ export function ServerInventoryTable({
   onQueryChange: (query: ServerInventoryQuery) => void;
   totalElements: number;
   totalHosts: number;
+  lastDefinitionUpdate: string | null;
   totalPages: number;
   accessTypes: string[];
   databaseEngines: string[];
@@ -1078,6 +1107,10 @@ export function ServerInventoryTable({
                 count: filteredCount,
                 hosts: totalHosts,
               })}
+          <LastDefinitionUpdate
+            loading={showSkeleton}
+            value={lastDefinitionUpdate}
+          />
         </p>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Select
