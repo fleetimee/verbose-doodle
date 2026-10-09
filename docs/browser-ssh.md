@@ -3,8 +3,10 @@
 Administrators can open an SSH inventory entry and select **Open terminal**.
 The terminal opens in a separate browser window. It supports interactive commands,
 terminal applications, resizing, Disconnect, and Reconnect. Reconnect starts a
-new shell; closing the window ends the connection. Each session lasts at most
-30 minutes, with at most 16 open terminal connections per backend instance.
+new shell; closing the window ends the connection. Established sessions have no
+fixed backend lifetime limit, with at most 16 open terminal connections per backend
+instance. The frontend lock overlay is disabled on the terminal route. Network
+failures, remote SSH policies, and backend restarts can still end the connection.
 
 The entry must have a stored username and password. Browser SSH currently uses
 password authentication. Key-only and multi-step MFA logins still require a

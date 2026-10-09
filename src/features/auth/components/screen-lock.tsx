@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useMatch } from "react-router";
 import { Button } from "@/components/ui/button";
 import { SCREEN_LOCK_STORAGE_KEY, useAuth } from "@/features/auth/context";
 import { MacOsLogin } from "@/features/login/components/macos-login";
@@ -21,17 +22,20 @@ const LockContext = createContext<(() => void) | null>(null);
 
 export function ScreenLockProvider({ children }: { children: ReactNode }) {
   const { snapshot } = useAuth();
+  const terminalRoute = useMatch("/servers/:serverId/terminal");
+  const desktopRoute = useMatch("/servers/:serverId/desktop");
+  const remoteSession = Boolean(terminalRoute || desktopRoute);
   const [account, setAccount] = useState(() =>
     sessionStorage.getItem(SCREEN_LOCK_STORAGE_KEY)
   );
 
   const lock = useCallback(() => {
-    if (!snapshot.user) {
+    if (!snapshot.user || remoteSession) {
       return;
     }
     sessionStorage.setItem(SCREEN_LOCK_STORAGE_KEY, snapshot.user.username);
     setAccount(snapshot.user.username);
-  }, [snapshot.user]);
+  }, [snapshot.user, remoteSession]);
 
   const unlock = useCallback(() => {
     sessionStorage.removeItem(SCREEN_LOCK_STORAGE_KEY);
@@ -39,7 +43,7 @@ export function ScreenLockProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!snapshot.user || account !== null) {
+    if (!snapshot.user || account !== null || remoteSession) {
       return;
     }
 
@@ -115,12 +119,14 @@ export function ScreenLockProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("message", handleGameActivity);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [snapshot.user, account, lock]);
+  }, [snapshot.user, account, lock, remoteSession]);
 
   return (
     <LockContext.Provider value={lock}>
       {children}
-      {account !== null && <LockScreen account={account} onUnlocked={unlock} />}
+      {account !== null && !remoteSession && (
+        <LockScreen account={account} onUnlocked={unlock} />
+      )}
     </LockContext.Provider>
   );
 }

@@ -21,8 +21,11 @@ on other backend instances. It does not force Windows to disconnect another user
 Closing the window or navigating away disconnects RDP. Reconnect obtains a fresh
 ticket and creates a new connection. It does not log off the remote Windows user;
 the Windows server controls whether an existing desktop session is resumed.
-Sessions have a 30-minute backend limit, with up to eight connections per backend
-instance. Audio, clipboard, printing, and file transfers are outside this flow.
+Established sessions have no fixed backend lifetime limit, with up to eight
+connections per backend instance. The frontend lock overlay is disabled on the
+desktop route. Closing the page, network failures, remote Windows policies, and
+backend restarts can still end the connection. Audio, clipboard, printing, and
+file transfers are outside this flow.
 
 ## Backend setup
 
@@ -85,7 +88,7 @@ Using an administrator account and a disposable RDP entry:
    and supported RDP servers should update their desktop dimensions.
 6. Disconnect and reconnect. Confirm a new ticket is acquired.
 7. Check bad credentials, an untrusted certificate, an unavailable gateway, and
-   a backend session timeout. Each should show a readable recovery message.
+   an interrupted connection. Each should show a readable recovery message.
 8. Verify a USER account cannot open the route or request an RDP ticket.
 
 ## References
