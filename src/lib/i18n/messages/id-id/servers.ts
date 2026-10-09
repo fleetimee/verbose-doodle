@@ -372,7 +372,21 @@ export const serversMessages = {
     "Koneksi desktop berakhir. Hubungkan kembali untuk membukanya lagi.",
   rdpUnstable: "Koneksi desktop merespons dengan lambat.",
   rdpDesktopHelp:
-    "Klik desktop untuk mengontrolnya. Tekan Shift+Escape untuk kembali ke kontrol. Untuk mengunduh file, salin ke This PC > Fleetime Downloads > Download di Windows. Menutup jendela ini memutuskan RDP.",
+    "Klik desktop untuk mengontrolnya. Tekan Shift+Escape untuk kembali ke kontrol. Gunakan File > Unggah file untuk mengirim file ke Windows. Untuk mengunduh file, salin ke This PC > Fleetime Downloads > Download di Windows. Menutup jendela ini memutuskan RDP.",
+  rdpFilesMenu: "File",
+  rdpUploadAction: "Unggah file…",
+  rdpUploadCancel: "Batalkan unggahan",
+  rdpUploadSending: "Mengunggah file…",
+  rdpUploadReady:
+    "File diunggah ke Fleetime Downloads. Salin ke folder Windows sebelum memutuskan koneksi.",
+  rdpUploadCancelled:
+    "Unggahan dibatalkan. File parsial mungkin masih ada di Fleetime Downloads; hapus sebelum mencoba lagi.",
+  rdpUploadInterrupted:
+    "Unggahan terputus. Hubungkan kembali dan pilih lagi file tersebut.",
+  rdpUploadFailed:
+    "File tidak dapat diunggah. Periksa ruang drive dan nama file, lalu coba lagi.",
+  rdpUploadLimit:
+    "Batas unggahan tercapai. Gunakan file hingga 100 MiB, pilih maksimal 10 file, dan unggah hingga 300 MiB per sesi.",
   rdpDownloadReceiving: "Menerima file…",
   rdpDownloadReady: "File siap. Periksa unduhan browser Anda.",
   rdpDownloadSave: "Simpan file",

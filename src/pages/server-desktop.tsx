@@ -40,6 +40,9 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
     unstable,
     disconnect,
     sendShortcut,
+    chooseUpload,
+    cancelUpload,
+    uploadBusy,
   } = useServerDesktop(entry.id, attempt);
   const statusLabel = {
     connecting: copy.rdpConnecting,
@@ -181,12 +184,15 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
         entry={entry}
         fullscreen={fullscreen}
         keyboardInputRef={keyboardInputRef}
+        onCancelUpload={cancelUpload}
         onDisconnect={disconnect}
         onReconnect={() => setAttempt((value) => value + 1)}
         onShortcut={sendShortcut}
         onToggleFullscreen={toggleFullscreen}
+        onUpload={chooseUpload}
         statusLabel={statusLabel}
         unstable={unstable}
+        uploadBusy={uploadBusy}
       />
       {error && (
         <p

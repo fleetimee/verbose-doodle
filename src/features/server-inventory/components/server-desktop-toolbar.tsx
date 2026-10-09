@@ -35,12 +35,15 @@ interface DesktopToolbarProps {
   entry: ServerEntry;
   fullscreen: boolean;
   keyboardInputRef: RefObject<HTMLTextAreaElement | null>;
+  onCancelUpload: () => void;
   onDisconnect: () => void;
   onReconnect: () => void;
   onShortcut: (shortcut: DesktopShortcut) => void;
   onToggleFullscreen: () => void;
+  onUpload: () => void;
   statusLabel: string;
   unstable: boolean;
+  uploadBusy: boolean;
 }
 
 export function ServerDesktopToolbar({
@@ -51,11 +54,14 @@ export function ServerDesktopToolbar({
   fullscreen,
   keyboardInputRef,
   onDisconnect,
+  onCancelUpload,
+  onUpload,
   onReconnect,
   onShortcut,
   onToggleFullscreen,
   statusLabel,
   unstable,
+  uploadBusy,
 }: DesktopToolbarProps) {
   const { messages } = useI18n();
   const copy = messages.servers;
@@ -140,6 +146,21 @@ export function ServerDesktopToolbar({
                 onClick={() => onShortcut("ctrl-alt-delete")}
               >
                 {copy.rdpCtrlAltDelete}
+              </MenubarItem>
+            </MenubarGroup>
+          </MenubarContent>
+        </MenubarMenu>
+        <MenubarMenu>
+          <MenubarTrigger disabled={!connected}>
+            {copy.rdpFilesMenu}
+          </MenubarTrigger>
+          <MenubarContent>
+            <MenubarGroup>
+              <MenubarItem disabled={uploadBusy} onClick={onUpload}>
+                {copy.rdpUploadAction}
+              </MenubarItem>
+              <MenubarItem disabled={!uploadBusy} onClick={onCancelUpload}>
+                {copy.rdpUploadCancel}
               </MenubarItem>
             </MenubarGroup>
           </MenubarContent>

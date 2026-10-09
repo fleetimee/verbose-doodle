@@ -16,8 +16,11 @@ import {
   createDesktopInput,
   type DesktopShortcut,
 } from "@/features/server-inventory/utils/desktop-input";
+import { createDesktopUploads } from "@/features/server-inventory/utils/desktop-uploads";
 
 type DesktopControls = {
+  cancelUpload: () => void;
+  chooseUpload: () => void;
   disconnect: () => void;
   sendShortcut: (shortcut: DesktopShortcut) => void;
 };
@@ -29,6 +32,8 @@ export function useServerDesktop(serverId: string, attempt: number) {
   const disconnectButtonRef = useRef<HTMLButtonElement>(null);
   const keyboardInputRef = useRef<HTMLTextAreaElement>(null);
   const controlsRef = useRef<DesktopControls>({
+    cancelUpload: () => undefined,
+    chooseUpload: () => undefined,
     disconnect: () => undefined,
     sendShortcut: () => undefined,
   });
@@ -37,6 +42,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
   >("connecting");
   const [error, setError] = useState("");
   const [unstable, setUnstable] = useState(false);
+  const [uploadBusy, setUploadBusy] = useState(false);
   const [certificate, setCertificate] = useState<RdpCertificateReview | null>(
     null
   );
@@ -93,12 +99,14 @@ export function useServerDesktop(serverId: string, attempt: number) {
     let client: Guacamole.Client | null = null;
     let input: ReturnType<typeof createDesktopInput> | null = null;
     let downloads: ReturnType<typeof createDesktopDownloads> | null = null;
+    let uploads: ReturnType<typeof createDesktopUploads> | null = null;
     let lastWidth = 0;
     let lastHeight = 0;
     let resizeFrame = 0;
     setStatus("connecting");
     setError("");
     setUnstable(false);
+    setUploadBusy(false);
 
     function size() {
       return {
@@ -142,6 +150,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
       window.clearTimeout(timeout);
       input?.disable();
       downloads?.interrupt();
+      uploads?.interrupt();
       connected = false;
       client?.disconnect();
       if (!disposed) {
@@ -168,6 +177,8 @@ export function useServerDesktop(serverId: string, attempt: number) {
       disconnect();
     }
     controlsRef.current = {
+      cancelUpload: () => uploads?.cancel(),
+      chooseUpload: () => uploads?.chooseFiles(),
       disconnect,
       sendShortcut: (shortcut) => input?.sendShortcut(shortcut),
     };
@@ -247,6 +258,11 @@ export function useServerDesktop(serverId: string, attempt: number) {
         tunnel.unstableThreshold = 5000;
         client = new Guacamole.Client(tunnel);
         downloads = createDesktopDownloads(client, copy);
+        uploads = createDesktopUploads(client, copy, (busy) => {
+          if (!disposed) {
+            setUploadBusy(busy);
+          }
+        });
         const display = client.getDisplay();
         surface.append(display.getElement());
         input = createDesktopInput(client, surface, copy.rdpKeyboardLabel, () =>
@@ -308,6 +324,8 @@ export function useServerDesktop(serverId: string, attempt: number) {
       keyboardInputRef.current = null;
       container.replaceChildren();
       controlsRef.current = {
+        cancelUpload: () => undefined,
+        chooseUpload: () => undefined,
         disconnect: () => undefined,
         sendShortcut: () => undefined,
       };
@@ -315,6 +333,9 @@ export function useServerDesktop(serverId: string, attempt: number) {
   }, [serverId, attempt, copy]);
 
   return {
+    cancelUpload: () => controlsRef.current.cancelUpload(),
+    chooseUpload: () => controlsRef.current.chooseUpload(),
+    uploadBusy,
     sessionWarning,
     continueSession: () => sessionDecision.current(true),
     certificate,

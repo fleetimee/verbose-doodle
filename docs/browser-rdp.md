@@ -2,7 +2,7 @@
 
 Administrators can open an RDP inventory entry and select **Open desktop**.
 The desktop opens in a separate browser window. Click its display to send mouse
-and keyboard input. The compact menubar groups Session, Desktop, and View actions.
+and keyboard input. The compact menubar groups Session, Desktop, Files, and View actions.
 Desktop sends Windows shortcuts for previous/next virtual desktop, Task View,
 Show Desktop, Task Manager, and Ctrl+Alt+Delete directly to the remote server.
 These actions require a connected session and the corresponding Windows feature;
@@ -28,8 +28,8 @@ the Windows server controls whether an existing desktop session is resumed.
 Established sessions have no fixed backend lifetime limit, with up to eight
 connections per backend instance. The frontend lock overlay is disabled on the
 desktop route. Closing the page, network failures, remote Windows policies, and
-backend restarts can still end the connection. Audio, clipboard, printing, and
-file uploads are outside this flow.
+backend restarts can still end the connection. Audio, clipboard, and printing
+are outside this flow.
 
 ## Downloading files
 
@@ -50,6 +50,28 @@ root only stages it; the **Download** folder triggers the browser transfer.
 This requires the matching backend changes and Windows policy permitting RDP
 drive redirection. If **Fleetime Downloads** does not appear, reconnect after
 updating the backend and check the policy and gateway storage permissions.
+
+## Uploading files
+
+While connected, use **Files > Upload files** and select files from your computer.
+The app uploads files one at a time and shows progress with **Cancel uploads**.
+Uploaded files appear in the root of **This PC > Fleetime Downloads**. Refresh
+Windows File Explorer if needed, then copy the files into a normal Windows folder
+before disconnecting. The redirected drive is temporary and is removed when the
+session ends. Folder uploads require a ZIP file.
+
+Select up to ten files at once. Each file is limited to 100 MiB, and the backend
+accepts up to 300 MiB of upload data per session, including partial transfers.
+The backend rejects filenames containing paths or Windows-invalid characters,
+reserved names, and existing files. Rename a conflicting file before retrying.
+Cancellation stops the queue after the current chunk is acknowledged; a partial
+file can remain in the drive. Delete that partial file before uploading the same
+name again. Disconnecting or changing the app language interrupts uploads.
+
+Uploads require the updated frontend and backend. Production Compose uses a new
+`rdp-transfers` tmpfs capped at 2 GiB across all sessions, retaining group 2000 for
+both containers. Recreate both services after applying the new configuration.
+No data migration is needed because transfer storage is temporary.
 
 ## Backend setup
 
@@ -109,7 +131,10 @@ Using an administrator account and a disposable RDP entry:
 2. Click the display, type, move the mouse, click, scroll, and drag a window by
    its title bar. Copy a small file into **Fleetime Downloads > Download**, check
    the downloaded filename and contents, and try **Save file** from the toast.
-   Check an empty file, a filename with spaces/non-ASCII characters, the 100 MiB
+   Use **Files > Upload files** to upload a text file, an empty file, and a ZIP.
+   Check their names and contents in Windows, cancellation, a duplicate name,
+   rejection above 100 MiB, and interruption during disconnect.
+   Check an empty download, a filename with spaces/non-ASCII characters, the 100 MiB
    limit, and disconnecting during a transfer. Confirm folders require a ZIP.
 3. Use Desktop > Task View and previous/next desktop with at least two Windows
    virtual desktops. Check Show Desktop, Task Manager, and Ctrl+Alt+Delete.

@@ -370,7 +370,21 @@ export const serversMessages = {
   rdpSessionEnded: "The desktop connection ended. Reconnect to open it again.",
   rdpUnstable: "The desktop connection is responding slowly.",
   rdpDesktopHelp:
-    "Click the desktop to control it. Press Shift+Escape to return to the controls. To download a file, copy it into This PC > Fleetime Downloads > Download in Windows. Closing this window disconnects RDP.",
+    "Click the desktop to control it. Press Shift+Escape to return to the controls. Use Files > Upload files to send files to Windows. To download a file, copy it into This PC > Fleetime Downloads > Download in Windows. Closing this window disconnects RDP.",
+  rdpFilesMenu: "Files",
+  rdpUploadAction: "Upload files…",
+  rdpUploadCancel: "Cancel uploads",
+  rdpUploadSending: "Uploading file…",
+  rdpUploadReady:
+    "File uploaded to Fleetime Downloads. Copy it to a Windows folder before disconnecting.",
+  rdpUploadCancelled:
+    "Uploads cancelled. A partial file may remain in Fleetime Downloads; delete it before retrying.",
+  rdpUploadInterrupted:
+    "Upload interrupted. Reconnect and select the file again.",
+  rdpUploadFailed:
+    "Could not upload the file. Check drive space and the filename, then try again.",
+  rdpUploadLimit:
+    "Upload limit reached. Use files up to 100 MiB, select at most 10 files, and upload up to 300 MiB per session.",
   rdpDownloadReceiving: "Receiving file…",
   rdpDownloadReady: "File ready. Check your browser downloads.",
   rdpDownloadSave: "Save file",
