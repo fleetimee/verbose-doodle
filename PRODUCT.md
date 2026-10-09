@@ -45,7 +45,7 @@ Within the Biller Simulator domain, a **Biller** is a billing service represente
 - Test TCP client, TCP server, and UDP behavior.
 - Inspect authorized SOCKS relay activity for REST API and ISO 8583 traffic.
 - Browse and filter server access entries. `ADMIN` users can create, edit, delete, and temporarily reveal stored passwords; `USER` users have read-only access to metadata.
-- Open interactive browser SSH terminals as an administrator using stored inventory credentials.
+- Open interactive browser SSH terminals and RDP desktops as an administrator using stored inventory credentials.
 - Use developer utilities for JSON/YAML conversion, JSON Schema validation, JWT inspection, cron parsing, number-base conversion, date conversion, and related integration tasks.
 - Preserve role-based access and the distinction between `ADMIN` and `USER` capabilities.
 - Treat each module as a distinct tool within Fleetime Labs rather than presenting every capability as part of the Biller Simulator module.

@@ -1,4 +1,28 @@
 export const serversMessages = {
+  rdpSessionWarningTitle: "This RDP account is already in use",
+  rdpSessionWarningDescription:
+    "Another browser connection through this backend is using this server and Windows account. Continuing may disconnect that connection, depending on Windows settings. Do you want to continue?",
+  rdpSessionChanged:
+    "Another connection started while you were connecting. Reconnect to review the session warning.",
+
+  rdpCertificateTitle: "Trust this server certificate?",
+  rdpCertificateWarning:
+    "This certificate has not been trusted for this server. Your connection may not be secure. Continue only if you recognize this server and certificate.",
+  rdpCertificateChanged:
+    "The server certificate has changed. Review its fingerprint before continuing.",
+  rdpCertificateSubject: "Subject",
+  rdpCertificateIssuer: "Issuer",
+  rdpCertificateValidity: "Valid from / until",
+  rdpCertificatePrevious: "Previously trusted fingerprint",
+  rdpCertificateManaged:
+    "Certificate trust is managed by the operator. Contact your administrator to update the configured fingerprint.",
+  rdpCertificateTrustFailed:
+    "Could not trust the certificate. Reconnect to check whether it changed, then try again.",
+  rdpCertificateCancel: "Cancel",
+  rdpCertificateContinue: "Continue",
+  rdpCertificateSaving: "Trusting certificate…",
+  rdpShowCertificate: "Show certificate",
+
   exportExcel: "Excel (.xlsx)",
   exportDescription:
     "Export connection details and notes. Choose which entries to include.",
@@ -278,4 +302,34 @@ export const serversMessages = {
     "Closing this window disconnects SSH. Sessions end after 30 minutes. Reconnect starts a new shell.",
   sshOutputOverflow:
     "Terminal output exceeded the buffer limit. Reconnect to start a new shell.",
+  rdpOpenDesktop: "Open desktop",
+  rdpBrowserIntro:
+    "Open an interactive remote desktop in a new window using the stored credentials.",
+  rdpCredentialsRequired:
+    "Save a username and password in this RDP entry to use the browser desktop.",
+  rdpDesktopTitle: "Remote desktop",
+  rdpConnecting: "Connecting to desktop…",
+  rdpConnected: "Connected",
+  rdpDisconnected: "Disconnected",
+  rdpConnectionFailed:
+    "Could not connect to the desktop. Check that the RDP gateway is running, can reach the server, and trusts its certificate.",
+  rdpAuthFailed:
+    "Authentication failed. Check your app session and the stored RDP username and password, then reconnect.",
+  rdpInvalidEntry:
+    "The RDP connection settings are invalid. Check this inventory entry and reconnect.",
+  rdpCapacityExceeded:
+    "The backend desktop limit has been reached. Disconnect another desktop or try again later.",
+  rdpSessionExpired:
+    "The desktop session expired. Reconnect to start another connection.",
+  rdpSessionEnded: "The desktop connection ended. Reconnect to open it again.",
+  rdpUnstable: "The desktop connection is responding slowly.",
+  rdpDesktopHelp:
+    "Click the desktop to control it. Press Shift+Escape to return to the controls. Closing this window disconnects RDP.",
+  rdpCtrlAltDelete: "Send Ctrl+Alt+Delete",
+  rdpFullscreen: "Fullscreen desktop",
+  rdpExitFullscreen: "Exit fullscreen",
+  rdpFullscreenFailed:
+    "Fullscreen could not be opened. Try again using the fullscreen button.",
+  rdpKeyboardLabel: "Remote desktop keyboard input",
+  rdpDesktopLoading: "Waiting for the remote desktop…",
 } as const;

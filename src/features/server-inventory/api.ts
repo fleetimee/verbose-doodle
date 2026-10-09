@@ -79,3 +79,45 @@ export async function fetchServerEntry(id: string): Promise<ServerEntry> {
   );
   return response.data.server;
 }
+
+export interface RdpCertificateReview {
+  canTrust: boolean;
+  certificate: {
+    fingerprint: string;
+    subject: string;
+    issuer: string;
+    validFrom: string;
+    validUntil: string;
+  };
+  previousFingerprint: string | null;
+  trusted: boolean;
+}
+
+export async function inspectRdpCertificate(
+  id: string
+): Promise<RdpCertificateReview> {
+  const response = await apiGet<{ data: RdpCertificateReview }>(
+    `${endpoints.detail(id)}/rdp-certificate`,
+    { cache: "no-store" }
+  );
+  return response.data;
+}
+
+export async function trustRdpCertificate(
+  id: string,
+  fingerprint: string
+): Promise<void> {
+  await apiPost(`${endpoints.detail(id)}/rdp-certificate/trust`, {
+    fingerprint,
+  });
+}
+
+export async function reviewRdpSession(
+  id: string
+): Promise<{ busy: boolean; revision: string }> {
+  const response = await apiGet<{ data: { busy: boolean; revision: string } }>(
+    `${endpoints.detail(id)}/rdp-session`,
+    { cache: "no-store" }
+  );
+  return response.data;
+}

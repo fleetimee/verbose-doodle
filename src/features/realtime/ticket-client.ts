@@ -4,7 +4,8 @@ export type RealtimeAudience =
   | "dashboard-visits"
   | "relay-events"
   | "socket-test"
-  | "server-ssh";
+  | "server-ssh"
+  | "server-rdp";
 
 type RealtimeTicketApiResponse = {
   readonly data: {

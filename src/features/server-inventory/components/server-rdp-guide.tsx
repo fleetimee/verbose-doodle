@@ -16,7 +16,13 @@ import type { ServerEntry } from "@/features/server-inventory/types";
 import { detectClientPlatform } from "@/features/server-inventory/utils/detect-client-platform";
 import { copyToClipboard } from "@/lib/clipboard";
 
-export function ServerRdpGuide({ entry }: { entry: ServerEntry }) {
+export function ServerRdpGuide({
+  entry,
+  isAdmin,
+}: {
+  entry: ServerEntry;
+  isAdmin: boolean;
+}) {
   const { messages } = useI18n();
   const copy = messages.servers;
   const [defaultPlatform] = useState(detectClientPlatform);
@@ -85,6 +91,33 @@ export function ServerRdpGuide({ entry }: { entry: ServerEntry }) {
       <h3 className="font-medium" id="server-detail-rdp">
         {copy.rdpTitle}
       </h3>
+      {isAdmin && (
+        <div className="space-y-2">
+          <Button
+            disabled={!(entry.username && entry.hasPassword)}
+            onClick={() => {
+              const desktopWindow = window.open(
+                `/servers/${encodeURIComponent(entry.id)}/desktop`,
+                "_blank",
+                "popup,width=1280,height=800"
+              );
+              if (desktopWindow) {
+                desktopWindow.opener = null;
+              } else {
+                toast.error(copy.sshPopupBlocked);
+              }
+            }}
+            size="sm"
+          >
+            {copy.rdpOpenDesktop}
+          </Button>
+          <p className="text-muted-foreground text-xs leading-relaxed">
+            {entry.username && entry.hasPassword
+              ? copy.rdpBrowserIntro
+              : copy.rdpCredentialsRequired}
+          </p>
+        </div>
+      )}
       <Tabs defaultValue={defaultPlatform}>
         <TabsList aria-label={copy.rdpPlatform} className="w-full">
           {platforms.map((platform) => (

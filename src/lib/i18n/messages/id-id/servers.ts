@@ -1,4 +1,28 @@
 export const serversMessages = {
+  rdpSessionWarningTitle: "Akun RDP ini sedang digunakan",
+  rdpSessionWarningDescription:
+    "Koneksi browser lain melalui backend ini sedang menggunakan server dan akun Windows ini. Melanjutkan dapat memutus koneksi tersebut, tergantung pengaturan Windows. Lanjutkan?",
+  rdpSessionChanged:
+    "Koneksi lain dimulai saat Anda sedang menghubungkan. Hubungkan ulang untuk meninjau peringatan sesi.",
+
+  rdpCertificateTitle: "Percayai sertifikat server ini?",
+  rdpCertificateWarning:
+    "Sertifikat ini belum dipercaya untuk server ini. Koneksi Anda mungkin tidak aman. Lanjutkan hanya jika Anda mengenali server dan sertifikatnya.",
+  rdpCertificateChanged:
+    "Sertifikat server telah berubah. Periksa sidik jarinya sebelum melanjutkan.",
+  rdpCertificateSubject: "Subjek",
+  rdpCertificateIssuer: "Penerbit",
+  rdpCertificateValidity: "Berlaku mulai / hingga",
+  rdpCertificatePrevious: "Sidik jari yang sebelumnya dipercaya",
+  rdpCertificateManaged:
+    "Kepercayaan sertifikat dikelola oleh operator. Hubungi administrator untuk memperbarui sidik jari konfigurasi.",
+  rdpCertificateTrustFailed:
+    "Sertifikat tidak dapat dipercaya. Hubungkan ulang untuk memeriksa perubahan sertifikat, lalu coba lagi.",
+  rdpCertificateCancel: "Batal",
+  rdpCertificateContinue: "Lanjutkan",
+  rdpCertificateSaving: "Mempercayai sertifikat…",
+  rdpShowCertificate: "Tampilkan sertifikat",
+
   exportExcel: "Excel (.xlsx)",
   exportDescription:
     "Ekspor detail koneksi dan catatan. Pilih entri yang akan disertakan.",
@@ -279,4 +303,35 @@ export const serversMessages = {
     "Menutup jendela ini memutuskan SSH. Sesi berakhir setelah 30 menit. Menghubungkan kembali memulai shell baru.",
   sshOutputOverflow:
     "Output terminal melebihi batas buffer. Hubungkan kembali untuk memulai shell baru.",
+  rdpOpenDesktop: "Buka desktop",
+  rdpBrowserIntro:
+    "Buka desktop jarak jauh interaktif di jendela baru menggunakan kredensial yang tersimpan.",
+  rdpCredentialsRequired:
+    "Simpan nama pengguna dan kata sandi pada entri RDP ini untuk menggunakan desktop browser.",
+  rdpDesktopTitle: "Desktop jarak jauh",
+  rdpConnecting: "Menghubungkan ke desktop…",
+  rdpConnected: "Terhubung",
+  rdpDisconnected: "Terputus",
+  rdpConnectionFailed:
+    "Tidak dapat terhubung ke desktop. Periksa apakah gateway RDP berjalan, dapat menjangkau server, dan mempercayai sertifikatnya.",
+  rdpAuthFailed:
+    "Autentikasi gagal. Periksa sesi aplikasi serta nama pengguna dan kata sandi RDP yang tersimpan, lalu hubungkan kembali.",
+  rdpInvalidEntry:
+    "Pengaturan koneksi RDP tidak valid. Periksa entri inventaris ini dan hubungkan kembali.",
+  rdpCapacityExceeded:
+    "Batas desktop backend telah tercapai. Putuskan desktop lain atau coba lagi nanti.",
+  rdpSessionExpired:
+    "Sesi desktop kedaluwarsa. Hubungkan kembali untuk memulai koneksi lain.",
+  rdpSessionEnded:
+    "Koneksi desktop berakhir. Hubungkan kembali untuk membukanya lagi.",
+  rdpUnstable: "Koneksi desktop merespons dengan lambat.",
+  rdpDesktopHelp:
+    "Klik desktop untuk mengontrolnya. Tekan Shift+Escape untuk kembali ke kontrol. Menutup jendela ini memutuskan RDP.",
+  rdpCtrlAltDelete: "Kirim Ctrl+Alt+Delete",
+  rdpFullscreen: "Desktop layar penuh",
+  rdpExitFullscreen: "Keluar dari layar penuh",
+  rdpFullscreenFailed:
+    "Layar penuh tidak dapat dibuka. Coba lagi menggunakan tombol layar penuh.",
+  rdpKeyboardLabel: "Input keyboard desktop jarak jauh",
+  rdpDesktopLoading: "Menunggu desktop jarak jauh…",
 } as const;

@@ -3901,3 +3901,18 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 .server-ssh-terminal > .xterm {
   height: 100%;
 }
+
+.server-rdp-viewport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.server-rdp-surface {
+  position: relative;
+  flex-shrink: 0;
+  touch-action: none;
+}

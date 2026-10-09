@@ -138,7 +138,9 @@ export function ServerEntryDetails({
       {accessType === "SSH" && (
         <ServerSshGuide entry={entry} isAdmin={isAdmin} />
       )}
-      {accessType === "RDP" && <ServerRdpGuide entry={entry} />}
+      {accessType === "RDP" && (
+        <ServerRdpGuide entry={entry} isAdmin={isAdmin} />
+      )}
       {accessType === "DATABASE" && <ServerDatabaseGuide entry={entry} />}
       {["FTP", "SFTP", "FTPS"].includes(accessType) && (
         <ServerFileTransferGuide entry={entry} />

@@ -35,6 +35,7 @@ bun run preview     # Serve the production build locally
 
 - [Deployment guide](docs/deployment.md)
 - [Browser SSH terminal setup](docs/browser-ssh.md)
+- [Browser RDP desktop setup](docs/browser-rdp.md)
 - [Product scope and terminology](PRODUCT.md)
 - [Design system](DESIGN.md)
 - [Mascot references](docs/mascot.md)
