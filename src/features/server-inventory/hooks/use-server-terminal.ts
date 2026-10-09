@@ -33,6 +33,18 @@ const terminalEventSchema = z.union([
   hostKeySchema,
 ]);
 
+const SUDO_PASSWORD_PROMPT_REGEX = /\[sudo\]\s+password(\s+for\s+\S+)?:\s*$/i;
+const GENERIC_PASSWORD_PROMPT_REGEX = /(?:^|\s)password:\s*$/i;
+const PASSPHRASE_PROMPT_REGEX = /(?:^|\s)passphrase:\s*$/i;
+
+function isPasswordPromptText(text: string): boolean {
+  return (
+    SUDO_PASSWORD_PROMPT_REGEX.test(text) ||
+    GENERIC_PASSWORD_PROMPT_REGEX.test(text) ||
+    PASSPHRASE_PROMPT_REGEX.test(text)
+  );
+}
+
 export function useServerTerminal(serverId: string, attempt: number) {
   const { messages } = useI18n();
   const copy = messages.servers;
@@ -43,12 +55,18 @@ export function useServerTerminal(serverId: string, attempt: number) {
   );
   const [trustPending, setTrustPending] = useState(false);
   const disconnectRef = useRef<() => void>(() => undefined);
+  const sendInputRef = useRef<(data: string) => void>(() => undefined);
   const terminalRef = useRef<Terminal | null>(null);
   const resizeRef = useRef<() => void>(() => undefined);
   const keyboardInputRef = useRef<HTMLTextAreaElement | null>(null);
   const fontSizeRef = useRef(14);
   const [fontSize, setFontSize] = useState(14);
   const [hasSelection, setHasSelection] = useState(false);
+  const [passwordPrompt, setPasswordPrompt] = useState<{
+    x: number;
+    y: number;
+    promptText: string;
+  } | null>(null);
 
   function changeFontSize(value: number) {
     const next = Math.max(10, Math.min(24, value));
@@ -133,9 +151,22 @@ export function useServerTerminal(serverId: string, attempt: number) {
         resize();
       }
     });
+    sendInputRef.current = (data: string) => {
+      if (connected) {
+        send({ type: "input", data });
+        setPasswordPrompt(null);
+      }
+    };
     const input = terminal.onData((data) => {
       if (connected) {
         send({ type: "input", data });
+        if (
+          data.includes("\r") ||
+          data.includes("\n") ||
+          data.includes("\x03")
+        ) {
+          setPasswordPrompt(null);
+        }
       }
     });
     const binaryInput = terminal.onBinary((data) => {
@@ -173,6 +204,38 @@ export function useServerTerminal(serverId: string, attempt: number) {
       send({ type: "trust-host-key", challengeId });
     };
 
+    function checkForPasswordPrompt() {
+      if (disposed || !connected) {
+        return;
+      }
+      try {
+        const buffer = terminal.buffer.active;
+        const line = buffer.getLine(buffer.baseY + buffer.cursorY);
+        const text = line?.translateToString(true).trim() ?? "";
+        if (!isPasswordPromptText(text)) {
+          setPasswordPrompt(null);
+          return;
+        }
+
+        const cols = Math.max(1, terminal.cols);
+        const rows = Math.max(1, terminal.rows);
+        const charWidth = container
+          ? container.clientWidth / cols
+          : fontSizeRef.current * 0.6;
+        const charHeight = container
+          ? container.clientHeight / rows
+          : fontSizeRef.current * 1.2;
+
+        setPasswordPrompt({
+          x: Math.max(12, buffer.cursorX * charWidth),
+          y: Math.max(12, buffer.cursorY * charHeight),
+          promptText: text,
+        });
+      } catch {
+        setPasswordPrompt(null);
+      }
+    }
+
     function writeOutput(data: ArrayBuffer) {
       const bytes = new Uint8Array(data);
       outputBytes += bytes.length;
@@ -183,6 +246,7 @@ export function useServerTerminal(serverId: string, attempt: number) {
       }
       terminal.write(bytes, () => {
         outputBytes -= bytes.length;
+        checkForPasswordPrompt();
       });
     }
 
@@ -319,6 +383,7 @@ export function useServerTerminal(serverId: string, attempt: number) {
       terminal.dispose();
       terminalRef.current = null;
       keyboardInputRef.current = null;
+      sendInputRef.current = () => undefined;
       resizeRef.current = () => undefined;
       trustRef.current = () => undefined;
     };
@@ -333,6 +398,8 @@ export function useServerTerminal(serverId: string, attempt: number) {
     clear: () => terminalRef.current?.clear(),
     selectAll: () => terminalRef.current?.selectAll(),
     getSelection: () => terminalRef.current?.getSelection() ?? "",
+    sendInput: (data: string) => sendInputRef.current(data),
+    focus: () => terminalRef.current?.focus(),
     status,
     error,
     hostKey,
@@ -342,6 +409,8 @@ export function useServerTerminal(serverId: string, attempt: number) {
         trustRef.current(hostKey.challengeId);
       }
     },
+    passwordPrompt,
+    dismissPasswordPrompt: () => setPasswordPrompt(null),
     disconnect: () => disconnectRef.current(),
   };
 }

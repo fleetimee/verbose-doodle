@@ -17,6 +17,9 @@ import {
   MenubarMenu,
   MenubarSeparator,
   MenubarShortcut,
+  MenubarSub,
+  MenubarSubContent,
+  MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import {
@@ -41,7 +44,10 @@ interface TerminalToolbarProps {
   onFontSizeChange: (size: number) => void;
   onReconnect: () => void;
   onSelectAll: () => void;
+  onSendPassword: (targetServerId: string) => void;
   onToggleFullscreen: () => void;
+  otherServers?: ServerEntry[];
+  sendingPassword?: boolean;
   statusLabel: string;
 }
 
@@ -59,7 +65,10 @@ export function ServerTerminalToolbar({
   onCopy,
   onSelectAll,
   onFontSizeChange,
+  onSendPassword,
   onToggleFullscreen,
+  otherServers = [],
+  sendingPassword = false,
   statusLabel,
 }: TerminalToolbarProps) {
   const { messages } = useI18n();
@@ -70,6 +79,9 @@ export function ServerTerminalToolbar({
   const healthy = connected;
   const connectionLabel = disconnected ? copy.sshReconnect : copy.sshDisconnect;
   const connectionAction = disconnected ? onReconnect : onDisconnect;
+  const serversWithPassword = otherServers.filter(
+    (server) => server.id !== entry.id && server.hasPassword
+  );
 
   return (
     <header className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b px-3 py-1.5">
@@ -123,6 +135,43 @@ export function ServerTerminalToolbar({
                 {copy.sshClearDisplay}
               </MenubarItem>
             </MenubarGroup>
+          </MenubarContent>
+        </MenubarMenu>
+        <MenubarMenu>
+          <MenubarTrigger>{copy.sshCredentialsMenu}</MenubarTrigger>
+          <MenubarContent finalFocus={keyboardInputRef}>
+            <MenubarGroup>
+              <MenubarItem
+                disabled={!(connected && entry.hasPassword) || sendingPassword}
+                onClick={() => onSendPassword(entry.id)}
+              >
+                {copy.sshPasteServerPassword}
+              </MenubarItem>
+            </MenubarGroup>
+            {serversWithPassword.length > 0 && (
+              <>
+                <MenubarSeparator />
+                <MenubarGroup>
+                  <MenubarSub>
+                    <MenubarSubTrigger disabled={!connected || sendingPassword}>
+                      {copy.sshPasteOtherServerPassword}
+                    </MenubarSubTrigger>
+                    <MenubarSubContent className="max-h-64 overflow-y-auto">
+                      {serversWithPassword.map((server) => (
+                        <MenubarItem
+                          key={server.id}
+                          onClick={() => onSendPassword(server.id)}
+                        >
+                          <span className="truncate">
+                            {server.name} ({server.username ?? server.host})
+                          </span>
+                        </MenubarItem>
+                      ))}
+                    </MenubarSubContent>
+                  </MenubarSub>
+                </MenubarGroup>
+              </>
+            )}
           </MenubarContent>
         </MenubarMenu>
         <MenubarMenu>
