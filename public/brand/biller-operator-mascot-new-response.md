@@ -2,10 +2,11 @@
 
 Generated with the built-in imagegen tool using
 `biller-operator-mascot-library.png` as the character and illustration reference.
-The image appears at 20% opacity in the bottom-right of the new response
+The image appears at full opacity in the bottom-right of the new response
 workspace throughout the form steps, up to 580px wide and 780px tall.
-It sits above the form without changing the form's position or capturing
-pointer input.
+It sits behind the form without changing the form's position or capturing
+pointer input. The form card's background uses 70% opacity so the illustration
+remains visible through it, while the form content stays fully opaque.
 
 ## Generation prompt
 

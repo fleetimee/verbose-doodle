@@ -320,7 +320,7 @@ export function ResponseStepper({
         <img
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute right-0 bottom-0 z-20 h-[min(90%,780px)] w-[clamp(240px,36vw,580px)] select-none object-contain object-right-bottom opacity-20"
+          className="pointer-events-none absolute right-0 bottom-0 h-[min(90%,780px)] w-[clamp(240px,36vw,580px)] select-none object-contain object-right-bottom"
           draggable={false}
           height={780}
           src="/brand/biller-operator-mascot-new-response.png"
@@ -333,7 +333,7 @@ export function ResponseStepper({
             onStepClick={handleGoToStep}
           />
 
-          <section className="min-w-0 rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm">
+          <section className="min-w-0 rounded-2xl border-2 border-border/80 border-b-4 bg-card/70 shadow-sm">
             {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: Form needs keyboard navigation for stepper UX */}
             <form
               className="flex min-h-[34rem] min-w-0 flex-col"
