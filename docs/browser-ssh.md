@@ -24,10 +24,13 @@ SSH port, including any required office network or VPN.
 
 Set `SSH_KNOWN_HOSTS` or `app.ssh.known-hosts` to an OpenSSH `known_hosts` file.
 When empty, the backend uses `.ssh/known_hosts` in its process user's home.
-Mount this file into the backend container when deploying with Docker.
+Mount the SSH directory into the backend container with write access when deploying
+with Docker. The backend creates a missing `known_hosts` file after the first
+explicit host-key approval.
 Verify each server fingerprint through a trusted channel before adding its host
-key. Nonstandard ports use OpenSSH's `[host]:port` notation. Unknown and changed
-keys are rejected; the application never automatically trusts or replaces keys.
+key. Nonstandard ports use OpenSSH's `[host]:port` notation. Unknown keys require
+fingerprint review and explicit administrator approval in the terminal. Changed
+keys remain rejected; the application never automatically trusts or replaces keys.
 
 Allow the frontend origin in the backend's existing `app.websocket.allowed-origins`
 configuration. The terminal uses the existing Redis-backed, single-use realtime

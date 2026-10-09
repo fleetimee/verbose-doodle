@@ -321,10 +321,22 @@ export const serversMessages = {
     "Could not connect. Check the server address, port, and backend network access, then reconnect.",
   sshAuthFailed:
     "SSH authentication failed. Check the stored username and password, then reconnect.",
+  sshHostKeyTitle: "Trust this SSH server?",
+  sshHostKeyDescription:
+    "This server is not trusted yet. Compare its SHA-256 fingerprint with the server administrator before approving. Approval saves this key on the backend and continues the connection. This request expires after 90 seconds.",
+  sshHostKeyAlgorithm: "Key algorithm",
+  sshHostKeyFingerprint: "SHA-256 fingerprint",
+  sshHostKeyTrust: "Trust key and connect",
+  sshHostKeySaving: "Saving key and connecting…",
+  sshHostKeyCancel: "Cancel connection",
+  sshKnownHostsWriteFailed:
+    "Could not save the host key. Ask an administrator to make the backend SSH directory writable, then reconnect.",
+  sshHostKeyApprovalExpired:
+    "Host key approval expired. Reconnect to review the fingerprint again.",
   sshKnownHostsMissing:
     "The backend known_hosts file is missing. Ask an administrator to configure it, then reconnect.",
   sshHostKeyRejected:
-    "The server host key is unknown or has changed. Ask an administrator to verify it and update the backend known_hosts file.",
+    "The server host key was rejected or has changed. Ask an administrator to verify it and update the backend known_hosts file.",
   sshSessionEnded: "The SSH session ended. Reconnect to start a new shell.",
   sshOutputOverflow:
     "Terminal output exceeded the buffer limit. Reconnect to start a new shell.",

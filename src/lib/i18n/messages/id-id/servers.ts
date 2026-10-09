@@ -321,10 +321,22 @@ export const serversMessages = {
     "Tidak dapat terhubung. Periksa alamat server, port, dan akses jaringan backend, lalu hubungkan kembali.",
   sshAuthFailed:
     "Autentikasi SSH gagal. Periksa nama pengguna dan kata sandi yang tersimpan, lalu hubungkan kembali.",
+  sshHostKeyTitle: "Percayai server SSH ini?",
+  sshHostKeyDescription:
+    "Server ini belum dipercaya. Cocokkan sidik jari SHA-256 dengan administrator server sebelum menyetujui. Persetujuan menyimpan kunci di backend dan melanjutkan koneksi. Permintaan ini kedaluwarsa setelah 90 detik.",
+  sshHostKeyAlgorithm: "Algoritma kunci",
+  sshHostKeyFingerprint: "Sidik jari SHA-256",
+  sshHostKeyTrust: "Percayai kunci dan hubungkan",
+  sshHostKeySaving: "Menyimpan kunci dan menghubungkan…",
+  sshHostKeyCancel: "Batalkan koneksi",
+  sshKnownHostsWriteFailed:
+    "Kunci host tidak dapat disimpan. Minta administrator mengizinkan penulisan ke direktori SSH backend, lalu hubungkan kembali.",
+  sshHostKeyApprovalExpired:
+    "Persetujuan kunci host kedaluwarsa. Hubungkan kembali untuk memeriksa sidik jari.",
   sshKnownHostsMissing:
     "File known_hosts backend tidak ditemukan. Minta administrator mengonfigurasinya, lalu hubungkan kembali.",
   sshHostKeyRejected:
-    "Kunci host server tidak dikenal atau telah berubah. Minta administrator memverifikasinya dan memperbarui file known_hosts backend.",
+    "Kunci host server ditolak atau telah berubah. Minta administrator memverifikasinya dan memperbarui file known_hosts backend.",
   sshSessionEnded:
     "Sesi SSH berakhir. Hubungkan kembali untuk memulai shell baru.",
   sshOutputOverflow:

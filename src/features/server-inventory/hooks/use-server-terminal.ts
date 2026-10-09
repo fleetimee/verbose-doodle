@@ -12,17 +12,36 @@ type TerminalCommand =
   | { type: "connect"; serverId: string; cols: number; rows: number }
   | { type: "resize"; cols: number; rows: number }
   | { type: "input" | "binary-input"; data: string }
-  | { type: "ping" };
+  | { type: "ping" }
+  | { type: "trust-host-key"; challengeId: string };
 
-const terminalEventSchema = z.object({
-  type: z.enum(["connected", "error", "pong"]),
-  code: z.string(),
+const hostKeySchema = z.object({
+  type: z.literal("host-key"),
+  code: z.literal("HOST_KEY_UNKNOWN"),
+  challengeId: z.string().uuid(),
+  host: z.string(),
+  port: z.number().int().min(1).max(65_535),
+  algorithm: z.string(),
+  fingerprint: z.string().startsWith("SHA256:"),
 });
+
+const terminalEventSchema = z.union([
+  z.object({
+    type: z.enum(["connected", "error", "pong"]),
+    code: z.string(),
+  }),
+  hostKeySchema,
+]);
 
 export function useServerTerminal(serverId: string, attempt: number) {
   const { messages } = useI18n();
   const copy = messages.servers;
   const containerRef = useRef<HTMLDivElement>(null);
+  const trustRef = useRef<(challengeId: string) => void>(() => undefined);
+  const [hostKey, setHostKey] = useState<z.infer<typeof hostKeySchema> | null>(
+    null
+  );
+  const [trustPending, setTrustPending] = useState(false);
   const disconnectRef = useRef<() => void>(() => undefined);
   const terminalRef = useRef<Terminal | null>(null);
   const resizeRef = useRef<() => void>(() => undefined);
@@ -81,6 +100,8 @@ export function useServerTerminal(serverId: string, attempt: number) {
     terminal.textarea?.setAttribute("aria-label", copy.sshTitle);
     setStatus("connecting");
     setError("");
+    setHostKey(null);
+    setTrustPending(false);
 
     function send(message: TerminalCommand) {
       if (socket?.readyState === WebSocket.OPEN) {
@@ -124,7 +145,7 @@ export function useServerTerminal(serverId: string, attempt: number) {
       }
     });
     const heartbeat = window.setInterval(() => send({ type: "ping" }), 20_000);
-    const timeout = window.setTimeout(() => {
+    let timeout = window.setTimeout(() => {
       if (!(disposed || cancelled || connected)) {
         setError(copy.sshConnectionFailed);
         disconnectRef.current();
@@ -132,12 +153,24 @@ export function useServerTerminal(serverId: string, attempt: number) {
     }, 30_000);
 
     disconnectRef.current = () => {
+      setHostKey(null);
+      setTrustPending(false);
       cancelled = true;
       connected = false;
       window.clearTimeout(timeout);
       window.clearInterval(heartbeat);
       socket?.close();
       setStatus("disconnected");
+    };
+
+    trustRef.current = (challengeId) => {
+      window.clearTimeout(timeout);
+      timeout = window.setTimeout(() => {
+        setError(copy.sshConnectionFailed);
+        disconnectRef.current();
+      }, 30_000);
+      setTrustPending(true);
+      send({ type: "trust-host-key", challengeId });
     };
 
     function writeOutput(data: ArrayBuffer) {
@@ -162,7 +195,16 @@ export function useServerTerminal(serverId: string, attempt: number) {
           return;
         }
         const message = result.data;
-        if (message.type === "connected") {
+        if (message.type === "host-key") {
+          setHostKey(message);
+          window.clearTimeout(timeout);
+          timeout = window.setTimeout(() => {
+            setError(copy.sshHostKeyApprovalExpired);
+            disconnectRef.current();
+          }, 95_000);
+        } else if (message.type === "connected") {
+          setHostKey(null);
+          setTrustPending(false);
           connected = true;
           window.clearTimeout(timeout);
           setStatus("connected");
@@ -174,8 +216,12 @@ export function useServerTerminal(serverId: string, attempt: number) {
             ["HOST_KEY_REJECTED", copy.sshHostKeyRejected],
             ["INVALID_ENTRY", copy.sshCredentialsRequired],
             ["KNOWN_HOSTS_MISSING", copy.sshKnownHostsMissing],
+            ["KNOWN_HOSTS_WRITE_FAILED", copy.sshKnownHostsWriteFailed],
+            ["HOST_KEY_APPROVAL_EXPIRED", copy.sshHostKeyApprovalExpired],
             ["CAPACITY_EXCEEDED", copy.sshCapacityExceeded],
           ]);
+          setHostKey(null);
+          setTrustPending(false);
           setError(errors.get(message.code) ?? copy.sshConnectionFailed);
           socket?.close();
         }
@@ -243,6 +289,8 @@ export function useServerTerminal(serverId: string, attempt: number) {
           window.clearTimeout(timeout);
           window.clearInterval(heartbeat);
           if (!disposed) {
+            setHostKey(null);
+            setTrustPending(false);
             setStatus("disconnected");
           }
         };
@@ -272,6 +320,7 @@ export function useServerTerminal(serverId: string, attempt: number) {
       terminalRef.current = null;
       keyboardInputRef.current = null;
       resizeRef.current = () => undefined;
+      trustRef.current = () => undefined;
     };
   }, [serverId, attempt, copy]);
 
@@ -286,6 +335,13 @@ export function useServerTerminal(serverId: string, attempt: number) {
     getSelection: () => terminalRef.current?.getSelection() ?? "",
     status,
     error,
+    hostKey,
+    trustPending,
+    trustHostKey: () => {
+      if (hostKey && !trustPending) {
+        trustRef.current(hostKey.challengeId);
+      }
+    },
     disconnect: () => disconnectRef.current(),
   };
 }
