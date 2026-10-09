@@ -3570,6 +3570,21 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   color: #ff8895;
 }
 
+.server-inventory-table > [data-slot="scroll-area"]::after {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: clamp(200px, 42%, 480px);
+  height: min(85%, 520px);
+  pointer-events: none;
+  content: "";
+  background:
+    url("/brand/biller-operator-mascot-library.png") right bottom / contain
+    no-repeat;
+  opacity: 0.08;
+  mask-image: linear-gradient(to bottom, transparent, black 25%);
+}
+
 .server-inventory-table [data-slot="table-body"] {
   opacity: 1;
   transition: opacity 150ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));

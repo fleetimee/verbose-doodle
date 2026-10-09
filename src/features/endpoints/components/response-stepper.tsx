@@ -314,10 +314,19 @@ export function ResponseStepper({
       />
 
       <div
-        className="flex-1 overflow-y-scroll bg-muted/20 px-4 py-6 [scrollbar-gutter:stable] md:px-8 md:py-8"
+        className="relative isolate flex-1 overflow-y-scroll bg-muted/20 px-4 py-6 [scrollbar-gutter:stable] md:px-8 md:py-8"
         ref={scrollContainerRef}
       >
-        <div className="mx-auto grid w-full max-w-6xl items-start gap-6 lg:grid-cols-[18rem_1fr]">
+        <img
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute right-0 bottom-0 z-20 h-[min(90%,780px)] w-[clamp(240px,36vw,580px)] select-none object-contain object-right-bottom opacity-20"
+          draggable={false}
+          height={780}
+          src="/brand/biller-operator-mascot-new-response.png"
+          width={580}
+        />
+        <div className="relative z-10 mx-auto grid w-full max-w-6xl items-start gap-6 lg:grid-cols-[18rem_1fr]">
           <ResponseBuilderRail
             currentStepIndex={currentStepIndex}
             formValues={formValues}

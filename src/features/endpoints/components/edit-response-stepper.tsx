@@ -222,195 +222,212 @@ export function EditResponseStepper({
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 items-center justify-center overflow-y-scroll bg-muted/20 px-4 py-8 [scrollbar-gutter:stable] md:px-8 md:pb-8">
-        <Card className="w-full max-w-3xl" variant="elevated">
-          {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: Form needs keyboard navigation for stepper UX */}
-          <form
-            className="flex min-h-[34rem] flex-col"
-            onKeyDown={handleKeyDown}
-            onSubmit={handleSubmit}
-          >
-            <AnimatePresence initial={false} mode="wait">
-              <motion.div
-                animate={{ opacity: 1, x: 0 }}
-                className="flex flex-1 flex-col gap-8 p-5 md:p-8"
-                exit={{ opacity: 0, x: shouldReduceMotion ? 0 : -8 }}
-                initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 8 }}
-                key={editType}
-                transition={{
-                  duration: shouldReduceMotion ? MOTION_DURATION.fast : 0.16,
-                  ease: "easeOut",
-                }}
-              >
-                <div className="flex items-start gap-3 border-b pb-5">
-                  <div
-                    className={`flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/70 ${step.bgColor}`}
-                  >
-                    <step.icon className={`size-5 ${step.color}`} />
+      <div className="relative isolate flex flex-1 items-center justify-center overflow-y-scroll bg-muted/20 px-4 py-8 [scrollbar-gutter:stable] md:px-8 md:pb-8">
+        <div className="relative z-10 my-auto w-full max-w-3xl shrink-0">
+          <Card className="w-full" variant="elevated">
+            {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: Form needs keyboard navigation for stepper UX */}
+            <form
+              className="flex min-h-[34rem] flex-col"
+              onKeyDown={handleKeyDown}
+              onSubmit={handleSubmit}
+            >
+              <AnimatePresence initial={false} mode="wait">
+                <motion.div
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex flex-1 flex-col gap-8 p-5 md:p-8"
+                  exit={{ opacity: 0, x: shouldReduceMotion ? 0 : -8 }}
+                  initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 8 }}
+                  key={editType}
+                  transition={{
+                    duration: shouldReduceMotion ? MOTION_DURATION.fast : 0.16,
+                    ease: "easeOut",
+                  }}
+                >
+                  <div className="flex items-start gap-3 border-b pb-5">
+                    <div
+                      className={`flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/70 ${step.bgColor}`}
+                    >
+                      <step.icon className={`size-5 ${step.color}`} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="font-bold text-2xl tracking-tight md:text-3xl">
+                        {step.title}
+                      </h2>
+                      <p className="mt-1.5 text-muted-foreground text-sm leading-relaxed">
+                        {step.description}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h2 className="font-bold text-2xl tracking-tight md:text-3xl">
-                      {step.title}
-                    </h2>
-                    <p className="mt-1.5 text-muted-foreground text-sm leading-relaxed">
-                      {step.description}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex-1 space-y-4">
-                  {editType === "name" && (
-                    <Controller
-                      control={form.control}
-                      name="name"
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                          <FieldContent>
-                            <Input
-                              {...field}
-                              aria-invalid={fieldState.invalid}
-                              autoComplete="off"
-                              autoFocus
-                              id="edit-response-name"
-                              placeholder={
-                                messages.endpoints.responseNamePlaceholder
-                              }
-                              size="xl"
-                              variant="mono-lg"
-                            />
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {[
-                                "success_response",
-                                "validation_error",
-                                "timeout_fallback",
-                              ].map((example) => (
-                                <button
-                                  className="rounded-lg border border-border/60 bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
-                                  key={example}
-                                  onClick={() => {
-                                    field.onChange(example);
-                                    form.trigger("name").catch(() => undefined);
-                                  }}
-                                  type="button"
-                                >
-                                  {example}
-                                </button>
-                              ))}
-                            </div>
-                            <FieldDescription className="mt-3">
-                              {messages.endpoints.editNameFieldDescription}
-                            </FieldDescription>
-                          </FieldContent>
-                          {fieldState.invalid && (
-                            <FieldError errors={[fieldState.error]} />
-                          )}
-                        </Field>
-                      )}
-                    />
-                  )}
-
-                  {editType === "statusCode" && (
-                    <Controller
-                      control={form.control}
-                      name="statusCode"
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                          <FieldContent>
-                            <div className="mb-4 grid gap-2 sm:grid-cols-5">
-                              {COMMON_STATUS_CODES.map((status) => (
-                                <Button
-                                  key={status.code}
-                                  onClick={() => {
-                                    field.onChange(status.code);
-                                    form
-                                      .trigger("statusCode")
-                                      .catch(() => undefined);
-                                  }}
-                                  size="tile"
-                                  type="button"
-                                  variant={
-                                    field.value === status.code
-                                      ? "elevated"
-                                      : "card"
-                                  }
-                                >
-                                  <span className="font-bold font-mono text-base">
-                                    {status.code}
-                                  </span>
-                                  <span className="max-w-full truncate text-xs opacity-80">
-                                    {status.label}
-                                  </span>
-                                </Button>
-                              ))}
-                            </div>
-                            <StatusCodeCombobox
-                              field={field}
-                              fieldError={fieldState.error}
-                              onSelect={handleSubmit}
-                            />
-                            <FieldDescription className="mt-4">
-                              {messages.endpoints.editStatusFieldDescription}
-                            </FieldDescription>
-                          </FieldContent>
-                          {fieldState.invalid && (
-                            <FieldError errors={[fieldState.error]} />
-                          )}
-                        </Field>
-                      )}
-                    />
-                  )}
-
-                  {editType === "json" && (
-                    <Controller
-                      control={form.control}
-                      name="json"
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                          <FieldContent>
-                            <div className="overflow-hidden rounded-xl border bg-background shadow-xs">
-                              <JsonEditor
+                  <div className="flex-1 space-y-4">
+                    {editType === "name" && (
+                      <Controller
+                        control={form.control}
+                        name="name"
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldContent>
+                              <Input
+                                {...field}
                                 aria-invalid={fieldState.invalid}
+                                autoComplete="off"
                                 autoFocus
-                                className="[&>div:first-child]:rounded-none [&>div:first-child]:border-0"
-                                height="280px"
-                                id="edit-response-json"
-                                onBlur={field.onBlur}
-                                onChange={field.onChange}
-                                placeholder='{\n  "name": "Novian Andika",\n  "age": 17,\n  "gender": true,\n  "jobs": ["fishing", "running"]\n}'
-                                value={field.value}
+                                id="edit-response-name"
+                                placeholder={
+                                  messages.endpoints.responseNamePlaceholder
+                                }
+                                size="xl"
+                                variant="mono-lg"
                               />
-                            </div>
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {JSON_PRESETS.map((preset) => (
-                                <button
-                                  className="rounded-lg border border-border/60 bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
-                                  key={preset.name}
-                                  onClick={() => {
-                                    field.onChange(preset.value);
-                                    form.trigger("json").catch(() => undefined);
-                                  }}
-                                  type="button"
-                                >
-                                  {preset.name}
-                                </button>
-                              ))}
-                            </div>
-                            <FieldDescription className="mt-4">
-                              {messages.endpoints.editJsonFieldDescription}
-                            </FieldDescription>
-                          </FieldContent>
-                          {fieldState.invalid && (
-                            <FieldError errors={[fieldState.error]} />
-                          )}
-                        </Field>
-                      )}
-                    />
-                  )}
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </form>
-        </Card>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {[
+                                  "success_response",
+                                  "validation_error",
+                                  "timeout_fallback",
+                                ].map((example) => (
+                                  <button
+                                    className="rounded-lg border border-border/60 bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+                                    key={example}
+                                    onClick={() => {
+                                      field.onChange(example);
+                                      form
+                                        .trigger("name")
+                                        .catch(() => undefined);
+                                    }}
+                                    type="button"
+                                  >
+                                    {example}
+                                  </button>
+                                ))}
+                              </div>
+                              <FieldDescription className="mt-3">
+                                {messages.endpoints.editNameFieldDescription}
+                              </FieldDescription>
+                            </FieldContent>
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    )}
+
+                    {editType === "statusCode" && (
+                      <Controller
+                        control={form.control}
+                        name="statusCode"
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldContent>
+                              <div className="mb-4 grid gap-2 sm:grid-cols-5">
+                                {COMMON_STATUS_CODES.map((status) => (
+                                  <Button
+                                    key={status.code}
+                                    onClick={() => {
+                                      field.onChange(status.code);
+                                      form
+                                        .trigger("statusCode")
+                                        .catch(() => undefined);
+                                    }}
+                                    size="tile"
+                                    type="button"
+                                    variant={
+                                      field.value === status.code
+                                        ? "elevated"
+                                        : "card"
+                                    }
+                                  >
+                                    <span className="font-bold font-mono text-base">
+                                      {status.code}
+                                    </span>
+                                    <span className="max-w-full truncate text-xs opacity-80">
+                                      {status.label}
+                                    </span>
+                                  </Button>
+                                ))}
+                              </div>
+                              <StatusCodeCombobox
+                                field={field}
+                                fieldError={fieldState.error}
+                                onSelect={handleSubmit}
+                              />
+                              <FieldDescription className="mt-4">
+                                {messages.endpoints.editStatusFieldDescription}
+                              </FieldDescription>
+                            </FieldContent>
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    )}
+
+                    {editType === "json" && (
+                      <Controller
+                        control={form.control}
+                        name="json"
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldContent>
+                              <div className="overflow-hidden rounded-xl border bg-background shadow-xs">
+                                <JsonEditor
+                                  aria-invalid={fieldState.invalid}
+                                  autoFocus
+                                  className="[&>div:first-child]:rounded-none [&>div:first-child]:border-0"
+                                  height="280px"
+                                  id="edit-response-json"
+                                  onBlur={field.onBlur}
+                                  onChange={field.onChange}
+                                  placeholder='{\n  "name": "Novian Andika",\n  "age": 17,\n  "gender": true,\n  "jobs": ["fishing", "running"]\n}'
+                                  value={field.value}
+                                />
+                              </div>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {JSON_PRESETS.map((preset) => (
+                                  <button
+                                    className="rounded-lg border border-border/60 bg-muted/40 px-2.5 py-1 font-mono text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+                                    key={preset.name}
+                                    onClick={() => {
+                                      field.onChange(preset.value);
+                                      form
+                                        .trigger("json")
+                                        .catch(() => undefined);
+                                    }}
+                                    type="button"
+                                  >
+                                    {preset.name}
+                                  </button>
+                                ))}
+                              </div>
+                              <FieldDescription className="mt-4">
+                                {messages.endpoints.editJsonFieldDescription}
+                              </FieldDescription>
+                            </FieldContent>
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    )}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </form>
+          </Card>
+        </div>
+        {editType === "json" && (
+          <img
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute right-0 bottom-0 h-[min(90%,780px)] w-[clamp(240px,36vw,580px)] select-none object-contain object-right-bottom"
+            draggable={false}
+            height={560}
+            src="/brand/biller-operator-mascot-json-editor-cutout.png"
+            width={360}
+          />
+        )}
       </div>
 
       {/* Footer - Edge to Edge */}
