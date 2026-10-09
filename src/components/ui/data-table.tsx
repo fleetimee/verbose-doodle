@@ -1,16 +1,31 @@
 import type {
 	ColumnDef,
 	ColumnFiltersState,
+	ColumnVisibilityState,
+	RowData,
 	SortingState,
-	VisibilityState,
 } from "@tanstack/react-table";
 import {
+	columnFilteringFeature,
+	columnVisibilityFeature,
+	createFilteredRowModel,
+	createPaginatedRowModel,
+	createSortedRowModel,
+	filterFn_arrIncludes,
+	filterFn_equals,
+	filterFn_inDateRange,
+	filterFn_inNumberRange,
+	filterFn_includesString,
+	filterFn_weakEquals,
 	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	useReactTable,
+	rowPaginationFeature,
+	rowSelectionFeature,
+	rowSortingFeature,
+	sortFn_alphanumeric,
+	sortFn_datetime,
+	sortFn_text,
+	tableFeatures,
+	useTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -34,36 +49,57 @@ import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { useI18n } from "@/components/i18n-provider";
 import { formatMessage } from "@/lib/i18n";
 
-type DataTableProps<TData, TValue> = {
-	columns: ColumnDef<TData, TValue>[];
+export const dataTableFeatures = tableFeatures({
+	columnFilteringFeature,
+	columnVisibilityFeature,
+	rowPaginationFeature,
+	rowSelectionFeature,
+	rowSortingFeature,
+	filteredRowModel: createFilteredRowModel(),
+	paginatedRowModel: createPaginatedRowModel(),
+	sortedRowModel: createSortedRowModel(),
+	filterFns: {
+		arrIncludes: filterFn_arrIncludes,
+		equals: filterFn_equals,
+		inDateRange: filterFn_inDateRange,
+		inNumberRange: filterFn_inNumberRange,
+		includesString: filterFn_includesString,
+		weakEquals: filterFn_weakEquals,
+	},
+	sortFns: {
+		alphanumeric: sortFn_alphanumeric,
+		datetime: sortFn_datetime,
+		text: sortFn_text,
+	},
+});
+
+type DataTableProps<TData extends RowData> = {
+	columns: ColumnDef<typeof dataTableFeatures, TData>[];
 	data: TData[];
 	filterColumn?: string;
 	filterPlaceholder?: string;
 };
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RowData>({
 	columns,
 	data,
 	filterColumn,
 	filterPlaceholder,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
 	const { messages } = useI18n();
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+	const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>(
 		{},
 	);
 	const [rowSelection, setRowSelection] = useState({});
 
-	const table = useReactTable({
+	const table = useTable({
+		features: dataTableFeatures,
 		data,
 		columns,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
-		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
 		onColumnVisibilityChange: setColumnVisibility,
 		onRowSelectionChange: setRowSelection,
 		state: {

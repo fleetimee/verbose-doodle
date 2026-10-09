@@ -9,6 +9,7 @@ import { ArrowUpDown } from "@/components/hugeicons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import type { dataTableFeatures } from "@/components/ui/data-table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +33,9 @@ const getStatusStyles = (active: string): string => {
   return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
 };
 
-export const createColumns = (actions: ColumnActions): ColumnDef<User>[] => [
+export const createColumns = (
+  actions: ColumnActions
+): ColumnDef<typeof dataTableFeatures, User>[] => [
   {
     cell: ({ row }) => (
       <Checkbox

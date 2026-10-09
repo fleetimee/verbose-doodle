@@ -9,12 +9,19 @@ import {
   type Column,
   type ColumnDef,
   type ColumnFiltersState,
+  type ColumnVisibilityState,
+  columnFilteringFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  filterFn_equalsString,
   flexRender,
   functionalUpdate,
-  getCoreRowModel,
+  globalFilteringFeature,
+  rowPaginationFeature,
+  rowSortingFeature,
   type SortingState,
-  useReactTable,
-  type VisibilityState,
+  tableFeatures,
+  useTable,
 } from "@tanstack/react-table";
 import { motion, useReducedMotion } from "motion/react";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
@@ -110,6 +117,16 @@ type InventoryStyle = CSSProperties & {
   "--fullscreen-origin"?: string;
 };
 
+const serverTableFeatures = tableFeatures({
+  columnFilteringFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  globalFilteringFeature,
+  rowPaginationFeature,
+  rowSortingFeature,
+  filterFns: { equalsString: filterFn_equalsString },
+});
+
 const AnimatedTableRow = motion.create(TableRow);
 const rowTransition = {
   duration: 0.15,
@@ -140,7 +157,7 @@ function SortHeader({
   column,
   label,
 }: {
-  column: Column<ServerEntry>;
+  column: Column<typeof serverTableFeatures, ServerEntry, unknown>;
   label: string;
 }) {
   const { messages } = useI18n();
@@ -254,9 +271,10 @@ export function ServerInventoryTable({
       ),
     });
   const pagination = { pageIndex: query.page, pageSize: query.size };
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    databaseEngine: false,
-  });
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({
+      databaseEngine: false,
+    });
   const [collapsedHosts, setCollapsedHosts] = useState<Set<string>>(new Set());
   const [animatedHost, setAnimatedHost] = useState<string | null>(null);
   const toggleHost = (host: string, animate = true) => {
@@ -344,7 +362,7 @@ export function ServerInventoryTable({
       toast.error(copy.copyFailed);
     }
   };
-  const columns: ColumnDef<ServerEntry>[] = [
+  const columns: ColumnDef<typeof serverTableFeatures, ServerEntry>[] = [
     {
       accessorKey: "name",
       size: 288,
@@ -452,11 +470,11 @@ export function ServerInventoryTable({
         ),
     },
   ];
-  const table = useReactTable({
+  const table = useTable({
+    features: serverTableFeatures,
     columns,
     data: entries,
     getRowId: (entry) => entry.id,
-    getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
@@ -511,7 +529,7 @@ export function ServerInventoryTable({
     hostGroups.set(row.original.host, group);
   }
   const filteredCount = totalElements;
-  const page = table.getState().pagination.pageIndex + 1;
+  const page = table.state.pagination.pageIndex + 1;
   const pages = Math.max(1, table.getPageCount());
 
   const tableStyle: InventoryStyle = {
@@ -1012,7 +1030,7 @@ export function ServerInventoryTable({
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Select
             onValueChange={(value) => table.setPageSize(Number(value))}
-            value={String(table.getState().pagination.pageSize)}
+            value={String(table.state.pagination.pageSize)}
           >
             <SelectTrigger aria-label={copy.hostsPerPage}>
               <SelectValue />
