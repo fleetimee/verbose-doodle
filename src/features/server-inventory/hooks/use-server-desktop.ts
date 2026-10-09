@@ -11,11 +11,14 @@ import {
   reviewRdpSession,
   trustRdpCertificate,
 } from "@/features/server-inventory/api";
-import { createDesktopInput } from "@/features/server-inventory/utils/desktop-input";
+import {
+  createDesktopInput,
+  type DesktopShortcut,
+} from "@/features/server-inventory/utils/desktop-input";
 
 type DesktopControls = {
   disconnect: () => void;
-  sendCtrlAltDelete: () => void;
+  sendShortcut: (shortcut: DesktopShortcut) => void;
 };
 
 export function useServerDesktop(serverId: string, attempt: number) {
@@ -23,9 +26,10 @@ export function useServerDesktop(serverId: string, attempt: number) {
   const copy = messages.servers;
   const containerRef = useRef<HTMLElement>(null);
   const disconnectButtonRef = useRef<HTMLButtonElement>(null);
+  const keyboardInputRef = useRef<HTMLTextAreaElement>(null);
   const controlsRef = useRef<DesktopControls>({
     disconnect: () => undefined,
-    sendCtrlAltDelete: () => undefined,
+    sendShortcut: () => undefined,
   });
   const [status, setStatus] = useState<
     "connecting" | "connected" | "disconnected"
@@ -162,7 +166,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
     }
     controlsRef.current = {
       disconnect,
-      sendCtrlAltDelete: () => input?.sendCtrlAltDelete(),
+      sendShortcut: (shortcut) => input?.sendShortcut(shortcut),
     };
 
     async function reviewCertificate() {
@@ -244,6 +248,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
         input = createDesktopInput(client, surface, copy.rdpKeyboardLabel, () =>
           disconnectButtonRef.current?.focus()
         );
+        keyboardInputRef.current = input.keyboardElement;
         display.onresize = resize;
         client.onerror = (failure) => fail(failure.code);
         tunnel.onerror = (failure) => fail(failure.code);
@@ -295,10 +300,11 @@ export function useServerDesktop(serverId: string, attempt: number) {
       observer.disconnect();
       window.removeEventListener("pagehide", disconnect);
       input?.dispose();
+      keyboardInputRef.current = null;
       container.replaceChildren();
       controlsRef.current = {
         disconnect: () => undefined,
-        sendCtrlAltDelete: () => undefined,
+        sendShortcut: () => undefined,
       };
     };
   }, [serverId, attempt, copy]);
@@ -313,10 +319,12 @@ export function useServerDesktop(serverId: string, attempt: number) {
     cancelCertificate: () => controlsRef.current.disconnect(),
     containerRef,
     disconnectButtonRef,
+    keyboardInputRef,
     status,
     error,
     unstable,
     disconnect: () => controlsRef.current.disconnect(),
-    sendCtrlAltDelete: () => controlsRef.current.sendCtrlAltDelete(),
+    sendShortcut: (shortcut: DesktopShortcut) =>
+      controlsRef.current.sendShortcut(shortcut),
   };
 }

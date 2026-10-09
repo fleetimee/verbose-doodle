@@ -4,6 +4,17 @@ const POINTER_EVENTS = ["mousedown", "mouseup", "mousemove"];
 const CONTROL = 0xff_e3;
 const ALT = 0xff_e9;
 const DELETE = 0xff_ff;
+const WINDOWS = 0xff_eb;
+const SHORTCUTS = {
+  "ctrl-alt-delete": [CONTROL, ALT, DELETE],
+  "previous-desktop": [WINDOWS, CONTROL, 0xff_51],
+  "next-desktop": [WINDOWS, CONTROL, 0xff_53],
+  "task-view": [WINDOWS, 0xff_09],
+  "show-desktop": [WINDOWS, 0x64],
+  "task-manager": [CONTROL, 0xff_e1, 0xff_1b],
+} as const;
+
+export type DesktopShortcut = keyof typeof SHORTCUTS;
 
 export function createDesktopInput(
   client: Guacamole.Client,
@@ -72,6 +83,7 @@ export function createDesktopInput(
 
   return {
     focus,
+    keyboardElement: input,
     reset,
     enable: () => {
       enabled = true;
@@ -82,15 +94,16 @@ export function createDesktopInput(
       enabled = false;
       input.disabled = true;
     },
-    sendCtrlAltDelete: () => {
+    sendShortcut: (shortcut: DesktopShortcut) => {
       if (!enabled) {
         return;
       }
       reset();
-      for (const keysym of [CONTROL, ALT, DELETE]) {
+      const keys = SHORTCUTS[shortcut];
+      for (const keysym of keys) {
         client.sendKeyEvent(1, keysym);
       }
-      for (const keysym of [DELETE, ALT, CONTROL]) {
+      for (const keysym of [...keys].reverse()) {
         client.sendKeyEvent(0, keysym);
       }
       focus();

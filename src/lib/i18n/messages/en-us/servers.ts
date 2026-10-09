@@ -1,4 +1,32 @@
 export const serversMessages = {
+  sshMenuLabel: "SSH terminal controls",
+  sshSessionMenu: "Session",
+  sshTerminalMenu: "Terminal",
+  sshViewMenu: "View",
+  sshCopySelection: "Copy selection",
+  sshSelectAll: "Select all",
+  sshClearDisplay: "Clear display and scrollback",
+  sshLargerText: "Larger text",
+  sshSmallerText: "Smaller text",
+  sshResetTextSize: "Reset text size",
+  sshFullscreen: "Fullscreen terminal",
+  sshExitFullscreen: "Exit fullscreen",
+  sshFullscreenFailed: "Could not change fullscreen mode. Try again.",
+  sshSelectionCopied: "Selection copied",
+  sshSelectionCopyFailed: "Could not copy the selection",
+  sshTerminalHelp:
+    "Closing this window disconnects SSH. Reconnect starts a new shell.",
+
+  rdpMenuLabel: "Remote desktop controls",
+  rdpSessionMenu: "Session",
+  rdpDesktopMenu: "Desktop",
+  rdpViewMenu: "View",
+  rdpPreviousDesktop: "Previous desktop",
+  rdpNextDesktop: "Next desktop",
+  rdpTaskView: "Task View",
+  rdpShowDesktop: "Show desktop",
+  rdpTaskManager: "Task Manager",
+
   rdpSessionWarningTitle: "This RDP account is already in use",
   rdpSessionWarningDescription:
     "Another browser connection through this backend is using this server and Windows account. Continuing may disconnect that connection, depending on Windows settings. Do you want to continue?",
@@ -298,8 +326,6 @@ export const serversMessages = {
   sshHostKeyRejected:
     "The server host key is unknown or has changed. Ask an administrator to verify it and update the backend known_hosts file.",
   sshSessionEnded: "The SSH session ended. Reconnect to start a new shell.",
-  sshTerminalHelp:
-    "Closing this window disconnects SSH. Sessions end after 30 minutes. Reconnect starts a new shell.",
   sshOutputOverflow:
     "Terminal output exceeded the buffer limit. Reconnect to start a new shell.",
   rdpOpenDesktop: "Open desktop",

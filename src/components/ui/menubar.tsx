@@ -1,4 +1,5 @@
 import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 import { Menu as MenuPrimitive } from "@base-ui/react/menu"
 import { Menubar as MenubarPrimitive } from "@base-ui/react/menubar"
 import { CircleIcon } from "@/components/hugeicons"
@@ -7,17 +8,26 @@ import { cn } from "@/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tick02Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
+const menubarVariants = cva("flex h-9 items-center gap-1", {
+  variants: {
+    variant: {
+      default: "rounded-md border bg-background p-1 shadow-xs",
+      plain: "bg-transparent p-0",
+    },
+  },
+  defaultVariants: { variant: "default" },
+})
+
 function Menubar({
   className,
+  variant = "default",
   ...props
-}: React.ComponentProps<typeof MenubarPrimitive>) {
+}: React.ComponentProps<typeof MenubarPrimitive> & VariantProps<typeof menubarVariants>) {
   return (
     <MenubarPrimitive
       data-slot="menubar"
-      className={cn(
-        "flex h-9 items-center gap-1 rounded-md border bg-background p-1 shadow-xs",
-        className
-      )}
+      data-variant={variant}
+      className={cn(menubarVariants({ variant }), className)}
       {...props}
     />
   )

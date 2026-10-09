@@ -1,4 +1,4 @@
-import { AppleIcon } from "@hugeicons/core-free-icons";
+import { AppleIcon, ComputerTerminal01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Linux, Microsoft } from "developer-icons";
 import { useState } from "react";
@@ -110,8 +110,15 @@ export function ServerSshGuide({
                 toast.error(copy.sshPopupBlocked);
               }
             }}
-            size="sm"
+            size="xs"
+            variant="outline"
           >
+            <HugeiconsIcon
+              aria-hidden="true"
+              data-icon="inline-start"
+              icon={ComputerTerminal01Icon}
+              strokeWidth={2}
+            />
             {copy.sshOpenTerminal}
           </Button>
           <p className="text-muted-foreground text-xs leading-relaxed">

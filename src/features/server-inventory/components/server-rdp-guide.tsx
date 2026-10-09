@@ -1,4 +1,4 @@
-import { AppleIcon } from "@hugeicons/core-free-icons";
+import { AppleIcon, ComputerIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Linux, Microsoft } from "developer-icons";
 import { useState } from "react";
@@ -107,8 +107,15 @@ export function ServerRdpGuide({
                 toast.error(copy.sshPopupBlocked);
               }
             }}
-            size="sm"
+            size="xs"
+            variant="outline"
           >
+            <HugeiconsIcon
+              aria-hidden="true"
+              data-icon="inline-start"
+              icon={ComputerIcon}
+              strokeWidth={2}
+            />
             {copy.rdpOpenDesktop}
           </Button>
           <p className="text-muted-foreground text-xs leading-relaxed">

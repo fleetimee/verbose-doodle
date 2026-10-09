@@ -1,4 +1,32 @@
 export const serversMessages = {
+  sshMenuLabel: "Kontrol terminal SSH",
+  sshSessionMenu: "Sesi",
+  sshTerminalMenu: "Terminal",
+  sshViewMenu: "Tampilan",
+  sshCopySelection: "Salin pilihan",
+  sshSelectAll: "Pilih semua",
+  sshClearDisplay: "Bersihkan tampilan dan riwayat",
+  sshLargerText: "Perbesar teks",
+  sshSmallerText: "Perkecil teks",
+  sshResetTextSize: "Atur ulang ukuran teks",
+  sshFullscreen: "Terminal layar penuh",
+  sshExitFullscreen: "Keluar layar penuh",
+  sshFullscreenFailed: "Mode layar penuh tidak dapat diubah. Coba lagi.",
+  sshSelectionCopied: "Pilihan disalin",
+  sshSelectionCopyFailed: "Pilihan tidak dapat disalin",
+  sshTerminalHelp:
+    "Menutup jendela ini memutus SSH. Hubungkan ulang untuk memulai shell baru.",
+
+  rdpMenuLabel: "Kontrol desktop jarak jauh",
+  rdpSessionMenu: "Sesi",
+  rdpDesktopMenu: "Desktop",
+  rdpViewMenu: "Tampilan",
+  rdpPreviousDesktop: "Desktop sebelumnya",
+  rdpNextDesktop: "Desktop berikutnya",
+  rdpTaskView: "Tampilan tugas",
+  rdpShowDesktop: "Tampilkan desktop",
+  rdpTaskManager: "Pengelola tugas",
+
   rdpSessionWarningTitle: "Akun RDP ini sedang digunakan",
   rdpSessionWarningDescription:
     "Koneksi browser lain melalui backend ini sedang menggunakan server dan akun Windows ini. Melanjutkan dapat memutus koneksi tersebut, tergantung pengaturan Windows. Lanjutkan?",
@@ -299,8 +327,6 @@ export const serversMessages = {
     "Kunci host server tidak dikenal atau telah berubah. Minta administrator memverifikasinya dan memperbarui file known_hosts backend.",
   sshSessionEnded:
     "Sesi SSH berakhir. Hubungkan kembali untuk memulai shell baru.",
-  sshTerminalHelp:
-    "Menutup jendela ini memutuskan SSH. Sesi berakhir setelah 30 menit. Menghubungkan kembali memulai shell baru.",
   sshOutputOverflow:
     "Output terminal melebihi batas buffer. Hubungkan kembali untuk memulai shell baru.",
   rdpOpenDesktop: "Buka desktop",

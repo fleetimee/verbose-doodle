@@ -24,6 +24,22 @@ export function useServerTerminal(serverId: string, attempt: number) {
   const copy = messages.servers;
   const containerRef = useRef<HTMLDivElement>(null);
   const disconnectRef = useRef<() => void>(() => undefined);
+  const terminalRef = useRef<Terminal | null>(null);
+  const resizeRef = useRef<() => void>(() => undefined);
+  const keyboardInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const fontSizeRef = useRef(14);
+  const [fontSize, setFontSize] = useState(14);
+  const [hasSelection, setHasSelection] = useState(false);
+
+  function changeFontSize(value: number) {
+    const next = Math.max(10, Math.min(24, value));
+    fontSizeRef.current = next;
+    setFontSize(next);
+    if (terminalRef.current) {
+      terminalRef.current.options.fontSize = next;
+      resizeRef.current();
+    }
+  }
   const [status, setStatus] = useState<
     "connecting" | "connected" | "disconnected"
   >("connecting");
@@ -42,7 +58,7 @@ export function useServerTerminal(serverId: string, attempt: number) {
     const terminal = new Terminal({
       cursorBlink: false,
       fontFamily: '"Geist Mono", monospace',
-      fontSize: 14,
+      fontSize: fontSizeRef.current,
       scrollback: 5000,
       screenReaderMode: true,
       theme: {
@@ -54,6 +70,14 @@ export function useServerTerminal(serverId: string, attempt: number) {
     const fit = new FitAddon();
     terminal.loadAddon(fit);
     terminal.open(container);
+    terminalRef.current = terminal;
+    keyboardInputRef.current = terminal.textarea ?? null;
+    setHasSelection(false);
+    const selection = terminal.onSelectionChange(() => {
+      if (!disposed) {
+        setHasSelection(terminal.hasSelection());
+      }
+    });
     terminal.textarea?.setAttribute("aria-label", copy.sshTitle);
     setStatus("connecting");
     setError("");
@@ -79,6 +103,7 @@ export function useServerTerminal(serverId: string, attempt: number) {
         }
       }
     }
+    resizeRef.current = resize;
     const observer = new ResizeObserver(resize);
     observer.observe(container);
     resize();
@@ -242,12 +267,23 @@ export function useServerTerminal(serverId: string, attempt: number) {
       observer.disconnect();
       input.dispose();
       binaryInput.dispose();
+      selection.dispose();
       terminal.dispose();
+      terminalRef.current = null;
+      keyboardInputRef.current = null;
+      resizeRef.current = () => undefined;
     };
   }, [serverId, attempt, copy]);
 
   return {
     containerRef,
+    keyboardInputRef,
+    fontSize,
+    hasSelection,
+    changeFontSize,
+    clear: () => terminalRef.current?.clear(),
+    selectAll: () => terminalRef.current?.selectAll(),
+    getSelection: () => terminalRef.current?.getSelection() ?? "",
     status,
     error,
     disconnect: () => disconnectRef.current(),

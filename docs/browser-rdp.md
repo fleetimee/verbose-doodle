@@ -2,8 +2,12 @@
 
 Administrators can open an RDP inventory entry and select **Open desktop**.
 The desktop opens in a separate browser window. Click its display to send mouse
-and keyboard input. The toolbar provides Ctrl+Alt+Delete, fullscreen, Disconnect,
-and Reconnect. Press Shift+Escape to release held keys and return focus to the
+and keyboard input. The compact menubar groups Session, Desktop, and View actions.
+Desktop sends Windows shortcuts for previous/next virtual desktop, Task View,
+Show Desktop, Task Manager, and Ctrl+Alt+Delete directly to the remote server.
+These actions require a connected session and the corresponding Windows feature;
+the app cannot enumerate or rename Windows virtual desktops. Fullscreen and
+Disconnect/Reconnect remain available as compact quick controls. Press Shift+Escape to release held keys and return focus to the
 connection control. Touch input emulates a mouse.
 
 The entry needs a stored username and password. USER accounts retain read-only
@@ -82,7 +86,9 @@ Using an administrator account and a disposable RDP entry:
    connection. Reconnect and Continue must save approval; reconnecting again
    should skip the prompt. A changed certificate must prompt again.
 2. Click the display, type, move the mouse, click, and scroll.
-3. Send Ctrl+Alt+Delete and confirm modifiers are released afterward.
+3. Use Desktop > Task View and previous/next desktop with at least two Windows
+   virtual desktops. Check Show Desktop, Task Manager, and Ctrl+Alt+Delete.
+   Confirm actions affect the remote server and release modifiers afterward.
 4. Press Shift+Escape and verify focus returns to the connection control.
 5. Resize the window and toggle fullscreen. The display should fit the viewport,
    and supported RDP servers should update their desktop dimensions.

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { toast } from "sonner";
 import { useI18n } from "@/components/i18n-provider";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { fetchServerEntry } from "@/features/server-inventory/api";
+import { ServerDesktopToolbar } from "@/features/server-inventory/components/server-desktop-toolbar";
 import { useServerDesktop } from "@/features/server-inventory/hooks/use-server-desktop";
 import type { ServerEntry } from "@/features/server-inventory/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
@@ -22,7 +23,6 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
   const copy = messages.servers;
   useDocumentMeta({ title: `${entry.name} | RDP` });
   const [attempt, setAttempt] = useState(0);
-  const rootRef = useRef<HTMLElement>(null);
   const [fullscreen, setFullscreen] = useState(false);
   const {
     sessionWarning,
@@ -34,11 +34,12 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
     cancelCertificate,
     containerRef,
     disconnectButtonRef,
+    keyboardInputRef,
     status,
     error,
     unstable,
     disconnect,
-    sendCtrlAltDelete,
+    sendShortcut,
   } = useServerDesktop(entry.id, attempt);
   const statusLabel = {
     connecting: copy.rdpConnecting,
@@ -48,7 +49,7 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
 
   useEffect(() => {
     const update = () =>
-      setFullscreen(document.fullscreenElement === rootRef.current);
+      setFullscreen(document.fullscreenElement === document.documentElement);
     document.addEventListener("fullscreenchange", update);
     return () => document.removeEventListener("fullscreenchange", update);
   }, []);
@@ -58,7 +59,7 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
       if (document.fullscreenElement) {
         await document.exitFullscreen();
       } else {
-        await rootRef.current?.requestFullscreen();
+        await document.documentElement.requestFullscreen();
       }
     } catch {
       toast.error(copy.rdpFullscreenFailed);
@@ -66,7 +67,7 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
   }
 
   return (
-    <main className="flex h-dvh flex-col bg-background" ref={rootRef}>
+    <main className="flex h-dvh flex-col bg-background">
       <AlertDialog
         onOpenChange={(open) => {
           if (!open) {
@@ -83,10 +84,14 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Button onClick={cancelCertificate} variant="outline">
+            <Button
+              onClick={cancelCertificate}
+              size="sm-compact"
+              variant="outline"
+            >
               {copy.rdpCertificateCancel}
             </Button>
-            <Button onClick={continueSession}>
+            <Button onClick={continueSession} size="sm-compact">
               {copy.rdpCertificateContinue}
             </Button>
           </AlertDialogFooter>
@@ -114,7 +119,7 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
             <summary className="cursor-pointer font-medium">
               {copy.rdpShowCertificate}
             </summary>
-            <dl className="mt-3 space-y-2 break-all text-muted-foreground">
+            <dl className="mt-3 flex flex-col gap-2 break-all text-muted-foreground">
               <dt>{copy.rdpCertificateSubject}</dt>
               <dd>{certificate?.certificate.subject}</dd>
               <dt>{copy.rdpCertificateIssuer}</dt>
@@ -152,6 +157,7 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
             <Button
               disabled={trustBusy}
               onClick={cancelCertificate}
+              size="sm-compact"
               variant="outline"
             >
               {copy.rdpCertificateCancel}
@@ -159,6 +165,7 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
             <Button
               disabled={trustBusy || !certificate?.canTrust}
               onClick={continueCertificate}
+              size="sm-compact"
             >
               {trustBusy
                 ? copy.rdpCertificateSaving
@@ -167,51 +174,20 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate font-semibold text-base">{entry.name}</h1>
-          <p className="truncate font-mono text-muted-foreground text-xs">
-            {entry.username}@{entry.host}:{entry.port ?? 3389}
-          </p>
-        </div>
-        <p
-          aria-live="polite"
-          className="text-muted-foreground text-sm"
-          role="status"
-        >
-          {statusLabel}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            disabled={status !== "connected"}
-            onClick={sendCtrlAltDelete}
-            size="sm"
-            variant="outline"
-          >
-            {copy.rdpCtrlAltDelete}
-          </Button>
-          <Button
-            aria-pressed={fullscreen}
-            onClick={toggleFullscreen}
-            size="sm"
-            variant="outline"
-          >
-            {fullscreen ? copy.rdpExitFullscreen : copy.rdpFullscreen}
-          </Button>
-          <Button
-            onClick={
-              status === "disconnected"
-                ? () => setAttempt((value) => value + 1)
-                : disconnect
-            }
-            ref={disconnectButtonRef}
-            size="sm"
-            variant="outline"
-          >
-            {status === "disconnected" ? copy.sshReconnect : copy.sshDisconnect}
-          </Button>
-        </div>
-      </header>
+      <ServerDesktopToolbar
+        connected={status === "connected"}
+        disconnectButtonRef={disconnectButtonRef}
+        disconnected={status === "disconnected"}
+        entry={entry}
+        fullscreen={fullscreen}
+        keyboardInputRef={keyboardInputRef}
+        onDisconnect={disconnect}
+        onReconnect={() => setAttempt((value) => value + 1)}
+        onShortcut={sendShortcut}
+        onToggleFullscreen={toggleFullscreen}
+        statusLabel={statusLabel}
+        unstable={unstable}
+      />
       {error && (
         <p
           className="border-b bg-destructive/10 px-4 py-3 text-destructive text-sm"
@@ -277,7 +253,7 @@ export function ServerDesktopPage() {
     !query.data.hasPassword
   ) {
     return (
-      <main className="space-y-4 p-6">
+      <main className="flex flex-col gap-4 p-6">
         <p role="alert">
           {query.isError ? copy.sshLoadFailed : copy.rdpCredentialsRequired}
         </p>

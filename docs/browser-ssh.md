@@ -2,7 +2,10 @@
 
 Administrators can open an SSH inventory entry and select **Open terminal**.
 The terminal opens in a separate browser window. It supports interactive commands,
-terminal applications, resizing, Disconnect, and Reconnect. Reconnect starts a
+terminal applications and resizing. The compact Session, Terminal, and View
+menus provide disconnect/reconnect, copy selection, select all, local display
+clearing, text sizing, and fullscreen. Clearing the local display does not run a
+remote command. Changing text size resizes the PTY without reconnecting. Reconnect starts a
 new shell; closing the window ends the connection. Established sessions have no
 fixed backend lifetime limit, with at most 16 open terminal connections per backend
 instance. The frontend lock overlay is disabled on the terminal route. Network
