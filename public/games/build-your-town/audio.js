@@ -513,11 +513,17 @@
         target.closest(".panel button") ||
         target.closest("#minimap button") ||
         target.closest("#btn-cities") ||
+        target.closest("#btn-missions") ||
+        target.closest(".era-tab") ||
         target.closest("#btn-lang") ||
         target.closest("#btn-help")
       ) {
         playClick();
       }
+    });
+
+    window.addEventListener("citybuilder-milestone", () => {
+      playMilestone();
     });
 
     // 4. Map interaction and placement sound detection
