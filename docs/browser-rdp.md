@@ -26,8 +26,8 @@ When an established session disconnects unexpectedly, the viewer opens a dialog
 with **Close** and **Reconnect**. A gateway `SESSION_CONFLICT` status identifies
 another connection ending the session; `SESSION_CLOSED` reports a forced remote
 closure. If no specific reason arrives, the dialog describes an unexpected
-disconnection without claiming a takeover. Manual Disconnect and closing the
-window do not open this dialog. Reconnect runs certificate trust and same-account
+disconnection without claiming a takeover. Manual Disconnect uses a separate
+confirmation instead of this unexpected-disconnect notice. Reconnect runs certificate trust and same-account
 session review again before obtaining a new ticket. Dismissing the dialog leaves
 the desktop disconnected and keeps the toolbar's Reconnect control available.
 
@@ -173,3 +173,19 @@ viewer opens the dialog and Reconnect performs the usual checks. Also check
 network loss, remote logoff, Close/Escape dismissal, manual Disconnect without a
 dialog, and English/Indonesian labels. Actual takeover wording depends on the
 gateway sending the conflict status; an ordinary close uses the generic notice.
+
+## Confirming manual exits
+
+Disconnect and Back to inventory ask for confirmation while a connection is
+connecting or connected. **Stay connected** cancels the exit without interrupting
+the desktop or file transfers. Confirming disconnect ends the connection;
+confirming leave also returns to inventory. The disconnected state bypasses
+confirmation, and the unexpected-disconnect dialog's Reconnect action continues
+to work without a redundant exit prompt.
+
+Tab close/reload and address-bar navigation request the browser's native warning
+while active. Its wording and availability are browser-controlled and require
+prior page interaction. Same-document browser history traversal is not blocked.
+Manual checks should cover both confirmation actions, cancellation during an
+upload, an unexpected takeover while confirmation is open, reconnect, and native
+close/reload warnings after page interaction.

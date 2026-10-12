@@ -1,4 +1,10 @@
 export const serversMessages = {
+  sessionExitTitle: "Putuskan koneksi ke {server}?",
+  sessionExitDescription:
+    "Koneksi akan berakhir dan transfer file yang sedang berjalan akan terputus. Server menentukan apakah desktop atau proses Anda tetap berjalan.",
+  sessionKeepConnected: "Tetap terhubung",
+  sessionDisconnectAndLeave: "Putuskan dan keluar",
+
   rdpDisconnectDialogTitle: "Desktop jarak jauh terputus",
   rdpSessionTakenOver:
     "Koneksi lain mengakhiri sesi RDP Anda. Anda dapat menghubungkan ulang, tetapi tindakan ini dapat memutus koneksi tersebut.",

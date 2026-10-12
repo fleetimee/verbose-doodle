@@ -441,3 +441,14 @@ pane. Keep English and Indonesian copy and visible keyboard focus.
 The SSH Files menu also retains Upload file and Download file path dialogs using
 the shared Dialog, Field, and Input components, plus Cancel transfer. These
 dialogs explain SFTP path resolution and use the same transfer progress controls.
+
+### Remote-session exit confirmations
+
+SSH, RDP, and SFTP Disconnect and Back to inventory actions use a compact
+AlertDialog with the server name, a transfer interruption explanation, Stay
+connected, and Disconnect or Disconnect and leave. The SFTP confirmation nests
+inside its fullscreen browser's Dialog context. Disconnected sessions bypass the
+confirmation; returning from the browser to SSH keeps the connection open. Active
+sessions register a native beforeunload warning for document navigation/closure.
+The SSH inventory guide places Open terminal and Open file browser in a flex row
+with an 8px gap, stacking the actions below the small breakpoint.

@@ -99,56 +99,58 @@ export function ServerSshGuide({
         {copy.sshTitle}
       </h3>
       {isAdmin && (
-        <div className="space-y-2">
-          <Button
-            disabled={!(entry.username && entry.hasPassword)}
-            onClick={() => {
-              const terminalWindow = window.open(
-                `/servers/${encodeURIComponent(entry.id)}/terminal`,
-                "_blank",
-                "popup,width=1100,height=720"
-              );
-              if (terminalWindow) {
-                terminalWindow.opener = null;
-              } else {
-                toast.error(copy.sshPopupBlocked);
-              }
-            }}
-            size="xs"
-            variant="outline"
-          >
-            <HugeiconsIcon
-              aria-hidden="true"
-              data-icon="inline-start"
-              icon={ComputerTerminal01Icon}
-              strokeWidth={2}
-            />
-            {copy.sshOpenTerminal}
-          </Button>
-          <Button
-            disabled={!(entry.username && entry.hasPassword)}
-            onClick={() => {
-              const filesWindow = window.open(
-                `/servers/${encodeURIComponent(entry.id)}/files`,
-                "_blank",
-                "popup,width=1300,height=800"
-              );
-              if (filesWindow) {
-                filesWindow.opener = null;
-              } else {
-                toast.error(copy.sshPopupBlocked);
-              }
-            }}
-            size="xs"
-            variant="outline"
-          >
-            <HugeiconsIcon
-              aria-hidden="true"
-              data-icon="inline-start"
-              icon={Folder01Icon}
-            />
-            {copy.sftpOpenBrowser}
-          </Button>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Button
+              disabled={!(entry.username && entry.hasPassword)}
+              onClick={() => {
+                const terminalWindow = window.open(
+                  `/servers/${encodeURIComponent(entry.id)}/terminal`,
+                  "_blank",
+                  "popup,width=1100,height=720"
+                );
+                if (terminalWindow) {
+                  terminalWindow.opener = null;
+                } else {
+                  toast.error(copy.sshPopupBlocked);
+                }
+              }}
+              size="xs"
+              variant="outline"
+            >
+              <HugeiconsIcon
+                aria-hidden="true"
+                data-icon="inline-start"
+                icon={ComputerTerminal01Icon}
+                strokeWidth={2}
+              />
+              {copy.sshOpenTerminal}
+            </Button>
+            <Button
+              disabled={!(entry.username && entry.hasPassword)}
+              onClick={() => {
+                const filesWindow = window.open(
+                  `/servers/${encodeURIComponent(entry.id)}/files`,
+                  "_blank",
+                  "popup,width=1300,height=800"
+                );
+                if (filesWindow) {
+                  filesWindow.opener = null;
+                } else {
+                  toast.error(copy.sshPopupBlocked);
+                }
+              }}
+              size="xs"
+              variant="outline"
+            >
+              <HugeiconsIcon
+                aria-hidden="true"
+                data-icon="inline-start"
+                icon={Folder01Icon}
+              />
+              {copy.sftpOpenBrowser}
+            </Button>
+          </div>
           <p className="text-muted-foreground text-xs leading-relaxed">
             {entry.username && entry.hasPassword
               ? copy.sshBrowserIntro

@@ -1,4 +1,10 @@
 export const serversMessages = {
+  sessionExitTitle: "Disconnect from {server}?",
+  sessionExitDescription:
+    "This will end your connection and interrupt any active file transfers. The remote server controls whether your desktop or processes keep running.",
+  sessionKeepConnected: "Stay connected",
+  sessionDisconnectAndLeave: "Disconnect and leave",
+
   rdpDisconnectDialogTitle: "Remote desktop disconnected",
   rdpSessionTakenOver:
     "Another connection ended your RDP session. You can reconnect, but doing so may disconnect the other connection.",

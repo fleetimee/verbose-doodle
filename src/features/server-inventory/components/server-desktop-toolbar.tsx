@@ -6,7 +6,6 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { RefObject } from "react";
-import { Link } from "react-router";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +34,7 @@ interface DesktopToolbarProps {
   entry: ServerEntry;
   fullscreen: boolean;
   keyboardInputRef: RefObject<HTMLTextAreaElement | null>;
+  onBackToInventory: () => void;
   onCancelUpload: () => void;
   onDisconnect: () => void;
   onReconnect: () => void;
@@ -54,6 +54,7 @@ export function ServerDesktopToolbar({
   fullscreen,
   keyboardInputRef,
   onDisconnect,
+  onBackToInventory,
   onCancelUpload,
   onUpload,
   onReconnect,
@@ -120,7 +121,7 @@ export function ServerDesktopToolbar({
             </MenubarGroup>
             <MenubarSeparator />
             <MenubarGroup>
-              <MenubarItem render={<Link to="/dashboard/servers" />}>
+              <MenubarItem onClick={onBackToInventory}>
                 {copy.sshBackToInventory}
               </MenubarItem>
             </MenubarGroup>

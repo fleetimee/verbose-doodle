@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { useI18n } from "@/components/i18n-provider";
 import {
@@ -14,12 +14,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { fetchServerEntry } from "@/features/server-inventory/api";
 import { ServerDesktopToolbar } from "@/features/server-inventory/components/server-desktop-toolbar";
+import { ServerSessionExitDialog } from "@/features/server-inventory/components/server-session-exit-dialog";
 import { useServerDesktop } from "@/features/server-inventory/hooks/use-server-desktop";
+import { useServerSessionExit } from "@/features/server-inventory/hooks/use-server-session-exit";
 import type { ServerEntry } from "@/features/server-inventory/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { copyToClipboard } from "@/lib/clipboard";
 
 function DesktopSession({ entry }: { entry: ServerEntry }) {
+  const navigate = useNavigate();
   const { messages } = useI18n();
   const copy = messages.servers;
   useDocumentMeta({ title: `${entry.name} | RDP` });
@@ -48,6 +51,9 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
     cancelUpload,
     uploadBusy,
   } = useServerDesktop(entry.id, attempt);
+  const exit = useServerSessionExit(status !== "disconnected", disconnect, () =>
+    navigate("/dashboard/servers")
+  );
   const statusLabel = {
     connecting: copy.rdpConnecting,
     connected: unstable ? copy.rdpUnstable : copy.rdpConnected,
@@ -75,6 +81,12 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
 
   return (
     <main className="flex h-dvh flex-col bg-background">
+      <ServerSessionExitDialog
+        action={exit.action}
+        onCancel={exit.cancel}
+        onConfirm={exit.confirm}
+        serverName={entry.name}
+      />
       <AlertDialog
         onOpenChange={(open) => {
           if (!open) {
@@ -221,8 +233,9 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
         entry={entry}
         fullscreen={fullscreen}
         keyboardInputRef={keyboardInputRef}
+        onBackToInventory={exit.requestLeave}
         onCancelUpload={cancelUpload}
-        onDisconnect={disconnect}
+        onDisconnect={exit.requestDisconnect}
         onReconnect={() => setAttempt((value) => value + 1)}
         onShortcut={sendShortcut}
         onToggleFullscreen={toggleFullscreen}
@@ -285,6 +298,19 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
         </Button>
         <Link
           className="text-primary underline underline-offset-4"
+          onClick={(event) => {
+            if (
+              !(
+                event.ctrlKey ||
+                event.metaKey ||
+                event.shiftKey ||
+                event.altKey
+              )
+            ) {
+              event.preventDefault();
+              exit.requestLeave();
+            }
+          }}
           to="/dashboard/servers"
         >
           {copy.sshBackToInventory}

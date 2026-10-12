@@ -18,12 +18,14 @@ import {
   revealServerPassword,
 } from "@/features/server-inventory/api";
 import { ServerFileBrowser } from "@/features/server-inventory/components/server-file-browser";
+import { ServerSessionExitDialog } from "@/features/server-inventory/components/server-session-exit-dialog";
 import {
   ServerTerminalFiles,
   type TerminalFileAction,
 } from "@/features/server-inventory/components/server-terminal-files";
 import { ServerTerminalToolbar } from "@/features/server-inventory/components/server-terminal-toolbar";
 import { serverInventoryKeys } from "@/features/server-inventory/hooks/use-server-inventory";
+import { useServerSessionExit } from "@/features/server-inventory/hooks/use-server-session-exit";
 import { useServerTerminal } from "@/features/server-inventory/hooks/use-server-terminal";
 import type { ServerEntry } from "@/features/server-inventory/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
@@ -86,6 +88,20 @@ function TerminalSession({
     passwordPrompt,
     dismissPasswordPrompt,
   } = useServerTerminal(entry.id, attempt, filesOnly ? "files" : "terminal");
+
+  const exit = useServerSessionExit(status !== "disconnected", disconnect, () =>
+    navigate("/dashboard/servers")
+  );
+
+  const browserVisible = fileBrowserOpen && status !== "connecting";
+  const exitDialog = (
+    <ServerSessionExitDialog
+      action={exit.action}
+      onCancel={exit.cancel}
+      onConfirm={exit.confirm}
+      serverName={entry.name}
+    />
+  );
 
   async function handleSendPassword(targetServerId: string) {
     if (status !== "connected" || sendingPassword) {
@@ -150,6 +166,7 @@ function TerminalSession({
 
   return (
     <main className="flex h-dvh min-w-0 flex-col overflow-hidden bg-background">
+      {!browserVisible && exitDialog}
       <ServerTerminalToolbar
         connected={status === "connected"}
         disconnected={status === "disconnected"}
@@ -158,11 +175,12 @@ function TerminalSession({
         fullscreen={fullscreen}
         hasSelection={hasSelection}
         keyboardInputRef={keyboardInputRef}
+        onBackToInventory={exit.requestLeave}
         onBrowseFiles={() => setFileBrowserOpen(true)}
         onCancelTransfer={cancelFileTransfer}
         onClear={clear}
         onCopy={copySelection}
-        onDisconnect={disconnect}
+        onDisconnect={exit.requestDisconnect}
         onDownload={() => setFileAction("download")}
         onFontSizeChange={changeFontSize}
         onReconnect={() => setAttempt((value) => value + 1)}
@@ -189,20 +207,22 @@ function TerminalSession({
         connected={status === "connected"}
         connectionError={error}
         entry={entry}
+        exitDialog={exitDialog}
         filesOnly={filesOnly}
         listFiles={listFiles}
         onCancel={cancelFileTransfer}
+        onDisconnect={exit.requestDisconnect}
         onDownload={downloadFile}
         onOpenChange={(open) => {
           if (!open && filesOnly) {
-            navigate("/dashboard/servers");
+            exit.requestLeave();
           } else {
             setFileBrowserOpen(open);
           }
         }}
         onReconnect={() => setAttempt((value) => value + 1)}
         onUpload={uploadFile}
-        open={fileBrowserOpen && status !== "connecting"}
+        open={browserVisible}
         transfer={fileTransfer}
       />
       {hostKey && (
@@ -332,6 +352,19 @@ function TerminalSession({
         <p>{copy.sshTerminalHelp}</p>
         <Link
           className="text-primary underline underline-offset-4"
+          onClick={(event) => {
+            if (
+              !(
+                event.ctrlKey ||
+                event.metaKey ||
+                event.shiftKey ||
+                event.altKey
+              )
+            ) {
+              event.preventDefault();
+              exit.requestLeave();
+            }
+          }}
           to="/dashboard/servers"
         >
           {copy.sshBackToInventory}

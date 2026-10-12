@@ -137,3 +137,24 @@ remote folder, download back and compare contents. Check keyboard activation,
 empty folders, invalid paths, symlinks, truncated listings, desktop/mobile layout,
 and both languages. Verify wrong-password errors and host-key approval are
 visible, and that reconnecting after a remote disconnect works.
+
+## Confirming disconnects and leaving
+
+SSH and standalone SFTP sessions show **Stay connected** and **Disconnect**
+before a manual disconnect, or **Disconnect and leave** when returning to
+inventory. Cancelling leaves the connection and transfers running. Already
+disconnected sessions return immediately. Closing the file browser to return
+to its SSH terminal keeps the connection open and does not require confirmation.
+
+While connecting or connected, closing/reloading the tab or entering another
+address requests the browser's standard leave-page warning. Browsers control the
+wording, require prior interaction with the session page, and may suppress this
+warning in some situations, including mobile lifecycle events. This warning does
+not lock the address bar. In-app exit controls use the custom confirmation;
+same-document browser history traversal is not intercepted.
+
+Manual checks: decline and accept Disconnect and Back to inventory in SSH and
+SFTP; check SFTP Escape/back confirms exit and keeps focus in the nested dialog.
+Verify returning from the browser to SSH stays connected, and tab close/reload
+shows the native warning after interacting with the page. Confirm no warning
+remains after disconnection.

@@ -5,7 +5,7 @@ import {
   Upload01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,9 +30,11 @@ interface ServerFileBrowserProps {
   connected: boolean;
   connectionError?: string;
   entry: ServerEntry;
+  exitDialog?: ReactNode;
   filesOnly?: boolean;
   listFiles: (path: string) => Promise<RemoteFileListing>;
   onCancel: () => void;
+  onDisconnect: () => void;
   onDownload: (path: string) => boolean;
   onOpenChange: (open: boolean) => void;
   onReconnect: () => void;
@@ -47,9 +49,11 @@ export function ServerFileBrowser({
   connected,
   connectionError,
   entry,
+  exitDialog,
   filesOnly = false,
   listFiles,
   onCancel,
+  onDisconnect,
   onDownload,
   onOpenChange,
   onReconnect,
@@ -161,6 +165,11 @@ export function ServerFileBrowser({
             <span className="text-muted-foreground text-xs" role="status">
               {connected ? copy.sshConnected : copy.sshDisconnected}
             </span>
+            {connected && (
+              <Button onClick={onDisconnect} size="sm" variant="outline">
+                {copy.sshDisconnect}
+              </Button>
+            )}
             {!connected && (
               <Button onClick={onReconnect} size="sm" variant="outline">
                 {copy.sshReconnect}
@@ -355,6 +364,7 @@ export function ServerFileBrowser({
           type="file"
         />
       </DialogContent>
+      {open && exitDialog}
     </Dialog>
   );
 }
