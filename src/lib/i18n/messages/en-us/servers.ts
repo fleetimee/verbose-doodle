@@ -5,6 +5,7 @@ export const serversMessages = {
   sessionKeepConnected: "Stay connected",
   sessionDisconnectAndLeave: "Disconnect and leave",
 
+  rdpTakeoverNotificationTitle: "RDP session taken over: {name}",
   rdpDisconnectDialogTitle: "Remote desktop disconnected",
   rdpSessionTakenOver:
     "Another connection ended your RDP session. You can reconnect, but doing so may disconnect the other connection.",

@@ -50,7 +50,7 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
     chooseUpload,
     cancelUpload,
     uploadBusy,
-  } = useServerDesktop(entry.id, attempt);
+  } = useServerDesktop(entry.id, attempt, entry.name);
   const exit = useServerSessionExit(status !== "disconnected", disconnect, () =>
     navigate("/dashboard/servers")
   );
@@ -65,6 +65,29 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
       setFullscreen(document.fullscreenElement === document.documentElement);
     document.addEventListener("fullscreenchange", update);
     return () => document.removeEventListener("fullscreenchange", update);
+  }, []);
+
+  useEffect(() => {
+    if (
+      !(window.isSecureContext && "Notification" in window) ||
+      Notification.permission !== "default"
+    ) {
+      return;
+    }
+    function requestNotifications(event: Event) {
+      if (!event.isTrusted) {
+        return;
+      }
+      document.removeEventListener("pointerdown", requestNotifications, true);
+      document.removeEventListener("keydown", requestNotifications, true);
+      Notification.requestPermission().catch(() => undefined);
+    }
+    document.addEventListener("pointerdown", requestNotifications, true);
+    document.addEventListener("keydown", requestNotifications, true);
+    return () => {
+      document.removeEventListener("pointerdown", requestNotifications, true);
+      document.removeEventListener("keydown", requestNotifications, true);
+    };
   }, []);
 
   async function toggleFullscreen() {

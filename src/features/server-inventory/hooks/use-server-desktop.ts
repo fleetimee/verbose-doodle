@@ -26,7 +26,11 @@ type DesktopControls = {
   sendShortcut: (shortcut: DesktopShortcut) => void;
 };
 
-export function useServerDesktop(serverId: string, attempt: number) {
+export function useServerDesktop(
+  serverId: string,
+  attempt: number,
+  serverName: string
+) {
   const { messages } = useI18n();
   const copy = messages.servers;
   const containerRef = useRef<HTMLElement>(null);
@@ -183,6 +187,25 @@ export function useServerDesktop(serverId: string, attempt: number) {
         [codes.SESSION_CLOSED, copy.rdpSessionForcedClosed],
       ]);
       const message = errors.get(code) ?? copy.rdpConnectionFailed;
+      if (
+        code === codes.SESSION_CONFLICT &&
+        window.isSecureContext &&
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ) {
+        try {
+          const notification = new Notification(
+            copy.rdpTakeoverNotificationTitle.replace("{name}", serverName),
+            { body: copy.rdpSessionTakenOver, tag: `rdp-takeover-${serverId}` }
+          );
+          notification.onclick = () => {
+            window.focus();
+            notification.close();
+          };
+        } catch {
+          // Some browsers require service-worker notifications instead.
+        }
+      }
       setError(message);
       if (connected || code === codes.SESSION_CONFLICT) {
         setDisconnectNotice(errors.get(code) ?? copy.rdpDisconnectUnexpected);
@@ -355,7 +378,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
         sendShortcut: () => undefined,
       };
     };
-  }, [serverId, attempt, copy]);
+  }, [serverId, attempt, copy, serverName]);
 
   return {
     clipboardText,

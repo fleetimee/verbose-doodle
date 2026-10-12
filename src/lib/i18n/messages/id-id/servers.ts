@@ -5,6 +5,7 @@ export const serversMessages = {
   sessionKeepConnected: "Tetap terhubung",
   sessionDisconnectAndLeave: "Putuskan dan keluar",
 
+  rdpTakeoverNotificationTitle: "Sesi RDP diambil alih: {name}",
   rdpDisconnectDialogTitle: "Desktop jarak jauh terputus",
   rdpSessionTakenOver:
     "Koneksi lain mengakhiri sesi RDP Anda. Anda dapat menghubungkan ulang, tetapi tindakan ini dapat memutus koneksi tersebut.",

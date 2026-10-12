@@ -189,3 +189,21 @@ prior page interaction. Same-document browser history traversal is not blocked.
 Manual checks should cover both confirmation actions, cancellation during an
 upload, an unexpected takeover while confirmation is open, reconnect, and native
 close/reload warnings after page interaction.
+
+## Browser takeover notifications
+
+Takeover notifications are enabled by default when browser permission is granted.
+On the first click or keypress in the RDP window, the app asks the browser for
+notification permission if no decision has been saved. Select **Allow** in the
+browser prompt. HTTPS or localhost and a browser supporting desktop notifications
+are required. If permission is blocked, allow notifications in the browser's site
+settings. The app does not repeatedly prompt after permission is denied.
+
+When the gateway reports `SESSION_CONFLICT`, the browser displays a notification
+with the server name, including when the RDP window is in the background. Clicking
+the notification focuses that window. The existing disconnect dialog remains
+available if notifications are blocked or cannot be displayed. Other disconnect
+reasons do not trigger a takeover notification.
+
+Keep the RDP window open. This uses the active RDP connection, not backend Web
+Push, so it cannot notify after the window is closed.
