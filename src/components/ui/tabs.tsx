@@ -112,6 +112,19 @@ function TabsTrigger({
   )
 }
 
+function TabsIndicator({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Indicator>) {
+  return (
+    <TabsPrimitive.Indicator
+      data-slot="tabs-indicator"
+      className={cn("pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-primary", className)}
+      {...props}
+    />
+  )
+}
+
 const tabsContentVariants = cva("flex-1 outline-none", {
   variants: {
     variant: {
@@ -144,6 +157,7 @@ export {
   TabsList,
   TabsTrigger,
   TabsContent,
+  TabsIndicator,
   tabsVariants,
   tabsListVariants,
   tabsTriggerVariants,

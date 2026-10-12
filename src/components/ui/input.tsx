@@ -10,6 +10,7 @@ const inputVariants = cva(
       variant: {
         "mono-amount": "font-mono font-semibold text-base md:text-base",
         default: "",
+        "search-field": "bg-card shadow-none focus-visible:ring-1 focus-visible:ring-ring/30",
         mono: "font-mono",
         muted: "bg-muted/20 border-border/80 shadow-none",
         "muted-mono": "font-mono bg-muted/20 border-border/80 shadow-none",

@@ -29,6 +29,7 @@ import {
   RadioTower,
   Route,
   Server,
+  Users,
   Waves,
 } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
@@ -118,6 +119,14 @@ export function getSidebarData(
         description: messages.servers.navigationDescription,
         title: messages.servers.title,
         url: "/dashboard/servers",
+      },
+      {
+        adminOnly: true,
+        groupLabel: messages.common.navWorkspace,
+        icon: Users,
+        description: messages.employees.description,
+        title: messages.employees.title,
+        url: "/dashboard/employees",
       },
       {
         groupLabel: messages.common.navNetworkTools,

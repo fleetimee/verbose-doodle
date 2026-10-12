@@ -6,6 +6,7 @@ import { commonMessages as idCommonMessages } from "@/lib/i18n/messages/id-id/co
 import { cronParserMessages as idCronParserMessages } from "@/lib/i18n/messages/id-id/cron-parser";
 import { dateConverterMessages as idDateConverterMessages } from "@/lib/i18n/messages/id-id/date-converter";
 import { developerToolsMessages as idDeveloperToolsMessages } from "@/lib/i18n/messages/id-id/developer-tools";
+import { employeesMessages as idEmployeesMessages } from "@/lib/i18n/messages/id-id/employees";
 import { endpointsMessages as idEndpointsMessages } from "@/lib/i18n/messages/id-id/endpoints";
 import { errorsMessages as idErrorsMessages } from "@/lib/i18n/messages/id-id/errors";
 import { hmacGeneratorMessages } from "@/lib/i18n/messages/id-id/hmac-generator";
@@ -27,6 +28,7 @@ import { usersMessages as idUsersMessages } from "@/lib/i18n/messages/id-id/user
 
 export const idIdMessages = {
   ...enUsMessages,
+  employees: idEmployeesMessages,
   hmacGenerator: hmacGeneratorMessages,
   jsonTextDiff: jsonTextDiffMessages,
   scheduleOverlapChecker: scheduleOverlapCheckerMessages,

@@ -80,6 +80,8 @@ const buttonVariants = cva(
       size: {
         "upload": "h-auto gap-3 px-4 py-3",
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        field: "h-9 px-3 py-2",
+        "text-link": "h-auto p-0 text-sm",
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         "toggle-xs": "h-6 w-full gap-1 px-1.5 text-xs [&_svg:not([class*='size-'])]:size-3",
         sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",

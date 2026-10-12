@@ -3933,3 +3933,24 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   flex-shrink: 0;
   touch-action: none;
 }
+
+/* Base UI measures the selected tab; only its underline changes position. */
+.employee-profile-tab-navigation [data-slot="tabs-indicator"] {
+  clip-path: inset(
+    0 calc(100% - var(--active-tab-left) - var(--active-tab-width)) 0
+      var(--active-tab-left)
+  );
+  transition: clip-path var(--employee-tab-duration)
+    var(--employee-tab-ease-in-out);
+}
+
+.employee-profile-tab-navigation [data-slot="tabs-trigger"] {
+  transition-timing-function: var(--employee-tab-ease-out);
+  transition-duration: var(--employee-tab-duration);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .employee-profile-tab-navigation [data-slot="tabs-indicator"] {
+    transition-property: opacity;
+  }
+}

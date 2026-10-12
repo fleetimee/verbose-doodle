@@ -2,6 +2,7 @@ import { Navigate, Route } from "react-router";
 import { ProtectedRoute } from "@/components/protected-route";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
 import { developerToolRoutes } from "@/features/developer-tools/routes";
+import { employeeRoutes } from "@/features/employees/routes";
 import { endpointRoutes } from "@/features/endpoints/routes";
 import { gameRoutes } from "@/features/games/routes";
 import { overviewRoutes } from "@/features/overview/routes";
@@ -23,6 +24,7 @@ export const dashboardRoutes = (
     {overviewRoutes}
     {endpointRoutes}
     {serverInventoryRoutes}
+    {employeeRoutes}
     {socketTesterRoutes}
     {developerToolRoutes}
     {socksRelayRoutes}

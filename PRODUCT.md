@@ -23,6 +23,7 @@ Fleetime Labs is an umbrella workspace, not a single-purpose API mocker. Its mod
 - **Biller Simulator** models billers, endpoints, response templates, and billing interactions.
 - **Socket Test** exercises TCP client, TCP server, and UDP workflows.
 - **SOCKS Relay** supports authorized inspection of REST API and ISO 8583 relay activity.
+- **Employee Directory** lets administrators search HRMIS employees and view work units, contact details, and reporting relationships.
 - **Server Inventory** records server connection metadata with a separate entry for each access method.
 - **Developer Tools** provides focused conversion, validation, parsing, and inspection utilities.
 

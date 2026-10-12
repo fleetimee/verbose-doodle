@@ -33,6 +33,10 @@ export const API_ENDPOINTS = {
     dashboard: {
       visits: "/api/dashboard/visits",
     },
+    employees: {
+      list: "/api/employees",
+      detail: (nrp: number) => `/api/employees/${nrp}`,
+    },
     endpoints: {
       availability: (method: string, url: string, excludeSlug?: string) => {
         const search = new URLSearchParams({ method, url });

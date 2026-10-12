@@ -104,6 +104,7 @@ function getRouteLabels(
     overview: messages.common.navOverview,
     "rest-api": messages.common.navRestApi,
     servers: messages.servers.title,
+    employees: messages.employees.title,
     settings: messages.common.navSettings,
     "socket-test": messages.common.navSocketTester,
     "socket-tester": messages.common.navSocketTester,
@@ -134,6 +135,10 @@ export function DashboardLayout() {
   const location = useLocation();
   const params = useParams();
   const isOverview = location.pathname === "/dashboard/overview";
+  const usesFixedWorkspace = [
+    "/dashboard/overview",
+    "/dashboard/employees",
+  ].includes(location.pathname);
   const hasOwnPageEntrance = location.pathname.startsWith(
     "/dashboard/socket-test/"
   );
@@ -288,7 +293,7 @@ export function DashboardLayout() {
                 className="h-full min-h-0 w-full"
                 contentClassName={cn(
                   "flex flex-col",
-                  isOverview ? "h-full min-h-0" : "min-h-full",
+                  usesFixedWorkspace ? "h-full min-h-0" : "min-h-full",
                   (location.pathname === "/dashboard/servers" ||
                     location.pathname ===
                       "/dashboard/developer-tools/qris-creator" ||
@@ -308,7 +313,7 @@ export function DashboardLayout() {
                     location.pathname.startsWith("/dashboard/socket-test/")) &&
                     "lg:h-full lg:min-h-0"
                 )}
-                variant={isOverview ? "overview" : "fit"}
+                variant={usesFixedWorkspace ? "overview" : "fit"}
                 viewportRef={scrollViewportRef}
               >
                 <header

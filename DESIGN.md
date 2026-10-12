@@ -452,3 +452,62 @@ confirmation; returning from the browser to SSH keeps the connection open. Activ
 sessions register a native beforeunload warning for document navigation/closure.
 The SSH inventory guide places Open terminal and Open file browser in a flex row
 with an 8px gap, stacking the actions below the small breakpoint.
+
+### Employee directory
+
+The admin-only Employee Directory sits in Workspace at `/dashboard/employees`.
+It reuses DeveloperToolLayout with a compact title and a fixed-height workspace.
+Desktop search, cabang, and unit controls share a row. Control labels, heights,
+and spacing align; the search-field Input variant uses a thin focus ring.
+Mobile filters open in a Sheet with an active-filter count. Searchable
+Popover/Command pickers, removable chips, and Clear filters show filter state.
+
+Name/NIP search updates after a 300ms typing pause and requires 2–100 characters.
+Filters also work without a name. Units follow the chosen branch, and changing
+branch resets the chosen unit. Active employees only starts checked; Include
+outsourcing starts unchecked. Inclusion adds outsourcing alongside other
+categories, rather than restricting results to outsourcing. Clear filters
+unchecks both controls. Changing filters/search resets pagination and selection.
+Server pagination returns matching totals and at most 50 records per page.
+Previous/Next controls remain outside the result pane's scroll area.
+
+Results are compact employee entries, with no table. Subsequent searches retain
+the previous list with a small searching indicator; old results cannot be
+selected while the latest search is pending. First-load skeletons appear only
+when no list is available. Detail loading shares the real identity header and
+tab navigation, displaying known employee metadata immediately and small field
+placeholders until details arrive. Loading tabs are disabled.
+
+The profile uses shadcn Tabs for Employment, Contact, Work history,
+Certifications, Education, Family, and Reporting. Identity and navigation stay
+fixed; only the active panel scrolls. Tabs support keyboard navigation and
+horizontal overflow on narrow screens. Employment includes HRMIS category,
+active/inactive status, and completed years/months of service with its calculation
+date. Former employees' tenure stops at a recorded exit date. Unknown status or
+unusable dates use the standard fallback. Family includes recorded parent names.
+Copy actions are available for populated NIP, email, and phone fields.
+
+Education and reporting use connected timelines. Work history presents approved
+appointment records newest decision first, including effective dates and SK
+numbers, without inferring promotions or continuous date ranges. Certification
+records are distinguished from certification-related training; participation
+alone does not establish an awarded qualification. Provider and recorded
+issue/expiry dates remain separate from event dates. No payroll fields are shown.
+
+Supervisor names open their employee profiles without changing the search,
+filters, or page. Back to previous profile restores the prior Reporting tab;
+mobile retains Back to results. Following a supervisor uses their metadata for
+the loading preview without inferring a branch. Choosing a result or changing
+search/filters clears the profile navigation history.
+
+Tab feedback uses Base UI's measured indicator and a 150ms CSS clip-path
+transition with the existing MOTION_EASE.inOut token. Only the underline moves;
+profile data changes immediately and stays still. Rapid pointer selection
+retargets the transition. Keyboard changes and initial layout are instant.
+Reduced-motion mode removes indicator travel and retains gentle color feedback.
+
+Missing fields display Not available / Belum tersedia. Empty histories and
+missing supervisors have explicit localized messages. Permission, not-found,
+and connection failures are distinct states with recovery actions. Employee data
+uses the authenticated API client, no browser response cache, and query data is
+discarded when unobserved. Both English and Indonesian copy are maintained.
