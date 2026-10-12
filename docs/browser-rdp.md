@@ -22,6 +22,15 @@ connection. If the active connections change before setup, reconnect to review
 again. This check does not detect native RDP clients, hostname aliases, or sessions
 on other backend instances. It does not force Windows to disconnect another user.
 
+When an established session disconnects unexpectedly, the viewer opens a dialog
+with **Close** and **Reconnect**. A gateway `SESSION_CONFLICT` status identifies
+another connection ending the session; `SESSION_CLOSED` reports a forced remote
+closure. If no specific reason arrives, the dialog describes an unexpected
+disconnection without claiming a takeover. Manual Disconnect and closing the
+window do not open this dialog. Reconnect runs certificate trust and same-account
+session review again before obtaining a new ticket. Dismissing the dialog leaves
+the desktop disconnected and keeps the toolbar's Reconnect control available.
+
 Closing the window or navigating away disconnects RDP. Reconnect obtains a fresh
 ticket and creates a new connection. It does not log off the remote Windows user;
 the Windows server controls whether an existing desktop session is resumed.
@@ -157,3 +166,10 @@ Using an administrator account and a disposable RDP entry:
 
 - [Guacamole JavaScript client](https://guacamole.apache.org/doc/guacamole-common-js/)
 - [Guacamole RDP configuration](https://guacamole.apache.org/doc/gug/configuring-guacamole.html#rdp)
+
+Manual disconnect-dialog checks: connect to a disposable desktop, then connect
+with the same Windows account from another RDP client. Confirm the displaced
+viewer opens the dialog and Reconnect performs the usual checks. Also check
+network loss, remote logoff, Close/Escape dismissal, manual Disconnect without a
+dialog, and English/Indonesian labels. Actual takeover wording depends on the
+gateway sending the conflict status; an ordinary close uses the generic notice.

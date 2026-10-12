@@ -1,4 +1,12 @@
 export const serversMessages = {
+  rdpDisconnectDialogTitle: "Desktop jarak jauh terputus",
+  rdpSessionTakenOver:
+    "Koneksi lain mengakhiri sesi RDP Anda. Anda dapat menghubungkan ulang, tetapi tindakan ini dapat memutus koneksi tersebut.",
+  rdpSessionForcedClosed:
+    "Server mengakhiri sesi RDP Anda secara paksa. Hubungkan ulang untuk mencoba lagi.",
+  rdpDisconnectUnexpected:
+    "Koneksi RDP Anda berakhir tanpa diminta. Penyebabnya dapat berupa koneksi lain, jaringan, atau server. Hubungkan ulang untuk mencoba lagi.",
+
   sftpBrowserTitle: "Browser file SFTP",
   sftpOpenBrowser: "Buka browser file",
   sftpBackToTerminal: "Kembali ke terminal",

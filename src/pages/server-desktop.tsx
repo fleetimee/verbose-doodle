@@ -27,6 +27,8 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
   const [fullscreen, setFullscreen] = useState(false);
   const {
     clipboardText,
+    disconnectNotice,
+    dismissDisconnectNotice,
     sessionWarning,
     continueSession,
     certificate,
@@ -73,6 +75,39 @@ function DesktopSession({ entry }: { entry: ServerEntry }) {
 
   return (
     <main className="flex h-dvh flex-col bg-background">
+      <AlertDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            dismissDisconnectNotice();
+          }
+        }}
+        open={disconnectNotice !== null}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{copy.rdpDisconnectDialogTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{disconnectNotice}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button
+              onClick={dismissDisconnectNotice}
+              size="sm-compact"
+              variant="outline"
+            >
+              {messages.common.close}
+            </Button>
+            <Button
+              onClick={() => {
+                dismissDisconnectNotice();
+                setAttempt((value) => value + 1);
+              }}
+              size="sm-compact"
+            >
+              {copy.sshReconnect}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AlertDialog
         onOpenChange={(open) => {
           if (!open) {

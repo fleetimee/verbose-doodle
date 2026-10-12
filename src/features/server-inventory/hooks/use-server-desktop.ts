@@ -42,6 +42,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
     "connecting" | "connected" | "disconnected"
   >("connecting");
   const [error, setError] = useState("");
+  const [disconnectNotice, setDisconnectNotice] = useState<string | null>(null);
   const [unstable, setUnstable] = useState(false);
   const [clipboardText, setClipboardText] = useState<string | null>(null);
   const [uploadBusy, setUploadBusy] = useState(false);
@@ -108,6 +109,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
     let resizeFrame = 0;
     setStatus("connecting");
     setError("");
+    setDisconnectNotice(null);
     setUnstable(false);
     setUploadBusy(false);
     setClipboardText(null);
@@ -177,8 +179,18 @@ export function useServerDesktop(serverId: string, attempt: number) {
         [codes.CLIENT_BAD_REQUEST, copy.rdpInvalidEntry],
         [codes.RESOURCE_NOT_FOUND, copy.sshLoadFailed],
         [codes.SESSION_TIMEOUT, copy.rdpSessionExpired],
+        [codes.SESSION_CONFLICT, copy.rdpSessionTakenOver],
+        [codes.SESSION_CLOSED, copy.rdpSessionForcedClosed],
       ]);
-      setError(errors.get(code) ?? copy.rdpConnectionFailed);
+      const message = errors.get(code) ?? copy.rdpConnectionFailed;
+      setError(message);
+      if (connected || code === codes.SESSION_CONFLICT) {
+        setDisconnectNotice(errors.get(code) ?? copy.rdpDisconnectUnexpected);
+      }
+      disconnect();
+    }
+    function unexpectedDisconnect() {
+      setDisconnectNotice(copy.rdpDisconnectUnexpected);
       disconnect();
     }
     controlsRef.current = {
@@ -291,7 +303,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
           }
           if (state === Guacamole.Tunnel.State.CLOSED) {
             if (connected) {
-              disconnect();
+              unexpectedDisconnect();
             } else {
               fail(Guacamole.Status.Code.UPSTREAM_ERROR);
             }
@@ -315,7 +327,7 @@ export function useServerDesktop(serverId: string, attempt: number) {
               fail(Guacamole.Status.Code.UPSTREAM_ERROR);
               return;
             }
-            disconnect();
+            unexpectedDisconnect();
           }
         };
         client.connect(parameters);
@@ -347,6 +359,8 @@ export function useServerDesktop(serverId: string, attempt: number) {
 
   return {
     clipboardText,
+    disconnectNotice,
+    dismissDisconnectNotice: () => setDisconnectNotice(null),
     cancelUpload: () => controlsRef.current.cancelUpload(),
     chooseUpload: () => controlsRef.current.chooseUpload(),
     uploadBusy,

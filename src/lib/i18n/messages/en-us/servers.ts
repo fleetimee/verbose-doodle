@@ -1,4 +1,12 @@
 export const serversMessages = {
+  rdpDisconnectDialogTitle: "Remote desktop disconnected",
+  rdpSessionTakenOver:
+    "Another connection ended your RDP session. You can reconnect, but doing so may disconnect the other connection.",
+  rdpSessionForcedClosed:
+    "The remote server forcibly closed your RDP session. Reconnect to try again.",
+  rdpDisconnectUnexpected:
+    "Your RDP connection ended unexpectedly. Another connection, the network, or the remote server may have ended it. Reconnect to try again.",
+
   sftpBrowserTitle: "SFTP file browser",
   sftpOpenBrowser: "Open file browser",
   sftpBackToTerminal: "Back to terminal",
