@@ -1,4 +1,80 @@
 export const serversMessages = {
+  sftpBrowserTitle: "SFTP file browser",
+  sftpOpenBrowser: "Open file browser",
+  sftpBackToTerminal: "Back to terminal",
+  sftpLocal: "Local",
+  sftpSelectedFiles: "Selected files",
+  sftpChooseFiles: "Choose files",
+  sftpChooseFolder: "Choose folder",
+  sftpLocalHint:
+    "Local files stay on your computer until uploaded. Choose files or a folder to browse. Downloads use your browser's save location.",
+  sftpLocalEmpty:
+    "Choose local files or a folder to get started. Folder selection lists files and their folders; empty folders are not included.",
+  sftpEmptyDirectory: "This directory is empty.",
+  sftpNoMatches: "No files match your filter.",
+  sftpLoading: "Loading directory...",
+  sftpListFailed:
+    "Could not list this directory. Check the path, account permissions, and SFTP support, then refresh.",
+  sftpNotDirectory:
+    "This path is not a directory. Enter a folder path or download the file instead.",
+  sftpModified: "Date modified",
+  sftpSize: "Size",
+  sftpKind: "Kind",
+  sftpFolder: "Folder",
+  sftpFile: "File",
+  sftpSymlink: "Link",
+  sftpOther: "Other",
+  sftpBack: "Back",
+  sftpForward: "Forward",
+  sftpUp: "Parent directory",
+  sftpRefresh: "Refresh directory",
+  sftpPath: "Path",
+  sftpFilter: "Filter files",
+  sftpHidden: "Hidden files",
+  sftpOpenFolder: "Open folder",
+  sftpItems: "items",
+  sftpTruncated: "Showing the first 1,000 entries.",
+  sftpInteractionHint:
+    "Select a file, then Upload or Download. Double-click a folder to open it.",
+  sftpLimitHint:
+    "One transfer at a time. 100 MiB per file. Existing files are never overwritten.",
+
+  sshFilesMenu: "Files",
+  sshUploadAction: "Upload file",
+  sshDownloadAction: "Download file",
+  sshCancelTransfer: "Cancel transfer",
+  sshCancellingTransfer: "Cancelling transfer...",
+  sshUploadDirectory: "Remote directory",
+  sshDownloadPath: "Remote file path",
+  sshUploadFile: "Local file",
+  sshTransferDescription:
+    "Transfer one file at a time, up to 100 MiB. Compress folders into a ZIP first.",
+  sshUploadHint:
+    "Use an existing directory. Relative paths start in the SFTP home directory, independently of the shell. Existing files are never overwritten.",
+  sshDownloadHint:
+    "Enter the path of a regular file. Relative paths start in the SFTP home directory. Downloads use your browser's save location.",
+  sshTransferFailed:
+    "Transfer failed. Check the path, account permissions, and that the server supports SFTP.",
+  sshTransferExists:
+    "The remote file already exists. Rename the local file or choose another directory.",
+  sshTransferLimit:
+    "Transfer limit reached. Each file must be at most 100 MiB, with up to 300 MiB uploaded per SSH session.",
+  sshTransferNotFile:
+    "This path is not a regular file. Compress folders into a ZIP first.",
+  sshTransferChanged:
+    "The remote file changed during download. Try again after it stops changing.",
+  sshTransferTimeout: "Transfer timed out. Check the connection and try again.",
+  sshTransferBusy:
+    "A transfer is already running. Wait for it to finish and try again.",
+  sshTransferCancelled:
+    "Transfer cancelled. An interrupted upload may leave a partial file; check the remote directory.",
+  sshTransferInterrupted:
+    "Transfer interrupted by disconnection. Check for a partial upload before retrying.",
+  sshUploadReady: "File uploaded",
+  sshDownloadReady: "File ready to save",
+  sshUploading: "Uploading",
+  sshDownloading: "Downloading",
+
   sshMenuLabel: "SSH terminal controls",
   sshSessionMenu: "Session",
   sshTerminalMenu: "Terminal",

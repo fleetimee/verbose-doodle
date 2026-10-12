@@ -411,3 +411,33 @@ Home/End for the bounds. Resizing changes height directly without animation.
 The console header includes Fullscreen and Restore controls. Fullscreen fills
 the app viewport and Restore returns to the height used before maximizing. The
 slider, draggable edge, and keyboard End key can also reach 100%.
+
+### SFTP file browser and SSH transfers
+
+The Termius-inspired file browser uses a fullscreen Dialog with local and remote
+panes, compact toolbars, thin dividers, and the existing theme tokens. Panes sit
+side by side on desktop and stack below the medium breakpoint, with file lists
+scrolling inside each pane. `ADMIN` users open `/servers/:serverId/files` from
+SSH or SFTP inventory details, or Browse files from the SSH terminal's Files menu.
+The direct route uses a standalone SFTP connection without starting a shell.
+
+The local pane requires an explicit Choose files or Choose folder action. Folder
+selection creates virtual navigation from the chosen files; empty folders are
+unavailable because the browser picker supplies files only. Explain this boundary
+in the browser rather than suggesting unrestricted access to the local filesystem.
+
+Remote navigation provides breadcrumbs, Back, Forward, Up, an editable path, and
+Refresh. Both panes offer filtering, hidden-file visibility, sortable columns,
+and filename, modification date, size, and kind metadata; remote rows also show
+permissions. Select a file for Upload or Download; double-click or Enter opens a
+folder or transfers a file. Directory listings show truncation explicitly.
+
+Transfer one file at a time, with filename, transferred MiB, progress, and Cancel
+in a compact row. Upload into the current remote directory and never overwrite
+an existing file. Disable remote navigation and transfer actions while listing,
+transferring, or disconnected; show connection and listing errors in the remote
+pane. Keep English and Indonesian copy and visible keyboard focus.
+
+The SSH Files menu also retains Upload file and Download file path dialogs using
+the shared Dialog, Field, and Input components, plus Cancel transfer. These
+dialogs explain SFTP path resolution and use the same transfer progress controls.

@@ -24,7 +24,8 @@ export function ScreenLockProvider({ children }: { children: ReactNode }) {
   const { snapshot } = useAuth();
   const terminalRoute = useMatch("/servers/:serverId/terminal");
   const desktopRoute = useMatch("/servers/:serverId/desktop");
-  const remoteSession = Boolean(terminalRoute || desktopRoute);
+  const filesRoute = useMatch("/servers/:serverId/files");
+  const remoteSession = Boolean(terminalRoute || desktopRoute || filesRoute);
   const [account, setAccount] = useState(() =>
     sessionStorage.getItem(SCREEN_LOCK_STORAGE_KEY)
   );

@@ -143,7 +143,7 @@ export function ServerEntryDetails({
       )}
       {accessType === "DATABASE" && <ServerDatabaseGuide entry={entry} />}
       {["FTP", "SFTP", "FTPS"].includes(accessType) && (
-        <ServerFileTransferGuide entry={entry} />
+        <ServerFileTransferGuide entry={entry} isAdmin={isAdmin} />
       )}
       <section aria-labelledby="server-detail-notes" className="space-y-2">
         <h3 className="font-medium" id="server-detail-notes">

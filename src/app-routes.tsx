@@ -41,6 +41,14 @@ export function AppRoutes() {
         <Route
           element={
             <ProtectedRoute requiredRole="ADMIN">
+              <ServerTerminalPage filesOnly />
+            </ProtectedRoute>
+          }
+          path="/servers/:serverId/files"
+        />
+        <Route
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
               <ServerDesktopPage />
             </ProtectedRoute>
           }

@@ -63,3 +63,77 @@ With an administrator account and an SSH entry for a disposable server:
    with a readable error; neither should disclose credentials.
 6. Confirm a USER account cannot open the terminal route or obtain a `server-ssh`
    ticket. Confirm a consumed ticket cannot open another connection.
+
+## File uploads and downloads
+
+While connected, choose **Files > Upload file** or **Files > Download file**.
+Uploads require a local file and an existing remote destination directory.
+Downloads require the remote path of a regular file. Relative paths start in the
+SFTP home directory, independently of the terminal's current directory; use an
+absolute path when in doubt. Paths are passed to SFTP and never executed as shell
+commands. The stored SSH account must have permission to read or write the path,
+and the remote server must enable its SFTP subsystem. Transfers do not use `sudo`.
+
+One transfer can run per terminal connection. Each file is limited to 100 MiB;
+uploads have a cumulative 300 MiB session limit, including partial transfers.
+Existing files are never overwritten. Uploaded files are created with owner-only
+read/write permissions, subject to the remote server's permission handling.
+Folders must be compressed into a ZIP first. The progress bar and **Files >
+Cancel transfer** stop an in-flight transfer without closing the terminal.
+
+Downloads use the browser's configured save location. The completion notification
+also offers **Save file** for 60 seconds if automatic saving was blocked. Download
+contents stay in browser memory until completion or interruption. Cancelled
+uploads attempt to remove the partial remote file; a lost connection or a failed
+cleanup can leave it behind. Check the destination before retrying. Disconnecting
+ends active transfers, and reconnecting starts a new shell and a new upload budget.
+
+Deploy both frontend and backend changes together, then reconnect. No additional
+HTTP routes, proxy configuration, or credentials are required. Transfer errors,
+such as a missing path, permission denial, or disabled SFTP, leave the shell open.
+
+For manual verification, upload a disposable file, download it back, and compare
+its contents. Repeat with an empty file and a file larger than one chunk. Check
+existing filename rejection, invalid paths, directory downloads, cancellation,
+and disconnect during upload. Confirm the terminal still accepts commands after
+a transfer fails, and check both English and Indonesian controls.
+
+## Two-pane SFTP file browser
+
+Administrators can select **Open file browser** from an SSH or SFTP inventory
+entry, or **Files > Open file browser** inside an SSH terminal. The standalone
+route is `/servers/:serverId/files`. It uses the same administrator-only
+`server-ssh` ticket, stored credentials, and host-key review, and connects without
+starting a remote shell. SSH and SFTP entries both require a saved username and
+password. SFTP credentials are shown in the inventory entry form.
+
+The fullscreen browser has local files on the left and the remote directory on
+the right. Choose local files or a folder first. Browser folder selection grants
+access only to the selected files and their virtual folder tree; it does not
+expose the rest of your computer or empty folders. Local files stay on your
+computer until you upload them. Downloads use the browser's save location.
+
+Both panes offer breadcrumbs, back/forward and parent-folder navigation, filename
+filters, hidden-file visibility, and sortable name, modified date, size, and kind
+columns. Remote entries also show permissions in octal. Select a folder and use
+**Open folder**, double-click it, or press Enter to enter it. Select a local file
+and **Upload file** to send it to the current remote folder; select a remote file
+and **Download file** to save it. File double-click/Enter also starts its transfer.
+Symlinks are labeled as links; opening a link attempts directory navigation, while
+downloading follows it only if its target is a regular file.
+
+Remote navigation and transfers run one operation at a time. Directory listings
+show at most 1,000 entries, with a visible notice when truncated. Filters and
+sorting apply to the loaded entries. Upload completion refreshes the current
+remote folder. Browsing does not rename or delete remote files. All existing
+transfer limits, permissions, cancellation, and no-overwrite behavior still apply.
+Closing the standalone browser returns to inventory and disconnects; returning to
+the terminal from its browser keeps that SSH session open. The file-browser route
+shares the existing remote-session screen-lock exemption.
+
+Manual browser checks: choose a disposable folder containing nested files,
+navigate both panes, sort/filter and toggle hidden entries, upload to the current
+remote folder, download back and compare contents. Check keyboard activation,
+empty folders, invalid paths, symlinks, truncated listings, desktop/mobile layout,
+and both languages. Verify wrong-password errors and host-key approval are
+visible, and that reconnecting after a remote disconnect works.

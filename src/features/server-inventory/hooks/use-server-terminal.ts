@@ -1,6 +1,6 @@
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useI18n } from "@/components/i18n-provider";
 import {
@@ -8,8 +8,29 @@ import {
   createRealtimeTicket,
 } from "@/features/realtime/ticket-client";
 
+import {
+  createTerminalFileBrowser,
+  type FileListCommand,
+  fileListEventSchema,
+  type RemoteFileListing,
+} from "@/features/server-inventory/utils/terminal-file-browser";
+import {
+  createTerminalFileTransfers,
+  type FileTransferCommand,
+  fileTransferEventSchema,
+  type TerminalFileTransfer,
+} from "@/features/server-inventory/utils/terminal-file-transfers";
+
 type TerminalCommand =
-  | { type: "connect"; serverId: string; cols: number; rows: number }
+  | FileListCommand
+  | FileTransferCommand
+  | {
+      type: "connect";
+      serverId: string;
+      cols: number;
+      rows: number;
+      mode: "terminal" | "files";
+    }
   | { type: "resize"; cols: number; rows: number }
   | { type: "input" | "binary-input"; data: string }
   | { type: "ping" }
@@ -31,6 +52,8 @@ const terminalEventSchema = z.union([
     code: z.string(),
   }),
   hostKeySchema,
+  fileTransferEventSchema,
+  fileListEventSchema,
 ]);
 
 const SUDO_PASSWORD_PROMPT_REGEX = /\[sudo\]\s+password(\s+for\s+\S+)?:\s*$/i;
@@ -45,9 +68,28 @@ function isPasswordPromptText(text: string): boolean {
   );
 }
 
-export function useServerTerminal(serverId: string, attempt: number) {
+export function useServerTerminal(
+  serverId: string,
+  attempt: number,
+  mode: "terminal" | "files" = "terminal"
+) {
   const { messages } = useI18n();
   const copy = messages.servers;
+  const browserRef = useRef<ReturnType<
+    typeof createTerminalFileBrowser
+  > | null>(null);
+  const listFiles = useCallback(
+    (path: string): Promise<RemoteFileListing> =>
+      browserRef.current?.list(path) ??
+      Promise.reject(new Error(copy.sshTransferInterrupted)),
+    [copy.sshTransferInterrupted]
+  );
+  const filesRef = useRef<ReturnType<
+    typeof createTerminalFileTransfers
+  > | null>(null);
+  const [fileTransfer, setFileTransfer] = useState<TerminalFileTransfer | null>(
+    null
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const trustRef = useRef<(challengeId: string) => void>(() => undefined);
   const [hostKey, setHostKey] = useState<z.infer<typeof hostKeySchema> | null>(
@@ -127,8 +169,26 @@ export function useServerTerminal(serverId: string, attempt: number) {
     function send(message: TerminalCommand) {
       if (socket?.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(message));
+        return true;
       }
+      return false;
     }
+    const files = createTerminalFileTransfers(
+      (command) => connected && send(command),
+      copy,
+      (transfer) => {
+        if (!disposed) {
+          setFileTransfer(transfer);
+        }
+      }
+    );
+    const browser = createTerminalFileBrowser(
+      (command) => connected && send(command),
+      copy
+    );
+    browserRef.current = browser;
+    filesRef.current = files;
+    setFileTransfer(null);
     function resize() {
       if (
         container &&
@@ -201,6 +261,8 @@ export function useServerTerminal(serverId: string, attempt: number) {
     disconnectRef.current = () => {
       setHostKey(null);
       setTrustPending(false);
+      browser.interrupt();
+      files.interrupt();
       cancelled = true;
       connected = false;
       window.clearTimeout(timeout);
@@ -265,6 +327,22 @@ export function useServerTerminal(serverId: string, attempt: number) {
       });
     }
 
+    function handleConnectionError(code: string) {
+      const errors = new Map([
+        ["AUTH_FAILED", copy.sshAuthFailed],
+        ["HOST_KEY_REJECTED", copy.sshHostKeyRejected],
+        ["INVALID_ENTRY", copy.sshCredentialsRequired],
+        ["KNOWN_HOSTS_MISSING", copy.sshKnownHostsMissing],
+        ["KNOWN_HOSTS_WRITE_FAILED", copy.sshKnownHostsWriteFailed],
+        ["HOST_KEY_APPROVAL_EXPIRED", copy.sshHostKeyApprovalExpired],
+        ["CAPACITY_EXCEEDED", copy.sshCapacityExceeded],
+      ]);
+      setHostKey(null);
+      setTrustPending(false);
+      setError(errors.get(code) ?? copy.sshConnectionFailed);
+      socket?.close();
+    }
+
     function handleControl(data: string) {
       try {
         const result = terminalEventSchema.safeParse(JSON.parse(data));
@@ -274,35 +352,35 @@ export function useServerTerminal(serverId: string, attempt: number) {
           return;
         }
         const message = result.data;
-        if (message.type === "host-key") {
-          setHostKey(message);
-          window.clearTimeout(timeout);
-          timeout = window.setTimeout(() => {
-            setError(copy.sshHostKeyApprovalExpired);
-            disconnectRef.current();
-          }, 95_000);
-        } else if (message.type === "connected") {
-          setHostKey(null);
-          setTrustPending(false);
-          connected = true;
-          window.clearTimeout(timeout);
-          setStatus("connected");
-          resize();
-          terminal.focus();
-        } else if (message.type === "error") {
-          const errors = new Map([
-            ["AUTH_FAILED", copy.sshAuthFailed],
-            ["HOST_KEY_REJECTED", copy.sshHostKeyRejected],
-            ["INVALID_ENTRY", copy.sshCredentialsRequired],
-            ["KNOWN_HOSTS_MISSING", copy.sshKnownHostsMissing],
-            ["KNOWN_HOSTS_WRITE_FAILED", copy.sshKnownHostsWriteFailed],
-            ["HOST_KEY_APPROVAL_EXPIRED", copy.sshHostKeyApprovalExpired],
-            ["CAPACITY_EXCEEDED", copy.sshCapacityExceeded],
-          ]);
-          setHostKey(null);
-          setTrustPending(false);
-          setError(errors.get(message.code) ?? copy.sshConnectionFailed);
-          socket?.close();
+        switch (message.type) {
+          case "file-list":
+            browser.handle(message);
+            break;
+          case "file-transfer":
+            files.handle(message);
+            break;
+          case "host-key":
+            setHostKey(message);
+            window.clearTimeout(timeout);
+            timeout = window.setTimeout(() => {
+              setError(copy.sshHostKeyApprovalExpired);
+              disconnectRef.current();
+            }, 95_000);
+            break;
+          case "connected":
+            setHostKey(null);
+            setTrustPending(false);
+            connected = true;
+            window.clearTimeout(timeout);
+            setStatus("connected");
+            resize();
+            terminal.focus();
+            break;
+          case "error":
+            handleConnectionError(message.code);
+            break;
+          default:
+            break;
         }
       } catch {
         setError(copy.sshConnectionFailed);
@@ -334,6 +412,7 @@ export function useServerTerminal(serverId: string, attempt: number) {
           send({
             type: "connect",
             serverId,
+            mode,
             cols: Math.min(terminal.cols, 500),
             rows: Math.min(terminal.rows, 200),
           });
@@ -364,6 +443,8 @@ export function useServerTerminal(serverId: string, attempt: number) {
                   : copy.sshConnectionFailed)
             );
           }
+          browser.interrupt();
+          files.interrupt();
           connected = false;
           window.clearTimeout(timeout);
           window.clearInterval(heartbeat);
@@ -384,6 +465,10 @@ export function useServerTerminal(serverId: string, attempt: number) {
     const close = () => disconnectRef.current();
     window.addEventListener("pagehide", close);
     return () => {
+      browser.interrupt();
+      browserRef.current = null;
+      files.dispose();
+      filesRef.current = null;
       disposed = true;
       connected = false;
       window.clearTimeout(timeout);
@@ -403,10 +488,16 @@ export function useServerTerminal(serverId: string, attempt: number) {
       resizeRef.current = () => undefined;
       trustRef.current = () => undefined;
     };
-  }, [serverId, attempt, copy]);
+  }, [serverId, attempt, copy, mode]);
 
   return {
     containerRef,
+    fileTransfer,
+    listFiles,
+    uploadFile: (directory: string, file: File) =>
+      filesRef.current?.upload(directory, file) ?? false,
+    downloadFile: (path: string) => filesRef.current?.download(path) ?? false,
+    cancelFileTransfer: () => filesRef.current?.cancel(),
     keyboardInputRef,
     fontSize,
     hasSelection,

@@ -1,4 +1,4 @@
-import { AppleIcon } from "@hugeicons/core-free-icons";
+import { AppleIcon, Folder01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Linux, Microsoft } from "developer-icons";
 import { useState } from "react";
@@ -16,7 +16,13 @@ import type { ServerEntry } from "@/features/server-inventory/types";
 import { detectClientPlatform } from "@/features/server-inventory/utils/detect-client-platform";
 import { copyToClipboard } from "@/lib/clipboard";
 
-export function ServerFileTransferGuide({ entry }: { entry: ServerEntry }) {
+export function ServerFileTransferGuide({
+  entry,
+  isAdmin,
+}: {
+  entry: ServerEntry;
+  isAdmin: boolean;
+}) {
   const { messages } = useI18n();
   const copy = messages.servers;
   const [defaultPlatform] = useState(detectClientPlatform);
@@ -82,6 +88,32 @@ export function ServerFileTransferGuide({ entry }: { entry: ServerEntry }) {
       <h3 className="font-medium" id="server-detail-transfer">
         {copy.transferTitle.replace("{type}", type)}
       </h3>
+      {isAdmin && isSftp && (
+        <Button
+          disabled={!(entry.username && entry.hasPassword)}
+          onClick={() => {
+            const filesWindow = window.open(
+              `/servers/${encodeURIComponent(entry.id)}/files`,
+              "_blank",
+              "popup,width=1300,height=800"
+            );
+            if (filesWindow) {
+              filesWindow.opener = null;
+            } else {
+              toast.error(copy.sshPopupBlocked);
+            }
+          }}
+          size="xs"
+          variant="outline"
+        >
+          <HugeiconsIcon
+            aria-hidden="true"
+            data-icon="inline-start"
+            icon={Folder01Icon}
+          />
+          {copy.sftpOpenBrowser}
+        </Button>
+      )}
       <Tabs defaultValue={defaultPlatform}>
         <TabsList aria-label={copy.rdpPlatform} className="w-full">
           {platforms.map((platform) => (

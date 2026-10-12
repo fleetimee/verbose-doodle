@@ -114,10 +114,11 @@ export function ServerEntryDrawer({
   const clearPassword = form.watch("clearPassword");
   const accessType = form.watch("accessType").toUpperCase();
   const values = form.watch();
-  const showCredentials = ["SSH", "RDP", "FTP"].includes(accessType);
+  const showCredentials = ["SSH", "RDP", "FTP", "SFTP"].includes(accessType);
   const contextualFields = new Map(
     Object.entries({
       SSH: ["port", "username"],
+      SFTP: ["port", "username"],
       RDP: ["port", "username"],
       FTP: ["port", "username"],
       DATABASE: ["port", "databaseEngine", "databaseName"],

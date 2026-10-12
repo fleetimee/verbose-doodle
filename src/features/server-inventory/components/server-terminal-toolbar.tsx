@@ -38,20 +38,32 @@ interface TerminalToolbarProps {
   fullscreen: boolean;
   hasSelection: boolean;
   keyboardInputRef: RefObject<HTMLTextAreaElement | null>;
+  onBrowseFiles: () => void;
+  onCancelTransfer: () => void;
   onClear: () => void;
   onCopy: () => void;
   onDisconnect: () => void;
+  onDownload: () => void;
   onFontSizeChange: (size: number) => void;
   onReconnect: () => void;
   onSelectAll: () => void;
   onSendPassword: (targetServerId: string) => void;
   onToggleFullscreen: () => void;
+  onUpload: () => void;
   otherServers?: ServerEntry[];
   sendingPassword?: boolean;
   statusLabel: string;
+  transferBusy: boolean;
+  transferCancelling: boolean;
 }
 
 export function ServerTerminalToolbar({
+  onUpload,
+  onDownload,
+  onBrowseFiles,
+  onCancelTransfer,
+  transferBusy,
+  transferCancelling,
   connected,
   disconnected,
   entry,
@@ -133,6 +145,37 @@ export function ServerTerminalToolbar({
             <MenubarGroup>
               <MenubarItem onClick={onClear}>
                 {copy.sshClearDisplay}
+              </MenubarItem>
+            </MenubarGroup>
+          </MenubarContent>
+        </MenubarMenu>
+        <MenubarMenu>
+          <MenubarTrigger>{copy.sshFilesMenu}</MenubarTrigger>
+          <MenubarContent>
+            <MenubarGroup>
+              <MenubarItem disabled={!connected} onClick={onBrowseFiles}>
+                {copy.sftpOpenBrowser}
+              </MenubarItem>
+              <MenubarItem
+                disabled={!connected || transferBusy}
+                onClick={onUpload}
+              >
+                {copy.sshUploadAction}
+              </MenubarItem>
+              <MenubarItem
+                disabled={!connected || transferBusy}
+                onClick={onDownload}
+              >
+                {copy.sshDownloadAction}
+              </MenubarItem>
+            </MenubarGroup>
+            <MenubarSeparator />
+            <MenubarGroup>
+              <MenubarItem
+                disabled={!transferBusy || transferCancelling}
+                onClick={onCancelTransfer}
+              >
+                {copy.sshCancelTransfer}
               </MenubarItem>
             </MenubarGroup>
           </MenubarContent>

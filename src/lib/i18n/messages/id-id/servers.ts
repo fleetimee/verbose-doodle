@@ -1,4 +1,80 @@
 export const serversMessages = {
+  sftpBrowserTitle: "Browser file SFTP",
+  sftpOpenBrowser: "Buka browser file",
+  sftpBackToTerminal: "Kembali ke terminal",
+  sftpLocal: "Lokal",
+  sftpSelectedFiles: "File pilihan",
+  sftpChooseFiles: "Pilih file",
+  sftpChooseFolder: "Pilih folder",
+  sftpLocalHint:
+    "File lokal tetap di komputer Anda sampai diunggah. Pilih file atau folder untuk menjelajahinya. Unduhan mengikuti lokasi penyimpanan browser.",
+  sftpLocalEmpty:
+    "Pilih file lokal atau folder untuk memulai. Pemilihan folder menampilkan file beserta foldernya; folder kosong tidak disertakan.",
+  sftpEmptyDirectory: "Direktori ini kosong.",
+  sftpNoMatches: "Tidak ada file yang cocok dengan filter.",
+  sftpLoading: "Memuat direktori...",
+  sftpListFailed:
+    "Direktori tidak dapat dimuat. Periksa path, izin akun, dan dukungan SFTP, lalu muat ulang.",
+  sftpNotDirectory:
+    "Path ini bukan direktori. Masukkan path folder atau unduh file tersebut.",
+  sftpModified: "Tanggal diubah",
+  sftpSize: "Ukuran",
+  sftpKind: "Jenis",
+  sftpFolder: "Folder",
+  sftpFile: "File",
+  sftpSymlink: "Tautan",
+  sftpOther: "Lainnya",
+  sftpBack: "Kembali",
+  sftpForward: "Maju",
+  sftpUp: "Direktori induk",
+  sftpRefresh: "Muat ulang direktori",
+  sftpPath: "Path",
+  sftpFilter: "Filter file",
+  sftpHidden: "File tersembunyi",
+  sftpOpenFolder: "Buka folder",
+  sftpItems: "item",
+  sftpTruncated: "Menampilkan 1.000 entri pertama.",
+  sftpInteractionHint:
+    "Pilih file, lalu Unggah atau Unduh. Klik dua kali folder untuk membukanya.",
+  sftpLimitHint:
+    "Satu transfer sekaligus. 100 MiB per file. File yang sudah ada tidak akan ditimpa.",
+
+  sshFilesMenu: "File",
+  sshUploadAction: "Unggah file",
+  sshDownloadAction: "Unduh file",
+  sshCancelTransfer: "Batalkan transfer",
+  sshCancellingTransfer: "Membatalkan transfer...",
+  sshUploadDirectory: "Direktori tujuan di server",
+  sshDownloadPath: "Path file di server",
+  sshUploadFile: "File lokal",
+  sshTransferDescription:
+    "Transfer satu file sekaligus, maksimal 100 MiB. Kompres folder menjadi ZIP terlebih dahulu.",
+  sshUploadHint:
+    "Gunakan direktori yang sudah ada. Path relatif dimulai dari direktori home SFTP, terpisah dari shell. File yang sudah ada tidak akan ditimpa.",
+  sshDownloadHint:
+    "Masukkan path file biasa. Path relatif dimulai dari direktori home SFTP. Unduhan mengikuti lokasi penyimpanan browser.",
+  sshTransferFailed:
+    "Transfer gagal. Periksa path, izin akun, dan dukungan SFTP di server.",
+  sshTransferExists:
+    "File tujuan sudah ada. Ubah nama file lokal atau pilih direktori lain.",
+  sshTransferLimit:
+    "Batas transfer tercapai. Maksimal 100 MiB per file dan total unggahan 300 MiB per sesi SSH.",
+  sshTransferNotFile:
+    "Path ini bukan file biasa. Kompres folder menjadi ZIP terlebih dahulu.",
+  sshTransferChanged:
+    "File di server berubah saat diunduh. Coba lagi setelah perubahan selesai.",
+  sshTransferTimeout: "Waktu transfer habis. Periksa koneksi dan coba lagi.",
+  sshTransferBusy:
+    "Transfer lain sedang berjalan. Tunggu hingga selesai lalu coba lagi.",
+  sshTransferCancelled:
+    "Transfer dibatalkan. Unggahan terputus dapat menyisakan file parsial; periksa direktori tujuan.",
+  sshTransferInterrupted:
+    "Transfer terputus karena koneksi berakhir. Periksa file parsial sebelum mengunggah ulang.",
+  sshUploadReady: "File berhasil diunggah",
+  sshDownloadReady: "File siap disimpan",
+  sshUploading: "Mengunggah",
+  sshDownloading: "Mengunduh",
+
   sshMenuLabel: "Kontrol terminal SSH",
   sshSessionMenu: "Sesi",
   sshTerminalMenu: "Terminal",

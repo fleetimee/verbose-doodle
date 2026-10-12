@@ -7,7 +7,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -17,6 +17,11 @@ import {
   fetchServerEntry,
   revealServerPassword,
 } from "@/features/server-inventory/api";
+import { ServerFileBrowser } from "@/features/server-inventory/components/server-file-browser";
+import {
+  ServerTerminalFiles,
+  type TerminalFileAction,
+} from "@/features/server-inventory/components/server-terminal-files";
 import { ServerTerminalToolbar } from "@/features/server-inventory/components/server-terminal-toolbar";
 import { serverInventoryKeys } from "@/features/server-inventory/hooks/use-server-inventory";
 import { useServerTerminal } from "@/features/server-inventory/hooks/use-server-terminal";
@@ -25,10 +30,19 @@ import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { copyToClipboard } from "@/lib/clipboard";
 import "@xterm/xterm/css/xterm.css";
 
-function TerminalSession({ entry }: { entry: ServerEntry }) {
+function TerminalSession({
+  entry,
+  filesOnly,
+}: {
+  entry: ServerEntry;
+  filesOnly: boolean;
+}) {
+  const navigate = useNavigate();
+  const [fileBrowserOpen, setFileBrowserOpen] = useState(filesOnly);
   const { messages } = useI18n();
   const copy = messages.servers;
-  useDocumentMeta({ title: `${entry.name} | SSH` });
+  useDocumentMeta({ title: `${entry.name} | ${filesOnly ? "SFTP" : "SSH"}` });
+  const [fileAction, setFileAction] = useState<TerminalFileAction>(null);
   const [attempt, setAttempt] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const [sendingPassword, setSendingPassword] = useState(false);
@@ -48,6 +62,11 @@ function TerminalSession({ entry }: { entry: ServerEntry }) {
   });
 
   const {
+    listFiles,
+    fileTransfer,
+    uploadFile,
+    downloadFile,
+    cancelFileTransfer,
     containerRef,
     keyboardInputRef,
     fontSize,
@@ -66,7 +85,7 @@ function TerminalSession({ entry }: { entry: ServerEntry }) {
     trustHostKey,
     passwordPrompt,
     dismissPasswordPrompt,
-  } = useServerTerminal(entry.id, attempt);
+  } = useServerTerminal(entry.id, attempt, filesOnly ? "files" : "terminal");
 
   async function handleSendPassword(targetServerId: string) {
     if (status !== "connected" || sendingPassword) {
@@ -139,17 +158,52 @@ function TerminalSession({ entry }: { entry: ServerEntry }) {
         fullscreen={fullscreen}
         hasSelection={hasSelection}
         keyboardInputRef={keyboardInputRef}
+        onBrowseFiles={() => setFileBrowserOpen(true)}
+        onCancelTransfer={cancelFileTransfer}
         onClear={clear}
         onCopy={copySelection}
         onDisconnect={disconnect}
+        onDownload={() => setFileAction("download")}
         onFontSizeChange={changeFontSize}
         onReconnect={() => setAttempt((value) => value + 1)}
         onSelectAll={selectAll}
         onSendPassword={handleSendPassword}
         onToggleFullscreen={toggleFullscreen}
+        onUpload={() => setFileAction("upload")}
         otherServers={otherServersQuery.data?.servers}
         sendingPassword={sendingPassword}
         statusLabel={statusLabel}
+        transferBusy={!!fileTransfer}
+        transferCancelling={fileTransfer?.cancelling ?? false}
+      />
+      <ServerTerminalFiles
+        action={fileAction}
+        connected={status === "connected"}
+        onActionChange={setFileAction}
+        onCancel={cancelFileTransfer}
+        onDownload={downloadFile}
+        onUpload={uploadFile}
+        transfer={fileTransfer}
+      />
+      <ServerFileBrowser
+        connected={status === "connected"}
+        connectionError={error}
+        entry={entry}
+        filesOnly={filesOnly}
+        listFiles={listFiles}
+        onCancel={cancelFileTransfer}
+        onDownload={downloadFile}
+        onOpenChange={(open) => {
+          if (!open && filesOnly) {
+            navigate("/dashboard/servers");
+          } else {
+            setFileBrowserOpen(open);
+          }
+        }}
+        onReconnect={() => setAttempt((value) => value + 1)}
+        onUpload={uploadFile}
+        open={fileBrowserOpen && status !== "connecting"}
+        transfer={fileTransfer}
       />
       {hostKey && (
         <Alert className="shrink-0">
@@ -287,7 +341,11 @@ function TerminalSession({ entry }: { entry: ServerEntry }) {
   );
 }
 
-export function ServerTerminalPage() {
+export function ServerTerminalPage({
+  filesOnly = false,
+}: {
+  filesOnly?: boolean;
+}) {
   const { serverId = "" } = useParams();
   const { messages } = useI18n();
   const copy = messages.servers;
@@ -305,7 +363,9 @@ export function ServerTerminalPage() {
   }
   if (
     query.isError ||
-    query.data.accessType.toUpperCase() !== "SSH" ||
+    !(filesOnly ? ["SSH", "SFTP"] : ["SSH"]).includes(
+      query.data.accessType.toUpperCase()
+    ) ||
     !query.data.username ||
     !query.data.hasPassword
   ) {
@@ -320,5 +380,11 @@ export function ServerTerminalPage() {
       </main>
     );
   }
-  return <TerminalSession entry={query.data} key={query.data.id} />;
+  return (
+    <TerminalSession
+      entry={query.data}
+      filesOnly={filesOnly}
+      key={`${query.data.id}-${filesOnly ? "files" : "terminal"}`}
+    />
+  );
 }

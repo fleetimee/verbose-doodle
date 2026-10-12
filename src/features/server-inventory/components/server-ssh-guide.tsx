@@ -1,4 +1,8 @@
-import { AppleIcon, ComputerTerminal01Icon } from "@hugeicons/core-free-icons";
+import {
+  AppleIcon,
+  ComputerTerminal01Icon,
+  Folder01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Linux, Microsoft } from "developer-icons";
 import { useState } from "react";
@@ -120,6 +124,30 @@ export function ServerSshGuide({
               strokeWidth={2}
             />
             {copy.sshOpenTerminal}
+          </Button>
+          <Button
+            disabled={!(entry.username && entry.hasPassword)}
+            onClick={() => {
+              const filesWindow = window.open(
+                `/servers/${encodeURIComponent(entry.id)}/files`,
+                "_blank",
+                "popup,width=1300,height=800"
+              );
+              if (filesWindow) {
+                filesWindow.opener = null;
+              } else {
+                toast.error(copy.sshPopupBlocked);
+              }
+            }}
+            size="xs"
+            variant="outline"
+          >
+            <HugeiconsIcon
+              aria-hidden="true"
+              data-icon="inline-start"
+              icon={Folder01Icon}
+            />
+            {copy.sftpOpenBrowser}
           </Button>
           <p className="text-muted-foreground text-xs leading-relaxed">
             {entry.username && entry.hasPassword

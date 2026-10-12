@@ -46,6 +46,7 @@ Within the Biller Simulator domain, a **Biller** is a billing service represente
 - Inspect authorized SOCKS relay activity for REST API and ISO 8583 traffic.
 - Browse and filter server access entries. `ADMIN` users can create, edit, delete, and temporarily reveal stored passwords; `USER` users have read-only access to metadata.
 - Open interactive browser SSH terminals and RDP desktops as an administrator using stored inventory credentials.
+- Browse SSH and SFTP inventory files in a Termius-inspired fullscreen browser with local and remote panes that stack on smaller screens. Administrators can open a standalone SFTP session from inventory details or browse files from the SSH Files menu. Remote navigation includes breadcrumbs, history, editable paths, refresh, filtering, hidden files, sorting, and file metadata. Local files or folders require explicit selection; virtual folders omit empty directories. Transfer one file at a time with progress and cancellation, without overwriting existing remote files.
 - Use developer utilities for JSON/YAML conversion, JSON Schema validation, JWT inspection, cron parsing, number-base conversion, date conversion, and related integration tasks.
 - Preserve role-based access and the distinction between `ADMIN` and `USER` capabilities.
 - Treat each module as a distinct tool within Fleetime Labs rather than presenting every capability as part of the Biller Simulator module.
