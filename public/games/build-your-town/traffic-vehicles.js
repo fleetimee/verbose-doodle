@@ -85,6 +85,8 @@
     const cars = states.get(renderer)?.tiles.get(index);
     if (!cars) return;
     const lowest = Math.min(...corners);
+    const bridge = window.__seaRail?.roadHeights(city, index, renderer) ?? [0, 0, 0, 0];
+    corners = corners.map((height, corner) => height + bridge[corner]);
     for (const car of cars) {
       const u = car.x - Math.floor(car.x), v = car.y - Math.floor(car.y);
       const height = corners[0] * (1 - u) * (1 - v) + corners[1] * u * (1 - v) + corners[2] * u * v + corners[3] * (1 - u) * v;

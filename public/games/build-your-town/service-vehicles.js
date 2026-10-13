@@ -10,7 +10,7 @@
   };
   const states = new WeakMap();
   const drivable = (city, index) => (city.overlay[index] === 2 || city.overlay[index] === 7) &&
-    city.terrain[index] === 0 && !city.fire[index] && !city.flood[index];
+    !city.fire[index] && !city.flood[index];
 
   function neighbors(city, index) {
     const x = index % city.size;
@@ -220,6 +220,8 @@
     const vehicles = state?.tiles.get(index);
     if (!vehicles) return;
     const lowest = Math.min(...corners);
+    const bridge = window.__seaRail?.roadHeights(city, index, renderer) ?? [0, 0, 0, 0];
+    corners = corners.map((height, corner) => height + bridge[corner]);
     for (const vehicle of vehicles) {
       const u = vehicle.x - Math.floor(vehicle.x);
       const v = vehicle.y - Math.floor(vehicle.y);
