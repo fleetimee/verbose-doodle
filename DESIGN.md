@@ -479,7 +479,7 @@ tab navigation, displaying known employee metadata immediately and small field
 placeholders until details arrive. Loading tabs are disabled.
 
 The profile uses shadcn Tabs for Employment, Contact, Work history,
-Certifications, Education, Family, and Reporting. Identity and navigation stay
+Training, Certifications, Education, Family, and Reporting. Identity and navigation stay
 fixed; only the active panel scrolls. Tabs support keyboard navigation and
 horizontal overflow on narrow screens. Employment includes HRMIS category,
 active/inactive status, and completed years/months of service with its calculation
@@ -511,3 +511,18 @@ missing supervisors have explicit localized messages. Permission, not-found,
 and connection failures are distinct states with recovery actions. Employee data
 uses the authenticated API client, no browser response cache, and query data is
 discarded when unobserved. Both English and Indonesian copy are maintained.
+
+Training has its own profile tab with all recorded participation, newest first.
+Label certification-related courses without implying an awarded certificate.
+Certifications contains only dedicated HRMIS certification records.
+
+Presence has a separate tab with 10 daily attendance records per request. Use
+month/year filters, an Only recorded checkbox, and Load more within the profile
+scroll area. Presence uses a compact shadcn table to compare daily timestamps.
+Preserve records while loading another page. Missing timestamps say Not recorded;
+never infer attendance from missing punches or expand unknown HRMIS status codes.
+
+Presence rows open the existing shadcn right-side drawer with recorded office, shift, timestamps, and
+verified status meanings. The date button provides keyboard access. Distinguish
+recorded office from physical punch location; unknown status meanings remain
+unavailable.

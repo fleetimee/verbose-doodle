@@ -6,8 +6,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   EmployeeCertifications,
+  EmployeeTraining,
   EmployeeWorkHistory,
 } from "@/features/employees/components/employee-career-history";
+import { EmployeePresence } from "@/features/employees/components/employee-presence";
 import {
   EmployeeProfileHeader,
   EmployeeProfileTabs,
@@ -217,10 +219,24 @@ export function EmployeeProfile({
             </div>
           </ScrollArea>
         </TabsContent>
+        <TabsContent className="min-h-0 overflow-hidden" value="presence">
+          <ScrollArea className="h-full min-h-0" variant="fit">
+            <div className="p-4 sm:p-5">
+              <EmployeePresence key={employee.nrp} nrp={employee.nrp} />
+            </div>
+          </ScrollArea>
+        </TabsContent>
         <TabsContent className="min-h-0 overflow-hidden" value="work-history">
           <ScrollArea className="h-full min-h-0" variant="fit">
             <div className="p-4 sm:p-5">
               <EmployeeWorkHistory employee={employee} />
+            </div>
+          </ScrollArea>
+        </TabsContent>
+        <TabsContent className="min-h-0 overflow-hidden" value="training">
+          <ScrollArea className="h-full min-h-0" variant="fit">
+            <div className="p-4 sm:p-5">
+              <EmployeeTraining employee={employee} />
             </div>
           </ScrollArea>
         </TabsContent>

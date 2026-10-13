@@ -103,24 +103,46 @@ export function EmployeeWorkHistory({
   );
 }
 
-export function EmployeeCertifications({
+function LearningRecordType({
+  related,
+}: {
+  related: boolean | null | undefined;
+}) {
+  const { messages } = useI18n();
+  const copy = messages.employees;
+  if (related === undefined) {
+    return copy.certificationRecord;
+  }
+  if (related === null) {
+    return copy.unavailable;
+  }
+  return related ? copy.certificationTraining : copy.trainingRecord;
+}
+
+function EmployeeLearningHistory({
   employee,
+  training = false,
 }: {
   employee: EmployeeDetails;
+  training?: boolean;
 }) {
   const { messages, locale } = useI18n();
   const copy = messages.employees;
-  const records = employee.certifications ?? [];
+  const records =
+    (training ? employee.training : employee.certifications) ?? [];
+  const headingId = training ? "training-heading" : "certifications-heading";
   return (
-    <section aria-labelledby="certifications-heading">
-      <h3 className="mb-2 font-semibold text-sm" id="certifications-heading">
-        {copy.certifications}
+    <section aria-labelledby={headingId}>
+      <h3 className="mb-2 font-semibold text-sm" id={headingId}>
+        {training ? copy.training : copy.certifications}
       </h3>
       <p className="mb-4 text-muted-foreground text-xs">
-        {copy.certificationHint}
+        {training ? copy.trainingHint : copy.certificationHint}
       </p>
       {records.length === 0 ? (
-        <p className="text-muted-foreground text-sm">{copy.noCertifications}</p>
+        <p className="text-muted-foreground text-sm">
+          {training ? copy.noTraining : copy.noCertifications}
+        </p>
       ) : (
         <ol className="ml-2 border-l">
           {records.map((entry) => (
@@ -137,9 +159,13 @@ export function EmployeeCertifications({
                   {entry.name || copy.unavailable}
                 </p>
                 <p className="mt-1 text-muted-foreground text-xs">
-                  {entry.source === "TRAINING"
-                    ? copy.certificationTraining
-                    : copy.certificationRecord}
+                  <LearningRecordType
+                    related={
+                      "certificationRelated" in entry
+                        ? entry.certificationRelated
+                        : undefined
+                    }
+                  />
                 </p>
               </div>
               <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
@@ -167,4 +193,16 @@ export function EmployeeCertifications({
       )}
     </section>
   );
+}
+
+export function EmployeeCertifications({
+  employee,
+}: {
+  employee: EmployeeDetails;
+}) {
+  return <EmployeeLearningHistory employee={employee} />;
+}
+
+export function EmployeeTraining({ employee }: { employee: EmployeeDetails }) {
+  return <EmployeeLearningHistory employee={employee} training />;
 }

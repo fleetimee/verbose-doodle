@@ -37,6 +37,7 @@ export interface EmployeeDetails extends EmployeeSummary {
   secondaryPhone: string | null;
   supervisors: EmployeeSupervisor[];
   tenure: { years: number; months: number; asOfDate: string } | null;
+  training: EmployeeTraining[];
   unitCode: string | null;
   unitKerja: string | null;
   village: string | null;
@@ -101,4 +102,31 @@ export interface EmployeeCertification {
   sequence: number;
   source: "CERTIFICATION" | "TRAINING";
   startDate: string | null;
+}
+
+export interface EmployeeTraining {
+  certificationRelated: boolean | null;
+  endDate: string | null;
+  expiryDate: string | null;
+  issuedDate: string | null;
+  name: string | null;
+  provider: string | null;
+  sequence: number;
+  startDate: string | null;
+}
+
+export interface EmployeePresence {
+  checkIn: string | null;
+  checkOut: string | null;
+  date: string;
+  recordedOffice: string | null;
+  shift: string | null;
+  statusCode: string | null;
+}
+
+export interface EmployeePresencePage {
+  hasMore: boolean;
+  page: number;
+  records: EmployeePresence[];
+  years: number[];
 }

@@ -71,7 +71,9 @@ export function EmployeeProfileTabs({
   const sections = [
     { value: "employment", label: copy.employment },
     { value: "contact", label: copy.contact },
+    { value: "presence", label: copy.presence },
     { value: "work-history", label: copy.workHistory },
+    { value: "training", label: copy.training },
     { value: "certifications", label: copy.certifications },
     { value: "education", label: copy.education },
     { value: "family", label: copy.family },
