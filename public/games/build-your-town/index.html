@@ -16,19 +16,31 @@
   <script src="./audio.js"></script>
   <script src="./missions.js"></script>
   <script src="./encounters.js"></script>
+  <script src="./scenarios.js"></script>
+  <script src="./save-manager.js"></script>
   <style>
-    #btn-sound {
-      width: 42px;
-      font-size: 16px;
+    /* Tidy up topbar buttons into a sleek, uniform cluster */
+    button.lang .code {
+      display: none;
+    }
+    button.lang,
+    #btn-sound,
+    #btn-help {
+      width: 36px;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 !important;
+      font-size: 15px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
-    @media (width <= 900px) {
-      #btn-sound {
-        width: 36px;
-        font-size: 14px;
-      }
+    #btn-cities,
+    #btn-missions {
+      height: 36px;
+    }
+    .group.menus {
+      gap: 5px;
     }
   </style>
 </head>

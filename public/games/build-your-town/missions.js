@@ -680,7 +680,9 @@
     }
   };
 
-  // Build the Missions Panel UI
+  let hubMode = "missions";
+
+  // Build the Unified Career Hub Panel UI (Missions + Scenarios)
   const createMissionsPanel = () => {
     if (document.getElementById("panel-missions")) return;
 
@@ -690,34 +692,67 @@
     aside.hidden = true;
 
     aside.innerHTML = `
-      <div class="head">
-        <span>🎯 <span data-i18n="missions.title">Missions & Objectifs</span></span>
+      <div class="head hub-head">
+        <div class="career-hub-tabs">
+          <button type="button" class="hub-mode-tab active" id="tab-mode-missions">🎯 Missions</button>
+          <button type="button" class="hub-mode-tab" id="tab-mode-scenarios">🏆 Scenarios</button>
+        </div>
         <button class="ghost close" id="missions-close">✕</button>
       </div>
       <div class="body" id="missions-body">
-        <div class="era-selector" id="era-tabs"></div>
-        <div class="era-header" id="era-header"></div>
-        <div class="era-progress-bar"><div class="fill" id="era-fill"></div></div>
-        <div class="missions-list" id="missions-list"></div>
+        <div id="view-mode-missions">
+          <div class="era-selector" id="era-tabs"></div>
+          <div class="era-header" id="era-header"></div>
+          <div class="era-progress-bar"><div class="fill" id="era-fill"></div></div>
+          <div class="missions-list" id="missions-list"></div>
+        </div>
+        <div id="view-mode-scenarios" hidden>
+          <p class="scenarios-intro" id="hub-scenarios-intro"></p>
+          <div class="scenarios-grid" id="hub-scenarios-grid"></div>
+        </div>
       </div>
     `;
 
     document.body.appendChild(aside);
+
+    // Tab mode switching
+    const btnTabMissions = document.getElementById("tab-mode-missions");
+    const btnTabScenarios = document.getElementById("tab-mode-scenarios");
+    const viewMissions = document.getElementById("view-mode-missions");
+    const viewScenarios = document.getElementById("view-mode-scenarios");
+
+    btnTabMissions.addEventListener("click", () => {
+      hubMode = "missions";
+      btnTabMissions.classList.add("active");
+      btnTabScenarios.classList.remove("active");
+      viewMissions.hidden = false;
+      viewScenarios.hidden = true;
+      renderPanel();
+    });
+
+    btnTabScenarios.addEventListener("click", () => {
+      hubMode = "scenarios";
+      btnTabScenarios.classList.add("active");
+      btnTabMissions.classList.remove("active");
+      viewMissions.hidden = true;
+      viewScenarios.hidden = false;
+      renderScenariosHub();
+    });
 
     // Event listener to close panel
     document.getElementById("missions-close").addEventListener("click", () => {
       aside.hidden = true;
     });
 
-    // Topbar Missions Button
+    // Topbar Career Hub Button
     const topMenus = document.querySelector(".group.menus");
     if (topMenus && !document.getElementById("btn-missions")) {
       const btn = document.createElement("button");
       btn.id = "btn-missions";
       btn.className = "missions";
       btn.type = "button";
-      btn.title = "Missions & Objectives";
-      btn.setAttribute("aria-label", "Missions");
+      btn.title = "Career Hub: Missions & Scenarios";
+      btn.setAttribute("aria-label", "Career Hub");
       btn.innerHTML = `🎯 <span class="badge" id="missions-badge" hidden>0</span>`;
 
       btn.addEventListener("click", (e) => {
@@ -736,8 +771,12 @@
 
         aside.hidden = !aside.hidden;
         if (!aside.hidden) {
-          evaluateMissions();
-          renderPanel();
+          if (hubMode === "missions") {
+            evaluateMissions();
+            renderPanel();
+          } else {
+            renderScenariosHub();
+          }
         }
       });
 
@@ -748,6 +787,24 @@
       } else {
         topMenus.appendChild(btn);
       }
+    }
+  };
+
+  const renderScenariosHub = () => {
+    const intro = document.getElementById("hub-scenarios-intro");
+    const grid = document.getElementById("hub-scenarios-grid");
+    const lang = getLang();
+    if (intro) {
+      intro.textContent =
+        lang === "fr"
+          ? "Prenez les rênes de villes pré-construites confrontées à des défis uniques. Décrochez les médailles de Bronze 🥉, Argent 🥈 et Or 🥇 !"
+          : "Take charge of pre-built cities facing unique crises! Conquer challenges to earn Bronze 🥉, Silver 🥈, and Gold 🥇 medals.";
+    }
+    if (grid && typeof window.__renderScenariosList === "function") {
+      const aside = document.getElementById("panel-missions");
+      window.__renderScenariosList(grid, () => {
+        if (aside) aside.hidden = true;
+      });
     }
   };
 
@@ -869,7 +926,40 @@
         text-align: center;
       }
       #panel-missions {
-        width: min(440px, 94vw);
+        width: min(520px, 94vw);
+      }
+      .career-hub-tabs {
+        display: flex;
+        gap: 4px;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 3px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .hub-mode-tab {
+        border: none;
+        background: transparent;
+        color: var(--muted, #a8b0c2);
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 4px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .hub-mode-tab:hover {
+        color: #fff;
+      }
+      .hub-mode-tab.active {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.08) 100%);
+        color: var(--accent, #f2c14e);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      }
+      #view-mode-scenarios {
+        max-height: 56vh;
+        overflow-y: auto;
+        padding-right: 4px;
       }
       .era-selector {
         display: flex;
