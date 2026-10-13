@@ -41,3 +41,4 @@ bun run preview     # Serve the production build locally
 - [Mascot references](docs/mascot.md)
 
 - [Game storefront media capture and hover previews](docs/game-storefront-media.md)
+- [Build Your Town endgame buildings and progression](docs/build-your-town-endgame.md)
