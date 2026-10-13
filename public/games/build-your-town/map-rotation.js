@@ -59,6 +59,15 @@
     for (const id of cache.keys()) if (!source.has(id)) cache.delete(id);
     return result;
   }
+  function clampCamera(camera, size) {
+    const limit = size - 1;
+    const tx = (camera.x / 32 + camera.y / 16) / 2;
+    const ty = (camera.y / 16 - camera.x / 32) / 2;
+    const clampedX = Math.max(0, Math.min(limit, tx));
+    const clampedY = Math.max(0, Math.min(limit, ty));
+    camera.x = (clampedX - clampedY) * 32;
+    camera.y = (clampedX + clampedY) * 16;
+  }
   function cityView(city) {
     if (!orientation) return city;
     if (sourceCity !== city || !view) {
@@ -79,7 +88,7 @@
     view.buildings = footprints(city.buildings, buildings, city, false);
     view.medianPlants = spatialMap(city.medianPlants, city);
     view.fireOrders = spatialMap(city.fireOrders, city);
-    view.actors = city.actors.map(actor => ({ ...actor, ...turn(actor.x, actor.y, city.size), dir: actor.dir + orientation * Math.PI / 2 }));
+    view.actors = city.actors.map(actor => ({ ...actor, ...turn(actor.x, actor.y, city.size - 1), dir: actor.dir + orientation * Math.PI / 2 }));
     return view;
   }
   function bind(target, buildingDefinitions) {
@@ -96,6 +105,7 @@
       const city = window.__city ?? target.city;
       const tile = turn(x, y, city.size - 1);
       center(tile.x, tile.y);
+      clampCamera(target.camera, city.size);
     };
   }
   function rotate(direction, force = false) {
@@ -104,14 +114,15 @@
     const city = window.__city;
     const camera = renderer.camera;
     const tile = { x: (camera.x / 32 + camera.y / 16) / 2, y: (camera.y / 16 - camera.x / 32) / 2 };
-    const original = inverse(tile, city.size);
+    const original = inverse(tile, city.size - 1);
     orientation = (orientation + direction + 4) % 4;
-    const rotated = turn(original.x, original.y, city.size);
+    const rotated = turn(original.x, original.y, city.size - 1);
     camera.x = (rotated.x - rotated.y) * 32;
     camera.y = (rotated.x + rotated.y) * 16;
+    clampCamera(camera, city.size);
     view = null;
     const rotatedCity = cityView(city);
-    const point = value => turn(value.x, value.y, city.size, direction);
+    const point = value => turn(value.x, value.y, city.size - 1, direction);
     const rotateTile = index => {
       const rotatedTile = turn(index % city.size, Math.floor(index / city.size), city.size - 1, direction);
       return city.idx(rotatedTile.x, rotatedTile.y);
@@ -143,5 +154,5 @@
     if (!enabled && orientation) rotate(-orientation, true);
   }
   window.__mapRotation = { bind, draw, rotate, setEnabled, cityView,
-    toWorldPoint: (point, size) => inverse(point, size), getAngle: () => orientation * 90 };
+    toWorldPoint: (point, size) => inverse(point, size - 1), getAngle: () => orientation * 90 };
 })();
