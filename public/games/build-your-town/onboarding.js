@@ -230,5 +230,5 @@
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("map").addEventListener("pointerdown", clearHighlight);
   });
-  window.__scenarioGuide = { render, showBriefing };
+  window.__scenarioGuide = { render, showBriefing, useAction };
 })();
