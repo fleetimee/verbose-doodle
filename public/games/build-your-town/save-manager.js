@@ -69,9 +69,14 @@
 
     // Include mission progression for this city
     let missionData = null;
+    let scenarioRun = null;
     try {
       const mRaw = localStorage.getItem(`citybuilder.missions.${activeKey}`);
       if (mRaw) missionData = JSON.parse(mRaw);
+      if (activeKey?.startsWith("scenario_")) {
+        const runRaw = localStorage.getItem(`citybuilder.scenarioRun.${activeKey.slice(9)}`);
+        if (runRaw) scenarioRun = JSON.parse(runRaw);
+      }
     } catch {}
 
     const cityName = (meta?.name || cityData.name || "City").replace(/[^a-zA-Z0-9_\-]/g, "_");
@@ -92,6 +97,7 @@
         data: cityData,
       },
       missions: missionData,
+      scenarioRun,
     };
 
     downloadJson(payload, filename);
@@ -115,6 +121,7 @@
 
     const exportedCities = [];
     const missionMap = {};
+    const scenarioRuns = {};
 
     list.forEach((meta) => {
       try {
@@ -127,6 +134,10 @@
           });
           const mRaw = localStorage.getItem(`citybuilder.missions.${meta.key}`);
           if (mRaw) missionMap[meta.key] = JSON.parse(mRaw);
+          if (meta.key.startsWith("scenario_")) {
+            const runRaw = localStorage.getItem(`citybuilder.scenarioRun.${meta.key.slice(9)}`);
+            if (runRaw) scenarioRuns[meta.key] = JSON.parse(runRaw);
+          }
         }
       } catch {}
     });
@@ -148,6 +159,7 @@
       cities: exportedCities,
       missions: missionMap,
       scenarioMedals,
+      scenarioRuns,
     };
 
     downloadJson(payload, filename);
@@ -211,6 +223,11 @@
         if (json.missions && json.missions[c.key]) {
           localStorage.setItem(`citybuilder.missions.${c.key}`, JSON.stringify(json.missions[c.key]));
         }
+        if (c.key.startsWith("scenario_")) {
+          const runKey = `citybuilder.scenarioRun.${c.key.slice(9)}`;
+          if (json.scenarioRuns?.[c.key]) localStorage.setItem(runKey, JSON.stringify(json.scenarioRuns[c.key]));
+          else localStorage.removeItem(runKey);
+        }
 
         importedCount++;
         lastImportedKey = c.key;
@@ -254,12 +271,14 @@
     let cityName = "Imported City";
     let cityKey = null;
     let missionData = null;
+    let scenarioRun = null;
 
     if (json.format === "buildyourtown-save" && json.city?.data) {
       cityData = json.city.data;
       cityName = json.city.name || cityData.name || "Imported City";
       cityKey = json.city.key || `city_${Date.now()}`;
       missionData = json.missions || null;
+      scenarioRun = json.scenarioRun || null;
     } else if (json.terrain && json.overlay && (json.size === 128 || json.v)) {
       // Raw city JSON
       cityData = json;
@@ -299,6 +318,11 @@
 
     if (missionData) {
       localStorage.setItem(`citybuilder.missions.${cityKey}`, JSON.stringify(missionData));
+    }
+    if (cityKey.startsWith("scenario_")) {
+      const runKey = `citybuilder.scenarioRun.${cityKey.slice(9)}`;
+      if (scenarioRun) localStorage.setItem(runKey, JSON.stringify(scenarioRun));
+      else localStorage.removeItem(runKey);
     }
 
     // Add to city index

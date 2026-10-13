@@ -371,6 +371,7 @@
   ];
 
   let activeScenario = null;
+  let scenarioCity = null;
   let scenarioBaseline = null;
   let scenarioReady = true;
   let runMedals = {};
@@ -401,8 +402,9 @@
   const syncScenario = () => {
     const key = localStorage.getItem("citybuilder.current");
     const scenario = SCENARIOS.find((s) => key === `scenario_${s.id}`) || null;
-    if (scenario === activeScenario) return;
+    if (scenario === activeScenario && scenarioCity === window.__city) return;
     activeScenario = scenario;
+    scenarioCity = window.__city;
     scenarioBaseline = null;
     runMedals = {};
     scenarioReady = true;
@@ -479,6 +481,7 @@
       // Persist the damaged starting city rather than the intact generated town.
       window.__startCity(city, key);
     }
+    scenarioCity = city;
 
     window.dispatchEvent(new CustomEvent("citybuilder-scenario-change"));
     try {
