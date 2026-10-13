@@ -47,3 +47,11 @@
   #minimap { width: 200px; }
   #query { bottom: calc(88px + env(safe-area-inset-bottom)); }
 }
+#view-settings { max-height: calc(100dvh / var(--game-ui-scale) - 88px); overflow-y: auto; }
+.view-rotation-settings { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.view-rotation-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+#enable-map-rotation, #enable-manual-disasters { margin: 0; width: 16px; height: 16px; accent-color: var(--accent); }
+#settings-map-rotation { display: flex; align-items: center; justify-content: center; gap: 12px; }
+#settings-map-rotation button { width: 36px; height: 32px; padding: 6px 8px; }
+#settings-map-angle { min-width: 42px; text-align: center; color: #c4cbd9; font-variant-numeric: tabular-nums; }
+#settings-map-rotation button:focus-visible, #enable-map-rotation:focus-visible, #enable-manual-disasters:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

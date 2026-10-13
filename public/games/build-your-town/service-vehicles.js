@@ -37,7 +37,7 @@
   }
 
   function incident(city, index, kind) {
-    if (kind === "fireengine") return city.fire[index] > 0;
+    if (kind === "fireengine") return city.fire[index] > 0 && (!window.__disasterRecovery || window.__disasterRecovery.canFight(city, index));
     const occupied = city.overlay[index] >= 3 && city.overlay[index] <= 5 && city.level[index] > 0;
     if (kind === "police") return occupied && city.crime[index] >= 80;
     return occupied && (city.fire[index] > 0 || city.flood[index] > 0 ||
@@ -286,5 +286,28 @@
       ctx.fillStyle = "#242c38"; ctx.beginPath(); ctx.ellipse(px, py, 1.4, 1.8, 0, 0, Math.PI * 2); ctx.fill();
     }
   }
-  window.__serviceVehicles = { update, draw, sprite };
+  function rotate(renderer, city, point, tile) {
+    const state = states.get(renderer);
+    if (!state) return;
+    state.city = city;
+    state.refresh = -Infinity;
+    state.tiles.clear();
+    const vehicles = new Map();
+    for (const [station, vehicle] of state.vehicles) {
+      const rotatedStation = city.structs.get(station.id);
+      if (!rotatedStation) continue;
+      Object.assign(vehicle, point(vehicle));
+      vehicle.station = rotatedStation;
+      vehicle.path = vehicle.path.map(tile);
+      const [kind, index] = vehicle.call.split(":");
+      vehicle.call = `${kind}:${tile(Number(index))}`;
+      vehicles.set(rotatedStation, vehicle);
+    }
+    state.vehicles = vehicles;
+    state.cooldowns = new Map([...state.cooldowns].map(([key, until]) => {
+      const [kind, index] = key.split(":");
+      return [`${kind}:${tile(Number(index))}`, until];
+    }));
+  }
+  window.__serviceVehicles = { update, draw, sprite, rotate };
 })();

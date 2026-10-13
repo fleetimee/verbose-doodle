@@ -3,19 +3,22 @@
   const inspectFire = (city) => {
     let count = 0;
     let covered = 0;
+    let ordered = 0;
     for (let i = 0; i < city.fire.length; i++) {
       if (!city.fire[i]) continue;
       count++;
       if (city.cover.fire[i] > 0) covered++;
+      if (city.fireOrders?.[i] && window.__disasterRecovery?.canFight(city, i)) ordered++;
     }
     const stations = [...city.structs.values()].filter((building) => building.type === "fire" || building.type === "firecommand").length;
-    return { count, covered, stations, funding: city.funding.fire };
+    return { count, covered, ordered, stations, funding: city.funding.fire };
   };
 
   let panel = null;
   let currentCity = null;
   let collapsed = false;
   let previousFocus = null;
+  let previousPending = 0;
   const setText = (id, value) => {
     const element = document.getElementById(id);
     if (element.textContent !== value) element.textContent = value;
@@ -33,7 +36,10 @@
     const city = window.__city;
     if (!city) return;
     const index = city.fire.findIndex((value) => value > 0);
-    if (index >= 0) window.__focusCityTile(index % city.size, Math.floor(index / city.size));
+    const recovery = window.__disasterRecovery?.progress(city);
+    const target = index >= 0 ? index : recovery?.next ?? -1;
+    if (target >= 0) window.__focusCityTile(target % city.size, Math.floor(target / city.size));
+    else if (city.actors[0]) window.__focusCityTile(city.actors[0].x, city.actors[0].y);
     update();
   };
 
@@ -41,9 +47,16 @@
     if (!panel || !window.__city) return;
     const city = window.__city;
     const fire = inspectFire(city);
-    if (currentCity !== city || !fire.count) collapsed = false;
+    const recovery = window.__disasterRecovery?.progress(city) ?? { pending: 0, complete: 0, total: 0 };
+    const manual = window.__disasterRecovery?.isManual() ?? false;
+    const tornado = manual && city.actors.some(actor => actor.kind === "tornado");
+    if (currentCity === city && previousPending > 0 && !recovery.pending && !fire.count && !tornado) {
+      window.__ui.toast(getLang() === "fr" ? "Reconstruction terminée : tous les dégâts suivis sont réparés." : "Recovery complete: all tracked damage repaired.", "good", { ms: 5000 });
+    }
+    if (currentCity !== city) collapsed = false;
+    previousPending = recovery.pending;
     currentCity = city;
-    if (!fire.count) {
+    if (!fire.count && !recovery.pending && !tornado) {
       if (!panel.hidden && panel.contains(document.activeElement)) {
         const target = previousFocus?.isConnected && !panel.contains(previousFocus)
           ? previousFocus : document.querySelector('#speed button.active');
@@ -55,23 +68,33 @@
     if (panel.hidden) previousFocus = document.activeElement;
     panel.hidden = false;
     const fr = getLang() === "fr";
-    setText("fire-response-title", fr ? "Incendie en cours" : "Fire emergency");
-    setText("fire-response-count", fr ? `${fire.count} case(s) en feu · ${fire.covered} couverte(s) · financement ${fire.funding} %` : `${fire.count} burning tile${fire.count === 1 ? "" : "s"} · ${fire.covered} covered · funding ${fire.funding}%`);
+    setText("fire-response-title", fire.count ? (fr ? "Intervention incendie" : "Fire response") : (fr ? "Reconstruction après sinistre" : "Disaster recovery"));
+    setText("fire-response-count", fr
+      ? `${fire.count} feu(x) · ${fire.ordered} intervention(s) · ${recovery.complete}/${recovery.total} cases restaurées`
+      : `${fire.count} fires · ${fire.ordered} assigned · ${recovery.complete}/${recovery.total} tiles restored`);
     let advice;
-    if (!fire.stations) advice = fr
-      ? "Construisez une caserne près du feu. Les services incendie interviennent automatiquement selon leur couverture et leur financement."
-      : "Build a fire station near the fire. Fire services respond automatically based on coverage and funding.";
-    else if (fire.funding < 100) advice = fr
-      ? "Augmentez le financement des pompiers dans le budget. Vérifiez aussi que les cases en feu sont couvertes par une caserne."
-      : "Increase fire-department funding in the budget. Also check that a station covers the burning tiles.";
-    else if (fire.covered < fire.count) advice = fr
-      ? "Des feux sont hors de portée des services incendie. Affichez la couverture et placez une caserne plus près."
-      : "Some fires are outside fire-service coverage. View the coverage map and place a station closer.";
+    if (!manual && fire.count) advice = fr
+      ? "Les pompiers interviennent automatiquement selon la couverture et le financement. Construisez une caserne près des feux et financez-la. Activez l'intervention manuelle dans les réglages pour diriger les secours."
+      : "Fire crews respond automatically based on coverage and funding. Build and fund a station near the fires. Enable manual disaster response in settings to direct crews yourself.";
+    else if (!fire.count) advice = fr
+      ? "Le sinistre ne répare pas la ville. Démolissez les décombres, reconstruisez les routes, réseaux et équipements, puis rezonez les terrains."
+      : "Damage stays until you repair it. Bulldoze debris, rebuild roads, utilities and facilities, then rezone damaged neighborhoods.";
+    else if (!fire.stations || fire.covered < fire.count) advice = fr
+      ? "Construisez une caserne couvrant les feux, financez les pompiers et cliquez sur Envoyer les pompiers. Les nouveaux feux nécessitent un nouvel ordre."
+      : "Build a station covering the fires, fund it, then click Dispatch firefighters. Newly spreading fires need another order.";
     else advice = fr
-      ? "Les feux sont couverts. Laissez tourner la ville à vitesse normale pour que les pompiers interviennent."
-      : "The fires are covered. Run the city at normal speed so fire services can respond.";
+      ? "Envoyez les pompiers pour autoriser l'intervention. Sans votre ordre, les feux se propagent ou laissent des décombres. Reprenez la simulation pour intervenir."
+      : "Dispatch firefighters to authorize a response. Without your order, fires spread or burn buildings into debris. Resume the simulation for crews to work.";
+    if (tornado) advice += fr ? " La tornade est encore active : mettez en pause pour préparer la reconstruction." : " The tornado is still active; pause to plan recovery.";
     setText("fire-response-advice", advice);
-    setText("fire-response-locate", fr ? "Localiser le feu" : "Go to fire");
+    setText("fire-response-locate", fire.count ? (fr ? "Localiser le feu" : "Go to fire") : (fr ? "Localiser les dégâts" : "Go to damage"));
+    setText("fire-response-dispatch", fr ? "Envoyer les pompiers" : "Dispatch firefighters");
+    document.getElementById("fire-response-dispatch").hidden = !manual;
+    document.getElementById("fire-response-dispatch").disabled = !fire.count || fire.covered <= fire.ordered || fire.funding <= 0;
+    setText("fire-response-clear", fr ? "Déblayer les décombres" : "Clear debris");
+    setText("fire-response-rebuild", fr ? "Reconstruire la prochaine case" : "Rebuild next tile");
+    document.getElementById("fire-response-clear").disabled = !recovery.pending;
+    document.getElementById("fire-response-rebuild").disabled = !recovery.pending;
     setText("fire-response-coverage", fr ? "Couverture incendie" : "View fire coverage");
     setText("fire-response-station", fr ? "Construire une caserne" : "Build fire station");
     setText("fire-response-budget", fr ? "Budget des pompiers" : "Review fire funding");
@@ -99,6 +122,9 @@
       <div id="fire-response-body">
         <p id="fire-response-advice"></p>
         <div class="fire-response-actions">
+          <button type="button" class="primary" id="fire-response-dispatch"></button>
+          <button type="button" id="fire-response-clear"></button>
+          <button type="button" id="fire-response-rebuild"></button>
           <button type="button" id="fire-response-coverage"></button>
           <button type="button" id="fire-response-station"></button>
           <button type="button" id="fire-response-budget"></button>
@@ -109,6 +135,26 @@
     document.getElementById("fire-response-locate").addEventListener("click", () => {
       closeOtherPanels();
       locate();
+    });
+    document.getElementById("fire-response-dispatch").addEventListener("click", () => {
+      window.__dispatchFirefighters();
+      update();
+    });
+    document.getElementById("fire-response-clear").addEventListener("click", () => {
+      closeOtherPanels();
+      window.__ui.handlers.onTool("bulldoze", false);
+      locate();
+    });
+    document.getElementById("fire-response-rebuild").addEventListener("click", () => {
+      const city = window.__city;
+      const index = window.__disasterRecovery.progress(city).next;
+      if (index < 0) return;
+      const task = city.disasterRecovery[index];
+      const tool = task.type ?? ({ 2: "road", 3: "res", 4: "com", 5: "ind", 7: "highway" }[task.overlay]) ?? (task.rail ? "rail" : "wire");
+      closeOtherPanels();
+      window.__ui.handlers.onTool(tool, false);
+      window.__focusCityTile(index % city.size, Math.floor(index / city.size));
+      update();
     });
     document.getElementById("fire-response-coverage").addEventListener("click", () => {
       closeOtherPanels();
@@ -145,6 +191,7 @@
     #fire-response-count { color: var(--muted); font-size: 12px; margin: 4px 0 10px; }
     #fire-response-advice { font-size: 13px; line-height: 1.5; margin: 12px 0; }
     #fire-response button { min-height: 44px; }
+    #fire-response button:disabled { opacity: 0.45; cursor: default; }
     .fire-response-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     #fire-response button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
     @media (max-width: 900px) { #fire-response { bottom: calc(106px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 170px - env(safe-area-inset-bottom)); } }

@@ -96,5 +96,18 @@
       renderer.ctx.drawImage(image, Math.round(px - 32 * scale), Math.round(py - 128 * scale));
     }
   }
-  window.__trafficVehicles = { update, draw };
+  function rotate(renderer, city, point, tile) {
+    const state = states.get(renderer);
+    if (!state) return;
+    state.city = city;
+    state.refresh = -Infinity;
+    state.tiles.clear();
+    for (const car of state.cars) {
+      Object.assign(car, point(car));
+      car.start = point(car.start);
+      car.from = tile(car.from);
+      car.to = tile(car.to);
+    }
+  }
+  window.__trafficVehicles = { update, draw, rotate };
 })();

@@ -77,7 +77,60 @@
     const zoom = document.createElement("span");
     zoom.id = "minimap-zoom";
     zoom.append(minus, plus);
+    const rotateLeft = button(text("Rotate map left 90°", "Tourner la carte à gauche de 90°"), "M3 10a9 9 0 1 1 2 8M3 4v6h6");
+    const rotateRight = button(text("Rotate map right 90°", "Tourner la carte à droite de 90°"), "M21 10a9 9 0 1 0-2 8M21 4v6h-6");
+    const angle = document.createElement("output");
+    angle.id = "settings-map-angle";
+    angle.textContent = "0°";
+    angle.setAttribute("aria-label", text("Camera rotation", "Rotation de la caméra"));
+    angle.setAttribute("aria-live", "polite");
+    rotateLeft.addEventListener("click", event => { event.stopPropagation(); window.__mapRotation?.rotate(-1); });
+    rotateRight.addEventListener("click", event => { event.stopPropagation(); window.__mapRotation?.rotate(1); });
+    window.addEventListener("town-view-rotation", event => { angle.textContent = `${event.detail}°`; });
+    const rotations = document.createElement("div");
+    rotations.id = "settings-map-rotation";
+    rotations.append(rotateLeft, angle, rotateRight);
     document.querySelector("#minimap .head").append(zoom);
+    const rotationSection = document.createElement("section");
+    rotationSection.className = "view-rotation-settings";
+    const rotationLabel = document.createElement("label");
+    rotationLabel.className = "view-rotation-toggle";
+    const enableRotation = document.createElement("input");
+    enableRotation.type = "checkbox";
+    enableRotation.id = "enable-map-rotation";
+    try { enableRotation.checked = localStorage.getItem("citybuilder.mapRotation") === "true"; } catch {}
+    rotationLabel.append(enableRotation, document.createTextNode(text("Enable map rotation", "Activer la rotation de la carte")));
+    const rotationNote = document.createElement("p");
+    rotationNote.textContent = text("Turn the camera in 90° steps. Disabling restores the original view.", "Tournez la caméra par pas de 90°. Désactiver rétablit la vue d'origine.");
+    const applyRotation = () => {
+      window.__mapRotation?.setEnabled(enableRotation.checked);
+      rotateLeft.disabled = rotateRight.disabled = !enableRotation.checked;
+      rotations.hidden = !enableRotation.checked;
+      try { localStorage.setItem("citybuilder.mapRotation", String(enableRotation.checked)); } catch {}
+    };
+    enableRotation.addEventListener("change", applyRotation);
+    rotationSection.append(rotationLabel, rotationNote, rotations);
+    panel.append(rotationSection);
+    applyRotation();
+    const disasterSection = document.createElement("section");
+    disasterSection.className = "view-rotation-settings";
+    const disasterLabel = document.createElement("label");
+    disasterLabel.className = "view-rotation-toggle";
+    const manualDisasters = document.createElement("input");
+    manualDisasters.type = "checkbox";
+    manualDisasters.id = "enable-manual-disasters";
+    try { manualDisasters.checked = localStorage.getItem("citybuilder.manualDisasters") === "true"; } catch {}
+    disasterLabel.append(manualDisasters, document.createTextNode(text("Manual disaster response", "Intervention manuelle")));
+    const disasterNote = document.createElement("p");
+    disasterNote.textContent = text("Require firefighter dispatch and track storm repairs. Off uses automatic fire response.", "Envoyez les pompiers et suivez les réparations. Désactivé, les pompiers interviennent automatiquement.");
+    const applyDisasters = () => {
+      window.__disasterRecovery?.setManual(manualDisasters.checked);
+      try { localStorage.setItem("citybuilder.manualDisasters", String(manualDisasters.checked)); } catch {}
+    };
+    manualDisasters.addEventListener("change", applyDisasters);
+    disasterSection.append(disasterLabel, disasterNote);
+    panel.append(disasterSection);
+    applyDisasters();
     for (const [control, direction] of [[minus, -1], [plus, 1]]) {
       control.addEventListener("click", event => {
         event.stopPropagation();
