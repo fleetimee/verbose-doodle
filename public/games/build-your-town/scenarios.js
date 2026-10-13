@@ -469,6 +469,10 @@
     runMedals = {};
     saveRun();
     scenario.setup(city);
+    // The simulated prehistory must not carry a loss into a fresh scenario.
+    city.bankrupt = false;
+    city.brokeMonths = 0;
+    city.log = city.log.filter(entry => entry.key !== "log.bankrupt" && entry.key !== "advice.bankruptSoon");
 
     // 4. Set as active city in the game
     const key = `scenario_${scenario.id}`;

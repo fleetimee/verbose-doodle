@@ -10,7 +10,7 @@
   };
   const states = new WeakMap();
   const drivable = (city, index) => (city.overlay[index] === 2 || city.overlay[index] === 7) &&
-    city.terrain[index] === 0 && !city.fire[index] && !city.flood[index] && !city.rail[index];
+    city.terrain[index] === 0 && !city.fire[index] && !city.flood[index];
 
   function neighbors(city, index) {
     const x = index % city.size;
@@ -36,47 +36,50 @@
     return result;
   }
 
-  function route(renderer, city, origin, station, radius, kind, sequence) {
+  function incident(city, index, kind) {
+    if (kind === "fireengine") return city.fire[index] > 0;
+    const occupied = city.overlay[index] >= 3 && city.overlay[index] <= 5 && city.level[index] > 0;
+    if (kind === "police") return occupied && city.crime[index] >= 80;
+    return occupied && (city.fire[index] > 0 || city.flood[index] > 0 ||
+      city.overlay[index] === 3 && city.pollution[index] >= 90 && city.cover.health[index] < 64);
+  }
+
+  function route(renderer, city, origin, station, radius, kind, state) {
     const previous = new Map([[origin, -1]]);
     const queue = [origin];
-    const destinations = [];
     let target = null;
+    let call = null;
     for (let cursor = 0; cursor < queue.length && cursor < 2048; cursor++) {
       const index = queue[cursor];
-      const x = index % city.size;
-      const y = Math.floor(index / city.size);
-      const crossing = window.__townPedestrians?.hasCrosswalk(renderer, city, index);
-      if (kind === "fireengine" && !crossing) {
+      const x = index % city.size, y = Math.floor(index / city.size);
+      if (!window.__townPedestrians?.hasCrosswalk(renderer, city, index)) {
         for (let dy = -2; dy <= 2 && target === null; dy++) {
           for (let dx = -2; dx <= 2; dx++) {
             if (!city.inBounds(x + dx, y + dy)) continue;
-            const fire = city.idx(x + dx, y + dy);
-            if (index !== origin && city.fire[fire] && Math.hypot(x + dx - station.x, y + dy - station.y) <= radius) {
-              target = index;
-              break;
-            }
+            const tile = city.idx(x + dx, y + dy);
+            const key = `${kind}:${tile}`;
+            if (!incident(city, tile, kind) || Math.hypot(x + dx - station.x, y + dy - station.y) > radius ||
+              (state.cooldowns.get(key) ?? 0) > state.clock ||
+              [...state.vehicles.values()].some(vehicle => vehicle.call === key)) continue;
+            target = index;
+            call = key;
+            break;
           }
         }
         if (target !== null) break;
       }
-      if (index !== origin && !crossing) destinations.push(index);
       for (const next of neighbors(city, index)) {
-        const nx = next % city.size;
-        const ny = Math.floor(next / city.size);
+        const nx = next % city.size, ny = Math.floor(next / city.size);
         if (previous.has(next) || Math.hypot(nx - station.x, ny - station.y) > radius) continue;
         previous.set(next, index);
         queue.push(next);
       }
     }
-    const responding = target !== null;
-    if (target === null && destinations.length) {
-      target = destinations[(sequence * 17 + station.x * 13 + station.y * 7) % destinations.length];
-    }
     if (target === null || target === origin) return null;
     const path = [];
     for (let index = target; index !== -1; index = previous.get(index)) path.push(index);
     path.reverse();
-    return { path, responding };
+    return { path, responding: true, call };
   }
 
   function returnRoute(city, from, destination) {
@@ -120,7 +123,7 @@
     const origin = current !== undefined && drivable(city, current) ? current : entrances(city, station, definition.size).find(index => neighbors(city, index).length > 0);
     if (origin === undefined) return null;
     const trip = route(renderer, city, origin, station, definition.radius * Math.min(1.5, funding / 100),
-      department.kind, vehicle?.sequence || 0);
+      department.kind, state);
     if (!trip) return null;
     const returning = returnRoute(city, trip.path[trip.path.length - 1], origin);
     if (!returning) return null;
@@ -132,14 +135,14 @@
     else start.y += next.y > start.y ? -0.4 : 0.4;
     if (origin === current) { start.x = vehicle.x; start.y = vehicle.y; }
     return { station, kind: department.kind, path, step: 0, x: start.x, y: start.y,
-      sequence: vehicle?.sequence || 0, responding: trip.responding,
+      sequence: vehicle?.sequence || 0, responding: trip.responding, call: trip.call,
       dispatched: state.clock, dwell: 0, outboundEnd: trip.path.length - 1 };
   }
 
   function update(renderer, city, time, speed, definitions) {
     let state = states.get(renderer);
     if (!state || state.city !== city) {
-      state = { city, vehicles: new Map(), tiles: new Map(), last: time, clock: 0, refresh: -Infinity };
+      state = { city, vehicles: new Map(), tiles: new Map(), last: time, clock: 0, refresh: -Infinity, cooldowns: new Map() };
       states.set(renderer, state);
     }
     const delta = reducedMotion.matches ? 0 : Math.min(0.12, Math.max(0, (time - state.last) / 1000)) * speed;
@@ -149,14 +152,14 @@
       const eligible = new Set();
       const counts = { police: 0, ambulance: 0, fireengine: 0 };
       for (const vehicle of state.vehicles.values()) counts[vehicle.kind]++;
-      state.hasFire = city.fire.some(value => value > 0);
+      for (const [key, until] of state.cooldowns) if (until <= state.clock) state.cooldowns.delete(key);
       for (const station of city.structs.values()) {
         const department = departments[station.type];
         const definition = definitions[station.type];
         if (!department || city.funding[department.funding] <= 0 ||
             (definition.endgame && !city.powered[city.idx(station.x, station.y)])) continue;
         eligible.add(station);
-        if (!state.vehicles.has(station) && counts[department.kind] < 6) {
+        if (speed > 0 && !state.vehicles.has(station) && counts[department.kind] < 3) {
           const vehicle = dispatch(renderer, city, station, definition, null, state);
           if (vehicle) {
             state.vehicles.set(station, vehicle);
@@ -168,17 +171,19 @@
       state.refresh = time;
     }
     state.tiles.clear();
-    for (const [station, vehicle] of state.vehicles) {
+    for (let [station, vehicle] of state.vehicles) {
       if (city.funding[departments[station.type].funding] <= 0 || !city.structs.has(station.id)) continue;
       const index = city.idx(Math.floor(vehicle.x), Math.floor(vehicle.y));
       const invalid = !drivable(city, index) || vehicle.path.some((index, step) => !drivable(city, index) || step > 0 &&
         !(window.__roadLayout?.canStep(city, vehicle.path[step - 1], index) ?? true));
-      const rerouteFire = vehicle.kind === "fireengine" && state.hasFire && !vehicle.responding && state.clock - vehicle.dispatched > 4;
-      if (invalid || vehicle.step >= vehicle.path.length - 1 || rerouteFire) {
-        vehicle.sequence++;
-        const replacement = dispatch(renderer, city, station, definitions[station.type], vehicle, state);
-        if (replacement) state.vehicles.set(station, replacement);
-        else state.vehicles.delete(station);
+      if (vehicle.step >= vehicle.path.length - 1) {
+        state.cooldowns.set(vehicle.call, state.clock + 60);
+        state.vehicles.delete(station);
+        continue;
+      }
+      if (invalid) {
+        // Road edits can invalidate a trip; wait at base for another reachable call.
+        state.vehicles.delete(station);
         continue;
       }
       if (vehicle.dwell > 0) vehicle.dwell = Math.max(0, vehicle.dwell - delta);
@@ -197,7 +202,10 @@
         vehicle.back = (vehicle.axis === "x" ? dx : dy) < 0 ? 1 : 0;
         if (distance <= travel && fraction === 1) {
           vehicle.step++;
-          if (vehicle.step === vehicle.outboundEnd) vehicle.dwell = vehicle.responding ? 4 : 1.5;
+          if (vehicle.step === vehicle.outboundEnd) {
+            vehicle.dwell = 4;
+            vehicle.responding = false;
+          }
         }
       }
       const tile = city.idx(Math.floor(vehicle.x), Math.floor(vehicle.y));
@@ -219,7 +227,7 @@
         corners[2] * u * v + corners[3] * (1 - u) * v;
       const px = x + (u - v) * 32 * scale;
       const py = y + (u + v) * 16 * scale - (height - lowest) * 8 * scale;
-      const flashing = vehicle.kind !== "police" || vehicle.responding;
+      const flashing = vehicle.responding;
       const frame = flashing && !reducedMotion.matches ? Math.floor(state.clock * 4) % 2 + 1 : 0;
       const sprite = renderer.sprites.get(`emergency:${vehicle.kind}:${vehicle.axis || "x"}:${vehicle.back || 0}:${frame}`, scale);
       renderer.ctx.drawImage(sprite, Math.round(px - 32 * scale), Math.round(py - 128 * scale));

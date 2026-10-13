@@ -1,0 +1,49 @@
+:root { --game-ui-scale: 1; }
+#topbar, #toolbar, #flyout, #tooltip, #query, .panel, .menu, #minimap, #statusbar, #toast, #view-settings { zoom: var(--game-ui-scale); }
+#toolbar { width: 128px; grid-template-columns: repeat(2, 54px); gap: 4px; padding: 6px; max-height: calc(100dvh / var(--game-ui-scale) - 104px); }
+#toolbar button.tool, #toolbar button.menu-btn { width: 54px; height: 54px; }
+#toolbar button.tool .ico { width: 48px; height: 48px; }
+#toolbar button.tool .ico canvas { max-width: 48px; max-height: 48px; object-fit: contain; }
+#toolbar button.menu-btn { height: 40px; font-size: 23px; }
+#toolbar hr { width: 106px; }
+#flyout, .panel, .menu { left: 148px; }
+#panel-cities { left: 50%; }
+#query { max-height: calc(100dvh / var(--game-ui-scale) - 232px); }
+#topbar { left: 0; right: 0; width: auto; overflow-x: auto; scrollbar-width: none; }
+#topbar::-webkit-scrollbar { display: none; }
+#topbar > * { flex-shrink: 0; }
+#statusbar { left: 0; right: 0; width: auto; }
+#btn-view-settings { width: 36px; height: 36px; padding: 7px; flex-shrink: 0; }
+#btn-view-settings svg, #view-settings svg { width: 20px; height: 20px; display: block; }
+#view-settings { position: fixed; z-index: 12; top: 64px; right: 12px; width: 280px; max-width: calc(100vw / var(--game-ui-scale) - 24px); padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-flat); box-shadow: 0 8px 24px #0006; }
+.view-settings-head, .view-scale-label { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+#view-settings h2 { font-size: 16px; margin: 0; }
+.view-settings-head { margin-bottom: 18px; }
+.view-settings-head button { padding: 6px; }
+.view-scale-label output { color: var(--accent); font-variant-numeric: tabular-nums; }
+#game-ui-scale { width: 100%; margin: 12px 0 4px; accent-color: var(--accent); }
+#view-settings p { font-size: 12px; color: #c4cbd9; line-height: 1.5; margin: 8px 0 16px; }
+#view-settings button:focus-visible, #btn-view-settings:focus-visible, #minimap-zoom button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#minimap-zoom { display: flex; gap: 3px; margin-left: auto; }
+#minimap #minimap-zoom button { width: 24px; }
+#minimap-zoom svg { width: 14px; height: 14px; }
+#minimap-zoom button:disabled { opacity: 0.4; cursor: default; }
+#minimap .head > span:first-child { margin-right: auto; }
+@media (max-width: 900px) {
+  #toolbar { left: 0; right: 0; width: auto; grid-template-columns: none; }
+  #toolbar button.tool, #toolbar button.menu-btn { width: 44px; height: 44px; }
+  #toolbar button.tool .ico, #toolbar button.tool .ico canvas { width: 40px; height: 40px; }
+  #flyout, .panel, .menu { left: 10px; }
+  #panel-cities { left: 50%; }
+}
+@media (max-width: 600px) {
+  #query { max-height: calc(48dvh / var(--game-ui-scale)); }
+}
+@media (max-height: 480px) and (min-width: 601px) {
+  #query { max-height: calc(100dvh / var(--game-ui-scale) - 110px); }
+}
+@media (max-width: 900px) {
+  #toolbar hr { width: 1px; }
+  #minimap { width: 200px; }
+  #query { bottom: calc(88px + env(safe-area-inset-bottom)); }
+}
