@@ -25,13 +25,6 @@
       },
       setup: (city) => {
         city.money = 12000;
-        // Turn some buildings into rubble and cut lines
-        if (typeof window.__triggerDisaster === "function") {
-          setTimeout(() => {
-            window.__triggerDisaster("quake");
-            window.__triggerDisaster("fire");
-          }, 800);
-        }
       },
       bronze: {
         title: {
@@ -50,7 +43,7 @@
               if (c.overlay[i] === 8) rubbleCount++; // 8 is b.Rubble
             }
           }
-          const ok = burning === 0 && rubbleCount <= 2;
+          const ok = burning === 0 && rubbleCount === 0;
           return {
             done: ok,
             label: burning > 0 ? `Fires active: ${burning}` : `Rubble remaining: ${rubbleCount}`,
@@ -67,9 +60,8 @@
           fr: "Construisez une caserne et un hôpital, avec un réseau électrique stable.",
         },
         check: (c) => {
-          const structs = c.structs ? [...c.structs.values()] : [];
-          const fire = structs.some((s) => s.type === "fire");
-          const hosp = structs.some((s) => s.type === "hospital");
+          const fire = countNewStructures(c, ["fire"]) >= 1;
+          const hosp = countNewStructures(c, ["hospital"]) >= 1;
           const powOk = (c.power?.supply || 0) >= (c.power?.demand || 0) && (c.power?.demand || 0) > 0;
           const ok = fire && hosp && powOk;
           return {
@@ -84,8 +76,8 @@
           fr: "La Renaissance",
         },
         desc: {
-          en: "Restore city population back past 4,000 residents with a positive monthly balance.",
-          fr: "Portez la population au-delà de 4 000 habitants avec un budget mensuel positif.",
+          en: "Add 1,000 residents and reach at least 4,000 residents with a positive monthly balance.",
+          fr: "Gagnez 1 000 habitants pour atteindre au moins 4 000 habitants avec un budget mensuel positif.",
         },
         check: (c) => {
           const pop = c.stats?.pop || 0;
@@ -107,10 +99,10 @@
               (b.interest || 0);
             net = Math.round(inc - exp);
           }
-          const ok = pop >= 4000 && net > 0;
+          const ok = pop >= Math.max(4000, (scenarioBaseline?.pop || 0) + 1000) && net > 0;
           return {
             done: ok,
-            label: `${pop.toLocaleString()} / 4,000 pop | Net: ${net >= 0 ? "+" : ""}${net}$/mo`,
+            label: `${pop.toLocaleString()} / ${Math.max(4000, (scenarioBaseline?.pop || 0) + 1000).toLocaleString()} pop | Net: ${net >= 0 ? "+" : ""}${net}$/mo`,
           };
         },
       },
@@ -132,12 +124,12 @@
       mapKind: "river",
       cityName: "Oakhaven Debt",
       desc: {
-        en: "The former mayor plunged Oakhaven into $-6,000 of debt with a crippling monthly deficit! If the debt breaches -$10,000, bankruptcy is declared. Turn this sinking ship around before time runs out.",
+        en: "The former mayor plunged Oakhaven into -$6,000 of debt with a crippling monthly deficit! If the debt breaches -$10,000, bankruptcy is declared. Turn this sinking ship around before time runs out.",
         fr: "L'ancien maire a plongé Oakhaven dans une dette de -6 000 $ avec un lourd déficit ! Si la dette atteint -10 000 $, la faillite sonne. Redressez les comptes avant qu'il ne soit trop tard.",
       },
       setup: (city) => {
         city.money = -6000;
-        city.difficulty = "facile";
+        city.taxRate = 4;
       },
       bronze: {
         title: {
@@ -145,12 +137,14 @@
           fr: "Stopper l'hémorragie",
         },
         desc: {
-          en: "Achieve a positive monthly balance (+$$$/month) to halt the deficit.",
-          fr: "Atteignez un solde mensuel positif (+$$$/mois) pour arrêter les pertes.",
+          en: "Achieve a positive monthly balance (above $0/month) to halt the deficit.",
+          fr: "Atteignez un solde mensuel positif (au-dessus de 0 $/mois) pour arrêter les pertes.",
         },
         check: (c) => {
           const b = c.lastBudget;
-          if (!b) return { done: false, label: "Evaluating..." };
+          if (!b || (scenarioBaseline && c.year * 12 + c.month <= scenarioBaseline.month)) {
+            return { done: false, label: "Awaiting the first monthly balance..." };
+          }
           const inc = (b.taxR || 0) + (b.taxC || 0) + (b.taxI || 0);
           const exp =
             (b.roads || 0) +
@@ -196,18 +190,18 @@
           fr: "Prospérité retrouvée",
         },
         desc: {
-          en: "Grow the city past 3,500 residents with City Hall erected and $25,000 saved.",
-          fr: "Dépassez 3 500 habitants avec l'Hôtel de ville érigé et 25 000 $ en réserve.",
+          en: "Add 1,500 residents and reach at least 3,500 residents with City Hall erected and $25,000 saved.",
+          fr: "Gagnez 1 500 habitants pour atteindre au moins 3 500 habitants avec l'Hôtel de ville érigé et 25 000 $ en réserve.",
         },
         check: (c) => {
           const pop = c.stats?.pop || 0;
           const money = c.money || 0;
           const structs = c.structs ? [...c.structs.values()] : [];
           const hasHall = structs.some((s) => s.type === "cityhall");
-          const ok = pop >= 3500 && money >= 25000 && hasHall;
+          const ok = pop >= Math.max(3500, (scenarioBaseline?.pop || 0) + 1500) && money >= 25000 && hasHall;
           return {
             done: ok,
-            label: `${pop.toLocaleString()}/3,500 pop | $${Math.round(money).toLocaleString()}/$25k | Hall: ${hasHall ? "✓" : "✗"}`,
+            label: `${pop.toLocaleString()}/${Math.max(3500, (scenarioBaseline?.pop || 0) + 1500).toLocaleString()} pop | $${Math.round(money).toLocaleString()}/$25k | Hall: ${hasHall ? "✓" : "✗"}`,
           };
         },
       },
@@ -241,12 +235,11 @@
           fr: "Poumons verts",
         },
         desc: {
-          en: "Build at least 3 Parks or Big Parks to filter air around residential neighborhoods.",
-          fr: "Posez au moins 3 parcs pour aérer les quartiers résidentiels.",
+          en: "Build 3 additional small or large parks to filter air around residential neighborhoods.",
+          fr: "Posez 3 parcs supplémentaires pour aérer les quartiers résidentiels.",
         },
         check: (c) => {
-          const structs = c.structs ? [...c.structs.values()] : [];
-          const parks = structs.filter((s) => s.type === "park" || s.type === "bigpark").length;
+          const parks = countNewStructures(c, ["park", "bigpark"]);
           const ok = parks >= 3;
           return {
             done: ok,
@@ -260,12 +253,11 @@
           fr: "Transition énergétique",
         },
         desc: {
-          en: "Build Nuclear, Wind, or Fusion power and maintain full electrical coverage.",
-          fr: "Déployez de l'éolien, du nucléaire ou de la fusion avec zéro panne.",
+          en: "Build new wind, solar, geothermal, nuclear, or fusion power and maintain full electrical coverage.",
+          fr: "Ajoutez de l'éolien, du solaire, de la géothermie, du nucléaire ou de la fusion avec zéro panne.",
         },
         check: (c) => {
-          const structs = c.structs ? [...c.structs.values()] : [];
-          const hasClean = structs.some((s) => s.type === "wind" || s.type === "nuclear" || s.type === "fusion");
+          const hasClean = countNewStructures(c, ["wind", "solarfarm", "geothermal", "nuclear", "fusion"]) >= 1;
           const powOk = (c.power?.supply || 0) >= (c.power?.demand || 0) && (c.power?.demand || 0) > 0;
           const ok = hasClean && powOk;
           return {
@@ -280,16 +272,17 @@
           fr: "Éco-mégalopole",
         },
         desc: {
-          en: "Achieve over 80% running water coverage, raise population to 5,000, and keep budget healthy.",
-          fr: "Alimentez plus de 80 % de la ville en eau, atteignez 5 000 habitants et gardez des comptes sains.",
+          en: "Achieve over 80% running water coverage, grow population by 2,000 to at least 5,000, and maintain a positive monthly balance.",
+          fr: "Alimentez plus de 80 % de la ville en eau, gagnez 2 000 habitants pour atteindre au moins 5 000 habitants et gardez des comptes sains.",
         },
         check: (c) => {
           const water = Math.round((c.stats?.waterShare || 0) * 100);
           const pop = c.stats?.pop || 0;
-          const ok = water >= 80 && pop >= 5000;
+          const net = monthlyBalance(c);
+          const ok = water >= 80 && pop >= Math.max(5000, (scenarioBaseline?.pop || 0) + 2000) && net > 0;
           return {
             done: ok,
-            label: `Water: ${water}% / 80% | Pop: ${pop.toLocaleString()} / 5,000`,
+            label: `Water: ${water}% / 80% | Pop: ${pop.toLocaleString()} / ${Math.max(5000, (scenarioBaseline?.pop || 0) + 2000).toLocaleString()} | Net: ${net}$/mo`,
           };
         },
       },
@@ -323,11 +316,11 @@
           fr: "Ponts maritimes",
         },
         desc: {
-          en: "Build at least 40 road and bridge tiles to link the central islands together.",
-          fr: "Construisez au moins 40 cases de routes et ponts pour relier les îles centrales.",
+          en: "Build 40 additional road and bridge tiles to link the central islands together.",
+          fr: "Construisez 40 cases supplémentaires de routes et ponts pour relier les îles centrales.",
         },
         check: (c) => {
-          const roads = c.stats?.roads || 0;
+          const roads = Math.max(0, (c.stats?.roads || 0) - (scenarioBaseline?.roads || 0));
           const ok = roads >= 40;
           return {
             done: ok,
@@ -341,13 +334,12 @@
           fr: "Ligne ferroviaire insulaire",
         },
         desc: {
-          en: "Build a Train Station and at least 20 rail tracks crossing the waterways.",
-          fr: "Construisez une gare ferroviaire et au moins 20 rails franchissant l'eau.",
+          en: "Build a Train Station and 20 additional rail tiles.",
+          fr: "Construisez une gare ferroviaire et 20 cases de rails supplémentaires.",
         },
         check: (c) => {
-          const structs = c.structs ? [...c.structs.values()] : [];
-          const hasStation = structs.some((s) => s.type === "station" || s.type === "bus");
-          const rails = c.stats?.rails || 0;
+          const hasStation = countNewStructures(c, ["station"]) >= 1;
+          const rails = Math.max(0, (c.stats?.rails || 0) - (scenarioBaseline?.rails || 0));
           const ok = hasStation && rails >= 20;
           return {
             done: ok,
@@ -361,18 +353,17 @@
           fr: "Capitale du commerce maritime",
         },
         desc: {
-          en: "Construct a Commercial Seaport, grow population to 6,000, and amassing $40,000.",
-          fr: "Construisez un port de commerce, dépassez 6 000 habitants et amassez 40 000 $.",
+          en: "Construct a Commercial Seaport, grow population by 2,500 to at least 6,000, and amass $40,000.",
+          fr: "Construisez un port de commerce, gagnez 2 500 habitants pour atteindre au moins 6 000 habitants et amassez 40 000 $.",
         },
         check: (c) => {
-          const structs = c.structs ? [...c.structs.values()] : [];
-          const hasPort = structs.some((s) => s.type === "port");
+          const hasPort = countNewStructures(c, ["port"]) >= 1;
           const pop = c.stats?.pop || 0;
           const money = c.money || 0;
-          const ok = hasPort && pop >= 6000 && money >= 40000;
+          const ok = hasPort && pop >= Math.max(6000, (scenarioBaseline?.pop || 0) + 2500) && money >= 40000;
           return {
             done: ok,
-            label: `Seaport: ${hasPort ? "✓" : "✗"} | Pop: ${pop.toLocaleString()}/6k | Funds: $${Math.round(money).toLocaleString()}/$40k`,
+            label: `Seaport: ${hasPort ? "✓" : "✗"} | Pop: ${pop.toLocaleString()}/${Math.max(6000, (scenarioBaseline?.pop || 0) + 2500).toLocaleString()} | Funds: $${Math.round(money).toLocaleString()}/$40k`,
           };
         },
       },
@@ -380,6 +371,54 @@
   ];
 
   let activeScenario = null;
+  let scenarioBaseline = null;
+  let scenarioReady = true;
+  let runMedals = {};
+  let hudCollapsed = false;
+
+  const countNewStructures = (city, types) => {
+    const structs = city.structs ? [...city.structs.values()] : [];
+    return structs.filter((s) => types.includes(s.type) &&
+      !scenarioBaseline?.structs.includes(`${s.type}:${s.x}:${s.y}`)).length;
+  };
+
+  const monthlyBalance = (city) => {
+    const b = city.lastBudget;
+    if (!b) return 0;
+    return Math.round((b.taxR || 0) + (b.taxC || 0) + (b.taxI || 0) -
+      ["roads", "power", "water", "police", "fire", "education", "health",
+        "parks", "transport", "ordinances", "interest"].reduce((sum, key) => sum + (b[key] || 0), 0));
+  };
+
+  const captureBaseline = (city) => ({
+    month: city.year * 12 + city.month,
+    pop: city.stats?.pop || 0,
+    roads: city.stats?.roads || 0,
+    rails: city.stats?.rails || 0,
+    structs: [...city.structs.values()].map((s) => `${s.type}:${s.x}:${s.y}`),
+  });
+
+  const syncScenario = () => {
+    const key = localStorage.getItem("citybuilder.current");
+    const scenario = SCENARIOS.find((s) => key === `scenario_${s.id}`) || null;
+    if (scenario === activeScenario) return;
+    activeScenario = scenario;
+    scenarioBaseline = null;
+    runMedals = {};
+    scenarioReady = true;
+    if (scenario) {
+      const saved = JSON.parse(localStorage.getItem(`citybuilder.scenarioRun.${scenario.id}`) || "null");
+      scenarioBaseline = saved?.baseline || captureBaseline(window.__city);
+      runMedals = saved?.medals || {};
+      saveRun();
+    }
+    window.dispatchEvent(new CustomEvent("citybuilder-scenario-change"));
+  };
+
+  const saveRun = () => {
+    localStorage.setItem(`citybuilder.scenarioRun.${activeScenario.id}`,
+      JSON.stringify({ baseline: scenarioBaseline, medals: runMedals }));
+  };
   let scenarioMedals = {}; // { scenarioId: { bronze: bool, silver: bool, gold: bool } }
 
   const getLang = () => {
@@ -415,19 +454,33 @@
     // 1. Generate base city
     const seed = scenario.seed;
     const kind = scenario.mapKind || "coast";
-    const city = window.__City.generate(seed, scenario.cityName, "moyen", kind);
+    const city = window.__City.generate(seed, scenario.cityName, scenario.id === "island_transit" ? "difficile" : scenario.id === "debt_crisis" ? "facile" : "moyen", kind);
 
     // 2. Pre-build town infrastructure using the engine's built-in generator
     window.__buildTown(city, { years: 6, size: 50, mode: "mixed" });
 
     // 3. Apply scenario specific starting balance & hazards
+    activeScenario = scenario;
+    scenarioReady = scenario.id !== "quake_recovery";
+    hudCollapsed = false;
+    scenarioBaseline = captureBaseline(city);
+    runMedals = {};
+    saveRun();
     scenario.setup(city);
 
     // 4. Set as active city in the game
     const key = `scenario_${scenario.id}`;
+    localStorage.removeItem(`citybuilder.missions.${key}`);
     window.__startCity(city, key);
+    if (scenario.id === "quake_recovery") {
+      window.__triggerDisaster("quake");
+      window.__triggerDisaster("fire");
+      scenarioReady = true;
+      // Persist the damaged starting city rather than the intact generated town.
+      window.__startCity(city, key);
+    }
 
-    activeScenario = scenario;
+    window.dispatchEvent(new CustomEvent("citybuilder-scenario-change"));
     try {
       localStorage.setItem("citybuilder.activeScenario", scenario.id);
     } catch {}
@@ -446,29 +499,23 @@
     }
 
     renderHUD();
+    window.__scenarioGuide?.showBriefing(scenario, lang);
   };
 
   // Check medal achievements
   const evaluateActiveScenario = () => {
-    if (!activeScenario) {
-      try {
-        const id = localStorage.getItem("citybuilder.activeScenario");
-        if (id) {
-          activeScenario = SCENARIOS.find((s) => s.id === id) || null;
-        }
-      } catch {}
-    }
-
-    if (!activeScenario) return;
+    syncScenario();
+    if (!activeScenario || !scenarioReady) return;
     const city = window.__city;
     if (!city) return;
+    if (scenarioBaseline && city.year * 12 + city.month <= scenarioBaseline.month) return;
 
     const id = activeScenario.id;
     if (!scenarioMedals[id]) {
       scenarioMedals[id] = { bronze: false, silver: false, gold: false };
     }
 
-    const m = scenarioMedals[id];
+    const m = runMedals;
     let newlyEarned = null;
 
     // 1. Bronze
@@ -499,7 +546,14 @@
     }
 
     if (newlyEarned) {
+      scenarioMedals[id] = {
+        bronze: scenarioMedals[id].bronze || m.bronze,
+        silver: scenarioMedals[id].silver || m.silver,
+        gold: scenarioMedals[id].gold || m.gold,
+      };
+      saveRun();
       saveMedals();
+      if (m.gold) window.dispatchEvent(new CustomEvent("citybuilder-scenario-change"));
       renderHUD();
       try {
         window.dispatchEvent(new CustomEvent("citybuilder-milestone"));
@@ -532,26 +586,27 @@
     hud.hidden = false;
     const lang = getLang();
     const id = activeScenario.id;
-    const m = scenarioMedals[id] || { bronze: false, silver: false, gold: false };
+    const m = runMedals;
 
     const bRes = activeScenario.bronze.check(city);
     const sRes = activeScenario.silver.check(city);
     const gRes = activeScenario.gold.check(city);
 
-    hud.innerHTML = `
+    const markup = `
       <div class="hud-header">
         <div class="hud-title">
           <span class="hud-icon">${activeScenario.icon}</span>
           <strong>${activeScenario.name[lang] || activeScenario.name.en}</strong>
         </div>
-        <button type="button" class="hud-toggle" id="hud-toggle-btn" title="Minimize / Expand">▼</button>
+        <button type="button" class="hud-toggle" id="hud-toggle-btn" aria-controls="hud-body-content" aria-expanded="${!hudCollapsed}" aria-label="${lang === "fr" ? "Afficher ou masquer les objectifs" : "Expand or collapse objectives"}">${hudCollapsed ? "▲" : "▼"}</button>
       </div>
-      <div class="hud-body" id="hud-body-content">
+      <div class="hud-body" id="hud-body-content" ${hudCollapsed ? "hidden" : ""}>
+        <section id="scenario-next-action" aria-label="${lang === "fr" ? "Prochaine action" : "Next action"}"></section>
         <div class="hud-medal ${m.bronze ? "done" : ""}">
           <span class="medal-icon">🥉</span>
           <div class="medal-info">
             <span class="medal-name">${activeScenario.bronze.title[lang] || activeScenario.bronze.title.en}</span>
-            <small>${bRes.label}</small>
+            <small>${scenarioReady ? bRes.label : "Preparing disaster recovery..."}</small>
           </div>
         </div>
         <div class="hud-medal ${m.silver ? "done" : ""}">
@@ -571,13 +626,27 @@
       </div>
     `;
 
-    document.getElementById("hud-toggle-btn").addEventListener("click", () => {
+    const focusedId = hud.contains(document.activeElement) ? document.activeElement.id : null;
+    if (hud.dataset.markup !== markup) {
+      hud.innerHTML = markup;
+      hud.dataset.markup = markup;
+    }
+    window.__scenarioGuide?.render(activeScenario, city, {
+      medals: runMedals,
+      baseline: scenarioBaseline,
+      countNew: countNewStructures,
+    }, lang);
+    if (focusedId) document.getElementById(focusedId)?.focus({ preventScroll: true });
+
+    document.getElementById("hud-toggle-btn").onclick = () => {
       const content = document.getElementById("hud-body-content");
       if (content) {
-        content.hidden = !content.hidden;
+        hudCollapsed = !hudCollapsed;
+        content.hidden = hudCollapsed;
         document.getElementById("hud-toggle-btn").textContent = content.hidden ? "▲" : "▼";
+        document.getElementById("hud-toggle-btn").setAttribute("aria-expanded", String(!hudCollapsed));
       }
-    });
+    };
   };
 
   // Build the Scenario Selection Browser Modal
@@ -627,6 +696,7 @@
             <div>
               <h3>${s.name[lang] || s.name.en}</h3>
               <span class="sc-tag" style="border-color:${s.diffColor};color:${s.diffColor}">${s.tag[lang] || s.tag.en}</span>
+              <small>${s.difficulty}</small>
             </div>
           </div>
           <div class="sc-medals-earned">
@@ -802,7 +872,9 @@
         border: 1px solid var(--accent, #f2c14e);
         border-radius: 10px;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-        width: 250px;
+        width: min(290px, calc(100vw - 24px));
+        max-height: calc(100dvh - 180px);
+        overflow-y: auto;
         padding: 8px 10px;
         font-size: 11.5px;
       }
@@ -833,6 +905,9 @@
         display: flex;
         flex-direction: column;
         gap: 6px;
+      }
+      .hud-body[hidden] {
+        display: none;
       }
       .hud-medal {
         display: flex;
@@ -885,6 +960,7 @@
             <div>
               <h3>${s.name[lang] || s.name.en}</h3>
               <span class="sc-tag" style="border-color:${s.diffColor};color:${s.diffColor}">${s.tag[lang] || s.tag.en}</span>
+              <small>${s.difficulty}</small>
             </div>
           </div>
           <div class="sc-medals-earned">
@@ -920,6 +996,7 @@
   const init = () => {
     injectStyles();
     loadMedals();
+    syncScenario();
     renderHUD();
 
     // Loop to evaluate medals

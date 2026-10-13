@@ -384,8 +384,8 @@
             fr: "Transition énergétique",
           },
           desc: {
-            en: "Construct Nuclear, Wind, or Fusion power with zero power blackout.",
-            fr: "Construisez une centrale nucléaire, éolienne ou à fusion sans coupure.",
+            en: "Build wind, solar, geothermal, nuclear, or fusion power with zero blackout.",
+            fr: "Déployez de l'éolien, du solaire, de la géothermie, du nucléaire ou de la fusion sans coupure.",
           },
           reward: 25000,
           rewardLabel: "+$25,000 Clean Energy Rebate",
@@ -395,6 +395,8 @@
               (s) =>
                 s.type === "nuclear" ||
                 s.type === "wind" ||
+                s.type === "solarfarm" ||
+                s.type === "geothermal" ||
                 s.type === "fusion"
             );
             const sup = c.power?.supply ?? 0;
@@ -404,7 +406,7 @@
               done: ok,
               cur: ok ? 1 : 0,
               target: 1,
-              label: ok ? "Power grid modernized" : "Build Nuclear/Wind/Fusion",
+              label: ok ? "Power grid modernized" : "Build clean power",
             };
           },
         },
@@ -540,6 +542,18 @@
     },
   ];
 
+  ERAS.push(...(window.__townExpansion?.eras || []));
+
+  const scenarioFinished = () => {
+    const key = localStorage.getItem("citybuilder.current");
+    if (!key?.startsWith("scenario_")) return false;
+    const run = JSON.parse(localStorage.getItem(`citybuilder.scenarioRun.${key.slice(9)}`) || "null");
+    return !!run?.medals.gold;
+  };
+  const availableEras = () => localStorage.getItem("citybuilder.current")?.startsWith("scenario_")
+    ? ERAS.filter((era) => era.id >= 6)
+    : ERAS;
+
   // State Management
   let completedMissions = new Set();
   let activeEraId = 1;
@@ -594,6 +608,7 @@
   const evaluateMissions = () => {
     const city = window.__city;
     if (!city) return;
+    if (localStorage.getItem("citybuilder.current")?.startsWith("scenario_") && !scenarioFinished()) return;
 
     // Check if city changed
     try {
@@ -607,7 +622,7 @@
     const lang = getLang();
     let newlyCompleted = false;
 
-    for (const era of ERAS) {
+    for (const era of availableEras()) {
       for (const m of era.missions) {
         if (completedMissions.has(m.id)) continue;
         const res = m.check(city);
@@ -659,8 +674,13 @@
   const updateBadge = () => {
     const badge = document.getElementById("missions-badge");
     if (!badge) return;
+    if (localStorage.getItem("citybuilder.current")?.startsWith("scenario_") && !scenarioFinished()) {
+      badge.hidden = true;
+      return;
+    }
 
-    const currentEra = ERAS.find((e) => e.id === activeEraId);
+    const eras = availableEras();
+    const currentEra = eras.find((e) => e.id === activeEraId) || eras[0];
     if (!currentEra) return;
 
     const remaining = currentEra.missions.filter(
@@ -681,6 +701,7 @@
   };
 
   let hubMode = "missions";
+  let panelSignature = "";
 
   // Build the Unified Career Hub Panel UI (Missions + Scenarios)
   const createMissionsPanel = () => {
@@ -801,47 +822,78 @@
           : "Take charge of pre-built cities facing unique crises! Conquer challenges to earn Bronze 🥉, Silver 🥈, and Gold 🥇 medals.";
     }
     if (grid && typeof window.__renderScenariosList === "function") {
+      const signature = `${lang}:${localStorage.getItem("citybuilder.scenarios.medals") || ""}`;
+      if (grid.dataset.signature === signature && grid.childElementCount > 0) return;
       const aside = document.getElementById("panel-missions");
       window.__renderScenariosList(grid, () => {
         if (aside) aside.hidden = true;
       });
+      grid.dataset.signature = signature;
     }
   };
 
   // Render the active era and mission list
   const renderPanel = () => {
+    const inScenario = localStorage.getItem("citybuilder.current")?.startsWith("scenario_");
+    const missionsTab = document.getElementById("tab-mode-missions");
+    const endgameReady = scenarioFinished();
+    if (missionsTab) missionsTab.hidden = !!inScenario && !endgameReady;
+    if (inScenario && !endgameReady) {
+      hubMode = "scenarios";
+      document.getElementById("tab-mode-missions").classList.remove("active");
+      document.getElementById("tab-mode-scenarios").classList.add("active");
+      document.getElementById("view-mode-missions").hidden = true;
+      document.getElementById("view-mode-scenarios").hidden = false;
+      renderScenariosHub();
+      return;
+    }
     const lang = getLang();
     const city = window.__city || { stats: {}, power: {}, structs: new Map() };
+    const eras = availableEras();
+    if (!eras.some((era) => era.id === activeEraId)) activeEraId = eras[0].id;
+    const currentEra = eras.find((e) => e.id === activeEraId) || eras[0];
+    const signature = JSON.stringify([
+      localStorage.getItem("citybuilder.current"), lang, activeEraId, hubMode,
+      [...completedMissions], currentEra.missions.map((m) => m.check(city)),
+    ]);
+    if (signature === panelSignature) return;
+    panelSignature = signature;
 
     // 1. Era Tabs
     const tabs = document.getElementById("era-tabs");
     if (tabs) {
-      tabs.innerHTML = "";
-      ERAS.forEach((era) => {
+      const tabSet = `${lang}:${eras.map((era) => era.id).join(",")}`;
+      if (tabs.dataset.tabSet !== tabSet) {
+        tabs.innerHTML = "";
+        tabs.dataset.tabSet = tabSet;
+      }
+      eras.forEach((era) => {
         const eraCompletedCount = era.missions.filter((m) =>
           completedMissions.has(m.id)
         ).length;
         const allDone = eraCompletedCount === era.missions.length;
 
-        const tabBtn = document.createElement("button");
-        tabBtn.type = "button";
+        let tabBtn = tabs.querySelector(`[data-era="${era.id}"]`);
+        if (!tabBtn) {
+          tabBtn = document.createElement("button");
+          tabBtn.type = "button";
+          tabBtn.dataset.era = String(era.id);
+          tabBtn.addEventListener("click", () => {
+            activeEraId = era.id;
+            saveProgress();
+            renderPanel();
+            updateBadge();
+          });
+          tabs.appendChild(tabBtn);
+        }
         tabBtn.className = `era-tab ${era.id === activeEraId ? "active" : ""} ${allDone ? "completed" : ""}`;
         tabBtn.innerHTML = `<span>${allDone ? "✓" : era.id}</span>`;
         tabBtn.title = era.title[lang] || era.title.en;
-
-        tabBtn.addEventListener("click", () => {
-          activeEraId = era.id;
-          saveProgress();
-          renderPanel();
-          updateBadge();
-        });
-
-        tabs.appendChild(tabBtn);
+        tabBtn.setAttribute("aria-pressed", String(era.id === activeEraId));
       });
     }
 
     // 2. Era Header & Subtitle
-    const currentEra = ERAS.find((e) => e.id === activeEraId) || ERAS[0];
     const eraHeader = document.getElementById("era-header");
     if (eraHeader) {
       const eraCompletedCount = currentEra.missions.filter((m) =>
@@ -899,6 +951,24 @@
         list.appendChild(card);
       });
     }
+  };
+
+  window.__openEndgameMissions = () => {
+    if (localStorage.getItem("citybuilder.current")?.startsWith("scenario_") && !scenarioFinished()) return;
+    loadProgress();
+    activeEraId = 6;
+    hubMode = "missions";
+    document.getElementById("tab-mode-missions").classList.add("active");
+    document.getElementById("tab-mode-scenarios").classList.remove("active");
+    document.getElementById("view-mode-missions").hidden = false;
+    document.getElementById("view-mode-scenarios").hidden = true;
+    window.__ui?.closePanels();
+    const cheats = document.getElementById("panel-cheats");
+    if (cheats) cheats.hidden = true;
+    document.getElementById("panel-missions").hidden = false;
+    renderPanel();
+    saveProgress();
+    updateBadge();
   };
 
   // Add Custom CSS for Missions UI
@@ -1136,6 +1206,11 @@
     injectStyles();
     createMissionsPanel();
     loadProgress();
+    window.addEventListener("citybuilder-scenario-change", () => {
+      loadProgress();
+      renderPanel();
+      updateBadge();
+    });
     evaluateMissions();
     updateBadge();
 
