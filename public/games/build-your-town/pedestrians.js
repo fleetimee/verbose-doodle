@@ -5,7 +5,7 @@
   const destinations = new Set([
     "park", "bigpark", "school", "hospital", "station", "stadium",
     "university", "medicalcenter", "botanicalgarden", "grandmuseum",
-    "residentialtower", "researchcampus",
+    "residentialtower", "researchcampus", "beachcarnival", "volleyballcourt", "soccerfield", "shoppingmall", "skylineapartments", "officeskyscraper", "supertall",
   ]);
   const states = new WeakMap();
   const hash = (value) => {

@@ -90,15 +90,28 @@
     const [tx, ty] = point(0.5, 0, 8);
     ctx.strokeStyle = "#806248"; ctx.lineWidth = 1.3;
     ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(tx, ty); ctx.stroke();
-    if (variant === 2) {
+    if (variant === 4) {
+      const [px, py] = point(0.5, 0, 13);
+      ctx.strokeStyle = "#806248"; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(px, py); ctx.stroke();
+      for (const [dx, dy] of [[-5, 2], [5, 2], [-4, -3], [4, -3], [0, -5]]) {
+        ctx.fillStyle = dx < 0 ? "#4b8755" : "#72a75a";
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.quadraticCurveTo(px + dx * 0.7, py + dy - 2, px + dx, py + dy); ctx.quadraticCurveTo(px + dx * 0.4, py + 1, px, py); ctx.fill();
+      }
+    } else if (variant === 3) {
+      for (const [base, tip, width] of [[3, 10, 0.065], [7, 14, 0.05], [11, 17, 0.035]]) {
+        polygon(ctx, [point(0.5, -width, base), point(0.5, width, base), point(0.5, 0, tip)], "#315f4a", "#42603b", 0.5);
+        polygon(ctx, [point(0.5, -width, base), point(0.5, 0, base), point(0.5, 0, tip)], "#61936b");
+      }
+    } else if (variant === 2) {
       polygon(ctx, [point(0.5, -0.075, 5), point(0.5, 0.075, 5),
         point(0.5, 0, 12)], "#52794a", "#42603b", 0.5);
       polygon(ctx, [point(0.46, -0.04, 7), point(0.54, 0.04, 7),
         point(0.5, 0, 12)], "#87a65d");
     } else {
-      ctx.fillStyle = "#527a45";
+      ctx.fillStyle = variant === 5 ? "#b67595" : "#527a45";
       ctx.beginPath(); ctx.ellipse(tx, ty - 0.7, 3.3, 3.7, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#89aa60";
+      ctx.fillStyle = variant === 5 ? "#efb7c6" : "#89aa60";
       ctx.beginPath(); ctx.ellipse(tx - 0.8, ty - 1.5, 2.6, 2.7, 0, 0, Math.PI * 2); ctx.fill();
     }
   }

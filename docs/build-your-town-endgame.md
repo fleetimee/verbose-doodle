@@ -23,14 +23,40 @@ and upkeep.
 | Fire command center | 25,000 | 3 × 3 | $14,000 | $38 | Fire services within 24 tiles; needs 6 MW |
 | Botanical garden | 30,000 | 4 × 4 | $18,000 | $30 | Park coverage within 16 tiles improves land value |
 | Grand museum | 40,000 | 3 × 3 | $16,000 | $28 | Park coverage within 14 tiles improves land value; needs 5 MW |
+| Beach carnival | 5,000 | 4 × 4 | $6,000 | $25 | Up to 90 Fun within 12 tiles and park coverage; needs shoreline, roads and 4 MW |
+| Volleyball court | 500 | 2 × 2 | $250 | $2 | Up to 45 Fun within 6 tiles and park coverage; needs roads, no power |
+| Soccer field | 1,000 | 4 × 4 | $1,500 | $8 | Up to 65 Fun within 10 tiles and park coverage; needs roads, no power |
+| Shopping mall | 10,000 | 4 × 4 | $12,000 | $35 | Up to 75 Fun within 14 tiles, park coverage and 600 taxable jobs; needs roads and 8 MW |
 | Residential tower | 40,000 | 3 × 3 | $25,000 | $60 | 2,500 residents and 500 taxable jobs; needs roads and 18 MW |
 | Research campus | 60,000 | 4 × 4 | $40,000 | $90 | 2,500 taxable jobs and education within 16 tiles; needs roads and 20 MW |
+| Skyline apartments | 60,000 | 4 × 4 | $60,000 | $140 | 6,000 residents and 1,200 taxable jobs; needs roads and 36 MW |
+| Office skyscraper | 75,000 | 4 × 4 | $85,000 | $190 | 6,500 taxable jobs; needs roads and 48 MW |
+| Metropolitan supertall | 100,000 | 4 × 4 | $160,000 | $350 | 10,000 residents and 5,000 taxable jobs; needs roads and 90 MW |
 
 Services use the existing department-funding sliders. New buildings that consume
 power provide their coverage only while powered. Housing and research buildings
 also need a road within the engine's existing three-tile access distance to
 contribute residents, jobs, or taxes. Their road connections become destinations
 in the commuting network.
+
+Advanced districts includes three endgame skyscrapers alongside the existing
+residential tower and research campus. Skyline apartments use two terraced
+residential towers, the office skyscraper has a glass facade and rooftop antenna,
+and the metropolitan supertall has a stepped crown and spire. Their models fit
+the existing sprite headroom so roofs and antennas remain visible on the map
+and in construction previews. All use the existing population, commercial jobs,
+commuting destinations and tax calculations, with no new saved fields. Housing
+also contributes to the resident-weighted Fun average. Upkeep appears under
+Parks, following the existing advanced-building budget behavior.
+
+For a manual check, inspect population locks in Advanced districts, then build
+each tower with road and power connections. Compare population, jobs, power
+demand, upkeep and taxes. Disconnect roads or power to check that residents,
+jobs and taxes stop contributing, then restore them. Save/reload and
+export/import the city and compare the towers' types, positions and effects.
+Inspect crowns and spires at close zoom and the construction menu at mobile
+width. Earlier saves continue loading without migration; exports containing
+these types require the updated runtime.
 
 ## Progression
 
@@ -60,6 +86,107 @@ The existing save format stores building types and positions. Existing cities
 continue to load. Cities containing expansion buildings require this updated
 runtime when imported; an upstream copy without these definitions cannot load
 the additional types.
+
+## Fun and recreation
+
+`recreation.js` calculates a 0–100 Fun score from attractions near residents.
+Small parks provide up to 20 Fun within 3 tiles, large parks 40 within 5 tiles,
+botanical gardens 60 within 16 tiles, museums 60 within 14 tiles, and beach
+carnivals 90 within 12 tiles. Volleyball courts provide up to 45 within 6 tiles,
+soccer fields 65 within 10 tiles, and shopping malls 75 within 14 tiles.
+Coverage decreases with distance and uses the
+strongest nearby attraction, so overlapping attractions do not stack. Trees,
+bushes and prestige buildings do not provide Fun.
+
+Beach carnivals need water touching their footprint, power, and a local road
+within the existing three-tile access distance from the building origin.
+Volleyball courts, soccer fields and malls also require the same road access.
+Fields operate without power; malls require 8 MW and add 600 taxable commercial
+jobs while powered and road-connected, using the existing jobs, commuting and
+tax calculations. Their upkeep appears under Parks in the budget, like other
+recreation buildings.
+
+Attractions stop providing Fun when burning or flooded; powered attractions
+also stop when power is unavailable. A carnival without road access or its
+shoreline provides neither Fun nor its park land-value bonus. Upkeep still
+applies while closed and appears under Parks in the budget.
+
+The city score averages local Fun by resident population, including powered
+residential towers and arcologies. Empty cities show zero. Fun adds at most
+0.12 to the residential demand target and 0.08 to the commercial target before
+the existing clamp and monthly smoothing. It adds no penalty to cities without
+recreation.
+
+Fun appears below population, in Budget indicators, and in the tile query.
+Attraction queries report whether the attraction operates. The Parks flyout
+uses compact rows and scrolls within the viewport. Construction groups separate
+Landscaping (trees and bushes), Parks (small park, large park and botanical
+garden), Recreation (volleyball court, soccer field, beach carnival, shopping mall
+and grand museum), and Landmarks (statue,
+city hall, mansion and arcology). English and French are supported.
+
+No save version or required field changes. The runtime continues to accept
+versions 1–5. Fun coverage and the average are derived after loading, so older
+cities immediately receive credit for their existing parks. Carnival type and
+position use the existing structure serialization in city exports and backups.
+Saves containing a carnival require the updated runtime, as with other expansion
+buildings.
+
+For the expanded roster, place each recreation building through its tool, check
+construction charges and monthly upkeep, and remove roads to check that Fun stops.
+Remove mall power to check that its Fun, jobs and taxes stop. Save/reload and
+export/import a city with courts, fields and malls and compare their positions.
+
+## Building animation
+
+`building-activity.js` adds ambient activity to all 19 expansion building types.
+Carnival wheels rotate with upright cabins, carousel riders circulate, volleyball
+teams volley a ball, soccer players move around the pitch, and mall visitors walk
+past sliding entrance doors. Gardens have visitors and butterflies; the museum
+and university have visitors. Towers and the research campus have slowly changing
+window lights, with roof beacons where their models include antennas. Medical,
+police and fire buildings have staff activity or beacons. Solar panels receive
+moving reflections, geothermal plants release drifting steam, and water buildings
+show ripples.
+
+The new building animations always use full motion, including when the system
+requests reduced motion, following the requested game behavior. Pause freezes
+their exact pose, including subsequent map redraws. The three running speeds
+advance activity at 1×, 2× and 4×. These effects appear in the isometric view at
+0.5 zoom or closer and are hidden in flat view and data maps. Existing pedestrian
+and service-vehicle accessibility behavior is unchanged.
+
+Buildings stop activity when burning, flooded, or missing their required power,
+road access or shoreline. Department-funded services also need funding; research
+jobs remain active under the existing employment rules. Closed carnival rides
+keep their last pose; sports players and visitors leave closed facilities. Activity
+resumes when operating conditions return.
+
+The renderer paints reusable transparent activity canvases at 12 simulation
+frames per second and clips them into the same columns as the native building
+sprites, preserving occlusion. Up to 96 visible expansion buildings animate at
+once; additional buildings retain their complete static models. Canvas storage
+is bounded, removed buildings are discarded, and no animation frame becomes a
+permanent sprite-cache entry. Construction icons retain static previews.
+
+Activity is visual only. It changes no construction costs, Fun coverage,
+population, jobs, taxes, traffic calculations or save format. Its clocks and
+temporary actors are not serialized, so earlier cities need no migration.
+
+For a manual check, open each building at close zoom and compare two poses while
+running. Pause, then move the camera or refresh to confirm the pose stays fixed.
+Compare normal and faster speeds, remove and restore power or roads, and check
+closed facilities. Repeat with a system reduced-motion preference: the new
+building activity should still animate. Save/reload and compare the city's
+structures, residents, jobs and budget. Inspect overlapping buildings, mobile
+view, flat view and data maps for occlusion or stray animation.
+
+For a manual compatibility check, import an older city without Fun fields and
+compare its funds, date, structures and population. Build a powered carnival
+with shoreline and road access, place housing nearby, then save/reload and
+export/import. Compare Fun and building positions. Remove power or nearby roads
+and check that coverage stops; restore them and check that it returns. Inspect
+the Parks flyout and Budget indicators at desktop and mobile widths.
 
 Single-city exports and full backups include scenario-run medals and the starting
 baseline as optional fields. This keeps the endgame transition available after
@@ -181,7 +308,9 @@ and preserves both vehicle lanes and the outer pedestrian sidewalks.
 
 ## Manual landscaping
 
-The parks menu starts with Tree ($10), Small tree ($6), and Bushes ($4). Choose
+The Landscaping menu contains Tree ($10), Small tree ($6), Cemara tree ($12),
+Palm tree ($15), Flowering tree ($14), and Bushes ($4). Cemara has layered evergreen
+foliage, palms have spreading fronds, and flowering trees have pink blossoms. Choose
 a plant, then click empty, flat land to place a one-tile decoration. These
 plants need no road, power, or upkeep. Existing buildings, roads, utilities,
 water, and occupied land retain their placement protections.
@@ -192,3 +321,22 @@ preserving the road, lanes, and sidewalks. Choosing the same manual planting
 again is rejected without charging. Choices persist in city saves and exports;
 older saves keep automatic median planting. Bulldozing a road half clears its
 manual median choice. Ground plants use normal building removal.
+
+Existing median variant IDs 0–2 retain their original appearance. The new tree
+choices use IDs 3–5 and persist in saves and exports. Earlier cities need no
+migration; cities containing the new trees require this updated runtime.
+
+Ground landscaping uses the native terrain palette instead of a bright park
+foundation. Planted trees next to another planted tree or a natural forest tile,
+including diagonally, render as varied groves of two to four trees per tile.
+Removing the last neighboring tree restores a single tree. Ordinary and small
+trees follow the nearby forest style; cemara stays evergreen, palms keep their
+fronds, and flowering trees keep pink blossoms. Shrubs remain low clusters.
+Tree sizes and positions vary deterministically, so save/reload preserves their
+appearance without adding saved fields. Existing planted trees receive the new
+appearance automatically; median planting keeps its existing rendering.
+
+For a visual check, place two trees side by side and compare them with a natural
+forest. Mix tree varieties, remove a neighbor, and reload the city. Compare the
+ground tint and silhouettes at close zoom, on elevated flat land, and in flat
+view. Costs and structure positions should remain unchanged.

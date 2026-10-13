@@ -10,7 +10,14 @@
     { type: "firecommand", name: ["Centre de secours", "Fire command center"], desc: ["Couverture incendie à 24 cases. Consomme 6 MW. Se débloque à 25 000 habitants.", "Fire coverage within 24 tiles. Uses 6 MW. Unlocks at 25,000 residents."], size: 3, cost: 14000, upkeep: 38, radius: 24, consumes: 6, dept: "fire", category: "service", unlockPop: 25000 },
     { type: "botanicalgarden", name: ["Jardin botanique", "Botanical garden"], desc: ["Améliore la valeur foncière à 16 cases. Se débloque à 30 000 habitants.", "Improves land value within 16 tiles. Unlocks at 30,000 residents."], size: 4, cost: 18000, upkeep: 30, radius: 16, category: "park", unlockPop: 30000 },
     { type: "grandmuseum", name: ["Grand musée", "Grand museum"], desc: ["Améliore la valeur foncière à 14 cases. Consomme 5 MW. Se débloque à 40 000 habitants.", "Improves land value within 14 tiles. Uses 5 MW. Unlocks at 40,000 residents."], size: 3, cost: 16000, upkeep: 28, radius: 14, consumes: 5, category: "park", unlockPop: 40000 },
+    { type: "volleyballcourt", name: ["Terrain de volley-ball", "Volleyball court"], desc: ["Jusqu'à 45 points de loisirs à 6 cases. Route à 3 cases requise, sans électricité. Se débloque à 500 habitants.", "Up to 45 Fun within 6 tiles. Needs a road within 3 tiles; no power required. Unlocks at 500 residents."], size: 2, cost: 250, upkeep: 2, radius: 6, fun: 45, requiresRoad: true, category: "park", unlockPop: 500 },
+    { type: "soccerfield", name: ["Terrain de football", "Soccer field"], desc: ["Jusqu'à 65 points de loisirs à 10 cases. Route à 3 cases requise, sans électricité. Se débloque à 1 000 habitants.", "Up to 65 Fun within 10 tiles. Needs a road within 3 tiles; no power required. Unlocks at 1,000 residents."], size: 4, cost: 1500, upkeep: 8, radius: 10, fun: 65, requiresRoad: true, category: "park", unlockPop: 1000 },
+    { type: "shoppingmall", name: ["Centre commercial", "Shopping mall"], desc: ["Jusqu'à 75 points de loisirs à 14 cases et 600 emplois imposables. Route à 3 cases et 8 MW requis. Se débloque à 10 000 habitants.", "Up to 75 Fun within 14 tiles and 600 taxable jobs. Needs a road within 3 tiles and 8 MW. Unlocks at 10,000 residents."], size: 4, cost: 12000, upkeep: 35, radius: 14, fun: 75, jobs: 600, taxable: true, requiresRoad: true, consumes: 8, category: "park", unlockPop: 10000 },
+    { type: "beachcarnival", name: ["Fête foraine du littoral", "Beach carnival"], desc: ["Jusqu’à 90 points de loisirs à 12 cases. Littoral, électricité et route à 3 cases requis. Consomme 4 MW. Se débloque à 5 000 habitants.", "Up to 90 Fun within 12 tiles. Needs shoreline, power and a road within 3 tiles. Uses 4 MW. Unlocks at 5,000 residents."], size: 4, cost: 6000, upkeep: 25, radius: 12, fun: 90, consumes: 4, needsShore: true, requiresRoad: true, category: "park", unlockPop: 5000 },
     { type: "residentialtower", name: ["Tour résidentielle", "Residential tower"], desc: ["2 500 habitants et 500 emplois avec électricité et accès routier. Génère des impôts. Se débloque à 40 000 habitants.", "2,500 residents and 500 jobs with power and road access. Generates tax income. Unlocks at 40,000 residents."], size: 3, cost: 25000, upkeep: 60, consumes: 18, pop: 2500, jobs: 500, taxable: true, requiresRoad: true, category: "reward", unlockPop: 40000 },
+    { type: "skylineapartments", name: ["Tours résidentielles jumelles", "Skyline apartments"], desc: ["6 000 habitants et 1 200 emplois imposables. Route à 3 cases et 36 MW requis. Se débloque à 60 000 habitants.", "6,000 residents and 1,200 taxable jobs. Needs a road within 3 tiles and 36 MW. Unlocks at 60,000 residents."], size: 4, cost: 60000, upkeep: 140, consumes: 36, pop: 6000, jobs: 1200, taxable: true, requiresRoad: true, category: "reward", unlockPop: 60000 },
+    { type: "officeskyscraper", name: ["Gratte-ciel de bureaux", "Office skyscraper"], desc: ["6 500 emplois imposables. Route à 3 cases et 48 MW requis. Se débloque à 75 000 habitants.", "6,500 taxable jobs. Needs a road within 3 tiles and 48 MW. Unlocks at 75,000 residents."], size: 4, cost: 85000, upkeep: 190, consumes: 48, jobs: 6500, taxable: true, requiresRoad: true, category: "reward", unlockPop: 75000 },
+    { type: "supertall", name: ["Tour métropolitaine", "Metropolitan supertall"], desc: ["10 000 habitants et 5 000 emplois imposables. Route à 3 cases et 90 MW requis. Se débloque à 100 000 habitants.", "10,000 residents and 5,000 taxable jobs. Needs a road within 3 tiles and 90 MW. Unlocks at 100,000 residents."], size: 4, cost: 160000, upkeep: 350, consumes: 90, pop: 10000, jobs: 5000, taxable: true, requiresRoad: true, category: "reward", unlockPop: 100000 },
     { type: "researchcampus", name: ["Campus de recherche", "Research campus"], desc: ["2 500 emplois avec électricité et accès routier. Couverture scolaire à 16 cases et recettes fiscales. Se débloque à 60 000 habitants.", "2,500 jobs with power and road access. Education coverage within 16 tiles and tax income. Unlocks at 60,000 residents."], size: 4, cost: 40000, upkeep: 90, radius: 16, consumes: 20, jobs: 2500, taxable: true, requiresRoad: true, dept: "education", category: "service", unlockPop: 60000 },
   ];
 
@@ -20,6 +27,8 @@
       messages[`struct.${type}`] = name;
       messages[`struct.${type}.desc`] = desc;
     }
+    messages["group.recreation"] = ["Loisirs", "Recreation"];
+    messages["group.landmarks"] = ["Monuments", "Landmarks"];
     messages["group.districts"] = ["Grands quartiers", "Advanced districts"];
     messages["query.structResidents"] = ["{n} habitants avec électricité et accès routier", "{n} residents with power and road access"];
     messages["query.structJobs"] = ["{n} emplois avec électricité et accès routier", "{n} jobs with power and road access"];
@@ -30,21 +39,33 @@
       ["wind", ["solarfarm", "geothermal"]],
       ["pump", ["desalination", "reservoir"]],
       ["police", ["university", "medicalcenter", "policehq", "firecommand"]],
-      ["park", ["botanicalgarden", "grandmuseum"]],
     ]) groups.find((group) => group.items?.some((item) => item.tool === anchor)).items.push(...items(types));
+    const parksIndex = groups.findIndex((group) => group.items?.some((item) => item.tool === "park"));
+    groups.splice(parksIndex, 1,
+      { ...groups[parksIndex], items: items(["park", "bigpark", "botanicalgarden"]) },
+      { group: translate("group.recreation"), icon: icon("volleyballcourt", 1.6), items: items(["volleyballcourt", "soccerfield", "beachcarnival", "shoppingmall", "grandmuseum"]) },
+      { group: translate("group.landmarks"), icon: icon("statue", 1.6), items: items(["statue", "cityhall", "mansion", "arcology"]) },
+    );
     groups.splice(groups.length - 1, 0, {
       group: translate("group.districts"),
       icon: icon("residentialtower", 1.6),
-      items: items(["residentialtower", "researchcampus"]),
+      items: items(["residentialtower", "researchcampus", "skylineapartments", "officeskyscraper", "supertall"]),
     });
     return groups;
   };
 
   // Use the game's isometric primitives for both map buildings and construction previews.
-  const draw = (type, scene, project, polygon) => {
+  const draw = (type, scene, project, polygon, { animatedBase = false } = {}) => {
     const building = BUILDINGS.find((item) => item.type === type);
     if (!building) return false;
     const face = (points, color, depth = 40) => scene.custom(depth, (ctx) => polygon(ctx, points.map((point) => project(...point)), color));
+    const line = (points, color = "#f5f0db", width = 1, depth = 25) => scene.custom(depth, (ctx) => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      points.forEach((point, index) => index ? ctx.lineTo(...project(...point)) : ctx.moveTo(...project(...point)));
+      ctx.stroke();
+    });
     const trees = (size) => {
       for (const [x, y] of [[0.25, 0.25], [size - 0.25, 0.25], [0.25, size - 0.25], [size - 0.25, size - 0.25]]) scene.tree(x, y, 5);
     };
@@ -61,7 +82,7 @@
         for (const y of [0.6, 1.7]) {
           scene.cylinder(2.35, y, 0.42, 26, "#a6b8b0", "#d7e6df");
           scene.cylinder(2.35, y, 0.16, 12, "#b9c8c0", "#718d80", { z0: 26 });
-          scene.steam(2.35, y, 38);
+          if (!animatedBase) scene.steam(2.35, y, 38);
         }
         scene.box(0.3, 2.1, 1.7, 2.7, 10, "#5e7f6b", "#86a38b");
         break;
@@ -124,12 +145,128 @@
         scene.box(0.25, 1.95, 2.75, 2.4, 3, "#dacdb2", "#f1e7cf", { z0: 22, key: 30 });
         scene.dome(1.5, 1.15, 0.6, 22, "#89a8a4");
         break;
+      case "volleyballcourt":
+        face([[0.12, 0.08, 0.3], [1.88, 0.08, 0.3], [1.88, 1.92, 0.3], [0.12, 1.92, 0.3]], "#e4c993", -1);
+        line([[0.25, 0.2, 0.5], [1.75, 0.2, 0.5], [1.75, 1.8, 0.5], [0.25, 1.8, 0.5], [0.25, 0.2, 0.5]]);
+        for (const y of [0.6, 1.4]) line([[0.25, y, 0.5], [1.75, y, 0.5]]);
+        for (const x of [0.18, 1.82]) scene.cylinder(x, 1, 0.025, 10, "#688c9a", "#b8d5dc");
+        for (const z of [4, 6, 8, 10]) line([[0.18, 1, z], [1.82, 1, z]], z === 10 ? "#fff3d9" : "#899da3", 0.7, 30);
+        for (let x = 0.35; x < 1.82; x += 0.2) line([[x, 1, 4], [x, 1, 10]], "#899da3", 0.6, 30);
+        if (!animatedBase) scene.disc(1.4, 1.6, 0.065, "#faf0d0", 1);
+        break;
+      case "soccerfield":
+        for (let n = 0; n < 8; n++) {
+          const y = 0.25 + n * 0.4375;
+          face([[0.35, y, 0.3], [3.65, y, 0.3], [3.65, y + 0.4375, 0.3], [0.35, y + 0.4375, 0.3]], n % 2 ? "#609552" : "#72a560", -1);
+        }
+        line([[0.45, 0.35, 0.5], [3.55, 0.35, 0.5], [3.55, 3.65, 0.5], [0.45, 3.65, 0.5], [0.45, 0.35, 0.5]]);
+        line([[0.45, 2, 0.5], [3.55, 2, 0.5]]);
+        line(Array.from({ length: 25 }, (_, n) => [2 + Math.cos(n * Math.PI / 12) * 0.45, 2 + Math.sin(n * Math.PI / 12) * 0.45, 0.5]));
+        for (const [end, inside, behind] of [[0.35, 1.05, 0.12], [3.65, 2.95, 3.88]]) {
+          line([[1.1, end, 0.5], [1.1, inside, 0.5], [2.9, inside, 0.5], [2.9, end, 0.5]]);
+          line([[1.6, end, 0.5], [1.6, end, 6], [2.4, end, 6], [2.4, end, 0.5]], "#fff4df", 1.3, 30);
+          for (const x of [1.6, 1.8, 2, 2.2, 2.4]) line([[x, end, 6], [x, behind, 0.5]], "#c9d9c0", 0.55, 30);
+          line([[1.6, behind, 0.5], [2.4, behind, 0.5]], "#c9d9c0", 0.7, 30);
+        }
+        for (const x of [0.06, 3.8]) {
+          scene.box(x, 1.15, x + 0.14, 2.85, 3, "#8e8e82", "#d6d0b6");
+          scene.box(x, 1.3, x + 0.14, 2.7, 2, "#6f897d", "#bcc5aa", { z0: 3 });
+        }
+        if (!animatedBase) scene.disc(2.2, 2.1, 0.065, "#f9f1d9", 1);
+        break;
+      case "shoppingmall":
+        face([[0.15, 3.2, 0.3], [3.85, 3.2, 0.3], [3.85, 3.9, 0.3], [0.15, 3.9, 0.3]], "#929b9e", -1);
+        scene.box(0.25, 0.3, 3.75, 3.05, 23, "#cbbfa8", "#e7ddc8", { windows: true, floors: true });
+        scene.box(1.35, 0.5, 2.65, 2.8, 6, "#7496a4", "#c1dce0", { z0: 23 });
+        face([[1.5, 0.7, 29.2], [2.5, 0.7, 29.2], [2.5, 2.6, 29.2], [1.5, 2.6, 29.2]], "#94c4d0", 20);
+        for (const [x, color] of [[0.35, "#cd6952"], [1.25, "#4a9c9f"], [2.75, "#c79545"]]) {
+          scene.box(x, 2.95, x + 0.8, 3.17, 10, "#517487", "#b6d5dc");
+          face([[x, 2.95, 12], [x + 0.8, 2.95, 12], [x + 0.8, 3.25, 10], [x, 3.25, 10]], color, 25);
+        }
+        scene.box(2.15, 2.95, 2.6, 3.2, 13, "#456c83", "#a5cad5");
+        for (const x of [0.5, 1.25, 2.75, 3.5]) line([[x, 3.45, 0.5], [x, 3.85, 0.5]], "#e8e4d4", 0.7, -0.5);
+        scene.box(0.65, 3.45, 1.05, 3.75, 3, "#608dba", "#bbd4dd");
+        scene.box(2.85, 3.45, 3.25, 3.75, 3, "#b8634e", "#eac6a4");
+        scene.tree(0.12, 0.15, 3); scene.tree(3.88, 0.15, 3);
+        break;
+      case "beachcarnival":
+        face([[0.15, 0.15, 0.2], [3.85, 0.15, 0.2], [3.85, 3.85, 0.2], [0.15, 3.85, 0.2]], "#e8d1a0", -1);
+        scene.box(0.2, 2.85, 3.8, 3.15, 1, "#ad8660", "#d8b38b");
+        for (const [x, color] of [[0.45, "#da6254"], [1.55, "#4aabb1"], [2.65, "#e9b941"]]) {
+          scene.house(x - 0.04, 3.2, x + 0.84, 3.85, 7, 6, "#f7e2b2", color, { chimney: false, door: false });
+        }
+        scene.cylinder(2.85, 1.6, 0.72, 3, "#cf8d5d", "#f5d3a1");
+        scene.cylinder(2.85, 1.6, 0.06, 17, "#e8c45f", "#f9e8b1");
+        if (!animatedBase) for (let n = 0; n < 8; n++) {
+          const a = n * Math.PI / 4;
+          const b = (n + 1) * Math.PI / 4;
+          face([[2.85, 1.6, 24], [2.85 + Math.cos(a) * 0.8, 1.6 + Math.sin(a) * 0.8, 17], [2.85 + Math.cos(b) * 0.8, 1.6 + Math.sin(b) * 0.8, 17]], n % 2 ? "#f9e8bc" : "#d95756", 20);
+          scene.cylinder(2.85 + Math.cos(a) * 0.5, 1.6 + Math.sin(a) * 0.5, 0.07, 5, "#5f9fa4", "#a6d5cb", { z0: 3 });
+        }
+        scene.custom(30, (ctx) => {
+          const center = project(1.15, 1.45, 30);
+          const rim = Array.from({ length: 16 }, (_, n) => {
+            const angle = n * Math.PI / 8;
+            return project(1.15 + Math.cos(angle) * 0.8, 1.45, 30 + Math.sin(angle) * 23);
+          });
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "#607c8e";
+          for (const x of [0.6, 1.7]) {
+            const foot = project(x, 1.45, 1);
+            ctx.beginPath(); ctx.moveTo(...foot); ctx.lineTo(...center); ctx.stroke();
+          }
+          if (animatedBase) return;
+          ctx.strokeStyle = "#f6e6b9";
+          ctx.beginPath();
+          rim.forEach((point, n) => n ? ctx.lineTo(...point) : ctx.moveTo(...point));
+          ctx.closePath(); ctx.stroke();
+          for (let n = 0; n < rim.length; n += 2) {
+            ctx.beginPath(); ctx.moveTo(...center); ctx.lineTo(...rim[n]); ctx.stroke();
+            ctx.fillStyle = ["#e16b57", "#53aeb4", "#efbd45", "#8b85bb"][n / 2 % 4];
+            ctx.fillRect(rim[n][0] - 3, rim[n][1], 6, 5);
+          }
+        });
+        break;
       case "residentialtower":
         scene.box(0.25, 0.25, 2.75, 2.75, 12, "#b4c7cc", "#dee8e6", { windows: true });
         scene.box(0.65, 0.65, 2.35, 2.35, 58, "#7cabb8", "#b7d6da", { z0: 12, windows: true, floors: true });
         scene.box(1, 1, 2, 2, 24, "#91bcc5", "#d1e5e8", { z0: 70, windows: true, floors: true });
         scene.antenna(1.5, 1.5, 94, 8);
         trees(3);
+        break;
+      case "skylineapartments":
+        scene.box(0.2, 0.2, 3.8, 3.8, 12, "#b4b7aa", "#ddd6be", { windows: true });
+        scene.box(0.6, 0.6, 1.75, 1.8, 94, "#91afb1", "#d2e0d7", { z0: 12, windows: true, floors: true });
+        scene.box(2.1, 1.85, 3.45, 3.3, 112, "#91afb1", "#d2e0d7", { z0: 12, windows: true, floors: true });
+        for (const z of [28, 46, 64, 82, 100]) scene.box(0.55, 0.55, 1.8, 1.85, 1.5, "#c2c6b5", "#e6ddc4", { z0: z });
+        for (const z of [28, 46, 64, 82, 100, 118]) scene.box(2.05, 1.8, 3.5, 3.35, 1.5, "#c2c6b5", "#e6ddc4", { z0: z });
+        scene.box(0.85, 0.85, 1.5, 1.55, 10, "#77949b", "#bcd2ce", { z0: 106, windows: true });
+        scene.box(2.4, 2.15, 3.15, 3, 10, "#77949b", "#bcd2ce", { z0: 124, windows: true });
+        face([[0.4, 2.2, 12.2], [1.6, 2.2, 12.2], [1.6, 3.4, 12.2], [0.4, 3.4, 12.2]], "#71915b", 20);
+        scene.tree(0.75, 2.7, 3); scene.tree(1.25, 3.2, 3);
+        break;
+      case "officeskyscraper":
+        scene.box(0.25, 0.25, 3.75, 3.75, 12, "#8d9da4", "#c7d2d0", { windows: true });
+        scene.box(0.85, 0.85, 3.15, 3.15, 105, "#5f899d", "#a7cbd3", { z0: 12, windows: true, floors: true });
+        scene.box(1.05, 1.05, 2.95, 2.95, 15, "#648c9f", "#bbd9de", { z0: 117, windows: true });
+        scene.box(1.45, 1.45, 2.55, 2.55, 7, "#849ea9", "#d5e2de", { z0: 132 });
+        for (const x of [1.35, 1.95, 2.55]) line([[x, 3.16, 14], [x, 3.16, 116]], "#bdd7dc", 0.7, 30);
+        for (const y of [1.35, 1.95, 2.55]) line([[3.16, y, 14], [3.16, y, 116]], "#789dac", 0.7, 30);
+        scene.antenna(2, 2, 139, 22);
+        scene.box(1.4, 3.45, 2.6, 3.85, 9, "#517c91", "#a8c9d0");
+        scene.tree(0.35, 3.6, 3); scene.tree(3.65, 0.35, 3);
+        break;
+      case "supertall":
+        scene.box(0.2, 0.2, 3.8, 3.8, 14, "#9a9ca5", "#d4d2cb", { windows: true });
+        scene.box(1, 1, 3, 3, 104, "#698799", "#aec6d0", { z0: 14, windows: true, floors: true });
+        scene.box(1.25, 1.25, 2.75, 2.75, 18, "#728b9c", "#bed0d6", { z0: 118, windows: true });
+        scene.box(1.5, 1.5, 2.5, 2.5, 12, "#859ca9", "#d3dce0", { z0: 136, windows: true });
+        scene.box(1.75, 1.75, 2.25, 2.25, 8, "#bdaf83", "#eddbac", { z0: 148 });
+        scene.antenna(2, 2, 156, 12);
+        for (const x of [1.35, 1.75, 2.15, 2.55]) line([[x, 3.01, 16], [x, 3.01, 117]], "#bdd0d7", 0.65, 30);
+        scene.box(1.25, 3.4, 2.75, 3.85, 11, "#6d8595", "#d0c4a5");
+        face([[0.4, 2.4, 14.2], [0.85, 2.4, 14.2], [0.85, 3.5, 14.2], [0.4, 3.5, 14.2]], "#7b9661", 20);
+        face([[3.15, 0.4, 14.2], [3.6, 0.4, 14.2], [3.6, 1.5, 14.2], [3.15, 1.5, 14.2]], "#7b9661", 20);
         break;
       case "researchcampus":
         scene.box(0.3, 0.3, 1.6, 3.5, 24, "#7b9ba7", "#d0dfe3", { windows: true, floors: true });
