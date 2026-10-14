@@ -215,7 +215,6 @@
 
     if (last) button(text("Continue", "Continuer"), `${last.name} · ${last.pop.toLocaleString()} ${text("residents", "habitants")}`, () => {
       api.ui.handlers.onLoadCity(last.key);
-      if (home) document.getElementById("start-status").textContent = text("This save could not be opened. Choose another city or import a backup.", "Cette sauvegarde ne peut pas être ouverte. Choisissez une autre ville ou importez une sauvegarde.");
     }, true);
 
     const open = action => {
@@ -301,6 +300,14 @@
     }
     api = value;
     renderStartScreen();
+    window.__townLoading?.finish();
+    for (const name of ["onNewCity", "onLoadCity"]) {
+      const handler = api.ui.handlers[name];
+      api.ui.handlers[name] = (...args) => window.__townLoading.run(() => {
+        handler(...args);
+        if (name === "onLoadCity" && home) document.getElementById("start-status").textContent = text("This save could not be opened. Choose another city or import a backup.", "Cette sauvegarde ne peut pas être ouverte. Choisissez une autre ville ou importez une sauvegarde.");
+      });
+    }
 
     const dialogs = ["welcome", "panel-cities", "home-settings", "modal-scenarios"].map(id => document.getElementById(id)).filter(Boolean);
     new MutationObserver(() => {

@@ -10,6 +10,8 @@
   <meta property="og:description" content="Fondez une ville, faites-la grandir. Found a city, make it grow.">
   <meta property="og:type" content="website">
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="stylesheet" href="./loading-screen.css?v=1">
+  <script src="./loading-screen.js?v=1"></script>
   <script type="module" crossorigin src="./assets/index-DCrPNbHR.js?v=footprint-access-1"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-CanL7pau.css">
   <link rel="stylesheet" href="./start-screen.css?v=home-return-1">
@@ -153,6 +155,14 @@
   </style>
 </head>
 <body>
+  <section id="town-loading" aria-label="Loading Build Your Town" aria-busy="true">
+    <div class="town-loading-content">
+      <h1>Build<span>Your</span>Town</h1>
+      <p id="town-loading-status" role="status">Preparing your town…</p>
+      <div class="town-loading-track" aria-hidden="true"><span></span></div>
+      <div class="town-loading-advice"><h2 id="town-loading-tip-title">Mayor's tip</h2><p id="town-loading-tip">Start small. Leave room for your town to grow.</p></div>
+    </div>
+  </section>
   <canvas id="map"></canvas>
 
   <header id="topbar">
