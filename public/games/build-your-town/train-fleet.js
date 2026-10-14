@@ -37,6 +37,35 @@
     walker.t = Math.abs(position - previous);
     return true;
   }
+  function railHeight(renderer, city, point) {
+    const x = Math.floor(point.x), y = Math.floor(point.y);
+    if (!city.inBounds(x, y)) return null;
+    const index = city.idx(x, y);
+    if (!city.rail[index]) return null;
+    const ramp = mask => {
+      const heights = [1.5, 1.5, 1.5, 1.5];
+      if (mask & 1) heights[0] = heights[1] = 0;
+      if (mask & 2) heights[1] = heights[2] = 0;
+      if (mask & 4) heights[2] = heights[3] = 0;
+      if (mask & 8) heights[3] = heights[0] = 0;
+      return heights;
+    };
+    let extra = [0, 0, 0, 0];
+    const deck = renderer.railDeck(city, x, y);
+    const upper = deck ? 0 : renderer.railRamp(city, x, y, renderer.railMask(city, x, y));
+    if (city.terrain[index] === 1) {
+      const base = city.overlay[index] === 0 ? renderer.railBridgeRamp(city, x, y) : renderer.rampMask(city, x, y);
+      extra = ramp(base);
+      if (upper >= 0) {
+        const raised = ramp(upper);
+        extra = extra.map((value, corner) => value + raised[corner]);
+      }
+    } else if (upper >= 0) extra = ramp(upper);
+    const heights = city.corners(x, y).map((height, corner) => height + extra[corner]);
+    const u = point.x - x, v = point.y - y;
+    return heights[0] * (1 - u) * (1 - v) + heights[1] * u * (1 - v) +
+      heights[2] * u * v + heights[3] * (1 - u) * v;
+  }
   function bind(renderer) {
     if (bound.has(renderer)) return;
     bound.add(renderer);
@@ -86,8 +115,17 @@
         if (!city.inBounds(x, y)) continue;
         const axis = Math.abs(direction.x) >= Math.abs(direction.y) ? "x" : "y";
         const index = city.idx(x, y), vehicles = renderer.vehiclesByTile.get(index) ?? [];
+        const travel = direction[axis] < 0 ? -1 : 1;
+        const wheel = offset => ({ x: point.x + (axis === "x" ? offset * travel : 0),
+          y: point.y + (axis === "y" ? offset * travel : 0) });
+        const front = railHeight(renderer, city, wheel(0.22));
+        const rear = railHeight(renderer, city, wheel(-0.22));
+        const rideHeight = front !== null && rear !== null
+          ? ((front + rear) / 2 - Math.min(...city.corners(x, y))) * 8 : undefined;
+        const pitch = front !== null && rear !== null
+          ? -(front - rear) * 8 / (0.44 * 32 * travel * (axis === "x" ? 1 : -1)) : 0;
         vehicles.push({ u: point.x - x, v: point.y - y, kind: `fleet-${variant}-${car === 0 ? 0 : car === count - 1 ? 2 : 1}`,
-          axis, back: +(direction[axis] < 0), train: true });
+          axis, back: +(travel < 0), train: true, rideHeight, pitch });
         renderer.vehiclesByTile.set(index, vehicles);
       }
     };
@@ -160,16 +198,21 @@
       const image = renderer.sprites.get(`vehicle:${vehicle.kind}:${vehicle.axis}:${vehicle.back}`, scale);
       const x = train.x + (vehicle.u - vehicle.v) * halfWidth - anchorX;
       const y = train.y + (vehicle.u + vehicle.v) * halfHeight -
-        heightAt(vehicle.u, vehicle.v, train.heights) * scale - halfHeight - anchorY;
-      ctx.drawImage(image, x, y);
+        (vehicle.rideHeight ?? heightAt(vehicle.u, vehicle.v, train.heights)) * scale - halfHeight - anchorY;
+      const pitch = vehicle.pitch ?? 0;
+      ctx.save();
+      ctx.transform(1, pitch, 0, 1, x, y - pitch * image.width / 2);
+      ctx.drawImage(image, 0, 0);
+      ctx.restore();
+      const padding = Math.abs(pitch) * image.width / 2;
       ctx.save();
       ctx.beginPath();
-      ctx.rect(x, y, image.width, image.height);
+      ctx.rect(x, y - padding, image.width, image.height + padding * 2);
       ctx.clip();
       for (const building of occluders) {
         if (building.tile <= train.tile || building.x >= x + image.width ||
-            building.x + building.image.width <= x || building.y >= y + image.height ||
-            building.y + building.image.height <= y) continue;
+            building.x + building.image.width <= x || building.y >= y + image.height + padding ||
+            building.y + building.image.height <= y - padding) continue;
         ctx.drawImage(building.image, building.x, building.y);
       }
       ctx.restore();

@@ -32,7 +32,7 @@
   #query { right: 12px; top: auto; bottom: 48px; max-height: 48dvh; }
   #query-body { max-height: calc(48dvh - 62px); }
 }
-#query { z-index: 5; max-height: calc(100dvh - 232px); display: flex; flex-direction: column; }
+#query { z-index: 9; max-height: calc(100dvh - 232px); display: flex; flex-direction: column; }
 #query[hidden] { display: none; }
 #query .head { flex-shrink: 0; }
 #query-body { min-height: 0; max-height: none; }
