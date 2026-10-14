@@ -1,7 +1,7 @@
 (() => {
   const tools = {
     landfill: { source: 1, target: 0, cost: 50, name: ["Remblayer", "Landfill"], desc: ["Transformez l'eau libre en terrain constructible au niveau de la mer. Glissez pour sélectionner une zone.", "Turn empty water into buildable land at sea level. Drag to select an area."] },
-    digwater: { source: 0, target: 1, cost: 30, name: ["Creuser un bassin", "Dig water"], desc: ["Transformez un terrain libre et plat au niveau de la mer en eau. Abaissez d'abord les terrains élevés. Glissez pour sélectionner une zone.", "Turn empty, flat land at sea level into water. Lower raised land first. Drag to select an area."] },
+    digwater: { source: 0, target: 1, cost: 30, name: ["Creuser un bassin", "Dig water"], desc: ["Transformez un terrain libre en eau. Le terrain est automatiquement abaissé au niveau de la mer. Glissez pour sélectionner une zone.", "Turn empty land into water. Raised ground is automatically lowered to sea level. Drag to select an area."] },
   };
   function install(messages) {
     for (const [tool, definition] of Object.entries(tools)) {
@@ -12,11 +12,12 @@
     messages["terrain.level"] = ["Abaissez et aplanissez d'abord le terrain au niveau de la mer (altitude 0).", "Lower and level the land to sea level (altitude 0) first."];
     messages["terrain.unchanged"] = ["Aucune case à convertir dans cette zone.", "No tiles to convert in this area."];
   }
-  function preview(city, tool, start, end, translate) {
+  function preview(city, tool, start, end, translate, levelTerrain) {
     const definition = tools[tool];
     if (!definition) return null;
     const tiles = [];
     let reason;
+    let needsExcavation = false;
     for (let y = Math.min(start.y, end.y); y <= Math.max(start.y, end.y); y++) {
       for (let x = Math.min(start.x, end.x); x <= Math.max(start.x, end.x); x++) {
         if (!city.inBounds(x, y)) continue;
@@ -24,15 +25,49 @@
         if (city.terrain[index] !== definition.source) continue;
         tiles.push(index);
         if (city.overlay[index] !== 0 || city.wire[index] || city.rail[index] || city.fire[index] || city.flood[index]) reason = translate("terrain.empty");
-        else if (city.base(x, y) !== 0 || !city.isFlat(x, y)) reason ??= translate("terrain.level");
+        else if (city.base(x, y) !== 0 || !city.isFlat(x, y)) {
+          if (tool === "digwater") needsExcavation = true;
+          else reason ??= translate("terrain.level");
+        }
       }
     }
     if (!tiles.length) reason = translate("terrain.unchanged");
-    return { tool, tiles, cost: tiles.length * definition.cost, valid: !reason, reason, terrainChange: definition.target };
+    let excavation;
+    if (!reason && needsExcavation) {
+      const xs = tiles.map(index => index % city.size), ys = tiles.map(index => Math.floor(index / city.size));
+      const left = Math.min(...xs), top = Math.min(...ys), right = Math.max(...xs), bottom = Math.max(...ys);
+      const working = Object.create(city);
+      working.elev = city.elev.slice();
+      const changes = new Map(), affected = new Set();
+      let unitCost = 0;
+      for (let pass = 0; pass < 32; pass++) {
+        let leveled = true;
+        for (let y = top; y <= bottom + 1; y++) for (let x = left; x <= right + 1; x++) {
+          if (working.elev[y * (city.size + 1) + x] !== 0) leveled = false;
+        }
+        if (leveled) break;
+        const step = levelTerrain(working, left, top, right, bottom, 0);
+        if (!step.valid) { reason = step.reason; break; }
+        unitCost = step.cost / step.changes.size;
+        for (const [index, height] of step.changes) {
+          working.elev[index] = height;
+          changes.set(index, height);
+        }
+        for (const index of step.tiles) affected.add(index);
+      }
+      for (let y = top; y <= bottom + 1; y++) for (let x = left; x <= right + 1; x++) {
+        if (working.elev[y * (city.size + 1) + x] !== 0) reason ??= translate("terrain.level");
+      }
+      for (const [index, height] of changes) if (height === city.elev[index]) changes.delete(index);
+      excavation = { changes, tiles: [...affected], cost: changes.size * unitCost, valid: !reason };
+    }
+    return { tool, tiles, cost: tiles.length * definition.cost + (excavation?.cost ?? 0),
+      valid: !reason, reason, terrainChange: definition.target, excavation };
   }
-  function apply(city, plan) {
+  function apply(city, plan, applyTerrain) {
     const definition = tools[plan.tool];
     if (!definition || plan.terrainChange !== definition.target) return null;
+    if (plan.excavation) applyTerrain(city, plan.excavation);
     for (const index of plan.tiles) {
       city.terrain[index] = definition.target;
       city.landValue[index] = definition.target === 0 ? 60 : 0;
