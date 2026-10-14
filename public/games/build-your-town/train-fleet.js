@@ -54,13 +54,20 @@
     const deck = renderer.railDeck(city, x, y);
     const upper = deck ? 0 : renderer.railRamp(city, x, y, renderer.railMask(city, x, y));
     if (city.terrain[index] === 1) {
-      const base = city.overlay[index] === 0 ? renderer.railBridgeRamp(city, x, y) : renderer.rampMask(city, x, y);
+      const base = renderer.railBridgeRamp(city, x, y);
       extra = ramp(base);
       if (upper >= 0) {
         const raised = ramp(upper);
         extra = extra.map((value, corner) => value + raised[corner]);
       }
     } else if (upper >= 0) extra = ramp(upper);
+    const curved = window.__seaRail.curveHeight(renderer.railMask(city, x, y),
+      city.terrain[index] === 1 ? renderer.railBridgeRamp(city, x, y) : -1,
+      deck ? 16 : upper, point.x - x, point.y - y);
+    if (curved !== null) {
+      const [a, b, c, d] = city.corners(x, y), u = point.x - x, v = point.y - y;
+      return a * (1 - u) * (1 - v) + b * u * (1 - v) + c * u * v + d * (1 - u) * v + curved;
+    }
     const heights = city.corners(x, y).map((height, corner) => height + extra[corner]);
     const u = point.x - x, v = point.y - y;
     return heights[0] * (1 - u) * (1 - v) + heights[1] * u * (1 - v) +
@@ -202,20 +209,29 @@
       const x = train.x + (vehicle.u - vehicle.v) * halfWidth - anchorX;
       const y = train.y + (vehicle.u + vehicle.v) * halfHeight -
         (vehicle.rideHeight ?? heightAt(vehicle.u, vehicle.v, train.heights)) * scale - halfHeight - anchorY;
-      const pitch = vehicle.pitch ?? 0;
+      const angle = Math.max(-0.28, Math.min(0.28, Math.atan(vehicle.pitch ?? 0)));
+      const pivotX = image.width / 2, pivotY = anchorY + halfHeight;
+      const cos = Math.cos(angle), sin = Math.sin(angle);
+      const corners = [[0, 0], [image.width, 0], [image.width, image.height], [0, image.height]]
+        .map(([u, v]) => ({ x: x + pivotX + (u - pivotX) * cos - (v - pivotY) * sin,
+          y: y + pivotY + (u - pivotX) * sin + (v - pivotY) * cos }));
+      const left = Math.min(...corners.map(point => point.x));
+      const right = Math.max(...corners.map(point => point.x));
+      const top = Math.min(...corners.map(point => point.y));
+      const bottom = Math.max(...corners.map(point => point.y));
       ctx.save();
-      ctx.transform(1, pitch, 0, 1, x, y - pitch * image.width / 2);
-      ctx.drawImage(image, 0, 0);
+      ctx.translate(x + pivotX, y + pivotY);
+      ctx.rotate(angle);
+      ctx.drawImage(image, -pivotX, -pivotY);
       ctx.restore();
-      const padding = Math.abs(pitch) * image.width / 2;
       ctx.save();
       ctx.beginPath();
-      ctx.rect(x, y - padding, image.width, image.height + padding * 2);
+      ctx.rect(left, top, right - left, bottom - top);
       ctx.clip();
       for (const building of occluders) {
-        if (building.tile <= train.tile || building.x >= x + image.width ||
-            building.x + building.image.width <= x || building.y >= y + image.height + padding ||
-            building.y + building.image.height <= y - padding) continue;
+        if (building.tile < train.tile || building.x >= right ||
+            building.x + building.image.width <= left || building.y >= bottom ||
+            building.y + building.image.height <= top) continue;
         ctx.drawImage(building.image, building.x, building.y);
       }
       ctx.restore();

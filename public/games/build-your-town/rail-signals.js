@@ -98,32 +98,69 @@
     for (const block of required) state.owners.set(block, train);
     return true;
   }
+  function rightHandScore(city, x, y, dx, dy) {
+    // Check if there is an adjacent parallel rail tile to the left or right of our travel vector
+    // Vector pointing right: [dy, -dx], Vector pointing left: [-dy, dx]
+    const leftX = x - dy, leftY = y + dx;
+    const rightX = x + dy, rightY = y - dx;
+    const hasLeftRail = city.inBounds(leftX, leftY) && city.rail[city.idx(leftX, leftY)];
+    const hasRightRail = city.inBounds(rightX, rightY) && city.rail[city.idx(rightX, rightY)];
+    // Standard right-hand running: if we have an adjacent track to our left, we are on the right track (+2 bonus).
+    // If we have an adjacent track to our right and none to our left, we are on the wrong side (-2 penalty).
+    if (hasLeftRail && !hasRightRail) return 2;
+    if (hasRightRail && !hasLeftRail) return -2;
+    return 0;
+  }
+
   function bind(renderer) {
     const pick = renderer.pickNext.bind(renderer);
     renderer.pickNext = (city, train, initial) => {
       if (train.kind !== "train" || initial) return pick(city, train, initial);
       const state = states.get(renderer);
       if (!state || state.city !== city) return pick(city, train, initial);
-      const preferred = { ...train };
-      if (!pick(city, preferred, false)) return false;
+      const dx = train.x - train.px, dy = train.y - train.py;
       const available = point => {
         const block = state.blocks.get(city.idx(point.x, point.y));
         const owner = state.owners.get(block);
         return !owner || owner === train || owner === train.signalTrain;
       };
-      if (available(preferred)) {
-        Object.assign(train, { px: preferred.px, py: preferred.py, x: preferred.x, y: preferred.y, t: 0 });
-        return true;
-      }
-      const dx = train.x - train.px, dy = train.y - train.py;
-      for (const [x, y] of [[dx, dy], [-dy, dx], [dy, -dx]]) {
-        const next = { x: train.x + x, y: train.y + y };
-        if (!renderer.walkable(city, "train", next.x, next.y) || !available(next)) continue;
+
+      // Candidates in priority order: straight [dx, dy], right branch [dy, -dx], left branch [-dy, dx]
+      const candidates = [[dx, dy], [dy, -dx], [-dy, dx]]
+        .filter(([vx, vy]) => renderer.walkable(city, "train", train.x + vx, train.y + vy))
+        .map(([vx, vy]) => {
+          const next = { x: train.x + vx, y: train.y + vy, vx, vy };
+          const free = available(next);
+          const score = rightHandScore(city, next.x, next.y, vx, vy);
+          const isStraight = vx === dx && vy === dy;
+          return { next, free, score, isStraight };
+        });
+
+      if (!candidates.length) return false;
+
+      // Sort candidate choices:
+      // 1. Available/unblocked first
+      // 2. Right-hand track corridor adherence score
+      // 3. Forward straight momentum over unnecessary turns unless switching tracks
+      candidates.sort((a, b) => {
+        if (a.free !== b.free) return Number(b.free) - Number(a.free);
+        if (a.score !== b.score) return b.score - a.score;
+        return Number(b.isStraight) - Number(a.isStraight);
+      });
+
+      const choice = candidates[0];
+      if (!choice || !choice.free) {
+        // If preferred choices are blocked, check if any walkable option is available
+        const fallback = candidates.find(c => c.free);
+        if (!fallback) return false;
         train.px = train.x; train.py = train.y;
-        train.x = next.x; train.y = next.y; train.t = 0;
+        train.x = fallback.next.x; train.y = fallback.next.y; train.t = 0;
         return true;
       }
-      return false;
+
+      train.px = train.x; train.py = train.y;
+      train.x = choice.next.x; train.y = choice.next.y; train.t = 0;
+      return true;
     };
     const setup = renderer.setupWalkers.bind(renderer);
     renderer.setupWalkers = city => {
