@@ -403,6 +403,9 @@
     const lang = getLang();
     actionContainer.innerHTML = `
       <div class="save-actions-grid">
+        <button type="button" class="save-btn scenario-btn" id="btn-career-scenarios">
+          <span>🏆</span> ${lang === "fr" ? "Scénarios de carrière" : "Career Scenarios"}
+        </button>
         <button type="button" class="save-btn import-btn" id="btn-import-save">
           <span>📥</span> ${lang === "fr" ? "Importer une sauvegarde" : "Import Save File"}
         </button>
@@ -412,12 +415,20 @@
         <button type="button" class="save-btn backup-btn" id="btn-export-all">
           <span>💾</span> ${lang === "fr" ? "Sauvegarde complète" : "Full Backup"}
         </button>
+        <button type="button" class="save-btn home-btn" id="btn-return-main-menu">
+          <span>🏠</span> ${lang === "fr" ? "Retour au menu principal" : "Return to Main Menu"}
+        </button>
       </div>
     `;
 
     body.appendChild(actionContainer);
 
     // Event Listeners
+    document.getElementById("btn-career-scenarios").addEventListener("click", () => {
+      panelCities.hidden = true;
+      if (window.__openScenarioModal) window.__openScenarioModal();
+    });
+
     document.getElementById("btn-import-save").addEventListener("click", () => {
       fileInput.click();
     });
@@ -428,6 +439,18 @@
 
     document.getElementById("btn-export-all").addEventListener("click", () => {
       exportAllCities();
+    });
+
+    document.getElementById("btn-return-main-menu")?.addEventListener("click", async () => {
+      panelCities.hidden = true;
+      if (window.__townDialogs?.confirmReturnHome) {
+        const confirmed = await window.__townDialogs.confirmReturnHome();
+        if (!confirmed) {
+          panelCities.hidden = false;
+          return;
+        }
+      }
+      window.__townStartScreen?.returnToHome();
     });
 
     // Observer on #cities-list to append per-row Export buttons
@@ -522,6 +545,14 @@
         color: var(--accent, #f2c14e);
       }
       .save-btn.backup-btn:hover {
+        background: rgba(242, 193, 78, 0.18);
+      }
+      .save-btn.home-btn {
+        background: rgba(242, 193, 78, 0.08);
+        border-color: rgba(242, 193, 78, 0.3);
+        color: var(--accent, #f2c14e);
+      }
+      .save-btn.home-btn:hover {
         background: rgba(242, 193, 78, 0.18);
       }
       .btn-row-export:hover {

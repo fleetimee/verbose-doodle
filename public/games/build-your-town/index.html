@@ -10,14 +10,16 @@
   <meta property="og:description" content="Fondez une ville, faites-la grandir. Found a city, make it grow.">
   <meta property="og:type" content="website">
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <script type="module" crossorigin src="./assets/index-DCrPNbHR.js?v=auto-water-excavation-16"></script>
+  <script type="module" crossorigin src="./assets/index-DCrPNbHR.js?v=footprint-access-1"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-CanL7pau.css">
-  <link rel="stylesheet" href="./start-screen.css?v=stable-settings-tabs-4">
+  <link rel="stylesheet" href="./start-screen.css?v=home-return-1">
   <script src="./start-city.js?v=1"></script>
-  <script src="./start-screen.js?v=keyboard-menu-4"></script>
+  <script src="./start-screen.js?v=home-return-1"></script>
+  <link rel="stylesheet" href="./game-dialogs.css?v=btn-contrast-1">
+  <script src="./game-dialogs.js?v=home-return-1"></script>
   <script src="../activity.js"></script>
   <script src="./audio.js"></script>
-  <script src="./endgame.js?v=building-activity-1"></script>
+  <script src="./endgame.js?v=footprint-access-1"></script>
   <link rel="stylesheet" href="./query-coverage.css?v=query-layer-3">
   <script src="./query-coverage.js?v=2"></script>
   <link rel="stylesheet" href="./view-controls.css?v=encounter-options-5">
@@ -25,11 +27,11 @@
   <script src="./train-fleet.js?v=rail-signals-6"></script>
   <script src="./map-rotation.js?v=train-fleet-3"></script>
   <script src="./view-controls.js?v=encounter-options-2"></script>
-  <script src="./recreation.js?v=beach-carnival-1"></script>
+  <script src="./recreation.js?v=footprint-access-1"></script>
   <script src="./building-activity.js?v=building-activity-2"></script>
   <script src="./sea-rail.js?v=1"></script>
   <script src="./road-layout.js?v=paved-median-5"></script>
-  <script src="./terrain-editing.js?v=auto-excavation-2"></script>
+  <script src="./terrain-editing.js?v=beach-3"></script>
   <script src="./landscaping.js?v=planted-groves-1"></script>
   <script src="./pedestrians.js?v=endgame-skyscrapers-1"></script>
   <script src="./vehicle-fleet.js?v=1"></script>
@@ -38,12 +40,12 @@
   <script src="./missions.js?v=start-screen-2"></script>
   <script src="./encounters.js?v=home-options-2"></script>
   <script src="./onboarding.js"></script>
-  <script src="./scenarios.js?v=start-screen-2"></script>
-  <script src="./save-manager.js?v=city-selector-2"></script>
+  <script src="./scenarios.js?v=game-dialogs-3"></script>
+  <script src="./save-manager.js?v=home-return-1"></script>
   <script src="./cheats.js"></script>
   <script src="./disaster-recovery.js?v=optional-1"></script>
   <script src="./fire-response.js?v=optional-1"></script>
-  <script src="./topbar-menu.js?v=1"></script>
+  <script src="./topbar-menu.js?v=home-return-1"></script>
   <style>
     * {
       scrollbar-width: thin;
@@ -270,6 +272,7 @@
       </div>
     </form>
   </div>
+  <div id="modal-scenarios" class="modal" hidden></div>
 
   <div id="toast" hidden></div>
   <div id="minimap"><div class="head"><span id="minimap-name" data-i18n="minimap.title">Carte</span><button id="minimap-flat" type="button" data-i18n-title="btn.flat" title="Vue à plat"><svg viewBox="0 0 32 20" aria-hidden="true"><path d="M16.0 3.6 21.9 6.5 16.0 9.4 10.1 6.5Z" fill="currentColor"/><path d="M23.0 7.1 28.9 10.0 23.0 12.9 17.1 10.0Z" fill="currentColor" opacity="0.8"/><path d="M9.0 7.1 14.9 10.0 9.0 12.9 3.1 10.0Z" fill="currentColor" opacity="0.8"/><path d="M16.0 10.6 21.9 13.5 16.0 16.4 10.1 13.5Z" fill="currentColor"/></svg></button><button id="minimap-maps" type="button" data-i18n-title="btn.maps" title="Cartes">🗺️</button></div><canvas id="minimap-canvas" width="256" height="128" data-i18n-title="minimap" title="Carte : appuyez pour vous y rendre"></canvas></div>

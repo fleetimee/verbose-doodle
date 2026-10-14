@@ -1,0 +1,13 @@
+#town-confirmation { width: min(420px, calc(100vw - 32px)); padding: 24px; color: var(--text); background: #202a3d; border: 1px solid #526079; border-radius: 14px; box-shadow: 0 20px 64px #080e2080; font-family: var(--font-body); }
+#town-confirmation::backdrop { background: #0c142bb3; }
+#town-confirmation h2 { margin: 0 0 12px; font-size: 21px; line-height: 1.2; }
+#town-confirmation p { margin: 0; color: #bbc6d7; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+#town-confirmation form { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+#town-confirmation button { min-height: 36px; padding: 8px 16px; background: #34425a; border: 1px solid #526079; border-radius: 7px; box-shadow: none; font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; transition: all 0.15s ease; }
+#town-confirmation button:hover { background: #41526f; border-color: #6a7c99; }
+#town-confirmation .dialog-destructive { background: #9d4549; border-color: #c27175; color: #fff; }
+#town-confirmation .dialog-destructive:hover { background: #b14e53; border-color: #d68387; }
+#town-confirmation button.primary { background: #f2c14e; border-color: #f2c14e; color: #292411; font-weight: 700; text-shadow: none; }
+#town-confirmation button.primary:hover { background: #f8d476; border-color: #f8d476; }
+#town-confirmation button:active { margin-bottom: 0; transform: none; }
+#town-confirmation button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

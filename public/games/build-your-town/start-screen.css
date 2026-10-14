@@ -1,4 +1,6 @@
 body.town-home #topbar, body.town-home #toolbar, body.town-home #minimap, body.town-home #statusbar, body.town-home #scenario-hud, body.town-home #toast, body.town-home #query { visibility: hidden; pointer-events: none; }
+body:not(.town-home) #town-start-screen { display: none !important; }
+.town-home #btn-return-main-menu { display: none !important; }
 #town-start-screen { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; padding: clamp(24px, 6vw, 88px); background: linear-gradient(90deg, #101827ed 0%, #111a2dd4 30%, #111a2d55 68%, #111a2d25); color: #f4f0e5; font-family: var(--font-body); }
 .start-content { width: min(400px, 100%); }
 .start-eyebrow { font-size: 12px; color: #d3be85; margin-bottom: 10px; letter-spacing: 0.04em; }
@@ -20,7 +22,7 @@ body.town-home #topbar, body.town-home #toolbar, body.town-home #minimap, body.t
 #start-back { display: none; position: absolute; top: 18px; left: 20px; padding: 9px 12px; background: #202c40; border: 1px solid #65758b; font: inherit; font-size: 12px; box-shadow: none; }
 .town-home.home-dialog .start-content { visibility: hidden; }
 .town-home.home-dialog #start-back { display: block; }
-.town-home #panel-cities, .town-home #welcome, .town-home #view-settings { z-index: 20; }
+.town-home #panel-cities, .town-home #welcome, .town-home #view-settings, .town-home #modal-scenarios { z-index: 20; }
 .town-home #welcome { background: transparent; }
 .town-home #view-settings { left: 50%; top: 50%; right: auto; transform: translate(-50%, -50%); width: min(340px, calc(100vw - 32px)); }
 @media (max-width: 600px) {

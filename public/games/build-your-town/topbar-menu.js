@@ -85,6 +85,7 @@
       if (!open(menu, text("Game menu", "Menu du jeu"))) return;
       for (const [id, label, path] of actions) {
         const original = document.getElementById(id);
+        if (!original) continue;
         const row = document.createElement("button");
         row.type = "button";
         row.innerHTML = icon(path);
@@ -96,6 +97,22 @@
         row.addEventListener("click", () => { close(true); original.click(); });
         popup.append(row);
       }
+      const homeRow = document.createElement("button");
+      homeRow.type = "button";
+      homeRow.innerHTML = icon("M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H4a1 1 0 0 1-1-1V9.5Z");
+      const homeName = document.createElement("span");
+      homeName.textContent = text("Main menu", "Menu principal");
+      homeRow.append(homeName);
+      homeRow.title = text("Return to main menu", "Retourner au menu principal");
+      homeRow.addEventListener("click", async () => {
+        close(true);
+        if (window.__townDialogs?.confirmReturnHome) {
+          const confirmed = await window.__townDialogs.confirmReturnHome();
+          if (!confirmed) return;
+        }
+        window.__townStartScreen?.returnToHome();
+      });
+      popup.append(homeRow);
       popup.querySelector("button").focus();
     });
     rate.addEventListener("click", () => {

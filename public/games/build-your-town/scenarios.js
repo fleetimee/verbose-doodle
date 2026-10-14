@@ -447,10 +447,29 @@
     } catch {}
   };
 
+  const isScenarioUnlocked = (index) => {
+    if (index <= 0) return true;
+    const prevScenario = SCENARIOS[index - 1];
+    if (!prevScenario) return true;
+    const medals = scenarioMedals[prevScenario.id];
+    return !!(medals?.bronze || medals?.silver || medals?.gold);
+  };
+
   // Launch a Pre-Built Scenario
   const startScenario = (scenario) => {
     if (!window.__City || !window.__buildTown || !window.__startCity) {
-      alert("Game engine loading, please try in a moment.");
+      window.__townDialogs.notice("Game engine loading, please try in a moment.");
+      return;
+    }
+
+    const sIndex = SCENARIOS.findIndex((item) => item.id === scenario.id);
+    if (sIndex > 0 && !isScenarioUnlocked(sIndex)) {
+      const prev = SCENARIOS[sIndex - 1];
+      const prevName = prev ? (prev.name[getLang()] || prev.name.en) : "";
+      const msg = getLang() === "fr"
+        ? `Ce scénario est verrouillé. Terminez d'abord « ${prevName} » avec au moins le Bronze 🥉.`
+        : `This scenario is locked. Complete "${prevName}" with at least a Bronze medal 🥉 to unlock.`;
+      if (window.__ui?.toast) window.__ui.toast(msg, "alert", { ms: 5000 });
       return;
     }
 
@@ -496,6 +515,9 @@
     // Close scenario modal
     const modal = document.getElementById("modal-scenarios");
     if (modal) modal.hidden = true;
+    if (document.body.classList.contains("town-home")) {
+      document.body.classList.remove("home-dialog");
+    }
 
     // Toast
     const lang = getLang();
@@ -658,6 +680,74 @@
     };
   };
 
+  const createScenarioCard = (s, index, lang, onLaunch) => {
+    const id = s.id;
+    const medals = scenarioMedals[id] || { bronze: false, silver: false, gold: false };
+    const unlocked = isScenarioUnlocked(index);
+    const prevScenario = index > 0 ? SCENARIOS[index - 1] : null;
+
+    const card = document.createElement("div");
+    card.className = `scenario-card${unlocked ? "" : " locked"}`;
+
+    card.innerHTML = `
+      <div class="sc-card-top">
+        <div class="sc-header-left">
+          <span class="sc-icon">${unlocked ? s.icon : "🔒"}</span>
+          <div>
+            <h3>${s.name[lang] || s.name.en}</h3>
+            ${
+              unlocked
+                ? `<span class="sc-tag" style="border-color:${s.diffColor};color:${s.diffColor}">${s.tag[lang] || s.tag.en}</span>
+                   <small>${s.difficulty}</small>`
+                : `<span class="sc-tag locked-tag">🔒 ${lang === "fr" ? "Verrouillé" : "Locked"}</span>`
+            }
+          </div>
+        </div>
+        <div class="sc-medals-earned">
+          ${
+            unlocked
+              ? `<span class="m-icon ${medals.bronze ? "lit" : "dim"}" title="Bronze">🥉</span>
+                 <span class="m-icon ${medals.silver ? "lit" : "dim"}" title="Silver">🥈</span>
+                 <span class="m-icon ${medals.gold ? "lit" : "dim"}" title="Gold">🥇</span>`
+              : `<span class="m-lock" title="${lang === "fr" ? "Verrouillé" : "Locked"}">🔒</span>`
+          }
+        </div>
+      </div>
+      <p class="sc-desc">${s.desc[lang] || s.desc.en}</p>
+      ${
+        !unlocked && prevScenario
+          ? `<div class="sc-lock-requirement">
+               <span class="lock-icon">🔒</span>
+               <span>${
+                 lang === "fr"
+                   ? `Terminez « ${prevScenario.name[lang] || prevScenario.name.en} » avec au moins le Bronze 🥉 pour débloquer.`
+                   : `Complete "${prevScenario.name[lang] || prevScenario.name.en}" with at least Bronze 🥉 to unlock.`
+               }</span>
+             </div>`
+          : ""
+      }
+      <div class="sc-objectives">
+        <div class="sc-obj"><span class="m-dot">🥉</span> <span>${s.bronze.title[lang] || s.bronze.title.en}</span></div>
+        <div class="sc-obj"><span class="m-dot">🥈</span> <span>${s.silver.title[lang] || s.silver.title.en}</span></div>
+        <div class="sc-obj"><span class="m-dot">🥇</span> <span>${s.gold.title[lang] || s.gold.title.en}</span></div>
+      </div>
+      <div class="sc-foot">
+        <button type="button" class="primary sc-launch-btn ${unlocked ? "" : "locked-btn"}" ${unlocked ? "" : "disabled"}>
+          ${unlocked ? (lang === "fr" ? "Lancer le scénario ▶" : "Launch Scenario ▶") : (lang === "fr" ? "🔒 Verrouillé" : "🔒 Locked")}
+        </button>
+      </div>
+    `;
+
+    if (unlocked) {
+      card.querySelector(".sc-launch-btn").addEventListener("click", () => {
+        startScenario(s);
+        if (typeof onLaunch === "function") onLaunch();
+      });
+    }
+
+    return card;
+  };
+
   // Build the Scenario Selection Browser Modal
   const openScenarioBrowser = () => {
     let modal = document.getElementById("modal-scenarios");
@@ -681,8 +771,8 @@
           <p class="scenarios-intro">
             ${
               lang === "fr"
-                ? "Prenez les rênes de villes pré-construites confrontées à des défis uniques. Rétablissez les comptes, reconstruisez après un séisme ou transformez une cité polluée pour décrocher les médailles de Bronze 🥉, Argent 🥈 et Or 🥇 !"
-                : "Take charge of pre-built cities facing unique crises! Balance broken budgets, rebuild from devastating earthquakes, or conquer island logistics to earn Bronze 🥉, Silver 🥈, and Gold 🥇 medals."
+                ? "Prenez les rênes de villes pré-construites confrontées à des défis uniques. Débloquez les scénarios suivants au fur et à mesure de vos victoires (style Planet Coaster) pour décrocher les médailles de Bronze 🥉, Argent 🥈 et Or 🥇 !"
+                : "Take charge of pre-built cities facing unique crises! Unlock subsequent scenarios sequentially (Planet Coaster style) as you conquer each crisis to earn Bronze 🥉, Silver 🥈, and Gold 🥇 medals."
             }
           </p>
           <div class="scenarios-grid" id="scenarios-grid"></div>
@@ -691,52 +781,16 @@
     `;
 
     const grid = modal.querySelector("#scenarios-grid");
-    SCENARIOS.forEach((s) => {
-      const id = s.id;
-      const medals = scenarioMedals[id] || { bronze: false, silver: false, gold: false };
-
-      const card = document.createElement("div");
-      card.className = "scenario-card";
-
-      card.innerHTML = `
-        <div class="sc-card-top">
-          <div class="sc-header-left">
-            <span class="sc-icon">${s.icon}</span>
-            <div>
-              <h3>${s.name[lang] || s.name.en}</h3>
-              <span class="sc-tag" style="border-color:${s.diffColor};color:${s.diffColor}">${s.tag[lang] || s.tag.en}</span>
-              <small>${s.difficulty}</small>
-            </div>
-          </div>
-          <div class="sc-medals-earned">
-            <span class="m-icon ${medals.bronze ? "lit" : "dim"}">🥉</span>
-            <span class="m-icon ${medals.silver ? "lit" : "dim"}">🥈</span>
-            <span class="m-icon ${medals.gold ? "lit" : "dim"}">🥇</span>
-          </div>
-        </div>
-        <p class="sc-desc">${s.desc[lang] || s.desc.en}</p>
-        <div class="sc-objectives">
-          <div class="sc-obj"><span class="m-dot">🥉</span> <span>${s.bronze.title[lang] || s.bronze.title.en}</span></div>
-          <div class="sc-obj"><span class="m-dot">🥈</span> <span>${s.silver.title[lang] || s.silver.title.en}</span></div>
-          <div class="sc-obj"><span class="m-dot">🥇</span> <span>${s.gold.title[lang] || s.gold.title.en}</span></div>
-        </div>
-        <div class="sc-foot">
-          <button type="button" class="primary sc-launch-btn">
-            ${lang === "fr" ? "Lancer le scénario ▶" : "Launch Scenario ▶"}
-          </button>
-        </div>
-      `;
-
-      card.querySelector(".sc-launch-btn").addEventListener("click", () => {
-        startScenario(s);
-      });
-
-      grid.appendChild(card);
+    SCENARIOS.forEach((s, index) => {
+      grid.appendChild(createScenarioCard(s, index, lang));
     });
 
     modal.hidden = false;
     modal.querySelector("#scenarios-close").addEventListener("click", () => {
       modal.hidden = true;
+      if (document.body.classList.contains("town-home")) {
+        document.body.classList.remove("home-dialog");
+      }
     });
   };
 
@@ -944,6 +998,41 @@
         font-size: 10px;
         color: var(--muted, #a8b0c2);
       }
+      .scenario-card.locked {
+        opacity: 0.65;
+        border-style: dashed;
+        border-color: rgba(255, 255, 255, 0.16);
+      }
+      .scenario-card.locked:hover {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+      .sc-tag.locked-tag {
+        border-color: #8590a6;
+        color: #b0bbd0;
+      }
+      .sc-lock-requirement {
+        background: rgba(242, 193, 78, 0.08);
+        border: 1px solid rgba(242, 193, 78, 0.28);
+        border-radius: 8px;
+        padding: 8px 10px;
+        color: #f2c14e;
+        font-size: 11.5px;
+        line-height: 1.4;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .sc-launch-btn.locked-btn {
+        background: #2a3547 !important;
+        color: #7b8a9e !important;
+        border-color: #405068 !important;
+        cursor: not-allowed;
+      }
+      .m-lock {
+        font-size: 16px;
+        opacity: 0.6;
+      }
     `;
     document.head.appendChild(style);
   };
@@ -955,51 +1044,27 @@
     const lang = getLang();
     loadMedals();
 
-    SCENARIOS.forEach((s) => {
-      const id = s.id;
-      const medals = scenarioMedals[id] || { bronze: false, silver: false, gold: false };
-
-      const card = document.createElement("div");
-      card.className = "scenario-card";
-
-      card.innerHTML = `
-        <div class="sc-card-top">
-          <div class="sc-header-left">
-            <span class="sc-icon">${s.icon}</span>
-            <div>
-              <h3>${s.name[lang] || s.name.en}</h3>
-              <span class="sc-tag" style="border-color:${s.diffColor};color:${s.diffColor}">${s.tag[lang] || s.tag.en}</span>
-              <small>${s.difficulty}</small>
-            </div>
-          </div>
-          <div class="sc-medals-earned">
-            <span class="m-icon ${medals.bronze ? "lit" : "dim"}">🥉</span>
-            <span class="m-icon ${medals.silver ? "lit" : "dim"}">🥈</span>
-            <span class="m-icon ${medals.gold ? "lit" : "dim"}">🥇</span>
-          </div>
-        </div>
-        <p class="sc-desc">${s.desc[lang] || s.desc.en}</p>
-        <div class="sc-objectives">
-          <div class="sc-obj"><span class="m-dot">🥉</span> <span>${s.bronze.title[lang] || s.bronze.title.en}</span></div>
-          <div class="sc-obj"><span class="m-dot">🥈</span> <span>${s.silver.title[lang] || s.silver.title.en}</span></div>
-          <div class="sc-obj"><span class="m-dot">🥇</span> <span>${s.gold.title[lang] || s.gold.title.en}</span></div>
-        </div>
-        <div class="sc-foot">
-          <button type="button" class="primary sc-launch-btn">
-            ${lang === "fr" ? "Lancer le scénario ▶" : "Launch Scenario ▶"}
-          </button>
-        </div>
-      `;
-
-      card.querySelector(".sc-launch-btn").addEventListener("click", () => {
-        startScenario(s);
-        if (typeof onLaunch === "function") onLaunch();
-      });
-
-      container.appendChild(card);
+    SCENARIOS.forEach((s, index) => {
+      container.appendChild(createScenarioCard(s, index, lang, onLaunch));
     });
   };
   window.__openScenarioModal = openScenarioBrowser;
+
+  // Debug/Testing helper to unlock all scenarios or reset medals
+  window.__unlockAllScenarios = () => {
+    SCENARIOS.forEach((s) => {
+      scenarioMedals[s.id] = { bronze: true, silver: true, gold: true };
+    });
+    saveMedals();
+    const modal = document.getElementById("modal-scenarios");
+    if (modal && !modal.hidden) openScenarioBrowser();
+  };
+  window.__resetScenarioProgress = () => {
+    scenarioMedals = {};
+    saveMedals();
+    const modal = document.getElementById("modal-scenarios");
+    if (modal && !modal.hidden) openScenarioBrowser();
+  };
 
   // Initialization
   const init = () => {

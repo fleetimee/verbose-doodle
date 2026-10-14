@@ -1,6 +1,6 @@
 (() => {
   if (new URLSearchParams(location.search).has("demo")) return;
-  let home = true, api, screen, frame;
+  let home = true, api, screen, frame, actions;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const text = (en, fr) => document.documentElement.lang === "fr" ? fr : en;
   const isHome = () => home;
@@ -145,34 +145,50 @@
     if (!home || !key) return;
     home = false;
     cancelAnimationFrame(frame);
-    screen.remove();
-    document.getElementById("home-settings").remove();
+    screen?.remove();
+    document.getElementById("home-settings")?.remove();
     document.body.classList.remove("town-home", "home-dialog");
-    api.renderer.camera.zoom = 0.5;
-    api.ui.handlers.onSpeed(1);
+    if (api?.renderer?.camera) api.renderer.camera.zoom = 0.5;
+    if (api?.ui?.handlers?.onSpeed) api.ui.handlers.onSpeed(1);
     window.dispatchEvent(new Event("town-city-entered"));
-    document.getElementById("btn-cities").focus();
+    document.getElementById("btn-cities")?.focus();
   };
-  function ready(value, initialized = false) {
-    if (!initialized && document.readyState !== "complete") {
-      document.addEventListener("DOMContentLoaded", () => ready(value, true), { once: true });
-      return;
+
+  const closeDialogs = () => {
+    api?.ui?.closePanels?.();
+    const toClose = ["welcome", "panel-cities", "home-settings", "modal-scenarios"];
+    for (const id of toClose) {
+      const el = document.getElementById(id);
+      if (el) el.hidden = true;
     }
-    api = value;
+  };
+
+  const renderStartScreen = () => {
+    home = true;
     document.body.classList.add("town-home");
+    document.body.classList.remove("home-dialog");
+
+    document.getElementById("town-start-screen")?.remove();
+    document.getElementById("home-settings")?.remove();
+
     screen = document.createElement("section");
     screen.id = "town-start-screen";
     screen.setAttribute("aria-label", text("Build Your Town main menu", "Menu principal de Build Your Town"));
     screen.innerHTML = `<div class="start-content"><div class="start-eyebrow">${text("A city of your own", "Une ville à vous")}</div><h1>Build<span>Your</span>Town</h1><p class="start-intro">${text("Every great city starts with you.", "Chaque grande ville commence avec vous.")}</p><div class="start-actions"></div><p id="start-status" role="status"></p></div><div class="start-bottom"><span>Build Your Town · v0.7.0</span><span>${text("A living city. Your next chapter.", "Une ville vivante. Votre prochain chapitre.")}</span></div>`;
     document.body.append(screen);
     createSettings(api);
-    const newCityTitle = document.createElement("h2");
-    newCityTitle.className = "home-new-title";
-    newCityTitle.textContent = text("New city", "Nouvelle ville");
-    document.querySelector("#welcome-form .hero").prepend(newCityTitle);
-    const actions = screen.querySelector(".start-actions");
-    const cities = api.cities();
-    const last = cities.find(city => city.key === api.last()) ?? cities[0];
+
+    if (!document.querySelector(".home-new-title")) {
+      const newCityTitle = document.createElement("h2");
+      newCityTitle.className = "home-new-title";
+      newCityTitle.textContent = text("New city", "Nouvelle ville");
+      document.querySelector("#welcome-form .hero")?.prepend(newCityTitle);
+    }
+
+    actions = screen.querySelector(".start-actions");
+    const cities = api?.cities ? api.cities() : [];
+    const last = cities.find(city => city.key === api?.last?.()) ?? cities[0];
+
     const button = (label, description, action, primary = false) => {
       const element = document.createElement("button");
       element.type = "button";
@@ -196,16 +212,22 @@
       actions.append(element);
       return element;
     };
+
     if (last) button(text("Continue", "Continuer"), `${last.name} · ${last.pop.toLocaleString()} ${text("residents", "habitants")}`, () => {
       api.ui.handlers.onLoadCity(last.key);
       if (home) document.getElementById("start-status").textContent = text("This save could not be opened. Choose another city or import a backup.", "Cette sauvegarde ne peut pas être ouverte. Choisissez une autre ville ou importez une sauvegarde.");
     }, true);
+
     const open = action => {
       document.body.classList.add("home-dialog");
       api.ui.handlers.onSpeed(0);
       action();
     };
-    button(text("New city", "Nouvelle ville"), text("Choose a map and make it yours", "Choisissez une carte et créez votre ville"), () => open(() => api.ui.openWelcome(false)), !last);
+
+    button(text("Sandbox city", "Ville bac à sable"), text("Custom map & free city building", "Carte personnalisée et construction libre"), () => open(() => api.ui.openWelcome(false)), !last);
+    button(text("Career scenarios", "Scénarios de carrière"), text("Planet Coaster style crisis progression", "Défis de crise et médailles à débloquer"), () => open(() => {
+      if (window.__openScenarioModal) window.__openScenarioModal();
+    }));
     button(text("Load city", "Charger une ville"), text("Browse cities or import a save", "Parcourez vos villes ou importez une sauvegarde"), () => open(() => {
       api.ui.setCityList(api.cities(), null);
       document.getElementById("btn-cities").click();
@@ -214,31 +236,87 @@
       document.getElementById("home-settings").hidden = false;
       document.querySelector("#home-settings .home-panel-close").focus();
     }));
+
     const back = document.createElement("button");
     back.id = "start-back";
     back.type = "button";
     back.textContent = text("← Back to main menu", "← Retour au menu principal");
     screen.append(back);
-    const closeDialogs = () => {
-      api.ui.closePanels();
-      document.getElementById("welcome").hidden = true;
-      document.getElementById("home-settings").hidden = true;
-    };
     back.addEventListener("click", closeDialogs);
-    const dialogs = ["welcome", "panel-cities", "home-settings"].map(id => document.getElementById(id));
+
+    cancelAnimationFrame(frame);
+    if (api?.renderer?.camera) {
+      api.renderer.camera.zoom = 0.8;
+      const origin = { ...api.renderer.camera };
+      const start = performance.now();
+      const drift = time => {
+        if (!home) return;
+        if (!reducedMotion.matches && localStorage.getItem("citybuilder.menuAnimation") !== "false" && !document.body.classList.contains("home-dialog")) {
+          const elapsed = (time - start) / 1000;
+          api.renderer.camera.x = origin.x + Math.sin(elapsed / 25) * 100;
+          api.renderer.camera.y = origin.y + Math.sin(elapsed / 32) * 35;
+        }
+        frame = requestAnimationFrame(drift);
+      };
+      frame = requestAnimationFrame(drift);
+    }
+
+    if (reducedMotion.matches || localStorage.getItem("citybuilder.menuAnimation") === "false") {
+      api?.ui?.handlers?.onSpeed?.(0);
+    } else {
+      api?.ui?.handlers?.onSpeed?.(1);
+    }
+
+    actions.querySelector("button")?.focus();
+  };
+
+  const returnToHome = () => {
+    if (home) return;
+
+    // 1. Dispatch pagehide to trigger auto-save in engine
+    window.dispatchEvent(new Event("pagehide"));
+
+    // 2. Close any open panels, dialogs, and flyouts
+    api?.ui?.closePanels?.();
+    const toClose = [
+      "welcome", "panel-cities", "home-settings", "modal-scenarios",
+      "panel-missions", "panel-budget", "panel-journal", "demand-pop",
+      "maps-menu", "flyout", "query", "view-settings", "panel-cheats",
+      "topbar-popup"
+    ];
+    for (const id of toClose) {
+      const el = document.getElementById(id);
+      if (el) el.hidden = true;
+    }
+
+    // 3. Render fresh start screen
+    renderStartScreen();
+    window.dispatchEvent(new Event("town-returned-home"));
+  };
+
+  function ready(value, initialized = false) {
+    if (!initialized && document.readyState !== "complete") {
+      document.addEventListener("DOMContentLoaded", () => ready(value, true), { once: true });
+      return;
+    }
+    api = value;
+    renderStartScreen();
+
+    const dialogs = ["welcome", "panel-cities", "home-settings", "modal-scenarios"].map(id => document.getElementById(id)).filter(Boolean);
     new MutationObserver(() => {
       if (!home || dialogs.some(dialog => !dialog.hidden)) return;
       document.body.classList.remove("home-dialog");
-      api.ui.handlers.onSpeed(reducedMotion.matches || localStorage.getItem("citybuilder.menuAnimation") === "false" ? 0 : 1);
-      actions.querySelector("button").focus();
+      api?.ui?.handlers?.onSpeed?.(reducedMotion.matches || localStorage.getItem("citybuilder.menuAnimation") === "false" ? 0 : 1);
+      actions?.querySelector("button")?.focus();
     }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["hidden"] });
+
     window.addEventListener("keydown", event => {
-      if (!home) return;
+      if (!home || document.querySelector("#town-confirmation[open]")) return;
       if (event.key === "Escape") { closeDialogs(); event.preventDefault(); event.stopImmediatePropagation(); return; }
       if (!document.body.classList.contains("home-dialog") && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        const choices = [...actions.querySelectorAll("button:not(:disabled)")];
+        const choices = [...(actions ? actions.querySelectorAll("button:not(:disabled)") : [])];
         const current = choices.indexOf(document.activeElement);
         let next;
         if (event.key === "Home") next = 0;
@@ -247,28 +325,13 @@
           const direction = event.key === "ArrowUp" || event.key === "ArrowLeft" ? -1 : 1;
           next = current === -1 ? direction > 0 ? 0 : choices.length - 1 : (current + direction + choices.length) % choices.length;
         }
-        choices[next].focus();
+        choices[next]?.focus();
         return;
       }
 
       if (event.target.getAttribute("role") === "tab") return;
       if (!["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName) && !["Tab", "Enter"].includes(event.key)) event.stopImmediatePropagation();
     }, true);
-    api.renderer.camera.zoom = 0.8;
-    const origin = { ...api.renderer.camera };
-    const start = performance.now();
-    const drift = time => {
-      if (!home) return;
-      if (!reducedMotion.matches && localStorage.getItem("citybuilder.menuAnimation") !== "false" && !document.body.classList.contains("home-dialog")) {
-        const elapsed = (time - start) / 1000;
-        api.renderer.camera.x = origin.x + Math.sin(elapsed / 25) * 100;
-        api.renderer.camera.y = origin.y + Math.sin(elapsed / 32) * 35;
-      }
-      frame = requestAnimationFrame(drift);
-    };
-    frame = requestAnimationFrame(drift);
-    if (reducedMotion.matches || localStorage.getItem("citybuilder.menuAnimation") === "false") api.ui.handlers.onSpeed(0);
-    actions.querySelector("button").focus();
   }
-  window.__townStartScreen = { ready, cityChanged, isHome };
+  window.__townStartScreen = { ready, cityChanged, isHome, returnToHome };
 })();
