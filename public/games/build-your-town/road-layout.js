@@ -22,7 +22,7 @@
           if (!valid) continue;
           const side = across === lower ? 0 : 1;
           const direction = axis === "x" ? side ? 1 : -1 : side ? -1 : 1;
-          return { axis, side, direction, lane: side ? 0.35 : 0.65 };
+          return { axis, side, direction, lane: side ? 0.23 : 0.77 };
         }
       }
     }
@@ -52,12 +52,18 @@
       before.side === layout.side && after.side === layout.side;
   }
 
+  function plantedMedian(city, x, y, layout) {
+    if (!median(city, x, y, layout)) return false;
+    const owner = city.idx(x, y) + (layout.side === 0 ? layout.axis === "x" ? city.size : 1 : 0);
+    return city.medianPlants?.[owner] !== undefined;
+  }
+
   function sprite(ctx, axis, side, direction, project, polygon, grass, planted) {
     grass(ctx, 0);
     const point = (along, across) => axis === "x" ? project(along, across) : project(across, along);
     const band = (low, high, color) => polygon(ctx, [point(0, low), point(1, low), point(1, high), point(0, high)], color);
-    band(side ? 0 : 0.26, side ? 0.74 : 1, "#9aa0a6");
-    band(side ? 0 : 0.3, side ? 0.7 : 1, "#565b61");
+    band(side ? 0 : 0.52, side ? 0.48 : 1, "#9aa0a6");
+    band(side ? 0 : 0.56, side ? 0.44 : 1, "#565b61");
     if (planted) {
       band(side ? 0 : 0.89, side ? 0.11 : 1, "#b6bba5");
       band(side ? 0 : 0.915, side ? 0.085 : 1, "#708d4c");
@@ -66,7 +72,11 @@
     ctx.lineWidth = 1.1;
     ctx.beginPath(); ctx.moveTo(...point(0, side ? planted ? 0.11 : 0.025 : planted ? 0.89 : 0.975));
     ctx.lineTo(...point(1, side ? planted ? 0.11 : 0.025 : planted ? 0.89 : 0.975)); ctx.stroke();
-    const lane = side ? 0.35 : 0.65;
+    const lane = side ? 0.23 : 0.77;
+    for (const along of [0.16, 0.84]) {
+      polygon(ctx, [point(along - 0.055, lane - 0.012), point(along + 0.055, lane - 0.012),
+        point(along + 0.055, lane + 0.012), point(along - 0.055, lane + 0.012)], "#d8c25a");
+    }
     const tip = 0.5 + direction * 0.09;
     polygon(ctx, [point(tip, lane), point(0.5 - direction * 0.04, lane - 0.045),
       point(0.5 - direction * 0.04, lane + 0.045)], "#e9e6da");
@@ -120,9 +130,10 @@
     const tx = index % city.size, ty = Math.floor(index / city.size);
     const layout = wide(city, tx, ty);
     if (!layout || layout.side !== 1 || !median(city, tx, ty, layout)) return;
-    const variant = city.medianPlants?.[index] ?? ((layout.axis === "x" ? tx : ty) + city.seed) % 3;
+    const variant = city.medianPlants?.[index];
+    if (variant === undefined) return;
     const image = renderer.sprites.get(`median:${layout.axis}:${variant}`, scale);
     renderer.ctx.drawImage(image, Math.round(x - 32 * scale), Math.round(y - 112 * scale));
   }
-  window.__roadLayout = { wide, median, canStep, sprite, plantSprite, drawMedian };
+  window.__roadLayout = { wide, median, plantedMedian, canStep, sprite, plantSprite, drawMedian };
 })();

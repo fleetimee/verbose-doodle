@@ -198,8 +198,10 @@
         const fraction = window.__townPedestrians?.limitVehicleStep(renderer, city, vehicle, next) ?? 1;
         vehicle.x += (next.x - vehicle.x) * fraction;
         vehicle.y += (next.y - vehicle.y) * fraction;
-        vehicle.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
-        vehicle.back = (vehicle.axis === "x" ? dx : dy) < 0 ? 1 : 0;
+        if (distance > 0.001) {
+          vehicle.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
+          vehicle.back = (vehicle.axis === "x" ? dx : dy) < 0 ? 1 : 0;
+        }
         if (distance <= travel && fraction === 1) {
           vehicle.step++;
           if (vehicle.step === vehicle.outboundEnd) {
@@ -215,7 +217,7 @@
     }
   }
 
-  function draw(renderer, index, x, y, scale, corners) {
+  function draw(renderer, city, index, x, y, scale, corners) {
     const state = states.get(renderer);
     const vehicles = state?.tiles.get(index);
     if (!vehicles) return;
@@ -232,7 +234,7 @@
       const flashing = vehicle.responding;
       const frame = flashing && !reducedMotion.matches ? Math.floor(state.clock * 4) % 2 + 1 : 0;
       const sprite = renderer.sprites.get(`emergency:${vehicle.kind}:${vehicle.axis || "x"}:${vehicle.back || 0}:${frame}`, scale);
-      renderer.ctx.drawImage(sprite, Math.round(px - 32 * scale), Math.round(py - 128 * scale));
+      renderer.roadVehicleDraws.push({ image: sprite, x: px - 32 * scale, y: py - 128 * scale, tile: index });
     }
   }
 
@@ -309,5 +311,6 @@
       return [`${kind}:${tile(Number(index))}`, until];
     }));
   }
-  window.__serviceVehicles = { update, draw, sprite, rotate };
+  window.__serviceVehicles = { update, draw, sprite, rotate,
+    hasActive: renderer => !reducedMotion.matches && !!states.get(renderer)?.vehicles.size };
 })();

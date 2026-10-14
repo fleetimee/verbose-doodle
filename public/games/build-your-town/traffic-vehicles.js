@@ -46,7 +46,7 @@
         const choices = neighbors(city, from);
         const to = choices[id % choices.length];
         const start = position(city, from, to);
-        state.cars.push({ id, from, to, start, x: start.x, y: start.y, progress: 0, trips: 0, color: id % 8, speed: 0.32 + id % 5 * 0.025 });
+        state.cars.push({ id, from, to, start, x: start.x, y: start.y, progress: 0, trips: 0, color: id % 8, model: id % 9, speed: 0.32 + id % 5 * 0.025 });
         state.sequence = id;
         state.spawnAt = state.clock;
         break;
@@ -63,8 +63,9 @@
       car.progress = Math.min(1, car.progress + delta * car.speed * fraction);
       car.x = car.start.x + (end.x - car.start.x) * car.progress;
       car.y = car.start.y + (end.y - car.start.y) * car.progress;
-      car.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
-      car.back = (car.axis === "x" ? dx : dy) < 0 ? 1 : 0;
+      const headingX = end.x - car.start.x, headingY = end.y - car.start.y;
+      car.axis = Math.abs(headingX) >= Math.abs(headingY) ? "x" : "y";
+      car.back = (car.axis === "x" ? headingX : headingY) < 0 ? 1 : 0;
       if (car.progress >= 1) {
         const nextTile = destination(city, car);
         if (nextTile !== null) {
@@ -92,8 +93,8 @@
       const height = corners[0] * (1 - u) * (1 - v) + corners[1] * u * (1 - v) + corners[2] * u * v + corners[3] * (1 - u) * v;
       const px = x + (u - v) * 32 * scale;
       const py = y + (u + v) * 16 * scale - (height - lowest) * 8 * scale;
-      const image = renderer.sprites.get(`car:${car.axis}:${car.color}:${car.back}:0`, scale);
-      renderer.ctx.drawImage(image, Math.round(px - 32 * scale), Math.round(py - 128 * scale));
+      const image = renderer.sprites.get(`carfleet:${car.model}:${car.axis}:${car.color}:${car.back}`, scale);
+      renderer.roadVehicleDraws.push({ image, x: px - 32 * scale, y: py - 128 * scale, tile: index });
     }
   }
   function rotate(renderer, city, point, tile) {
@@ -109,5 +110,6 @@
       car.to = tile(car.to);
     }
   }
-  window.__trafficVehicles = { update, draw, rotate };
+  window.__trafficVehicles = { update, draw, rotate,
+    hasActive: renderer => !reducedMotion.matches && !!states.get(renderer)?.cars.length };
 })();

@@ -95,6 +95,7 @@
     definitions = buildingDefinitions;
     if (renderer === target) return;
     renderer = target;
+    window.__trainFleet?.bind(target);
     const select = target.screenToTile.bind(target);
     target.screenToTile = (x, y, city = window.__city) => {
       const tile = select(x, y, cityView(city));
