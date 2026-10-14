@@ -10,7 +10,9 @@
   let isMuted = false;
   let isPlayingBgm = false;
   let bgmTimer = null;
-  let twinkleTimer = null;
+  const melodyVoices = new Set();
+  let lastAlert = -Infinity;
+  let lastMilestone = -Infinity;
   let activeBgmVoices = [];
 
   const STORAGE_KEY = "citybuilder.sound";
@@ -31,17 +33,17 @@
 
       // Master SFX Bus
       sfxGain = audioCtx.createGain();
-      sfxGain.gain.setValueAtTime(isMuted ? 0 : 0.35, audioCtx.currentTime);
+      sfxGain.gain.setValueAtTime(isMuted ? 0 : 0.22, audioCtx.currentTime);
       sfxGain.connect(audioCtx.destination);
 
       // Master BGM Bus with Lowpass Filter for warm ambient sound
       bgmFilter = audioCtx.createBiquadFilter();
       bgmFilter.type = "lowpass";
-      bgmFilter.frequency.setValueAtTime(850, audioCtx.currentTime);
-      bgmFilter.Q.setValueAtTime(1.0, audioCtx.currentTime);
+      bgmFilter.frequency.setValueAtTime(1800, audioCtx.currentTime);
+      bgmFilter.Q.setValueAtTime(0.5, audioCtx.currentTime);
 
       bgmGain = audioCtx.createGain();
-      bgmGain.gain.setValueAtTime(isMuted ? 0 : 0.08, audioCtx.currentTime);
+      bgmGain.gain.setValueAtTime(isMuted ? 0 : 0.2, audioCtx.currentTime);
       bgmFilter.connect(bgmGain);
       bgmGain.connect(audioCtx.destination);
 
@@ -61,7 +63,7 @@
   };
 
   const startBgmIfNeeded = () => {
-    if (isPlayingBgm || isMuted) return;
+    if (isPlayingBgm || isMuted || document.hidden) return;
     const ctx = getAudioContext();
     if (!ctx) return;
     isPlayingBgm = true;
@@ -199,32 +201,14 @@
     osc.stop(t + 0.2);
   };
 
-  // SFX: Monthly Tax Income (Dual coin bell chime)
-  const playMoney = () => {
-    const ctx = getAudioContext();
-    if (!ctx || isMuted) return;
-    const t = ctx.currentTime;
-
-    [987.77, 1318.51].forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(freq, t + idx * 0.04);
-      gain.gain.setValueAtTime(0.25, t + idx * 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.04 + 0.45);
-      osc.connect(gain);
-      gain.connect(sfxGain);
-      osc.start(t + idx * 0.04);
-      osc.stop(t + idx * 0.04 + 0.48);
-    });
-  };
-
   // SFX: Milestone / Reward Unlock (Ascending major triad)
   const playMilestone = () => {
     const ctx = getAudioContext();
     if (!ctx || isMuted) return;
     const t = ctx.currentTime;
-    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+    if (ctx.currentTime - lastMilestone < 4) return;
+    lastMilestone = ctx.currentTime;
+    const notes = [392, 493.88, 587.33];
 
     notes.forEach((freq, idx) => {
       const start = t + idx * 0.09;
@@ -232,7 +216,7 @@
       const gain = ctx.createGain();
       osc.type = "triangle";
       osc.frequency.setValueAtTime(freq, start);
-      gain.gain.setValueAtTime(0.35, start);
+      gain.gain.setValueAtTime(0.16, start);
       gain.gain.exponentialRampToValueAtTime(0.001, start + 0.5);
       osc.connect(gain);
       gain.connect(sfxGain);
@@ -241,29 +225,24 @@
     });
   };
 
-  // SFX: Disaster Alert Siren (Fire / Flood)
+  // A quiet two-note cue, with a cooldown for recurring warnings.
   const playAlert = () => {
     const ctx = getAudioContext();
-    if (!ctx || isMuted) return;
-    const t = ctx.currentTime;
-    const pitches = [740, 550, 740, 550];
-
-    pitches.forEach((freq, idx) => {
-      const start = t + idx * 0.12;
+    if (!ctx || isMuted || document.hidden || ctx.currentTime - lastAlert < 20) return;
+    lastAlert = ctx.currentTime;
+    [392, 329.63].forEach((frequency, index) => {
+      const start = ctx.currentTime + index * 0.22;
       const osc = ctx.createOscillator();
-      const filter = ctx.createBiquadFilter();
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(1200, start);
       const gain = ctx.createGain();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(freq, start);
-      gain.gain.setValueAtTime(0.25, start);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.11);
-      osc.connect(filter);
-      filter.connect(gain);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.linearRampToValueAtTime(0.14, start + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.55);
+      osc.connect(gain);
       gain.connect(sfxGain);
       osc.start(start);
-      osc.stop(start + 0.12);
+      osc.stop(start + 0.6);
     });
   };
 
@@ -286,41 +265,10 @@
     osc.stop(t + 0.04);
   };
 
-  // SFX: Action Rejected / Not enough money
-  const playReject = () => {
-    const ctx = getAudioContext();
-    if (!ctx || isMuted) return;
-    const t = ctx.currentTime;
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "square";
-    osc.frequency.setValueAtTime(140, t);
-    gain.gain.setValueAtTime(0.18, t);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-    osc.connect(gain);
-    gain.connect(sfxGain);
-    osc.start(t);
-    osc.stop(t + 0.13);
-  };
-
   // ----------------------------------------------------
   // PROCEDURAL AMBIENT MUSIC ENGINE (BGM)
-  // Generative relaxing peaceful chords + delicate chime sparkles
+  // Slow melody, warm chords, and soft plucked accompaniment
   // ----------------------------------------------------
-
-  const CHORDS = [
-    // Fmaj9: F3, A3, C4, E4, G4
-    [174.61, 220.0, 261.63, 329.63, 392.0],
-    // G6: G3, B3, D4, E4
-    [196.0, 246.94, 293.66, 329.63],
-    // Em7: E3, G3, B3, D4
-    [164.81, 196.0, 246.94, 293.66],
-    // Am9: A3, C4, E4, G4, B4
-    [220.0, 261.63, 329.63, 392.0, 493.88],
-  ];
-
-  let currentChordIndex = 0;
 
   const playAmbientPad = (frequencies, durationSec) => {
     const ctx = getAudioContext();
@@ -328,7 +276,7 @@
     const now = ctx.currentTime;
 
     // Fade out previous voices
-    activeBgmVoices.forEach(({ osc, gain, stopTime }) => {
+    activeBgmVoices.forEach(({ osc, gain }) => {
       try {
         gain.gain.cancelScheduledValues(now);
         gain.gain.setValueAtTime(gain.gain.value, now);
@@ -358,6 +306,7 @@
 
       osc.connect(gain);
       gain.connect(bgmFilter);
+      osc.onended = () => { osc.disconnect(); gain.disconnect(); };
       osc.start(now);
       osc.stop(now + durationSec + 0.2);
 
@@ -365,73 +314,91 @@
     });
   };
 
-  const playTwinkleChime = () => {
-    const ctx = getAudioContext();
-    if (!ctx || isMuted) return;
-    const now = ctx.currentTime;
-
-    // Melodic pentatonic notes
-    const PENTATONIC = [
-      523.25, 587.33, 659.25, 783.99, 880.0, 987.77, 1046.5, 1174.66, 1318.51,
-    ];
-    const freq = PENTATONIC[Math.floor(Math.random() * PENTATONIC.length)];
-
+  const playMusicNote = (frequency, start, length, level, plucked = false) => {
+    const ctx = audioCtx;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, now);
-
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.035, now + 0.04);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
-
+    osc.type = plucked ? "triangle" : "sine";
+    osc.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.linearRampToValueAtTime(level, start + (plucked ? 0.018 : 0.08));
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + length);
     osc.connect(gain);
     gain.connect(bgmFilter);
-    osc.start(now);
-    osc.stop(now + 1.9);
+    const voice = { osc, gain };
+    melodyVoices.add(voice);
+    osc.onended = () => {
+      melodyVoices.delete(voice);
+      osc.disconnect();
+      gain.disconnect();
+    };
+    osc.start(start);
+    osc.stop(start + length + 0.05);
   };
 
+  let musicMode = null;
+  let trackIndex = -1;
+  let phraseIndex = 0;
+  const pitch = midi => 440 * 2 ** ((midi - 69) / 12);
+
   const startAmbientEngine = () => {
-    if (bgmTimer) clearInterval(bgmTimer);
-    if (twinkleTimer) clearInterval(twinkleTimer);
-
-    const stepChord = () => {
-      const chord = CHORDS[currentChordIndex % CHORDS.length];
-      currentChordIndex++;
-      playAmbientPad(chord, 14);
+    clearTimeout(bgmTimer);
+    const mode = document.body.classList.contains("town-home") ? "menu" : "city";
+    const tracks = window.__townMusic[mode];
+    if (musicMode !== mode) {
+      musicMode = mode;
+      trackIndex = Math.floor(Math.random() * tracks.length);
+      phraseIndex = 0;
+    }
+    const stepPhrase = () => {
+      if (isMuted || document.hidden) return;
+      const track = tracks[trackIndex];
+      const beatLength = 60 / track.tempo;
+      const section = phraseIndex % track.phrases.length;
+      const answering = phraseIndex >= track.phrases.length;
+      const chord = track.chords[section];
+      const now = audioCtx.currentTime + 0.05;
+      playAmbientPad(chord.map(pitch), beatLength * 8 + 1);
+      const melody = answering ? track.answers[section] : track.phrases[section];
+      for (const [beat, note] of melody) {
+        playMusicNote(pitch(note), now + beat * beatLength,
+          beatLength * (mode === "menu" ? 2 : 1.6), mode === "menu" ? 0.065 : 0.085);
+      }
+      const accompaniment = mode === "menu" ? [0, 4] : [0, 2, 4, 6];
+      for (const [index, beat] of accompaniment.entries()) {
+        const note = chord[index % chord.length];
+        playMusicNote(pitch(note), now + beat * beatLength, beatLength * 1.4, 0.035, true);
+      }
+      if (mode === "city") {
+        playMusicNote(pitch(chord[0] - 12), now, beatLength * 3, 0.045);
+      }
+      phraseIndex++;
+      if (phraseIndex === track.phrases.length * 2) {
+        phraseIndex = 0;
+        trackIndex = (trackIndex + 1) % tracks.length;
+      }
+      bgmTimer = setTimeout(stepPhrase, beatLength * 8 * 1000);
     };
-
-    stepChord();
-    bgmTimer = setInterval(stepChord, 13000);
-
-    // Random melodic twinkles every 4-7 seconds
-    const scheduleTwinkle = () => {
-      const nextDelay = 3500 + Math.random() * 4000;
-      twinkleTimer = setTimeout(() => {
-        if (!isMuted) playTwinkleChime();
-        scheduleTwinkle();
-      }, nextDelay);
-    };
-    scheduleTwinkle();
+    stepPhrase();
   };
 
   const stopAmbientEngine = () => {
-    if (bgmTimer) clearInterval(bgmTimer);
-    if (twinkleTimer) clearTimeout(twinkleTimer);
+    if (bgmTimer) clearTimeout(bgmTimer);
     bgmTimer = null;
-    twinkleTimer = null;
     isPlayingBgm = false;
 
     if (audioCtx) {
       const now = audioCtx.currentTime;
-      activeBgmVoices.forEach(({ osc, gain }) => {
+      [...activeBgmVoices, ...melodyVoices].forEach(({ osc, gain }) => {
         try {
           gain.gain.cancelScheduledValues(now);
+          gain.gain.setValueAtTime(gain.gain.value, now);
           gain.gain.linearRampToValueAtTime(0.0001, now + 0.8);
           osc.stop(now + 0.9);
         } catch {}
       });
       activeBgmVoices = [];
+      melodyVoices.clear();
     }
   };
 
@@ -450,11 +417,11 @@
       const now = ctx.currentTime;
       if (sfxGain) {
         sfxGain.gain.cancelScheduledValues(now);
-        sfxGain.gain.setValueAtTime(isMuted ? 0 : 0.35, now);
+        sfxGain.gain.setValueAtTime(isMuted ? 0 : 0.22, now);
       }
       if (bgmGain) {
         bgmGain.gain.cancelScheduledValues(now);
-        bgmGain.gain.setValueAtTime(isMuted ? 0 : 0.08, now);
+        bgmGain.gain.setValueAtTime(isMuted ? 0 : 0.2, now);
       }
     }
 
@@ -489,6 +456,19 @@
     };
     window.addEventListener("pointerdown", unlock, { capture: true });
     window.addEventListener("keydown", unlock, { capture: true });
+
+    const changeMusicScene = () => {
+      if (!isPlayingBgm) return;
+      stopAmbientEngine();
+      startBgmIfNeeded();
+    };
+    window.addEventListener("town-city-entered", changeMusicScene);
+    window.addEventListener("town-returned-home", changeMusicScene);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopAmbientEngine();
+      else if (audioCtx) startBgmIfNeeded();
+    });
 
     // 2. Sound Button in Topbar
     const soundBtn = document.getElementById("btn-sound");
@@ -527,7 +507,13 @@
     });
 
     // 4. Map interaction and placement sound detection
-    const map = document.getElementById("map");
+    let lastMapAction = -Infinity;
+    document.getElementById("map")?.addEventListener("pointerdown", () => {
+      lastMapAction = performance.now();
+    });
+    document.getElementById("map")?.addEventListener("pointerup", () => {
+      lastMapAction = performance.now();
+    });
     const moneyEl = document.getElementById("money");
     const dateEl = document.getElementById("date");
     const toastEl = document.getElementById("toast");
@@ -578,10 +564,7 @@
           if (monthPassed) {
             // Month turned over
             lastDate = currentDate;
-            if (delta > 0) {
-              playMoney(); // Tax revenue collected!
-            }
-          } else if (delta < 0) {
+          } else if (delta < 0 && performance.now() - lastMapAction < 600 && !document.body.classList.contains("town-home")) {
             // Money spent on player action (placement, bulldoze, etc.)
             const tool = getActiveTool();
             if (tool === "bulldoze") {
@@ -645,12 +628,6 @@
           playAlert();
         } else if (toastEl.classList.contains("good")) {
           playMilestone();
-        } else {
-          // If placement error or general info
-          const currentMoney = parseMoney(moneyEl?.textContent);
-          if (currentMoney === lastMoney) {
-            playReject();
-          }
         }
       });
 
@@ -673,7 +650,7 @@
             const now = ctx.currentTime;
             bgmFilter.frequency.cancelScheduledValues(now);
             bgmFilter.frequency.linearRampToValueAtTime(
-              pauseBtn ? 380 : 850,
+              pauseBtn ? 1100 : 1800,
               now + 0.3
             );
           }
