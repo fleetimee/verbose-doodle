@@ -1,6 +1,6 @@
 (() => {
   const road = (city, x, y, height) => city.inBounds(x, y) &&
-    city.overlay[city.idx(x, y)] === 2 && !city.rail[city.idx(x, y)] &&
+    city.overlay[city.idx(x, y)] === 2 &&
     city.terrain[city.idx(x, y)] === 0 && city.isFlat(x, y) && city.base(x, y) === height;
 
   function wide(city, x, y) {
@@ -16,13 +16,19 @@
         for (let start = along - 2; start <= along; start++) {
           let valid = true;
           for (let a = start; a < start + 3; a++) {
-            if (!exists(a, lower) || !exists(a, lower + 1) ||
-                (exists(a, lower - 1) || exists(a, lower + 2))) { valid = false; break; }
+            if (!exists(a, lower) || !exists(a, lower + 1)) { valid = false; break; }
           }
           if (!valid) continue;
+          // A parallel third lane is a road block, not a two-lane corridor.
+          if ([lower - 1, lower + 2].some(b =>
+            [start, start + 1, start + 2].every(a => exists(a, b)))) continue;
           const side = across === lower ? 0 : 1;
           const direction = axis === "x" ? side ? 1 : -1 : side ? -1 : 1;
-          return { axis, side, direction, lane: side ? 0.23 : 0.77 };
+          const junction = exists(along, lower - 1) || exists(along, lower + 2);
+          const broadJunction = junction && [-1, 1].some(delta =>
+            exists(along + delta, lower - 1) || exists(along + delta, lower + 2));
+          const branchSide = exists(along + 1, lower - 1) || exists(along + 1, lower + 2) ? 0 : 1;
+          return { axis, side, direction, lane: side ? 0.23 : 0.77, junction, broadJunction, branchSide };
         }
       }
     }
@@ -32,23 +38,24 @@
   function canStep(city, from, to) {
     const x = from % city.size, y = Math.floor(from / city.size);
     const layout = wide(city, x, y);
-    if (!layout) return true;
+    if (!layout || layout.junction) return true;
     const dx = to % city.size - x, dy = Math.floor(to / city.size) - y;
     const along = layout.axis === "x" ? dx : dy;
     if (along) return along * layout.direction > 0;
     const nx = x + (layout.axis === "x" ? layout.direction : 0);
     const ny = y + (layout.axis === "y" ? layout.direction : 0);
     const ahead = wide(city, nx, ny);
-    return !ahead || ahead.axis !== layout.axis || ahead.side !== layout.side;
+    return !ahead || ahead.junction || ahead.axis !== layout.axis || ahead.side !== layout.side;
   }
 
   function median(city, x, y, layout) {
-    if (!layout) return false;
+    if (!layout || layout.junction || city.rail[city.idx(x, y)]) return false;
     const dx = layout.axis === "x" ? 1 : 0;
     const dy = layout.axis === "y" ? 1 : 0;
     const before = wide(city, x - dx, y - dy);
     const after = wide(city, x + dx, y + dy);
     return before?.axis === layout.axis && after?.axis === layout.axis &&
+      !before.junction && !after.junction &&
       before.side === layout.side && after.side === layout.side;
   }
 
@@ -58,12 +65,49 @@
     return city.medianPlants?.[owner] !== undefined;
   }
 
-  function sprite(ctx, axis, side, direction, project, polygon, grass, planted) {
+  function sprite(ctx, axis, side, direction, project, polygon, grass, planted, junction = false, mask = 0, signal, broadJunction = false, signalMask = mask, branchSide = 0) {
     grass(ctx, 0);
     const point = (along, across) => axis === "x" ? project(along, across) : project(across, along);
-    const band = (low, high, color) => polygon(ctx, [point(0, low), point(1, low), point(1, high), point(0, high)], color);
+    const band = (low, high, color) => {
+      const curb = color === "#9aa0a6";
+      const branchLow = branchSide ? 0 : curb ? 0.52 : 0.56;
+      const branchHigh = branchSide ? curb ? 0.48 : 0.44 : 1;
+      const start = broadJunction && !(mask & (axis === "x" ? 8 : 1)) ? branchLow : 0;
+      const end = broadJunction && !(mask & (axis === "x" ? 2 : 4)) ? branchHigh : 1;
+      polygon(ctx, [point(start, low), point(end, low), point(end, high), point(start, high)], color);
+    };
     band(side ? 0 : 0.52, side ? 0.48 : 1, "#9aa0a6");
     band(side ? 0 : 0.56, side ? 0.44 : 1, "#565b61");
+    if (junction) {
+      const outerArm = axis === "x" ? side ? 4 : 1 : side ? 2 : 8;
+      const connected = (mask & outerArm) !== 0;
+      const rectangle = (a, b, low, high, color) => polygon(ctx,
+        [point(a, low), point(b, low), point(b, high), point(a, high)], color);
+      if (broadJunction) {
+        const low = branchSide ? 0 : 0.56;
+        const high = branchSide ? 0.44 : 1;
+        rectangle(branchSide ? 0 : 0.52, branchSide ? 0.48 : 1,
+          side ? 0 : connected ? 0 : 0.52, side ? connected ? 1 : 0.48 : 1, "#9aa0a6");
+        rectangle(low, high, side ? 0 : connected ? 0 : 0.56,
+          side ? connected ? 1 : 0.44 : 1, "#565b61");
+        if (connected && (signalMask & outerArm)) {
+          const stop = side ? 0.8 : 0.2;
+          rectangle(low + 0.04, high - 0.04, stop - 0.012, stop + 0.012, "#f2f2f2");
+          signal?.(ctx, outerArm, branchSide ? 0.23 : 0.77);
+        }
+        return;
+      }
+      // Join the offset lanes across the median, extending only to connected arms.
+      rectangle(0.26, 0.74, side ? 0 : connected ? 0 : 0.52,
+        side ? connected ? 1 : 0.48 : 1, "#9aa0a6");
+      rectangle(0.3, 0.7, side ? 0 : connected ? 0 : 0.56,
+        side ? connected ? 1 : 0.44 : 1, "#565b61");
+      const lane = side ? 0.23 : 0.77;
+      const stop = direction > 0 ? 0.25 : 0.75;
+      rectangle(stop - 0.012, stop + 0.012, lane - 0.16, lane + 0.16, "#f2f2f2");
+      if (connected) signal?.(ctx, outerArm);
+      return;
+    }
     if (planted) {
       band(side ? 0 : 0.89, side ? 0.11 : 1, "#b6bba5");
       band(side ? 0 : 0.915, side ? 0.085 : 1, "#708d4c");
@@ -135,5 +179,13 @@
     const image = renderer.sprites.get(`median:${layout.axis}:${variant}`, scale);
     renderer.ctx.drawImage(image, Math.round(x - 32 * scale), Math.round(y - 112 * scale));
   }
-  window.__roadLayout = { wide, median, plantedMedian, canStep, sprite, plantSprite, drawMedian };
+  function signals(city, x, y) {
+    let mask = 0;
+    for (const [dx, dy, arm] of [[0, -1, 1], [1, 0, 2], [0, 1, 4], [-1, 0, 8]]) {
+      const neighbor = wide(city, x + dx, y + dy);
+      if (!neighbor?.junction) mask |= arm;
+    }
+    return mask;
+  }
+  window.__roadLayout = { signals, wide, median, plantedMedian, canStep, sprite, plantSprite, drawMedian };
 })();

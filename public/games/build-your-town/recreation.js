@@ -15,10 +15,25 @@
     messages["query.attractionClosed"] = ["Attraction fermée : vérifiez l'électricité, la route, le littoral et les dégâts.", "Attraction closed: check power, road access, shoreline and damage."];
   };
 
+  const structRoadDist = (city, building, size = 1) => {
+    let min = 255;
+    for (let y = building.y; y < building.y + size; y++) {
+      for (let x = building.x; x < building.x + size; x++) {
+        if (city.inBounds(x, y)) {
+          const dist = city.roadDist[city.idx(x, y)];
+          if (dist < min) min = dist;
+        }
+      }
+    }
+    return min;
+  };
+
   const operating = (city, building, definition) => {
     const index = city.idx(building.x, building.y);
     if (definition.consumes && !city.powered[index]) return false;
-    if (definition.requiresRoad && city.roadDist[index] === 255) return false;
+    const roadDist = structRoadDist(city, building, definition.size);
+    if (definition.requiresRoad && roadDist === 255) return false;
+    if (city.roadDist[index] > roadDist) city.roadDist[index] = roadDist;
     let shore = !definition.needsShore;
     for (let y = building.y; y < building.y + definition.size; y++) {
       for (let x = building.x; x < building.x + definition.size; x++) {
@@ -70,7 +85,9 @@
     for (const building of city.structs.values()) {
       const definition = definitions[building.type];
       const index = city.idx(building.x, building.y);
-      if (!definition.pop || !city.powered[index] || (definition.requiresRoad && city.roadDist[index] === 255)) continue;
+      const roadDist = structRoadDist(city, building, definition.size);
+      if (city.roadDist[index] > roadDist) city.roadDist[index] = roadDist;
+      if (!definition.pop || !city.powered[index] || (definition.requiresRoad && roadDist === 255)) continue;
       let score = 0;
       for (let y = building.y; y < building.y + definition.size; y++) {
         for (let x = building.x; x < building.x + definition.size; x++) score += city.fun?.[city.idx(x, y)] ?? 0;

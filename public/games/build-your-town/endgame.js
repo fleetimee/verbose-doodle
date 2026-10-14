@@ -287,7 +287,27 @@
     const expenses = ["roads", "power", "water", "police", "fire", "education", "health", "parks", "transport", "ordinances", "interest"].reduce((sum, key) => sum + (b[key] || 0), 0);
     return Math.round(income - expenses);
   };
-  const active = (city, type) => [...city.structs.values()].filter((building) => building.type === type && city.powered[city.idx(building.x, building.y)] && (!BUILDINGS.find((item) => item.type === type)?.requiresRoad || city.roadDist[city.idx(building.x, building.y)] !== 255)).length;
+  const structRoadDist = (city, building, size = 1) => {
+    let min = 255;
+    for (let y = building.y; y < building.y + size; y++) {
+      for (let x = building.x; x < building.x + size; x++) {
+        if (city.inBounds(x, y)) {
+          const dist = city.roadDist[city.idx(x, y)];
+          if (dist < min) min = dist;
+        }
+      }
+    }
+    return min;
+  };
+  const active = (city, type) => [...city.structs.values()].filter((building) => {
+    if (building.type !== type) return false;
+    const def = BUILDINGS.find((item) => item.type === type);
+    const size = def?.size || 1;
+    const rDist = structRoadDist(city, building, size);
+    const idx = city.idx(building.x, building.y);
+    if (city.roadDist[idx] > rDist) city.roadDist[idx] = rDist;
+    return city.powered[idx] && (!def?.requiresRoad || rDist !== 255);
+  }).length;
   const result = (done, cur, target, label) => ({ done, cur, target, label });
   const mission = (id, en, fr, descEn, descFr, reward, check) => ({ id, title: { en, fr }, desc: { en: descEn, fr: descFr }, reward, rewardLabel: `+$${reward.toLocaleString("en-US")}`, check });
   const ERAS = [
