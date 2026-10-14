@@ -6,11 +6,12 @@
   let sfxGain = null;
   let bgmGain = null;
   let bgmFilter = null;
+  let musicWaves = null;
   let noiseBuffer = null;
   let isMuted = false;
   let isPlayingBgm = false;
   let bgmTimer = null;
-  const melodyVoices = new Set();
+  const bgmVoices = new Set();
   let lastAlert = -Infinity;
   let lastMilestone = -Infinity;
   let activeBgmVoices = [];
@@ -33,7 +34,7 @@
 
       // Master SFX Bus
       sfxGain = audioCtx.createGain();
-      sfxGain.gain.setValueAtTime(isMuted ? 0 : 0.22, audioCtx.currentTime);
+      sfxGain.gain.setValueAtTime(isMuted || document.hidden ? 0 : 0.22, audioCtx.currentTime);
       sfxGain.connect(audioCtx.destination);
 
       // Master BGM Bus with Lowpass Filter for warm ambient sound
@@ -43,9 +44,39 @@
       bgmFilter.Q.setValueAtTime(0.5, audioCtx.currentTime);
 
       bgmGain = audioCtx.createGain();
-      bgmGain.gain.setValueAtTime(isMuted ? 0 : 0.2, audioCtx.currentTime);
+      bgmGain.gain.setValueAtTime(isMuted || document.hidden ? 0 : 0.2, audioCtx.currentTime);
       bgmFilter.connect(bgmGain);
       bgmGain.connect(audioCtx.destination);
+
+      // A short stereo room gives the synthesized ensemble depth. The wet path
+      // stays inside the music bus so the existing mute control silences it too.
+      const room = audioCtx.createConvolver();
+      const roomLength = Math.floor(audioCtx.sampleRate * 1.8);
+      const impulse = audioCtx.createBuffer(2, roomLength, audioCtx.sampleRate);
+      for (let channel = 0; channel < 2; channel++) {
+        const samples = impulse.getChannelData(channel);
+        for (let i = 0; i < roomLength; i++) {
+          samples[i] = (Math.random() * 2 - 1) * (1 - i / roomLength) ** 3;
+        }
+      }
+      room.buffer = impulse;
+      const roomGain = audioCtx.createGain();
+      roomGain.gain.value = 0.18;
+      bgmFilter.connect(room);
+      room.connect(roomGain);
+      roomGain.connect(bgmGain);
+
+      // Gentle harmonic colors, generated once rather than loading sample files.
+      musicWaves = {};
+      for (const [name, harmonics] of Object.entries({
+        piano: [0, 1, 0.32, 0.14, 0.06, 0.025],
+        lead: [0, 1, 0.14, 0.05],
+        bell: [0, 1, 0, 0.22, 0, 0.08],
+      })) {
+        musicWaves[name] = audioCtx.createPeriodicWave(
+          new Float32Array(harmonics.length), new Float32Array(harmonics)
+        );
+      }
 
       // Pre-generate 1 second of noise buffer for demolition / textures
       const bufferSize = audioCtx.sampleRate;
@@ -56,7 +87,7 @@
       }
     }
 
-    if (audioCtx.state === "suspended") {
+    if (audioCtx.state === "suspended" && !document.hidden) {
       audioCtx.resume();
     }
     return audioCtx;
@@ -267,8 +298,30 @@
 
   // ----------------------------------------------------
   // PROCEDURAL AMBIENT MUSIC ENGINE (BGM)
-  // Slow melody, warm chords, and soft plucked accompaniment
+  // Open harmony, piano ostinatos, and slowly developing city themes
   // ----------------------------------------------------
+
+  const releaseMusicVoice = (voice, now, fade) => {
+    const { osc, gain, start, level } = voice;
+    if (start >= now) {
+      // Future voices still have the GainNode default of 1. Never replace their
+      // quiet scheduled attack with that value when cancelling playback.
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(0, now);
+      osc.stop(now);
+      voice.dispose();
+      return;
+    }
+    if (gain.gain.cancelAndHoldAtTime) gain.gain.cancelAndHoldAtTime(now);
+    else {
+      const current = Math.min(level, gain.gain.value);
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(current, now);
+    }
+    gain.gain.linearRampToValueAtTime(0.0001, now + fade);
+    osc.stop(now + fade + 0.01);
+    if (fade === 0) voice.dispose();
+  };
 
   const playAmbientPad = (frequencies, durationSec) => {
     const ctx = getAudioContext();
@@ -276,12 +329,9 @@
     const now = ctx.currentTime;
 
     // Fade out previous voices
-    activeBgmVoices.forEach(({ osc, gain }) => {
+    activeBgmVoices.forEach(voice => {
       try {
-        gain.gain.cancelScheduledValues(now);
-        gain.gain.setValueAtTime(gain.gain.value, now);
-        gain.gain.linearRampToValueAtTime(0.0001, now + 2.5);
-        osc.stop(now + 2.6);
+        releaseMusicVoice(voice, now, 2.5);
       } catch {}
     });
     activeBgmVoices = [];
@@ -298,40 +348,57 @@
       // Slight detune for analog warmth
       osc.detune.setValueAtTime((Math.random() - 0.5) * 6, now);
 
-      const voiceMax = 0.06 / frequencies.length;
+      const voiceMax = (musicMode === "city" ? 0.1 : 0.06) / frequencies.length;
       gain.gain.setValueAtTime(0.0001, now);
       gain.gain.linearRampToValueAtTime(voiceMax, now + 2.8);
       gain.gain.setValueAtTime(voiceMax, now + durationSec - 2.8);
       gain.gain.linearRampToValueAtTime(0.0001, now + durationSec);
 
       osc.connect(gain);
-      gain.connect(bgmFilter);
-      osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+      const pan = ctx.createStereoPanner();
+      pan.pan.value = (idx / (frequencies.length - 1) - 0.5) * 0.8;
+      gain.connect(pan);
+      pan.connect(bgmFilter);
+      const voice = { osc, gain, start: now, level: voiceMax, dispose: () => {
+        bgmVoices.delete(voice);
+        osc.disconnect(); gain.disconnect(); pan.disconnect();
+      } };
+      bgmVoices.add(voice);
+      osc.onended = voice.dispose;
       osc.start(now);
       osc.stop(now + durationSec + 0.2);
 
-      activeBgmVoices.push({ osc, gain });
+      activeBgmVoices.push(voice);
     });
   };
 
-  const playMusicNote = (frequency, start, length, level, plucked = false) => {
+  const playMusicNote = (frequency, start, length, level, instrument = "soft", position = 0) => {
     const ctx = audioCtx;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.type = plucked ? "triangle" : "sine";
+    if (musicWaves[instrument]) osc.setPeriodicWave(musicWaves[instrument]);
+    else osc.type = instrument === "pluck" ? "triangle" : "sine";
     osc.frequency.setValueAtTime(frequency, start);
     gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.linearRampToValueAtTime(level, start + (plucked ? 0.018 : 0.08));
+    const attack = instrument === "lead" ? 0.14 : instrument === "soft" ? 0.08 : 0.012;
+    gain.gain.linearRampToValueAtTime(level, start + Math.min(attack, length * 0.2));
+    if (instrument === "lead") {
+      gain.gain.linearRampToValueAtTime(level * 0.75, start + length * 0.65);
+    }
     gain.gain.exponentialRampToValueAtTime(0.0001, start + length);
     osc.connect(gain);
-    gain.connect(bgmFilter);
-    const voice = { osc, gain };
-    melodyVoices.add(voice);
-    osc.onended = () => {
-      melodyVoices.delete(voice);
+    const pan = ctx.createStereoPanner();
+    pan.pan.value = position;
+    gain.connect(pan);
+    pan.connect(bgmFilter);
+    const voice = { osc, gain, start, level, dispose: () => {
+      bgmVoices.delete(voice);
       osc.disconnect();
       gain.disconnect();
-    };
+      pan.disconnect();
+    } };
+    bgmVoices.add(voice);
+    osc.onended = voice.dispose;
     osc.start(start);
     osc.stop(start + length + 0.05);
   };
@@ -354,51 +421,68 @@
       if (isMuted || document.hidden) return;
       const track = tracks[trackIndex];
       const beatLength = 60 / track.tempo;
+      const phraseBeats = track.beats || 8;
       const section = phraseIndex % track.phrases.length;
       const answering = phraseIndex >= track.phrases.length;
       const chord = track.chords[section];
       const now = audioCtx.currentTime + 0.05;
-      playAmbientPad(chord.map(pitch), beatLength * 8 + 1);
+      // Each track grows from a restrained opening into a fuller second pass,
+      // then thins at the cadence before the next track arrives.
+      const energy = phraseIndex < 2 ? 0.6 : section === track.phrases.length - 1 ? 0.65 : answering ? 1 : 0.8;
+      playAmbientPad(chord.map(pitch), beatLength * phraseBeats + 1);
       const melody = answering ? track.answers[section] : track.phrases[section];
-      for (const [beat, note] of melody) {
+      for (const [beat, note, length = mode === "menu" ? 2 : 1.6] of melody) {
         playMusicNote(pitch(note), now + beat * beatLength,
-          beatLength * (mode === "menu" ? 2 : 1.6), mode === "menu" ? 0.065 : 0.085);
+          beatLength * length, mode === "menu" ? 0.065 : 0.07 * energy,
+          mode === "city" ? "lead" : "soft", mode === "city" ? 0.12 : 0);
       }
-      const accompaniment = mode === "menu" ? [0, 4] : [0, 2, 4, 6];
-      for (const [index, beat] of accompaniment.entries()) {
-        const note = chord[index % chord.length];
-        playMusicNote(pitch(note), now + beat * beatLength, beatLength * 1.4, 0.035, true);
-      }
-      if (mode === "city") {
-        playMusicNote(pitch(chord[0] - 12), now, beatLength * 3, 0.045);
+      if (mode === "menu") {
+        for (const [index, beat] of [0, 4].entries()) {
+          playMusicNote(pitch(chord[index]), now + beat * beatLength, beatLength * 1.4, 0.035, "pluck");
+        }
+      } else {
+        // Interlocking piano figures replace the constant offbeat bounce.
+        const spacing = energy < 0.7 ? 1 : 0.5;
+        for (let beat = 0, index = 0; beat < phraseBeats; beat += spacing, index++) {
+          const note = chord[track.arpeggio[index % track.arpeggio.length]] + 12;
+          playMusicNote(pitch(note), now + beat * beatLength, beatLength * 1.8,
+            (index % 4 === 0 ? 0.035 : 0.023) * energy, "piano", -0.3);
+        }
+        for (let beat = 0; beat < phraseBeats; beat += 4) {
+          const note = beat % 8 === 0 ? chord[0] - 12 : chord[0];
+          playMusicNote(pitch(note), now + beat * beatLength, beatLength * 3.5, 0.055 * energy);
+        }
+        if (answering && energy > 0.7) {
+          for (const [beat, note] of [[2.5, chord[2] + 24], [10.5, chord[1] + 24]]) {
+            playMusicNote(pitch(note), now + beat * beatLength, beatLength * 2.5, 0.016, "bell", 0.4);
+          }
+        }
       }
       phraseIndex++;
       if (phraseIndex === track.phrases.length * 2) {
         phraseIndex = 0;
         trackIndex = (trackIndex + 1) % tracks.length;
       }
-      bgmTimer = setTimeout(stepPhrase, beatLength * 8 * 1000);
+      bgmTimer = setTimeout(stepPhrase, beatLength * phraseBeats * 1000);
     };
     stepPhrase();
   };
 
-  const stopAmbientEngine = () => {
+  const stopAmbientEngine = (immediate = false) => {
     if (bgmTimer) clearTimeout(bgmTimer);
     bgmTimer = null;
     isPlayingBgm = false;
 
     if (audioCtx) {
       const now = audioCtx.currentTime;
-      [...activeBgmVoices, ...melodyVoices].forEach(({ osc, gain }) => {
+      // Include pads already fading from earlier chords, keeping rapid tab and
+      // scene changes from leaving untracked music behind.
+      [...bgmVoices].forEach(voice => {
         try {
-          gain.gain.cancelScheduledValues(now);
-          gain.gain.setValueAtTime(gain.gain.value, now);
-          gain.gain.linearRampToValueAtTime(0.0001, now + 0.8);
-          osc.stop(now + 0.9);
+          releaseMusicVoice(voice, now, immediate ? 0 : 0.8);
         } catch {}
       });
       activeBgmVoices = [];
-      melodyVoices.clear();
     }
   };
 
@@ -417,16 +501,16 @@
       const now = ctx.currentTime;
       if (sfxGain) {
         sfxGain.gain.cancelScheduledValues(now);
-        sfxGain.gain.setValueAtTime(isMuted ? 0 : 0.22, now);
+        sfxGain.gain.setValueAtTime(isMuted || document.hidden ? 0 : 0.22, now);
       }
       if (bgmGain) {
         bgmGain.gain.cancelScheduledValues(now);
-        bgmGain.gain.setValueAtTime(isMuted ? 0 : 0.2, now);
+        bgmGain.gain.setValueAtTime(isMuted || document.hidden ? 0 : 0.2, now);
       }
     }
 
     if (isMuted) {
-      stopAmbientEngine();
+      stopAmbientEngine(true);
     } else {
       startBgmIfNeeded();
     }
@@ -466,8 +550,17 @@
     window.addEventListener("town-returned-home", changeMusicScene);
 
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) stopAmbientEngine();
-      else if (audioCtx) startBgmIfNeeded();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      sfxGain.gain.cancelScheduledValues(now);
+      sfxGain.gain.setValueAtTime(isMuted || document.hidden ? 0 : 0.22, now);
+      bgmGain.gain.cancelScheduledValues(now);
+      bgmGain.gain.setValueAtTime(0, now);
+      if (document.hidden) stopAmbientEngine(true);
+      else if (!isMuted) {
+        bgmGain.gain.linearRampToValueAtTime(0.2, now + 0.4);
+        startBgmIfNeeded();
+      }
     });
 
     // 2. Sound Button in Topbar

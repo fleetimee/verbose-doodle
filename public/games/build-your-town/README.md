@@ -59,11 +59,28 @@ cash remainder, and encounter scheduling). Legacy saves map `tickInMonth` onto
 the equivalent position in their month; fresh cities start on day 1 at 08:00.
 No catch-up charges or offline progress apply when loading.
 
-Growth probabilities retain the old equivalent of 25 trials per month, spread
-across hourly updates. Demand smoothing retains its original monthly rate.
-Population, networks, service coverage, pollution, and the monthly budget
-forecast refresh hourly. Land value, crime, disaster chances, historical reports,
-and the six-month bankruptcy grace period retain their monthly cadence.
+Live zoning development accumulates saved progress toward the next tier instead
+of relying on a random growth roll. Empty lots use 200 equivalent development
+trials per day, then 80/40/20/10 at tiers 1–4. Rates retain the existing demand,
+land-value, crime, pollution, and difficulty modifiers. A stable ±20% variation
+in required effort keeps neighboring lots from upgrading together. Connected
+starter layouts typically see their first homes/jobs within 1–2 minutes at 1×;
+later tiers take longer. Growth freezes when demand or infrastructure is missing.
+Demand responds daily (35% toward its target each day). Parks, services, pollution,
+and crime update land value and crime at midnight. Abandonment uses four
+equivalent trials per day, avoiding sudden neighborhood-wide losses.
+Population, networks, service coverage, pollution, milestones, and the monthly
+budget forecast refresh hourly. Disaster chances, historical reports, and the
+six-month bankruptcy grace period retain their monthly cadence.
+
+The city journal defaults to the last seven days, with 30-day, one-year, and
+ten-year options. The chosen range is remembered as `citybuilder.journalRange`.
+Daily population and funds snapshots are recorded during live simulation and
+saved in `journalDaily` (up to 366 samples). The current day updates in place;
+pause and background tabs do not manufacture history. Long-range charts combine
+daily samples with the existing monthly history. Legacy saves keep their monthly
+charts and begin daily recording when resumed. A new city immediately shows its
+current values, even before a second daily snapshot exists.
 Emergency response continues on the existing 120 ms simulation interval at 1×.
 
 Tax income, upkeep, ordinances, and loan interest accrue proportionally as time
@@ -72,6 +89,23 @@ Fractional cash is carried across days and saves rather than rounded away.
 Encounter cooldowns and chance checks retain their previous frequency per
 simulated month, and pause or the main menu cannot generate encounter rewards.
 Accelerated showcase/scenario city generation retains its original simulation.
+
+Selecting a residential, commercial, or industrial tile shows its current tier,
+next-tier progress, and blocking conditions in the details panel, with a small
+matching bar on the selected map tile. Tier 4 requires a connected, flat 2×2
+block of tier-3 zones; tier 5 requires a 3×3 block of tier-4 zones. Progress waits
+at 100% until the footprint is available. Tier 3 and above still need water.
+Sparse `zoneGrowth` records preserve partial progress in city saves; older saves
+start with zero progress. Demolishing or changing a zone/tier clears its progress.
+
+For growth QA, use a disposable flat starter city with a powered road connecting
+at least three residential and four industrial lots. Observe progress at 1× and
+4×, then pause and verify it stops. Query each zone type and rotate/zoom the map
+to check the selected-tile bar. Disconnect power and confirm the blocker appears
+without clearing progress; reconnect it and verify development resumes. Export
+and reload the disposable city to check partial progress, then remove `zoneGrowth`
+from that export to check legacy loading. Check tier-3 water/land-value gates and
+tier-4/5 footprints. Keep this QA separate from player saves.
 
 The clock beside the speed controls includes a daylight viewing toggle. This
 preference changes map lighting only; activity continues to follow city time.

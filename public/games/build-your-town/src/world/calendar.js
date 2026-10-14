@@ -66,6 +66,7 @@
       } else city.dayTime = boundary;
       city.tickInMonth = Math.min(24, Math.floor((calendar.day - 1 + city.dayTime / 24) / daysInMonth(city.year, city.month) * 25));
     }
+    window.__townJournal?.capture(city);
     return result;
   }
   function settleBudget(city, monthlyNet, fraction) {

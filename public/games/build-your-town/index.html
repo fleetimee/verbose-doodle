@@ -12,7 +12,7 @@
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="./src/ui/loading-screen.css?v=1">
   <script src="./src/ui/loading-screen.js?v=1"></script>
-  <script type="module" crossorigin src="./assets/index-DCrPNbHR.js?v=calendar-1"></script>
+  <script type="module" crossorigin src="./assets/index-DCrPNbHR.js?v=journal-daily-3"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-CanL7pau.css">
   <link rel="stylesheet" href="./src/ui/start-screen.css?v=home-return-1">
   <script src="./src/world/start-city.js?v=1"></script>
@@ -20,11 +20,13 @@
   <link rel="stylesheet" href="./src/ui/game-dialogs.css?v=btn-contrast-1">
   <script src="./src/ui/game-dialogs.js?v=home-return-1"></script>
   <script src="../activity.js"></script>
-  <script src="./src/platform/music-score.js?v=1"></script>
-  <script src="./src/platform/audio.js?v=music-variety-1"></script>
+  <script src="./src/platform/music-score.js?v=3"></script>
+  <script src="./src/platform/audio.js?v=tab-volume-4"></script>
   <script src="./src/progression/endgame.js?v=footprint-access-1"></script>
-  <link rel="stylesheet" href="./src/ui/query-coverage.css?v=query-layer-3">
-  <script src="./src/ui/query-coverage.js?v=2"></script>
+  <link rel="stylesheet" href="./src/ui/query-coverage.css?v=query-layer-4">
+  <script src="./src/ui/query-coverage.js?v=3"></script>
+  <link rel="stylesheet" href="./src/ui/city-journal.css?v=1">
+  <script src="./src/ui/city-journal.js?v=1"></script>
   <link rel="stylesheet" href="./src/ui/view-controls.css?v=encounter-options-5">
   <script src="./src/transport/rail-signals.js?v=1"></script>
   <script src="./src/transport/train-fleet.js?v=rail-signals-6"></script>
@@ -32,7 +34,8 @@
   <script src="./src/ui/view-controls.js?v=encounter-options-2"></script>
   <script src="./src/world/recreation.js?v=footprint-access-1"></script>
   <link rel="stylesheet" href="./src/world/day-night.css?v=1">
-  <script src="./src/world/calendar.js?v=1"></script>
+  <script src="./src/world/calendar.js?v=2"></script>
+  <script src="./src/world/zone-growth.js?v=1"></script>
   <script src="./src/world/day-night.js?v=calendar-1"></script>
   <script src="./src/world/building-activity.js?v=day-night-1"></script>
   <script src="./src/transport/sea-rail.js?v=1"></script>
@@ -218,10 +221,20 @@
   <aside id="panel-journal" class="panel" hidden>
     <div class="head"><span data-i18n="journal.title">Journal de la ville</span><button class="ghost close">✕</button></div>
     <div class="body">
-      <h3 data-i18n="journal.pop">Population, 10 dernières années</h3>
-      <canvas id="chart-pop" width="316" height="70"></canvas>
-      <h3 data-i18n="journal.money">Fonds, 10 dernières années</h3>
-      <canvas id="chart-money" width="316" height="70"></canvas>
+      <div class="journal-range">
+        <label id="journal-range-label" for="journal-range">Time range</label>
+        <select id="journal-range">
+          <option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option>
+          <option value="1y">Last year</option>
+          <option value="10y">Last 10 years</option>
+        </select>
+      </div>
+      <h3 id="journal-pop-title">Population · Last 7 days</h3>
+      <canvas id="chart-pop" width="316" height="120" role="img" aria-label="Population history"></canvas>
+      <h3 id="journal-money-title">Funds · Last 7 days</h3>
+      <canvas id="chart-money" width="316" height="120" role="img" aria-label="Funds history"></canvas>
+      <p id="journal-history-note"></p>
       <h3 data-i18n="journal.advice">Conseils</h3>
       <ul id="journal-advice" class="advice"></ul>
       <h3 data-i18n="journal.events">Événements</h3>

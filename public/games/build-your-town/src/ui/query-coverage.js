@@ -1,6 +1,8 @@
 (() => {
   let selected = null;
   let visible = true;
+  let growthView = null;
+  const zoneColors = { 3: "#75d47d", 4: "#7cbaff", 5: "#f2c14e" };
   const colors = { power: "#f2c14e", water: "#72c8ee", police: "#8daeff", fire: "#ef967c", education: "#d1a4ed", health: "#85d5ca", park: "#b1df89" };
   const node = (tag, className, text) => {
     const element = document.createElement(tag);
@@ -50,6 +52,7 @@
 
   function show(query, city, definitions, translate, language) {
     selected = query?.tile ?? null;
+    growthView = null;
     visible = true;
     if (!query) return;
     const fr = language === "fr";
@@ -58,6 +61,23 @@
     const body = document.getElementById("query-body");
     body.replaceChildren();
     body.append(node("p", "query-location", translate("query.tile", query.tile)));
+    if (window.__zoneGrowth?.inspect(city, city.idx(selected.x, selected.y))) {
+      const section = node("section", "query-growth");
+      const heading = node("div", "query-growth-heading");
+      const label = node("strong", "");
+      const value = node("span", "query-growth-value");
+      heading.append(label, value);
+      const progress = node("progress", "query-growth-bar");
+      progress.max = 100;
+      progress.setAttribute("aria-label", copy("Progress to next building tier", "Progression vers le prochain niveau"));
+      const status = node("p", "query-growth-status");
+      const tiers = node("div", "query-growth-tiers");
+      for (let tier = 1; tier <= 5; tier++) tiers.append(node("span", "", String(tier)));
+      section.append(heading, progress, tiers, status);
+      body.append(section);
+      growthView = { city, section, label, value, progress, status, tiers, translate, copy };
+      refreshGrowth(city);
+    }
     const building = city.structAt(city.idx(selected.x, selected.y));
     const definition = building && definitions[building.type];
     if (definition) {
@@ -166,5 +186,76 @@
     if (placing && preview?.color === "#e0392b") return preview;
     return { tiles: [...new Set([...tiles, ...preview?.tiles ?? []])], color: colors[definition.dept ?? definition.category] ?? colors.park, alpha: 0.22, stroke: "rgba(255,255,255,0.18)" };
   }
-  window.__queryCoverage = { show, overlay };
+  function refreshGrowth(city) {
+    if (!growthView || growthView.city !== city || !selected || document.getElementById("query").hidden) return;
+    const state = window.__zoneGrowth.inspect(city, city.idx(selected.x, selected.y));
+    if (!state) { growthView.section.hidden = true; return; }
+    const { section, label, value, progress, status, tiers, translate, copy } = growthView;
+    section.hidden = false;
+    const percent = Math.floor(state.progress * 100);
+    const paused = document.querySelector('#speed button[data-speed="0"].active') !== null;
+    const renderKey = `${state.zone}:${state.tier}:${percent}:${state.status}:${paused}`;
+    if (growthView.renderKey === renderKey) return;
+    growthView.renderKey = renderKey;
+    section.style.setProperty("--growth-color", zoneColors[state.zone]);
+    label.textContent = state.tier === 5 ? copy("Tier 5 · Fully developed", "Niveau 5 · Développement maximal")
+      : copy(`Tier ${state.tier} → ${state.next}`, `Niveau ${state.tier} → ${state.next}`);
+    value.textContent = `${percent}%`;
+    progress.value = percent;
+    for (const [index, step] of [...tiers.children].entries()) {
+      step.classList.toggle("reached", index < state.tier);
+      step.classList.toggle("next", index === state.tier);
+    }
+    const messages = {
+      growing: copy("Developing toward the next tier", "Développement vers le prochain niveau"),
+      complete: copy("Maximum tier reached", "Niveau maximal atteint"),
+      bankrupt: copy("Growth stopped: city is bankrupt", "Croissance arrêtée : ville en faillite"),
+      disaster: copy("Growth blocked by fire or flooding", "Croissance bloquée par un incendie ou une inondation"),
+      road: copy("Needs road access", "Accès routier nécessaire"),
+      power: copy("Needs a power connection", "Connexion électrique nécessaire"),
+      jobs: copy("Needs reachable jobs", "Emplois accessibles nécessaires"),
+      workers: copy("Needs reachable residents", "Résidents accessibles nécessaires"),
+      demand: copy("Waiting for positive zone demand", "En attente d’une demande positive"),
+      water: copy("Needs water to reach tier 3 and above", "Eau nécessaire à partir du niveau 3"),
+      pollution: copy("Reduce pollution to allow higher tiers", "Réduisez la pollution pour atteindre les niveaux supérieurs"),
+      land: copy("Improve land value with parks and services", "Améliorez la valeur foncière avec des parcs et des services"),
+      footprint: copy(`Ready: needs a connected ${state.next === 4 ? "2 × 2" : "3 × 3"} block of tier ${state.tier} zones`,
+        `Prêt : nécessite un bloc connecté de ${state.next === 4 ? "2 × 2" : "3 × 3"} zones de niveau ${state.tier}`),
+    };
+    status.textContent = messages[state.status];
+    if (paused && state.status === "growing") status.textContent = copy("Paused · Development progress retained", "En pause · Progression conservée");
+    status.classList.toggle("query-warning", !["growing", "complete"].includes(state.status));
+    document.getElementById("query-title").textContent = translate("query.zone", { label: translate(`zone.${state.zone}`), lvl: state.tier });
+  }
+  function drawGrowth(renderer, city) {
+    if (!selected || document.getElementById("query").hidden || renderer.dataMap !== "none") return;
+    refreshGrowth(city);
+    const state = window.__zoneGrowth?.inspect(city, city.idx(selected.x, selected.y));
+    if (!state) return;
+    let { x, y } = selected;
+    const turns = (window.__mapRotation?.getAngle() ?? 0) / 90;
+    for (let turn = 0; turn < turns; turn++) [x, y] = [city.size - 1 - y, x];
+    const point = renderer.worldToScreen((x - y) * 32,
+      (x + y + 1) * 16 - city.base(selected.x, selected.y) * 8);
+    const width = Math.max(42, Math.min(70, 58 * renderer.camera.zoom));
+    const left = point.x - width / 2, top = point.y + 6;
+    const ctx = renderer.ctx;
+    ctx.save();
+    ctx.setTransform(renderer.dpr, 0, 0, renderer.dpr, 0, 0);
+    ctx.fillStyle = "#182131";
+    ctx.strokeStyle = "#dce5ef";
+    ctx.lineWidth = 1;
+    ctx.fillRect(left - 3, top - 3, width + 6, 25);
+    ctx.strokeRect(left - 3, top - 3, width + 6, 25);
+    ctx.fillStyle = "#edf0f5";
+    ctx.font = "bold 10px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(`${state.tier}/5 · ${Math.floor(state.progress * 100)}%`, point.x, top + 8);
+    ctx.fillStyle = "#41516a";
+    ctx.fillRect(left, top + 12, width, 5);
+    ctx.fillStyle = zoneColors[state.zone];
+    ctx.fillRect(left, top + 12, width * state.progress, 5);
+    ctx.restore();
+  }
+  window.__queryCoverage = { show, overlay, refreshGrowth, drawGrowth };
 })();

@@ -1,0 +1,6 @@
+#panel-journal .journal-range { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+#journal-range-label { color: #bec6d5; font-size: 13px; }
+#journal-range { min-height: 34px; max-width: 100%; padding: 5px 28px 5px 10px; border: 1px solid #526079; border-radius: 6px; background: #303b51; color: #edf0f5; font: inherit; font-size: 13px; }
+#journal-range:focus-visible { outline: 2px solid #f2c14e; outline-offset: 2px; }
+#panel-journal #chart-pop, #panel-journal #chart-money { width: 100%; height: 120px; }
+#journal-history-note { margin: 10px 0 18px; color: #bec6d5; font-size: 12px; line-height: 1.5; }
