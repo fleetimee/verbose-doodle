@@ -1,6 +1,6 @@
 # Build Your Town endgame
 
-The bundled game loads `public/games/build-your-town/endgame.js` before its
+The bundled game loads `public/games/build-your-town/src/progression/endgame.js` before its
 engine starts. That file owns the additional building definitions, English and
 French names, isometric drawing routines, construction-menu entries, and career
 eras 6 and 7.
