@@ -77,7 +77,7 @@
     const active = !!(window.__recreation.operating(city, building, definition) &&
       (!definition.dept || definition.jobs || city.funding[definition.dept] > 0));
     const elapsed = state.clock - record.last;
-    if (active && record.active && state.speed > 0 && elapsed <= 1) record.clock += elapsed;
+    if (active && record.active && state.speed > 0 && elapsed <= 1) record.clock += elapsed * (window.__dayNight?.activity(city, 6, building.type) ?? 1);
     record.last = state.clock;
     const frame = Math.floor(record.clock * 12);
     if (frame !== record.frame || active !== record.active) {

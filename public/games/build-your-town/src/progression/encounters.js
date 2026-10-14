@@ -447,12 +447,23 @@
   ];
 
   let currentModal = null;
-  let lastEncounterTime = Date.now();
+  const encounterClock = (city) => {
+    const calendar = window.__townCalendar.initialize(city);
+    const now = window.__townCalendar.monthTime(city);
+    calendar.encounterAt ??= now;
+    calendar.encounterCheckAt ??= now;
+    return { calendar, now };
+  };
+  const resetEncounterClock = () => {
+    if (!window.__city) return;
+    const { calendar, now } = encounterClock(window.__city);
+    calendar.encounterAt = calendar.encounterCheckAt = now;
+  };
   const MIN_POP_FOR_ENCOUNTERS = 150;
   const frequencies = {
-    rare: { cooldown: 300000, chance: 0.15 },
-    normal: { cooldown: 90000, chance: 0.25 },
-    frequent: { cooldown: 45000, chance: 0.5 },
+    rare: { cooldown: 100, chance: 0.15 },
+    normal: { cooldown: 30, chance: 0.25 },
+    frequent: { cooldown: 15, chance: 0.5 },
   };
   let options = { enabled: true, frequency: "normal" };
   try {
@@ -465,12 +476,12 @@
     setOptions: value => {
       options = { enabled: value.enabled !== false,
         frequency: Object.hasOwn(frequencies, value.frequency) ? value.frequency : "normal" };
-      lastEncounterTime = Date.now();
+      resetEncounterClock();
       if (!options.enabled && currentModal) currentModal.hidden = true;
       try { localStorage.setItem("citybuilder.encounters", JSON.stringify(options)); } catch {}
     },
   };
-  window.addEventListener("town-city-entered", () => { lastEncounterTime = Date.now(); });
+  window.addEventListener("town-city-entered", () => { if (window.__city) encounterClock(window.__city); });
 
   const getLang = () => {
     try {
@@ -541,7 +552,7 @@
     const closeModal = () => {
       modal.hidden = true;
       currentModal = null;
-      lastEncounterTime = Date.now();
+      resetEncounterClock();
     };
 
     // Choice A
@@ -571,7 +582,7 @@
 
   // Evaluate if it's time for a random encounter
   const checkRandomEncounter = () => {
-    if (window.__townStartScreen?.isHome()) { lastEncounterTime = Date.now(); return; }
+    if (window.__townStartScreen?.isHome() || document.hidden || document.querySelector('#speed button.active')?.dataset.speed === "0") return;
     if (!options.enabled) return;
     if (currentModal && !currentModal.hidden) return;
 
@@ -581,8 +592,9 @@
     const pop = city.stats.pop || 0;
     if (pop < MIN_POP_FOR_ENCOUNTERS) return;
 
-    const elapsed = Date.now() - lastEncounterTime;
-    if (elapsed < frequencies[options.frequency].cooldown) return;
+    const { calendar, now } = encounterClock(city);
+    if (now - calendar.encounterAt < frequencies[options.frequency].cooldown || now - calendar.encounterCheckAt < 5) return;
+    calendar.encounterCheckAt = now;
 
     // Frequency controls both the minimum delay and the chance of an event.
     if (Math.random() < frequencies[options.frequency].chance) {

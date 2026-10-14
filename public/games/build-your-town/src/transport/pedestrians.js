@@ -34,8 +34,8 @@
         const index = city.idx(x + dx, y + dy);
         if (city.fire[index] || city.flood[index]) continue;
         const zone = city.overlay[index];
-        if (zone >= 3 && zone <= 5) total += city.level[index];
-        else if (zone === 6 && destinations.has(city.structAt(index)?.type)) total += 3;
+        if (zone >= 3 && zone <= 5) total += city.level[index] * (window.__dayNight?.activity(city, zone) ?? 1);
+        else if (zone === 6 && destinations.has(city.structAt(index)?.type)) total += 3 * (window.__dayNight?.activity(city, zone, city.structAt(index)?.type) ?? 1);
       }
     }
     return total;
@@ -68,7 +68,7 @@
     const existing = new Map(state.people.map((person) => [person.id, person]));
     state.people = [];
     for (const candidate of candidates) {
-      const count = Math.min(3, 1 + Math.floor(candidate.density / 8));
+      const count = Math.min(3, Math.ceil(candidate.density / 8));
       for (let slot = 0; slot < count && state.people.length < 240; slot++) {
         const id = candidate.index * 3 + slot;
         const previous = existing.get(id);

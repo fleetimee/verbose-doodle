@@ -36,7 +36,7 @@
       for (let index = 0; index < city.count; index++) if (road(city, index) && city.traffic[index] > 0 && neighbors(city, index).length) state.roads.push(index);
       state.refresh = time;
     }
-    const target = Math.min(32, Math.ceil(state.roads.length / 28));
+    const target = Math.ceil(Math.min(32, Math.ceil(state.roads.length / 28)) * (window.__dayNight?.traffic(city) ?? 1));
     if (speed > 0 && state.cars.length < target && state.clock - state.spawnAt >= 0.8) {
       for (let attempt = 0; attempt < Math.min(state.roads.length, 32); attempt++) {
         const id = state.sequence + 1;
@@ -53,7 +53,12 @@
       }
     }
     state.tiles.clear();
-    state.cars = state.cars.filter(car => road(city, car.from) && road(city, car.to));
+    let surplus = Math.max(0, state.cars.length - target);
+    state.cars = state.cars.filter(car => {
+      if (!road(city, car.from) || !road(city, car.to)) return false;
+      if (speed > 0 && surplus > 0 && car.trips >= 8 && car.progress === 0) { surplus--; return false; }
+      return true;
+    });
     for (const car of state.cars) {
       const end = position(city, car.to, car.to + (car.to - car.from));
       const dx = end.x - car.x, dy = end.y - car.y;
