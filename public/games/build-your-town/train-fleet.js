@@ -69,10 +69,13 @@
   function bind(renderer) {
     if (bound.has(renderer)) return;
     bound.add(renderer);
+    window.__railSignals.bind(renderer);
     const step = renderer.stepWalker.bind(renderer);
     renderer.stepWalker = (city, walker, delta) => {
       if (walker.kind !== "train") return step(city, walker, delta);
       if (!renderer.walkable(city, "train", walker.x, walker.y)) return;
+      walker.signalWaiting = !window.__railSignals.canMove(renderer, city, walker);
+      if (walker.signalWaiting) return;
       walker.t += walker.speed * delta;
       while (walker.t >= 1) {
         const remaining = walker.t - 1;
@@ -239,5 +242,5 @@
       ctx.restore();
     }
   }
-  window.__trainFleet = { bind, sprite, drawLayer, drawRoadLayer };
+  window.__trainFleet = { bind, sprite, drawLayer, drawRoadLayer, railHeight };
 })();

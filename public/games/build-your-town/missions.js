@@ -606,6 +606,7 @@
 
   // Evaluate missions and trigger rewards
   const evaluateMissions = () => {
+    if (window.__townStartScreen?.isHome()) return;
     const city = window.__city;
     if (!city) return;
     if (localStorage.getItem("citybuilder.current")?.startsWith("scenario_") && !scenarioFinished()) return;

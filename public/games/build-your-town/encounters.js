@@ -449,7 +449,28 @@
   let currentModal = null;
   let lastEncounterTime = Date.now();
   const MIN_POP_FOR_ENCOUNTERS = 150;
-  const COOLDOWN_MS = 90000; // 90 seconds minimum cooldown between random events
+  const frequencies = {
+    rare: { cooldown: 300000, chance: 0.15 },
+    normal: { cooldown: 90000, chance: 0.25 },
+    frequent: { cooldown: 45000, chance: 0.5 },
+  };
+  let options = { enabled: true, frequency: "normal" };
+  try {
+    const saved = JSON.parse(localStorage.getItem("citybuilder.encounters") || "null");
+    if (saved) options = { enabled: saved.enabled !== false,
+      frequency: Object.hasOwn(frequencies, saved.frequency) ? saved.frequency : "normal" };
+  } catch {}
+  window.__townEncounters = {
+    getOptions: () => ({ ...options }),
+    setOptions: value => {
+      options = { enabled: value.enabled !== false,
+        frequency: Object.hasOwn(frequencies, value.frequency) ? value.frequency : "normal" };
+      lastEncounterTime = Date.now();
+      if (!options.enabled && currentModal) currentModal.hidden = true;
+      try { localStorage.setItem("citybuilder.encounters", JSON.stringify(options)); } catch {}
+    },
+  };
+  window.addEventListener("town-city-entered", () => { lastEncounterTime = Date.now(); });
 
   const getLang = () => {
     try {
@@ -461,6 +482,7 @@
 
   // Open the Mayoral Encounter Modal
   const triggerEncounter = (encounter) => {
+    if (!options.enabled || window.__townStartScreen?.isHome()) return;
     const lang = getLang();
     const city = window.__city;
     if (!city) return;
@@ -549,6 +571,8 @@
 
   // Evaluate if it's time for a random encounter
   const checkRandomEncounter = () => {
+    if (window.__townStartScreen?.isHome()) { lastEncounterTime = Date.now(); return; }
+    if (!options.enabled) return;
     if (currentModal && !currentModal.hidden) return;
 
     const city = window.__city;
@@ -558,10 +582,10 @@
     if (pop < MIN_POP_FOR_ENCOUNTERS) return;
 
     const elapsed = Date.now() - lastEncounterTime;
-    if (elapsed < COOLDOWN_MS) return;
+    if (elapsed < frequencies[options.frequency].cooldown) return;
 
-    // 25% chance every tick when cooldown is met
-    if (Math.random() < 0.25) {
+    // Frequency controls both the minimum delay and the chance of an event.
+    if (Math.random() < frequencies[options.frequency].chance) {
       const pick = ENCOUNTERS[Math.floor(Math.random() * ENCOUNTERS.length)];
       triggerEncounter(pick);
     }

@@ -447,7 +447,8 @@
           exportBtn.type = "button";
           exportBtn.className = "ghost btn-row-export";
           exportBtn.title = lang === "fr" ? "Exporter ce fichier" : "Export this city file";
-          exportBtn.innerHTML = "📥";
+          exportBtn.setAttribute("aria-label", exportBtn.title);
+          exportBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg>';
           exportBtn.style.padding = "0 8px";
           exportBtn.style.fontSize = "14px";
 

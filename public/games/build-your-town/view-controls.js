@@ -131,6 +131,40 @@
     disasterSection.append(disasterLabel, disasterNote);
     panel.append(disasterSection);
     applyDisasters();
+    const encounterSection = document.createElement("section");
+    encounterSection.className = "view-rotation-settings";
+    const encounterLabel = document.createElement("label");
+    encounterLabel.className = "view-rotation-toggle";
+    const enabledEncounters = document.createElement("input");
+    enabledEncounters.type = "checkbox";
+    enabledEncounters.id = "enable-random-encounters";
+    const encounterOptions = window.__townEncounters.getOptions();
+    enabledEncounters.checked = encounterOptions.enabled;
+    encounterLabel.append(enabledEncounters, document.createTextNode(text("Random encounters", "Événements aléatoires")));
+    const frequencyLabel = document.createElement("label");
+    frequencyLabel.htmlFor = "encounter-frequency";
+    frequencyLabel.textContent = text("Frequency", "Fréquence");
+    const frequency = document.createElement("select");
+    frequency.id = "encounter-frequency";
+    for (const [value, en, fr] of [["rare", "Occasional", "Occasionnelle"], ["normal", "Standard", "Normale"], ["frequent", "Frequent", "Fréquente"]]) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = text(en, fr);
+      frequency.append(option);
+    }
+    frequency.value = encounterOptions.frequency;
+    frequency.disabled = !enabledEncounters.checked;
+    const encounterNote = document.createElement("p");
+    encounterNote.textContent = text("Mayor requests and city dilemmas during gameplay. Never shown on the main menu.", "Demandes au maire et décisions pendant le jeu. Jamais dans le menu principal.");
+    const updateEncounters = () => {
+      frequency.disabled = !enabledEncounters.checked;
+      window.__townEncounters.setOptions({ enabled: enabledEncounters.checked, frequency: frequency.value });
+    };
+    enabledEncounters.addEventListener("change", updateEncounters);
+    frequency.addEventListener("change", updateEncounters);
+    encounterSection.append(encounterLabel, frequencyLabel, frequency, encounterNote);
+    panel.append(encounterSection);
+
     for (const [control, direction] of [[minus, -1], [plus, 1]]) {
       control.addEventListener("click", event => {
         event.stopPropagation();

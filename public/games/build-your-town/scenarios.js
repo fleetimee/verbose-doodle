@@ -400,6 +400,7 @@
   });
 
   const syncScenario = () => {
+    if (window.__townStartScreen?.isHome()) return;
     const key = localStorage.getItem("citybuilder.current");
     const scenario = SCENARIOS.find((s) => key === `scenario_${s.id}`) || null;
     if (scenario === activeScenario && scenarioCity === window.__city) return;
@@ -511,6 +512,7 @@
 
   // Check medal achievements
   const evaluateActiveScenario = () => {
+    if (window.__townStartScreen?.isHome()) return;
     syncScenario();
     if (!activeScenario || !scenarioReady) return;
     const city = window.__city;
