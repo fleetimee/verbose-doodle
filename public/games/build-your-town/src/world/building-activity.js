@@ -55,7 +55,7 @@
   }
 
   function prepare(renderer, city, building, definition) {
-    const style = styles[building.type];
+    const style = styles[building.type] ?? (window.__industry?.byType[building.type] ? { kind: "industry", type: building.type } : null);
     const state = states.get(renderer);
     if (!style || !state || state.city !== city) return null;
     let record = state.records.get(building.id);
@@ -74,12 +74,13 @@
         last: state.clock, frame: -1, active: false };
       state.records.set(building.id, record);
     }
-    const active = !!(window.__recreation.operating(city, building, definition) &&
+    const active = !!((style.kind !== "industry" || window.__industry.operating(city, building)) && window.__recreation.operating(city, building, definition) &&
       (!definition.dept || definition.jobs || city.funding[definition.dept] > 0));
     const elapsed = state.clock - record.last;
     if (active && record.active && state.speed > 0 && elapsed <= 1) record.clock += elapsed * (window.__dayNight?.activity(city, 6, building.type) ?? 1);
     record.last = state.clock;
-    const frame = Math.floor(record.clock * 12);
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const frame = reducedMotion ? 0 : Math.floor(record.clock * 12);
     if (frame !== record.frame || active !== record.active) {
       record.frame = frame;
       record.active = !!active;
@@ -207,6 +208,7 @@
 
   function paint(ctx, project, style, time, active) {
     ctx.lineCap = "round";
+    if (style.kind === "industry") { window.__industryModels.paint(ctx, project, style.type, time, active); return; }
     if (style.kind === "carnival") carnival(ctx, project, time);
     if (style.kind === "volleyball") {
       if (!active) { ball(ctx, project, 1.4, 1.6, 1); return; }
@@ -267,5 +269,5 @@
     }
   }
 
-  window.__buildingActivity = { update, setSpeed, beginFrame, prepare, draw, has: type => !!styles[type] };
+  window.__buildingActivity = { update, setSpeed, beginFrame, prepare, draw, has: type => !!styles[type] || !!window.__industry?.byType[type] };
 })();

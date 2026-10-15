@@ -36,6 +36,24 @@ The engine is compiled upstream code with local patches, rather than the
 original engine source tree. Keep edits in the readable extension scripts
 where possible; changing this layout does not rebuild the engine.
 
+## Road and highway access
+
+Residential, commercial, and industrial zones can develop within 12 tile steps
+of a road or highway (four times the original three-tile access reach).
+The shared access map also connects placed buildings to the nearest network
+entry within that distance, measured from their footprint. Commuting and freight
+then follow the actual connected roads/highways; isolated networks cannot supply
+each other. Power, water, service coverage, and growth-tier requirements retain
+their own rules. Zones occupy surrounding land, not the paved roadway itself.
+
+Access is recalculated when routes are built, demolished, or destroyed and when
+a city loads; existing saves require no migration. For manual QA in a disposable
+flat city, place each R/C/I zone type 4, 12, and 13 tiles from a highway and an
+ordinary road. With power, demand, and workers/jobs supplied, the first two
+distances should develop; 13 tiles must show the missing-access blocker. Check
+commuting, a placed industrial facility, save/load, and loss of access after
+removing the only nearby road/highway. Keep player saves separate from QA.
+
 ## Validation
 
 From the repository root, run `rtk bun run lint`, `rtk bun run lint:oxlint`,
@@ -127,3 +145,99 @@ paused. A 60,000 ms advance at 1× spans one complete day. Check midnight,
 February/leap-year and December rollovers, daily budget totals against the monthly
 forecast, partial-day save/load, and 0×/1×/2×/4× progression. Never advance a player
 save for capture or QA.
+
+## Resource industries
+
+Selecting Industrial, or pressing I, opens a chooser for ordinary industrial
+zoning, coal/iron/copper mines, a steel mill, a goods factory, and a freight
+terminal. Ordinary zoning grows automatically without deposits; mines are placed
+on matching deposits. The factory-outline button below
+the construction tools opens the Industry & resources ledger. Use Show deposits
+or select a mine to reveal resource locations; the ledger can locate each deposit.
+Generic industrial zoning continues to develop normally.
+
+Mines require the matching finite deposit, electricity, water, and road access.
+Coal and iron feed steel mills; steel and copper feed goods factories. Supplies
+stay within connected road/highway networks. Terminals or seaports beside a
+continuous railway can transfer freight between road districts. Terminals,
+operating seaports, and roads reaching a map edge provide limited export capacity.
+The economy reserves two days of connected processors’ inputs before exporting
+surplus, with goods and steel sold first. Local coal also reduces an existing
+coal power plant’s upkeep by up to 40%; plants retain their usual fuel supply
+when local coal is unavailable.
+
+Industry advances hourly on the game clock. Deposits, facility inventories,
+cumulative export income, and pending midnight income survive save/export/load.
+Old cities receive deposits deterministically from their map seed. A facility
+holds up to 240 units of each resource; demolishing it discards its inventory.
+Exhausted mines stop and can be demolished. Changing the map view never changes
+resource locations or inventories.
+
+Models and paused/operating machinery are drawn with the game’s isometric
+primitives. Hoists, excavator arms, crushers, conveyors, furnace sparks, forklifts,
+and freight cranes follow simulation speed and stop when the facility cannot
+operate. Reduced-motion mode keeps the machinery static. New hooks in the bundled
+engine route placement, stats, budgets, rendering, and hourly simulation to
+`src/world/industry.js`, `industry-models.js`, and `src/ui/industry-panel.js`.
+
+For manual QA, use an isolated browser profile and a disposable flat city.
+Connect the three mines, mill, factory, and terminal to one road and power/water
+network. Inspect hourly input/output stocks and exports, then break the road:
+processors must wait once their connected inputs are unavailable. Add terminals
+and a continuous railway to reconnect the districts. Check power/water outages,
+finite deposit exhaustion, full storage without exports, and local coal savings.
+Verify paused and 1×/2×/4× animation, reduced motion, all four map rotations,
+English/French UI, mobile panel scrolling, placement away from deposits, and
+save/export/load round-trips including a legacy save without `industry`.
+
+### Freight vehicles
+
+Container trucks carry goods and steel; bulk carriers show coal and ore.
+Locomotives and matching freight wagons appear when shipments use a railway.
+These vehicles visualize actual hourly supplier-to-processor, local coal-fuel,
+and export transfers. They follow the dispatched road/rail route, including
+terminal transfers, lane directions, bridges, and track height. Routes through
+fire/flood damage are unavailable; broken connections stop new deliveries.
+
+Inventory and export income are accounted for at the hourly transfer, rather
+than on animation arrival. The bounded fleet (up to 48 visible vehicle parts)
+does not charge for vehicles or change simulation results when zoomed out,
+paused, in a flat/data view, or using reduced motion. Reduced motion hides the
+moving fleet. Vehicle positions follow the game clock, so speed controls and
+background pause apply consistently. Recent dispatches are saved in the
+optional `industry.freight` field; old saves start with no dispatches. The
+transport code lives in `src/transport/freight-routes.js` and
+`src/transport/freight-vehicles.js`.
+
+For freight QA, use a disposable industry city and inspect trucks on a shared
+road. Split the road between suppliers and processors and clear disposable
+processor stocks: no new cargo should cross the cut. Reconnect using operating
+terminals and continuous rails, then observe road → rail → road dispatches and
+container/bulk consists. Check 1×/2×/4×, pause, save/reload mid-route, all four
+rotations, road/rail damage, and hiding vehicles in flat/data/reduced-motion
+views. Check the Industrial chooser and I shortcut on desktop, mobile, and in
+both languages; ordinary zoning must still paint lots, and mines must still
+require deposits.
+
+## Help guide
+
+Game menu → Help & controls opens a ten-topic guide. It explains starting a
+neighborhood, navigation, construction, utilities, growth, mining, processing,
+freight, budgets, and city services/saves in English and French. Use the topic
+selector to jump directly to a subject, or Back/Next and Left/Right to browse.
+The guide pauses the city and restores its previous speed when closed. Its
+demonstrations use actual game sprites and never change city data.
+
+Demonstrations have Pause/Play and Replay controls. Reduced-motion mode shows
+static diagrams; hidden guides discard their demonstration nodes. The guide
+traps keyboard focus, preserves native topic-selector keys, closes with Escape,
+and returns focus to its opener. Topic actions close Help before selecting an
+existing construction tool or opening the industry ledger/budget.
+
+The readable implementation is `src/ui/help-guide.js` and `help-guide.css`;
+the bundled engine delegates tutorial binding to `window.__townHelp`.
+For manual QA, use a disposable city in an isolated browser profile. Browse all
+topics on desktop and mobile in both languages, check scrolling and keyboard
+navigation, pause/replay and reduced motion, then close using Done, Escape,
+the close button, and the backdrop. Verify the original simulation speed returns
+and topic actions open the intended tool/panel without changing funds or stock.

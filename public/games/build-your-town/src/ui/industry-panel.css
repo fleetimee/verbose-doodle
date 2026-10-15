@@ -1,0 +1,19 @@
+#btn-industry svg { width: 26px; height: 26px; }
+#panel-industry { width: 430px; }
+#panel-industry h2 { font: inherit; margin: 0; }
+.industry-controls { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 14px 4px; }
+.industry-controls select { background: var(--panel-flat); color: var(--text); border: 1px solid var(--border); border-radius: 7px; padding: 6px; font: inherit; }
+.industry-intro, .industry-note { line-height: 1.6; }
+.industry-ledger { display: grid; grid-template-columns: 1fr auto; gap: 7px 14px; margin: 16px 0; }
+.industry-ledger dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+.industry-facility { display: flex; align-items: center; gap: 6px; margin-top: 12px; }
+.industry-facility > div { flex: 1; min-width: 0; }
+.industry-secondary { display: block; color: var(--muted); font-size: 11px; }
+.industry-recipe { margin: 3px 0 12px; font-size: 11px; }
+.industry-deposit { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; }
+.industry-deposit button { text-align: left; }
+.industry-deposit span { font-size: 11px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.industry-query p { margin: 6px 0; }
+@media (max-width: 900px) {
+  #panel-industry { width: auto; max-height: 62dvh; }
+}
