@@ -61,6 +61,74 @@
     row.append(label, output);
     panel.append(header, row, range, note, reset);
     document.body.append(panel);
+    const graphics = window.__townGraphics;
+    const graphicsSection = document.createElement("section");
+    graphicsSection.className = "view-rotation-settings graphics-settings";
+    const graphicsLabel = document.createElement("label");
+    graphicsLabel.htmlFor = "graphics-quality";
+    const quality = document.createElement("select");
+    quality.id = "graphics-quality";
+    quality.setAttribute("aria-describedby", "graphics-note graphics-status");
+    const options = [["auto", "Auto", "Auto"], ["low", "Low", "Faible"], ["medium", "Medium", "Moyenne"],
+      ["high", "High", "Élevée"], ["custom", "Custom", "Personnalisée"]];
+    for (const [value] of options) {
+      const option = document.createElement("option");
+      option.value = value;
+      quality.append(option);
+    }
+    const graphicsNote = document.createElement("p");
+    graphicsNote.id = "graphics-note";
+    const graphicsStatus = document.createElement("p");
+    graphicsStatus.id = "graphics-status";
+    graphicsStatus.setAttribute("role", "status");
+    const sliders = document.createElement("div");
+    sliders.className = "graphics-sliders";
+    const controls = [];
+    for (const [name, en, fr, min, max, step] of [
+      ["resolution", "Render resolution", "Résolution de rendu", 0.75, 2, 0.25],
+      ["fps", "Frame-rate limit", "Limite d’images par seconde", 15, 60, 5],
+      ["effects", "Visual effects", "Effets visuels", 0, 2, 1],
+    ]) {
+      const row = document.createElement("div");
+      row.className = "view-scale-label";
+      const label = document.createElement("label");
+      label.htmlFor = `graphics-${name}`;
+      const output = document.createElement("output");
+      output.htmlFor = label.htmlFor;
+      const input = document.createElement("input");
+      input.id = label.htmlFor;
+      input.type = "range";
+      input.min = String(min); input.max = String(max); input.step = String(step);
+      input.addEventListener("input", () => graphics.setCustom({ [name]: Number(input.value) }));
+      row.append(label, output);
+      sliders.append(row, input);
+      controls.push({ name, en, fr, label, output, input });
+    }
+    const syncGraphics = () => {
+      const state = graphics.state();
+      graphicsLabel.textContent = text("Graphics quality", "Qualité graphique");
+      options.forEach(([, en, fr], index) => { quality.options[index].textContent = text(en, fr); });
+      quality.value = state.mode;
+      graphicsNote.textContent = text("Auto adapts to performance. Adjust a slider for Custom. City simulation stays unchanged.",
+        "Auto s’adapte aux performances. Un curseur active le mode personnalisé. La simulation reste inchangée.");
+      const names = [text("Low", "Faible"), text("Medium", "Moyenne"), text("High", "Élevée")];
+      graphicsStatus.textContent = state.mode === "auto" ? text(`Auto is using ${names[["low", "medium", "high"].indexOf(state.tier)]} quality.`,
+        `Auto utilise la qualité ${names[["low", "medium", "high"].indexOf(state.tier)].toLowerCase()}.`) : "";
+      graphicsStatus.hidden = state.mode !== "auto";
+      for (const { name, en, fr, label, output, input } of controls) {
+        label.textContent = text(en, fr);
+        input.value = String(state[name]);
+        const value = name === "resolution" ? `${Math.round(state[name] * 100)}%` : name === "fps" ? `${state[name]} ${text("FPS", "i/s")}` : names[state[name]];
+        output.textContent = value;
+        input.setAttribute("aria-valuetext", value);
+      }
+    };
+    quality.addEventListener("change", () => graphics.setMode(quality.value));
+    graphicsSection.append(graphicsLabel, quality, graphicsNote, graphicsStatus, sliders);
+    panel.append(graphicsSection);
+    window.addEventListener("town-graphics-change", syncGraphics);
+    new MutationObserver(syncGraphics).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+    syncGraphics();
     const hide = () => { panel.hidden = true; settings.setAttribute("aria-expanded", "false"); };
     close.addEventListener("click", () => { hide(); settings.focus(); });
     settings.addEventListener("click", () => {

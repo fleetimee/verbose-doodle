@@ -174,6 +174,9 @@
   }
   function render(ctx, width, height, time) {
     const k = Math.max(0.6, Math.min(2, width / 1200)), area = width * height / (1280 * 720);
+    const detail = window.__townGraphics?.effects() ?? 2;
+    if (!detail) return;
+    const density = detail === 1 ? 0.4 : 1;
     const sec = time / 1000;
     if (levels.cloud > 0.01) {
       ctx.fillStyle = `rgba(70,80,100,${levels.cloud * 0.22})`; ctx.fillRect(0, 0, width, height);
@@ -186,7 +189,7 @@
       ctx.fillStyle = gradient; ctx.fillRect(0, 0, width, height);
     }
     if (levels.rain > 0.01) {
-      const count = Math.min(700, Math.floor(260 * levels.rain * area));
+      const count = Math.min(700, Math.floor(260 * levels.rain * area * density));
       ctx.strokeStyle = `rgba(190,215,245,${0.35 + levels.rain * 0.25})`; ctx.lineWidth = k; ctx.beginPath();
       scatter(ctx, count, width, height, sec, 1100 * k, (x, y) => {
         ctx.moveTo(x, y); ctx.lineTo(x - 4 * k, y + 14 * k);
@@ -194,7 +197,7 @@
       ctx.stroke();
     }
     if (levels.snow > 0.01) {
-      const count = Math.min(500, Math.floor(180 * levels.snow * area));
+      const count = Math.min(500, Math.floor(180 * levels.snow * area * density));
       ctx.fillStyle = `rgba(255,255,255,${0.55 + levels.snow * 0.3})`; ctx.beginPath();
       scatter(ctx, count, width, height, sec, 70 * k, (x, y, i) => {
         const radius = (1 + hash(i, 4) * 1.8) * k;
@@ -205,7 +208,7 @@
     }
     if (levels.leaves > 0.01) {
       const colors = ["#d9822b", "#b5481d", "#e0b53c", "#8f5a24"];
-      scatter(ctx, Math.floor(40 * levels.leaves * area), width, height, sec, 55 * k, (x, y, i) => {
+      scatter(ctx, Math.floor(40 * levels.leaves * area * density), width, height, sec, 55 * k, (x, y, i) => {
         const sx = x + Math.sin(sec * 0.9 + i) * 30 * k;
         ctx.fillStyle = colors[i % colors.length]; ctx.globalAlpha = 0.85;
         ctx.beginPath(); ctx.ellipse(sx, y, 4 * k, 2 * k, sec + i, 0, Math.PI * 2); ctx.fill();
@@ -213,7 +216,7 @@
       ctx.globalAlpha = 1;
     }
     if (levels.petals > 0.01) {
-      scatter(ctx, Math.floor(30 * levels.petals * area), width, height, sec, 40 * k, (x, y, i) => {
+      scatter(ctx, Math.floor(30 * levels.petals * area * density), width, height, sec, 40 * k, (x, y, i) => {
         const sx = x + Math.sin(sec * 0.7 + i) * 24 * k;
         ctx.fillStyle = i % 2 ? "#f7c6d6" : "#ffe3ec"; ctx.globalAlpha = 0.8;
         ctx.beginPath(); ctx.ellipse(sx, y, 3 * k, 1.8 * k, sec * 0.8 + i, 0, Math.PI * 2); ctx.fill();
@@ -245,7 +248,7 @@
     ctx.fillStyle = tints[next.season.id]; ctx.fillRect(0, 0, width, height);
     render(ctx, width, height, now);
     ctx.restore();
-    if (active && !pending) {
+    if (active && (window.__townGraphics?.effects() ?? 2) > 0 && !pending) {
       pending = true;
       setTimeout(() => { pending = false; window.__townView?.redraw(); }, 33);
     }

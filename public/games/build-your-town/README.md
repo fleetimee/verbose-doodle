@@ -241,3 +241,36 @@ topics on desktop and mobile in both languages, check scrolling and keyboard
 navigation, pause/replay and reduced motion, then close using Done, Escape,
 the close button, and the backdrop. Verify the original simulation speed returns
 and topic actions open the intended tool/panel without changing funds or stock.
+
+## Graphics quality
+
+Interface settings includes Auto (default), Low, Medium, High, and Custom graphics.
+Auto starts at Medium, or Low when reported CPU concurrency or device memory is
+four or less. Missing hardware hints use Medium. It measures full map render
+cost and animation-frame delays during foreground gameplay, waits three seconds
+after changes, then requires two slow five-second windows to step down or three
+comfortable windows to step up. Paused cities, hidden tabs, and the main menu do
+not contribute samples. Auto choices are session-local so a later launch can
+adapt to a different workload; manual settings persist as `citybuilder.graphics`.
+
+Low uses up to 1× pixel density and 30 FPS, with static building effects and no
+weather particles or decorative night lights. Medium uses up to 1.5× and 30 FPS,
+fewer weather particles, six building-animation frames per second, and window
+lights. High uses up to 2× and 60 FPS with full effects. Pixel density never
+exceeds the display's native density. Seasonal colors and the day/night tint
+remain in every preset; city simulation, saves, and emergency feedback are unchanged.
+
+Moving any graphics slider selects Custom: resolution 75–200%, frame-rate limit
+15–60 FPS, and visual effects Low–High. Resolution percentages are relative to
+CSS pixels and capped at native density. UI scale and map zoom stay separate.
+Selecting Custom from a preset starts with that preset's values.
+
+For manual QA, use the disposable showcase URL above in an isolated profile.
+Switch each preset and inspect `window.__townGraphics.state()` and the map canvas
+pixel size. Move each slider, reload to check persistence, and switch back to
+Auto. Compare rainy/night scenes and animated industry at each effects level;
+verify all buildings, transport, emergency markers, and seasonal colors remain
+readable. Check keyboard interaction, French labels, and mobile panel scrolling.
+Compare foreground 1× gameplay, pause, and a hidden tab when checking adaptation;
+compare an exported disposable city's simulation at the same elapsed game time
+across graphics settings. Never benchmark or advance a player's save.

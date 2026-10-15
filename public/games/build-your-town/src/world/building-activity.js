@@ -80,7 +80,8 @@
     if (active && record.active && state.speed > 0 && elapsed <= 1) record.clock += elapsed * (window.__dayNight?.activity(city, 6, building.type) ?? 1);
     record.last = state.clock;
     const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const frame = reducedMotion ? 0 : Math.floor(record.clock * 12);
+    const detail = window.__townGraphics?.effects() ?? 2;
+    const frame = reducedMotion || !detail ? 0 : Math.floor(record.clock * (detail === 1 ? 6 : 12)) * (detail === 1 ? 2 : 1);
     if (frame !== record.frame || active !== record.active) {
       record.frame = frame;
       record.active = !!active;

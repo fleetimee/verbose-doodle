@@ -59,6 +59,8 @@
     ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = `rgba(12,25,56,${night * 0.48})`; ctx.fillRect(0, 0, width, height);
     ctx.fillStyle = `rgba(220,109,56,${twilight * 0.13})`; ctx.fillRect(0, 0, width, height);
+    const detail = window.__townGraphics?.effects() ?? 2;
+    if (!detail) { ctx.restore(); return; }
     let layer = layers.get(renderer);
     if (!layer) { layer = document.createElement("canvas"); layers.set(renderer, layer); }
     if (layer.width !== width || layer.height !== height) { layer.width = width; layer.height = height; }
@@ -80,7 +82,7 @@
     for (const roof of roofs) light.drawImage(roof.image, roof.x, roof.y);
     light.globalCompositeOperation = "source-over";
     ctx.drawImage(layer, 0, 0);
-    if (night > 0.1) {
+    if (night > 0.1 && detail >= 2) {
       for (let index = 0; index < city.count; index++) {
         if (city.overlay[index] !== 2 || index % 7 || city.roadDist[index] === 255 || city.fire[index] || city.flood[index]) continue;
         const x = index % city.size, y = Math.floor(index / city.size);

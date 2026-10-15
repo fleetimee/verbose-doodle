@@ -158,3 +158,14 @@ body.town-home #simulation-status { display: none; }
 
 #tooltip:not([hidden]) { display: block !important; }
 #tooltip { max-width: calc(100vw / var(--game-ui-scale) - 16px); overflow-wrap: anywhere; pointer-events: none; }
+
+.graphics-settings > label { display: block; margin-bottom: 8px; }
+#graphics-quality { width: 100%; min-height: 36px; padding: 6px 8px; font: inherit; color: var(--text); background: var(--panel-flat); border: 1px solid var(--border); border-radius: 6px; }
+#view-settings #graphics-status { color: var(--accent); margin-top: -8px; }
+.graphics-sliders input[type="range"] { width: 100%; min-height: 28px; margin: 4px 0 12px; accent-color: var(--accent); }
+.graphics-sliders .view-scale-label { font-size: 12px; }
+.graphics-sliders output { flex-shrink: 0; }
+#graphics-quality:focus-visible, .graphics-sliders input:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+@media (max-width: 900px) {
+  #graphics-quality, .graphics-sliders input[type="range"] { min-height: 44px; }
+}
