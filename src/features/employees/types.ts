@@ -19,6 +19,8 @@ export interface EmployeeSupervisor {
 export interface EmployeeDetails extends EmployeeSummary {
   active: boolean | null;
   address: string | null;
+  age: number | null;
+  birthYear: number | null;
   certifications: EmployeeCertification[];
   city: string | null;
   district: string | null;

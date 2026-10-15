@@ -1,4 +1,7 @@
 export const employeesMessages = {
+  birthYear: "Tahun lahir",
+  age: "Usia",
+  ageValue: "{years} tahun",
   presenceDetails: "Detail presensi",
   statusMeaning: "Arti status",
   recordedOffice: "Kantor tercatat",

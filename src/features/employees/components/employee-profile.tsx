@@ -164,6 +164,18 @@ export function EmployeeProfile({
                     label={copy.officeCity}
                     value={employee.officeCity}
                   />
+                  <ProfileField
+                    label={copy.birthYear}
+                    value={employee.birthYear?.toString() ?? null}
+                  />
+                  <ProfileField
+                    label={copy.age}
+                    value={
+                      employee.age !== null && employee.age !== undefined
+                        ? formatMessage(copy.ageValue, { years: employee.age })
+                        : null
+                    }
+                  />
                   <ProfileField label={copy.startDate} value={startDate} />
                   <EmploymentFacts employee={employee} />
                 </dl>
