@@ -84,62 +84,258 @@
     };
     switch (type) {
       case "statueofliberty":
-        scene.box(0.3, 0.3, 2.7, 2.7, 5, "#989b86", "#d9d5b8");
-        scene.box(0.85, 0.85, 2.15, 2.15, 18, "#b3a88b", "#ded2b1", { z0: 5 });
-        scene.cylinder(1.5, 1.5, 0.4, 36, "#508f80", "#85b6a0", { z0: 23, rTop: 0.18 });
-        scene.cylinder(1.5, 1.5, 0.18, 8, "#508f80", "#a0cbb0", { z0: 59 });
-        line([[1.35, 1.5, 53], [0.85, 1.5, 69], [0.75, 1.5, 80]], "#70a58f", 5);
-        scene.cylinder(0.75, 1.5, 0.09, 5, "#d0a851", "#ffe18a", { z0: 80 });
-        scene.box(1.7, 1.4, 1.94, 1.85, 12, "#4f897c", "#83b7a0", { z0: 40 });
-        for (let n = 0; n < 7; n++) {
-          const a = n * Math.PI / 3.5;
-          line([[1.5, 1.5, 65], [1.5 + Math.cos(a) * 0.36, 1.5 + Math.sin(a) * 0.36, 71]], "#8fbfa7", 1.2);
+      case "christredeemer": {
+        const liberty = type === "statueofliberty";
+        scene.cylinder(1.5, 1.5, 1.1, 3, liberty ? "#a8a58e" : "#7e916e", liberty ? "#d6cfb0" : "#acb68b");
+        scene.box(0.9, 0.9, 2.1, 2.1, 10, "#9b998b", "#d6cfb8", { z0: 3 });
+        scene.box(1, 1, 2, 2, 3, "#b5b19b", "#e1dac1", { z0: 13 });
+        if (liberty) {
+          scene.box(1.18, 1.18, 1.82, 1.82, 3, "#a9a691", "#ddd5b9", { z0: 16 });
+          scene.custom(40, ctx => {
+            const p = (dx, z) => project(1.5 + dx, 1.5, z);
+            const path = (cmds) => {
+              ctx.beginPath();
+              cmds.forEach(([op, ...a]) => {
+                if (op === "M") ctx.moveTo(...p(a[0], a[1]));
+                else if (op === "L") ctx.lineTo(...p(a[0], a[1]));
+                else ctx.bezierCurveTo(...p(a[0], a[1]), ...p(a[2], a[3]), ...p(a[4], a[5]));
+              });
+            };
+            const fill = (cmds, color, outline) => {
+              path(cmds); ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+              if (outline) { ctx.strokeStyle = outline; ctx.lineWidth = 0.9; ctx.lineJoin = "round"; ctx.stroke(); }
+            };
+            const stroke = (cmds, color, width) => {
+              ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = color; ctx.lineWidth = width;
+              path(cmds); ctx.stroke();
+            };
+            const [lx] = p(-0.4, 0), [rx] = p(0.4, 0);
+            const robe = ctx.createLinearGradient(lx, 0, rx, 0);
+            robe.addColorStop(0, "#3f7b6c"); robe.addColorStop(0.45, "#86bba2"); robe.addColorStop(1, "#437f70");
+            const dark = "#2f5f55", mid = "#5e9985", light = "#b4d9c3";
+            // Raised right arm (viewer's left) behind the head.
+            stroke([["M", -0.22, 54], ["C", -0.42, 60, -0.52, 72, -0.58, 84]], dark, 7.5);
+            stroke([["M", -0.22, 54], ["C", -0.42, 60, -0.52, 72, -0.58, 84]], mid, 5);
+            stroke([["M", -0.24, 56], ["C", -0.42, 62, -0.51, 72, -0.57, 83]], light, 1.4);
+            // Robe body with flared hem, cinched waist and shoulder line.
+            fill([["M", -0.42, 16], ["C", -0.38, 26, -0.3, 34, -0.25, 42], ["C", -0.27, 48, -0.3, 53, -0.27, 57],
+              ["C", -0.12, 59, 0.12, 59, 0.28, 57], ["C", 0.31, 52, 0.28, 46, 0.26, 42],
+              ["C", 0.32, 34, 0.4, 26, 0.44, 16], ["C", 0.2, 13, -0.2, 13, -0.42, 16]], robe, dark);
+            // Drapery folds.
+            for (const [x0, x1, x2, w] of [[-0.3, -0.27, -0.2, 0.9], [-0.15, -0.14, -0.1, 1.1], [0.02, 0.04, 0.06, 1], [0.17, 0.2, 0.26, 1.1], [0.32, 0.34, 0.37, 0.9]]) {
+              stroke([["M", x0, 17], ["C", x1, 26, x1 - 0.02, 34, x2 * 0.6, 43]], dark, w);
+            }
+            stroke([["M", -0.22, 17], ["C", -0.2, 26, -0.17, 34, -0.12, 42]], light, 0.8);
+            stroke([["M", 0.1, 17], ["C", 0.12, 26, 0.14, 34, 0.16, 42]], light, 0.8);
+            // Diagonal toga sash across the chest.
+            stroke([["M", -0.26, 56], ["C", -0.12, 52, 0.08, 46, 0.26, 41]], light, 2.4);
+            stroke([["M", -0.26, 54], ["C", -0.12, 50, 0.08, 44, 0.26, 39]], dark, 0.9);
+            // Left arm holds the tablet against the hip.
+            stroke([["M", 0.27, 55], ["C", 0.38, 52, 0.42, 47, 0.4, 42]], dark, 7);
+            stroke([["M", 0.27, 55], ["C", 0.38, 52, 0.42, 47, 0.4, 42]], mid, 4.6);
+            fill([["M", 0.33, 33], ["L", 0.52, 36], ["L", 0.5, 47], ["L", 0.31, 44]], "#79ad98", dark);
+            stroke([["M", 0.36, 37], ["L", 0.36, 43]], light, 1);
+            stroke([["M", 0.52, 36], ["L", 0.5, 47]], dark, 1.6);
+            // Neck and head.
+            fill([["M", -0.06, 57], ["L", 0.06, 57], ["L", 0.05, 62], ["L", -0.05, 62]], "#5f9a87", dark);
+            const [hx, hy] = p(0, 66);
+            ctx.fillStyle = robe; ctx.beginPath(); ctx.ellipse(hx, hy, 4.4, 6, -0.06, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = dark; ctx.lineWidth = 0.9; ctx.stroke();
+            ctx.lineWidth = 0.9; ctx.beginPath(); ctx.moveTo(hx - 2.2, hy - 0.8); ctx.lineTo(hx - 0.6, hy - 1); ctx.moveTo(hx + 1, hy - 1); ctx.lineTo(hx + 2.4, hy - 0.8); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(hx + 0.2, hy); ctx.lineTo(hx - 0.4, hy + 2); ctx.lineTo(hx + 0.8, hy + 2); ctx.stroke();
+            // Diadem band with seven rays.
+            ctx.strokeStyle = mid; ctx.lineWidth = 2.2; ctx.lineCap = "round";
+            ctx.beginPath(); ctx.ellipse(hx, hy - 3, 4.6, 2.4, 0, Math.PI, Math.PI * 2); ctx.stroke();
+            for (let n = 0; n < 7; n++) {
+              const angle = Math.PI + 0.2 + n * (Math.PI - 0.4) / 6;
+              ctx.strokeStyle = n % 2 ? mid : light; ctx.lineWidth = 1.6;
+              ctx.beginPath(); ctx.moveTo(hx + Math.cos(angle) * 4.6, hy - 3 + Math.sin(angle) * 3);
+              ctx.lineTo(hx + Math.cos(angle) * 11, hy - 3 + Math.sin(angle) * 9.5); ctx.stroke();
+            }
+            // Hand, bronze torch with balcony and flame.
+            stroke([["M", -0.58, 84], ["L", -0.6, 89]], "#b88a3e", 3.2);
+            fill([["M", -0.68, 89], ["L", -0.52, 89], ["L", -0.55, 92], ["L", -0.65, 92]], "#c99a46", "#7a5a24");
+            const [fx, fy] = p(-0.6, 94);
+            const flame = ctx.createRadialGradient(fx, fy - 4, 0.5, fx, fy - 4, 8);
+            flame.addColorStop(0, "#fff4c0"); flame.addColorStop(0.55, "#ffd05a"); flame.addColorStop(1, "#f19a2d");
+            ctx.fillStyle = flame; ctx.beginPath(); ctx.moveTo(fx, fy - 13);
+            ctx.bezierCurveTo(fx + 6, fy - 6, fx + 5, fy + 1, fx, fy + 1);
+            ctx.bezierCurveTo(fx - 5, fy + 1, fx - 5, fy - 6, fx, fy - 13); ctx.fill();
+          });
+          break;
         }
+        scene.custom(40, ctx => {
+          const p = (x, z) => project(x, 1.5, z);
+          const move = (x, z) => ctx.moveTo(...p(x, z));
+          const curve = (x1, z1, x2, z2, x3, z3) => ctx.bezierCurveTo(...p(x1, z1), ...p(x2, z2), ...p(x3, z3));
+          const stroke = (points, color, width) => {
+            ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = "round"; ctx.lineJoin = "round";
+            ctx.beginPath(); move(...points[0]);
+            for (let n = 1; n < points.length; n += 3) curve(...points[n], ...points[n + 1], ...points[n + 2]);
+            ctx.stroke();
+          };
+          const [left] = p(1, 20), [right] = p(2, 20);
+          const stone = ctx.createLinearGradient(left, 0, right, 0);
+          stone.addColorStop(0, liberty ? "#427c70" : "#939fa0");
+          stone.addColorStop(0.42, liberty ? "#90bf9d" : "#e6e8de");
+          stone.addColorStop(1, liberty ? "#4c8d80" : "#b7c1bb");
+          const rings = [[17, 0.44, 0.27], [26, 0.36, 0.23], [39, 0.29, 0.19], [49, 0.31, 0.2], [55, 0.23, 0.16]];
+          const shades = liberty ? ["#447b69", "#548c77", "#75a58a", "#94b89a", "#80ab90", "#689981", "#4b826f", "#3d6c60"] : ["#9da9a3", "#b3bdb2", "#d0d4c4", "#e9e7d6", "#d9ddcc", "#bec9bd", "#a4b3a9", "#8e9e98"];
+          const facets = [];
+          const ringPoint = (ring, angle) => [1.5 + Math.cos(angle) * ring[1], 1.5 + Math.sin(angle) * ring[2], ring[0]];
+          for (let level = 0; level < rings.length - 1; level++) {
+            for (let n = 0; n < 16; n++) {
+              const a = n * Math.PI / 8, b = (n + 1) * Math.PI / 8;
+              const points = [ringPoint(rings[level], a), ringPoint(rings[level], b), ringPoint(rings[level + 1], b), ringPoint(rings[level + 1], a)];
+              facets.push({ points, depth: points.reduce((sum, point) => sum + point[0] + point[1], 0), color: shades[Math.floor(n / 2)] });
+            }
+          }
+          facets.sort((a, b) => a.depth - b.depth);
+          for (const facet of facets) {
+            ctx.fillStyle = facet.color; ctx.beginPath();
+            facet.points.forEach((point, n) => n ? ctx.lineTo(...project(...point)) : ctx.moveTo(...project(...point)));
+            ctx.closePath(); ctx.fill();
+          }
+          for (const [x, shade] of [[1.15, liberty ? "#3e796d" : "#8e9e9b"], [1.38, liberty ? "#b0ceb0" : "#f0f0e3"], [1.7, liberty ? "#377567" : "#9ca9a5"]]) {
+            stroke([[x, 19], [x + 0.12, 29], [x - 0.06, 38], [1.5 + (x - 1.5) * 0.65, 49]], shade, 0.65);
+          }
+          if (liberty) {
+            stroke([[1.22, 52], [0.95, 56], [0.78, 66], [0.69, 76]], "#4c8979", 7);
+            stroke([[1.18, 54], [0.95, 58], [0.81, 68], [0.73, 76]], "#8bb79a", 3);
+            stroke([[1.78, 52], [2.05, 47], [2.12, 43], [1.83, 42]], "#6eaa90", 7);
+          } else {
+            for (const side of [-1, 1]) {
+              stroke([[1.5 + side * 0.2, 53], [1.5 + side * 0.5, 53], [1.5 + side, 53], [1.5 + side * 1.25, 53]], "#9caaa5", 7);
+              stroke([[1.5 + side * 0.2, 55], [1.5 + side * 0.6, 55], [1.5 + side, 55], [1.5 + side * 1.25, 54]], "#e1e5d8", 3);
+              stroke([[1.5 + side * 1.25, 53], [1.5 + side * 1.32, 54], [1.5 + side * 1.35, 54], [1.5 + side * 1.4, 54]], "#d6ded1", 3);
+            }
+          }
+          stroke([[1.5, 56], [1.5, 58], [1.5, 60], [1.5, 61]], liberty ? "#6da78e" : "#c3cec3", 4);
+          const [hx, hy] = p(1.5, 64);
+          ctx.fillStyle = stone; ctx.beginPath(); ctx.ellipse(hx, hy, 4.2, 6, -0.08, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = liberty ? "#3b7569" : "#7d8e89"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(hx - 2, hy - 3); ctx.quadraticCurveTo(hx + 1, hy - 5, hx + 3, hy - 2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(hx + 1, hy - 1); ctx.lineTo(hx + 2, hy + 2); ctx.lineTo(hx, hy + 3); ctx.stroke();
+          if (!liberty) {
+            ctx.strokeStyle = "#89958e"; ctx.lineWidth = 1.8; ctx.lineCap = "round";
+            ctx.beginPath(); ctx.moveTo(hx - 3.5, hy + 1); ctx.bezierCurveTo(hx - 6, hy - 7, hx + 5, hy - 9, hx + 4, hy + 1); ctx.stroke();
+            ctx.fillStyle = "#a1ada2"; ctx.beginPath(); ctx.moveTo(hx - 2, hy + 2);
+            ctx.quadraticCurveTo(hx, hy + 8, hx + 3, hy + 2); ctx.quadraticCurveTo(hx, hy + 4, hx - 2, hy + 2); ctx.fill();
+          }
+          if (liberty) {
+            ctx.strokeStyle = "#9fc7a5"; ctx.lineWidth = 1.4;
+            for (let n = 0; n < 7; n++) {
+              const angle = Math.PI + n * Math.PI / 6;
+              ctx.beginPath(); ctx.moveTo(hx + Math.cos(angle) * 4, hy + Math.sin(angle) * 4);
+              ctx.lineTo(hx + Math.cos(angle) * 10, hy + Math.sin(angle) * 10); ctx.stroke();
+            }
+            stroke([[0.7, 76], [0.7, 78], [0.7, 80], [0.7, 82]], "#ba9140", 3);
+            const [tx, ty] = p(0.7, 85);
+            ctx.fillStyle = "#ffd36f"; ctx.beginPath(); ctx.moveTo(tx, ty - 8);
+            ctx.bezierCurveTo(tx + 7, ty - 1, tx + 4, ty + 5, tx, ty + 4);
+            ctx.bezierCurveTo(tx - 5, ty + 3, tx - 3, ty - 2, tx, ty - 8); ctx.fill();
+          }
+        });
+        if (liberty) scene.box(1.8, 1.62, 2.05, 1.92, 12, "#487f73", "#9abd9e", { z0: 36 });
         break;
-      case "eiffeltower":
-        scene.box(0.1, 0.1, 2.9, 2.9, 2, "#b6aa94", "#ddd2b9");
-        for (const [x, y] of [[0.35, 0.35], [2.65, 0.35], [0.35, 2.65], [2.65, 2.65]]) {
-          line([[x, y, 2], [1.5 + (x - 1.5) * 0.45, 1.5 + (y - 1.5) * 0.45, 34], [1.5, 1.5, 92]], "#90745a", 3);
+      }
+      case "eiffeltower": {
+        const levels = [[2, 1.22], [18, 0.91], [38, 0.57], [52, 0.4], [70, 0.27], [92, 0.17], [116, 0.09], [138, 0.035]];
+        const corner = (sx, sy, level) => [1.5 + sx * level[1], 1.5 + sy * level[1], level[0]];
+        for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+          scene.box(1.5 + sx * 1.22 - 0.14, 1.5 + sy * 1.22 - 0.14, 1.5 + sx * 1.22 + 0.14, 1.5 + sy * 1.22 + 0.14, 3, "#92927e", "#c7bca1");
+          line(levels.map(level => corner(sx, sy, level)), "#6f5540", 3.8, 18);
+          line(levels.map(([z, spread]) => [1.5 + sx * (spread - 0.035), 1.5 + sy * (spread - 0.035), z]), "#bc9870", 1.2, 19);
         }
-        for (const [z, spread] of [[28, 0.65], [48, 0.4], [76, 0.15]]) {
+        for (const [a, b] of [[[-1, -1], [1, -1]], [[-1, -1], [-1, 1]], [[1, -1], [1, 1]], [[-1, 1], [1, 1]]]) {
+          for (let n = 0; n < levels.length - 1; n++) {
+            const low = levels[n], high = levels[n + 1];
+            line([corner(...a, low), corner(...b, high)], "#9e7c56", 0.85, 20);
+            line([corner(...b, low), corner(...a, high)], "#9e7c56", 0.85, 20);
+            line([corner(...a, low), corner(...b, low)], "#70533d", 1, 21);
+          }
+          const arch = Array.from({ length: 25 }, (_, n) => {
+            const t = n / 24;
+            return [1.5 + (a[0] * (1 - t) + b[0] * t) * 1.15,
+              1.5 + (a[1] * (1 - t) + b[1] * t) * 1.15, 5 + Math.sin(Math.PI * t) * 25];
+          });
+          line(arch, "#94714e", 2.2, 22);
+        }
+        for (const [z, spread] of [[38, 0.62], [70, 0.32], [133, 0.1]]) {
           const a = 1.5 - spread, b = 1.5 + spread;
-          scene.box(a, a, b, b, 2, "#8a6e56", "#c1a184", { z0: z });
-          line([[a, a, z], [b, b, z + 14]], "#a3876c", 1);
-          line([[a, b, z], [b, a, z + 14]], "#a3876c", 1);
+          // Open observation decks leave the ironwork visible through the center.
+          for (const [x1, y1, x2, y2] of [[a, a, b, a + 0.08], [a, b - 0.08, b, b], [a, a, a + 0.08, b], [b - 0.08, a, b, b]]) {
+            scene.box(x1, y1, x2, y2, 1.5, "#72553e", "#b99b72", { z0: z, key: 25 });
+          }
+          line([[a, a, z + 3], [b, a, z + 3], [b, b, z + 3], [a, b, z + 3], [a, a, z + 3]], "#8c6c4b", 0.7, 26);
         }
-        scene.antenna(1.5, 1.5, 92, 12);
+        scene.cylinder(1.5, 1.5, 0.065, 4, "#856347", "#bf9c70", { z0: 138 });
+        line([[1.5, 1.5, 142], [1.5, 1.5, 151]], "#937453", 1, 30);
         break;
-      case "greatpyramid":
-        face([[0.15, 0.15, 0.3], [3.85, 0.15, 0.3], [3.85, 3.85, 0.3], [0.15, 3.85, 0.3]], "#dfc48e", -1);
-        face([[0.3, 0.3, 1], [3.7, 0.3, 1], [2, 2, 60]], "#efd093", 10);
-        face([[3.7, 0.3, 1], [3.7, 3.7, 1], [2, 2, 60]], "#c7a367", 11);
-        face([[3.7, 3.7, 1], [0.3, 3.7, 1], [2, 2, 60]], "#d7b477", 12);
-        face([[0.3, 3.7, 1], [0.3, 0.3, 1], [2, 2, 60]], "#e4c285", 13);
-        for (let z = 8; z < 58; z += 8) {
-          const a = 0.3 + 1.7 * (z - 1) / 59, b = 4 - a;
-          line([[a, b, z], [b, b, z], [b, a, z]], "#b79461", 0.6, 20);
+      }
+      case "greatpyramid": {
+        const shade = (hex, amount) => {
+          const channel = (offset) => Math.max(0, Math.min(255, Math.round(parseInt(hex.slice(offset, offset + 2), 16) * amount)));
+          return `rgb(${channel(1)}, ${channel(3)}, ${channel(5)})`;
+        };
+        const inset = (z) => 0.3 + 1.7 * (z - 1) / 59;
+        const courses = 10, rise = 59 / courses;
+        // Sides sorted back-to-front: far (north, west) faces first, lit/shaded near faces last.
+        const sides = [
+          { color: "#efd093", depth: 10, edge: (a, b, z) => [[a, a, z], [b, a, z]] },
+          { color: "#e4c285", depth: 11, edge: (a, b, z) => [[a, b, z], [a, a, z]] },
+          { color: "#c7a367", depth: 12, edge: (a, b, z) => [[b, a, z], [b, b, z]] },
+          { color: "#d7b477", depth: 13, edge: (a, b, z) => [[b, b, z], [a, b, z]] },
+        ];
+        for (const side of sides) {
+          for (let n = 0; n < courses; n++) {
+            const z0 = 1 + n * rise, z1 = z0 + rise;
+            const a0 = inset(z0), b0 = 4 - a0, a1 = inset(z1), b1 = 4 - a1;
+            const [p0, p1] = side.edge(a0, b0, z0), [q0, q1] = side.edge(a1, b1, z1);
+            // Lower courses are darker (ambient occlusion), alternating blocks add masonry rhythm.
+            const tone = (0.86 + 0.14 * n / (courses - 1)) * (n % 2 ? 1 : 0.95);
+            face([p0, p1, q1, q0], shade(side.color, tone), side.depth);
+          }
         }
+        // Lit ridge lines on the corner edges, plus a shadowed entrance on the north face.
+        for (const [sx, sy] of [[0.3, 0.3], [3.7, 0.3], [3.7, 3.7], [0.3, 3.7]]) line([[sx, sy, 1], [2, 2, 60]], "#f7e3b0", 0.8, 21);
+        face([[1.8, 0.62, 1], [2.2, 0.62, 1], [2.2, 0.62, 6], [1.8, 0.62, 6]], "#6e5538", 22);
         break;
-      case "tajmahal":
-        scene.box(0.15, 0.15, 3.85, 3.85, 3, "#bdb8a7", "#eee9d8");
-        scene.box(1.15, 1.05, 2.85, 2.75, 25, "#e5dfcf", "#fff5de", { z0: 3, windows: true });
-        scene.dome(2, 1.9, 0.75, 28, "#f6edd9");
-        scene.antenna(2, 1.9, 48, 9);
-        for (const [x, y] of [[0.45, 0.45], [3.55, 0.45], [0.45, 3.55], [3.55, 3.55]]) {
-          scene.cylinder(x, y, 0.13, 33, "#dbd5c4", "#faf0d8", { z0: 3 });
-          scene.dome(x, y, 0.19, 36, "#f6edd9");
+      }
+      case "tajmahal": {
+        // Stepped marble plinth sits directly on the terrain; no separate ground plate.
+        scene.box(0.55, 0.55, 3.45, 3.45, 1.5, "#d6d0bf", "#f2ecdb");
+        scene.box(0.8, 0.7, 3.2, 2.95, 2.5, "#e3ddcc", "#f8f1dd", { z0: 1.5 });
+        // Reflecting pool and garden axis.
+        face([[1.8, 3.05, 4], [2.2, 3.05, 4], [2.2, 3.95, 4], [1.8, 3.95, 4]], "#5fb0c2", 8);
+        face([[1.86, 3.1, 4.2], [2.14, 3.1, 4.2], [2.14, 3.9, 4.2], [1.86, 3.9, 4.2]], "#8bd1de", 9);
+        // Main mausoleum with recessed iwan arches and a drum under the dome.
+        scene.box(1.2, 1.05, 2.8, 2.7, 24, "#ebe5d4", "#fff7e3", { z0: 4, windows: true });
+        scene.box(1.75, 2.62, 2.25, 2.78, 20, "#d9d2bf", "#f3ead4", { z0: 4 });
+        face([[1.84, 2.79, 6], [2.16, 2.79, 6], [2.16, 2.79, 21], [1.84, 2.79, 21]], "#7d8b92", 24);
+        face([[1.9, 2.8, 7], [2.1, 2.8, 7], [2.1, 2.8, 19], [1.9, 2.8, 19]], "#4d5d66", 25);
+        scene.box(1.62, 1.4, 2.38, 2.1, 5, "#f1ead7", "#fff7e3", { z0: 28 });
+        scene.dome(2, 1.75, 0.55, 33, "#f8f0dc");
+        scene.antenna(2, 1.75, 50, 8);
+        // Small chhatri domes at the corners of the roofline.
+        for (const [x, y] of [[1.35, 1.2], [2.65, 1.2], [1.35, 2.5], [2.65, 2.5]]) {
+          scene.cylinder(x, y, 0.08, 7, "#e2dccb", "#faf0d8", { z0: 28 });
+          scene.dome(x, y, 0.13, 30, "#f6edd9");
         }
-        face([[1.78, 2.8, 3.2], [2.22, 2.8, 3.2], [2.22, 3.8, 3.2], [1.78, 3.8, 3.2]], "#64adba", 30);
-        for (const x of [1, 3]) scene.tree(x, 3.35, 3);
+        // Four tiered minarets with balconies and capped tops.
+        for (const [x, y] of [[0.7, 0.8], [3.3, 0.8], [0.7, 2.85], [3.3, 2.85]]) {
+          scene.cylinder(x, y, 0.15, 14, "#e0dac8", "#faf0d8", { z0: 4 });
+          scene.cylinder(x, y, 0.2, 1, "#c9c2ae", "#f0e6cc", { z0: 17 });
+          scene.cylinder(x, y, 0.13, 12, "#e6e0ce", "#faf0d8", { z0: 18 });
+          scene.cylinder(x, y, 0.18, 1, "#c9c2ae", "#f0e6cc", { z0: 29 });
+          scene.cylinder(x, y, 0.1, 5, "#ece6d4", "#faf0d8", { z0: 30 });
+          scene.dome(x, y, 0.14, 35, "#f6edd9");
+        }
+        // Cypress rows flanking the pool.
+        for (const y of [3.3, 3.7]) for (const x of [1.45, 2.55]) scene.tree(x, y, 3);
         break;
-      case "christredeemer":
-        scene.cylinder(1.5, 1.5, 1.2, 5, "#80916b", "#acb68b");
-        scene.box(1.05, 1.05, 1.95, 1.95, 12, "#9b9f9c", "#d3d5c9", { z0: 5 });
-        scene.cylinder(1.5, 1.5, 0.36, 40, "#b8c1bf", "#e8e9dd", { z0: 17, rTop: 0.2 });
-        scene.cylinder(1.5, 1.5, 0.17, 9, "#c4ccca", "#eef0e4", { z0: 57 });
-        scene.box(0.2, 1.36, 2.8, 1.64, 5, "#b8c1bf", "#e8e9dd", { z0: 50 });
-        for (const x of [0.13, 2.8]) scene.box(x, 1.37, x + 0.1, 1.63, 3, "#b8c1bf", "#edf0e4", { z0: 51 });
-        break;
+      }
+
       case "solarthermal":
         face([[0.1, 0.1, 0.2], [3.9, 0.1, 0.2], [3.9, 3.9, 0.2], [0.1, 3.9, 0.2]], "#c9bb91", -1);
         scene.cylinder(2, 2, 0.22, 58, "#b6b9af", "#e3e3cf");
@@ -295,17 +491,35 @@
         for (const x of [0.2, 1.8]) scene.cylinder(x, 1.8, 0.055, 7, "#79624b", "#f2d6a8");
         scene.box(1.4, 0.25, 1.8, 0.8, 4, "#467988", "#a3ced3");
         break;
-      case "floatingwaterpark":
-        scene.box(0.15, 0.15, 3.85, 3.85, 2, "#d78c35", "#f9d45c");
-        face([[0.5, 0.5, 2.2], [3.5, 0.5, 2.2], [3.5, 3.5, 2.2], [0.5, 3.5, 2.2]], "#4daec7", 3);
-        for (const [x, y, color] of [[0.6, 0.6, "#ef8261"], [2.6, 0.6, "#78cb97"], [0.6, 2.6, "#eb81ac"]]) {
-          scene.box(x, y, x + 0.8, y + 0.8, 5, color, "#fff1ae", { z0: 2 });
+      case "floatingwaterpark": {
+        // Deck ring is four raised strips so the inner walls catch light; the pool between them is
+        // left undrawn so the real sea tiles show through, identical to the surrounding water.
+        const deck = "#c98a34", deckTop = "#f2c75a";
+        for (const [x1, y1, x2, y2] of [[0.15, 0.15, 3.85, 0.55], [0.15, 3.45, 3.85, 3.85], [0.15, 0.55, 0.55, 3.45], [3.45, 0.55, 3.85, 3.45]]) {
+          scene.box(x1, y1, x2, y2, 4, deck, deckTop, { z0: 0 });
         }
-        scene.box(2.65, 2.6, 3.35, 3.3, 18, "#9175bd", "#d5b2eb", { z0: 2 });
-        face([[2.65, 2.6, 20], [3.35, 2.6, 20], [2.5, 1.3, 4], [1.8, 1.3, 4]], "#f17f59", 24);
-        scene.box(1.5, 3.5, 2.5, 3.95, 2, "#936f4f", "#dfc099", { z0: 2 });
-        for (const x of [0.2, 3.8]) for (const y of [0.2, 3.8]) scene.cylinder(x, y, 0.07, 4, "#e27544", "#fff2d1", { z0: 2 });
+        // Inflatable platforms float slightly above the water with a pale rim.
+        for (const [x, y, color, rim] of [[0.75, 0.75, "#ef8261", "#ffd0b8"], [2.55, 0.75, "#78cb97", "#cdf3d9"], [0.75, 2.45, "#eb81ac", "#ffd1e3"]]) {
+          scene.box(x, y, x + 0.8, y + 0.8, 5, color, rim, { z0: 1 });
+          scene.box(x + 0.1, y + 0.1, x + 0.7, y + 0.7, 1, rim, "#ffffff", { z0: 6 });
+        }
+        // Slide tower with a stairway, railings and a banked slide into the pool.
+        scene.box(2.65, 2.55, 3.3, 3.2, 20, "#8465b1", "#d5b2eb", { z0: 1 });
+        scene.box(2.6, 2.5, 3.35, 3.25, 2, "#6c4f98", "#b894e0", { z0: 21 });
+        scene.box(3.05, 2.1, 3.25, 2.55, 12, "#a98ad3", "#e5cffa", { z0: 1 });
+        line([[3.05, 2.1, 13], [3.05, 2.55, 21]], "#4e3877", 1.4, 27);
+        face([[2.7, 2.6, 23], [3.25, 2.6, 23], [2.45, 1.35, 3], [1.85, 1.35, 3]], "#f17f59", 24);
+        face([[2.7, 2.6, 23], [2.6, 2.6, 23], [1.75, 1.35, 3], [1.85, 1.35, 3]], "#c9573a", 25);
+        line([[2.7, 2.6, 23], [1.85, 1.35, 3]], "#ffd0b8", 1.2, 26);
+        line([[3.25, 2.6, 23], [2.45, 1.35, 3]], "#b34a30", 1.2, 26);
+        // Entry dock, parasol lounge and buoys along the rim.
+        scene.box(1.5, 3.45, 2.5, 3.95, 2, "#936f4f", "#dfc099", { z0: 3 });
+        scene.cylinder(1.1, 3.1, 0.035, 9, "#f4efe0", "#ffffff", { z0: 1.5 });
+        scene.cylinder(1.1, 3.1, 0.2, 1, "#e85d5d", "#ffb0a0", { z0: 10 });
+        for (const x of [0.2, 3.8]) for (const y of [0.2, 3.8]) scene.cylinder(x, y, 0.07, 6, "#e27544", "#fff2d1", { z0: 4 });
         break;
+      }
+
       case "jetski":
       case "bananaboat": {
         scene.box(0.08, 0.12, 0.38, 2.88, 3, "#926d49", "#d9b583");

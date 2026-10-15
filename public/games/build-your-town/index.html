@@ -12,8 +12,8 @@
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="./src/ui/loading-screen.css?v=1">
   <script src="./src/ui/loading-screen.js?v=1"></script>
-  <script type="module" crossorigin src="./assets/index-DCrPNbHR.js?v=wide-power-1"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-CanL7pau.css">
+  <script type="module" crossorigin src="./assets/index-DCrPNbHR.js?v=wide-power-5"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CanL7pau.css?v=tip-2">
   <link rel="stylesheet" href="./src/ui/start-screen.css?v=home-return-1">
   <script src="./src/world/start-city.js?v=1"></script>
   <script src="./src/ui/start-screen.js?v=home-return-1"></script>
@@ -23,22 +23,23 @@
   <script src="./src/platform/music-score.js?v=3"></script>
   <script src="./src/platform/audio.js?v=tab-volume-4"></script>
   <script src="./src/world/power-grid.js?v=1"></script>
-  <script src="./src/progression/endgame.js?v=wide-power-1"></script>
+  <script src="./src/progression/endgame.js?v=landmark-sculptures-3"></script>
   <link rel="stylesheet" href="./src/ui/query-coverage.css?v=query-layer-4">
   <script src="./src/ui/query-coverage.js?v=3"></script>
   <link rel="stylesheet" href="./src/ui/city-journal.css?v=1">
   <script src="./src/ui/city-journal.js?v=1"></script>
-  <link rel="stylesheet" href="./src/ui/view-controls.css?v=tooltips-responsive-1">
+  <link rel="stylesheet" href="./src/ui/view-controls.css?v=playback-layout-2">
   <script src="./src/transport/rail-signals.js?v=1"></script>
   <script src="./src/transport/train-fleet.js?v=rail-signals-6"></script>
   <script src="./src/world/map-rotation.js?v=train-fleet-3"></script>
   <script src="./src/ui/view-controls.js?v=encounter-options-2"></script>
   <script src="./src/world/water-recreation.js?v=1"></script>
   <script src="./src/world/recreation.js?v=water-recreation-2"></script>
-  <link rel="stylesheet" href="./src/world/day-night.css?v=1">
+  <link rel="stylesheet" href="./src/world/day-night.css?v=compact-1">
   <script src="./src/world/calendar.js?v=2"></script>
   <script src="./src/world/zone-growth.js?v=1"></script>
-  <script src="./src/world/day-night.js?v=calendar-1"></script>
+  <script src="./src/world/day-night.js?v=compact-1"></script>
+  <script src="./src/world/weather.js?v=7"></script>
   <script src="./src/world/building-activity.js?v=day-night-1"></script>
   <script src="./src/transport/sea-rail.js?v=1"></script>
   <script src="./src/transport/road-layout.js?v=paved-median-5"></script>
@@ -53,7 +54,7 @@
   <script src="./src/ui/onboarding.js"></script>
   <script src="./src/progression/scenarios.js?v=game-dialogs-3"></script>
   <script src="./src/platform/save-manager.js?v=home-return-1"></script>
-  <script src="./src/progression/cheats.js"></script>
+  <script src="./src/progression/cheats.js?v=weather-1"></script>
   <script src="./src/disasters/disaster-recovery.js?v=optional-1"></script>
   <script src="./src/disasters/fire-response.js?v=optional-1"></script>
   <script src="./src/ui/topbar-menu.js?v=pause-indicator-4"></script>
@@ -120,7 +121,7 @@
     }
     #flyout {
       width: 340px;
-      max-height: min(560px, calc(100dvh - 96px));
+      max-height: min(560px, calc(100dvh / var(--game-ui-scale) - 96px));
       overflow-y: auto;
       overscroll-behavior: contain;
       scrollbar-gutter: stable;

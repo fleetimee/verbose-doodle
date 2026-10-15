@@ -58,6 +58,11 @@
     const amount = Math.round(city.money).toLocaleString(lang === "fr" ? "fr-FR" : "en-US");
     document.getElementById("cheat-funds").textContent = `${city.name} · ${lang === "fr" ? `Fonds : ${amount} $` : `Funds: $${amount}`}`;
     document.getElementById("cheat-disasters").checked = city.randomDisasters;
+    const override = window.__townWeather?.getOverride();
+    if (override) {
+      document.getElementById("cheat-season").value = override.season ?? "";
+      document.getElementById("cheat-weather").value = override.kind ?? "";
+    }
   };
 
   const applyCheat = (cheat) => {
@@ -106,6 +111,12 @@
         <h3>Construction</h3>
         <div class="cheat-actions">${CHEATS.slice(3, 5).map((cheat) => `<button type="button" data-cheat="${cheat.id}">${cheat[lang]}</button>`).join("")}</div>
         <p class="cheat-note">${lang === "fr" ? "Le développement augmente d'un niveau les logements, commerces et industries déjà zonés. Fournissez toujours routes, emplois, eau et électricité pour conserver cette croissance." : "Growth raises existing residential, commercial and industrial zones by one level. Keep roads, jobs, water and power available to sustain it."}</p>
+        <h3>${lang === "fr" ? "Saison et météo" : "Season and weather"}</h3>
+        <div class="cheat-selects">
+          <label>${lang === "fr" ? "Saison" : "Season"}<select id="cheat-season"></select></label>
+          <label>${lang === "fr" ? "Météo" : "Weather"}<select id="cheat-weather"></select></label>
+        </div>
+        <p class="cheat-note">${lang === "fr" ? "Force la saison et la météo affichées, sans changer le calendrier. Remettez « Auto » pour suivre la ville. Réinitialisé au rechargement." : "Forces the displayed season and weather without changing the calendar. Set back to Auto to follow the city. Resets on reload."}</p>
         <h3>${lang === "fr" ? "Catastrophes" : "Disasters"}</h3>
         <div class="cheat-actions">${CHEATS.slice(5).map((cheat) => `<button type="button" data-cheat="${cheat.id}">${cheat[lang]}</button>`).join("")}</div>
         <label class="cheat-toggle"><input type="checkbox" id="cheat-disasters"> ${lang === "fr" ? "Catastrophes aléatoires" : "Random disasters"}</label>
@@ -135,6 +146,21 @@
       const cheat = CHEATS.find((item) => item.id === id);
       if (cheat) applyCheat(cheat);
     });
+    const weather = window.__townWeather;
+    if (weather) {
+      const fill = (id, items) => {
+        const select = document.getElementById(id);
+        select.append(new Option("Auto", ""), ...items.map((item) => new Option(item[lang], item.id)));
+        select.addEventListener("change", () => {
+          weather.setOverride({ [id === "cheat-season" ? "season" : "kind"]: select.value || null });
+          const label = select.selectedOptions[0].textContent;
+          document.getElementById("cheat-result").textContent = label;
+          window.__ui?.toast(label, "good", { ms: 2000 });
+        });
+      };
+      fill("cheat-season", weather.options.seasons);
+      fill("cheat-weather", weather.options.kinds);
+    } else document.querySelector(".cheat-selects").hidden = true;
     document.getElementById("cheat-disasters").addEventListener("change", (event) => {
       const enabled = event.target.checked;
       applyCheat({ en: enabled ? "Random disasters enabled" : "Random disasters disabled", fr: enabled ? "Catastrophes aléatoires activées" : "Catastrophes aléatoires désactivées", apply: (city) => { city.randomDisasters = enabled; } });
@@ -166,8 +192,11 @@
     #panel-cheats .cheat-actions { display: flex; flex-direction: column; gap: 6px; }
     #panel-cheats .cheat-actions button { min-height: 44px; text-align: left; }
     #panel-cheats .cheat-toggle { display: flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 10px; }
+    #panel-cheats .cheat-selects { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    #panel-cheats .cheat-selects label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: 12px; }
+    #panel-cheats select { min-height: 44px; }
     #panel-cheats input { width: 18px; height: 18px; accent-color: var(--teal); }
-    #panel-cheats button:focus-visible, #panel-cheats input:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+    #panel-cheats button:focus-visible, #panel-cheats input:focus-visible, #panel-cheats select:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
     #cheat-result { color: var(--ok); min-height: 18px; }
     @media (max-width: 900px) { #panel-cheats { width: auto; max-height: 65dvh; } }
   `;

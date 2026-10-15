@@ -1,4 +1,4 @@
-#town-time { display: flex; align-items: center; gap: 8px; padding: 0 6px; }
+#town-time { display: flex; align-items: center; gap: 4px; padding: 0 4px; }
 .town-time-reading { display: flex; flex-direction: column; min-width: 42px; }
 #town-time time { color: var(--text); font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
 #town-time .town-time-reading > span { color: #bec6d5; font-size: 10px; }
@@ -10,3 +10,7 @@
   #town-time { order: -1; position: sticky; left: 0; z-index: 1; background: #20293c; }
   #town-time button { max-width: 90px; white-space: normal; line-height: 1.2; }
 }
+#town-time .town-icon { width: 30px; min-width: 30px; padding: 4px 0; text-align: center; line-height: 1; font-size: 14px; }
+#town-time .town-weather[aria-pressed="true"] { border-color: #526079; }
+#town-time .town-icon[aria-pressed="false"].town-weather { opacity: 0.45; }
+@media (max-width: 900px) { #town-time .town-icon { width: 40px; min-width: 40px; } }

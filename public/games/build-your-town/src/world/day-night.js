@@ -17,9 +17,11 @@
     const time = hour(city), minutes = Math.floor(time * 60);
     clock.textContent = `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
     phase.textContent = time < 6 || time >= 20 ? text("Night", "Nuit") : time < 8 ? text("Dawn", "Aube") : time < 18 ? text("Day", "Jour") : text("Dusk", "Crépuscule");
-    toggle.textContent = daylight ? text("Daylight view", "Vue de jour") : text("Cycle view", "Vue cyclique");
+    toggle.textContent = daylight ? "🔆" : "🌓";
     toggle.setAttribute("aria-pressed", String(daylight));
-    toggle.title = text("Keep the map bright while the city clock continues", "Gardez la carte éclairée sans arrêter l’horloge");
+    const mode = daylight ? text("Daylight view", "Vue de jour") : text("Cycle view", "Vue cyclique");
+    toggle.setAttribute("aria-label", mode);
+    toggle.title = `${mode} – ${text("Keep the map bright while the city clock continues", "Gardez la carte éclairée sans arrêter l’horloge")}`;
   }
   function update(renderer, city) {
     sync(city);
@@ -102,7 +104,7 @@
     const group = document.createElement("div"); group.id = "town-time";
     clock = document.createElement("time"); phase = document.createElement("span");
     const reading = document.createElement("span"); reading.className = "town-time-reading"; reading.append(clock, phase);
-    toggle = document.createElement("button"); toggle.type = "button";
+    toggle = document.createElement("button"); toggle.type = "button"; toggle.className = "town-icon";
     toggle.addEventListener("click", () => {
       daylight = !daylight;
       try { localStorage.setItem("citybuilder.daylightView", String(daylight)); } catch {}
