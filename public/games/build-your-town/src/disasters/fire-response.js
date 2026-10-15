@@ -150,7 +150,10 @@
       const index = window.__disasterRecovery.progress(city).next;
       if (index < 0) return;
       const task = city.disasterRecovery[index];
-      const tool = task.type ?? ({ 2: "road", 3: "res", 4: "com", 5: "ind", 7: "highway" }[task.overlay]) ?? (task.rail ? "rail" : "wire");
+      const missingRail = task.rail && city.overlay[index] === task.overlay &&
+        (!city.rail[index] || (window.__railTransit?.kind(city, index) ?? 0) !== (task.railKind ?? 0));
+      const railTool = task.railKind === 1 ? "highspeedRail" : task.railKind === 2 ? "elevatedLrt" : "rail";
+      const tool = missingRail ? railTool : task.type ?? ({ 2: "road", 3: "res", 4: "com", 5: "ind", 7: "highway" }[task.overlay]) ?? (task.rail ? task.railKind === 1 ? "highspeedRail" : task.railKind === 2 ? "elevatedLrt" : "rail" : "wire");
       closeOtherPanels();
       window.__ui.handlers.onTool(tool, false);
       window.__focusCityTile(index % city.size, Math.floor(index / city.size));

@@ -107,3 +107,14 @@ Keep building finances within the incumbent panel system, entered through Budget
 **The Forecast Rule.** Label every figure as a monthly forecast, not lifetime earnings. Income combines taxes and exports; show coal fuel savings separately. Net combines income and savings, then subtracts upkeep adjusted for difficulty and service funding. Exports and savings reflect the latest simulated hour. Query details expose taxes, export income, fuel savings, upkeep, and net contribution as a two-column ledger. State that services, stations, and freight terminals earn no fares or service fees; producer facilities receive export income. Keep citywide costs and any unattributed trade outside the building ranking visibly explained.
 
 Preserve readable English and French labels, locale-formatted currency, and explanatory notes at the existing compact scale. On mobile, retain all comparison columns in a horizontally scrollable, keyboard-focusable table region within the vertically scrolling panel. Keep focus and both scroll positions stable when forecasts refresh, and preserve visible focus indicators and Escape dismissal.
+
+## Dedicated passenger rail
+
+Keep the three rail systems visually distinct: ordinary timber-sleeper tracks,
+light ballast/slab high-speed rail with white/blue tapered train cabs, and elevated
+LRT viaducts with teal urban trains. LRT platforms align with the 24-unit viaduct
+deck; show structural supports and street-level stairs/lift access so the station
+reads as elevated. High-speed stations stay at ground level. Use the existing
+isometric model primitives, transport chooser, amber selection, and bilingual
+query help. Track and station descriptions must name their matching system and
+flat-terrain restrictions.

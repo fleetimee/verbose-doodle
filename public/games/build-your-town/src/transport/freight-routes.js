@@ -15,7 +15,7 @@
     const count = city.count, total = count * 2;
     const valid = node => {
       const tile = node % count;
-      return !city.fire[tile] && !city.flood[tile] && (node >= count ? city.rail[tile] === 1 : city.overlay[tile] === 2 || city.overlay[tile] === 7);
+      return !city.fire[tile] && !city.flood[tile] && (node >= count ? city.rail[tile] === 1 && !window.__railTransit?.kind(city, tile) : city.overlay[tile] === 2 || city.overlay[tile] === 7);
     };
     const entry = building => typeof building === "number" ? building : building.entry ?? city.entry[city.idx(building.x, building.y)];
     const transfers = new Map(), exporters = [];
@@ -29,7 +29,7 @@
       for (let y = building.y - 1; y <= building.y + def.size; y++) for (let x = building.x - 1; x <= building.x + def.size; x++) {
         if (!city.inBounds(x, y)) continue;
         const tile = city.idx(x, y);
-        if (city.rail[tile]) { link(start, tile + count); link(tile + count, start); }
+        if (city.rail[tile] && !window.__railTransit?.kind(city, tile)) { link(start, tile + count); link(tile + count, start); }
       }
     }
     const directedLinks = new Map();
@@ -37,7 +37,7 @@
       if (directed && directedLinks.has(node)) return directedLinks.get(node);
       const rail = node >= count, index = node % count;
       const links = [...adjacent(city, index).map(tile => tile + (rail ? count : 0)).filter(next => valid(next) &&
-        (rail || !directed || (window.__roadLayout?.canStep(city, node, next) ?? true))), ...transfers.get(node) ?? []];
+        (rail ? (window.__doubleRail?.canStep(city, index % city.size, Math.floor(index / city.size), (next % count) % city.size, Math.floor((next % count) / city.size)) ?? true) : !directed || (window.__roadLayout?.canStep(city, node, next) ?? true))), ...transfers.get(node) ?? []];
       if (directed) directedLinks.set(node, links);
       return links;
     };

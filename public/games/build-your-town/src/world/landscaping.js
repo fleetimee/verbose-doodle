@@ -26,8 +26,8 @@
       definitions[type] = { size: 1, cost: plant.cost, upkeep: 0, category: "park" };
       messages[`struct.${type}`] = plant.name;
       messages[`struct.${type}.desc`] = [
-        "Sur un terrain libre ou au centre d'une route double. Aucun entretien.",
-        "Plant on empty land or a merged-road median. No upkeep.",
+        "Sur un terrain libre, un terre-plein routier ou entre deux voies ferrées. Aucun entretien.",
+        "Plant on empty land, a merged-road median, or a double-track middle strip. No upkeep.",
       ];
     }
     messages["group.landscaping"] = ["Aménagement paysager", "Landscaping"];
@@ -52,6 +52,12 @@
     const plant = plants[tool];
     if (!plant || !city.inBounds(position.x, position.y)) return null;
     const index = city.idx(position.x, position.y);
+    const railMedian = window.__doubleRail?.median(city, position.x, position.y);
+    if (railMedian) {
+      const unchanged = city.medianPlants?.[railMedian.owner] === plant.variant;
+      return { tool, tiles: unchanged ? [] : [railMedian.owner], footprint: [railMedian.owner], cost: plant.cost,
+        valid: !unchanged, medianOwner: railMedian.owner, reason: unchanged ? translate("landscape.same") : undefined };
+    }
     if (city.overlay[index] !== 2) return null;
     const layout = window.__roadLayout?.wide(city, position.x, position.y);
     let owner = index;
@@ -76,6 +82,8 @@
 
   function clear(city, index) {
     if (!city.medianPlants) return;
+    const railMedian = window.__doubleRail?.median(city, index % city.size, Math.floor(index / city.size));
+    if (railMedian) { delete city.medianPlants[railMedian.owner]; delete city.medianPlants[railMedian.other]; return; }
     const layout = window.__roadLayout?.wide(city, index % city.size, Math.floor(index / city.size));
     const owner = layout?.side === 0 ? index + (layout.axis === "x" ? city.size : 1) : index;
     delete city.medianPlants[owner];

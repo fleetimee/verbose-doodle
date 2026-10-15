@@ -279,3 +279,71 @@ readable. Check keyboard interaction, French labels, and mobile panel scrolling.
 Compare foreground 1× gameplay, pause, and a hidden tab when checking adaptation;
 compare an exported disposable city's simulation at the same elapsed game time
 across graphics settings. Never benchmark or advance a player's save.
+
+## Double-track railways
+
+Transport includes **Double-track railway**, which lays a straight, two-tile-wide
+pair on land. Drag along the desired direction; the dominant drag axis sets the
+alignment and the second track sits on the positive map-coordinate side. Each
+new rail tile costs $25 ($50 per new pair); existing rail is retained and free.
+The whole preview is rejected if either lane is obstructed or outside the map.
+Use the ordinary Railway tool for bridges, bends, and junctions. Parallel runs
+of at least three tiles render as separate tracks with independent ends, retaining
+outside branches. Trains and signals follow these connections. Saves use the
+existing rail tiles and require no migration. Parallel tracks on flat land
+sit closer together, with a narrow middle strip. Use Landscaping trees or bushes
+on either track to plant that strip, or lay power lines on the rail tiles to put
+poles in the middle. These remain functional power lines. Planting is saved in
+`medianPlants`; demolishing either track clears its planting. Junctions, crossings,
+slopes, and bridges retain normal track placement; trains follow the shifted
+tracks and taper back at connections to ordinary track.
+
+Manual QA: in a disposable city, drag horizontal and vertical pairs in both
+directions. Check preview, funds, existing-track extension, blocked land, water,
+map edges, road crossings, single-track branches, trains/signals, rotation, and
+save/export/load. Keep player saves separate from QA.
+
+## High-speed rail and elevated LRT
+
+Transport also includes two dedicated passenger systems:
+
+| System | Track | Station | Visible train |
+| --- | --- | --- | --- |
+| High-speed rail | $80/tile, ground level | High-speed station: $5,000, $40/month, 4 MW | Five-car white/blue Shinkansen-style set with tapered cabs |
+| Elevated LRT | $120/tile, raised 24 drawing units | Elevated LRT station: $2,500, $24/month, 2 MW | Three-car teal light-rail set with wide windows and doors |
+
+Both use flat land at a single ground elevation and their own matching station.
+Stations are 2×2 and unlock at 5,000 peak residents, like the ordinary rail station.
+Place the station beside its matching track and a road/highway at the same ground
+elevation, then supply electricity. A line needs at least 12 connected tiles and
+an operating matching station to show a train. Up to four dedicated passenger
+trains appear across connected systems; these are visual representations, not
+scheduled services. Ordinary train designs remain on ordinary rail.
+
+LRT tracks have viaduct decks and piers; the station has platforms at that deck
+height, a canopy, street stairs, and a lift tower. LRT can run over roads and
+highways. Its tiles cannot also contain another railway, power line, or building.
+High-speed rail stays at ground level and needs a clear corridor. Water and
+sloping routes are currently rejected by both tools. Use ordinary rail for those
+routes. The double-track landscaping strip remains for ordinary parallel rail.
+
+Passenger trips board at matching powered, road-connected stations. Different
+track systems do not join when adjacent; road connections can link their stations
+for interchanges. Freight continues using ordinary rail. Track upkeep uses the
+existing per-rail-tile rate; stations have the monthly upkeep above. High-speed
+train animation runs faster than the ordinary fleet; this does not change the
+underlying passenger route-cost model.
+
+Sparse `railKinds` save entries distinguish dedicated track tiles while retaining
+the existing `rail` occupancy array. Old saves load as ordinary rail. Export/load,
+rotation, demolition/rebuilding, and manual disaster recovery preserve or restore
+the appropriate system. Demolition retains the existing behavior of clearing all
+infrastructure on that tile, including a road beneath LRT.
+
+Manual QA in a disposable city: build both systems with their matching stations,
+power and road access; observe their train styles, reversal at line ends, signals,
+pause/speed controls, and all four camera orientations. Check station platform
+height against LRT decks, ground traffic under viaducts, save/export/load, loss of
+station power or access, mismatched station rejection, separate neighboring rail
+systems, freight exclusion, demolition, and disaster rebuilding. Keep player
+saves separate from QA.

@@ -4,6 +4,8 @@
     { body: "#e2e8ee", stripe: "#2874bd", roof: "#8b9aa8", height: 8, cars: 3 },
     { body: "#cce5df", stripe: "#178776", roof: "#566d70", height: 9, cars: 4 },
     { body: "#f5eee2", stripe: "#bd3e42", roof: "#acafb6", height: 7, cars: 5 },
+    { body: "#f5f8fa", stripe: "#256bc1", roof: "#dbe7ec", height: 7.5, cars: 5 },
+    { body: "#d9eeed", stripe: "#159d95", roof: "#829fa9", height: 8.5, cars: 3 },
   ];
   const bound = new WeakSet();
   function reverse(walker) {
@@ -42,6 +44,7 @@
     if (!city.inBounds(x, y)) return null;
     const index = city.idx(x, y);
     if (!city.rail[index]) return null;
+    if (window.__railTransit?.kind(city, index) === 2) return city.base(x, y) + 3;
     const ramp = mask => {
       const heights = [1.5, 1.5, 1.5, 1.5];
       if (mask & 1) heights[0] = heights[1] = 0;
@@ -80,7 +83,8 @@
     const step = renderer.stepWalker.bind(renderer);
     renderer.stepWalker = (city, walker, delta) => {
       if (walker.kind !== "train") return step(city, walker, delta);
-      if (!renderer.walkable(city, "train", walker.x, walker.y)) return;
+      if (!renderer.walkable(city, "train", walker.x, walker.y) ||
+          (window.__railTransit?.kind(city, city.idx(walker.x, walker.y)) ?? 0) !== (walker.transitType ?? 0)) return;
       walker.signalWaiting = !window.__railSignals.canMove(renderer, city, walker);
       if (walker.signalWaiting) return;
       walker.t += walker.speed * delta;
@@ -88,7 +92,8 @@
         const remaining = walker.t - 1;
         const dx = walker.x - walker.px, dy = walker.y - walker.py;
         const forward = [[dx, dy], [-dy, dx], [dy, -dx]].some(([x, y]) =>
-          renderer.walkable(city, "train", walker.x + x, walker.y + y));
+          renderer.walkable(city, "train", walker.x + x, walker.y + y) &&
+          (window.__doubleRail?.canStep(city, walker.x, walker.y, walker.x + x, walker.y + y) ?? true));
         if (!forward && reverse(walker)) walker.t += remaining;
         else if (renderer.pickNext(city, walker, false)) walker.t = remaining;
         else { walker.t = 0.999; break; }
@@ -104,7 +109,7 @@
     const place = renderer.placeCars.bind(renderer);
     renderer.placeCars = (city, walker) => {
       if (walker.kind !== "train") return place(city, walker);
-      const variant = walker.fleetVariant ??= renderer.walkers.filter(item => item.kind === "train").indexOf(walker) % palettes.length;
+      const variant = walker.fleetVariant ??= renderer.walkers.filter(item => item.kind === "train").indexOf(walker) % 3;
       const count = palettes[variant].cars;
       for (let car = 0; car < count; car++) {
         let remaining = car * spacing, point, direction;
@@ -121,6 +126,7 @@
           remaining -= length;
         }
         if (!point) continue;
+        point = window.__doubleRail?.position(city, point) ?? point;
         const x = Math.floor(point.x), y = Math.floor(point.y);
         if (!city.inBounds(x, y)) continue;
         const axis = Math.abs(direction.x) >= Math.abs(direction.y) ? "x" : "y";
@@ -161,6 +167,40 @@
     const diesel = cab && variant === 2;
     const commuter = cab && variant === 0;
     box(0.28, -0.28, 0, 1.4, "#2a323b", "#2a323b");
+    if (variant === 3) {
+      const front = cab ? 0.05 : 0.3;
+      box(front, -0.3, 1.4, 7.5, palette.body, palette.roof);
+      box(front, -0.3, 2.5, 3.2, palette.stripe, palette.stripe);
+      if (cab) {
+        polygon(ctx, [point(0.05, 0.11, 1.4), point(0.43, 0.055, 1.4), point(0.39, 0.055, 2.8), point(0.05, 0.11, 7.5)], palette.body, "#698795", 0.4);
+        polygon(ctx, [point(0.05, -0.11, 7.5), point(0.05, 0.11, 7.5), point(0.39, 0.055, 2.8), point(0.39, -0.055, 2.8)], "#ecf4f8", "#698795", 0.4);
+        polygon(ctx, [point(0.07, -0.08, 7.1), point(0.07, 0.08, 7.1), point(0.17, 0.065, 5.5), point(0.17, -0.065, 5.5)], "#1d4059");
+        polygon(ctx, [point(0.05, 0.112, 2.5), point(0.4, 0.057, 1.8), point(0.39, 0.057, 2.3), point(0.05, 0.112, 3.2)], palette.stripe);
+        polygon(ctx, [point(0.3, -0.04, 2.5), point(0.35, -0.035, 2), point(0.35, 0.035, 2), point(0.3, 0.04, 2.5)], rear ? "#e45c62" : "#f8edc8");
+      }
+      for (let along = -0.25; along < (cab ? 0.01 : 0.23); along += 0.1) polygon(ctx,
+        [point(along, 0.112, 4.3), point(along + 0.06, 0.112, 4.3), point(along + 0.06, 0.112, 6.3), point(along, 0.112, 6.3)], "#23485f");
+      if (!cab) box(0.08, -0.08, 7.5, 8.2, "#91a7b3", "#b0c5cf");
+      return;
+    }
+    if (variant === 4) {
+      box(0.29, -0.29, 1.4, 8.5, palette.body, palette.roof);
+      box(0.29, -0.29, 1.6, 3, palette.stripe, palette.stripe);
+      box(0.29, -0.29, 7.8, 8.5, palette.stripe, palette.stripe);
+      if (cab) polygon(ctx, [point(0.291, -0.1, 3.3), point(0.291, 0.1, 3.3), point(0.291, 0.1, 7.6), point(0.291, -0.1, 7.6)], "#203e50", "#527e8b", 0.4);
+      for (const along of [-0.25, 0.05]) polygon(ctx,
+        [point(along, 0.112, 3.5), point(along + 0.16, 0.112, 3.5), point(along + 0.16, 0.112, 7.4), point(along, 0.112, 7.4)], "#244958");
+      polygon(ctx, [point(-0.06, 0.113, 1.8), point(0.04, 0.113, 1.8), point(0.04, 0.113, 7.6), point(-0.06, 0.113, 7.6)], "#519b9b", "#1d636b", 0.4);
+      box(0.13, -0.13, 8.5, 9.6, "#607e8d", "#abc4cc");
+      if (!cab) {
+        const roof = [point(-0.08, 0, 9.8), point(0, 0, 12.2), point(0.1, 0, 10), point(-0.08, 0, 9.8)];
+        ctx.strokeStyle = "#496573"; ctx.lineWidth = 0.8; ctx.beginPath();
+        roof.forEach((p, i) => i ? ctx.lineTo(...p) : ctx.moveTo(...p)); ctx.stroke();
+      }
+      if (cab) for (const across of [-0.075, 0.055]) polygon(ctx,
+        [point(0.292, across, 2.3), point(0.292, across + 0.02, 2.3), point(0.292, across + 0.02, 3), point(0.292, across, 3)], rear ? "#e76e66" : "#fff2cf");
+      return;
+    }
     if (diesel) {
       box(0.3, -0.3, 1.4, 3.2, "#ce5b32", "#ce5b32");
       box(0.3, -0.3, 3.2, 5.7, "#e6e4dc", "#a0a6aa");

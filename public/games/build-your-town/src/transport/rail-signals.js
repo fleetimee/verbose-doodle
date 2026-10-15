@@ -1,10 +1,10 @@
 (() => {
   const states = new WeakMap();
   const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-  const length = train => [3, 4, 5][train.fleetVariant ?? 0] * 0.68;
+  const length = train => [3, 4, 5, 5, 3][train.fleetVariant ?? 0] * 0.68;
   function railSignature(city) {
     let signature = 0;
-    for (let index = 0; index < city.count; index++) if (city.rail[index]) signature = (signature + Math.imul(index + 1, index + 3)) | 0;
+    for (let index = 0; index < city.count; index++) if (city.rail[index]) signature = (signature + Math.imul(index + 1, index + 3 + (window.__railTransit?.kind(city, index) ?? 0))) | 0;
     return signature;
   }
   function network(city, signature = railSignature(city)) {
@@ -12,7 +12,8 @@
     for (let index = 0; index < city.count; index++) {
       if (!city.rail[index]) continue;
       const x = index % city.size, y = Math.floor(index / city.size);
-      neighbors.set(index, directions.filter(([dx, dy]) => city.inBounds(x + dx, y + dy) && city.rail[city.idx(x + dx, y + dy)])
+      neighbors.set(index, directions.filter(([dx, dy]) => city.inBounds(x + dx, y + dy) && city.rail[city.idx(x + dx, y + dy)] &&
+        (window.__doubleRail?.canStep(city, x, y, x + dx, y + dy) ?? true))
         .map(([dx, dy]) => city.idx(x + dx, y + dy)));
     }
     const blocks = new Map();
@@ -86,7 +87,8 @@
       if (block !== undefined) required.add(block);
       if (!renderer.pickNext(city, probe, false)) {
         const dx = probe.x - probe.px, dy = probe.y - probe.py;
-        if ([[dx, dy], [-dy, dx], [dy, -dx]].some(([x, y]) => renderer.walkable(city, "train", probe.x + x, probe.y + y))) return false;
+        if ([[dx, dy], [-dy, dx], [dy, -dx]].some(([x, y]) => renderer.walkable(city, "train", probe.x + x, probe.y + y) &&
+            (window.__doubleRail?.canStep(city, probe.x, probe.y, probe.x + x, probe.y + y) ?? true))) return false;
         break;
       }
     }
@@ -127,7 +129,8 @@
 
       // Candidates in priority order: straight [dx, dy], right branch [dy, -dx], left branch [-dy, dx]
       const candidates = [[dx, dy], [dy, -dx], [-dy, dx]]
-        .filter(([vx, vy]) => renderer.walkable(city, "train", train.x + vx, train.y + vy))
+        .filter(([vx, vy]) => renderer.walkable(city, "train", train.x + vx, train.y + vy) &&
+          (window.__doubleRail?.canStep(city, train.x, train.y, train.x + vx, train.y + vy) ?? true))
         .map(([vx, vy]) => {
           const next = { x: train.x + vx, y: train.y + vy, vx, vy };
           const free = available(next);
@@ -183,7 +186,8 @@
   function draw(renderer, city, originX, originY, halfWidth, halfHeight, heightScale, scale) {
     const state = stateFor(renderer, city), ctx = renderer.ctx;
     for (const signal of state.signals) {
-      const x = signal.index % city.size + 0.2, y = Math.floor(signal.index / city.size) + 0.2;
+      const point = { x: signal.index % city.size + 0.2, y: Math.floor(signal.index / city.size) + 0.2 };
+      const { x, y } = window.__doubleRail?.position(city, point) ?? point;
       const px = originX + (x - y) * halfWidth;
       const elevation = window.__trainFleet.railHeight(renderer, city, { x, y }) ?? city.base(Math.floor(x), Math.floor(y));
       const py = originY + (x + y) * halfHeight - elevation * heightScale;

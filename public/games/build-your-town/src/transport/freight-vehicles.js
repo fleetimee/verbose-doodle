@@ -18,7 +18,7 @@
   function road(city, tile) { return city.overlay[tile] === 2 || city.overlay[tile] === 7; }
   function valid(city, leg) {
     return leg.path.every((tile, n) => !city.fire[tile] && !city.flood[tile] &&
-      (leg.mode === "rail" ? city.rail[tile] === 1 : road(city, tile) && (!n || (window.__roadLayout?.canStep(city, leg.path[n - 1], tile) ?? true))));
+      (leg.mode === "rail" ? city.rail[tile] === 1 && !window.__railTransit?.kind(city, tile) : road(city, tile) && (!n || (window.__roadLayout?.canStep(city, leg.path[n - 1], tile) ?? true))));
   }
   function pointAt(city, leg, progress) {
     if (progress < 0 || leg.path.length < 2) return null;
@@ -27,8 +27,9 @@
     const ax = a % city.size, ay = Math.floor(a / city.size), bx = b % city.size, by = Math.floor(b / city.size);
     const dx = bx - ax, dy = by - ay;
     const lane = tile => leg.mode === "rail" ? 0.5 : window.__roadLayout?.wide(city, tile % city.size, Math.floor(tile / city.size))?.lane ?? (dx ? dx > 0 ? 0.64 : 0.36 : dy > 0 ? 0.36 : 0.64);
-    return { x: ax + dx * t + (dx ? 0.5 : lane(a) + (lane(b) - lane(a)) * t),
+    const point = { x: ax + dx * t + (dx ? 0.5 : lane(a) + (lane(b) - lane(a)) * t),
       y: ay + dy * t + (dx ? lane(a) + (lane(b) - lane(a)) * t : 0.5), dx, dy };
+    return leg.mode === "rail" ? window.__doubleRail?.position(city, point) ?? point : point;
   }
   function rotate(point, size, turns) {
     let { x, y, dx, dy } = point;

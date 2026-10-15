@@ -4,7 +4,7 @@
   const tasks = city => city.disasterRecovery ??= {};
   const restored = (city, index, task) => city.overlay[index] === task.overlay &&
     (!task.type || city.structAt(index)?.type === task.type) &&
-    (!task.rail || city.rail[index]) && (!task.wire || city.wire[index]);
+    (!task.rail || city.rail[index] && (window.__railTransit?.kind(city, index) ?? 0) === (task.railKind ?? 0)) && (!task.wire || city.wire[index]);
   function progress(city) {
     const entries = Object.entries(tasks(city));
     const pending = entries.filter(([index, task]) => !restored(city, Number(index), task));
@@ -27,7 +27,7 @@
         const overlay = this.overlay[tile];
         if (overlay === 8) continue;
         if (overlay >= 2 && overlay <= 7 || this.rail[tile] || this.wire[tile]) damaged.push([tile,
-          { overlay, ...(structure ? { type: structure.type } : {}), rail: this.rail[tile], wire: this.wire[tile] }]);
+          { overlay, ...(structure ? { type: structure.type } : {}), rail: this.rail[tile], railKind: window.__railTransit?.kind(this, tile) ?? 0, wire: this.wire[tile] }]);
       }
       if (damaged.length && !progress(this).pending) this.disasterRecovery = {};
       for (const [tile, task] of damaged) tasks(this)[tile] ??= task;
@@ -60,7 +60,7 @@
         const index = Number(key);
         if (!Number.isInteger(index) || index < 0 || index >= city.count || !task ||
           !Number.isInteger(task.overlay) || task.overlay < 0 || task.overlay > 7 || task.type && !definitions[task.type]) continue;
-        city.disasterRecovery[index] = { overlay: task.overlay, ...(task.type ? { type: task.type } : {}), rail: task.rail === 1 ? 1 : 0, wire: task.wire === 1 ? 1 : 0 };
+        city.disasterRecovery[index] = { overlay: task.overlay, ...(task.type ? { type: task.type } : {}), rail: task.rail === 1 ? 1 : 0, railKind: task.railKind === 1 || task.railKind === 2 ? task.railKind : 0, wire: task.wire === 1 ? 1 : 0 };
       }
       for (const entry of Array.isArray(data.disasterFires) ? data.disasterFires : []) {
         if (!Array.isArray(entry)) continue;
