@@ -139,5 +139,8 @@ and put the longer material behind their independent help buttons.
 
 Compact double-track railway draws both tracks inside one tile, like highway
 lanes. Keep opposing trains on their corresponding track and leave a narrow
-center strip for small planting or power poles. Older two-tile corridors retain
-their geometry; never shift or delete saved infrastructure to compact them.
+center strip for small planting or power poles. Where two alignments meet at a
+right angle, draw and drive the corner as a shared single turnout so both lanes
+merge through it and turn; parallel tracks keep their separate lanes. Older
+two-tile corridors retain their geometry; never shift or delete saved
+infrastructure to compact them.

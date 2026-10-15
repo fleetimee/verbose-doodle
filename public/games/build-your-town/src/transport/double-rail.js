@@ -30,7 +30,7 @@
       tool: "doubleRail",
       name: copy("Double-track railway", "Double voie ferrée"),
       meta: copy("$50 / tile · two tracks", "50 $ / case · deux voies"),
-      desc: copy("Two parallel tracks inside one tile, like highway lanes. Plant trees or power poles in the center strip. Flat land only.", "Deux voies dans une case, comme les voies d’autoroute. Plantez ou posez des poteaux au centre. Terrain plat uniquement."),
+      desc: copy("Two parallel tracks inside one tile, like highway lanes. Plant trees or power poles in the center strip. Drag a right angle to turn a corner. Flat land only.", "Deux voies dans une case, comme les voies d’autoroute. Plantez ou posez des poteaux au centre. Tracez un angle droit pour tourner. Terrain plat uniquement."),
       icon: icon(["grass:0000:0", "compactrail:x:0.23:0.23:0000"]),
     });
     return groups;
@@ -56,9 +56,10 @@
       if (window.__railTransit?.kind(city, index)) return invalid(copy("Keep ordinary double track separate from high-speed rail and LRT", "Séparez la double voie ordinaire de la grande vitesse et du métro léger"));
       if (city.overlay[index] === 7) return invalid(copy("Use Railway for highway overpasses", "Utilisez Voie ferrée pour franchir les autoroutes"));
       if (city.fire[index] || city.flood[index] || !city.rail[index] && !available.has(index)) return invalid(native.note ?? translate("reason.occupied"));
-      if (axisAt(city, index) && axisAt(city, index) !== axis) return invalid(copy("Use ordinary Railway for a junction", "Utilisez Voie ferrée pour un aiguillage"));
       if (city.rail[index] && !axisAt(city, index) && (window.__railTransit.mask(city, point.x, point.y) & ~(axis === 1 ? 10 : 5))) return invalid(copy("Keep ordinary Railway at junctions; build a clear compact corridor", "Gardez les aiguillages en voie ordinaire ; libérez le corridor compact"));
-      if (axisAt(city, index) === axis) continue;
+      // A tile that already carries double track is kept; meeting it at a right
+      // angle turns a corner or crosses, instead of rejecting the whole drag.
+      if (axisAt(city, index)) continue;
       tiles.push(index); cost += city.rail[index] ? 25 : 50;
     }
     return { tool, tiles, footprint, cost, valid: tiles.length > 0, doubleAxis: axis, reason: tiles.length ? undefined : translate("reason.nothing") };
@@ -74,13 +75,42 @@
     city.money -= plan.cost; city.roadsDirty = true; city.gridDirty = true;
     return { ok: true, cost: plan.cost };
   }
+  const axisMask = axis => axis === 1 ? 10 : 5;
+  const armBit = (dx, dy) => dx > 0 ? 2 : dx < 0 ? 8 : dy > 0 ? 4 : 1;
+
+  // Connected arms of a compact tile: the two along its alignment, plus a
+  // perpendicular arm only where another double track turns in. Parallel tracks
+  // running alongside a corridor keep their own lane and stay straight, and
+  // single-track branches stay on ordinary Railway.
+  function arms(city, x, y) {
+    const axis = axisAt(city, city.idx(x, y));
+    if (!axis) return 0;
+    const dx = +(axis === 1), dy = +(axis === 2);
+    let result = 0;
+    for (const sign of [-1, 1]) {
+      const nx = x + dx * sign, ny = y + dy * sign;
+      if (city.hasRail(nx, ny) && (window.__railTransit?.canStep(city, x, y, nx, ny) ?? true)) result |= armBit(dx * sign, dy * sign);
+    }
+    for (const [sx, sy] of axis === 1 ? [[0, -1], [0, 1]] : [[-1, 0], [1, 0]]) {
+      const neighborAxis = city.inBounds(x + sx, y + sy) ? axisAt(city, city.idx(x + sx, y + sy)) : 0;
+      if (neighborAxis && neighborAxis !== axis && (window.__railTransit?.canStep(city, x, y, x + sx, y + sy) ?? true)) result |= armBit(sx, sy);
+    }
+    return result;
+  }
+  // A corner tile joins two perpendicular double tracks; it draws and drives as
+  // a shared turnout so both lanes can leave onto the turning track.
+  const turning = (city, x, y) => (arms(city, x, y) & ~axisMask(axisAt(city, city.idx(x, y)))) !== 0;
+
   function compact(city, x, y) {
     if (!city.inBounds(x, y)) return null;
-    const axis = axisAt(city, city.idx(x, y));
-    if (!axis) return null;
+    const index = city.idx(x, y), axis = axisAt(city, index);
+    if (!axis || turning(city, x, y)) return null;
     const dx = +(axis === 1), dy = +(axis === 2);
-    const edge = sign => city.hasRail(x + dx * sign, y + dy * sign)
-      ? axisAt(city, city.idx(x + dx * sign, y + dy * sign)) === axis ? 0.23 : 0 : 0.23;
+    const edge = sign => {
+      const nx = x + dx * sign, ny = y + dy * sign;
+      if (!city.hasRail(nx, ny)) return 0.23;
+      return axisAt(city, city.idx(nx, ny)) === axis && !turning(city, nx, ny) ? 0.23 : 0;
+    };
     return { axis: axis === 1 ? "x" : "y", start: edge(-1), center: 0.23, end: edge(1) };
   }
   function lane(city, index, dx, dy) {
@@ -121,8 +151,8 @@
   }
 
   function mask(city, x, y) {
-    const axis = city.inBounds(x, y) ? axisAt(city, city.idx(x, y)) : 0;
-    if (axis) return window.__railTransit.mask(city, x, y) & (axis === 1 ? 10 : 5);
+    if (!city.inBounds(x, y)) return null;
+    if (axisAt(city, city.idx(x, y))) return arms(city, x, y);
     return layout(city, x, y)?.mask ?? null;
   }
 

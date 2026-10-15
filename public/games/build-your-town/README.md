@@ -309,11 +309,15 @@ Drag a straight route on flat land at one elevation. New tiles cost $50; existin
 ordinary rail can be upgraded for $25 per tile. Existing double-track tiles are
 retained without charge. The full preview is rejected if any tile is obstructed,
 outside the map, on water, on a highway, or belongs to another rail system. Use
-ordinary Railway for bridges, highway overpasses, bends, and junctions.
+ordinary Railway for bridges and highway overpasses.
 
 Opposing trains use separate lanes, with lane-aware signal reservations. Ordinary
 Rail stations and freight terminals connect as before. At connections to single
 track, both lanes taper into the shared track; trains reserve the shared section.
+Drag a second double-track line at a right angle to turn a corner: the corner where
+the two alignments meet is drawn and driven as a shared single turnout, so both
+lanes merge through the shared section and trains reserve it before turning. Tracks
+that merely run alongside each other keep their own lane and stay straight.
 At road crossings that form an overpass, both tracks continue over widened bridge
 decks and ramps, with railings outside the two-track envelope.
 Landscaping trees/bushes and ordinary power lines occupy the small center strip.
