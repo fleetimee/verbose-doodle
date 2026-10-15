@@ -31,6 +31,12 @@
     const rate = document.createElement("button");
     rate.type = "button";
     rate.id = "btn-speed-menu";
+    const status = document.createElement("span");
+    status.id = "simulation-status";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    status.setAttribute("aria-atomic", "true");
+    document.body.append(status);
     speed.append(play, rate);
     const popup = document.createElement("div");
     popup.id = "topbar-popup";
@@ -51,6 +57,9 @@
       play.setAttribute("aria-label", value ? text("Pause simulation", "Mettre en pause") : text("Resume simulation", "Reprendre la simulation"));
       play.title = play.getAttribute("aria-label");
       const paused = value === 0;
+      const label = text("Paused", "En pause");
+      if (status.textContent !== label) status.textContent = label;
+      status.hidden = !paused;
       if (play.classList.contains("is-paused") !== paused) play.classList.toggle("is-paused", paused);
       rate.innerHTML = `<span>${[0, 1, 2, 4][lastSpeed]}×</span>${icon("m8 10 4 4 4-4")}`;
       rate.setAttribute("aria-label", text("Simulation speed", "Vitesse de simulation") + `: ${[0, 1, 2, 4][lastSpeed]}×`);

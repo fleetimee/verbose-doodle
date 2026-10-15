@@ -390,3 +390,59 @@ Remove the dock road, block the entire water channel, damage a landing, and
 restore each connection. Check an isolated lake stays disconnected. Save/reload
 and export/import, rotate the map, then bulldoze the dock or park and check the
 route disappears. Browser visual checks remain necessary for sprite overlap.
+
+## World landmarks
+
+Landmarks includes five additional world monuments with static isometric models:
+
+| Landmark | Unlock population | Size | Cost | Monthly upkeep | Fun / radius |
+| --- | ---: | --- | ---: | ---: | --- |
+| Statue of Liberty | 8,000 | 3 × 3 | $12,000 | $20 | 70 / 12 tiles |
+| Eiffel Tower | 15,000 | 3 × 3 | $18,000 | $28 | 80 / 16 tiles |
+| Great Pyramid | 12,000 | 4 × 4 | $16,000 | $15 | 75 / 14 tiles |
+| Taj Mahal | 22,000 | 4 × 4 | $24,000 | $32 | 85 / 18 tiles |
+| Christ the Redeemer | 30,000 | 3 × 3 | $30,000 | $25 | 90 / 20 tiles |
+
+Build on empty, flat land with a road within the existing three-tile footprint
+access distance. No electricity is required. The landmarks provide park
+land-value coverage and strongest-attraction Fun while road-connected and
+undamaged; upkeep remains under Parks even while closed. English and French
+names and descriptions are included. Structures serialize through the existing
+save format without migration. Cities containing these types need this runtime.
+
+Manual check: inspect all five population locks in Landmarks, place each in a
+disposable city, compare previews and full models, and inspect cost, upkeep and
+Fun. Remove/restore nearby roads and inspect operating state and coverage.
+Save/reload and export/import; compare landmark types and positions. Inspect
+mobile menu scrolling, flat view and overlapping structures at close zoom.
+
+## Wide-range power stations
+
+Energy includes three clean advanced plants with local distribution. Conductive
+zones, buildings and wires within a circular radius of the plant footprint's
+center connect to the plant without intervening wires. From these connections,
+the normal grid can extend farther through buildings and wires. Remote plants
+connected by these links share network capacity; generation is never duplicated.
+Demand still consumes capacity, and an overloaded grid leaves buildings unpowered.
+Existing plants retain their original grid behavior.
+
+| Plant | Unlock population | Size | Cost | Monthly upkeep | Output | Local range |
+| --- | ---: | --- | ---: | ---: | ---: | ---: |
+| Solar thermal station | 18,000 | 4 × 4 | $26,000 | $45 | 1,200 MW | 10 tiles |
+| Modular nuclear station | 45,000 | 4 × 4 | $75,000 | $130 | 4,500 MW | 18 tiles |
+| Stellar fusion station | 85,000 | 4 × 4 | $180,000 | $300 | 12,000 MW | 28 tiles |
+
+Models depict a solar receiver surrounded by mirrors, paired modular reactor
+domes, and a fusion ring. Names, descriptions and query range labels support
+English and French. Burning or flooding any footprint tile stops new-station
+generation and local links; upkeep remains under Power. Existing save structure
+serialization stores each type and position, with no new save fields.
+
+Manual check: unlock Energy in a disposable city, build each plant on flat land,
+and place disconnected zones just inside and outside its range. Compare power
+availability and demand. Add wires from the local service area to extend the
+grid, connect multiple generators, and overload capacity. Damage and restore the
+plant, bulldoze it, save/reload and export/import. Inspect construction models
+and query range descriptions at desktop and mobile sizes. The existing power
+map shows actual powered tiles; local range is described in the construction
+menu and building query.

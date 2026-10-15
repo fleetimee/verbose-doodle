@@ -1,5 +1,13 @@
 (() => {
   const BUILDINGS = [
+    { type: "statueofliberty", name: ["Statue de la Liberté", "Statue of Liberty"], desc: ["Monument du monde : jusqu’à 70 loisirs à 12 cases. Route à 3 cases requise, sans électricité. Se débloque à 8,000 habitants.", "World landmark: up to 70 Fun within 12 tiles. Needs a road within 3 tiles; no power required. Unlocks at 8,000 residents."], size: 3, cost: 12000, upkeep: 20, radius: 12, fun: 70, requiresRoad: true, category: "park", unlockPop: 8000 },
+    { type: "eiffeltower", name: ["Tour Eiffel", "Eiffel Tower"], desc: ["Monument du monde : jusqu’à 80 loisirs à 16 cases. Route à 3 cases requise, sans électricité. Se débloque à 15,000 habitants.", "World landmark: up to 80 Fun within 16 tiles. Needs a road within 3 tiles; no power required. Unlocks at 15,000 residents."], size: 3, cost: 18000, upkeep: 28, radius: 16, fun: 80, requiresRoad: true, category: "park", unlockPop: 15000 },
+    { type: "greatpyramid", name: ["Grande pyramide", "Great Pyramid"], desc: ["Monument du monde : jusqu’à 75 loisirs à 14 cases. Route à 3 cases requise, sans électricité. Se débloque à 12,000 habitants.", "World landmark: up to 75 Fun within 14 tiles. Needs a road within 3 tiles; no power required. Unlocks at 12,000 residents."], size: 4, cost: 16000, upkeep: 15, radius: 14, fun: 75, requiresRoad: true, category: "park", unlockPop: 12000 },
+    { type: "tajmahal", name: ["Taj Mahal", "Taj Mahal"], desc: ["Monument du monde : jusqu’à 85 loisirs à 18 cases. Route à 3 cases requise, sans électricité. Se débloque à 22,000 habitants.", "World landmark: up to 85 Fun within 18 tiles. Needs a road within 3 tiles; no power required. Unlocks at 22,000 residents."], size: 4, cost: 24000, upkeep: 32, radius: 18, fun: 85, requiresRoad: true, category: "park", unlockPop: 22000 },
+    { type: "christredeemer", name: ["Christ Rédempteur", "Christ the Redeemer"], desc: ["Monument du monde : jusqu’à 90 loisirs à 20 cases. Route à 3 cases requise, sans électricité. Se débloque à 30,000 habitants.", "World landmark: up to 90 Fun within 20 tiles. Needs a road within 3 tiles; no power required. Unlocks at 30,000 residents."], size: 3, cost: 30000, upkeep: 25, radius: 20, fun: 90, requiresRoad: true, category: "park", unlockPop: 30000 },
+    { type: "solarthermal", name: ["Centrale solaire thermique", "Solar thermal station"], desc: ["1,200 MW propres. Distribution locale à 10 cases sans lignes, puis réseau électrique normal. Se débloque à 18,000 habitants.", "1,200 MW of clean power. Local distribution within 10 tiles without wires, then normal grid connections. Unlocks at 18,000 residents."], size: 4, cost: 26000, upkeep: 45, power: 1200, powerRange: 10, category: "power", unlockPop: 18000 },
+    { type: "modularnuclear", name: ["Centrale nucléaire modulaire", "Modular nuclear station"], desc: ["4,500 MW propres. Distribution locale à 18 cases sans lignes, puis réseau électrique normal. Se débloque à 45,000 habitants.", "4,500 MW of clean power. Local distribution within 18 tiles without wires, then normal grid connections. Unlocks at 45,000 residents."], size: 4, cost: 75000, upkeep: 130, power: 4500, powerRange: 18, category: "power", unlockPop: 45000 },
+    { type: "stellarfusion", name: ["Centrale à fusion stellaire", "Stellar fusion station"], desc: ["12,000 MW propres. Distribution locale à 28 cases sans lignes, puis réseau électrique normal. Se débloque à 85,000 habitants.", "12,000 MW of clean power. Local distribution within 28 tiles without wires, then normal grid connections. Unlocks at 85,000 residents."], size: 4, cost: 180000, upkeep: 300, power: 12000, powerRange: 28, category: "power", unlockPop: 85000 },
     { type: "solarfarm", name: ["Ferme solaire", "Solar farm"], desc: ["180 MW propres sur 3 × 3 cases. Se débloque à 12 000 habitants.", "180 MW of clean power on a 3 × 3 footprint. Unlocks at 12,000 residents."], size: 3, cost: 8000, upkeep: 8, power: 180, category: "power", unlockPop: 12000 },
     { type: "geothermal", name: ["Centrale géothermique", "Geothermal plant"], desc: ["750 MW propres, sans dépendre du littoral. Se débloque à 35 000 habitants.", "750 MW of clean power without a shoreline requirement. Unlocks at 35,000 residents."], size: 3, cost: 22000, upkeep: 28, power: 750, category: "power", unlockPop: 35000 },
     { type: "desalination", name: ["Usine de dessalement", "Desalination plant"], desc: ["Sur le littoral, distribue l'eau à 24 cases. Consomme 12 MW. Se débloque à 20 000 habitants.", "Shoreline water supply with a 24-tile radius. Uses 12 MW. Unlocks at 20,000 residents."], size: 3, cost: 18000, upkeep: 35, radius: 24, consumes: 12, needsShore: true, category: "water", unlockPop: 20000 },
@@ -31,6 +39,7 @@
       messages[`struct.${type}`] = name;
       messages[`struct.${type}.desc`] = desc;
     }
+    messages["query.powerRange"] = ["Distribution locale : {n} cases sans lignes électriques", "Local power distribution: {n} tiles without wires"];
     messages["group.recreation"] = ["Loisirs", "Recreation"];
     messages["group.landmarks"] = ["Monuments", "Landmarks"];
     messages["group.districts"] = ["Grands quartiers", "Advanced districts"];
@@ -40,7 +49,7 @@
 
   const toolbar = (groups, items, translate, icon) => {
     for (const [anchor, types] of [
-      ["wind", ["solarfarm", "geothermal"]],
+      ["wind", ["solarfarm", "geothermal", "solarthermal", "modularnuclear", "stellarfusion"]],
       ["pump", ["desalination", "reservoir"]],
       ["police", ["university", "medicalcenter", "policehq", "firecommand"]],
     ]) groups.find((group) => group.items?.some((item) => item.tool === anchor)).items.push(...items(types));
@@ -48,7 +57,7 @@
     groups.splice(parksIndex, 1,
       { ...groups[parksIndex], items: items(["park", "bigpark", "botanicalgarden"]) },
       { group: translate("group.recreation"), icon: icon("volleyballcourt", 1.6), items: items(["volleyballcourt", "soccerfield", "shuttledock", "floatingwaterpark", "jetski", "bananaboat", "beachcarnival", "shoppingmall", "grandmuseum"]) },
-      { group: translate("group.landmarks"), icon: icon("statue", 1.6), items: items(["statue", "cityhall", "mansion", "arcology"]) },
+      { group: translate("group.landmarks"), icon: icon("statue", 1.6), items: items(["statue", "cityhall", "mansion", "arcology", "statueofliberty", "eiffeltower", "greatpyramid", "tajmahal", "christredeemer"]) },
     );
     groups.splice(groups.length - 1, 0, {
       group: translate("group.districts"),
@@ -74,6 +83,93 @@
       for (const [x, y] of [[0.25, 0.25], [size - 0.25, 0.25], [0.25, size - 0.25], [size - 0.25, size - 0.25]]) scene.tree(x, y, 5);
     };
     switch (type) {
+      case "statueofliberty":
+        scene.box(0.3, 0.3, 2.7, 2.7, 5, "#989b86", "#d9d5b8");
+        scene.box(0.85, 0.85, 2.15, 2.15, 18, "#b3a88b", "#ded2b1", { z0: 5 });
+        scene.cylinder(1.5, 1.5, 0.4, 36, "#508f80", "#85b6a0", { z0: 23, rTop: 0.18 });
+        scene.cylinder(1.5, 1.5, 0.18, 8, "#508f80", "#a0cbb0", { z0: 59 });
+        line([[1.35, 1.5, 53], [0.85, 1.5, 69], [0.75, 1.5, 80]], "#70a58f", 5);
+        scene.cylinder(0.75, 1.5, 0.09, 5, "#d0a851", "#ffe18a", { z0: 80 });
+        scene.box(1.7, 1.4, 1.94, 1.85, 12, "#4f897c", "#83b7a0", { z0: 40 });
+        for (let n = 0; n < 7; n++) {
+          const a = n * Math.PI / 3.5;
+          line([[1.5, 1.5, 65], [1.5 + Math.cos(a) * 0.36, 1.5 + Math.sin(a) * 0.36, 71]], "#8fbfa7", 1.2);
+        }
+        break;
+      case "eiffeltower":
+        scene.box(0.1, 0.1, 2.9, 2.9, 2, "#b6aa94", "#ddd2b9");
+        for (const [x, y] of [[0.35, 0.35], [2.65, 0.35], [0.35, 2.65], [2.65, 2.65]]) {
+          line([[x, y, 2], [1.5 + (x - 1.5) * 0.45, 1.5 + (y - 1.5) * 0.45, 34], [1.5, 1.5, 92]], "#90745a", 3);
+        }
+        for (const [z, spread] of [[28, 0.65], [48, 0.4], [76, 0.15]]) {
+          const a = 1.5 - spread, b = 1.5 + spread;
+          scene.box(a, a, b, b, 2, "#8a6e56", "#c1a184", { z0: z });
+          line([[a, a, z], [b, b, z + 14]], "#a3876c", 1);
+          line([[a, b, z], [b, a, z + 14]], "#a3876c", 1);
+        }
+        scene.antenna(1.5, 1.5, 92, 12);
+        break;
+      case "greatpyramid":
+        face([[0.15, 0.15, 0.3], [3.85, 0.15, 0.3], [3.85, 3.85, 0.3], [0.15, 3.85, 0.3]], "#dfc48e", -1);
+        face([[0.3, 0.3, 1], [3.7, 0.3, 1], [2, 2, 60]], "#efd093", 10);
+        face([[3.7, 0.3, 1], [3.7, 3.7, 1], [2, 2, 60]], "#c7a367", 11);
+        face([[3.7, 3.7, 1], [0.3, 3.7, 1], [2, 2, 60]], "#d7b477", 12);
+        face([[0.3, 3.7, 1], [0.3, 0.3, 1], [2, 2, 60]], "#e4c285", 13);
+        for (let z = 8; z < 58; z += 8) {
+          const a = 0.3 + 1.7 * (z - 1) / 59, b = 4 - a;
+          line([[a, b, z], [b, b, z], [b, a, z]], "#b79461", 0.6, 20);
+        }
+        break;
+      case "tajmahal":
+        scene.box(0.15, 0.15, 3.85, 3.85, 3, "#bdb8a7", "#eee9d8");
+        scene.box(1.15, 1.05, 2.85, 2.75, 25, "#e5dfcf", "#fff5de", { z0: 3, windows: true });
+        scene.dome(2, 1.9, 0.75, 28, "#f6edd9");
+        scene.antenna(2, 1.9, 48, 9);
+        for (const [x, y] of [[0.45, 0.45], [3.55, 0.45], [0.45, 3.55], [3.55, 3.55]]) {
+          scene.cylinder(x, y, 0.13, 33, "#dbd5c4", "#faf0d8", { z0: 3 });
+          scene.dome(x, y, 0.19, 36, "#f6edd9");
+        }
+        face([[1.78, 2.8, 3.2], [2.22, 2.8, 3.2], [2.22, 3.8, 3.2], [1.78, 3.8, 3.2]], "#64adba", 30);
+        for (const x of [1, 3]) scene.tree(x, 3.35, 3);
+        break;
+      case "christredeemer":
+        scene.cylinder(1.5, 1.5, 1.2, 5, "#80916b", "#acb68b");
+        scene.box(1.05, 1.05, 1.95, 1.95, 12, "#9b9f9c", "#d3d5c9", { z0: 5 });
+        scene.cylinder(1.5, 1.5, 0.36, 40, "#b8c1bf", "#e8e9dd", { z0: 17, rTop: 0.2 });
+        scene.cylinder(1.5, 1.5, 0.17, 9, "#c4ccca", "#eef0e4", { z0: 57 });
+        scene.box(0.2, 1.36, 2.8, 1.64, 5, "#b8c1bf", "#e8e9dd", { z0: 50 });
+        for (const x of [0.13, 2.8]) scene.box(x, 1.37, x + 0.1, 1.63, 3, "#b8c1bf", "#edf0e4", { z0: 51 });
+        break;
+      case "solarthermal":
+        face([[0.1, 0.1, 0.2], [3.9, 0.1, 0.2], [3.9, 3.9, 0.2], [0.1, 3.9, 0.2]], "#c9bb91", -1);
+        scene.cylinder(2, 2, 0.22, 58, "#b6b9af", "#e3e3cf");
+        scene.cylinder(2, 2, 0.34, 8, "#d29b45", "#fff1ad", { z0: 58 });
+        for (const [x, y] of [[0.3, 0.3], [1.5, 0.3], [2.7, 0.3], [0.3, 1.5], [2.7, 1.5], [0.3, 2.7], [1.5, 2.7], [2.7, 2.7]]) {
+          scene.box(x, y, x + 0.85, y + 0.7, 3, "#527d94", "#b6dbe4");
+          line([[x + 0.42, y, 3.2], [x + 0.42, y + 0.7, 3.2]], "#e5f1e8", 0.6);
+        }
+        break;
+      case "modularnuclear":
+        scene.box(0.2, 0.2, 3.8, 3.8, 3, "#8b9c9b", "#b7c7bf");
+        for (const x of [1.1, 2.9]) {
+          scene.cylinder(x, 1.3, 0.7, 19, "#a8bfbb", "#dce6d8", { z0: 3 });
+          scene.dome(x, 1.3, 0.7, 22, "#dae9df");
+        }
+        scene.box(0.4, 2.5, 2.7, 3.6, 16, "#6f8d98", "#b6d0d3", { z0: 3, windows: true });
+        for (const x of [3, 3.45]) scene.cylinder(x, 3, 0.17, 10, "#8b9c9b", "#cbd5c5", { z0: 3 });
+        break;
+      case "stellarfusion":
+        scene.box(0.15, 0.15, 3.85, 3.85, 5, "#687f91", "#a7bec9");
+        scene.cylinder(2, 1.8, 1.35, 12, "#60788e", "#a6c2d1", { z0: 5 });
+        scene.cylinder(2, 1.8, 1.12, 7, "#4e8193", "#71c2ce", { z0: 17 });
+        scene.cylinder(2, 1.8, 0.6, 5, "#496277", "#344b65", { z0: 24 });
+        for (let n = 0; n < 8; n++) {
+          const a = n * Math.PI / 4, x = 2 + Math.cos(a) * 1.05, y = 1.8 + Math.sin(a) * 1.05;
+          scene.cylinder(x, y, 0.12, 17, "#96b2c0", "#d7e8dd", { z0: 17 });
+        }
+        scene.box(0.45, 3.15, 3.55, 3.7, 12, "#536c89", "#b0c9d5", { z0: 5, windows: true });
+        scene.antenna(2, 1.8, 29, 22);
+        break;
       case "solarfarm":
         for (let y = 0.35; y < 2.8; y += 0.8) for (let x = 0.25; x < 2.7; x += 0.8) {
           scene.box(x, y, x + 0.65, y + 0.55, 2, "#7a8794", "#b7c2cb");

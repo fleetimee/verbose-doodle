@@ -96,7 +96,7 @@
 #topbar #btn-cities { background: transparent; border-color: transparent; gap: 7px; }
 #topbar #btn-game-menu { width: 34px; display: flex; align-items: center; justify-content: center; }
 #topbar #btn-game-menu svg, #topbar #btn-play-toggle svg { width: 17px; height: 17px; }
-#topbar #speed { background: #121a29; padding: 3px; border: 1px solid #46516a; border-radius: 8px; gap: 3px; }
+#topbar #speed, #topbar #speed.show { display: flex; position: sticky; left: 0; top: auto; transform: none; order: -1; z-index: 2; flex-shrink: 0; background: #121a29; padding: 3px; border: 1px solid #46516a; border-radius: 8px; gap: 3px; }
 #topbar #speed button { height: 28px; border: 0; border-radius: 5px; }
 #topbar #speed #btn-play-toggle { background: #f2c14e; color: #292411; }
 #topbar #speed #btn-play-toggle:hover { background: #f8d476; }
@@ -150,3 +150,11 @@
 
 #encounter-frequency { display: block; width: 100%; margin-top: 6px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel-flat); color: var(--text); font: inherit; }
 #encounter-frequency:disabled { opacity: 0.5; }
+
+#simulation-status { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(44px + env(safe-area-inset-bottom, 0px)); z-index: 10; display: flex; align-items: center; gap: 7px; padding: 6px 10px; border: 1px solid #526079; border-radius: 8px; background: #121a29ed; color: #f2c14e; font-family: var(--font-body); font-size: 12px; font-weight: 700; line-height: 1.2; pointer-events: none; }
+#simulation-status[hidden] { display: none; }
+#simulation-status::before { content: ""; width: 2px; height: 10px; flex-shrink: 0; background: currentColor; box-shadow: 4px 0 currentColor; margin-right: 4px; }
+body.town-home #simulation-status { display: none; }
+
+#tooltip:not([hidden]) { display: block !important; }
+#tooltip { max-width: calc(100vw / var(--game-ui-scale) - 16px); overflow-wrap: anywhere; pointer-events: none; }
