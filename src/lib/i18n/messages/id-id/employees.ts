@@ -110,7 +110,7 @@ export const employeesMessages = {
   allUnits: "Semua unit kerja",
   allBranches: "Semua cabang",
   filters: "Filter",
-  title: "Direktori Pegawai",
+  title: "Direktori",
   description: "Cari informasi pegawai, unit kerja, dan struktur pelaporan.",
   searchLabel: "Cari pegawai",
   searchPlaceholder: "Cari nama atau NIP",

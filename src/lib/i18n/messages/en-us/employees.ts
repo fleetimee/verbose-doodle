@@ -108,7 +108,7 @@ export const employeesMessages = {
   allUnits: "All work units",
   allBranches: "All branches",
   filters: "Filters",
-  title: "Employee Directory",
+  title: "Directory",
   description:
     "Find employee details, work units, and reporting relationships.",
   searchLabel: "Search employees",

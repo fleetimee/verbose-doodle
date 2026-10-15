@@ -19,7 +19,9 @@ import {
   YetAnotherVoxelcraftIcon,
 } from "@/components/game-icons";
 import {
-  Binary,
+  Cable,
+  Code2,
+  Compass,
   type HugeIcon,
   Info,
   LayoutDashboard,
@@ -29,6 +31,7 @@ import {
   RadioTower,
   Route,
   Server,
+  ServerCrash,
   Users,
   Waves,
 } from "@/components/hugeicons";
@@ -71,11 +74,12 @@ import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-cata
 import { usePrefetchOverview } from "@/features/overview/hooks/use-prefetch-overview";
 import { SocketBridgeStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
 
-type AppNavigationItem = NavMainItem & {
+type AppNavigationItem = Omit<NavMainItem, "items"> & {
   readonly adminOnly?: boolean;
   readonly description?: string;
   readonly keywords?: readonly string[];
   readonly items?: (NonNullable<NavMainItem["items"]>[number] & {
+    readonly adminOnly?: boolean;
     readonly description: string;
     readonly keywords?: readonly string[];
   })[];
@@ -121,14 +125,6 @@ export function getSidebarData(
         url: "/dashboard/servers",
       },
       {
-        adminOnly: true,
-        groupLabel: messages.common.navWorkspace,
-        icon: Users,
-        description: messages.employees.description,
-        title: messages.employees.title,
-        url: "/dashboard/employees",
-      },
-      {
         groupLabel: messages.common.navNetworkTools,
         icon: RadioTower,
         items: [
@@ -139,7 +135,7 @@ export function getSidebarData(
             url: "/dashboard/socket-test/tcp-client",
           },
           {
-            icon: Server,
+            icon: ServerCrash,
             description: messages.common.navTcpServerDesc,
             title: messages.common.navTcpServer,
             url: "/dashboard/socket-test/tcp-server",
@@ -161,13 +157,13 @@ export function getSidebarData(
         icon: Route,
         items: [
           {
-            icon: Plug,
+            icon: Cable,
             description: messages.common.navRestApiDesc,
             title: messages.common.navRestApi,
             url: "/dashboard/socks-relay/rest-api",
           },
           {
-            icon: Binary,
+            icon: Code2,
             description: messages.common.navIso8583Desc,
             title: messages.common.navIso8583,
             url: "/dashboard/socks-relay/iso-8583",
@@ -290,30 +286,44 @@ export function getSidebarData(
       ...DEVELOPER_TOOL_CATEGORIES.map((category) => ({
         groupLabel: messages.developerTools.navigationGroup,
         icon: category.icon,
-        items: category.tools
-          .filter(
-            (tool) =>
-              tool.id !== "iso8583-parser" &&
-              tool.id !== "iso8583-generator" &&
-              tool.id !== "qris-parser" &&
-              tool.id !== "qris-cpm-parser" &&
-              tool.id !== "qris-tap-parser" &&
-              tool.id !== "qris-creator" &&
-              tool.id !== "qris-mdr-calculator"
-          )
-          .map((tool) => ({
-            description: tool.searchDescription,
-            icon: tool.icon,
-            keywords: [
-              ...tool.tags,
-              ...tool.document.keywords,
-              tool.name,
-              tool.path,
-            ],
-            onPrefetch: tool.load,
-            title: tool.name,
-            url: getDeveloperToolHref(tool),
-          })),
+        items: [
+          ...(category.id === "inspection"
+            ? [
+                {
+                  adminOnly: true,
+                  description: messages.employees.description,
+                  icon: Users,
+                  keywords: ["employee", "employees", "pegawai", "HRMIS"],
+                  title: messages.employees.title,
+                  url: "/dashboard/employees",
+                },
+              ]
+            : []),
+          ...category.tools
+            .filter(
+              (tool) =>
+                tool.id !== "iso8583-parser" &&
+                tool.id !== "iso8583-generator" &&
+                tool.id !== "qris-parser" &&
+                tool.id !== "qris-cpm-parser" &&
+                tool.id !== "qris-tap-parser" &&
+                tool.id !== "qris-creator" &&
+                tool.id !== "qris-mdr-calculator"
+            )
+            .map((tool) => ({
+              description: tool.searchDescription,
+              icon: tool.icon,
+              keywords: [
+                ...tool.tags,
+                ...tool.document.keywords,
+                tool.name,
+                tool.path,
+              ],
+              onPrefetch: tool.load,
+              title: tool.name,
+              url: getDeveloperToolHref(tool),
+            })),
+        ],
         title: category.name,
       })).filter((category) => category.items.length > 0),
       {
@@ -322,7 +332,7 @@ export function getSidebarData(
         title: messages.common.navFunGames,
         items: [
           {
-            icon: GamesIcon,
+            icon: Compass,
             description: messages.common.gamesDescription,
             title: messages.common.gamesBrowse,
             url: "/dashboard/games",
@@ -458,24 +468,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         onPrefetch = prefetchEndpoints;
       }
 
-      const items = item.items?.map((subItem) => {
-        let subPrefetch = subItem.onPrefetch;
-        if (subItem.url === "/dashboard/developer-tools/iso8583-parser") {
-          subPrefetch = () => {
-            import("@/pages/dashboard/iso8583-parser");
+      const items = item.items
+        ?.filter((subItem) => !subItem.adminOnly || isAdmin)
+        .map((subItem) => {
+          let subPrefetch = subItem.onPrefetch;
+          if (subItem.url === "/dashboard/developer-tools/iso8583-parser") {
+            subPrefetch = () => {
+              import("@/pages/dashboard/iso8583-parser");
+            };
+          } else if (
+            subItem.url === "/dashboard/developer-tools/iso8583-generator"
+          ) {
+            subPrefetch = () => {
+              import("@/pages/dashboard/iso8583-generator");
+            };
+          }
+          return {
+            ...subItem,
+            onPrefetch: subPrefetch,
           };
-        } else if (
-          subItem.url === "/dashboard/developer-tools/iso8583-generator"
-        ) {
-          subPrefetch = () => {
-            import("@/pages/dashboard/iso8583-generator");
-          };
-        }
-        return {
-          ...subItem,
-          onPrefetch: subPrefetch,
-        };
-      });
+        });
 
       return {
         ...item,

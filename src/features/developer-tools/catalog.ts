@@ -1,11 +1,15 @@
 import type { ComponentType } from "react";
 import {
+  ArrowUpDown,
   Binary,
   Braces,
   CalendarClock,
   CalendarDays,
   FileJson,
   Fingerprint,
+  GitCommitIcon,
+  KeyRound,
+  Layers3,
   RadioReceiver,
   RefreshCw,
   ShieldCheck,
@@ -95,14 +99,14 @@ const CATEGORY_METADATA = [
     },
   },
   {
-    icon: RefreshCw,
+    icon: ArrowUpDown,
     id: "conversion" as const,
     get name() {
       return messages.developerTools.conversionCategory;
     },
   },
   {
-    icon: CalendarClock,
+    icon: Layers3,
     id: "scheduling" as const,
     get name() {
       return messages.developerTools.schedulingCategory;
@@ -211,7 +215,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
     categoryId: "inspection",
     id: "json-text-diff",
     path: "developer-tools/json-text-diff",
-    icon: Braces,
+    icon: GitCommitIcon,
     load: () =>
       import("@/pages/dashboard/json-text-diff").then(
         ({ JsonTextDiffPage }) => ({ default: JsonTextDiffPage })
@@ -529,7 +533,7 @@ export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
         title: messages.jwtInspector.pageTitle,
       };
     },
-    icon: Fingerprint,
+    icon: KeyRound,
     id: "jwt-inspector",
     get searchDescription() {
       return messages.developerTools.jwtInspectorSearchDescription;

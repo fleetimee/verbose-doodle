@@ -455,7 +455,8 @@ with an 8px gap, stacking the actions below the small breakpoint.
 
 ### Employee directory
 
-The admin-only Employee Directory sits in Workspace at `/dashboard/employees`.
+The admin-only Directory (Direktori in Indonesian) sits inside Inspection in the
+sidebar at `/dashboard/employees`.
 It reuses DeveloperToolLayout with a compact title and a fixed-height workspace.
 Desktop search, cabang, and unit controls share a row. Control labels, heights,
 and spacing align; the search-field Input variant uses a thin focus ring.
