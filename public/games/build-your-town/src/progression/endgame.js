@@ -13,6 +13,10 @@
     { type: "volleyballcourt", name: ["Terrain de volley-ball", "Volleyball court"], desc: ["Jusqu'à 45 points de loisirs à 6 cases. Route à 3 cases requise, sans électricité. Se débloque à 500 habitants.", "Up to 45 Fun within 6 tiles. Needs a road within 3 tiles; no power required. Unlocks at 500 residents."], size: 2, cost: 250, upkeep: 2, radius: 6, fun: 45, requiresRoad: true, category: "park", unlockPop: 500 },
     { type: "soccerfield", name: ["Terrain de football", "Soccer field"], desc: ["Jusqu'à 65 points de loisirs à 10 cases. Route à 3 cases requise, sans électricité. Se débloque à 1 000 habitants.", "Up to 65 Fun within 10 tiles. Needs a road within 3 tiles; no power required. Unlocks at 1,000 residents."], size: 4, cost: 1500, upkeep: 8, radius: 10, fun: 65, requiresRoad: true, category: "park", unlockPop: 1000 },
     { type: "shoppingmall", name: ["Centre commercial", "Shopping mall"], desc: ["Jusqu'à 75 points de loisirs à 14 cases et 600 emplois imposables. Route à 3 cases et 8 MW requis. Se débloque à 10 000 habitants.", "Up to 75 Fun within 14 tiles and 600 taxable jobs. Needs a road within 3 tiles and 8 MW. Unlocks at 10,000 residents."], size: 4, cost: 12000, upkeep: 35, radius: 14, fun: 75, jobs: 600, taxable: true, requiresRoad: true, consumes: 8, category: "park", unlockPop: 10000 },
+    { type: "shuttledock", name: ["Embarcadère de navette", "Visitor shuttle dock"], desc: ["À terre, au bord de l'eau. Route à 3 cases requise. Relie les parcs flottants par bateau, sans électricité. Se débloque à 3 500 habitants.", "Place on land beside water with a road within 3 tiles. Connects floating water parks by boat; no power required. Unlocks at 3,500 residents."], size: 2, cost: 1800, upkeep: 8, needsShore: true, requiresRoad: true, category: "park", unlockPop: 3500 },
+    { type: "floatingwaterpark", name: ["Parc aquatique flottant", "Floating water park"], desc: ["Sur 4 × 4 cases d'eau libre, même au large. Un embarcadère accessible par route et un trajet d'eau libre sont requis. Jusqu'à 95 loisirs à 20 cases. Se débloque à 5 000 habitants.", "Place on 4 × 4 clear water tiles, including offshore. Needs a clear water route to a road-connected Visitor shuttle dock. Up to 95 Fun within 20 tiles; no power required. Unlocks at 5,000 residents."], size: 4, cost: 9000, upkeep: 40, radius: 20, fun: 95, waterOnly: true, onWater: true, needsShuttle: true, category: "park", unlockPop: 5000 },
+    { type: "jetski", name: ["Circuit de jet-ski", "Jet ski circuit"], desc: ["Sur 3 × 3 cases d'eau libre au bord de la terre. Route à 3 cases du rivage requise. Jusqu'à 60 loisirs à 10 cases. Sans électricité. Se débloque à 2 000 habitants.", "Place on 3 × 3 clear water tiles touching land. Needs a road within 3 tiles of the shore. Up to 60 Fun within 10 tiles; no power required. Unlocks at 2,000 residents."], size: 3, cost: 2200, upkeep: 10, radius: 10, fun: 60, waterOnly: true, onWater: true, requiresRoad: true, category: "park", unlockPop: 2000 },
+    { type: "bananaboat", name: ["Bouée banane", "Banana boat rides"], desc: ["Sur 3 × 3 cases d'eau libre au bord de la terre. Route à 3 cases du rivage requise. Jusqu'à 75 loisirs à 12 cases. Sans électricité. Se débloque à 3 500 habitants.", "Place on 3 × 3 clear water tiles touching land. Needs a road within 3 tiles of the shore. Up to 75 Fun within 12 tiles; no power required. Unlocks at 3,500 residents."], size: 3, cost: 3500, upkeep: 15, radius: 12, fun: 75, waterOnly: true, onWater: true, requiresRoad: true, category: "park", unlockPop: 3500 },
     { type: "beachcarnival", name: ["Fête foraine du littoral", "Beach carnival"], desc: ["Jusqu’à 90 points de loisirs à 12 cases. Littoral, électricité et route à 3 cases requis. Consomme 4 MW. Se débloque à 5 000 habitants.", "Up to 90 Fun within 12 tiles. Needs shoreline, power and a road within 3 tiles. Uses 4 MW. Unlocks at 5,000 residents."], size: 4, cost: 6000, upkeep: 25, radius: 12, fun: 90, consumes: 4, needsShore: true, requiresRoad: true, category: "park", unlockPop: 5000 },
     { type: "residentialtower", name: ["Tour résidentielle", "Residential tower"], desc: ["2 500 habitants et 500 emplois avec électricité et accès routier. Génère des impôts. Se débloque à 40 000 habitants.", "2,500 residents and 500 jobs with power and road access. Generates tax income. Unlocks at 40,000 residents."], size: 3, cost: 25000, upkeep: 60, consumes: 18, pop: 2500, jobs: 500, taxable: true, requiresRoad: true, category: "reward", unlockPop: 40000 },
     { type: "skylineapartments", name: ["Tours résidentielles jumelles", "Skyline apartments"], desc: ["6 000 habitants et 1 200 emplois imposables. Route à 3 cases et 36 MW requis. Se débloque à 60 000 habitants.", "6,000 residents and 1,200 taxable jobs. Needs a road within 3 tiles and 36 MW. Unlocks at 60,000 residents."], size: 4, cost: 60000, upkeep: 140, consumes: 36, pop: 6000, jobs: 1200, taxable: true, requiresRoad: true, category: "reward", unlockPop: 60000 },
@@ -43,7 +47,7 @@
     const parksIndex = groups.findIndex((group) => group.items?.some((item) => item.tool === "park"));
     groups.splice(parksIndex, 1,
       { ...groups[parksIndex], items: items(["park", "bigpark", "botanicalgarden"]) },
-      { group: translate("group.recreation"), icon: icon("volleyballcourt", 1.6), items: items(["volleyballcourt", "soccerfield", "beachcarnival", "shoppingmall", "grandmuseum"]) },
+      { group: translate("group.recreation"), icon: icon("volleyballcourt", 1.6), items: items(["volleyballcourt", "soccerfield", "shuttledock", "floatingwaterpark", "jetski", "bananaboat", "beachcarnival", "shoppingmall", "grandmuseum"]) },
       { group: translate("group.landmarks"), icon: icon("statue", 1.6), items: items(["statue", "cityhall", "mansion", "arcology"]) },
     );
     groups.splice(groups.length - 1, 0, {
@@ -189,6 +193,47 @@
         scene.box(2.85, 3.45, 3.25, 3.75, 3, "#b8634e", "#eac6a4");
         scene.tree(0.12, 0.15, 3); scene.tree(3.88, 0.15, 3);
         break;
+      case "shuttledock":
+        scene.box(0.05, 0.05, 1.95, 1.95, 3, "#8d7052", "#d8b789");
+        scene.house(0.2, 0.2, 1.25, 1.1, 10, 5, "#efe4cb", "#449dba", { chimney: false });
+        for (const x of [0.2, 1.8]) scene.cylinder(x, 1.8, 0.055, 7, "#79624b", "#f2d6a8");
+        scene.box(1.4, 0.25, 1.8, 0.8, 4, "#467988", "#a3ced3");
+        break;
+      case "floatingwaterpark":
+        scene.box(0.15, 0.15, 3.85, 3.85, 2, "#d78c35", "#f9d45c");
+        face([[0.5, 0.5, 2.2], [3.5, 0.5, 2.2], [3.5, 3.5, 2.2], [0.5, 3.5, 2.2]], "#4daec7", 3);
+        for (const [x, y, color] of [[0.6, 0.6, "#ef8261"], [2.6, 0.6, "#78cb97"], [0.6, 2.6, "#eb81ac"]]) {
+          scene.box(x, y, x + 0.8, y + 0.8, 5, color, "#fff1ae", { z0: 2 });
+        }
+        scene.box(2.65, 2.6, 3.35, 3.3, 18, "#9175bd", "#d5b2eb", { z0: 2 });
+        face([[2.65, 2.6, 20], [3.35, 2.6, 20], [2.5, 1.3, 4], [1.8, 1.3, 4]], "#f17f59", 24);
+        scene.box(1.5, 3.5, 2.5, 3.95, 2, "#936f4f", "#dfc099", { z0: 2 });
+        for (const x of [0.2, 3.8]) for (const y of [0.2, 3.8]) scene.cylinder(x, y, 0.07, 4, "#e27544", "#fff2d1", { z0: 2 });
+        break;
+      case "jetski":
+      case "bananaboat": {
+        scene.box(0.08, 0.12, 0.38, 2.88, 3, "#926d49", "#d9b583");
+        for (const y of [0.25, 1.5, 2.75]) scene.cylinder(0.23, y, 0.045, 5, "#6f5541", "#f0d0a0");
+        for (const [x, y] of [[0.75, 0.45], [2.65, 0.45], [2.65, 2.65], [0.75, 2.65]]) {
+          scene.cylinder(x, y, 0.07, 2, "#df7040", "#fff0bf");
+        }
+        for (const y of type === "jetski" ? [1, 2] : [0.8]) {
+          face([[1.15, y, 1], [1.55, y - 0.2, 1], [2.15, y, 1], [1.55, y + 0.2, 1]], "#f4f0d9", 10);
+          scene.box(1.4, y - 0.1, 1.85, y + 0.1, 3, "#dc5746", "#f29357");
+          scene.box(1.48, y - 0.07, 1.7, y + 0.07, 2, "#374958", "#455965", { z0: 3 });
+          line([[1.88, y - 0.12, 4], [1.88, y + 0.12, 4]], "#344753", 1.3);
+        }
+        if (type === "bananaboat") {
+          line([[1.55, 1, 1], [1.55, 1.55, 1]], "#e8ddbf");
+          scene.box(1.35, 1.55, 1.75, 2.65, 3, "#dda82e", "#ffe252");
+          for (const y of [1.65, 2, 2.35]) {
+            scene.cylinder(1.55, y, 0.065, 5, "#ed7952", "#f5c69e", { z0: 3 });
+            line([[1.3, y, 3], [1.8, y, 3]], "#415267");
+          }
+          scene.cylinder(1.55, 2.65, 0.18, 5, "#e4b432", "#ffe56b");
+        }
+        break;
+      }
       case "beachcarnival":
         face([[0.15, 0.15, 0.2], [3.85, 0.15, 0.2], [3.85, 3.85, 0.2], [0.15, 3.85, 0.2]], "#e8d1a0", -1);
         scene.box(0.2, 2.85, 3.8, 3.15, 1, "#ad8660", "#d8b38b");

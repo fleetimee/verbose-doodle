@@ -8,6 +8,9 @@
       messages[`struct.${type}.desc`][0] += ` Jusqu'à ${fun} points de loisirs à ${radius} cases.`;
       messages[`struct.${type}.desc`][1] += ` Up to ${fun} Fun within ${radius} tiles.`;
     }
+    messages["query.shuttleConnected"] = ["Navette : trajet ouvert vers un embarcadère", "Shuttle: connected to a visitor dock"];
+    messages["query.shuttleMissing"] = ["Navette indisponible : vérifiez le trajet, la route et les dégâts de l’embarcadère.", "No shuttle: check the water route, dock road access and damage."];
+    messages["reason.waterRecreation"] = ["Choisissez de l'eau libre directement au bord de la terre.", "Choose clear water directly beside land."];
     messages["top.fun"] = ["Loisirs", "Fun"];
     messages["top.fun.title"] = ["Loisirs moyens des habitants. Les parcs et attractions stimulent légèrement la demande.", "Residents' average Fun. Parks and attractions give demand a small boost."];
     messages["query.fun"] = ["Loisirs ici : {n} / 100", "Fun here: {n} / 100"];
@@ -32,8 +35,23 @@
     const index = city.idx(building.x, building.y);
     if (definition.consumes && !city.powered[index]) return false;
     const roadDist = structRoadDist(city, building, definition.size);
-    if (definition.requiresRoad && roadDist === 255) return false;
+    if (definition.requiresRoad && !definition.waterOnly && roadDist === 255) return false;
     if (city.roadDist[index] > roadDist) city.roadDist[index] = roadDist;
+    if (definition.needsShuttle) return !!window.__waterRecreation?.connected(city, building);
+    if (definition.waterOnly) {
+      let access = false;
+      for (let y = building.y - 1; y <= building.y + definition.size; y++) {
+        for (let x = building.x - 1; x <= building.x + definition.size; x++) {
+          if (!city.inBounds(x, y)) continue;
+          const inside = x >= building.x && x < building.x + definition.size && y >= building.y && y < building.y + definition.size;
+          const tile = city.idx(x, y);
+          if (inside && city.terrain[tile] !== 1) return false;
+          const edge = (x >= building.x && x < building.x + definition.size) || (y >= building.y && y < building.y + definition.size);
+          if (!inside && edge && city.terrain[tile] === 0 && city.roadDist[tile] < 255) access = true;
+        }
+      }
+      if (!access) return false;
+    }
     let shore = !definition.needsShore;
     for (let y = building.y; y < building.y + definition.size; y++) {
       for (let x = building.x; x < building.x + definition.size; x++) {
@@ -54,6 +72,7 @@
   const coverage = (city, definitions) => {
     city.fun ??= new Uint8Array(city.count);
     city.fun.fill(0);
+    window.__waterRecreation?.refresh(city, definitions);
     for (const building of city.structs.values()) {
       const definition = definitions[building.type];
       if (!definition.fun || !operating(city, building, definition)) continue;

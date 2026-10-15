@@ -340,3 +340,53 @@ For a visual check, place two trees side by side and compare them with a natural
 forest. Mix tree varieties, remove a neighbor, and reload the city. Compare the
 ground tint and silhouettes at close zoom, on elevated flat land, and in flat
 view. Costs and structure positions should remain unchanged.
+
+## Water recreation
+
+Recreation now includes Jet ski circuit (2,000 residents, $2,200 construction,
+$10 monthly upkeep, up to 60 Fun within 10 tiles) and Banana boat rides
+(3,500 residents, $3,500 construction, $15 monthly upkeep, up to 75 Fun within
+12 tiles). Both occupy 3 × 3 clear, flat water tiles directly touching land.
+They need a road within the existing three-tile access distance of an adjacent
+shore tile and no electricity. Their dock, buoy course and watercraft use static
+isometric models. Upkeep belongs to Parks; Fun uses the existing strongest
+attraction rule. Burning or flooded attractions close normally.
+
+For a manual check, unlock Recreation in a disposable city, place both types on
+water beside land and connect a shore road. Check Fun, cost, upkeep and queries.
+Reject inland placements, open water without adjacent land, occupied water and
+map-edge footprints. Remove/restore the shore road and compare operation.
+Bulldoze a ride and confirm the water remains. Save/reload and export/import;
+both types use existing structure serialization without a save migration.
+
+### Offshore park and shuttle boats
+
+Visitor shuttle dock unlocks at 3,500 residents, costs $1,800 and has $8 monthly
+upkeep. Place its 2 × 2 footprint on land touching water and connect a road
+within the existing three-tile footprint access distance. It needs no power.
+Floating water park unlocks at 5,000 residents, costs $9,000 and has $40 monthly
+upkeep. Place its 4 × 4 footprint on clear, flat water, including offshore.
+It provides up to 95 Fun within 20 tiles while connected to an operating dock.
+Both appear in Recreation with English and French labels and native models.
+
+Routes use cardinally connected clear water. Land, structures, bridges, rail,
+wires, fire and floods block navigation. The park's footprint stays reserved;
+boats land alongside it. Multiple docks share a breadth-first route search, and
+each park uses the nearest reachable landing. A burning/flooded dock or park,
+missing dock road access, or a blocked channel closes the park. Fun uses the
+existing non-stacking attraction calculation and upkeep remains under Parks.
+
+Up to 24 visible shuttle routes have small passenger boats traveling out and
+back, with a pause at each landing. Movement follows pause and 1×/2×/4× speeds;
+reduced motion freezes boats. Boats hide in flat/data views and below 0.5 zoom.
+Routes refresh at most once per second during rendering and whenever Fun is
+recalculated. Routes and boats are derived, not saved; dock/park structures use
+the existing save and export format. Rotation recomputes routes.
+
+Manual check: build a road-connected dock and an offshore park in a disposable
+city. Inspect the park's shuttle query and Fun, then watch passenger boats at
+close zoom. Pause and change speeds; inspect flat/data views and reduced motion.
+Remove the dock road, block the entire water channel, damage a landing, and
+restore each connection. Check an isolated lake stays disconnected. Save/reload
+and export/import, rotate the map, then bulldoze the dock or park and check the
+route disappears. Browser visual checks remain necessary for sprite overlap.
