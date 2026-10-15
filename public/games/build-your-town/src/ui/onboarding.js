@@ -20,7 +20,7 @@
     island_transit: [
       copy("Use Roads to connect isolated land. Drag across water to build bridges; they cost more than land roads.", "Reliez les terres isolées avec les routes. Traversez l'eau pour créer des ponts, plus chers que les routes terrestres."),
       copy("Add 40 road or bridge tiles beyond the starting network for Bronze. Plan short crossings to protect your budget.", "Ajoutez 40 cases de routes ou ponts au réseau initial pour le bronze. Privilégiez les traversées courtes pour préserver le budget."),
-      copy("For Silver, build a new rail station beside a road and railway, then add 20 rail tiles. A bus depot does not count.", "Pour l'argent, placez une nouvelle gare près d'une route et de rails, puis ajoutez 20 cases de rails. Un dépôt de bus ne compte pas."),
+      copy("For Silver, build a new rail station beside a road or highway and railway, then add 20 rail tiles. A bus depot does not count.", "Pour l'argent, placez une nouvelle gare près d'une route ou autoroute et de rails, puis ajoutez 20 cases de rails. Un dépôt de bus ne compte pas."),
     ],
   };
 
@@ -93,7 +93,7 @@
       "road", copy("Select roads", "Choisir les routes"));
     if (tier === "silver") {
       if (!newCount(["station"])) return hint(copy("Place a new rail station", "Placez une nouvelle gare"),
-        copy("Place a new station beside both a road and a railway. Then extend the rail network by 20 tiles.", "Placez une nouvelle gare près d'une route et de rails. Ajoutez ensuite 20 cases au réseau ferroviaire."),
+        copy("Place a new station beside both a road or highway and a railway. Then extend the rail network by 20 tiles.", "Placez une nouvelle gare près d'une route ou autoroute et de rails. Ajoutez ensuite 20 cases au réseau ferroviaire."),
         "station", copy("Select rail station", "Choisir la gare"));
       return hint(copy("Extend the railway", "Étendez le chemin de fer"),
         copy("Add 20 rail tiles beyond the starting network. Connect the station to the neighborhoods it should serve.", "Ajoutez 20 cases de rails au réseau initial. Reliez la gare aux quartiers à desservir."),
