@@ -23,6 +23,7 @@
   const key = building => `${building.type}:${building.x}:${building.y}`;
   function initialize(city) {
     if (city.industry) {
+      city.industry.lastByBuilding ??= {};
       city.industry.freight ??= [];
       city.industry.freightSequence ??= 0;
       return city.industry;
@@ -44,7 +45,7 @@
       }
       if (best) deposits.push(best);
     }
-    city.industry = { v: 1, deposits, stocks: {}, earned: 0, exported: 0, lastTrade: 0, lastFuel: 0, freight: [], freightSequence: 0 };
+    city.industry = { v: 1, deposits, stocks: {}, earned: 0, exported: 0, lastTrade: 0, lastFuel: 0, freight: [], freightSequence: 0, lastByBuilding: {} };
     return city.industry;
   }
   function depositAt(city, building, resource) {
@@ -75,7 +76,7 @@
     return group.buildings.reduce((sum, building) => sum +
       (byType[building.type] && (!destination || group.route(building, destination)) ? stock(city, building)[resource] : 0), 0);
   }
-  function take(city, group, resource, amount, destination) {
+  function take(city, group, resource, amount, destination, onTransfer) {
     const requested = amount;
     for (const building of group.buildings) {
       if (!byType[building.type] || !(stock(city, building)[resource] > 0)) continue;
@@ -83,6 +84,7 @@
       if (destination && !route) continue;
       const inventory = stock(city, building), used = Math.min(amount, inventory[resource]);
       inventory[resource] -= used; amount -= used;
+      if (used > 0) onTransfer?.(building, used);
       if (used > 0 && destination) window.__freightRoutes.record(city, resource, used, route);
       if (amount < 1e-9) break;
     }
@@ -91,6 +93,11 @@
   function evaluate(city, produce) {
     const state = initialize(city), status = new Map(), fuel = new Set();
     let income = 0, exported = 0, fuelSaving = 0;
+    if (produce) state.lastByBuilding = {};
+    const credit = (building, field, amount) => {
+      const entry = state.lastByBuilding[key(building)] ??= { exports: 0, savings: 0 };
+      entry[field] += amount * 24;
+    };
     const present = new Set([...city.structs.values()].filter(b => byType[b.type]).map(key));
     for (const name of Object.keys(state.stocks)) if (!present.has(name)) delete state.stocks[name];
     if (!present.size) {
@@ -131,14 +138,14 @@
         fuel.add(plant.id);
         const saving = def.upkeep * city.diff.costMul * 0.4 / window.__townCalendar.daysInMonth(city.year, city.month) / 24 * (quantity / (8 / 24));
         fuelSaving += saving;
-        if (produce) take(city, group, "coal", quantity, plant);
+        if (produce) { take(city, group, "coal", quantity, plant); credit(plant, "savings", saving); }
       }
       if (!produce) continue;
       for (const exporter of group.exporters) {
         let capacity = exporter.capacity / 24;
         for (const resource of ["goods", "steel", "copper", "iron", "coal"]) {
           const amount = Math.min(capacity, Math.max(0, available(city, group, resource, exporter) - reserve[resource]));
-          const delivered = take(city, group, resource, amount, exporter); capacity -= delivered;
+          const delivered = take(city, group, resource, amount, exporter, (source, used) => credit(source, "exports", used * resources[resource].price)); capacity -= delivered;
           income += delivered * resources[resource].price; exported += delivered;
         }
       }
@@ -215,9 +222,11 @@
     City.fromJSON = function (data) {
       const city = load.call(this, data), saved = data.industry;
       if (saved?.v === 1 && Array.isArray(saved.deposits)) {
-        city.industry = { v: 1, deposits: saved.deposits.slice(0, 9).filter(d => ["coal", "iron", "copper"].includes(d.resource) && Number.isInteger(d.x) && Number.isInteger(d.y) && city.inBounds(d.x, d.y)).map(d => ({ resource: d.resource, x: d.x, y: d.y, remaining: finite(d.remaining, 18000) })), stocks: {},
+        city.industry = { v: 1, deposits: saved.deposits.slice(0, 9).filter(d => ["coal", "iron", "copper"].includes(d.resource) && Number.isInteger(d.x) && Number.isInteger(d.y) && city.inBounds(d.x, d.y)).map(d => ({ resource: d.resource, x: d.x, y: d.y, remaining: finite(d.remaining, 18000) })), stocks: {}, lastByBuilding: {},
           earned: finite(saved.earned, Number.MAX_SAFE_INTEGER), exported: finite(saved.exported, Number.MAX_SAFE_INTEGER), lastTrade: finite(saved.lastTrade, 100000), lastFuel: finite(saved.lastFuel, 100000) };
         for (const building of city.structs.values()) {
+          const financial = saved.lastByBuilding?.[key(building)];
+          if (financial && (byType[building.type] || building.type === "coal")) city.industry.lastByBuilding[key(building)] = { exports: finite(financial.exports, 100000), savings: finite(financial.savings, 100000) };
           if (!byType[building.type]) continue;
           const inventory = stock(city, building), source = saved.stocks?.[key(building)];
           for (const r of Object.keys(resources)) inventory[r] = finite(source?.[r], storage);

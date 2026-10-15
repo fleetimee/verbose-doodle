@@ -1,0 +1,23 @@
+#panel-building-finances { width: 690px; max-width: calc(100vw / var(--game-ui-scale, 1) - 24px); }
+#panel-building-finances h2 { font: inherit; margin: 0; }
+.finance-open { width: 100%; margin: 8px 0; white-space: normal; }
+.finance-controls { display: flex; flex-wrap: wrap; gap: 12px; }
+.finance-controls label { display: grid; gap: 5px; flex: 1; }
+.finance-controls select { background: var(--panel-flat); color: var(--text); border: 1px solid var(--border); border-radius: 7px; padding: 8px; font: inherit; }
+.finance-summary, .finance-note, .building-finance-query p { line-height: 1.6; }
+.finance-note { color: var(--muted); font-size: 12px; }
+.finance-table-scroll { overflow-x: auto; }
+.finance-table-scroll table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 12px; }
+.finance-table-scroll caption { text-align: left; padding: 8px 0; color: var(--muted); }
+.finance-table-scroll th, .finance-table-scroll td { padding: 9px 6px; border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; }
+.finance-table-scroll tr > :first-child { text-align: left; white-space: normal; min-width: 160px; }
+.finance-table-scroll th button { text-align: left; padding: 4px; font: inherit; }
+.finance-table-scroll small { display: block; margin: 3px 4px; font-weight: normal; color: var(--muted); }
+.finance-table-scroll tfoot { font-weight: bold; }
+.finance-negative { color: #ffb6ad; }
+.finance-ledger { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; }
+.finance-ledger dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.finance-controls select:focus-visible, .finance-table-scroll:focus-visible { outline: 2px solid #7edbc4; outline-offset: 2px; }
+@media (max-width: 900px) {
+  #panel-building-finances { width: auto; max-height: 65dvh; }
+}

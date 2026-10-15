@@ -89,7 +89,7 @@
         facts.append(term, node("dd", "", value));
       };
       fact(copy("Footprint", "Emprise"), `${definition.size} × ${definition.size}`, "grid");
-      fact(copy("Upkeep", "Entretien"), `${new Intl.NumberFormat(fr ? "fr" : "en", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(definition.upkeep)} ${copy("/ month", "/ mois")}`, "money");
+      fact(copy("Base upkeep", "Entretien de base"), `${new Intl.NumberFormat(fr ? "fr" : "en", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(definition.upkeep)} ${copy("/ month", "/ mois")}`, "money");
       if (definition.consumes) fact(copy("Power needed", "Électricité requise"), `${definition.consumes} MW`, "power");
       if (definition.power) fact(copy("Generation", "Production"), `${definition.onWater && city.terrain[city.idx(building.x, building.y)] === 1 ? definition.power * 1.5 : definition.power} MW`, "power");
       if (definition.radius) fact(copy("Coverage radius", "Rayon de couverture"), copy(`${definition.radius} tiles`, `${definition.radius} cases`), "range");
