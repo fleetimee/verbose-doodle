@@ -314,6 +314,8 @@ ordinary Railway for bridges, highway overpasses, bends, and junctions.
 Opposing trains use separate lanes, with lane-aware signal reservations. Ordinary
 Rail stations and freight terminals connect as before. At connections to single
 track, both lanes taper into the shared track; trains reserve the shared section.
+At road crossings that form an overpass, both tracks continue over widened bridge
+decks and ramps, with railings outside the two-track envelope.
 Landscaping trees/bushes and ordinary power lines occupy the small center strip.
 Clearing the tile removes its tracks and planting, using existing bulldozer rules.
 
