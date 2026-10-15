@@ -84,7 +84,12 @@ land-value, crime, pollution, and difficulty modifiers. A stable ±20% variation
 in required effort keeps neighboring lots from upgrading together. Connected
 starter layouts typically see their first homes/jobs within 1–2 minutes at 1×;
 later tiers take longer. Growth freezes when demand or infrastructure is missing.
-Demand responds daily (35% toward its target each day). Parks, services, pollution,
+Demand responds daily (35% toward its target each day). Commercial demand targets
+26 jobs per 100 residents before airport, difficulty, taxes, land-value, crime,
+tourism, and recreation modifiers (up from 22). This gives small towns room for
+more shops while retaining oversupply limits; empty commercial zoning does not
+count as existing jobs. Road access, workers, power, and tier requirements still
+apply. Parks, services, pollution,
 and crime update land value and crime at midnight. Abandonment uses four
 equivalent trials per day, avoiding sudden neighborhood-wide losses.
 Population, networks, service coverage, pollution, milestones, and the monthly
