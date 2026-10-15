@@ -90,6 +90,7 @@
     const kinds = initialize(city);
     for (const index of plan.tiles) {
       city.rail[index] = 1; kinds[index] = def.kind;
+      if (city.doubleTracks) city.doubleTracks[index] = 0;
       if (city.overlay[index] === 1) city.overlay[index] = 0;
     }
     city.money -= plan.cost; city.roadsDirty = true; city.gridDirty = true;

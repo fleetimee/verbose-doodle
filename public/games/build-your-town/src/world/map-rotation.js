@@ -86,6 +86,9 @@
     for (const [key, value] of Object.entries(city.cover)) view.cover[key] = remap(`cover.${key}`, value, permutation);
     view.structs = footprints(city.structs, structures, city, true);
     view.buildings = footprints(city.buildings, buildings, city, false);
+    if (orientation % 2 && view.doubleTracks) {
+      for (let index = 0; index < view.count; index++) if (view.doubleTracks[index]) view.doubleTracks[index] = 3 - view.doubleTracks[index];
+    }
     view.medianPlants = spatialMap(city.medianPlants, city);
     view.fireOrders = spatialMap(city.fireOrders, city);
     view.actors = city.actors.map(actor => ({ ...actor, ...turn(actor.x, actor.y, city.size - 1), dir: actor.dir + orientation * Math.PI / 2 }));

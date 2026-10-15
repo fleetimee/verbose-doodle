@@ -126,7 +126,7 @@
           remaining -= length;
         }
         if (!point) continue;
-        point = window.__doubleRail?.position(city, point) ?? point;
+        point = window.__doubleRail?.position(city, point, direction) ?? point;
         const x = Math.floor(point.x), y = Math.floor(point.y);
         if (!city.inBounds(x, y)) continue;
         const axis = Math.abs(direction.x) >= Math.abs(direction.y) ? "x" : "y";

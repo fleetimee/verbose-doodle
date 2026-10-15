@@ -133,7 +133,7 @@
       for (const line of query.lines) if (line === translate("query.funding", { pct: city.funding[definition.dept] }) || line === translate("query.produces", { mw: definition.power })) skip.add(line);
     }
     const types = [
-      ["track", ["highspeedRail", "elevatedLrt"]],
+      ["track", ["highspeedRail", "elevatedLrt", "doubleRail"]],
       ["power", ["powered", "unpowered", "powerYes", "powerNo", "wire"]],
       ["water", ["waterYes", "waterNo", "flooded"]],
       ["road", ["noRoad", "onRoad", "roadAt", "traffic"]],
@@ -148,7 +148,7 @@
       const topic = matches(line, "query.crime", translate) ? "crime"
         : matches(line, "query.traffic", translate) ? "traffic"
         : matches(line, "query.onFire", translate) || matches(line, "query.flooded", translate) ? "tileDamage"
-        : { track: "railTransit", power: "electricity", water: "tileWater", road: "tileRoad", activity: "tileOperation", people: "tileJobs",
+        : { track: matches(line, "query.doubleRail", translate) ? "compactRail" : "railTransit", power: "electricity", water: "tileWater", road: "tileRoad", activity: "tileOperation", people: "tileJobs",
           fun: "fun", altitude: "altitude", land: "lv", pollution: "pollution", shield: "coverage", info: "tileDevelopment" }[type];
       const metric = ["fun", "altitude", "land", "pollution"].includes(type) || matches(line, "query.crime", translate);
       if (metric) {

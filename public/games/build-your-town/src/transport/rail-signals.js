@@ -4,7 +4,7 @@
   const length = train => [3, 4, 5, 5, 3][train.fleetVariant ?? 0] * 0.68;
   function railSignature(city) {
     let signature = 0;
-    for (let index = 0; index < city.count; index++) if (city.rail[index]) signature = (signature + Math.imul(index + 1, index + 3 + (window.__railTransit?.kind(city, index) ?? 0))) | 0;
+    for (let index = 0; index < city.count; index++) if (city.rail[index]) signature = (signature + Math.imul(index + 1, index + 3 + (window.__railTransit?.kind(city, index) ?? 0) + (window.__doubleRail?.axisAt(city, index) ?? 0) * 3)) | 0;
     return signature;
   }
   function network(city, signature = railSignature(city)) {
@@ -43,12 +43,17 @@
     if (!state || state.city !== city || state.signature !== signature) { state = network(city, signature); states.set(renderer, state); }
     return state;
   }
+  function blockFor(state, city, index, dx, dy) {
+    const block = state.blocks.get(index);
+    const lane = window.__doubleRail?.lane(city, index, dx, dy);
+    return block === undefined || lane === null || lane === undefined ? block : `${block}:${lane}`;
+  }
   function occupied(state, city, train) {
     const result = new Set();
-    const mark = point => {
+    const mark = (point, direction = { x: train.x - train.px, y: train.y - train.py }) => {
       const x = Math.floor(point.x), y = Math.floor(point.y);
       if (city.inBounds(x, y)) {
-        const block = state.blocks.get(city.idx(x, y));
+        const block = blockFor(state, city, city.idx(x, y), direction.x, direction.y);
         if (block !== undefined) result.add(block);
       }
     };
@@ -60,10 +65,10 @@
       const distance = Math.hypot(point.x - previous.x, point.y - previous.y);
       if (distance > remaining) {
         if (distance) mark({ x: previous.x + (point.x - previous.x) * remaining / distance,
-          y: previous.y + (point.y - previous.y) * remaining / distance });
+          y: previous.y + (point.y - previous.y) * remaining / distance }, { x: previous.x - point.x, y: previous.y - point.y });
         break;
       }
-      mark(point);
+      mark(point, { x: previous.x - point.x || train.x - train.px, y: previous.y - point.y || train.y - train.py });
       remaining -= distance;
       previous = point;
     }
@@ -83,7 +88,7 @@
     const required = occupied(state, city, train);
     const probe = { ...train, signalTrain: train };
     for (let step = 0; step < 4; step++) {
-      const block = state.blocks.get(city.idx(probe.x, probe.y));
+      const block = blockFor(state, city, city.idx(probe.x, probe.y), probe.x - probe.px, probe.y - probe.py);
       if (block !== undefined) required.add(block);
       if (!renderer.pickNext(city, probe, false)) {
         const dx = probe.x - probe.px, dy = probe.y - probe.py;
@@ -122,7 +127,7 @@
       if (!state || state.city !== city) return pick(city, train, initial);
       const dx = train.x - train.px, dy = train.y - train.py;
       const available = point => {
-        const block = state.blocks.get(city.idx(point.x, point.y));
+        const block = blockFor(state, city, city.idx(point.x, point.y), point.vx, point.vy);
         const owner = state.owners.get(block);
         return !owner || owner === train || owner === train.signalTrain;
       };
@@ -187,12 +192,14 @@
     const state = stateFor(renderer, city), ctx = renderer.ctx;
     for (const signal of state.signals) {
       const point = { x: signal.index % city.size + 0.2, y: Math.floor(signal.index / city.size) + 0.2 };
-      const { x, y } = window.__doubleRail?.position(city, point) ?? point;
+      const shifted = window.__doubleRail?.position(city, point) ?? point;
+      const x = Math.max(Math.floor(point.x) + 0.05, Math.min(Math.floor(point.x) + 0.95, shifted.x));
+      const y = Math.max(Math.floor(point.y) + 0.05, Math.min(Math.floor(point.y) + 0.95, shifted.y));
       const px = originX + (x - y) * halfWidth;
       const elevation = window.__trainFleet.railHeight(renderer, city, { x, y }) ?? city.base(Math.floor(x), Math.floor(y));
       const py = originY + (x + y) * halfHeight - elevation * heightScale;
       if (px < -20 || py < 0 || px > renderer.canvas.width + 20 || py > renderer.canvas.height + 40) continue;
-      const occupied = state.owners.has(signal.block);
+      const occupied = state.owners.has(signal.block) || state.owners.has(`${signal.block}:0`) || state.owners.has(`${signal.block}:1`);
       ctx.strokeStyle = "#606d79";
       ctx.lineWidth = 1.5 * scale;
       ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, py - 12 * scale); ctx.stroke();

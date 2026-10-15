@@ -304,26 +304,29 @@ and check that repeated updates do not duplicate question marks.
 
 ## Double-track railways
 
-Transport includes **Double-track railway**, which lays a straight, two-tile-wide
-pair on land. Drag along the desired direction; the dominant drag axis sets the
-alignment and the second track sits on the positive map-coordinate side. Each
-new rail tile costs $25 ($50 per new pair); existing rail is retained and free.
-The whole preview is rejected if either lane is obstructed or outside the map.
-Use the ordinary Railway tool for bridges, bends, and junctions. Parallel runs
-of at least three tiles render as separate tracks with independent ends, retaining
-outside branches. Trains and signals follow these connections. Saves use the
-existing rail tiles and require no migration. Parallel tracks on flat land
-sit closer together, with a narrow middle strip. Use Landscaping trees or bushes
-on either track to plant that strip, or lay power lines on the rail tiles to put
-poles in the middle. These remain functional power lines. Planting is saved in
-`medianPlants`; demolishing either track clears its planting. Junctions, crossings,
-slopes, and bridges retain normal track placement; trains follow the shifted
-tracks and taper back at connections to ordinary track.
+**Double-track railway** places two tracks inside one tile, like highway lanes.
+Drag a straight route on flat land at one elevation. New tiles cost $50; existing
+ordinary rail can be upgraded for $25 per tile. Existing double-track tiles are
+retained without charge. The full preview is rejected if any tile is obstructed,
+outside the map, on water, on a highway, or belongs to another rail system. Use
+ordinary Railway for bridges, highway overpasses, bends, and junctions.
 
-Manual QA: in a disposable city, drag horizontal and vertical pairs in both
-directions. Check preview, funds, existing-track extension, blocked land, water,
-map edges, road crossings, single-track branches, trains/signals, rotation, and
-save/export/load. Keep player saves separate from QA.
+Opposing trains use separate lanes, with lane-aware signal reservations. Ordinary
+Rail stations and freight terminals connect as before. At connections to single
+track, both lanes taper into the shared track; trains reserve the shared section.
+Landscaping trees/bushes and ordinary power lines occupy the small center strip.
+Clearing the tile removes its tracks and planting, using existing bulldozer rules.
+
+Sparse `doubleTracks` save entries record each tile’s alignment. Older saves have
+no compact tracks and require no migration: existing two-tile parallel corridors
+retain their footprint and planting. They are not automatically collapsed or
+removed. Map rotation swaps compact-track alignment; manual disaster recovery
+records the correct track type and alignment for rebuilding.
+
+Manual QA: build horizontal and vertical routes, upgrade ordinary rail, and check
+preview costs, blocked land, map edges, road crossings, stations, freight, opposing
+trains, signals, center-strip plants/poles, all camera angles, save/load, and
+recovery. Keep player saves separate from QA.
 
 ## High-speed rail and elevated LRT
 

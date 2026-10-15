@@ -136,3 +136,8 @@ base figures in a compact two-column ledger. Separate placement requirements fro
 optional “Works well with” recommendations, each with a real model and a specific
 reason. Locked-item help remains available. Keep item-card descriptions short
 and put the longer material behind their independent help buttons.
+
+Compact double-track railway draws both tracks inside one tile, like highway
+lanes. Keep opposing trains on their corresponding track and leave a narrow
+center strip for small planting or power poles. Older two-tile corridors retain
+their geometry; never shift or delete saved infrastructure to compact them.
