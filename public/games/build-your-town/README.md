@@ -347,3 +347,17 @@ height against LRT decks, ground traffic under viaducts, save/export/load, loss 
 station power or access, mismatched station rejection, separate neighboring rail
 systems, freight exclusion, demolition, and disaster rebuilding. Keep player
 saves separate from QA.
+
+## Road and highway vehicle turns
+
+Decorative cars on roads and highways prefer the straight continuation through
+rail crossings when that continuation is allowed. At a dead end they follow a
+small semicircular U-turn within the last paved tile; merged-road lane pairs
+turn into the return lane. Endpoint positions use actual connected tiles, without
+inventing a continuation beyond the map. Camera rotation preserves fractional
+vehicle positions and in-progress turns.
+
+For manual QA, build disposable horizontal and vertical road/highway dead ends,
+including map-edge endpoints and merged roads. Check repeated turnarounds, rail
+crossings, pause/speed controls, and rotating the camera mid-turn. Keep player
+saves separate from QA.

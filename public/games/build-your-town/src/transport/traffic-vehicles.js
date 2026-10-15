@@ -10,17 +10,49 @@
   };
   function destination(city, vehicle) {
     const choices = neighbors(city, vehicle.to);
+    const dx = vehicle.to % city.size - vehicle.from % city.size;
+    const dy = Math.floor(vehicle.to / city.size) - Math.floor(vehicle.from / city.size);
+    const straight = choices.find(index => index % city.size - vehicle.to % city.size === dx &&
+      Math.floor(index / city.size) - Math.floor(vehicle.to / city.size) === dy);
+    if (straight !== undefined && (city.rail[vehicle.from] || city.rail[vehicle.to] || city.rail[straight])) return straight;
     const forward = choices.filter(index => index !== vehicle.from);
     const candidates = forward.length ? forward : choices;
     if (!candidates.length) return null;
     return candidates[(vehicle.id * 17 + vehicle.trips * 13) % candidates.length];
   }
-  function position(city, from, to) {
-    const x = from % city.size, y = Math.floor(from / city.size);
-    const dx = to % city.size - x, dy = Math.floor(to / city.size) - y;
+  function position(city, tile, neighbor, arriving = false) {
+    const x = tile % city.size, y = Math.floor(tile / city.size);
+    const sign = arriving ? -1 : 1;
+    const dx = (neighbor % city.size - x) * sign, dy = (Math.floor(neighbor / city.size) - y) * sign;
     const wide = window.__roadLayout?.wide(city, x, y);
-    const lane = wide?.lane ?? (dx ? dx > 0 ? 0.6 : 0.4 : dy > 0 ? 0.4 : 0.6);
+    if (wide) return wide.axis === "x" ? { x: x + 0.5, y: y + wide.lane } : { x: x + wide.lane, y: y + 0.5 };
+    const lane = dx ? dx > 0 ? 0.6 : 0.4 : dy > 0 ? 0.4 : 0.6;
     return { x: x + (dx ? 0.5 : lane), y: y + (dx ? lane : 0.5) };
+  }
+  function pathPoint(car, end, progress) {
+    if (!car.arc) return { x: car.start.x + (end.x - car.start.x) * progress, y: car.start.y + (end.y - car.start.y) * progress };
+    const across = car.arc.axis === "x" ? "y" : "x", along = car.arc.axis;
+    const middle = (car.start[across] + end[across]) / 2;
+    const radius = Math.abs(end[across] - car.start[across]) / 2;
+    return { [along]: car.start[along] + car.arc.direction * radius * Math.sin(Math.PI * progress),
+      [across]: middle + (car.start[across] - middle) * Math.cos(Math.PI * progress) };
+  }
+  function beginSegment(city, car, nextTile) {
+    const previous = car.from, current = car.to;
+    const dx = current % city.size - previous % city.size, dy = Math.floor(current / city.size) - Math.floor(previous / city.size);
+    car.start = { x: car.x, y: car.y }; car.from = current; car.to = nextTile; car.progress = 0; car.trips++;
+    car.arc = null; car.afterTurn = undefined;
+    if (nextTile === previous) {
+      car.to = current; car.afterTurn = nextTile;
+      car.arc = { axis: dx ? "x" : "y", direction: Math.sign(dx || dy), end: position(city, current, nextTile) };
+      return;
+    }
+    const layout = window.__roadLayout?.wide(city, current % city.size, Math.floor(current / city.size));
+    const other = window.__roadLayout?.wide(city, nextTile % city.size, Math.floor(nextTile / city.size));
+    if (layout && other && layout.axis === other.axis && layout.side !== other.side &&
+        (layout.axis === "x" ? current % city.size === nextTile % city.size : Math.floor(current / city.size) === Math.floor(nextTile / city.size))) {
+      car.arc = { axis: layout.axis, direction: layout.direction, end: position(city, nextTile, current, true) };
+    }
   }
   function update(renderer, city, time, speed) {
     let state = states.get(renderer);
@@ -55,30 +87,32 @@
     state.tiles.clear();
     let surplus = Math.max(0, state.cars.length - target);
     state.cars = state.cars.filter(car => {
-      if (!road(city, car.from) || !road(city, car.to)) return false;
+      if (!road(city, car.from) || !road(city, car.to) || car.afterTurn !== undefined && !road(city, car.afterTurn)) return false;
       if (speed > 0 && surplus > 0 && car.trips >= 8 && car.progress === 0) { surplus--; return false; }
       return true;
     });
     for (const car of state.cars) {
-      const end = position(city, car.to, car.to + (car.to - car.from));
-      const dx = end.x - car.x, dy = end.y - car.y;
-      const next = { x: car.x + dx * Math.min(1, delta * car.speed / Math.max(0.001, 1 - car.progress)),
-        y: car.y + dy * Math.min(1, delta * car.speed / Math.max(0.001, 1 - car.progress)) };
+      const end = car.arc?.end ?? position(city, car.to, car.from, true);
+      const travel = car.arc ? Math.max(0.2, Math.hypot(end.x - car.start.x, end.y - car.start.y) * Math.PI / 2) : 1;
+      const step = delta * car.speed / travel;
+      const next = pathPoint(car, end, Math.min(1, car.progress + step));
       const fraction = window.__townPedestrians?.limitVehicleStep(renderer, city, car, next) ?? 1;
-      car.progress = Math.min(1, car.progress + delta * car.speed * fraction);
-      car.x = car.start.x + (end.x - car.start.x) * car.progress;
-      car.y = car.start.y + (end.y - car.start.y) * car.progress;
-      const headingX = end.x - car.start.x, headingY = end.y - car.start.y;
+      car.progress = Math.min(1, car.progress + step * fraction);
+      const point = pathPoint(car, end, car.progress);
+      const before = pathPoint(car, end, Math.max(0, car.progress - 0.01));
+      const after = pathPoint(car, end, Math.min(1, car.progress + 0.01));
+      car.x = point.x; car.y = point.y;
+      const headingX = after.x - before.x, headingY = after.y - before.y;
       car.axis = Math.abs(headingX) >= Math.abs(headingY) ? "x" : "y";
       car.back = (car.axis === "x" ? headingX : headingY) < 0 ? 1 : 0;
       if (car.progress >= 1) {
-        const nextTile = destination(city, car);
-        if (nextTile !== null) {
-          car.start = { x: car.x, y: car.y };
-          car.from = car.to;
-          car.to = nextTile;
-          car.progress = 0;
-          car.trips++;
+        if (car.afterTurn !== undefined) {
+          const nextTile = car.afterTurn;
+          car.start = { x: car.x, y: car.y }; car.to = nextTile; car.progress = 0;
+          car.arc = null; car.afterTurn = undefined;
+        } else {
+          const nextTile = destination(city, car);
+          if (nextTile !== null) beginSegment(city, car, nextTile);
         }
       }
       const index = city.idx(Math.floor(car.x), Math.floor(car.y));
@@ -107,8 +141,19 @@
     state.refresh = -Infinity;
     state.tiles.clear();
     for (const car of state.cars) {
-      Object.assign(car, point(car));
-      car.start = point(car.start);
+      const continuous = value => {
+        const rotated = point({ x: value.x - 0.5, y: value.y - 0.5 });
+        return { x: rotated.x + 0.5, y: rotated.y + 0.5 };
+      };
+      Object.assign(car, continuous(car));
+      car.start = continuous(car.start);
+      if (car.arc) {
+        const origin = point({ x: 0, y: 0 });
+        const direction = point({ x: car.arc.axis === "x" ? car.arc.direction : 0, y: car.arc.axis === "y" ? car.arc.direction : 0 });
+        const dx = direction.x - origin.x, dy = direction.y - origin.y;
+        car.arc.end = continuous(car.arc.end); car.arc.axis = dx ? "x" : "y"; car.arc.direction = Math.sign(dx || dy);
+      }
+      if (car.afterTurn !== undefined) car.afterTurn = tile(car.afterTurn);
       car.from = tile(car.from);
       car.to = tile(car.to);
     }
