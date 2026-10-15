@@ -29,6 +29,9 @@ body .context-help-button:focus-visible, #town-context-help button:focus-visible
 
 .context-help-action { display: flex; align-items: center; gap: 2px; }
 .context-help-action > .item { flex: 1; min-width: 0; }
+#flyout .context-help-action:has(> .item) { position: relative; display: block; }
+#flyout .context-help-action > .item { width: 100%; padding-right: 48px; box-sizing: border-box; }
+#flyout .context-help-action:has(> .item) > .context-help-button { position: absolute; top: 8px; right: 8px; margin: 0; }
 #budget-body .row:not(.ord) > span[data-town-help] { display: flex; align-items: center; text-wrap: pretty; }
 
 #town-context-help.item-help-expanded { width: min(460px, calc(100vw / var(--game-ui-scale, 1) - 24px)); }
