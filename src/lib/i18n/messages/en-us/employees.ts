@@ -1,4 +1,5 @@
 export const employeesMessages = {
+  birthDetails: "Place and date of birth",
   birthYear: "Birth year",
   age: "Age",
   ageValue: "{years} years old",

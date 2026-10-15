@@ -20,6 +20,8 @@ export interface EmployeeDetails extends EmployeeSummary {
   active: boolean | null;
   address: string | null;
   age: number | null;
+  birthDate: string | null;
+  birthPlace: string | null;
   birthYear: number | null;
   certifications: EmployeeCertification[];
   city: string | null;

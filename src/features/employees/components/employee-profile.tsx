@@ -124,6 +124,17 @@ export function EmployeeProfile({
   const date = employee.employmentStartDate
     ? new Date(`${employee.employmentStartDate}T12:00:00`)
     : null;
+  const birth = employee.birthDate
+    ? new Date(`${employee.birthDate}T12:00:00`)
+    : null;
+  const birthDate =
+    birth && !Number.isNaN(birth.getTime())
+      ? `${birth.getDate()} ${new Intl.DateTimeFormat(locale, {
+          month: "long",
+        }).format(birth)} ${birth.getFullYear()}`
+      : null;
+  const birthDetails =
+    [employee.birthPlace?.trim(), birthDate].filter(Boolean).join(", ") || null;
   const educationRecords = employee.education ?? [];
   const startDate =
     date && !Number.isNaN(date.getTime())
@@ -163,6 +174,10 @@ export function EmployeeProfile({
                   <ProfileField
                     label={copy.officeCity}
                     value={employee.officeCity}
+                  />
+                  <ProfileField
+                    label={copy.birthDetails}
+                    value={birthDetails}
                   />
                   <ProfileField
                     label={copy.birthYear}

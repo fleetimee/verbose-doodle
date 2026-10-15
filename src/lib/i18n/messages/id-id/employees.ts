@@ -1,4 +1,5 @@
 export const employeesMessages = {
+  birthDetails: "Tempat, tanggal lahir",
   birthYear: "Tahun lahir",
   age: "Usia",
   ageValue: "{years} tahun",
