@@ -46,11 +46,12 @@
   const isFoliage = (r, g, b) => {
     if (g > 60 && g > b && r / g < 0.52) return true;
     if (g > b && b / g < 0.43 && r / g >= 0.5 && r / g < 0.8) return true;
-    return r > g * 1.25 && r > 150 && b / g < 0.5;
+    return r > g * 1.25 && r <= g * 1.55 && r > 150 && b / g < 0.5;
   };
   // Grass (~#6aa84f) keeps r/g near 0.63 and b/g near 0.47 under tile shading. Drier land blends it toward sand,
   // pushing r/g up to ~1 and b/g up to ~0.7; pure sand (r/g > 1.08) and water stay outside.
-  const isGrass = (r, g, b) => g > 45 && g >= r * 0.99 && g > b && r / g >= 0.5 && b / g >= 0.4 && b / g <= 0.7;
+  const isGrass = (r, g, b) => (g > 45 && g >= r * 0.99 && g > b && r / g >= 0.5 && b / g >= 0.4 && b / g <= 0.7)
+    || (r === 207 && g === 227 && b === 208);
   // Sprites that paint grass underneath; the rest are only touched when they hold foliage.
   const groundKeys = ["grass:", "road:", "boulevard:", "hwy:", "rail:", "railover:", "st:", "park:", "bld:", "big:"];
   const foliageKeys = ["tree:", "plant:"];
@@ -112,7 +113,8 @@
         const id = `${stage}|${key}@${zoom}`;
         let result = recolored.get(id);
         if (!result || result.source !== canvas) {
-          result = { source: canvas, canvas: recolor(canvas, stage, textHash(key), zoom) };
+          const stableKey = key.replace(/^(st:bigpark:)\d+:/, "$10:").replace(/^(park:[^:]+:[^:]+:)\d+$/, "$10");
+          result = { source: canvas, canvas: recolor(canvas, stage, textHash(stableKey), zoom) };
           recolored.set(id, result);
         }
         return result.canvas;
@@ -121,6 +123,12 @@
     const stage = enabled ? stageFor(city) : "";
     if (stage !== lastStage) {
       lastStage = stage;
+      // Building slices contain seasonal pixels from sprites.get; rebuild them for the new stage.
+      if (sprites?.cache) {
+        for (const key of sprites.cache.keys()) {
+          if (key.includes("#")) sprites.cache.delete(key);
+        }
+      }
       if (recolored.size > 4000) recolored.clear();
       setTimeout(() => window.__townView?.redraw(), 0);
     }
