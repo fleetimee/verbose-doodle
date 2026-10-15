@@ -161,6 +161,12 @@
       content.push(node("p", `${copy("Connected export capacity", "Capacité d’export reliée")}: ${number(info.exportCapacity)} ${copy("units/day", "unités/jour")}`));
     }
     if (building?.type === "coal") content.push(node("p", copy("A connected coal mine supplies local fuel: up to 40% less plant upkeep, consuming 8 coal/day. Without local coal the plant uses its usual fuel supply.", "Une mine reliée fournit le combustible local : jusqu’à 40 % d’entretien en moins, pour 8 charbons/jour. Sans charbon local, la centrale utilise son approvisionnement habituel.")));
+    for (const element of content) {
+      if (element.tagName !== "P") continue;
+      const text = element.textContent;
+      element.dataset.townHelp = text.startsWith(`${copy("Stored", "Stock")}:`) || text.startsWith(`${copy("Connected export capacity", "Capacité d’export reliée")}:`)
+        ? "exports" : deposit && element === content[1] ? "deposits" : "industry";
+    }
     const signature = content.map(el => el.textContent).join();
     if (section.dataset.signature !== signature) { section.replaceChildren(...content); section.dataset.signature = signature; }
   }

@@ -1,0 +1,53 @@
+/* Shared help affordance; keep labels and numeric columns in their existing layout. */
+body .context-help-button, #topbar .stat .context-help-button {
+  display: inline-flex; vertical-align: middle; align-items: center; justify-content: center;
+  flex: 0 0 28px; width: 28px; height: 28px; min-width: 28px; min-height: 28px;
+  margin: 0 0 0 4px; padding: 4px; border: 0; border-radius: 6px;
+  background: transparent; color: #b9c9df; box-shadow: none; cursor: pointer;
+}
+body .context-help-button svg { display: block; width: 18px; height: 18px; pointer-events: none; }
+body .context-help-button:hover, body .context-help-button[aria-expanded="true"] { background: #35445e; color: #f6d17a; }
+body .context-help-button:active { transform: none; margin-bottom: 0; }
+body .context-help-button:focus-visible, #town-context-help button:focus-visible { outline: 2px solid #3fc1c9; outline-offset: 2px; }
+#topbar .stat .context-help-button { flex-basis: 24px; width: 24px; min-width: 24px; margin-left: 2px; }
+#budget-body .row > span:first-child { min-width: 0; }
+#town-context-help {
+  position: fixed; inset: auto; margin: 0; padding: 16px; width: min(330px, calc(100vw / var(--game-ui-scale, 1) - 24px));
+  max-height: calc(100dvh / var(--game-ui-scale, 1) - 24px); overflow: auto; box-sizing: border-box;
+  zoom: var(--game-ui-scale, 1); color: #f3ecd8; background: #202a3d; border: 1px solid #65748e;
+  border-radius: 12px; box-shadow: 0 10px 28px #080e2070; font-family: var(--font-body); z-index: 100;
+}
+#town-context-help[hidden] { display: none; }
+#town-context-help > div { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+#town-context-help h2 { margin: 2px 0 0; font-family: var(--font-body); font-size: 15px; font-weight: 800; line-height: 1.4; }
+#town-context-help button { flex-shrink: 0; width: 28px; height: 28px; min-height: 28px; padding: 0; border: 0; border-radius: 6px; background: #35445e; color: #f3ecd8; box-shadow: none; font-size: 22px; line-height: 1; }
+#town-context-help p { margin: 12px 0 0; font-size: 13px; line-height: 1.6; color: #d4dced; }
+@media (max-width: 900px) {
+  body .context-help-button { flex-basis: 32px; width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 6px; }
+  #town-context-help button { width: 40px; height: 40px; }
+}
+
+.context-help-action { display: flex; align-items: center; gap: 2px; }
+.context-help-action > .item { flex: 1; min-width: 0; }
+#budget-body .row:not(.ord) > span[data-town-help] { display: flex; align-items: center; text-wrap: pretty; }
+
+#town-context-help.item-help-expanded { width: min(460px, calc(100vw / var(--game-ui-scale, 1) - 24px)); }
+#town-context-help article { min-width: 0; }
+#town-context-help article h3 { margin: 20px 0 8px; font-size: 13px; line-height: 1.4; color: #f3ecd8; }
+#town-context-help article ul { margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.6; color: #d4dced; }
+#town-context-help article li + li { margin-top: 6px; }
+#town-context-help .item-help-preview { display: flex; justify-content: center; margin: 12px 0 0; }
+#town-context-help .item-help-preview canvas { max-width: 100%; height: auto; }
+#town-context-help .item-help-facts { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; margin: 16px 0 0; padding: 12px 0; border-block: 1px solid #46516a; font-size: 12px; }
+#town-context-help .item-help-facts dt { color: #b9c9df; }
+#town-context-help .item-help-facts dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+#town-context-help .item-help-companion { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid #46516a; }
+#town-context-help .item-help-companion canvas { flex: 0 0 68px; width: 68px; height: 68px; }
+#town-context-help .item-help-companion strong { font-size: 13px; }
+#town-context-help .item-help-companion p { margin: 4px 0 0; font-size: 12px; }
+#town-context-help .item-help-lock { color: #f6d17a; font-size: 11px; }
+#toolbar .context-help-tool { position: relative; display: block; flex: none; }
+#toolbar .context-help-tool > .tool { width: 100%; height: 100%; }
+#toolbar .context-help-tool > .context-help-button { position: absolute; top: 0; right: 0; margin: 0; background: #202a3d; border-radius: 50%; }
+
+#town-context-help.item-help-expanded > div { position: sticky; top: -16px; margin: -16px -16px 0; padding: 16px; background: #202a3d; border-bottom: 1px solid #46516a; z-index: 1; }

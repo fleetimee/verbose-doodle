@@ -108,6 +108,17 @@ Keep building finances within the incumbent panel system, entered through Budget
 
 Preserve readable English and French labels, locale-formatted currency, and explanatory notes at the existing compact scale. On mobile, retain all comparison columns in a horizontally scrollable, keyboard-focusable table region within the vertically scrolling panel. Keep focus and both scroll positions stable when forecasts refresh, and preserve visible focus indicators and Escape dismissal.
 
+## Context explanations
+
+Use small outlined question-mark buttons next to the labels they explain. Keep
+budget values right-aligned and place help inside the label column. Explanations
+use one shared nonmodal popover with the incumbent navy surface, cream heading,
+muted body copy, teal keyboard focus, and a visible close control. Anchor it to
+the question mark and clamp it to the viewport; allow scrolling at small sizes.
+Clicking help must never change an associated slider, checkbox, or map tool.
+Support English/French copy, keyboard activation, Escape with focus return, and
+outside dismissal without passing that click through to construction controls.
+
 ## Dedicated passenger rail
 
 Keep the three rail systems visually distinct: ordinary timber-sleeper tracks,
@@ -118,3 +129,10 @@ reads as elevated. High-speed stations stay at ground level. Use the existing
 isometric model primitives, transport chooser, amber selection, and bilingual
 query help. Track and station descriptions must name their matching system and
 flat-terrain restrictions.
+
+Expanded construction help uses the same popover with more reading width and a
+sticky close header. Render the real item model above its description; present
+base figures in a compact two-column ledger. Separate placement requirements from
+optional “Works well with” recommendations, each with a real model and a specific
+reason. Locked-item help remains available. Keep item-card descriptions short
+and put the longer material behind their independent help buttons.

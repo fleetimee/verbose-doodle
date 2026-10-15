@@ -57,7 +57,7 @@
 #query .query-metrics dt { font-weight: 400; }
 #query .query-metrics dd { margin: 0; color: #f4f0e5; text-align: right; font-variant-numeric: tabular-nums; }
 #query .query-range-note { line-height: 1.45; }
-#query .query-growth { padding: 14px 0; border-bottom: 1px solid #46516a; }
+#query .query-growth { padding: 14px 0; }
 #query .query-growth-heading { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
 #query .query-growth-value { color: var(--growth-color); font-variant-numeric: tabular-nums; }
 #query .query-growth-bar { display: block; width: 100%; height: 8px; border: 0; border-radius: 4px; overflow: hidden; background: #354258; accent-color: var(--growth-color); }

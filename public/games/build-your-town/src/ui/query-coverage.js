@@ -11,6 +11,7 @@
     return element;
   };
   const iconPaths = {
+    track: "M7 3v18M17 3v18M5 6h14M5 10h14M5 14h14M5 18h14",
     power: "m13 2-9 12h7l-1 8 10-12h-7l1-8Z",
     water: "M12 3s-7 8-7 12a7 7 0 0 0 14 0c0-4-7-12-7-12Z",
     road: "m8 3-3 18M16 3l3 18M12 4v3m0 4v3m0 4v3",
@@ -71,11 +72,14 @@
       progress.max = 100;
       progress.setAttribute("aria-label", copy("Progress to next building tier", "Progression vers le prochain niveau"));
       const status = node("p", "query-growth-status");
+      status.dataset.townHelp = "growth";
+      const statusText = node("span", "");
+      status.append(statusText);
       const tiers = node("div", "query-growth-tiers");
       for (let tier = 1; tier <= 5; tier++) tiers.append(node("span", "", String(tier)));
       section.append(heading, progress, tiers, status);
       body.append(section);
-      growthView = { city, section, label, value, progress, status, tiers, translate, copy };
+      growthView = { city, section, label, value, progress, status, statusText, tiers, translate, copy };
       refreshGrowth(city);
     }
     const building = city.structAt(city.idx(selected.x, selected.y));
@@ -85,6 +89,7 @@
       const facts = node("dl", "query-facts");
       const fact = (label, value, symbol) => {
         const term = node("dt", "");
+        term.dataset.townHelp = { grid: "footprint", money: "upkeep", power: "electricity", range: "coverage", shield: definition.dept }[symbol] ?? "query";
         term.append(icon(symbol), node("span", "", label));
         facts.append(term, node("dd", "", value));
       };
@@ -128,6 +133,7 @@
       for (const line of query.lines) if (line === translate("query.funding", { pct: city.funding[definition.dept] }) || line === translate("query.produces", { mw: definition.power })) skip.add(line);
     }
     const types = [
+      ["track", ["highspeedRail", "elevatedLrt"]],
       ["power", ["powered", "unpowered", "powerYes", "powerNo", "wire"]],
       ["water", ["waterYes", "waterNo", "flooded"]],
       ["road", ["noRoad", "onRoad", "roadAt", "traffic"]],
@@ -139,16 +145,24 @@
     for (const line of query.lines) {
       if (skip.has(line)) continue;
       const type = types.find(([, keys]) => keys.some(key => matches(line, `query.${key}`, translate)))?.[0] ?? "info";
+      const topic = matches(line, "query.crime", translate) ? "crime"
+        : matches(line, "query.traffic", translate) ? "traffic"
+        : matches(line, "query.onFire", translate) || matches(line, "query.flooded", translate) ? "tileDamage"
+        : { track: "railTransit", power: "electricity", water: "tileWater", road: "tileRoad", activity: "tileOperation", people: "tileJobs",
+          fun: "fun", altitude: "altitude", land: "lv", pollution: "pollution", shield: "coverage", info: "tileDevelopment" }[type];
       const metric = ["fun", "altitude", "land", "pollution"].includes(type) || matches(line, "query.crime", translate);
       if (metric) {
         const separator = line.indexOf(":");
         const term = node("dt", "");
+        term.dataset.townHelp = topic;
         term.append(icon(type), node("span", "", separator < 0 ? line : line.slice(0, separator).trim()));
         metrics.append(term, node("dd", "", separator < 0 ? "" : line.slice(separator + 1).trim()));
         continue;
       }
       const row = node("div", `query-condition query-condition-${type}`);
-      row.append(icon(type), node("span", "query-condition-text", line));
+      const text = node("span", "query-condition-text", line);
+      text.dataset.townHelp = topic;
+      row.append(icon(type), text);
       if (["unpowered", "powerNo", "waterNo", "noRoad", "onFire", "flooded", "attractionClosed", "jobsNo", "workersNo"].some(key => matches(line, `query.${key}`, translate))) row.classList.add("query-warning");
       else if (["powered", "powerYes", "waterYes", "attractionOpen", "jobsOk", "workersOk"].some(key => matches(line, `query.${key}`, translate))) row.classList.add("query-success");
       if (matches(line, "query.services", translate) || matches(line, "query.noServices", translate)) environment.append(row);
@@ -190,7 +204,7 @@
     if (!growthView || growthView.city !== city || !selected || document.getElementById("query").hidden) return;
     const state = window.__zoneGrowth.inspect(city, city.idx(selected.x, selected.y));
     if (!state) { growthView.section.hidden = true; return; }
-    const { section, label, value, progress, status, tiers, translate, copy } = growthView;
+    const { section, label, value, progress, status, statusText, tiers, translate, copy } = growthView;
     section.hidden = false;
     const percent = Math.floor(state.progress * 100);
     const paused = document.querySelector('#speed button[data-speed="0"].active') !== null;
@@ -215,15 +229,19 @@
       power: copy("Needs a power connection", "Connexion électrique nécessaire"),
       jobs: copy("Needs reachable jobs", "Emplois accessibles nécessaires"),
       workers: copy("Needs reachable residents", "Résidents accessibles nécessaires"),
-      demand: copy("Waiting for positive zone demand", "En attente d’une demande positive"),
+      demand: state.zone === 3
+        ? copy("Low housing demand · Add jobs or lower taxes", "Faible demande de logements · Ajoutez des emplois ou baissez les impôts")
+        : state.zone === 4
+          ? copy("Low shop demand · Grow population or lower taxes", "Faible demande commerciale · Augmentez la population ou baissez les impôts")
+          : copy("Low industry demand · Grow population or lower taxes", "Faible demande industrielle · Augmentez la population ou baissez les impôts"),
       water: copy("Needs water to reach tier 3 and above", "Eau nécessaire à partir du niveau 3"),
       pollution: copy("Reduce pollution to allow higher tiers", "Réduisez la pollution pour atteindre les niveaux supérieurs"),
       land: copy("Improve land value with parks and services", "Améliorez la valeur foncière avec des parcs et des services"),
       footprint: copy(`Ready: needs a connected ${state.next === 4 ? "2 × 2" : "3 × 3"} block of tier ${state.tier} zones`,
         `Prêt : nécessite un bloc connecté de ${state.next === 4 ? "2 × 2" : "3 × 3"} zones de niveau ${state.tier}`),
     };
-    status.textContent = messages[state.status];
-    if (paused && state.status === "growing") status.textContent = copy("Paused · Development progress retained", "En pause · Progression conservée");
+    statusText.textContent = messages[state.status];
+    if (paused && state.status === "growing") statusText.textContent = copy("Paused · Development progress retained", "En pause · Progression conservée");
     status.classList.toggle("query-warning", !["growing", "complete"].includes(state.status));
     document.getElementById("query-title").textContent = translate("query.zone", { label: translate(`zone.${state.zone}`), lvl: state.tier });
   }

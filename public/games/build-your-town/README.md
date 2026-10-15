@@ -280,6 +280,28 @@ Compare foreground 1× gameplay, pause, and a hidden tab when checking adaptatio
 compare an exported disposable city's simulation at the same elapsed game time
 across graphics settings. Never benchmark or advance a player's save.
 
+## Context help
+
+Question-mark buttons beside budget rows, policies, HUD figures, settings, map
+options, panel headings, resource ledgers, building-finance columns, and tile
+facts open a shared explanation popover. Copy lives in
+`src/ui/context-help-topics.js` in English and French. Stable labels can opt in
+with `data-town-help="topic-id"`; `src/ui/context-help.js` also binds known UI
+selectors. Help does not change sliders, toggle policies, or place buildings.
+
+The popover supports keyboard activation, Escape with focus return, a close
+button, and outside-click dismissal. It stays within the viewport at the chosen
+UI scale. The mutation observer processes added UI subtrees and replaced help
+labels rather than scanning the document during each simulation frame.
+
+For manual QA, open the disposable showcase with `&panel=budget`. Open tax,
+funding, bond, ordinance, and indicator explanations; confirm controls keep their
+values. Escape must close only the explanation and return focus to its question
+mark. Test outside dismissal over the map without placing anything, French,
+75–125% UI scale, and a narrow viewport. Open industry, building finances, maps,
+settings, journal, missions, and tile details to verify dynamically created help
+and check that repeated updates do not duplicate question marks.
+
 ## Double-track railways
 
 Transport includes **Double-track railway**, which lays a straight, two-tile-wide
@@ -361,3 +383,26 @@ For manual QA, build disposable horizontal and vertical road/highway dead ends,
 including map-edge endpoints and merged roads. Check repeated turnarounds, rail
 crossings, pause/speed controls, and rotating the camera mid-turn. Keep player
 saves separate from QA.
+
+## Expanded construction-item help
+
+Every construction chooser entry has a separate help icon, including locked
+items. Direct toolbar tools also have a help badge. Opening help never selects
+the construction tool or spends funds. Expanded help shows the actual bundled
+building/tool model, a longer explanation, live-definition base costs and upkeep,
+footprint, unlock state, utility needs, operating requirements, and planning tips.
+Industry entries include full-operation jobs and daily input/output recipes.
+
+“Works well with” recommends complementary buildings or infrastructure with their
+rendered models, a reason for each pairing, and later-unlock labels. Suggestions
+are advisory; actual placement and operation requirements remain explicit above.
+The content supports English/French and uses the existing viewport-clamped,
+scrollable popover with keyboard focus, Escape dismissal, and focus return. Its
+close control stays visible while long content scrolls. Content generation lives
+in `src/ui/item-help.js`, using the registered engine definitions and translations.
+
+Manual QA: open item help in every construction group, including locked buildings,
+landscaping, resource industries, rail systems, terrain tools, and direct zoning
+tools. Verify building previews and complementary models, close/Escape and outside
+dismissal, keyboard focus, both languages, mobile sizes, and 75–125% UI scale.
+Check that opening help never builds or changes the selected tool.
