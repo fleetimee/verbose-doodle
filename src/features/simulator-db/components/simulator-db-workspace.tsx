@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { GridTableIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Code2, Database, Table } from "@/components/hugeicons";
+import { Code2, Database } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import {
   ResizableHandle,
@@ -10,21 +11,11 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  fetchColumns,
-  fetchTableData,
-  fetchTables,
-} from "@/features/simulator-db/api";
 import { DataGrid } from "@/features/simulator-db/components/data-grid";
 import { DatabaseExplorer } from "@/features/simulator-db/components/database-explorer";
 import { QueryConsole } from "@/features/simulator-db/components/query-console";
 import { TableStructure } from "@/features/simulator-db/components/table-structure";
-import {
-  type ColumnMetadata,
-  extractErrorMessage,
-  type TableDataPage,
-  type TableMetadata,
-} from "@/features/simulator-db/types";
+import { useDatabaseData } from "@/features/simulator-db/hooks/use-database-data";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export function SimulatorDbWorkspace() {
@@ -42,17 +33,24 @@ export function SimulatorDbWorkspace() {
     toast.info(m.finishEdit);
     return false;
   };
-  const [tables, setTables] = useState<TableMetadata[]>([]);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
-  const [tableData, setTableData] = useState<TableDataPage | null>(null);
-  const [columns, setColumns] = useState<ColumnMetadata[]>([]);
+  const {
+    tables,
+    tableData,
+    columns,
+    isLoadingTables,
+    isLoadingData,
+    tablesError,
+    dataError,
+    loadingReason,
+    loadTables,
+    loadTableDetails,
+    retryData,
+  } = useDatabaseData(selectedTable, setSelectedTable);
+  const previousTable = useRef<string | null>(null);
   const [activeTab, setActiveTab] = useState<"data" | "console" | "structure">(
     "data"
   );
-
-  const [isLoadingTables, setIsLoadingTables] = useState(false);
-  const [isLoadingData, setIsLoadingData] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(50);
@@ -60,57 +58,13 @@ export function SimulatorDbWorkspace() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Load all tables
-  const loadTables = useCallback(async () => {
-    setIsLoadingTables(true);
-    setError(null);
-    try {
-      const data = await fetchTables();
-      setTables(data);
-      if (data.length > 0 && !selectedTable) {
-        setSelectedTable(data[0].name);
-      }
-    } catch (cause: unknown) {
-      setError(extractErrorMessage(cause));
-    } finally {
-      setIsLoadingTables(false);
-    }
-  }, [selectedTable]);
-
   useEffect(() => {
     loadTables().catch(() => undefined);
   }, [loadTables]);
 
-  // Load table data and columns when selected table or pagination changes
-  const loadTableDetails = useCallback(
-    async (
-      tableName: string,
-      targetPage: number,
-      targetSize: number,
-      sBy?: string,
-      sDir?: "asc" | "desc",
-      search?: string
-    ) => {
-      setIsLoadingData(true);
-      setError(null);
-      try {
-        const [cols, dataPage] = await Promise.all([
-          fetchColumns(tableName),
-          fetchTableData(tableName, targetPage, targetSize, sBy, sDir, search),
-        ]);
-        setColumns(cols);
-        setTableData(dataPage);
-      } catch (cause: unknown) {
-        setError(extractErrorMessage(cause));
-      } finally {
-        setIsLoadingData(false);
-      }
-    },
-    []
-  );
-
   useEffect(() => {
-    if (selectedTable) {
+    if (selectedTable && previousTable.current !== selectedTable) {
+      previousTable.current = selectedTable;
       setPage(0);
       setSortBy(undefined);
       setSortDir("asc");
@@ -198,12 +152,10 @@ export function SimulatorDbWorkspace() {
         sortDir,
         searchQuery
       ).catch(() => undefined);
-      loadTables().catch(() => undefined);
     }
   };
 
   const handleMutationSuccess = (isNewRow: boolean) => {
-    loadTables().catch(() => undefined);
     if (!selectedTable) {
       return;
     }
@@ -235,7 +187,8 @@ export function SimulatorDbWorkspace() {
     }
   };
 
-  const connectionStatus = isLoadingTables ? m.loading : m.ready;
+  const connectionStatus =
+    isLoadingTables || isLoadingData ? m.loading : m.ready;
 
   return (
     <div className="database-studio flex min-h-0 min-w-0 flex-1 overflow-hidden bg-background">
@@ -259,6 +212,7 @@ export function SimulatorDbWorkspace() {
             onSelectTable={handleSelectTable}
             selectedTable={selectedTable}
             tables={tables}
+            tablesError={tablesError}
           />
         </ResizablePanel>
         <ResizableHandle aria-label={m.resizeExplorer} />
@@ -276,13 +230,17 @@ export function SimulatorDbWorkspace() {
               }
             }}
             value={activeTab}
+            variant="flush"
           >
             {/* DataGrip Tab Bar */}
             <div className="database-toolbar flex shrink-0 flex-wrap items-center justify-between gap-2 border-b px-3 py-2">
               <div className="flex min-w-0 flex-wrap items-center gap-3">
                 {selectedTable && (
                   <div className="flex items-center gap-1.5 font-mono font-semibold text-foreground text-xs">
-                    <Table className="size-3.5 text-primary" />
+                    <HugeiconsIcon
+                      className="size-3.5 text-primary"
+                      icon={GridTableIcon}
+                    />
                     <span className="max-w-48 truncate" title={selectedTable}>
                       {selectedTable}
                     </span>
@@ -296,7 +254,7 @@ export function SimulatorDbWorkspace() {
 
                 <TabsList size="xs" variant="subtle">
                   <TabsTrigger size="sm" value="data">
-                    <Table className="size-3" />
+                    <HugeiconsIcon icon={GridTableIcon} />
                     <span>{m.data}</span>
                   </TabsTrigger>
                   <TabsTrigger size="sm" value="console">
@@ -312,18 +270,10 @@ export function SimulatorDbWorkspace() {
 
               <div className="flex items-center gap-2">
                 <span className="flex items-center gap-1 text-muted-foreground text-xs">
-                  {error ? m.unavailable : connectionStatus}
+                  {tablesError || dataError ? m.unavailable : connectionStatus}
                 </span>
               </div>
             </div>
-
-            {/* Global Error Notice if any */}
-            {error && (
-              <Alert className="shrink-0" variant="destructive">
-                <AlertTitle>{m.connectionError}</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
 
             {/* Tab 1: Table Data Grid */}
             <TabsContent
@@ -334,12 +284,21 @@ export function SimulatorDbWorkspace() {
                 currentSortBy={sortBy}
                 currentSortDir={sortDir}
                 data={tableData}
-                isLoading={isLoadingData}
+                error={selectedTable ? dataError : tablesError}
+                isLoading={isLoadingData || (!selectedTable && isLoadingTables)}
                 key={selectedTable}
+                loadingLabel={m[loadingReason]}
                 onEditStateChange={setEditState}
                 onMutationSuccess={handleMutationSuccess}
                 onPageChange={handlePageChange}
                 onRefresh={handleRefreshData}
+                onRetry={
+                  selectedTable
+                    ? retryData
+                    : () => {
+                        loadTables().catch(() => undefined);
+                      }
+                }
                 onSearchChange={handleSearchChange}
                 onSizeChange={handleSizeChange}
                 onSortChange={handleSortChange}
@@ -360,7 +319,13 @@ export function SimulatorDbWorkspace() {
               className="min-h-0 flex-1 overflow-hidden"
               value="structure"
             >
-              <TableStructure columns={columns} tableName={selectedTable} />
+              <TableStructure
+                columns={columns}
+                error={dataError}
+                isLoading={isLoadingData}
+                onRetry={retryData}
+                tableName={selectedTable}
+              />
             </TabsContent>
           </Tabs>
         </ResizablePanel>

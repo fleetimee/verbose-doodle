@@ -69,6 +69,7 @@ const selectTriggerVariants = cva(
         "mono-sm": "bg-background font-mono text-xs shadow-none",
       },
       size: {
+        toolbar: "h-6 gap-1 rounded-sm px-1 py-0 text-xs",
         default: "data-[size=default]:h-9",
         sm: "data-[size=sm]:h-8",
         md: "data-[size=md]:h-11",

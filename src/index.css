@@ -3960,7 +3960,7 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   background: var(--sidebar);
 }
 
-.database-studio .database-grid > [data-slot="table-container"] {
+.database-studio .database-grid [data-slot="table-container"] {
   min-height: 100%;
   overflow: visible;
 }

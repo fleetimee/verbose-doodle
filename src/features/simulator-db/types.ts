@@ -3,8 +3,6 @@ export type SqlRow = Record<string, SqlCellValue>;
 
 export type TableMetadata = {
   readonly name: string;
-  readonly columnCount: number;
-  readonly rowCount: number;
 };
 
 export type ColumnMetadata = {
@@ -59,3 +57,10 @@ export function extractErrorMessage(cause: unknown): string {
   }
   return String(cause);
 }
+
+export type SchemaObject = {
+  readonly type: "index" | "trigger" | "view";
+  readonly name: string;
+  readonly tableName: string;
+  readonly sql: string | null;
+};

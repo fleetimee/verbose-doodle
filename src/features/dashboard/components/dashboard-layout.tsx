@@ -106,6 +106,7 @@ function getRouteLabels(
     servers: messages.servers.title,
     employees: messages.employees.title,
     settings: messages.common.navSettings,
+    "simulator-db": "ISOBillerSim",
     "socket-test": messages.common.navSocketTester,
     "socket-tester": messages.common.navSocketTester,
     "socks-relay": messages.common.navSocksRelay,

@@ -24,6 +24,7 @@ const inputVariants = cva(
         "mono-flat": "font-mono bg-background shadow-none",
       },
       size: {
+        toolbar: "h-6 rounded-sm px-2 py-0 text-xs md:text-xs",
         grid: "h-5 px-1 py-0 text-xs md:text-xs",
         default: "h-9",
         sm: "h-8 px-2 text-xs",

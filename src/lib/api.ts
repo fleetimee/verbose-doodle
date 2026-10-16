@@ -88,9 +88,14 @@ async function fetchWithTimeout(
   try {
     return await fetchImplementation(url, {
       ...options,
-      signal: controller.signal,
+      signal: options.signal
+        ? AbortSignal.any([options.signal, controller.signal])
+        : controller.signal,
     });
   } catch (error) {
+    if (options.signal?.aborted) {
+      throw error;
+    }
     if (error instanceof DOMException && error.name === "AbortError") {
       const timeoutError: ApiError = {
         code: "TIMEOUT",

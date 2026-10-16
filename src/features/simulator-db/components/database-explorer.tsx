@@ -1,22 +1,27 @@
-import { useMemo, useState } from "react";
-import { Database, RefreshCw, Table } from "@/components/hugeicons";
+import { GridTableIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { Database, Eye, RefreshCw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuGroup,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import type { TableMetadata } from "@/features/simulator-db/types";
-import { copyDatabaseValue } from "@/features/simulator-db/utils/clipboard";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { fetchSchemaObjects } from "@/features/simulator-db/api";
+import { DatabaseTableNode } from "@/features/simulator-db/components/database-table-node";
+import { DatabaseTreeBranch } from "@/features/simulator-db/components/database-tree";
+import { SchemaDefinitionDialog } from "@/features/simulator-db/components/schema-definition-dialog";
+import {
+  extractErrorMessage,
+  type SchemaObject,
+  type TableMetadata,
+} from "@/features/simulator-db/types";
 import { cn } from "@/lib/utils";
 
 type DatabaseExplorerProps = {
+  readonly tablesError: string | null;
   readonly isLoading: boolean;
   readonly onOpenTable: (
     name: string,
@@ -29,6 +34,7 @@ type DatabaseExplorerProps = {
 };
 
 export function DatabaseExplorer({
+  tablesError,
   isLoading,
   onOpenTable,
   onRefresh,
@@ -40,137 +46,177 @@ export function DatabaseExplorer({
     messages: { simulatorDb: m },
   } = useI18n();
   const [search, setSearch] = useState("");
-
-  const filteredTables = useMemo(() => {
-    if (!search.trim()) {
-      return tables;
-    }
-    const term = search.toLowerCase();
-    return tables.filter((t) => t.name.toLowerCase().includes(term));
-  }, [tables, search]);
-
+  const [inspectedObject, setInspectedObject] = useState<SchemaObject | null>(
+    null
+  );
+  const queryClient = useQueryClient();
+  const schema = useQuery({
+    queryKey: ["simulator-db-schema", "objects"],
+    queryFn: fetchSchemaObjects,
+    staleTime: 30_000,
+    gcTime: 60_000,
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+  const refresh = () => {
+    onRefresh();
+    queryClient
+      .invalidateQueries({ queryKey: ["simulator-db-schema"] })
+      .catch(() => undefined);
+  };
+  const term = search.trim().toLowerCase();
+  const filteredTables = tables.filter((table) =>
+    table.name.toLowerCase().includes(term)
+  );
+  const views = schema.data?.filter(
+    (object) =>
+      object.type === "view" && object.name.toLowerCase().includes(term)
+  );
   return (
     <div className="flex h-full min-h-0 flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex flex-col gap-1 border-b px-2 py-1">
-        <div className="flex min-w-0 items-center gap-1.5">
-          <Database className="size-3.5 shrink-0 text-muted-foreground" />
-          <span
-            className="min-w-0 flex-1 truncate font-medium text-xs"
-            title="dbIsoBillerSim.db · SQLite 3 · 192.168.4.45 (SMB)"
-          >
-            dbIsoBillerSim.db
-          </span>
+        <div className="flex min-w-0 items-center justify-between gap-1.5">
+          <span className="truncate font-medium text-xs">{m.explorer}</span>
           <Button
             aria-label={m.refresh}
-            disabled={isLoading}
-            onClick={onRefresh}
+            disabled={isLoading || schema.isFetching}
+            onClick={refresh}
             size="icon-xs"
             title={m.refresh}
             variant="ghost-muted"
           >
-            <RefreshCw className={cn(isLoading && "animate-spin")} />
+            <RefreshCw
+              className={cn((isLoading || schema.isFetching) && "animate-spin")}
+            />
           </Button>
         </div>
-
-        {/* Table Search Filter */}
         <Input
-          aria-label={m.filterTables}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={m.filterTables}
-          size="xs"
+          aria-label={m.filterSchema}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder={m.filterSchema}
+          size="toolbar"
           value={search}
           variant="search-field"
         />
       </div>
-
-      {/* Explorer Table Tree / List */}
-      <div className="flex items-center justify-between px-2 py-1 font-medium text-muted-foreground text-xs">
-        <span>
-          {m.tables} ({filteredTables.length})
-        </span>
-      </div>
-
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="flex flex-col p-1">
-          {filteredTables.length === 0 ? (
-            <div className="py-6 text-center text-muted-foreground text-xs">
-              {tables.length === 0 ? m.noTables : m.noMatches}
-            </div>
-          ) : (
-            filteredTables.map((table) => {
-              const isSelected = selectedTable === table.name;
-              return (
-                <ContextMenu key={table.name}>
-                  <ContextMenuTrigger asChild>
+      <ScrollArea className="min-h-0 min-w-0 flex-1" variant="fit">
+        <div className="p-1">
+          <DatabaseTreeBranch
+            defaultOpen
+            icon={<Database />}
+            label="dbIsoBillerSim.db"
+          >
+            <DatabaseTreeBranch
+              defaultOpen
+              icon={<HugeiconsIcon icon={GridTableIcon} />}
+              label={m.tables}
+            >
+              {isLoading && tables.length === 0 && (
+                <div
+                  aria-label={m.loading}
+                  className="flex flex-col gap-2 p-2"
+                  role="status"
+                >
+                  {Array.from({ length: 4 }, (_, index) => (
+                    <Skeleton
+                      className="h-3 w-3/4"
+                      key={index}
+                      variant="table"
+                    />
+                  ))}
+                </div>
+              )}
+              {tablesError && (
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    {m.tablesLoadError}: {tablesError}
                     <Button
-                      aria-pressed={isSelected}
-                      className="w-full justify-between"
-                      onClick={() => onSelectTable(table.name)}
+                      disabled={isLoading}
+                      onClick={refresh}
                       size="xs"
-                      variant={isSelected ? "secondary" : "ghost-muted"}
+                      variant="ghost"
                     >
-                      <div className="flex min-w-0 items-center gap-1.5 overflow-hidden">
-                        <Table
-                          className={cn(
-                            "size-3.5 shrink-0",
-                            isSelected
-                              ? "text-primary"
-                              : "text-muted-foreground"
-                          )}
-                        />
-                        <span className="truncate" title={table.name}>
-                          {table.name}
-                        </span>
-                      </div>
-                      <span className="shrink-0 text-muted-foreground text-xs tabular-nums">
-                        {table.rowCount.toLocaleString()}
-                      </span>
+                      {m.retryLoad}
                     </Button>
-                  </ContextMenuTrigger>
-                  <ContextMenuContent size="compact" variant="macos">
-                    <ContextMenuGroup>
-                      <ContextMenuItem
-                        onClick={() => onOpenTable(table.name, "data")}
-                        size="compact"
-                      >
-                        {m.openData}
-                      </ContextMenuItem>
-                      <ContextMenuItem
-                        onClick={() => onOpenTable(table.name, "console")}
-                        size="compact"
-                      >
-                        {m.openConsole}
-                      </ContextMenuItem>
-                      <ContextMenuItem
-                        onClick={() => onOpenTable(table.name, "structure")}
-                        size="compact"
-                      >
-                        {m.openStructure}
-                      </ContextMenuItem>
-                    </ContextMenuGroup>
-                    <ContextMenuSeparator />
-                    <ContextMenuGroup>
-                      <ContextMenuItem
-                        onClick={() => copyDatabaseValue(table.name)}
-                        size="compact"
-                      >
-                        {m.copyName}
-                      </ContextMenuItem>
-                      <ContextMenuItem
-                        disabled={isLoading}
-                        onClick={onRefresh}
-                        size="compact"
-                      >
-                        {m.refresh}
-                      </ContextMenuItem>
-                    </ContextMenuGroup>
-                  </ContextMenuContent>
-                </ContextMenu>
-              );
-            })
+                  </AlertDescription>
+                </Alert>
+              )}
+              {!(isLoading || tablesError) && filteredTables.length === 0 && (
+                <p className="px-2 py-1 text-muted-foreground text-xs">
+                  {tables.length === 0 ? m.noTables : m.noMatches}
+                </p>
+              )}
+              {filteredTables.map((table) => (
+                <DatabaseTableNode
+                  isLoading={isLoading}
+                  isSelected={selectedTable === table.name}
+                  key={table.name}
+                  onInspect={setInspectedObject}
+                  onOpenTable={onOpenTable}
+                  onRefresh={refresh}
+                  onSelectTable={onSelectTable}
+                  schemaFailed={schema.isError}
+                  schemaObjects={schema.data}
+                  table={table}
+                />
+              ))}
+            </DatabaseTreeBranch>
+            <DatabaseTreeBranch
+              defaultOpen={Boolean(term)}
+              icon={<Eye />}
+              label={m.views}
+            >
+              {schema.isPending && (
+                <p className="px-2 py-1 text-muted-foreground text-xs">
+                  {m.loading}
+                </p>
+              )}
+              {schema.isError && (
+                <p className="px-2 py-1 text-muted-foreground text-xs">
+                  {m.unavailable}
+                </p>
+              )}
+              {views?.length === 0 && (
+                <p className="px-2 py-1 text-muted-foreground text-xs">
+                  {m.noObjects}
+                </p>
+              )}
+              {views?.map((view) => (
+                <Button
+                  className="w-full justify-start"
+                  key={view.name}
+                  onClick={() => setInspectedObject(view)}
+                  size="xs"
+                  title={view.name}
+                  variant="ghost-muted"
+                >
+                  <Eye />
+                  <span className="truncate">{view.name}</span>
+                </Button>
+              ))}
+            </DatabaseTreeBranch>
+          </DatabaseTreeBranch>
+          {schema.isError && (
+            <Alert variant="destructive">
+              <AlertDescription>
+                {m.schemaError}: {extractErrorMessage(schema.error)}
+                <Button
+                  onClick={() => schema.refetch()}
+                  size="xs"
+                  variant="ghost"
+                >
+                  {m.retrySchema}
+                </Button>
+              </AlertDescription>
+            </Alert>
           )}
         </div>
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
+      <SchemaDefinitionDialog
+        object={inspectedObject}
+        onClose={() => setInspectedObject(null)}
+      />
     </div>
   );
 }

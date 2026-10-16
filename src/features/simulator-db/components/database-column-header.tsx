@@ -19,31 +19,54 @@ import {
 } from "@/components/ui/tooltip";
 import { copyDatabaseValue } from "@/features/simulator-db/utils/clipboard";
 
+function getHeaderWidth(name: string) {
+  return Math.max(
+    80,
+    Array.from(name).reduce(
+      (width, character) => width + (character.charCodeAt(0) > 127 ? 14 : 8),
+      48
+    )
+  );
+}
+
 export function useDatabaseColumns(
   defaultWidths: Readonly<Record<string, number>> = {}
 ) {
   const [widths, setWidths] = useState<Record<string, number>>({});
   const resize = (name: string, width: number) =>
-    setWidths((previous) => ({
-      ...previous,
-      [name]: Math.max(64, Math.min(1200, Math.round(width))),
-    }));
+    setWidths((previous) => {
+      const next = Math.max(
+        getHeaderWidth(name),
+        Math.min(1200, Math.round(width))
+      );
+      if (previous[name] === next) {
+        return previous;
+      }
+      return { ...previous, [name]: next };
+    });
   return {
-    width: (name: string) => widths[name] ?? defaultWidths[name] ?? 160,
+    width: (name: string) =>
+      Math.max(
+        getHeaderWidth(name),
+        widths[name] ?? defaultWidths[name] ?? 160
+      ),
     resize,
     reset: () => setWidths({}),
   };
 }
 
 export function fitDatabaseColumn(name: string, values: readonly unknown[]) {
-  const lines = [
-    name,
-    ...values.map((value) => String(value ?? "NULL")),
-  ].flatMap((value) => value.split("\n"));
-  return Math.min(
-    1200,
-    Math.max(80, ...lines.map((line) => line.length * 7 + 24))
-  );
+  const headerWidth = getHeaderWidth(name);
+  let width = headerWidth;
+  for (const value of values) {
+    for (const line of String(value ?? "NULL").split("\n")) {
+      width = Math.max(width, line.length * 7 + 24);
+      if (width >= 1200) {
+        return Math.max(headerWidth, 1200);
+      }
+    }
+  }
+  return width;
 }
 
 type DatabaseColumnHeaderProps = {
@@ -92,12 +115,14 @@ export function DatabaseColumnHeader({
           <Tooltip delayDuration={400}>
             <TooltipTrigger asChild>
               <Button
-                className="w-full justify-start overflow-hidden"
+                className="w-full justify-start"
                 onClick={onSort}
                 size="xs"
                 variant="ghost"
               >
-                <span className="truncate font-mono">{name}</span>
+                <span className="shrink-0 whitespace-nowrap font-mono">
+                  {name}
+                </span>
                 {sortDirection && (
                   <HugeiconsIcon
                     icon={
@@ -121,8 +146,8 @@ export function DatabaseColumnHeader({
           <Button
             aria-label={`${m.resizeColumn}: ${name}`}
             aria-orientation="vertical"
-            aria-valuemax={1200}
-            aria-valuemin={64}
+            aria-valuemax={Math.max(1200, getHeaderWidth(name))}
+            aria-valuemin={getHeaderWidth(name)}
             aria-valuenow={width}
             className="absolute inset-y-0 right-0 cursor-col-resize touch-none"
             onDoubleClick={() => onResize(fitWidth)}

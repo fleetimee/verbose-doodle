@@ -130,7 +130,7 @@ export function getSidebarData(
         groupLabel: messages.common.navWorkspace,
         icon: Database,
         description: "Inspect and query ISO8583 simulator SQLite database",
-        title: "Simulator DB Studio",
+        title: "ISOBillerSim",
         url: "/dashboard/simulator-db",
       },
       {

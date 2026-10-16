@@ -9,6 +9,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -21,20 +22,40 @@ import {
   fitDatabaseColumn,
   useDatabaseColumns,
 } from "@/features/simulator-db/components/database-column-header";
+import {
+  DatabaseGridSkeleton,
+  DatabaseLoadFailure,
+} from "@/features/simulator-db/components/database-load-state";
 import type { ColumnMetadata } from "@/features/simulator-db/types";
 import { copyDatabaseValue } from "@/features/simulator-db/utils/clipboard";
 
 type TableStructureProps = {
+  readonly isLoading: boolean;
+  readonly error: string | null;
+  readonly onRetry: () => void;
   readonly columns: readonly ColumnMetadata[];
   readonly tableName: string | null;
 };
 
-export function TableStructure({ tableName, columns }: TableStructureProps) {
+export function TableStructure({
+  tableName,
+  columns,
+  isLoading,
+  error,
+  onRetry,
+}: TableStructureProps) {
   const {
     messages: { simulatorDb: m },
   } = useI18n();
   const columnLayout = useDatabaseColumns();
   const [copiedDdl, setCopiedDdl] = useState(false);
+
+  if (isLoading) {
+    return <DatabaseGridSkeleton label={m.loadingData} />;
+  }
+  if (error) {
+    return <DatabaseLoadFailure error={error} onRetry={onRetry} />;
+  }
 
   if (!tableName) {
     return (
@@ -87,75 +108,82 @@ export function TableStructure({ tableName, columns }: TableStructureProps) {
               Columns ({columns.length})
             </h3>
           </div>
-          <div className="database-grid min-h-0 flex-1 overflow-auto">
-            <Table
-              className="w-(--database-table-width) table-fixed"
-              style={tableStyle}
+          <div className="database-grid min-h-0 min-w-0 flex-1 overflow-hidden">
+            <ScrollArea
+              className="h-full min-h-0 w-full min-w-0"
+              contentClassName="min-h-full"
+              variant="fit"
             >
-              <TableHeader>
-                <TableRow>
-                  {[
-                    "#",
-                    "Column Name",
-                    "Data Type",
-                    "Nullable",
-                    "Default",
-                    "Key",
-                  ].map((name) => (
-                    <DatabaseColumnHeader
-                      fitWidth={fitDatabaseColumn(
-                        name,
-                        columns.map((col) =>
-                          name === "Column Name" ? col.name : col.defaultValue
-                        )
-                      )}
-                      key={name}
-                      name={name}
-                      onResize={(width) => columnLayout.resize(name, width)}
-                      width={columnLayout.width(name)}
-                    />
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {columns.map((col) => (
-                  <TableRow key={col.cid}>
-                    <TableCell size="compact" variant="mono">
-                      {col.cid}
-                    </TableCell>
-                    <TableCell size="compact" variant="medium">
-                      {col.name}
-                    </TableCell>
-                    <TableCell size="compact">
-                      <Badge size="xs" variant="outline">
-                        {col.type || "ANY"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell size="compact">
-                      {col.notNull ? (
-                        <Badge size="xs" variant="secondary">
-                          NOT NULL
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">
-                          YES
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell size="compact" variant="mono">
-                      {col.defaultValue ?? "—"}
-                    </TableCell>
-                    <TableCell size="compact">
-                      {col.primaryKey && (
-                        <Badge size="xs" variant="default">
-                          PRIMARY KEY
-                        </Badge>
-                      )}
-                    </TableCell>
+              <Table
+                className="w-(--database-table-width) table-fixed"
+                style={tableStyle}
+              >
+                <TableHeader>
+                  <TableRow>
+                    {[
+                      "#",
+                      "Column Name",
+                      "Data Type",
+                      "Nullable",
+                      "Default",
+                      "Key",
+                    ].map((name) => (
+                      <DatabaseColumnHeader
+                        fitWidth={fitDatabaseColumn(
+                          name,
+                          columns.map((col) =>
+                            name === "Column Name" ? col.name : col.defaultValue
+                          )
+                        )}
+                        key={name}
+                        name={name}
+                        onResize={(width) => columnLayout.resize(name, width)}
+                        width={columnLayout.width(name)}
+                      />
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {columns.map((col) => (
+                    <TableRow key={col.cid}>
+                      <TableCell size="compact" variant="mono">
+                        {col.cid}
+                      </TableCell>
+                      <TableCell size="compact" variant="medium">
+                        {col.name}
+                      </TableCell>
+                      <TableCell size="compact">
+                        <Badge size="xs" variant="outline">
+                          {col.type || "ANY"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell size="compact">
+                        {col.notNull ? (
+                          <Badge size="xs" variant="secondary">
+                            NOT NULL
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">
+                            YES
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell size="compact" variant="mono">
+                        {col.defaultValue ?? "—"}
+                      </TableCell>
+                      <TableCell size="compact">
+                        {col.primaryKey && (
+                          <Badge size="xs" variant="default">
+                            PRIMARY KEY
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </div>
         </div>
       </ResizablePanel>
@@ -181,11 +209,14 @@ export function TableStructure({ tableName, columns }: TableStructureProps) {
             </Button>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-auto p-3">
-            <pre className="select-text whitespace-pre-wrap font-mono text-foreground text-xs">
-              {generatedDdl}
-            </pre>
-          </div>
+          <ScrollArea className="min-h-0 min-w-0 flex-1" variant="fit">
+            <div className="p-3">
+              <pre className="select-text whitespace-pre-wrap font-mono text-foreground text-xs">
+                {generatedDdl}
+              </pre>
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>

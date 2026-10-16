@@ -14,6 +14,12 @@ import {
 } from "@/features/simulator-db/types";
 import { buildCellUpdateSql } from "@/features/simulator-db/utils/sql-builder";
 
+export type InlineCellDraft = {
+  rowIndex: number;
+  row: SqlRow;
+  column: ColumnMetadata;
+};
+
 type InlineCellEditorProps = {
   readonly toolbar: HTMLDivElement | null;
   readonly column: ColumnMetadata;
@@ -170,11 +176,7 @@ export function InlineCellEditor({
 export function useInlineCellEdit(
   onEditStateChange?: (state: "idle" | "editing" | "saving") => void
 ) {
-  const [activeEdit, setActiveEdit] = useState<{
-    rowIndex: number;
-    row: SqlRow;
-    column: ColumnMetadata;
-  } | null>(null);
+  const [activeEdit, setActiveEdit] = useState<InlineCellDraft | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const editState = isSavingEdit ? "saving" : "editing";
   useEffect(() => {

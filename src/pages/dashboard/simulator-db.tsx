@@ -12,7 +12,7 @@ export function SimulatorDbPage() {
       "database studio",
       "iso8583",
     ],
-    title: "Simulator DB Studio",
+    title: "ISOBillerSim",
   });
 
   return <SimulatorDbWorkspace />;
