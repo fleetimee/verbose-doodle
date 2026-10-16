@@ -3954,3 +3954,87 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     transition-property: opacity;
   }
 }
+
+/* Database studio: compact chrome around independently scrolling work panes. */
+.database-studio .database-toolbar {
+  background: var(--sidebar);
+}
+
+.database-studio .database-grid > [data-slot="table-container"] {
+  min-height: 100%;
+  overflow: visible;
+}
+
+.database-studio .database-grid [data-slot="table-header"] {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--sidebar);
+}
+
+.database-studio .database-grid th {
+  height: 1.5rem;
+  padding: 0 0.25rem;
+  border-inline-end: 1px solid var(--border);
+}
+
+.database-studio .database-grid td {
+  height: 1.5rem;
+  padding: 1px 6px;
+  vertical-align: top;
+  border-inline-end: 1px solid var(--border);
+}
+
+.database-studio .database-cell-value {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 1.125rem;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.125rem;
+  text-align: start;
+  white-space: nowrap;
+}
+
+.database-studio [data-wrap="true"] .database-cell-value,
+.database-studio [data-wrap="true"] .database-cell-value > span {
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.database-studio [data-slot="resizable-handle"][aria-orientation="horizontal"] {
+  width: 100%;
+  height: 1px;
+}
+
+.database-studio
+  [data-slot="resizable-handle"][aria-orientation="horizontal"]::after {
+  inset: -3px 0;
+  width: 100%;
+  height: 7px;
+  transform: none;
+}
+
+.database-studio .database-grid th,
+.database-studio .database-grid td {
+  border-inline-end-color: color-mix(
+    in oklch,
+    var(--foreground) 20%,
+    var(--background)
+  );
+}
+
+.database-studio .database-data-pane [data-slot="table-row"] {
+  border-bottom-color: color-mix(
+    in oklch,
+    var(--foreground) 15%,
+    var(--background)
+  );
+}

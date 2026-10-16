@@ -135,9 +135,11 @@ export function DashboardLayout() {
   const location = useLocation();
   const params = useParams();
   const isOverview = location.pathname === "/dashboard/overview";
+  const isSimulatorDb = location.pathname === "/dashboard/simulator-db";
   const usesFixedWorkspace = [
     "/dashboard/overview",
     "/dashboard/employees",
+    "/dashboard/simulator-db",
   ].includes(location.pathname);
   const hasOwnPageEntrance = location.pathname.startsWith(
     "/dashboard/socket-test/"
@@ -381,7 +383,8 @@ export function DashboardLayout() {
                 <main
                   className={cn(
                     "flex min-h-0 min-w-0 flex-1 flex-col gap-4 bg-background/70 p-3 sm:p-4 md:p-6",
-                    isOverview && "dashboard-overview-main"
+                    isOverview && "dashboard-overview-main",
+                    { "overflow-hidden p-0 sm:p-0 md:p-0": isSimulatorDb }
                   )}
                 >
                   <Suspense fallback={<DashboardPageFallback />}>

@@ -21,6 +21,7 @@ import { overviewMessages as idOverviewMessages } from "@/lib/i18n/messages/id-i
 import { retryBackoffCalculatorMessages } from "@/lib/i18n/messages/id-id/retry-backoff-calculator";
 import { scheduleOverlapCheckerMessages } from "@/lib/i18n/messages/id-id/schedule-overlap-checker";
 import { serversMessages as idServersMessages } from "@/lib/i18n/messages/id-id/servers";
+import { simulatorDbMessages } from "@/lib/i18n/messages/id-id/simulator-db";
 import { socketTesterMessages as idSocketTesterMessages } from "@/lib/i18n/messages/id-id/socket-tester";
 import { socksRelayMessages as idSocksRelayMessages } from "@/lib/i18n/messages/id-id/socks-relay";
 import { themeMessages as idThemeMessages } from "@/lib/i18n/messages/id-id/theme";
@@ -28,6 +29,7 @@ import { usersMessages as idUsersMessages } from "@/lib/i18n/messages/id-id/user
 
 export const idIdMessages = {
   ...enUsMessages,
+  simulatorDb: simulatorDbMessages,
   employees: idEmployeesMessages,
   hmacGenerator: hmacGeneratorMessages,
   jsonTextDiff: jsonTextDiffMessages,

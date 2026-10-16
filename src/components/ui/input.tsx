@@ -8,6 +8,7 @@ const inputVariants = cva(
   {
     variants: {
       variant: {
+        "grid-cell": "rounded-none bg-background font-mono shadow-none focus-visible:ring-1",
         "mono-amount": "font-mono font-semibold text-base md:text-base",
         default: "",
         "search-field": "bg-card shadow-none focus-visible:ring-1 focus-visible:ring-ring/30",
@@ -23,6 +24,7 @@ const inputVariants = cva(
         "mono-flat": "font-mono bg-background shadow-none",
       },
       size: {
+        grid: "h-5 px-1 py-0 text-xs md:text-xs",
         default: "h-9",
         sm: "h-8 px-2 text-xs",
         xs: "h-7 px-2 text-xs",

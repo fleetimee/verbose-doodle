@@ -53,9 +53,9 @@ export function buildWhereClause(
     .map((col) => {
       const val = row[col.name];
       if (val === null || val === undefined) {
-        return `"${col.name}" IS NULL`;
+        return `"${col.name.replace(/"/g, '""')}" IS NULL`;
       }
-      return `"${col.name}" = ${formatRawCellValue(val, col.type)}`;
+      return `"${col.name.replace(/"/g, '""')}" = ${formatRawCellValue(val, col.type)}`;
     })
     .join(" AND ");
 }
@@ -106,4 +106,24 @@ export function buildDeleteSql(
 ): string {
   const whereClause = buildWhereClause(columns, row);
   return `DELETE FROM "${tableName}" WHERE ${whereClause};`;
+}
+
+export function buildCellUpdateSql(
+  tableName: string,
+  columns: readonly ColumnMetadata[],
+  originalRow: SqlRow,
+  column: ColumnMetadata,
+  field: { isNull: boolean; value: string }
+): string {
+  const table = `"${tableName.replace(/"/g, '""')}"`;
+  const name = `"${column.name.replace(/"/g, '""')}"`;
+  const where = buildWhereClause(columns, originalRow);
+  const originalValue = formatRawCellValue(
+    originalRow[column.name],
+    column.type
+  );
+  const target = columns.some((item) => item.primaryKey)
+    ? `${where} AND ${name} IS ${originalValue}`
+    : `rowid = (SELECT rowid FROM ${table} WHERE ${where} LIMIT 1)`;
+  return `UPDATE ${table} SET ${name} = ${formatSqlLiteral(field.value, field.isNull, column.type)} WHERE ${target};`;
 }

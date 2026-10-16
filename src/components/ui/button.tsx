@@ -78,6 +78,9 @@ const buttonVariants = cva(
           "text-muted-foreground underline-offset-4 hover:text-foreground hover:underline",
       },
       size: {
+        "grid-icon": "size-5 rounded-sm p-0 [&_svg:not([class*='size-'])]:size-3",
+        "database-cell": "database-cell-value",
+        "column-resize": "h-full w-2 rounded-none p-0",
         "upload": "h-auto gap-3 px-4 py-3",
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         field: "h-9 px-3 py-2",

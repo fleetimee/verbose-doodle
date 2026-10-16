@@ -20,12 +20,14 @@ import { overviewMessages } from "@/lib/i18n/messages/en-us/overview";
 import { retryBackoffCalculatorMessages } from "@/lib/i18n/messages/en-us/retry-backoff-calculator";
 import { scheduleOverlapCheckerMessages } from "@/lib/i18n/messages/en-us/schedule-overlap-checker";
 import { serversMessages } from "@/lib/i18n/messages/en-us/servers";
+import { simulatorDbMessages } from "@/lib/i18n/messages/en-us/simulator-db";
 import { socketTesterMessages } from "@/lib/i18n/messages/en-us/socket-tester";
 import { socksRelayMessages } from "@/lib/i18n/messages/en-us/socks-relay";
 import { themeMessages } from "@/lib/i18n/messages/en-us/theme";
 import { usersMessages } from "@/lib/i18n/messages/en-us/users";
 
 export const enUsMessages = {
+  simulatorDb: simulatorDbMessages,
   hmacGenerator: hmacGeneratorMessages,
   jsonTextDiff: jsonTextDiffMessages,
   scheduleOverlapChecker: scheduleOverlapCheckerMessages,

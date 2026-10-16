@@ -15,6 +15,7 @@ const toggleVariants = cva(
         tab: "rounded-lg font-medium text-xs data-pressed:bg-background data-pressed:shadow-xs",
       },
       size: {
+        "icon-xs": "size-6 p-0",
         default: "h-9 px-2 min-w-9",
         sm: "h-8 px-1.5 min-w-8",
         lg: "h-10 px-2.5 min-w-10",

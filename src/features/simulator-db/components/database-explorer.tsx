@@ -1,14 +1,27 @@
 import { useMemo, useState } from "react";
 import { Database, RefreshCw, Table } from "@/components/hugeicons";
-import { Badge } from "@/components/ui/badge";
+import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { TableMetadata } from "@/features/simulator-db/types";
+import { copyDatabaseValue } from "@/features/simulator-db/utils/clipboard";
 import { cn } from "@/lib/utils";
 
 type DatabaseExplorerProps = {
   readonly isLoading: boolean;
+  readonly onOpenTable: (
+    name: string,
+    tab: "data" | "console" | "structure"
+  ) => void;
   readonly onRefresh: () => void;
   readonly onSelectTable: (tableName: string) => void;
   readonly selectedTable: string | null;
@@ -17,11 +30,15 @@ type DatabaseExplorerProps = {
 
 export function DatabaseExplorer({
   isLoading,
+  onOpenTable,
   onRefresh,
   onSelectTable,
   selectedTable,
   tables,
 }: DatabaseExplorerProps) {
+  const {
+    messages: { simulatorDb: m },
+  } = useI18n();
   const [search, setSearch] = useState("");
 
   const filteredTables = useMemo(() => {
@@ -33,42 +50,33 @@ export function DatabaseExplorer({
   }, [tables, search]);
 
   return (
-    <div className="flex h-full flex-col border-r bg-sidebar text-sidebar-foreground">
-      {/* Explorer Header */}
-      <div className="flex flex-col gap-2.5 border-b p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-              <Database className="size-4" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 font-semibold text-xs tracking-tight">
-                <span className="truncate">dbIsoBillerSim.db</span>
-                <span className="size-1.5 shrink-0 rounded-full bg-success ring-2 ring-success/20" />
-              </div>
-              <p className="truncate font-mono text-muted-foreground text-xs">
-                192.168.4.45 (SMB)
-              </p>
-            </div>
-          </div>
+    <div className="flex h-full min-h-0 flex-col bg-sidebar text-sidebar-foreground">
+      <div className="flex flex-col gap-1 border-b px-2 py-1">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <Database className="size-3.5 shrink-0 text-muted-foreground" />
+          <span
+            className="min-w-0 flex-1 truncate font-medium text-xs"
+            title="dbIsoBillerSim.db · SQLite 3 · 192.168.4.45 (SMB)"
+          >
+            dbIsoBillerSim.db
+          </span>
           <Button
-            className="size-7 shrink-0"
+            aria-label={m.refresh}
             disabled={isLoading}
             onClick={onRefresh}
-            size="icon"
-            title="Refresh database schema"
+            size="icon-xs"
+            title={m.refresh}
             variant="ghost-muted"
           >
-            <RefreshCw
-              className={cn("size-3.5", isLoading && "animate-spin")}
-            />
+            <RefreshCw className={cn(isLoading && "animate-spin")} />
           </Button>
         </div>
 
         {/* Table Search Filter */}
         <Input
+          aria-label={m.filterTables}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Filter tables..."
+          placeholder={m.filterTables}
           size="xs"
           value={search}
           variant="search-field"
@@ -76,52 +84,88 @@ export function DatabaseExplorer({
       </div>
 
       {/* Explorer Table Tree / List */}
-      <div className="flex items-center justify-between px-3 py-1.5 font-medium text-muted-foreground text-xs">
-        <span>Tables ({filteredTables.length})</span>
-        <span className="text-xs">SQLite 3</span>
+      <div className="flex items-center justify-between px-2 py-1 font-medium text-muted-foreground text-xs">
+        <span>
+          {m.tables} ({filteredTables.length})
+        </span>
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="flex flex-col gap-0.5 p-2">
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="flex flex-col p-1">
           {filteredTables.length === 0 ? (
             <div className="py-6 text-center text-muted-foreground text-xs">
-              {tables.length === 0 ? "No tables found" : "No matching tables"}
+              {tables.length === 0 ? m.noTables : m.noMatches}
             </div>
           ) : (
             filteredTables.map((table) => {
               const isSelected = selectedTable === table.name;
               return (
-                <button
-                  className={cn(
-                    "flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs transition-colors",
-                    isSelected
-                      ? "bg-accent font-medium text-accent-foreground"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  )}
-                  key={table.name}
-                  onClick={() => onSelectTable(table.name)}
-                  type="button"
-                >
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <Table
-                      className={cn(
-                        "size-3.5 shrink-0",
-                        isSelected ? "text-primary" : "text-muted-foreground"
-                      )}
-                    />
-                    <span className="truncate font-mono">{table.name}</span>
-                  </div>
-                  <Badge
-                    className="ml-1.5 shrink-0"
-                    radius="rounded"
-                    size="xs"
-                    variant={isSelected ? "secondary" : "outline"}
-                  >
-                    <span className="tabular-nums">
-                      {table.rowCount.toLocaleString()}
-                    </span>
-                  </Badge>
-                </button>
+                <ContextMenu key={table.name}>
+                  <ContextMenuTrigger asChild>
+                    <Button
+                      aria-pressed={isSelected}
+                      className="w-full justify-between"
+                      onClick={() => onSelectTable(table.name)}
+                      size="xs"
+                      variant={isSelected ? "secondary" : "ghost-muted"}
+                    >
+                      <div className="flex min-w-0 items-center gap-1.5 overflow-hidden">
+                        <Table
+                          className={cn(
+                            "size-3.5 shrink-0",
+                            isSelected
+                              ? "text-primary"
+                              : "text-muted-foreground"
+                          )}
+                        />
+                        <span className="truncate" title={table.name}>
+                          {table.name}
+                        </span>
+                      </div>
+                      <span className="shrink-0 text-muted-foreground text-xs tabular-nums">
+                        {table.rowCount.toLocaleString()}
+                      </span>
+                    </Button>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent size="compact" variant="macos">
+                    <ContextMenuGroup>
+                      <ContextMenuItem
+                        onClick={() => onOpenTable(table.name, "data")}
+                        size="compact"
+                      >
+                        {m.openData}
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() => onOpenTable(table.name, "console")}
+                        size="compact"
+                      >
+                        {m.openConsole}
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onClick={() => onOpenTable(table.name, "structure")}
+                        size="compact"
+                      >
+                        {m.openStructure}
+                      </ContextMenuItem>
+                    </ContextMenuGroup>
+                    <ContextMenuSeparator />
+                    <ContextMenuGroup>
+                      <ContextMenuItem
+                        onClick={() => copyDatabaseValue(table.name)}
+                        size="compact"
+                      >
+                        {m.copyName}
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        disabled={isLoading}
+                        onClick={onRefresh}
+                        size="compact"
+                      >
+                        {m.refresh}
+                      </ContextMenuItem>
+                    </ContextMenuGroup>
+                  </ContextMenuContent>
+                </ContextMenu>
               );
             })
           )}
