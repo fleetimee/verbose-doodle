@@ -78,6 +78,16 @@
     output.htmlFor = scale.id;
     output.textContent = `${scale.value}%`;
     scale.parentElement.append(output);
+    const syncScale = () => {
+      scale.disabled = originalScale.disabled;
+      scale.value = originalScale.value;
+      output.textContent = `${scale.value}%`;
+      scale.parentElement.querySelector("small").textContent = scale.disabled
+        ? text("Fixed touch-friendly size on small screens. Map zoom stays separate.", "Taille adaptée au toucher sur petit écran. Le zoom de la carte reste indépendant.")
+        : text("Size of menus and controls in your city.", "Taille des menus et commandes dans votre ville.");
+    };
+    window.addEventListener("resize", syncScale);
+    syncScale();
     scale.addEventListener("input", () => {
       output.textContent = `${scale.value}%`;
       originalScale.value = scale.value;

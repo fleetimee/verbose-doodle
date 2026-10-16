@@ -416,9 +416,69 @@ tools. Verify building previews and complementary models, close/Escape and outsi
 dismissal, keyboard focus, both languages, mobile sizes, and 75–125% UI scale.
 Check that opening help never builds or changes the selected tool.
 
+
+## Mobile layout and graphics
+
+The phone HUD keeps simulation controls and the game menu in one fixed row,
+with city statistics scrolling separately underneath. Cities and saves are also
+available in the game menu. The overview-map button expands or collapses the
+small map; zoom and map-view controls remain available while it is collapsed.
+Panels fit above the bottom construction strip and account for safe areas.
+On screens up to 900px wide, and coarse-pointer screens up to 1024px wide,
+interface scale stays at 100% for touch targets;
+the desktop scale preference is retained for wider screens.
+
+On coarse-pointer devices up to 1024px wide, Auto graphics starts at Low and
+adapts between Low and Medium, both at 30 FPS and 1× maximum pixel ratio.
+Medium adds effects without increasing render resolution. Explicit High and
+Custom settings remain available. These limits reduce rendering work; they do
+not guarantee a particular frame rate on a device.
+
+For manual QA, use an isolated browser profile and disposable cities at
+320×568, 390×844, 844×390, and desktop sizes. Check sandbox creation, the game
+menu, Cities & saves, all speed choices, construction-strip scrolling and item
+help, budget/industry/query panel scrolling, and overview expand/collapse and
+zoom. Rotate the viewport with a panel open, and check browser safe-area/device
+emulation. Verify keyboard focus and English/French copy. Set desktop UI scale
+to 75% or 125%, narrow the viewport, and widen it again: mobile uses 100% and
+the desktop preference returns. On a real Android phone, compare Auto with High
+in the same city for 15–20 minutes and inspect input responsiveness, frame pacing,
+and heat. Keep player saves separate from QA.
+
+
+### Compact dialogs and touch input
+
+The new-city form uses a scrolling horizontal map gallery on small screens.
+Landscape phones place city name/difficulty beside that gallery. The header and
+submit/cancel actions sit outside the scrolling fields, so the actions do not
+cover map choices. Touch users focus the form initially instead of opening the
+keyboard immediately; tapping the name field still opens it. The viewport meta
+tag and `mobile-layout.js` account for reduced visual-viewport height when a
+keyboard opens. Settings scroll the active tab only. Scenarios use a single
+column on mobile; management panels use narrower sheets in landscape.
+
+The bundled engine has three small mobile integration patches: its compact-layout
+query includes coarse-pointer screens up to 1024px, `openWelcome` delegates focus
+to `__townMobile.focusWelcome`, and the existing input binder calls
+`__townMobile.bindInput`. The readable helper cancels pending construction when
+pointer capture is lost, a pending capture is released, or the app loses focus
+or becomes hidden. It retains the engine's existing tap, one-finger pan,
+long-press construction, two-finger pinch, and pointer-cancel behavior.
+
+Responsive QA covered 320×568, 390×844, 844×390, 900×540, 915×412, and desktop
+viewports, English/French new-city and settings screens, and a resized 320×360
+keyboard-sized viewport. In isolated Chromium sessions, touch input checks cover
+pan, pinch, normal long-press construction, cancellation after capture loss and
+blur, horizontal toolbar/gallery swipes, panel scrolling, map selection, zoom,
+and overview expand/collapse. Panning, pinching, panel/toolbar scrolling, and
+cancelled construction must not change city funds or tiles. Real Android/iOS
+keyboard, safe-area, and performance checks remain necessary on hardware.
+
 ## Item rotation
 
 Structures, developed zone buildings and 1x1 zone tiles rotate in 90° steps (`rot` 0-3, saved with the city). While placing, use the status-bar Rotate button, `R` or `]` (clockwise) and `[` (counter-clockwise); the ghost preview shows the orientation. For placed items, select with the Query tool and use the Orientation row (or the same keys). Logic lives in `src/world/item-rotation.js`; it composes with camera rotation (`map-rotation.js`) and animated overlays (`building-activity.js`). Verify: place/rotate every structure, rotate placed items, save/reload, rotate the camera, check animated buildings and disaster rebuild.
+
+The view settings include **Auto-hide toolbar** (`citybuilder.autoHideToolbar`). When on, the build toolbar slides off its edge after ~3.5 s idle (never while hovered, focused or while a flyout is open); hover or tap the edge handle to restore it. Logic: `src/ui/toolbar-autohide.js`.
 
 ## Resident routines and conversations
 

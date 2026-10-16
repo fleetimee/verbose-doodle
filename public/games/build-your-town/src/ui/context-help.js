@@ -115,7 +115,7 @@
     const elements = root.matches?.(selector) ? [root] : [];
     elements.push(...root.querySelectorAll(selector));
     for (const target of elements) {
-      if (target.closest("#town-context-help") || target.matches(".context-help-button") || target.querySelector(":scope > .context-help-button")) continue;
+      if (target.closest("#town-context-help") || target.matches(".context-help-button") || target.querySelector(":scope > .context-help-button, :scope > span > .context-help-button")) continue;
       if (target.matches("button") && target.parentElement.classList.contains("context-help-action")) continue;
       const mapTopics = { none: "maps", pollution: "pollution", crime: "crime", landValue: "lv", traffic: "traffic",
         power: "electricity", water: "cov-water", police: "cov-police", fire: "cov-fire", education: "cov-education", health: "cov-health" };
@@ -132,6 +132,10 @@
       if (target.matches("button")) {
         const row = document.createElement("div"); row.className = target.classList.contains("tool") ? "context-help-action context-help-tool" : "context-help-action";
         target.before(row); row.append(target, button);
+      } else if (target.matches("#welcome label.field")) {
+        target.querySelector(".lbl").append(button);
+      } else if (target.matches("#home-settings .home-setting-row label")) {
+        target.querySelector(":scope > span").append(button);
       } else target.append(button);
     }
   }
@@ -165,6 +169,7 @@
     }, true);
     document.addEventListener("scroll", event => { if (trigger && !popup.contains(event.target)) close(); }, true);
     window.addEventListener("resize", () => close());
+    window.visualViewport?.addEventListener("resize", () => close());
     enhance(document.body);
     // Inspect added subtrees only; simulation text updates never trigger a full-document scan.
     new MutationObserver(records => {

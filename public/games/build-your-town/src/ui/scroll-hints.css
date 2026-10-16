@@ -1,0 +1,23 @@
+/* Edge fades show which side of a scrollable HUD row still has hidden content. */
+#topbar-stats,
+#toolbar {
+  --fade-start: 0px;
+  --fade-end: 0px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent 100%);
+}
+#topbar-stats[data-scroll-start="more"],
+#toolbar[data-scroll-start="more"] { --fade-start: 28px; }
+#topbar-stats[data-scroll-end="more"],
+#toolbar[data-scroll-end="more"] { --fade-end: 28px; }
+
+.scroll-hint-chevron {
+  position: fixed; z-index: 30; width: 24px; padding: 0; border: 0; border-radius: 0; box-shadow: none;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; color: #f3ecd8; font: 700 22px/1 var(--font-body, sans-serif);
+  opacity: 0.45; cursor: pointer; transition: opacity 0.15s ease, color 0.15s ease;
+}
+.scroll-hint-chevron[hidden] { display: none; }
+.scroll-hint-chevron:hover, .scroll-hint-chevron:focus-visible { opacity: 1; color: #f6d17a; }
+.scroll-hint-chevron:active { transform: none; margin: 0; }
+@media (prefers-reduced-motion: reduce) { .scroll-hint-chevron { transition: none; } }

@@ -21,7 +21,7 @@
     toggle.setAttribute("aria-pressed", String(daylight));
     const mode = daylight ? text("Daylight view", "Vue de jour") : text("Cycle view", "Vue cyclique");
     toggle.setAttribute("aria-label", mode);
-    toggle.title = `${mode} – ${text("Keep the map bright while the city clock continues", "Gardez la carte éclairée sans arrêter l’horloge")}`;
+    toggle.dataset.tooltip = `${mode} – ${text("Keep the map bright while the city clock continues", "Gardez la carte éclairée sans arrêter l’horloge")}`;
   }
   function update(renderer, city) {
     sync(city);

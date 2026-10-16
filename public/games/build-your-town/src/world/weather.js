@@ -163,7 +163,7 @@
     button.textContent = icons[current.kind];
     button.setAttribute("aria-pressed", String(enabled));
     button.setAttribute("aria-label", `${summary}, ${state}`);
-    button.title = `${summary} (${state})`;
+    button.dataset.tooltip = `${summary} (${state})`;
   }
   function scatter(ctx, count, width, height, time, fall, draw) {
     for (let i = 0; i < count; i++) {

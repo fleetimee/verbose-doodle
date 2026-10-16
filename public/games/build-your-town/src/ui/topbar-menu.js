@@ -2,10 +2,14 @@
   const text = (en, fr) => document.documentElement.lang === "fr" ? fr : en;
   const icon = path => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${path}"/></svg>`;
   document.addEventListener("DOMContentLoaded", () => {
+    const stats = document.getElementById("topbar-stats");
+    stats.setAttribute("role", "group");
+    stats.setAttribute("aria-label", text("City statistics", "Statistiques de la ville"));
     const menus = document.querySelector("#topbar .menus");
     const speed = document.querySelector("#speed");
     const controls = [...speed.querySelectorAll("button[data-speed]")];
     const actions = [
+      ["btn-cities", text("Cities & saves", "Villes et sauvegardes"), "M3 21h18M5 21V7h7v14m0-10h7v10M8 10h1m-1 4h1m6 0h1m-1 3h1"],
       ["btn-missions", text("Career & objectives", "Carrière et objectifs"), "M12 3 3 7l9 4 9-4-9-4ZM3 12l9 4 9-4M3 17l9 4 9-4"],
       ["btn-view-settings", text("Interface settings", "Réglages de l'interface"), "M4 7h16M4 17h16M9 4v6m6 4v6"],
       ["btn-sound", text("Sound", "Son"), "M11 5 6 9H3v6h3l5 4V5Zm4 3a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"],
@@ -13,7 +17,7 @@
       ["btn-help", text("Help & controls", "Aide et commandes"), "M9 8a3 3 0 0 1 6 0c0 2-3 2-3 5m0 4h.01"],
       ["btn-cheats", text("Cheats", "Triches"), "m13 3-9 11h7l-1 7 10-12h-8l1-6Z"],
     ];
-    for (const original of [...actions.map(([id]) => document.getElementById(id)), ...controls]) {
+    for (const original of [...actions.filter(([id]) => id !== "btn-cities").map(([id]) => document.getElementById(id)), ...controls]) {
       original.classList.add("topbar-secondary");
       original.setAttribute("aria-hidden", "true");
       original.tabIndex = -1;
@@ -23,8 +27,48 @@
     menu.id = "btn-game-menu";
     menu.innerHTML = icon("M4 6h16M4 12h16M4 18h16");
     menu.setAttribute("aria-label", text("Game menu", "Menu du jeu"));
-    menu.title = text("Game menu", "Menu du jeu");
+    menu.dataset.tooltip = text("Game menu", "Menu du jeu");
     menus.append(menu);
+    const hint = document.createElement("div");
+    hint.id = "town-control-tooltip";
+    hint.setAttribute("role", "tooltip");
+    hint.hidden = true;
+    document.body.append(hint);
+    const hintSelector = "#town-time .town-icon, #btn-game-menu";
+    let hintButton;
+    const hideHint = () => {
+      hint.hidden = true;
+      hintButton?.removeAttribute("aria-describedby");
+      hintButton = undefined;
+    };
+    const showHint = button => {
+      hideHint();
+      const label = button.dataset.tooltip || button.getAttribute("aria-label");
+      if (!label) return;
+      hintButton = button;
+      hint.textContent = label;
+      hint.hidden = false;
+      button.setAttribute("aria-describedby", hint.id);
+      const bounds = button.getBoundingClientRect();
+      hint.style.left = `${Math.max(8, Math.min(bounds.left, innerWidth - hint.offsetWidth - 8))}px`;
+      hint.style.top = `${bounds.bottom + 8}px`;
+    };
+    document.addEventListener("pointerover", event => {
+      const button = event.target.closest(hintSelector);
+      if (button && !button.contains(event.relatedTarget) && event.pointerType !== "touch") showHint(button);
+    });
+    document.addEventListener("pointerout", event => {
+      if (hintButton?.contains(event.target) && !hintButton.contains(event.relatedTarget)) hideHint();
+    });
+    document.addEventListener("focusin", event => {
+      if (event.target.matches(hintSelector)) showHint(event.target);
+    });
+    document.addEventListener("focusout", hideHint);
+    document.addEventListener("pointerdown", hideHint);
+    document.addEventListener("keydown", event => { if (event.key === "Escape") hideHint(); });
+    window.addEventListener("resize", hideHint);
+    document.getElementById("topbar").addEventListener("scroll", hideHint);
+
     const play = document.createElement("button");
     play.type = "button";
     play.id = "btn-play-toggle";
@@ -82,6 +126,8 @@
       popup.hidden = false;
       button.setAttribute("aria-expanded", "true");
       const bounds = button.getBoundingClientRect();
+      popup.style.top = `${bounds.bottom + 8}px`;
+      popup.style.maxHeight = `${Math.max(0, innerHeight - bounds.bottom - 24)}px`;
       popup.style.right = `${Math.max(8, innerWidth - bounds.right)}px`;
       return true;
     };

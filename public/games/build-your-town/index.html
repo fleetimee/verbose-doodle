@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <title>BuildYourTown</title>
   <meta name="description" content="BuildYourTown : fondez une ville et faites-la grandir, dans votre navigateur. Build your town and make it grow, right in your browser.">
   <meta name="theme-color" content="#141a28">
@@ -12,14 +12,19 @@
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="./src/ui/loading-screen.css?v=1">
   <script src="./src/ui/loading-screen.js?v=1"></script>
-  <script src="./src/platform/graphics.js?v=1"></script>
+  <script src="./src/platform/graphics.js?v=mobile-1"></script>
+  <script src="./src/ui/mobile-layout.js?v=1"></script>
   <link rel="stylesheet" href="./src/ui/item-rotation.css?v=3">
   <script src="./src/world/item-rotation.js?v=2"></script>
+  <link rel="stylesheet" href="./src/ui/scroll-hints.css?v=2">
+  <script src="./src/ui/scroll-hints.js?v=3"></script>
+  <link rel="stylesheet" href="./src/ui/toolbar-autohide.css?v=1">
+  <script src="./src/ui/toolbar-autohide.js?v=tool-flicker-2"></script>
   <script type="module" crossorigin src="./assets/index-DCrPNbHR.js?v=town-controls-3"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-CanL7pau.css?v=tip-2">
   <link rel="stylesheet" href="./src/ui/start-screen.css?v=home-return-1">
   <script src="./src/world/start-city.js?v=1"></script>
-  <script src="./src/ui/start-screen.js?v=home-return-1"></script>
+  <script src="./src/ui/start-screen.js?v=mobile-1"></script>
   <link rel="stylesheet" href="./src/ui/game-dialogs.css?v=btn-contrast-1">
   <script src="./src/ui/game-dialogs.js?v=home-return-1"></script>
   <script src="../activity.js"></script>
@@ -37,7 +42,7 @@
   <script src="./src/transport/rail-signals.js?v=compact-double-1"></script>
   <script src="./src/transport/train-fleet.js?v=compact-double-1"></script>
   <script src="./src/world/map-rotation.js?v=item-rotation-1"></script>
-  <script src="./src/ui/view-controls.js?v=graphics-1"></script>
+  <script src="./src/ui/view-controls.js?v=autohide-1"></script>
   <script src="./src/world/water-recreation.js?v=1"></script>
   <script src="./src/world/recreation.js?v=water-recreation-2"></script>
   <script src="./src/world/industry.js?v=building-finances-1"></script>
@@ -74,11 +79,11 @@
   <script src="./src/progression/cheats.js?v=weather-1"></script>
   <script src="./src/disasters/disaster-recovery.js?v=item-rotation-1"></script>
   <script src="./src/disasters/fire-response.js?v=compact-double-1"></script>
-  <script src="./src/ui/topbar-menu.js?v=pause-indicator-4"></script>
-  <link rel="stylesheet" href="./src/ui/context-help.css?v=in-card-help-2">
+  <script src="./src/ui/topbar-menu.js?v=mobile-1"></script>
+  <link rel="stylesheet" href="./src/ui/context-help.css?v=in-card-help-3">
   <script src="./src/ui/context-help-topics.js?v=item-rotation-1"></script>
   <script src="./src/ui/item-help.js?v=compact-double-2"></script>
-  <script src="./src/ui/context-help.js?v=expanded-items-1"></script>
+  <script src="./src/ui/context-help.js?v=mobile-2"></script>
   <style>
     * {
       scrollbar-width: thin;
@@ -184,6 +189,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="./src/ui/mobile.css?v=3">
 </head>
 <body>
   <section id="town-loading" aria-label="Loading Build Your Town" aria-busy="true">
@@ -198,19 +204,21 @@
 
   <header id="topbar">
     <div class="brand">Build<span>Your</span>T<svg class="hat" viewBox="0.75 1.25 46.5 32" preserveAspectRatio="none" aria-hidden="true"><path d="M5 26 Q5 2 24 2 Q43 2 43 26 Z" fill="#f2c14e" stroke="#8a6a10" stroke-width="1.5"/><rect x="1.5" y="25" width="45" height="7.5" rx="3.75" fill="#e0a93a" stroke="#8a6a10" stroke-width="1.5"/><rect x="21" y="2" width="6" height="23" fill="#ffd97a"/></svg>wn</div>
-    <div class="stat money" data-i18n-title="top.funds"><span class="ico">💰</span><span class="txt"><span id="money" class="val">0 $</span><span id="budget-net" class="sub"></span></span></div>
-    <div class="stat date" data-i18n-title="top.date"><span class="ico">📅</span><span class="txt"><span id="date" class="val">Jan 1900</span></span></div>
-    <div class="stat pop" data-i18n-title="top.pop"><span class="ico">👥</span><span class="txt"><span id="pop" class="val">0</span><span class="sub" data-i18n-title="top.fun.title"><span data-i18n="top.fun">Fun</span> <span id="fun">0 / 100</span></span></span></div>
-    <div class="stat rci" data-i18n-title="top.demand.title">
-      <span class="ico">📈</span>
-      <div class="bars">
-        <div class="bar r"><div class="fill" id="rci-r"></div><span>R</span></div>
-        <div class="bar c"><div class="fill" id="rci-c"></div><span>C</span></div>
-        <div class="bar i"><div class="fill" id="rci-i"></div><span>I</span></div>
+    <div id="topbar-stats">
+      <div class="stat money" data-i18n-title="top.funds"><span class="ico">💰</span><span class="txt"><span id="money" class="val">0 $</span><span id="budget-net" class="sub"></span></span></div>
+      <div class="stat date" data-i18n-title="top.date"><span class="ico">📅</span><span class="txt"><span id="date" class="val">Jan 1900</span></span></div>
+      <div class="stat pop" data-i18n-title="top.pop"><span class="ico">👥</span><span class="txt"><span id="pop" class="val">0</span><span class="sub" data-i18n-title="top.fun.title"><span data-i18n="top.fun">Fun</span> <span id="fun">0 / 100</span></span></span></div>
+      <div class="stat rci" data-i18n-title="top.demand.title">
+        <span class="ico">📈</span>
+        <div class="bars">
+          <div class="bar r"><div class="fill" id="rci-r"></div><span>R</span></div>
+          <div class="bar c"><div class="fill" id="rci-c"></div><span>C</span></div>
+          <div class="bar i"><div class="fill" id="rci-i"></div><span>I</span></div>
+        </div>
       </div>
+      <div class="stat power" data-i18n-title="top.power.title"><span class="ico">⚡</span><span class="txt"><span id="power" class="val small">0 / 0 MW</span></span></div>
+      <div class="stat water" data-i18n-title="top.water.title"><span class="ico">💧</span><span class="txt"><span id="water" class="val small">0 %</span></span></div>
     </div>
-    <div class="stat power" data-i18n-title="top.power.title"><span class="ico">⚡</span><span class="txt"><span id="power" class="val small">0 / 0 MW</span></span></div>
-    <div class="stat water" data-i18n-title="top.water.title"><span class="ico">💧</span><span class="txt"><span id="water" class="val small">0 %</span></span></div>
     <div class="group menus">
       <button id="btn-cities" data-i18n-title="btn.cities.title"><span id="city-name" class="name">Ville</span><span class="caret">▾</span></button>
       <button id="btn-lang" class="lang" title="Switch language / Changer de langue"><span class="flag en"></span><span class="code">EN</span></button>
@@ -293,7 +301,7 @@
     </div>
   </div>
   <div id="welcome" class="modal" hidden>
-    <form id="welcome-form" class="welcome">
+    <form id="welcome-form" class="welcome" tabindex="-1">
       <div class="hero">
         <div class="logo">Build<span>Your</span>T<svg class="hat" viewBox="0.75 1.25 46.5 32" preserveAspectRatio="none" aria-hidden="true"><path d="M5 26 Q5 2 24 2 Q43 2 43 26 Z" fill="#f2c14e" stroke="#8a6a10" stroke-width="1.5"/><rect x="1.5" y="25" width="45" height="7.5" rx="3.75" fill="#e0a93a" stroke="#8a6a10" stroke-width="1.5"/><rect x="21" y="2" width="6" height="23" fill="#ffd97a"/></svg>wn</div>
         <p class="tagline" data-i18n="welcome.tagline">Fondez une ville, faites-la grandir.</p>
@@ -316,10 +324,10 @@
           <div id="welcome-maps" class="cards maps"></div>
           <button type="button" id="welcome-more" class="ghost small" data-i18n="welcome.more">Autres cartes</button>
         </div>
-        <div class="actions">
-          <button type="button" id="welcome-cancel" class="ghost" data-i18n="welcome.cancel">Annuler</button>
-          <button type="submit" class="primary big" data-i18n="welcome.found">Fonder la ville</button>
-        </div>
+      </div>
+      <div class="actions">
+        <button type="button" id="welcome-cancel" class="ghost" data-i18n="welcome.cancel">Annuler</button>
+        <button type="submit" class="primary big" data-i18n="welcome.found">Fonder la ville</button>
       </div>
     </form>
   </div>

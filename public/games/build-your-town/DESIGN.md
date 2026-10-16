@@ -145,6 +145,44 @@ merge through it and turn; parallel tracks keep their separate lanes. Older
 two-tile corridors retain their geometry; never shift or delete saved
 infrastructure to compact them.
 
+
+## Small-screen controls
+
+At 900px and below, and on coarse-pointer screens up to 1024px, keep the bottom construction strip, panel close controls,
+overview-map controls, and simulation controls at least 44px tall. Use a fixed
+100% interface scale at this breakpoint; retain the saved desktop scale for
+larger screens. Map zoom remains independent. Panels must fit between the HUD
+and the construction strip using dynamic viewport units and safe-area insets.
+Scroll panel bodies while keeping their headers available. Cap ordinary sheets at
+420px tall and use narrower sheets in landscape to retain map space. Avoid hover-only
+map tooltips on this layout; item help remains available through its buttons.
+
+At 600px and below, split the top bar into a fixed control row and a horizontally
+scrolling statistics row. Pause, speed, clock, daylight/weather controls, and the
+game menu remain reachable without scrolling. Prioritize funds, population, and
+demand before secondary statistics. Cities and saves remain available through
+the game menu. Collapse the overview canvas by default on mobile while retaining
+map-view and zoom buttons; its toggle expands the canvas. Hide these overview
+controls while a management panel occupies the same space.
+
+Keep construction item names at 14px, descriptions at 12px, and native select/text
+inputs at 16px on mobile. Preserve the existing navy, amber, and teal treatment.
+
+
+Compact dialogs use 18px headings, 12–13px body text, and 8–12px padding.
+Keep primary actions and close buttons at 44px without enlarging the whole
+surface. Native text/select inputs stay at 16px to avoid browser focus zoom.
+The new-city form keeps its footer outside the scrolling fields. Its map choices
+form a horizontally scrollable strip with native buttons and visible selection;
+landscape places that chooser beside city name/difficulty. Place contextual help
+beside a field's label, rather than reserving a separate row below its input.
+
+Use the visual viewport for dialog height during keyboard entry. Do not open
+the keyboard automatically when a touch user opens the new-city form. Keep
+settings tabs and close controls outside the settings scroll region. Do not
+retain hidden settings panels in the mobile layout. Keep the paused indicator
+behind dialogs, and keep pointer capture cancellation from committing a build.
+
 ## Item rotation controls
 
 The Rotate button in the status bar and the Orientation row in the query panel use the existing secondary button style, a 36px minimum touch target, and the gold focus ring. Rotation previews render the real rotated building at the same translucent ghost opacity, with a small amber arrow on the front edge.

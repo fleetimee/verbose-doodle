@@ -10,13 +10,21 @@
     return element;
   };
   document.addEventListener("DOMContentLoaded", () => {
+    const compact = matchMedia("(max-width: 900px), (pointer: coarse) and (max-width: 1024px)");
     let scale = 100;
     try { scale = Number(localStorage.getItem(key)) || 100; } catch {}
     scale = Math.max(75, Math.min(125, scale));
     const apply = (value) => {
       scale = value;
-      document.documentElement.style.setProperty("--game-ui-scale", String(scale / 100));
+      document.documentElement.style.setProperty("--game-ui-scale", String(compact.matches ? 1 : scale / 100));
       try { localStorage.setItem(key, String(scale)); } catch {}
+      range.disabled = compact.matches;
+      range.value = String(compact.matches ? 100 : scale);
+      output.textContent = `${compact.matches ? 100 : scale}%`;
+      reset.disabled = compact.matches;
+      note.textContent = compact.matches
+        ? text("Small-screen controls use a fixed touch-friendly size. Map zoom stays separate.", "Sur petit écran, les commandes gardent une taille adaptée au toucher. Le zoom de la carte reste indépendant.")
+        : text("Resize menus and controls. Map zoom stays separate.", "Redimensionnez les menus et commandes. Le zoom de la carte reste indépendant.");
       window.dispatchEvent(new Event("resize"));
     };
     const settings = button(text("Interface settings", "Réglages de l'interface"), "M4 7h16M4 17h16M9 4v6m6 4v6");
@@ -159,6 +167,16 @@
     rotations.id = "settings-map-rotation";
     rotations.append(rotateLeft, angle, rotateRight);
     document.querySelector("#minimap .head").append(zoom);
+    const overview = button(text("Toggle overview map", "Afficher ou masquer la vue d’ensemble"), "m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Zm6-3v15m6-12v15");
+    overview.id = "btn-minimap-toggle";
+    overview.setAttribute("aria-controls", "minimap-canvas");
+    overview.setAttribute("aria-expanded", "false");
+    overview.addEventListener("click", event => {
+      event.stopPropagation();
+      const expanded = document.getElementById("minimap").classList.toggle("town-minimap-expanded");
+      overview.setAttribute("aria-expanded", String(expanded));
+    });
+    document.getElementById("minimap-name").after(overview);
     const rotationSection = document.createElement("section");
     rotationSection.className = "view-rotation-settings";
     const rotationLabel = document.createElement("label");
@@ -232,6 +250,21 @@
     frequency.addEventListener("change", updateEncounters);
     encounterSection.append(encounterLabel, frequencyLabel, frequency, encounterNote);
     panel.append(encounterSection);
+    const toolbarSection = document.createElement("section");
+    toolbarSection.className = "view-rotation-settings";
+    const toolbarLabel = document.createElement("label");
+    toolbarLabel.className = "view-rotation-toggle";
+    const autoHide = document.createElement("input");
+    autoHide.type = "checkbox";
+    autoHide.id = "enable-toolbar-autohide";
+    autoHide.checked = window.__toolbarAutohide?.isEnabled() ?? false;
+    toolbarLabel.append(autoHide, document.createTextNode(text("Auto-hide toolbar", "Masquer la barre d’outils automatiquement")));
+    const toolbarNote = document.createElement("p");
+    toolbarNote.textContent = text("Slides the build toolbar away when idle. Hover or tap the edge handle to bring it back.", "Fait glisser la barre d’outils hors de l’écran en cas d’inactivité. Survolez ou touchez la poignée pour la rouvrir.");
+    autoHide.addEventListener("change", () => window.__toolbarAutohide?.setEnabled(autoHide.checked));
+    toolbarSection.append(toolbarLabel, toolbarNote);
+    panel.append(toolbarSection);
+
 
     for (const [control, direction] of [[minus, -1], [plus, 1]]) {
       control.addEventListener("click", event => {
@@ -250,6 +283,7 @@
     window.addEventListener("resize", sync);
     // Camera zoom can also change through touch gestures or city loading.
     window.setInterval(sync, 500);
+    compact.addEventListener("change", () => apply(scale));
     apply(scale);
     sync();
   });

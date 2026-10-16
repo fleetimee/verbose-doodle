@@ -1,12 +1,13 @@
 (() => {
   const key = "citybuilder.graphics";
+  const mobile = matchMedia("(pointer: coarse) and (max-width: 1024px)").matches;
   const presets = {
     low: { resolution: 1, fps: 30, effects: 0 },
-    medium: { resolution: 1.5, fps: 30, effects: 1 },
+    medium: { resolution: mobile ? 1 : 1.5, fps: 30, effects: 1 },
     high: { resolution: 2, fps: 60, effects: 2 },
   };
   const tiers = ["low", "medium", "high"];
-  const initialTier = () => (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4 ||
+  const initialTier = () => (mobile || navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4 ||
     navigator.deviceMemory && navigator.deviceMemory <= 4) ? "low" : "medium";
   let mode = "auto", tier = initialTier(), custom = { ...presets.medium };
   const clamp = (value, min, max, fallback) => Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : fallback;
@@ -67,7 +68,7 @@
     const average = cost / draws, index = tiers.indexOf(tier), budget = 1000 / config().fps;
     const slow = average > budget * 0.72 || ticks > 0 && late / ticks > 0.2;
     slowWindows = slow ? slowWindows + 1 : 0;
-    const next = presets[tiers[index + 1]];
+    const next = mobile && tier === "medium" ? null : presets[tiers[index + 1]];
     // Require spare capacity at the NEXT preset's resolution and frame rate before upgrading.
     const ratio = next ? Math.min(next.resolution, window.devicePixelRatio || 1) / Math.min(config().resolution, window.devicePixelRatio || 1) : 1;
     const fast = next && average * ratio * ratio < 1000 / next.fps * 0.5 && late / Math.max(1, ticks) < 0.03;
