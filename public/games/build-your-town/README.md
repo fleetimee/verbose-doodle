@@ -415,3 +415,40 @@ landscaping, resource industries, rail systems, terrain tools, and direct zoning
 tools. Verify building previews and complementary models, close/Escape and outside
 dismissal, keyboard focus, both languages, mobile sizes, and 75–125% UI scale.
 Check that opening help never builds or changes the selected tool.
+
+## Resident routines and conversations
+
+Visible residents now represent a bounded neighborhood simulation (up to 240
+people), rather than random passing traffic. Their city-clock routines are home
+at night (21:00–07:00), morning shopping (07:00–09:00), work (09:00–17:00),
+evening shopping (17:00–19:00), and leisure (19:00–21:00), with staggered starts.
+They choose deterministic destinations beside developed homes, businesses,
+industry, or recreation buildings and follow connected, level sidewalks through
+intersections. Planning searches up to 512 road tiles per person. Residents
+wait if the neighborhood has no reachable destination; they do not teleport
+between disconnected streets. Arrivals at home, work, and shops hide the outdoor
+sprite to represent time spent inside; leisure visitors remain visible. Residents
+approach the destination-facing edge of the sidewalk and fade through a short
+entrance transition, then reverse that transition when leaving. Existing residents
+retain their identities during density refreshes. Walking poses advance only
+when position changes, so red-light queues use a still standing pose.
+
+Nearby residents on the same sidewalk can stop for a short conversation, then
+resume their routine. Cream speech bubbles mark conversations; green bubbles
+mark repeated acquaintances. Meetings have individual cooldowns, and up to 512
+pair familiarity records survive city save/export/load in optional
+`residentSocial` data. Legacy saves start with no acquaintances. Walking routes
+and active conversations are rebuilt on load. This is ambient resident life;
+it does not alter population, jobs, funds, or economic capacity.
+
+Implementation lives in `src/world/resident-life.js` and the pedestrian renderer.
+Pause, background suspension, flat/data views, and reduced motion stop walking
+and conversation timers using the existing pedestrian animation clock. Daily
+routines continue to reflect the city calendar when animation resumes.
+
+For manual QA, use a disposable city with homes, shops, industry, and a park
+beside a connected road. Observe the five time bands, staggered departures,
+indoor arrivals, and conversations at 1×/2×/4×. Check a road intersection, remove
+a route, and verify disconnected districts cannot supply destinations. Pause
+mid-conversation, check reduced motion and map rotations, and export/reload to
+verify acquaintances persist. Keep all QA separate from player saves.

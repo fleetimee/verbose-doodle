@@ -24,7 +24,7 @@
   }
   const safe = (city, index, axis) => city.terrain[index] === 0 &&
     city.overlay[index] === 2 && !city.fire[index] && !city.flood[index] && !city.rail[index] &&
-    (axis ? sidewalkAxis(city, index) === axis : sidewalkAxis(city, index) !== null);
+    (!axis || sidewalkAxis(city, index) === null || sidewalkAxis(city, index) === axis);
 
   function activity(city, x, y) {
     let total = 0;
@@ -51,9 +51,9 @@
       const x = index % city.size;
       const y = Math.floor(index / city.size);
       const density = activity(city, x, y);
-      if (!density) continue;
       state.roads.add(index);
-      const axis = sidewalkAxis(city, index);
+      if (!density) continue;
+      const axis = sidewalkAxis(city, index) ?? "x";
       const dx = axis === "x" ? 1 : 0;
       const dy = axis === "y" ? 1 : 0;
       if (!window.__roadLayout?.wide(city, x, y) && hash(index ^ city.seed) % 4 === 0 && city.isFlat(x, y) &&
@@ -65,19 +65,15 @@
       candidates.push({ index, density, rank: hash(index ^ city.seed) });
     }
     candidates.sort((a, b) => a.rank - b.rank);
-    const existing = new Map(state.people.map((person) => [person.id, person]));
-    state.people = [];
+    state.people = state.people.filter(person => state.roads.has(person.index) && safe(city, person.index));
+    const existing = new Set(state.people.map(person => person.id));
     for (const candidate of candidates) {
       const count = Math.min(3, Math.ceil(candidate.density / 8));
       for (let slot = 0; slot < count && state.people.length < 240; slot++) {
         const id = candidate.index * 3 + slot;
-        const previous = existing.get(id);
-        if (previous && state.roads.has(previous.index) && safe(city, previous.index, previous.axis)) {
-          state.people.push(previous);
-          continue;
-        }
+        if (existing.has(id)) continue;
         const seed = hash(id ^ city.seed);
-        state.people.push({ id, seed, index: candidate.index, axis: sidewalkAxis(city, candidate.index),
+        state.people.push({ id, seed, index: candidate.index, axis: sidewalkAxis(city, candidate.index) ?? "x",
           position: 0.1 + (seed % 800) / 1000, direction: seed & 1 ? 1 : -1,
           side: seed & 2 ? 0.12 : 0.88, phase: seed % 100, nextCross: 0 });
       }
@@ -100,6 +96,8 @@
       refresh(city, state);
       state.refreshed = time;
     }
+    window.__residentLife?.prepare(city, state);
+    state.plans = 0;
     state.tiles.clear();
     for (const [key, car] of state.cars) {
       const crossing = crossingAt(state, car.index);
@@ -117,6 +115,9 @@
       const crossing = crossingAt(state, person.index);
       const phase = crossingPhase(state, crossing);
       const previousPosition = person.position;
+      const previousSide = person.side;
+      const previousIndex = person.index;
+      const resting = window.__residentLife?.resting(city, state, person);
       if (person.crossing) {
         if (!crossing) {
           person.side = person.side < 0.5 ? 0.12 : 0.88;
@@ -131,7 +132,7 @@
             person.nextCross = state.clock + 12 + person.seed % 10;
           }
         }
-      } else {
+      } else if (!resting) {
         person.position += delta * (0.26 + (person.seed % 10) / 100) * person.direction;
         if (crossing && state.clock >= person.nextCross &&
             (previousPosition - 0.5) * person.direction <= 0 &&
@@ -143,26 +144,31 @@
           }
         }
       }
-      person.phase += delta * 9;
+
       if (person.position < 0 || person.position > 1) {
         const x = person.index % city.size;
         const y = Math.floor(person.index / city.size);
+        window.__residentLife?.steer(state, person);
         const nx = x + (person.axis === "x" ? person.direction : 0);
         const ny = y + (person.axis === "y" ? person.direction : 0);
         const next = city.idx(nx, ny);
-        if (city.inBounds(nx, ny) && state.roads.has(next) && safe(city, next, person.axis) &&
+        if (city.inBounds(nx, ny) && state.roads.has(next) && safe(city, next) &&
             city.base(nx, ny) === city.base(x, y)) {
           person.index = next;
-          person.position += person.direction > 0 ? -1 : 1;
+          person.position = person.direction > 0 ? 0.01 : 0.99;
         } else {
           person.position = person.position < 0 ? -person.position : 2 - person.position;
           person.direction *= -1;
         }
       }
+      person.moving = person.entering && delta > 0 || person.index !== previousIndex ||
+        Math.abs(person.position - previousPosition) > 0.00001 || Math.abs(person.side - previousSide) > 0.00001;
+      if (person.moving) person.phase += delta * 9;
       const list = state.tiles.get(person.index) || [];
       list.push(person);
       state.tiles.set(person.index, list);
     }
+    window.__residentLife?.socialize(state);
   }
 
   function draw(renderer, index, x, y, scale, corners) {
@@ -173,13 +179,15 @@
     ctx.save();
     ctx.lineCap = "round";
     for (const person of people) {
-      const u = person.axis === "x" ? person.position : person.side;
-      const v = person.axis === "y" ? person.position : person.side;
+      if (person.indoors) continue;
+      ctx.globalAlpha = person.opacity ?? 1;
+      const u = person.visualU ?? (person.axis === "x" ? person.position : person.side);
+      const v = person.visualV ?? (person.axis === "y" ? person.position : person.side);
       const height = corners[0] * (1 - u) * (1 - v) + corners[1] * u * (1 - v) +
         corners[2] * u * v + corners[3] * (1 - u) * v;
       const px = x + (u - v) * 32 * scale;
       const py = y + (u + v) * 16 * scale - (height - lowest) * 8 * scale;
-      const stride = reducedMotion.matches ? 0 : Math.sin(person.phase) * 1.3 * scale;
+      const stride = reducedMotion.matches || !person.moving ? 0 : Math.sin(person.phase) * 1.3 * scale;
       ctx.fillStyle = "rgba(20,24,34,0.25)";
       ctx.beginPath();
       ctx.ellipse(px, py, 2.4 * scale, 1.1 * scale, 0, 0, Math.PI * 2);
@@ -209,6 +217,7 @@
       ctx.beginPath();
       ctx.arc(px, py - 7.3 * scale, 1.35 * scale, 0, Math.PI * 2);
       ctx.fill();
+      window.__residentLife?.draw(ctx, person, px, py, scale);
     }
     ctx.restore();
   }
@@ -304,7 +313,7 @@
     for (const index of indices) {
       const crossing = crossingAt(state, index);
       if (!crossing || crossingPhase(state, crossing) < 9 || !safe(city, index)) continue;
-      const axis = sidewalkAxis(city, index);
+      const axis = sidewalkAxis(city, index) ?? "x";
       const origin = axis === "x" ? index % city.size : Math.floor(index / city.size);
       const start = from[axis];
       const end = to[axis];
