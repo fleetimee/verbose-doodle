@@ -53,6 +53,9 @@ export const simulatorDbMessages = {
 
   finishEdit: "Simpan atau batalkan edit sel saat ini terlebih dahulu.",
   editValue: "Klik dua kali untuk mengedit · F2",
+  saveRow: "Simpan baris",
+  rowInserted: "Baris ditambahkan",
+  useDefault: "Gunakan nilai bawaan",
   saveValue: "Simpan nilai",
   cancelEdit: "Batalkan edit",
   setNull: "Atur NULL",

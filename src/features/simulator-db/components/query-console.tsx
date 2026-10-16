@@ -5,11 +5,16 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useRef, useState } from "react";
-import { Eraser, RefreshCw } from "@/components/hugeicons";
+import { Code2, Eraser, RefreshCw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+} from "@/components/ui/empty";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -198,7 +203,7 @@ export function QueryConsole({ selectedTable, tables }: QueryConsoleProps) {
                 {m.wrapText}
               </Toggle>
             </div>
-            <div className="database-grid min-h-0 min-w-0 flex-1 overflow-hidden bg-background">
+            <div className="database-grid relative min-h-0 min-w-0 flex-1 overflow-hidden bg-background">
               <ScrollArea
                 className="h-full min-h-0 w-full min-w-0"
                 contentClassName="min-h-full"
@@ -231,26 +236,23 @@ export function QueryConsole({ selectedTable, tables }: QueryConsoleProps) {
                   />
                 )}
 
-                {results && results.length === 0 && !error && (
-                  <Empty size="compact">
-                    <EmptyHeader>
-                      <EmptyDescription>{m.queryEmpty}</EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                )}
-
                 {isRunning && <DatabaseGridSkeleton label={m.loadingData} />}
-                {!results && affectedRows === null && !error && !isRunning && (
-                  <Empty className="h-full" size="compact">
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+              {!(isRunning || error) &&
+                affectedRows === null &&
+                (!results || results.length === 0) && (
+                  <Empty className="absolute inset-0" size="compact">
                     <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <Code2 />
+                      </EmptyMedia>
                       <EmptyDescription>
-                        {isRunning ? m.loading : m.queryHint}
+                        {results ? m.queryEmpty : m.queryHint}
                       </EmptyDescription>
                     </EmptyHeader>
                   </Empty>
                 )}
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
             </div>
           </div>
         </ResizablePanel>

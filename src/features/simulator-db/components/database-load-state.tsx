@@ -104,7 +104,7 @@ export function DatabaseRefreshIndicator({
   return (
     <div
       aria-label={label}
-      className="absolute inset-0 flex cursor-progress items-start justify-center bg-background/40 pt-3"
+      className="absolute inset-0 flex cursor-progress items-center justify-center bg-background/40"
       role="status"
     >
       <Badge variant="secondary">

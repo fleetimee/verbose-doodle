@@ -154,14 +154,16 @@ function EmployeeProfileContent({
   if (details.isLoading) {
     return <EmployeeProfileLoading employee={employee} />;
   }
+  if (!selected) {
+    return (
+      <DirectoryMessage
+        description={copy.selectDescription}
+        title={copy.selectTitle}
+      />
+    );
+  }
   return (
     <ScrollArea className="min-h-0 flex-1" variant="fit">
-      {selected ? null : (
-        <DirectoryMessage
-          description={copy.selectDescription}
-          title={copy.selectTitle}
-        />
-      )}
       {details.isError ? (
         <DirectoryError
           error={details.error}

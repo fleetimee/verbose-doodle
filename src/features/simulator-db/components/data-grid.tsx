@@ -53,6 +53,7 @@ import {
 } from "@/features/simulator-db/components/database-load-state";
 import { DeleteRowDialog } from "@/features/simulator-db/components/delete-row-dialog";
 import { useInlineCellEdit } from "@/features/simulator-db/components/inline-cell-editor";
+import { InlineNewRow } from "@/features/simulator-db/components/inline-new-row";
 import { RowEditDialog } from "@/features/simulator-db/components/row-edit-dialog";
 import type {
   SqlCellValue,
@@ -93,6 +94,74 @@ function getGridPagination(data: TableDataPage | null) {
   return { totalPages, currentPage, startRow, endRow };
 }
 
+function useStableColumnLayout(
+  defaultWidths: Record<string, number>,
+  hasData: boolean
+) {
+  const [initialWidths, setInitialWidths] = useState<Record<
+    string,
+    number
+  > | null>(null);
+  if (hasData && !initialWidths) {
+    setInitialWidths(defaultWidths);
+  }
+  return useDatabaseColumns(initialWidths ?? defaultWidths);
+}
+
+async function copyRowsJson(rows: readonly SqlRow[]) {
+  if (rows.length > 0) {
+    await copyDatabaseValue(JSON.stringify(rows, null, 2));
+  }
+}
+
+function exportPageCsv(data: TableDataPage | null) {
+  const rawRows = data?.rows ?? [];
+  const columns = data?.columns ?? [];
+  const currentPage = data?.page ?? 0;
+  if (!data || rawRows.length === 0) {
+    return;
+  }
+  const header = columns.map((c) => `"${c.name}"`).join(",");
+  const body = rawRows
+    .map((row) =>
+      columns
+        .map((c) => {
+          const val = row[c.name];
+          if (val === null || val === undefined) {
+            return "";
+          }
+          const str = String(val).replace(/"/g, '""');
+          return `"${str}"`;
+        })
+        .join(",")
+    )
+    .join("\n");
+
+  const blob = new Blob([`${header}\n${body}`], {
+    type: "text/csv;charset=utf-8;",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${data.tableName}-page-${currentPage + 1}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function getGridInteractionState(
+  saving: boolean,
+  adding: boolean,
+  editing: boolean,
+  busy: boolean
+) {
+  const locked = saving || adding;
+  return {
+    locked,
+    canSort: !(editing || busy || locked),
+    rowsBusy: busy || adding,
+  };
+}
+
 export function DataGrid({
   error,
   loadingLabel,
@@ -121,11 +190,22 @@ export function DataGrid({
     setActiveEdit(null);
     notifyMutationSuccess(false);
   }, [notifyMutationSuccess, setActiveEdit]);
+  const [isAdding, setIsAdding] = useState(false);
   const [wrapText, setWrapText] = useState(false);
   const [searchInput, setSearchInput] = useState(searchQuery ?? "");
   const searchPending = searchInput !== (searchQuery ?? "");
   const isBusy = isLoading || searchPending;
   const statusLabel = searchPending ? m.searchingData : loadingLabel;
+  const {
+    locked: gridLocked,
+    canSort,
+    rowsBusy,
+  } = getGridInteractionState(
+    isSavingEdit,
+    isAdding,
+    Boolean(activeEdit),
+    isBusy
+  );
   const searchChangeRef = useRef(onSearchChange);
   useEffect(() => {
     searchChangeRef.current = onSearchChange;
@@ -191,47 +271,13 @@ export function DataGrid({
       ),
     [fitWidths]
   );
-  const columnLayout = useDatabaseColumns(defaultWidths);
+  const columnLayout = useStableColumnLayout(defaultWidths, Boolean(data));
 
   const { totalPages, currentPage, startRow, endRow } = getGridPagination(data);
 
-  const handleExportCsv = () => {
-    if (!data || rawRows.length === 0) {
-      return;
-    }
-    const header = columns.map((c) => `"${c.name}"`).join(",");
-    const body = rawRows
-      .map((row) =>
-        columns
-          .map((c) => {
-            const val = row[c.name];
-            if (val === null || val === undefined) {
-              return "";
-            }
-            const str = String(val).replace(/"/g, '""');
-            return `"${str}"`;
-          })
-          .join(",")
-      )
-      .join("\n");
+  const handleExportCsv = () => exportPageCsv(data);
 
-    const blob = new Blob([`${header}\n${body}`], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${data.tableName}-page-${currentPage + 1}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleCopyJson = async () => {
-    if (!rawRows.length) {
-      return;
-    }
-    await copyDatabaseValue(JSON.stringify(rawRows, null, 2));
-  };
+  const handleCopyJson = () => copyRowsJson(rawRows);
 
   const tableStyle: CSSProperties & { "--database-table-width": string } = {
     "--database-table-width": `${32 + columns.reduce((total, col) => total + columnLayout.width(col.name), 0)}px`,
@@ -261,8 +307,11 @@ export function DataGrid({
         <div className="flex shrink-0 items-center gap-0.5">
           <Button
             aria-label={m.addRow}
-            disabled={isBusy || isSavingEdit || Boolean(error)}
-            onClick={() => setRowModal({ mode: "add", open: true, row: null })}
+            disabled={isBusy || gridLocked || Boolean(error)}
+            onClick={() => {
+              setActiveEdit(null);
+              setIsAdding(true);
+            }}
             size="icon-xs"
             title={m.addRow}
             variant="ghost"
@@ -272,7 +321,7 @@ export function DataGrid({
 
           <Button
             aria-label={m.refresh}
-            disabled={isBusy || isSavingEdit || Boolean(error)}
+            disabled={isBusy || gridLocked || Boolean(error)}
             onClick={onRefresh}
             size="icon-xs"
             title={m.refresh}
@@ -296,7 +345,7 @@ export function DataGrid({
           {/* Pagination controls */}
           <div className="flex items-center gap-1">
             <Button
-              disabled={currentPage <= 0 || isBusy || isSavingEdit}
+              disabled={currentPage <= 0 || isBusy || gridLocked}
               onClick={() => onPageChange(0)}
               size="icon-xs"
               title="First page"
@@ -305,7 +354,7 @@ export function DataGrid({
               <HugeiconsIcon className="size-3.5" icon={ArrowLeftDoubleIcon} />
             </Button>
             <Button
-              disabled={currentPage <= 0 || isBusy || isSavingEdit}
+              disabled={currentPage <= 0 || isBusy || gridLocked}
               onClick={() => onPageChange(currentPage - 1)}
               size="icon-xs"
               title="Previous page"
@@ -313,11 +362,11 @@ export function DataGrid({
             >
               <HugeiconsIcon className="size-3.5" icon={ChevronLeftIcon} />
             </Button>
-            <span className="px-1 text-muted-foreground text-xs tabular-nums">
+            <span className="min-w-16 px-1 text-center text-muted-foreground text-xs tabular-nums">
               {currentPage + 1} / {totalPages}
             </span>
             <Button
-              disabled={currentPage >= totalPages - 1 || isBusy || isSavingEdit}
+              disabled={currentPage >= totalPages - 1 || isBusy || gridLocked}
               onClick={() => onPageChange(currentPage + 1)}
               size="icon-xs"
               title="Next page"
@@ -326,7 +375,7 @@ export function DataGrid({
               <HugeiconsIcon className="size-3.5" icon={ChevronRightIcon} />
             </Button>
             <Button
-              disabled={currentPage >= totalPages - 1 || isBusy || isSavingEdit}
+              disabled={currentPage >= totalPages - 1 || isBusy || gridLocked}
               onClick={() => onPageChange(totalPages - 1)}
               size="icon-xs"
               title="Last page"
@@ -339,7 +388,7 @@ export function DataGrid({
           {/* Page size select */}
           <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
             <Select
-              disabled={isSavingEdit}
+              disabled={gridLocked}
               onValueChange={(val) => onSizeChange(Number(val))}
               value={String(data.size)}
             >
@@ -421,7 +470,7 @@ export function DataGrid({
           <div className="w-44 shrink-0">
             <Input
               aria-label={m.filterRows}
-              disabled={isSavingEdit}
+              disabled={gridLocked}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder={m.filterRows}
               size="toolbar"
@@ -457,7 +506,7 @@ export function DataGrid({
                     name={col.name}
                     onResize={(width) => columnLayout.resize(col.name, width)}
                     onSort={() => {
-                      if (!(activeEdit || isBusy)) {
+                      if (canSort) {
                         onSortChange(col.name);
                       }
                     }}
@@ -472,12 +521,25 @@ export function DataGrid({
                 ))}
               </TableRow>
             </TableHeader>
+            {isAdding && (
+              <InlineNewRow
+                columns={columns}
+                onCancel={() => setIsAdding(false)}
+                onEditStateChange={onEditStateChange}
+                onSaved={() => {
+                  setIsAdding(false);
+                  notifyMutationSuccess(true);
+                }}
+                tableName={data.tableName}
+                toolbar={editToolbar}
+              />
+            )}
             <DatabaseGridRows
               activeEdit={activeEdit}
               columns={columns}
               editToolbar={editToolbar}
               hasError={Boolean(error)}
-              isBusy={isBusy}
+              isBusy={rowsBusy}
               isSavingEdit={isSavingEdit}
               onSaved={handleCellSaved}
               rows={rawRows}

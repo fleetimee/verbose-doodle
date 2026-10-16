@@ -70,7 +70,9 @@ export function buildInsertSql(
     return Boolean(field);
   });
 
-  const colNames = activeEntries.map((col) => `"${col.name}"`).join(", ");
+  const colNames = activeEntries
+    .map((col) => `"${col.name.replace(/"/g, '""')}"`)
+    .join(", ");
   const valLiterals = activeEntries
     .map((col) => {
       const field = fieldValues[col.name] ?? { isNull: true, value: "" };
@@ -78,7 +80,11 @@ export function buildInsertSql(
     })
     .join(", ");
 
-  return `INSERT INTO "${tableName}" (${colNames})\nVALUES (${valLiterals});`;
+  const table = `"${tableName.replace(/"/g, '""')}"`;
+  if (activeEntries.length === 0) {
+    return `INSERT INTO ${table} DEFAULT VALUES;`;
+  }
+  return `INSERT INTO ${table} (${colNames})\nVALUES (${valLiterals});`;
 }
 
 export function buildUpdateSql(

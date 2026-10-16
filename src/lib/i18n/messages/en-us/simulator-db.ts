@@ -53,6 +53,9 @@ export const simulatorDbMessages = {
 
   finishEdit: "Save or cancel the current cell edit first.",
   editValue: "Double-click to edit · F2",
+  saveRow: "Save row",
+  rowInserted: "Row inserted",
+  useDefault: "Use default",
   saveValue: "Save value",
   cancelEdit: "Cancel edit",
   setNull: "Set NULL",
