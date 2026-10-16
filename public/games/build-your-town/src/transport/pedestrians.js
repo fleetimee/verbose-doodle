@@ -1,6 +1,8 @@
 (() => {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const shirts = ["#e9b44c", "#60b9c5", "#db776f", "#9b8cc9", "#e5e7de"];
+  const coats = ["#bd713e", "#477b86", "#a54f55", "#70628d", "#65755a"];
+  const umbrellas = ["#e9b44c", "#60b9c5", "#db776f", "#9b8cc9", "#78a86b"];
   const skin = ["#f2c5a0", "#c58d65", "#80533e"];
   const destinations = new Set([
     "park", "bigpark", "school", "hospital", "station", "stadium",
@@ -98,6 +100,7 @@
     }
     window.__residentLife?.prepare(city, state);
     state.plans = 0;
+    state.weather = window.__townWeather?.forecast(city);
     state.tiles.clear();
     for (const [key, car] of state.cars) {
       const crossing = crossingAt(state, car.index);
@@ -172,9 +175,12 @@
   }
 
   function draw(renderer, index, x, y, scale, corners) {
-    const people = states.get(renderer)?.tiles.get(index);
+    const state = states.get(renderer);
+    const people = state?.tiles.get(index);
     if (!people) return;
     const ctx = renderer.ctx;
+    const umbrella = state.weather?.kind === "rain" || state.weather?.kind === "storm";
+    const jacket = state.weather?.season.id === "winter" || state.weather?.kind === "snow";
     const lowest = Math.min(...corners);
     ctx.save();
     ctx.lineCap = "round";
@@ -200,13 +206,14 @@
       ctx.moveTo(px, py - 3 * scale);
       ctx.lineTo(px + stride, py);
       ctx.stroke();
-      ctx.strokeStyle = shirts[person.seed % shirts.length];
-      ctx.lineWidth = 2.5 * scale;
+      const clothing = jacket ? coats[person.seed % coats.length] : shirts[person.seed % shirts.length];
+      ctx.strokeStyle = clothing;
+      ctx.lineWidth = (jacket ? 3.6 : 2.5) * scale;
       ctx.beginPath();
       ctx.moveTo(px, py - 6 * scale);
-      ctx.lineTo(px, py - 3 * scale);
+      ctx.lineTo(px, py - (jacket ? 2.3 : 3) * scale);
       ctx.stroke();
-      ctx.lineWidth = scale;
+      ctx.lineWidth = (jacket ? 1.8 : 1) * scale;
       ctx.beginPath();
       ctx.moveTo(px - 1.2 * scale, py - 5.5 * scale);
       ctx.lineTo(px - 1.6 * scale, py - 3.5 * scale + stride);
@@ -217,7 +224,29 @@
       ctx.beginPath();
       ctx.arc(px, py - 7.3 * scale, 1.35 * scale, 0, Math.PI * 2);
       ctx.fill();
-      window.__residentLife?.draw(ctx, person, px, py, scale);
+      if (jacket) {
+        ctx.fillStyle = "#f3ecd8";
+        ctx.fillRect(px - 1.6 * scale, py - 6.5 * scale, 3.2 * scale, scale);
+        ctx.fillRect(px + 0.4 * scale, py - 5.5 * scale, 0.8 * scale, 1.8 * scale);
+        ctx.strokeStyle = "#303748"; ctx.lineWidth = 0.5 * scale;
+        ctx.beginPath(); ctx.moveTo(px, py - 5.3 * scale); ctx.lineTo(px, py - 2.4 * scale); ctx.stroke();
+      }
+      if (umbrella) {
+        const ux = px + 2 * scale, uy = py - 10 * scale;
+        ctx.strokeStyle = "#dce3ea"; ctx.lineWidth = 0.8 * scale;
+        ctx.beginPath(); ctx.moveTo(ux, py - 4 * scale); ctx.lineTo(ux, uy - 2 * scale); ctx.stroke();
+        ctx.fillStyle = umbrellas[(person.seed >>> 3) % umbrellas.length];
+        ctx.strokeStyle = "#303748"; ctx.lineWidth = 0.6 * scale;
+        ctx.beginPath(); ctx.moveTo(ux - 5 * scale, uy);
+        ctx.bezierCurveTo(ux - 4 * scale, uy - 6 * scale, ux + 4 * scale, uy - 6 * scale, ux + 5 * scale, uy);
+        ctx.quadraticCurveTo(ux + 2.5 * scale, uy - scale, ux, uy);
+        ctx.quadraticCurveTo(ux - 2.5 * scale, uy - scale, ux - 5 * scale, uy);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = "rgba(255,255,255,0.5)"; ctx.lineWidth = 0.5 * scale;
+        ctx.beginPath(); ctx.moveTo(ux, uy - 4.5 * scale);
+        ctx.quadraticCurveTo(ux - 2 * scale, uy - 3 * scale, ux - 2.5 * scale, uy - 0.5 * scale); ctx.stroke();
+      }
+      window.__residentLife?.draw(ctx, person, px, py - (umbrella ? 5 * scale : 0), scale);
     }
     ctx.restore();
   }

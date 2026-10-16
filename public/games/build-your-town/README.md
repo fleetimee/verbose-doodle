@@ -431,7 +431,10 @@ sprite to represent time spent inside; leisure visitors remain visible. Resident
 approach the destination-facing edge of the sidewalk and fade through a short
 entrance transition, then reverse that transition when leaving. Existing residents
 retain their identities during density refreshes. Walking poses advance only
-when position changes, so red-light queues use a still standing pose.
+when position changes, so red-light queues use a still standing pose. Rain and
+storm forecasts give outdoor residents umbrellas; winter or snow adds thicker
+jackets and scarves. Outfits follow the forecast and season overrides even when
+weather particles are disabled, and use the same paused/reduced-motion poses.
 
 Nearby residents on the same sidewalk can stop for a short conversation, then
 resume their routine. Cream speech bubbles mark conversations; green bubbles
