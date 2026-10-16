@@ -91,6 +91,15 @@ export const API_ENDPOINTS = {
       revealPassword: (id: string) => `/api/servers/${id}/password/reveal`,
       update: (id: string) => `/api/servers/${id}`,
     },
+    simulatorDb: {
+      columns: (tableName: string) =>
+        `/api/simulator-db/tables/${encodeURIComponent(tableName)}/columns`,
+      data: (tableName: string) =>
+        `/api/simulator-db/tables/${encodeURIComponent(tableName)}/data`,
+      execute: "/api/simulator-db/execute",
+      query: "/api/simulator-db/query",
+      tables: "/api/simulator-db/tables",
+    },
     users: {
       create: "/api/users/add",
       delete: (id: string | number) => `/api/users/${id}`,

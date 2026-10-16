@@ -22,6 +22,7 @@ import {
   Cable,
   Code2,
   Compass,
+  Database,
   type HugeIcon,
   Info,
   LayoutDashboard,
@@ -123,6 +124,14 @@ export function getSidebarData(
         description: messages.servers.navigationDescription,
         title: messages.servers.title,
         url: "/dashboard/servers",
+      },
+      {
+        adminOnly: true,
+        groupLabel: messages.common.navWorkspace,
+        icon: Database,
+        description: "Inspect and query ISO8583 simulator SQLite database",
+        title: "Simulator DB Studio",
+        url: "/dashboard/simulator-db",
       },
       {
         groupLabel: messages.common.navNetworkTools,

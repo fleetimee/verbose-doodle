@@ -30,6 +30,7 @@ import {
   CursorPointer01Icon,
   CursorTextIcon,
   DashboardSquare01Icon,
+  Database01Icon,
   Delete02Icon,
   DoorClosedIcon as DoorClosedDefinition,
   EraserIcon,
@@ -75,6 +76,7 @@ import {
   SignalIcon,
   SlidersHorizontalIcon,
   Sun03Icon,
+  Table01Icon,
   Tag01Icon,
   Timer01Icon,
   TorusIcon,
@@ -126,6 +128,7 @@ export const Code2 = createHugeIcon(CodeIcon);
 export const Compass = createHugeIcon(CompassIcon);
 export const Cpu = createHugeIcon(CpuIcon);
 export const CursorText = createHugeIcon(CursorTextIcon);
+export const Database = createHugeIcon(Database01Icon);
 export const DoorClosedIcon = createHugeIcon(DoorClosedDefinition);
 export const Eraser = createHugeIcon(EraserIcon);
 export const Eye = createHugeIcon(EyeIcon);
@@ -175,6 +178,7 @@ export const ShieldCheckIcon = createHugeIcon(SecurityCheckIcon);
 export const Signal = createHugeIcon(SignalIcon);
 export const SlidersHorizontal = createHugeIcon(SlidersHorizontalIcon);
 export const Sun = createHugeIcon(Sun03Icon);
+export const Table = createHugeIcon(Table01Icon);
 export const TagIcon = createHugeIcon(Tag01Icon);
 export const TextCursor = createHugeIcon(CursorTextIcon);
 export const Timer = createHugeIcon(Timer01Icon);
