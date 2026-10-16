@@ -20,7 +20,7 @@ export function EmployeePagination({
     return null;
   }
   return (
-    <div className="flex shrink-0 items-center justify-between gap-2 border-t px-3 py-2">
+    <div className="flex shrink-0 items-center justify-between gap-2 border-t bg-muted/10 px-3 py-2">
       <Button
         disabled={loading || page === 0}
         onClick={() => onChange(page - 1)}

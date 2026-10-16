@@ -47,7 +47,7 @@ function ProfileField({
     }
   }
   return (
-    <div className="min-w-0 space-y-1">
+    <div className="flex min-w-0 flex-col gap-1">
       <dt className="text-muted-foreground text-xs">{label}</dt>
       <dd className="flex items-start gap-2 text-sm">
         <span
@@ -292,7 +292,7 @@ export function EmployeeProfile({
                   <ol className="ml-2 border-l">
                     {educationRecords.map((education) => (
                       <li
-                        className="relative space-y-3 pb-6 pl-6 last:pb-0"
+                        className="relative flex flex-col gap-3 pb-6 pl-6 last:pb-0"
                         key={education.sequence}
                       >
                         <span

@@ -1,6 +1,7 @@
 import { useId } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldLabel } from "@/components/ui/field";
 
 export function EmployeeEmploymentFilters({
   activeOnly,
@@ -16,8 +17,8 @@ export function EmployeeEmploymentFilters({
   const activeId = useId();
   const outsourcingId = useId();
   return (
-    <div className="flex flex-wrap gap-x-6 gap-y-3">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      <Field className="w-auto" orientation="horizontal" size="sm">
         <Checkbox
           checked={activeOnly}
           id={activeId}
@@ -25,28 +26,28 @@ export function EmployeeEmploymentFilters({
             onChange(checked === true, includeOutsourcing)
           }
         />
-        <label
-          className="cursor-pointer text-sm"
+        <FieldLabel
+          className="cursor-pointer"
           htmlFor={activeId}
           title={copy.activeHint}
         >
           {copy.activeOnly}
-        </label>
-      </div>
-      <div className="flex items-center gap-2">
+        </FieldLabel>
+      </Field>
+      <Field className="w-auto" orientation="horizontal" size="sm">
         <Checkbox
           checked={includeOutsourcing}
           id={outsourcingId}
           onCheckedChange={(checked) => onChange(activeOnly, checked === true)}
         />
-        <label
-          className="cursor-pointer text-sm"
+        <FieldLabel
+          className="cursor-pointer"
           htmlFor={outsourcingId}
           title={copy.outsourcingHint}
         >
           {copy.includeOutsourcing}
-        </label>
-      </div>
+        </FieldLabel>
+      </Field>
     </div>
   );
 }

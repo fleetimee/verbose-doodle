@@ -6,8 +6,32 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Users } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Item,
+  ItemContent,
+  ItemGroup,
+  ItemMedia,
+  ItemSeparator,
+  ItemTitle,
+} from "@/components/ui/item";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -38,13 +62,15 @@ function DirectoryMessage({
   description: string;
 }) {
   return (
-    <div className="flex min-h-64 flex-col items-center justify-center px-6 py-12 text-center">
-      <Users aria-hidden="true" className="mb-4 size-7 text-muted-foreground" />
-      <h2 className="font-semibold text-base">{title}</h2>
-      <p className="mt-2 max-w-sm text-muted-foreground text-sm leading-relaxed">
-        {description}
-      </p>
-    </div>
+    <Empty className="min-h-64" size="default" variant="plain">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Users aria-hidden="true" />
+        </EmptyMedia>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>{description}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   );
 }
 
@@ -67,11 +93,20 @@ function DirectoryError({
     message = copy.notFound;
   }
   return (
-    <div className="space-y-4 p-6" role="alert">
-      <p className="text-destructive text-sm">{message}</p>
-      <Button disabled={loading} onClick={retry} size="sm" variant="outline">
-        {copy.retry}
-      </Button>
+    <div className="p-4 sm:p-6">
+      <Alert variant="destructive">
+        <AlertDescription>
+          <span>{message}</span>
+          <Button
+            disabled={loading}
+            onClick={retry}
+            size="sm"
+            variant="outline"
+          >
+            {copy.retry}
+          </Button>
+        </AlertDescription>
+      </Alert>
     </div>
   );
 }
@@ -158,8 +193,8 @@ function ProfileNavigation({
   return (
     <div
       className={cn(
-        "flex shrink-0 flex-wrap items-center gap-2 border-b px-4 py-2",
-        !hasPrevious && "lg:hidden"
+        "flex shrink-0 flex-wrap items-center gap-2 border-b bg-muted/20 px-4 py-2",
+        !hasPrevious && "md:hidden"
       )}
     >
       {hasPrevious ? (
@@ -168,7 +203,7 @@ function ProfileNavigation({
         </Button>
       ) : null}
       <Button
-        className="lg:hidden"
+        className="md:hidden"
         onClick={onResults}
         size="sm"
         variant="outline"
@@ -251,7 +286,7 @@ export function EmployeeDirectoryPage() {
       mainClassName="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       title={copy.title}
     >
-      <div className="grid shrink-0 gap-3 lg:grid-cols-3">
+      <div className="grid shrink-0 gap-3 md:grid-cols-[minmax(16rem,1fr)_minmax(0,1.5fr)] lg:grid-cols-3">
         <form
           className="min-w-0 shrink-0"
           onSubmit={(event) => {
@@ -272,46 +307,42 @@ export function EmployeeDirectoryPage() {
             }
           }}
         >
-          <label
-            className="mb-2 block font-medium text-sm"
-            htmlFor="employee-search"
-          >
-            {copy.searchLabel}
-          </label>
-          <div className="flex gap-2">
-            <Input
-              aria-describedby="employee-search-hint"
-              autoComplete="off"
-              id="employee-search"
-              maxLength={100}
-              onChange={(event) => {
-                const value = event.target.value;
-                setInput(value);
-                selection.clear();
-                if (value.trim().length < 2) {
-                  setQuery((previous) => ({
-                    ...previous,
-                    search: "",
-                    page: 0,
-                  }));
-                }
-              }}
-              placeholder={copy.searchPlaceholder}
-              ref={inputRef}
-              type="search"
-              value={input}
-              variant="search-field"
-            />
-            <Button disabled={!validSearch} type="submit">
-              {copy.search}
-            </Button>
-          </div>
-          <p
-            className="mt-2 text-muted-foreground text-xs leading-6"
-            id="employee-search-hint"
-          >
-            {copy.searchHint}
-          </p>
+          <Field size="sm">
+            <FieldLabel htmlFor="employee-search">
+              {copy.searchLabel}
+            </FieldLabel>
+            <div className="flex gap-2">
+              <Input
+                aria-describedby="employee-search-hint"
+                autoComplete="off"
+                id="employee-search"
+                maxLength={100}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setInput(value);
+                  selection.clear();
+                  if (value.trim().length < 2) {
+                    setQuery((previous) => ({
+                      ...previous,
+                      search: "",
+                      page: 0,
+                    }));
+                  }
+                }}
+                placeholder={copy.searchPlaceholder}
+                ref={inputRef}
+                type="search"
+                value={input}
+                variant="search-field"
+              />
+              <Button disabled={!validSearch} type="submit">
+                {copy.search}
+              </Button>
+            </div>
+            <FieldDescription id="employee-search-hint">
+              {copy.searchHint}
+            </FieldDescription>
+          </Field>
         </form>
         <div className="min-w-0 lg:col-span-2">
           <EmployeeFilters
@@ -340,97 +371,110 @@ export function EmployeeDirectoryPage() {
           />
         </div>
       </div>
-      <div className="grid min-h-0 min-w-0 flex-1 grid-rows-1 overflow-hidden rounded-lg border bg-card lg:grid-cols-[20rem_minmax(0,1fr)]">
+      <Card
+        className="grid min-h-0 min-w-0 flex-1 grid-rows-1 overflow-hidden md:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)] xl:grid-cols-[22rem_minmax(0,1fr)]"
+        size="none"
+        variant="outline"
+      >
         <section
           aria-label={copy.results}
           className={cn(
-            "flex min-h-0 min-w-0 flex-col overflow-hidden lg:border-r",
-            selectedNrp !== null && "hidden lg:flex"
+            "flex min-h-0 min-w-0 flex-col overflow-hidden md:border-r",
+            selectedNrp !== null && "hidden md:flex"
           )}
         >
-          <div className="shrink-0 border-b px-4 py-3">
-            <h2 className="font-medium text-sm">{copy.results}</h2>
-            <p
-              aria-live="polite"
-              className="mt-1 flex min-h-4 items-center gap-2 text-muted-foreground text-xs"
-            >
-              {isSearching ? <Spinner aria-hidden="true" size="xs" /> : null}
-              {isSearching
-                ? copy.loadingResults
-                : formatMessage(copy.resultCount, {
-                    count: results.data?.total ?? 0,
-                  })}
-            </p>
-          </div>
-          <ScrollArea className="min-h-0 flex-1" variant="fit">
-            {results.isPending ? (
-              <div
-                aria-busy="true"
-                aria-label={copy.loadingResults}
-                className="space-y-5 p-4"
-                role="status"
-              >
-                <Skeleton className="h-14 w-full" />
-                <Skeleton className="h-14 w-full" />
-                <Skeleton className="h-14 w-full" />
-              </div>
-            ) : null}
-            {results.isError ? (
-              <DirectoryError
-                error={results.error}
-                loading={results.isFetching}
-                retry={() => {
-                  results.refetch();
-                }}
-              />
-            ) : null}
-            {results.isSuccess &&
-            !isSearching &&
-            results.data.employees.length === 0 ? (
-              <DirectoryMessage
-                description={copy.noResultsDescription}
-                title={copy.noResults}
-              />
-            ) : null}
-            {results.isSuccess ? (
-              <ul aria-busy={isSearching} className="divide-y">
-                {results.data.employees.map((employee) => (
-                  <li key={employee.nrp}>
-                    <button
-                      aria-controls="employee-profile"
-                      aria-current={
-                        selectedNrp === employee.nrp ? "true" : undefined
-                      }
-                      className={cn(
-                        "flex w-full gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 disabled:cursor-wait",
-                        selectedNrp === employee.nrp && "bg-primary/5"
-                      )}
-                      disabled={isSearching}
-                      onClick={() => selectEmployee(employee)}
-                      type="button"
-                    >
-                      <EmployeeInitials name={employee.name} />
-                      <span className="min-w-0 flex-1">
-                        <span className="block break-words font-medium text-sm">
-                          {employee.name || copy.unavailable}
-                        </span>
-                        <span className="mt-1 block font-mono text-muted-foreground text-xs">
-                          {employee.nip || copy.unavailable}
-                        </span>
-                        <span className="mt-2 block break-words text-muted-foreground text-xs">
-                          {employee.branch || copy.unavailable} ·{" "}
-                          {employee.unitKerja || copy.unavailable}
-                        </span>
-                        <span className="mt-1 block break-words text-muted-foreground text-xs">
-                          {employee.position || copy.unavailable}
-                        </span>
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </ScrollArea>
+          <CardHeader className="shrink-0" size="sm" variant="subtle">
+            <CardTitle size="sm">{copy.results}</CardTitle>
+            <CardDescription aria-live="polite" size="xs">
+              <span className="flex min-h-4 items-center gap-2">
+                {isSearching ? <Spinner aria-hidden="true" size="xs" /> : null}
+                {isSearching
+                  ? copy.loadingResults
+                  : formatMessage(copy.resultCount, {
+                      count: results.data?.total ?? 0,
+                    })}
+              </span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex min-h-0 flex-1 flex-col" size="none">
+            <ScrollArea className="min-h-0 flex-1" variant="fit">
+              {results.isPending ? (
+                <div
+                  aria-busy="true"
+                  aria-label={copy.loadingResults}
+                  className="flex flex-col gap-4 p-4"
+                  role="status"
+                >
+                  <Skeleton className="h-14 w-full" />
+                  <Skeleton className="h-14 w-full" />
+                  <Skeleton className="h-14 w-full" />
+                </div>
+              ) : null}
+              {results.isError ? (
+                <DirectoryError
+                  error={results.error}
+                  loading={results.isFetching}
+                  retry={() => {
+                    results.refetch();
+                  }}
+                />
+              ) : null}
+              {results.isSuccess &&
+              !isSearching &&
+              results.data.employees.length === 0 ? (
+                <DirectoryMessage
+                  description={copy.noResultsDescription}
+                  title={copy.noResults}
+                />
+              ) : null}
+              {results.isSuccess ? (
+                <ItemGroup aria-busy={isSearching}>
+                  {results.data.employees.map((employee, index) => (
+                    <li className="list-none" key={employee.nrp}>
+                      {index > 0 ? <ItemSeparator /> : null}
+                      <Item
+                        className={cn(
+                          "w-full flex-nowrap items-start rounded-none border-0 text-left hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 focus-visible:ring-0 disabled:cursor-wait",
+                          selectedNrp === employee.nrp && "bg-primary/5"
+                        )}
+                        render={
+                          <button
+                            aria-controls="employee-profile"
+                            aria-current={
+                              selectedNrp === employee.nrp ? "true" : undefined
+                            }
+                            disabled={isSearching}
+                            onClick={() => selectEmployee(employee)}
+                            type="button"
+                          />
+                        }
+                        size="sm"
+                      >
+                        <ItemMedia className="translate-y-0!">
+                          <EmployeeInitials name={employee.name} />
+                        </ItemMedia>
+                        <ItemContent className="min-w-0">
+                          <ItemTitle className="w-full break-words">
+                            {employee.name || copy.unavailable}
+                          </ItemTitle>
+                          <span className="block font-mono text-muted-foreground text-xs">
+                            {employee.nip || copy.unavailable}
+                          </span>
+                          <span className="mt-1 block break-words text-muted-foreground text-xs">
+                            {employee.branch || copy.unavailable} ·{" "}
+                            {employee.unitKerja || copy.unavailable}
+                          </span>
+                          <span className="block break-words text-muted-foreground text-xs">
+                            {employee.position || copy.unavailable}
+                          </span>
+                        </ItemContent>
+                      </Item>
+                    </li>
+                  ))}
+                </ItemGroup>
+              ) : null}
+            </ScrollArea>
+          </CardContent>
           <EmployeePagination
             data={results.data}
             loading={isSearching}
@@ -445,7 +489,7 @@ export function EmployeeDirectoryPage() {
           aria-label={copy.title}
           className={cn(
             "flex min-h-0 min-w-0 flex-col overflow-hidden outline-none",
-            selectedNrp === null && "hidden lg:flex"
+            selectedNrp === null && "hidden md:flex"
           )}
           id="employee-profile"
           ref={profileRef}
@@ -465,7 +509,7 @@ export function EmployeeDirectoryPage() {
             selected={selectedNrp !== null}
           />
         </section>
-      </div>
+      </Card>
     </DeveloperToolLayout>
   );
 }

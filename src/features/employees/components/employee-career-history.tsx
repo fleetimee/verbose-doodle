@@ -24,7 +24,7 @@ function HistoryField({
 }) {
   const { messages } = useI18n();
   return (
-    <div className="min-w-0 space-y-1">
+    <div className="flex min-w-0 flex-col gap-1">
       <dt className="text-muted-foreground text-xs">{label}</dt>
       <dd
         className={
@@ -59,7 +59,7 @@ export function EmployeeWorkHistory({
         <ol className="ml-2 border-l">
           {history.map((entry) => (
             <li
-              className="relative space-y-3 pb-6 pl-6 last:pb-0"
+              className="relative flex flex-col gap-3 pb-6 pl-6 last:pb-0"
               key={entry.sequence}
             >
               <span
@@ -147,7 +147,7 @@ function EmployeeLearningHistory({
         <ol className="ml-2 border-l">
           {records.map((entry) => (
             <li
-              className="relative space-y-3 pb-6 pl-6 last:pb-0"
+              className="relative flex flex-col gap-3 pb-6 pl-6 last:pb-0"
               key={entry.sequence}
             >
               <span

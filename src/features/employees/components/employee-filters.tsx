@@ -2,8 +2,10 @@ import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Check, ChevronDown } from "@/components/hugeicons";
+import { Check, ChevronDown, SlidersHorizontal } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -13,6 +15,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Popover,
   PopoverContent,
@@ -22,6 +25,7 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -32,6 +36,7 @@ import type { EmployeeFilterOption } from "@/features/employees/types";
 import { formatMessage } from "@/lib/i18n";
 
 function FilterPicker({
+  id,
   label,
   allLabel,
   options,
@@ -40,6 +45,7 @@ function FilterPicker({
   onChange,
   portalContainer,
 }: {
+  id: string;
   label: string;
   allLabel: string;
   options: EmployeeFilterOption[];
@@ -62,6 +68,7 @@ function FilterPicker({
           aria-label={label}
           className="w-full justify-between"
           disabled={disabled}
+          id={id}
           role="combobox"
           size="field"
           type="button"
@@ -155,33 +162,35 @@ export function EmployeeFilters({
     onChange("", "");
     onEmploymentChange(false, false);
   }
-  function controls(portalContainer?: HTMLElement | null) {
+  function controls(idPrefix: string, portalContainer?: HTMLElement | null) {
     return (
       <>
-        <div className="min-w-0">
-          <p className="mb-2 block font-medium text-sm">{copy.branch}</p>
+        <Field className="min-w-0" size="sm">
+          <FieldLabel htmlFor={`${idPrefix}-branch`}>{copy.branch}</FieldLabel>
           <FilterPicker
             allLabel={copy.allBranches}
             disabled={options.isPending || options.isError}
+            id={`${idPrefix}-branch`}
             label={copy.branch}
             onChange={(code) => onChange(code, "")}
             options={branches}
             portalContainer={portalContainer}
             value={branchCode}
           />
-        </div>
-        <div className="min-w-0">
-          <p className="mb-2 block font-medium text-sm">{copy.unit}</p>
+        </Field>
+        <Field className="min-w-0" size="sm">
+          <FieldLabel htmlFor={`${idPrefix}-unit`}>{copy.unit}</FieldLabel>
           <FilterPicker
             allLabel={copy.allUnits}
             disabled={options.isFetching || options.isError}
+            id={`${idPrefix}-unit`}
             label={copy.unit}
             onChange={(code) => onChange(branchCode, code)}
             options={units}
             portalContainer={portalContainer}
             value={unitCode}
           />
-        </div>
+        </Field>
         <div className="flex flex-wrap items-center gap-3 md:col-span-2">
           <EmployeeEmploymentFilters
             activeOnly={activeOnly}
@@ -201,56 +210,61 @@ export function EmployeeFilters({
     );
   }
   return (
-    <div className="shrink-0 space-y-2">
+    <div className="flex shrink-0 flex-col gap-2">
       <div className="hidden grid-cols-2 gap-x-3 gap-y-2 md:grid">
-        {controls()}
+        {controls("desktop")}
       </div>
       <div className="md:hidden">
         <Sheet onOpenChange={setOpen} open={open}>
           <SheetTrigger asChild>
-            <Button variant="outline">
+            <Button className="w-full sm:w-auto" variant="outline">
+              <SlidersHorizontal data-icon="inline-start" />
               {copy.filters}
               {count ? ` (${count})` : ""}
             </Button>
           </SheetTrigger>
-          <SheetContent ref={setContainer}>
-            <SheetHeader>
+          <SheetContent ref={setContainer} size="flush">
+            <SheetHeader variant="muted">
               <SheetTitle>{copy.filters}</SheetTitle>
               <SheetDescription>{copy.description}</SheetDescription>
             </SheetHeader>
-            <div className="space-y-4 p-4">
-              {controls(container)}
+            <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+              {controls("mobile", container)}
+            </div>
+            <SheetFooter variant="bordered">
               <Button className="w-full" onClick={() => setOpen(false)}>
                 {copy.done}
               </Button>
-            </div>
+            </SheetFooter>
           </SheetContent>
         </Sheet>
       </div>
       {options.isError ? (
-        <div className="flex items-center gap-2" role="alert">
-          <p className="text-destructive text-sm">{copy.filterError}</p>
-          <Button
-            onClick={() => {
-              options.refetch();
-            }}
-            size="sm"
-            variant="outline"
-          >
-            {copy.retry}
-          </Button>
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>
+            <span>{copy.filterError}</span>
+            <Button
+              onClick={() => {
+                options.refetch();
+              }}
+              size="xs"
+              variant="outline"
+            >
+              {copy.retry}
+            </Button>
+          </AlertDescription>
+        </Alert>
       ) : null}
       {branchCode || unitCode ? (
         <div className="flex flex-wrap items-center gap-2">
           {branchCode ? (
-            <Button
+            <Badge
               aria-label={formatMessage(copy.removeFilter, {
                 filter: copy.branch,
               })}
               onClick={() => onChange("", "")}
-              size="xs"
-              variant="secondary"
+              radius="rounded"
+              render={<Button size="xs" type="button" variant="secondary" />}
             >
               <span className="max-w-40 truncate">
                 {branches.find((branch) => branch.code === branchCode)?.name ||
@@ -261,16 +275,16 @@ export function EmployeeFilters({
                 icon={Cancel01Icon}
                 strokeWidth={2}
               />
-            </Button>
+            </Badge>
           ) : null}
           {unitCode ? (
-            <Button
+            <Badge
               aria-label={formatMessage(copy.removeFilter, {
                 filter: copy.unit,
               })}
               onClick={() => onChange(branchCode, "")}
-              size="xs"
-              variant="secondary"
+              radius="rounded"
+              render={<Button size="xs" type="button" variant="secondary" />}
             >
               <span className="max-w-40 truncate">
                 {units.find((unit) => unit.code === unitCode)?.name || unitCode}
@@ -280,7 +294,7 @@ export function EmployeeFilters({
                 icon={Cancel01Icon}
                 strokeWidth={2}
               />
-            </Button>
+            </Badge>
           ) : null}
         </div>
       ) : null}

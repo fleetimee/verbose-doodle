@@ -61,7 +61,7 @@ export function EmployeeProfileLoading({
               </div>
               <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
                 {fields.map((label) => (
-                  <div className="min-w-0 space-y-2" key={label}>
+                  <div className="flex min-w-0 flex-col gap-2" key={label}>
                     <dt className="text-muted-foreground text-xs">{label}</dt>
                     <dd>
                       <Skeleton className="h-4 w-3/4 max-w-64" />

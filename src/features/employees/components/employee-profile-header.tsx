@@ -1,8 +1,13 @@
 import { type CSSProperties, useState } from "react";
 import { useI18n } from "@/components/i18n-provider";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TabsIndicator, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { EmployeeSummary } from "@/features/employees/types";
-
+import type {
+  EmployeeDetails,
+  EmployeeSummary,
+} from "@/features/employees/types";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 const NAME_SEPARATOR = /\s+/;
@@ -16,31 +21,41 @@ export function EmployeeInitials({ name }: { name: string | null }) {
       .map((part) => part[0])
       .join("") || "?";
   return (
-    <span
-      aria-hidden="true"
-      className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted font-semibold text-muted-foreground text-sm"
-    >
-      {initials}
-    </span>
+    <Avatar aria-hidden="true" size="xl" variant="square">
+      <AvatarFallback variant="square">{initials}</AvatarFallback>
+    </Avatar>
   );
 }
 
 export function EmployeeProfileHeader({
   employee,
 }: {
-  employee: EmployeeSummary;
+  employee: EmployeeSummary | EmployeeDetails;
 }) {
   const { messages } = useI18n();
   const copy = messages.employees;
+  const active = "active" in employee ? employee.active : undefined;
   return (
-    <header className="shrink-0 border-b px-4 py-3">
-      <div className="mb-2 flex items-center gap-3">
+    <header className="flex shrink-0 flex-col gap-2 border-b px-4 py-3">
+      <div className="flex items-start gap-3">
         <EmployeeInitials name={employee.name} />
-        <div className="min-w-0">
-          <h2 className="break-words font-semibold text-lg tracking-tight">
-            {employee.name || copy.unavailable}
-          </h2>
-          <p className="mt-1 text-muted-foreground text-sm">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="break-words font-semibold text-lg leading-tight tracking-tight">
+              {employee.name || copy.unavailable}
+            </h2>
+            {active === true ? (
+              <Badge size="sm" variant="primary-subtle">
+                {copy.active}
+              </Badge>
+            ) : null}
+            {active === false ? (
+              <Badge size="sm" variant="outline-muted">
+                {copy.inactive}
+              </Badge>
+            ) : null}
+          </div>
+          <p className="text-muted-foreground text-sm leading-snug">
             {employee.position || copy.unavailable}
           </p>
         </div>
@@ -81,31 +96,34 @@ export function EmployeeProfileTabs({
   ];
   return (
     <div
-      className="employee-profile-tab-navigation shrink-0 overflow-x-auto border-b px-4"
+      className="employee-profile-tab-navigation shrink-0 border-b px-4"
       style={tabMotionStyle}
     >
-      <TabsList
-        aria-label={copy.profileSections}
-        className="relative w-full min-w-max justify-start"
-        onKeyDownCapture={() => setInstant(true)}
-        onPointerDownCapture={() => setInstant(false)}
-        variant="transparent"
-      >
-        {sections.map((section) => (
-          <TabsTrigger
-            className="flex-none shrink-0"
-            disabled={disabled}
-            key={section.value}
-            size="sm"
-            value={section.value}
-          >
-            {section.label}
-          </TabsTrigger>
-        ))}
-        {disabled ? null : (
-          <TabsIndicator onTransitionEnd={() => setInstant(true)} />
-        )}
-      </TabsList>
+      <ScrollArea className="w-full">
+        <TabsList
+          aria-label={copy.profileSections}
+          className="relative w-full min-w-max justify-start"
+          onKeyDownCapture={() => setInstant(true)}
+          onPointerDownCapture={() => setInstant(false)}
+          variant="transparent"
+        >
+          {sections.map((section) => (
+            <TabsTrigger
+              className="flex-none shrink-0"
+              disabled={disabled}
+              key={section.value}
+              size="sm"
+              value={section.value}
+            >
+              {section.label}
+            </TabsTrigger>
+          ))}
+          {disabled ? null : (
+            <TabsIndicator onTransitionEnd={() => setInstant(true)} />
+          )}
+        </TabsList>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   );
 }

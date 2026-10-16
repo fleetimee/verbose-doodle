@@ -14,6 +14,7 @@ const avatarVariants = cva("relative flex size-8 shrink-0 overflow-hidden", {
       default: "size-8",
       sm: "size-7",
       lg: "size-9",
+      xl: "size-10",
     },
   },
   defaultVariants: {
@@ -59,7 +60,7 @@ const avatarFallbackVariants = cva(
     variants: {
       variant: {
         default: "rounded-full",
-        square: "rounded-lg",
+        square: "rounded-lg font-semibold text-muted-foreground text-sm",
       },
     },
     defaultVariants: {

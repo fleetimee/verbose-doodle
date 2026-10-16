@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { useState } from "react";
 import { useI18n } from "@/components/i18n-provider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -17,10 +18,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -94,7 +96,7 @@ function PresenceEntry({ record }: { record: PresenceRecord }) {
           <DrawerDescription>{date}</DrawerDescription>
         </DrawerHeader>
         <div
-          className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-4"
+          className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-6 py-4"
           data-vaul-no-drag
         >
           <dl className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -142,7 +144,7 @@ function PresenceDetailField({
   value: string;
 }) {
   return (
-    <div className="min-w-0 space-y-1">
+    <div className="flex min-w-0 flex-col gap-1">
       <dt className="text-muted-foreground text-xs">{label}</dt>
       <dd className="break-words text-sm">{value}</dd>
     </div>
@@ -188,8 +190,8 @@ function PresenceSelect({
   disabled?: boolean;
 }) {
   return (
-    <div className="min-w-0 space-y-2">
-      <Label htmlFor={id}>{label}</Label>
+    <Field className="min-w-0" data-disabled={disabled} size="sm">
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <Select
         disabled={disabled}
         items={options}
@@ -200,14 +202,16 @@ function PresenceSelect({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
+          <SelectGroup>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
         </SelectContent>
       </Select>
-    </div>
+    </Field>
   );
 }
 
@@ -247,7 +251,7 @@ export function EmployeePresence({ nrp }: { nrp: number }) {
     })),
   ];
   return (
-    <section aria-labelledby="presence-heading" className="space-y-4">
+    <section aria-labelledby="presence-heading" className="flex flex-col gap-4">
       <div>
         <h3 className="font-semibold text-sm" id="presence-heading">
           {copy.presence}
@@ -276,14 +280,16 @@ export function EmployeePresence({ nrp }: { nrp: number }) {
           value={month}
         />
       </div>
-      <div className="flex items-center gap-2">
+      <Field className="w-auto" orientation="horizontal" size="sm">
         <Checkbox
           checked={recordedOnly}
           id="presence-recorded-only"
           onCheckedChange={setRecordedOnly}
         />
-        <Label htmlFor="presence-recorded-only">{copy.recordedOnly}</Label>
-      </div>
+        <FieldLabel htmlFor="presence-recorded-only">
+          {copy.recordedOnly}
+        </FieldLabel>
+      </Field>
       <p className="text-muted-foreground text-xs">{copy.recordedOnlyHint}</p>
       <PresenceResults
         error={query.isError}
@@ -291,25 +297,28 @@ export function EmployeePresence({ nrp }: { nrp: number }) {
         records={records}
       />
       {query.isError ? (
-        <div className="space-y-2" role="alert">
-          <p className="text-destructive text-sm">{copy.presenceError}</p>
-          <Button
-            onClick={() => {
-              if (query.isFetchNextPageError) {
-                query.fetchNextPage();
-              } else {
-                query.refetch();
-              }
-            }}
-            size="sm"
-            variant="outline"
-          >
-            {copy.retry}
-          </Button>
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>
+            <span>{copy.presenceError}</span>
+            <Button
+              onClick={() => {
+                if (query.isFetchNextPageError) {
+                  query.fetchNextPage();
+                } else {
+                  query.refetch();
+                }
+              }}
+              size="sm"
+              variant="outline"
+            >
+              {copy.retry}
+            </Button>
+          </AlertDescription>
+        </Alert>
       ) : null}
       {query.hasNextPage && !query.isError ? (
         <Button
+          className="w-fit"
           disabled={query.isFetching}
           onClick={() => query.fetchNextPage()}
           size="sm"
@@ -337,11 +346,11 @@ function PresenceResults({
       <div
         aria-busy="true"
         aria-label={messages.employees.loadingPresence}
-        className="space-y-4"
+        className="flex flex-col gap-4"
         role="status"
       >
         {[0, 1, 2].map((key) => (
-          <div className="space-y-3" key={key}>
+          <div className="flex flex-col gap-3" key={key}>
             <Skeleton className="h-4 w-40" />
             <div className="grid grid-cols-3 gap-4">
               <Skeleton className="h-9 w-full" />
