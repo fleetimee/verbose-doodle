@@ -54,10 +54,22 @@
     states.get(renderer)?.selected.clear();
   }
 
-  function prepare(renderer, city, building, definition) {
+  function rotUV(u, v, size, r) {
+    const k = (r ?? 0) & 3;
+    return k === 1 ? [size - v, u] : k === 2 ? [size - u, size - v] : k === 3 ? [v, size - u] : [u, v];
+  }
+
+  function rotFacade(facade, size, r) {
+    const [left, back, right, front, base, height] = facade;
+    const [au, av] = rotUV(left, back, size, r), [bu, bv] = rotUV(right, front, size, r);
+    return [Math.min(au, bu), Math.min(av, bv), Math.max(au, bu), Math.max(av, bv), base, height];
+  }
+
+  function prepare(renderer, city, building, definition, rot = building.rot ?? 0) {
     const style = styles[building.type] ?? (window.__industry?.byType[building.type] ? { kind: "industry", type: building.type } : null);
     const state = states.get(renderer);
     if (!style || !state || state.city !== city) return null;
+    rot &= 3;
     let record = state.records.get(building.id);
     if (state.selected.has(building.id)) return record;
     if (state.selected.size >= limit) return null;
@@ -71,9 +83,10 @@
       canvas.width = definition.size * 64;
       canvas.height = definition.size * 32 + 112;
       record = { building, canvas, clock: (building.x * 13 + building.y * 7) % 30,
-        last: state.clock, frame: -1, active: false };
+        last: state.clock, frame: -1, active: false, rot };
       state.records.set(building.id, record);
     }
+    if (record.rot !== rot) { record.rot = rot; record.frame = -1; }
     const active = !!((style.kind !== "industry" || window.__industry.operating(city, building)) && window.__recreation.operating(city, building, definition) &&
       (!definition.dept || definition.jobs || city.funding[definition.dept] > 0));
     const elapsed = state.clock - record.last;
@@ -87,11 +100,14 @@
       record.active = !!active;
       const ctx = record.canvas.getContext("2d");
       ctx.clearRect(0, 0, record.canvas.width, record.canvas.height);
-      const project = (u, v, z = 0) => [(u - v) * 32 + definition.size * 32, (u + v) * 16 + 112 - z];
-      paint(ctx, project, style, frame / 12, record.active);
+      const size = definition.size;
+      const raw = (u, v, z = 0) => [(u - v) * 32 + size * 32, (u + v) * 16 + 112 - z];
+      const project = (u, v, z = 0) => { const [ru, rv] = rotUV(u, v, size, rot); return raw(ru, rv, z); };
+      paint(ctx, project, style, frame / 12, record.active, { raw, rot, size });
     }
     return record;
   }
+
 
   function draw(renderer, record, x, y, scale, columnX, columnY, size) {
     const ctx = renderer.ctx;
@@ -207,7 +223,7 @@
     riders.filter(r => r.u + r.v >= 4.45).forEach(drawRider);
   }
 
-  function paint(ctx, project, style, time, active) {
+  function paint(ctx, project, style, time, active, view = { raw: project, rot: 0, size: 0 }) {
     ctx.lineCap = "round";
     if (style.kind === "industry") { window.__industryModels.paint(ctx, project, style.type, time, active); return; }
     if (style.kind === "carnival") carnival(ctx, project, time);
@@ -232,7 +248,7 @@
     }
     if (!active) return;
     if (style.path) visitors(ctx, project, style.path, time);
-    for (const facade of style.facades || []) windows(ctx, project, facade, time);
+    for (const facade of style.facades || []) windows(ctx, view.raw, view.rot ? rotFacade(facade, view.size, view.rot) : facade, time);
     for (const [u, v, z, color] of style.beacons || []) {
       const [x, y] = project(u, v, z);
       ctx.globalAlpha = 0.35 + (Math.sin(time * Math.PI * 2 / 3.6) + 1) * 0.25;
@@ -262,7 +278,7 @@
       ctx.fillStyle = n % 2 ? "#e8bc63" : "#cca0bc";
       ctx.beginPath(); ctx.ellipse(x - 0.8, y, wing, 0.8, -0.4, 0, Math.PI * 2); ctx.ellipse(x + 0.8, y, wing, 0.8, 0.4, 0, Math.PI * 2); ctx.fill();
     }
-    if (style.kind === "mall") {
+    if (style.kind === "mall" && !view.rot) {
       const opening = (Math.sin(time * Math.PI * 2 / 8) + 1) * 0.07;
       polygon(ctx, project, [[2.17, 3.205, 0], [2.58, 3.205, 0], [2.58, 3.205, 11], [2.17, 3.205, 11]], "#28465a");
       polygon(ctx, project, [[2.17, 3.21, 0], [2.375 - opening, 3.21, 0], [2.375 - opening, 3.21, 11], [2.17, 3.21, 11]], "#9fc4cd");

@@ -187,7 +187,7 @@
             for (let n = 0; n < 16; n++) {
               const a = n * Math.PI / 8, b = (n + 1) * Math.PI / 8;
               const points = [ringPoint(rings[level], a), ringPoint(rings[level], b), ringPoint(rings[level + 1], b), ringPoint(rings[level + 1], a)];
-              facets.push({ points, depth: points.reduce((sum, point) => sum + point[0] + point[1], 0), color: shades[Math.floor(n / 2)] });
+              facets.push({ points, depth: points.reduce((sum, point) => sum + project(point[0], point[1], 0)[1], 0), color: shades[Math.floor(n / 2)] });
             }
           }
           facets.sort((a, b) => a.depth - b.depth);
@@ -287,6 +287,9 @@
           { color: "#c7a367", depth: 12, edge: (a, b, z) => [[b, a, z], [b, b, z]] },
           { color: "#d7b477", depth: 13, edge: (a, b, z) => [[b, b, z], [a, b, z]] },
         ];
+        const sideY = (side) => { const [p, q] = side.edge(0.3, 3.7, 0); return project((p[0] + q[0]) / 2, (p[1] + q[1]) / 2, 0)[1]; };
+        sides.sort((a, b) => sideY(a) - sideY(b));
+        sides.forEach((side, index) => { side.depth = 10 + index; });
         for (const side of sides) {
           for (let n = 0; n < courses; n++) {
             const z0 = 1 + n * rise, z1 = z0 + rise;

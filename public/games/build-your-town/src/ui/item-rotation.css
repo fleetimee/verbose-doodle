@@ -1,0 +1,12 @@
+#tool-rotate { margin-left: 8px; min-height: 28px; padding: 0 10px; font-size: 12px; cursor: pointer; }
+#tool-rotate[hidden] { display: none; }
+#tool-rotate:focus-visible,
+#query .query-rotate-btn:focus-visible { outline: 2px solid #f2c14e; outline-offset: 2px; }
+#query .query-rotation { padding: 8px 0; border-top: 1px solid #424b61; }
+#query .query-rotation-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+#query .query-rotation-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+#query .query-rotation-label { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #c4cbd9; }
+#query .query-rotation-label > * { margin: 0; flex-shrink: 0; }
+#query .query-rotation-value { color: #f4f0e5; font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#query .query-rotation-actions { display: flex; gap: 6px; flex-shrink: 0; }
+#query .query-rotate-btn { width: 36px; min-height: 32px; padding: 0; font-size: 16px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }

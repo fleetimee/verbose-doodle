@@ -29,8 +29,12 @@
         if (overlay >= 2 && overlay <= 7 || this.rail[tile] || this.wire[tile]) damaged.push([tile,
           { overlay, ...(structure ? { type: structure.type } : {}), rail: this.rail[tile], railKind: window.__railTransit?.kind(this, tile) ?? 0, doubleAxis: window.__doubleRail?.axisAt(this, tile) ?? 0, wire: this.wire[tile] }]);
       }
+      const savedRot = structure?.rot ?? building?.rot ?? this.tileRotations?.[index];
       if (damaged.length && !progress(this).pending) this.disasterRecovery = {};
-      for (const [tile, task] of damaged) tasks(this)[tile] ??= task;
+      for (const [tile, task] of damaged) {
+        tasks(this)[tile] ??= task;
+        if (savedRot !== undefined) tasks(this)[tile].rot = savedRot & 3;
+      }
       destroy.call(this, index);
       for (const [tile] of damaged) {
         this.overlay[tile] = 8;

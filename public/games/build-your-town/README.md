@@ -416,6 +416,10 @@ tools. Verify building previews and complementary models, close/Escape and outsi
 dismissal, keyboard focus, both languages, mobile sizes, and 75–125% UI scale.
 Check that opening help never builds or changes the selected tool.
 
+## Item rotation
+
+Structures, developed zone buildings and 1x1 zone tiles rotate in 90° steps (`rot` 0-3, saved with the city). While placing, use the status-bar Rotate button, `R` or `]` (clockwise) and `[` (counter-clockwise); the ghost preview shows the orientation. For placed items, select with the Query tool and use the Orientation row (or the same keys). Logic lives in `src/world/item-rotation.js`; it composes with camera rotation (`map-rotation.js`) and animated overlays (`building-activity.js`). Verify: place/rotate every structure, rotate placed items, save/reload, rotate the camera, check animated buildings and disaster rebuild.
+
 ## Resident routines and conversations
 
 Visible residents now represent a bounded neighborhood simulation (up to 240

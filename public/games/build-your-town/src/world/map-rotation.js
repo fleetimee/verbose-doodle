@@ -48,12 +48,16 @@
   }
   function footprints(source, cache, city, isStructure) {
     const result = new Map();
+    const step = (orientation / 90) & 3;
     for (const [id, record] of source) {
       const size = isStructure ? definitions[record.type].size : record.size;
       const point = turn(record.x, record.y, city.size - size);
       let rotated = cache.get(id);
       if (!rotated) { rotated = {}; cache.set(id, rotated); }
       Object.assign(rotated, record, point);
+      const auto = isStructure && record.rot === undefined && (record.type === "port" || window.__railTransit?.isStation(record.type));
+      if (!auto && (record.rot !== undefined || step)) rotated.rot = ((record.rot ?? 0) + step) & 3;
+      else if (auto) delete rotated.rot;
       result.set(id, rotated);
     }
     for (const id of cache.keys()) if (!source.has(id)) cache.delete(id);
@@ -89,6 +93,8 @@
     if (orientation % 2 && view.doubleTracks) {
       for (let index = 0; index < view.count; index++) if (view.doubleTracks[index]) view.doubleTracks[index] = 3 - view.doubleTracks[index];
     }
+    view.tileRotations = spatialMap(city.tileRotations, city);
+    for (const key of Object.keys(view.tileRotations)) view.tileRotations[key] = (view.tileRotations[key] + orientation / 90) & 3;
     view.medianPlants = spatialMap(city.medianPlants, city);
     view.fireOrders = spatialMap(city.fireOrders, city);
     view.actors = city.actors.map(actor => ({ ...actor, ...turn(actor.x, actor.y, city.size - 1), dir: actor.dir + orientation * Math.PI / 2 }));

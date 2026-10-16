@@ -144,3 +144,7 @@ right angle, draw and drive the corner as a shared single turnout so both lanes
 merge through it and turn; parallel tracks keep their separate lanes. Older
 two-tile corridors retain their geometry; never shift or delete saved
 infrastructure to compact them.
+
+## Item rotation controls
+
+The Rotate button in the status bar and the Orientation row in the query panel use the existing secondary button style, a 36px minimum touch target, and the gold focus ring. Rotation previews render the real rotated building at the same translucent ghost opacity, with a small amber arrow on the front edge.

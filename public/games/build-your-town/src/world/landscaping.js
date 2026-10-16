@@ -138,7 +138,7 @@
         seed,
       });
     }
-    trees.sort((a, b) => a.u + a.v - b.u - b.v);
+    trees.sort((a, b) => project(a.u, a.v)[1] - project(b.u, b.v)[1]);
     for (const { u, v, radius, seed } of trees) {
       const [x, y] = project(u, v);
       if (bushes) {
