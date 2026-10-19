@@ -180,7 +180,7 @@ export const endpointsMessages = {
         label: "Latensi p99",
       },
       requests: {
-        description: "Log traffic terfilter",
+        description: "Request tersimpan dalam rentang ini",
         label: "Request",
       },
       successRate: {
@@ -198,7 +198,8 @@ export const endpointsMessages = {
       p99Label: "p99",
       requestsLabel: "Request",
       successesLabel: "Berhasil",
-      volumeDescription: "Jumlah request, berhasil, dan error per bucket.",
+      volumeDescription:
+        "Request berhasil dan tidak berhasil per jam. Waktu dalam WIB.",
       volumeTitle: "Volume request",
     },
     description: "Metrik untuk {endpointLabel}",
@@ -210,10 +211,17 @@ export const endpointsMessages = {
     liveWindowLabel: "Jendela waktu live traffic",
     loadErrorTitle: "Tidak dapat memuat metrik",
     miniStats: {
-      lastSeen: "Terakhir dilihat",
+      lastSeen: "Jam aktif terakhir",
       slowestRequest: "Request terlambat",
       throughput: "Throughput",
     },
+    httpStatuses: {
+      title: "Kode respons HTTP",
+      description:
+        "Kode respons tercatat sebagai persentase seluruh request. Hasil simulasi ditampilkan terpisah di atas.",
+      empty: "Tidak ada kode respons HTTP tercatat pada rentang waktu ini.",
+    },
+    peakHourLabel: "Request per jam tertinggi",
     refreshButton: "Segarkan",
     relative: {
       hoursAgo: "{count}j yang lalu",
@@ -224,7 +232,7 @@ export const endpointsMessages = {
     statusMix: {
       clean: "{count} bersih",
       delayed: "{count} tertunda",
-      description: "Traffic tidak berhasil berdasarkan kategori.",
+      description: "Hasil simulasi, termasuk penundaan yang disengaja.",
       nonSuccess: "{count} tidak berhasil",
       title: "Komposisi status",
     },

@@ -46,6 +46,7 @@ export type EndpointMetrics = {
   readonly summary: EndpointMetricsSummary;
   readonly buckets: EndpointMetricsBucket[];
   readonly logs: EndpointTrafficLog[];
+  readonly httpStatusCounts: Record<string, number>;
 };
 
 export const ENDPOINT_METRICS_TIME_WINDOWS = {
@@ -92,39 +93,53 @@ export function getPersistedEndpointMetrics(
   const backendErrors = statusCount("backend_error");
   const minMs = minimum(hourly.map((bucket) => bucket.minDurationMs));
   const maxMs = maximum(hourly.map((bucket) => bucket.maxDurationMs));
-  const lastSeenAt =
-    hourly.filter((bucket) => bucket.requestCount > 0).at(-1)?.bucketStart ??
-    null;
+  const activeHours = hourly
+    .filter((bucket) => bucket.requestCount > 0)
+    .sort((a, b) => Date.parse(a.bucketStart) - Date.parse(b.bucketStart));
+  const lastSeenAt = activeHours.at(-1)?.bucketStart ?? null;
+  const httpStatusCounts: Record<string, number> = {};
+  for (const bucket of activeHours) {
+    for (const [code, count] of Object.entries(bucket.httpStatusCounts)) {
+      httpStatusCounts[code] = (httpStatusCounts[code] ?? 0) + count;
+    }
+  }
 
   return {
-    buckets: hourly.map((bucket) => {
-      const bucketSuccesses =
-        (bucket.hitStatusCounts.matched_success ?? 0) +
-        (bucket.hitStatusCounts.matched_delayed ?? 0);
-      return {
-        avgMs:
-          bucket.requestCount === 0
-            ? null
-            : Math.round(bucket.averageDurationMs),
-        bucketStart: Date.parse(bucket.bucketStart),
-        errors: bucket.requestCount - bucketSuccesses,
-        label: formatBucketLabel(Date.parse(bucket.bucketStart)),
-        p50Ms: null,
-        p95Ms: null,
-        p99Ms: null,
-        requests: bucket.requestCount,
-        successes: bucketSuccesses,
-      };
-    }),
+    buckets: [...hourly]
+      .sort((a, b) => Date.parse(a.bucketStart) - Date.parse(b.bucketStart))
+      .map((bucket) => {
+        const bucketSuccesses =
+          (bucket.hitStatusCounts.matched_success ?? 0) +
+          (bucket.hitStatusCounts.matched_delayed ?? 0);
+        return {
+          avgMs:
+            bucket.requestCount === 0
+              ? null
+              : Math.round(bucket.averageDurationMs),
+          bucketStart: Date.parse(bucket.bucketStart),
+          errors: bucket.requestCount - bucketSuccesses,
+          label: new Intl.DateTimeFormat("en-GB", {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+            timeZone: "Asia/Jakarta",
+          }).format(new Date(bucket.bucketStart)),
+          p50Ms: null,
+          p95Ms: null,
+          p99Ms: null,
+          requests: bucket.requestCount,
+          successes: bucketSuccesses,
+        };
+      }),
+    httpStatusCounts,
     logs: [],
     summary: {
       avgMs: requests === 0 ? null : Math.round(totalDurationMs / requests),
       backendErrors,
       delayed,
-      errorRate:
-        requests === 0
-          ? 0
-          : Math.round(((requests - successes) / requests) * 100),
+      errorRate: requests === 0 ? 0 : ((requests - successes) / requests) * 100,
       errors: requests - successes,
       lastSeenAt,
       maxMs,
@@ -133,16 +148,11 @@ export function getPersistedEndpointMetrics(
       p95Ms: null,
       p99Ms: null,
       requests,
-      requestsPerMinute: Number(
-        (
-          requests /
-          (PERSISTED_METRICS_TIME_WINDOWS[timeWindow] / 60_000)
-        ).toFixed(1)
-      ),
+      requestsPerMinute:
+        requests / (PERSISTED_METRICS_TIME_WINDOWS[timeWindow] / 60_000),
       slowestRequestMs: maxMs,
       successes,
-      successRate:
-        requests === 0 ? 0 : Math.round((successes / requests) * 100),
+      successRate: requests === 0 ? 0 : (successes / requests) * 100,
       timeouts,
       unmatched,
     },
@@ -161,6 +171,7 @@ export function getEndpointMetrics(
 
   return {
     buckets: getMetricsBuckets(filteredLogs, windowStart, now),
+    httpStatusCounts: {},
     logs: filteredLogs,
     summary,
   };
@@ -241,7 +252,7 @@ export function getMetricsSummary(
           ),
     backendErrors,
     delayed,
-    errorRate: requests === 0 ? 0 : Math.round((errors / requests) * 100),
+    errorRate: requests === 0 ? 0 : (errors / requests) * 100,
     errors,
     lastSeenAt: getLastSeenAt(logs),
     maxMs: durations.at(-1) ?? null,
@@ -258,7 +269,7 @@ export function getMetricsSummary(
           ),
     slowestRequestMs: durations.at(-1) ?? null,
     successes,
-    successRate: requests === 0 ? 0 : Math.round((successes / requests) * 100),
+    successRate: requests === 0 ? 0 : (successes / requests) * 100,
     timeouts,
     unmatched,
   };

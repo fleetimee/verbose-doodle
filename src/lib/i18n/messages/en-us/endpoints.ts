@@ -181,7 +181,7 @@ export const endpointsMessages = {
         label: "p99 latency",
       },
       requests: {
-        description: "Filtered traffic logs",
+        description: "Persisted requests in this window",
         label: "Requests",
       },
       successRate: {
@@ -199,7 +199,8 @@ export const endpointsMessages = {
       p99Label: "p99",
       requestsLabel: "Requests",
       successesLabel: "Success",
-      volumeDescription: "Request, success, and error counts by bucket.",
+      volumeDescription:
+        "Hourly successful and non-success requests. Times in WIB.",
       volumeTitle: "Request volume",
     },
     description: "Metrics for {endpointLabel}",
@@ -211,10 +212,17 @@ export const endpointsMessages = {
     liveWindowLabel: "Live traffic window",
     loadErrorTitle: "Unable to load metrics",
     miniStats: {
-      lastSeen: "Last seen",
+      lastSeen: "Latest active hour",
       slowestRequest: "Slowest request",
       throughput: "Throughput",
     },
+    httpStatuses: {
+      title: "HTTP response codes",
+      description:
+        "Recorded response codes as a share of all requests. Simulator outcomes are shown separately above.",
+      empty: "No HTTP response codes recorded in this window.",
+    },
+    peakHourLabel: "Peak hourly requests",
     refreshButton: "Refresh",
     relative: {
       hoursAgo: "{count}h ago",
@@ -225,7 +233,7 @@ export const endpointsMessages = {
     statusMix: {
       clean: "{count} clean",
       delayed: "{count} delayed",
-      description: "Non-success traffic by category.",
+      description: "Simulator outcomes, including intentional delays.",
       nonSuccess: "{count} non-success",
       title: "Status mix",
     },

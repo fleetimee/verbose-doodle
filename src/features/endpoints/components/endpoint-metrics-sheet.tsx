@@ -67,8 +67,8 @@ import {
   PERSISTED_METRICS_TIME_WINDOWS,
   type PersistedMetricsTimeWindow,
 } from "@/features/endpoints/utils/endpoint-metrics";
+import { formatJakartaTimestamp } from "@/features/endpoints/utils/endpoint-time";
 import { formatMessage, messages } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 
 const TIME_WINDOW_LABELS: Record<PersistedMetricsTimeWindow, string> = {
   "7d": messages.endpoints.metrics.timeWindows["7d"],
@@ -85,12 +85,8 @@ const latencyChartConfig = {
 
 const volumeChartConfig = {
   errors: {
-    color: "var(--chart-5)",
+    color: "var(--destructive)",
     label: messages.endpoints.metrics.charts.errorsLabel,
-  },
-  requests: {
-    color: "var(--chart-1)",
-    label: messages.endpoints.metrics.charts.requestsLabel,
   },
   successes: {
     color: "var(--chart-2)",
@@ -131,7 +127,7 @@ export function EndpointMetricsSheet({
 }: EndpointMetricsSheetProps) {
   const [timeWindow, setTimeWindow] =
     useState<PersistedMetricsTimeWindow>("24h");
-  const range = useMemo(() => getMetricRange(timeWindow), [timeWindow]);
+  const [range, setRange] = useState(() => getMetricRange("24h"));
   const telemetryFilters: EndpointTrafficLogsFilters = {
     includeBody: false,
     limit: 1,
@@ -161,7 +157,9 @@ export function EndpointMetricsSheet({
 
     if (nextValue) {
       // SAFETY: The segmented control emits one of the persisted time-window values.
-      setTimeWindow(nextValue as PersistedMetricsTimeWindow);
+      const window = nextValue as PersistedMetricsTimeWindow;
+      setTimeWindow(window);
+      setRange(getMetricRange(window));
     }
   };
 
@@ -250,10 +248,8 @@ export function EndpointMetricsSheet({
               <Button
                 disabled={summaryQuery.isFetching || hourlyQuery.isFetching}
                 onClick={async () => {
-                  await Promise.all([
-                    summaryQuery.refetch(),
-                    hourlyQuery.refetch(),
-                  ]);
+                  setRange(getMetricRange(timeWindow));
+                  await summaryQuery.refetch();
                 }}
                 size="sm"
                 type="button"
@@ -292,6 +288,13 @@ function MetricsContent({
   readonly timeWindow: PersistedMetricsTimeWindow;
 }) {
   const summary = metrics.summary;
+  const peakHour = metrics.buckets.reduce<
+    (typeof metrics.buckets)[number] | null
+  >(
+    (peak, bucket) =>
+      !peak || bucket.requests > peak.requests ? bucket : peak,
+    null
+  );
 
   return (
     <>
@@ -301,16 +304,6 @@ function MetricsContent({
             <div className="grid gap-0 md:grid-cols-[1fr_220px]">
               <div className="flex min-h-[220px] flex-col justify-between gap-8 p-6 md:p-8">
                 <div className="flex flex-col gap-3">
-                  <div className="inline-flex w-fit select-none items-center gap-2 rounded-lg border border-border/70 bg-muted/40 px-2.5 py-0.5 font-medium text-muted-foreground text-xs">
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        "size-2 rounded-full",
-                        summary.errorRate > 20 ? "bg-destructive" : "bg-primary"
-                      )}
-                    />
-                    {messages.endpoints.metrics.liveWindowLabel}
-                  </div>
                   <div>
                     <p className="font-semibold text-muted-foreground text-sm">
                       {messages.endpoints.metrics.requestHealthLabel}
@@ -337,7 +330,7 @@ function MetricsContent({
               <div className="grid border-t bg-muted/25 md:border-t-0 md:border-l">
                 <MiniStat
                   label={messages.endpoints.metrics.miniStats.throughput}
-                  value={`${summary.requestsPerMinute}/min`}
+                  value={`${summary.requestsPerMinute > 0 && summary.requestsPerMinute < 0.001 ? "<0.001" : new Intl.NumberFormat("en-US", { maximumFractionDigits: 3 }).format(summary.requestsPerMinute)}/min`}
                 />
                 <MiniStat
                   label={messages.endpoints.metrics.miniStats.slowestRequest}
@@ -345,7 +338,11 @@ function MetricsContent({
                 />
                 <MiniStat
                   label={messages.endpoints.metrics.miniStats.lastSeen}
-                  value={formatRelativeTime(summary.lastSeenAt)}
+                  value={
+                    summary.lastSeenAt
+                      ? formatJakartaTimestamp(summary.lastSeenAt)
+                      : "—"
+                  }
                 />
               </div>
             </div>
@@ -362,32 +359,34 @@ function MetricsContent({
               {messages.endpoints.metrics.statusMix.description}
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col" size="sm">
-            <StatusRow
-              label={messages.endpoints.metrics.statusRows.delayed}
-              total={summary.requests}
-              value={summary.delayed}
-            />
-            <StatusRow
-              label={messages.endpoints.metrics.statusRows.timeouts}
-              total={summary.requests}
-              value={summary.timeouts}
-            />
-            <StatusRow
-              label={messages.endpoints.metrics.statusRows.unmatched}
-              total={summary.requests}
-              value={summary.unmatched}
-            />
-            <StatusRow
-              label={messages.endpoints.metrics.statusRows.backendErrors}
-              total={summary.requests}
-              value={summary.backendErrors}
-            />
+          <CardContent size="sm">
+            <div className="flex flex-col gap-5">
+              <StatusRow
+                label={messages.endpoints.metrics.statusRows.delayed}
+                total={summary.requests}
+                value={summary.delayed}
+              />
+              <StatusRow
+                label={messages.endpoints.metrics.statusRows.timeouts}
+                total={summary.requests}
+                value={summary.timeouts}
+              />
+              <StatusRow
+                label={messages.endpoints.metrics.statusRows.unmatched}
+                total={summary.requests}
+                value={summary.unmatched}
+              />
+              <StatusRow
+                label={messages.endpoints.metrics.statusRows.backendErrors}
+                total={summary.requests}
+                value={summary.backendErrors}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <MetricCard
           description={messages.endpoints.metrics.cards.requests.description}
           icon={Activity}
@@ -431,6 +430,12 @@ function MetricsContent({
           icon={TrendingUp}
           label={messages.endpoints.metrics.cards.minMax.label}
           value={`${formatDuration(summary.minMs)} / ${formatDuration(summary.maxMs)}`}
+        />
+        <MetricCard
+          description={peakHour ? `${peakHour.label} WIB` : "—"}
+          icon={TrendingUp}
+          label={messages.endpoints.metrics.peakHourLabel}
+          value={formatInteger(peakHour?.requests ?? 0)}
         />
       </div>
 
@@ -514,25 +519,54 @@ function MetricsContent({
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Bar
-                  dataKey="requests"
-                  fill="var(--color-requests)"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
                   dataKey="successes"
                   fill="var(--color-successes)"
                   radius={[4, 4, 0, 0]}
+                  stackId="volume"
                 />
                 <Bar
                   dataKey="errors"
                   fill="var(--color-errors)"
                   radius={[4, 4, 0, 0]}
+                  stackId="volume"
                 />
               </BarChart>
             </ChartContainer>
           </CardContent>
         </Card>
       </div>
+      <Card variant="elevated">
+        <CardHeader>
+          <CardTitle size="sm">
+            {messages.endpoints.metrics.httpStatuses.title}
+          </CardTitle>
+          <CardDescription>
+            {messages.endpoints.metrics.httpStatuses.description}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+            {Object.entries(metrics.httpStatusCounts)
+              .filter(([, count]) => count > 0)
+              .sort(([a], [b]) => Number(a) - Number(b))
+              .map(([code, count]) => (
+                <StatusRow
+                  key={code}
+                  label={`HTTP ${code}`}
+                  total={summary.requests}
+                  value={count}
+                />
+              ))}
+            {Object.values(metrics.httpStatusCounts).every(
+              (count) => count === 0
+            ) && (
+              <p className="text-muted-foreground text-sm">
+                {messages.endpoints.metrics.httpStatuses.empty}
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </>
   );
 }
@@ -546,10 +580,8 @@ function MiniStat({
 }) {
   return (
     <div className="flex min-h-0 flex-col justify-center gap-1 border-b px-5 py-4 last:border-b-0">
-      <span className="font-bold text-muted-foreground text-xs uppercase tracking-wider">
-        {label}
-      </span>
-      <span className="break-words font-bold font-mono text-xl tracking-tight">
+      <span className="font-medium text-muted-foreground text-xs">{label}</span>
+      <span className="break-words font-medium font-mono text-sm tabular-nums">
         {value}
       </span>
     </div>
@@ -561,10 +593,7 @@ function StatusMixBar({ metrics }: { readonly metrics: EndpointMetrics }) {
   const cleanSuccesses = Math.max(summary.successes - summary.delayed, 0);
   const successWidth = getPercentage(cleanSuccesses, summary.requests);
   const delayedWidth = getPercentage(summary.delayed, summary.requests);
-  const errorWidth = Math.max(
-    getPercentage(summary.errors, summary.requests),
-    summary.errors > 0 ? 2 : 0
-  );
+  const errorWidth = getPercentage(summary.errors, summary.requests);
 
   return (
     <div className="flex flex-col gap-2">
@@ -626,6 +655,9 @@ function StatusRow({
         <span className="font-semibold text-sm">{label}</span>
         <span className="font-bold font-mono text-muted-foreground text-sm">
           {formatInteger(value)}
+          <span className="ml-2 font-normal text-xs">
+            {formatRate(percentage)}
+          </span>
         </span>
       </div>
       <div className="h-2.5 overflow-hidden rounded-full bg-muted">
@@ -665,10 +697,10 @@ function MetricCard({
     <Card variant={variant}>
       <CardHeader size="metric">
         <div className="min-w-0">
-          <CardDescription variant="badge">{label}</CardDescription>
+          <CardDescription>{label}</CardDescription>
           <CardTitle variant="kpi">{value}</CardTitle>
         </div>
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/40 text-muted-foreground shadow-xs">
+        <div className="flex size-6 shrink-0 items-center justify-center text-muted-foreground">
           <Icon aria-hidden="true" className="size-4" />
         </div>
       </CardHeader>
@@ -684,7 +716,7 @@ function MetricCard({
 function MetricsLoadingState() {
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 8 }).map((_, index) => (
           <Card key={`metric-summary-skeleton-${index}`}>
             <CardHeader>
@@ -723,37 +755,13 @@ function formatInteger(value: number) {
 }
 
 function formatRate(value: number) {
-  return `${value}%`;
-}
-
-function formatRelativeTime(value: string | null) {
-  if (!value) {
-    return "-";
+  if (value > 0 && value < 0.01) {
+    return "<0.01%";
   }
-
-  const timestamp = Date.parse(value);
-  if (Number.isNaN(timestamp)) {
-    return "-";
+  if (value < 100 && value > 99.99) {
+    return ">99.99%";
   }
-
-  const seconds = Math.max(Math.round((Date.now() - timestamp) / 1000), 0);
-  if (seconds < 60) {
-    return formatMessage(messages.endpoints.metrics.relative.secondsAgo, {
-      count: seconds,
-    });
-  }
-
-  const minutes = Math.round(seconds / 60);
-  if (minutes < 60) {
-    return formatMessage(messages.endpoints.metrics.relative.minutesAgo, {
-      count: minutes,
-    });
-  }
-
-  const hours = Math.round(minutes / 60);
-  return formatMessage(messages.endpoints.metrics.relative.hoursAgo, {
-    count: hours,
-  });
+  return `${new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(value)}%`;
 }
 
 function getPercentage(value: number, total: number) {
