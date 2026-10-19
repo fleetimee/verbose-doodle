@@ -33,6 +33,7 @@ const inputVariants = cva(
         amount: "h-8 px-2 text-base md:text-base",
         compact: "h-9 px-3 text-xs",
         search: "h-9 pl-9",
+        "search-sm": "h-8 pl-8 text-xs md:text-xs",
         md: "h-11",
         lg: "h-11 px-4 text-base md:text-lg",
         xl: "h-12 px-4 text-base md:text-lg",

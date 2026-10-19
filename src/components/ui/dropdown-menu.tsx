@@ -52,6 +52,7 @@ const dropdownMenuContentVariants = cva(
         default: "",
         subtle: "rounded-xl p-1.5",
         sidebar: "rounded-lg",
+        "endpoint-view": "endpoint-view-menu",
       },
       size: {
         default: "p-1",
