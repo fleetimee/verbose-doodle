@@ -7,6 +7,7 @@ export const MOTION_DURATION = {
   smooth: 0.45,
   standard: 0.2,
   step: 0.18,
+  viewExit: 0.1,
 } as const;
 
 export const MOTION_EASE = {

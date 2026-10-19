@@ -4038,3 +4038,93 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     var(--background)
   );
 }
+
+.endpoint-biller-actions {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 150ms var(--ease-out),
+    transform 150ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .endpoint-biller-actions {
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+
+  .endpoint-biller-group:hover .endpoint-biller-actions {
+    pointer-events: auto;
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .biller-group-action:hover {
+    transform: translateY(-1px);
+  }
+
+  .biller-group-action:active {
+    transform: translateY(0);
+  }
+}
+
+.endpoint-biller-group:has(:focus-visible) .endpoint-biller-actions {
+  pointer-events: auto;
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .endpoint-biller-actions {
+    transform: none;
+    transition: opacity 100ms var(--ease-out);
+  }
+
+  .biller-group-action:hover,
+  .biller-group-action:active {
+    transform: none;
+  }
+}
+
+.endpoint-view-choice {
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(2px);
+  transition:
+    opacity 150ms var(--ease-out),
+    transform 180ms var(--ease-out);
+}
+
+.endpoint-view-choice[data-selected="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.endpoint-view-menu {
+  transition-timing-function: var(--ease-out);
+  transition-duration: 180ms;
+}
+
+.endpoint-view-menu[data-starting-style],
+.endpoint-view-menu[data-ending-style] {
+  transform: translateY(-3px) scale(0.98);
+  scale: 1;
+}
+
+.endpoint-view-menu[data-ending-style] {
+  transition-duration: 125ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .endpoint-view-choice {
+    transform: none;
+    transition: opacity 100ms var(--ease-out);
+  }
+
+  .endpoint-view-menu[data-starting-style],
+  .endpoint-view-menu[data-ending-style] {
+    transform: none;
+  }
+}

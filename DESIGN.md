@@ -527,3 +527,91 @@ Presence rows open the existing shadcn right-side drawer with recorded office, s
 verified status meanings. The date button provides keyboard access. Distinguish
 recorded office from physical punch location; unknown status meanings remain
 unavailable.
+
+### Endpoint catalog table
+
+The endpoint catalog uses the same compact data-table controls as Server
+Inventory: sortable URL, HTTP method, biller, and enabled-status columns;
+searchable biller, method, status, and active-response filters; column visibility;
+and server pagination with 10, 25, 50, or 100 endpoints per page. Search waits
+300ms after typing. Filter and sort changes reset the page. A loading indicator
+keeps updates visible, failures offer Retry, and a deleted final row returns to
+the last available page. Controls wrap on narrow screens and the table scrolls
+horizontally. Full response payloads load for editing/deletion and Postman export;
+export includes all matching endpoints across pages. Administrator actions retain
+role checks. English and Indonesian use the same control structure.
+
+The endpoint table follows Server Inventory's desktop workspace sizing: the page
+fills the available dashboard height, with the toolbar and pagination outside
+the table's ScrollArea. Its sticky header stays visible while rows scroll.
+Endpoints on each page are grouped by biller slug, with collapsible biller
+headers and indented endpoint paths. On smaller screens, controls wrap and the
+page follows normal vertical flow, matching Server Inventory.
+
+Endpoint view selection offers Table, Grid, and List in the shared toolbar and
+persists under `endpoints-view-mode`, including existing grid/list preferences.
+All three views share server search, filters, sorting, pagination, collapsible
+biller groups, and the internal ScrollArea. Grid and List reuse the original
+endpoint cards and list items with summary response counts; administrator context
+menus load full details for editing and deletion. Table is the default for new
+preferences. Switching views keeps the current query and page.
+
+The endpoint toolbar keeps visible text labels for Table, Grid, List, Export,
+and each filter. Search, view/export actions, and filters share one desktop row;
+controls wrap only when the available width requires it. Hover tooltips retain full labels and values. Tooltip
+triggers using `asChild` contain exactly one element so the actual input, button,
+link, or text element remains the trigger.
+
+The labeled endpoint controls use compact 32px sizing. Table/Grid/List and Export
+form one joined ButtonGroup; all four filters form another joined ButtonGroup,
+with shared borders and no gaps between filter buttons. Toolbar padding is 8px.
+Labels remain visible, and narrow screens can scroll the filter group.
+
+Vertical shadcn Separators distinguish Search, View, Export, and Filters in the
+endpoint toolbar. View buttons remain joined; Export is a separate action, and
+filter buttons remain joined. Each divider stays with its following category as
+the toolbar wraps.
+
+Empty table results fill the remaining result area below the column headers and
+center the shared Empty component vertically. The empty state distinguishes an
+empty catalog, a biller without endpoints, and filters without matches. It offers
+Reset filters when narrowed and Add Endpoint for authorized users when the
+catalog or selected biller is empty. Toolbar and pagination remain visible.
+
+Endpoint table columns are URL, HTTP method, and Biller. Status, response counts,
+active-response details, and action buttons are omitted. Each endpoint row reuses
+the Grid/List context menu for opening details, enable/disable, URL copying,
+editing, and deletion; mutation controls retain administrator checks. Rows are
+focusable so the context menu is also available from the keyboard.
+
+Biller group headers in Table, Grid, and List expose Add Endpoint and Edit Biller
+shortcuts to authorized users. The controls reveal on header hover or keyboard
+focus without shifting layout; touch devices show them directly. Add Endpoint
+prefills the clicked group's biller, and Edit Biller opens its rename dialog.
+
+Biller-header shortcuts use softly outlined circular buttons rather than raised
+square panels. Fine-pointer hover reveals the reserved action area with a 150ms
+fade and 4px slide, using the shared ease-out curve; hovering an action lifts it
+1px. Keyboard focus reveals controls immediately. Touch keeps them visible, and
+reduced motion removes translations while retaining a short fade.
+
+The endpoint View category uses a single dropdown button showing the selected
+view's icon and label. Its radio menu offers Table, Grid, and List with the
+current choice checked. Selection retains the persisted preference and current
+search, filters, sort, page, and biller-group expansion state.
+
+The view selector reserves the widest localized label in an overlapping grid so
+changing views cannot resize the toolbar. Its icon and label crossfade in place;
+view content fades in over 150ms without layout animation. The nonmodal view menu
+avoids background scroll locking and uses the shared ease-out curve with a 180ms
+entry and 125ms exit. Keyboard-visible focus reveals header shortcuts instantly;
+pointer focus does not suppress their hover transitions. Reduced motion removes
+translations and the content entrance.
+
+Switching endpoint views uses an interruptible, sequential presence transition:
+the outgoing view fades and moves up 3px over 100ms, then the latest selected view
+fades and settles from 4px below over 180ms. The previous view remains mounted
+until its exit ends, keeping the result pane occupied; exiting content is inert.
+Rapid selections resolve to the latest choice. The initial load does not animate,
+and reduced motion switches immediately. Toolbar, pagination, query, and biller
+collapse state remain outside the animated panel.
