@@ -24,8 +24,6 @@ import {
   Clipboard,
   FileClock,
   ListFilter,
-  MonitorDown,
-  MonitorUp,
   TimerReset,
 } from "@/components/hugeicons";
 import {
@@ -1147,7 +1145,6 @@ function TerminalState({
 function LogExchangePane({
   body,
   headers,
-  icon,
   meta,
   title,
   tone,
@@ -1155,7 +1152,6 @@ function LogExchangePane({
 }: {
   readonly body: EndpointTrafficPayload;
   readonly headers: EndpointHttpHeaders | null;
-  readonly icon: ReactNode;
   readonly meta: readonly {
     readonly label: string;
     readonly value: string | number;
@@ -1164,44 +1160,34 @@ function LogExchangePane({
   readonly tone: ExchangeTone;
   readonly wrapLines: boolean;
 }) {
-  const accentClass =
-    tone === "request"
-      ? "border-info/45 bg-info/10 text-info dark:bg-info/15"
-      : "border-success/45 bg-success/10 text-success dark:bg-success/15";
-
   return (
     <div className="flex h-full min-h-0 flex-col bg-card">
-      <div className="flex items-center justify-between gap-3 border-b px-4 py-3 dark:border-border">
-        <div className="flex items-center gap-2">
-          <span className={cn("rounded border p-1.5", accentClass)}>
-            {icon}
-          </span>
-          <div>
-            <h4 className="font-semibold text-sm">
-              {tone === "request" ? "R" : "S"} · {title}
-            </h4>
-            <p className="text-muted-foreground text-xs">
-              {messages.endpoints.trafficLogHeadersAndBody}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-px border-b bg-border md:grid-cols-4">
-        {meta.map((item) => (
-          <div className="min-w-0 bg-card px-3 py-2" key={item.label}>
-            <p className="font-mono text-muted-foreground text-xs uppercase">
-              {item.label}
-            </p>
-            <p className="truncate font-mono text-foreground text-xs">
-              {item.value}
-            </p>
-          </div>
-        ))}
+      <div className="border-b px-4 py-3">
+        <h4
+          className={cn(
+            "font-semibold text-sm",
+            tone === "request" ? "text-info" : "text-success"
+          )}
+        >
+          {title}
+        </h4>
+        <dl className="mt-2 flex flex-wrap gap-x-5 gap-y-2">
+          {meta.map((item) => (
+            <div className="min-w-0" key={item.label}>
+              <dt className="text-muted-foreground text-xs">{item.label}</dt>
+              <dd
+                className="max-w-64 truncate font-mono text-xs"
+                title={String(item.value)}
+              >
+                {item.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="grid gap-4 p-4">
+        <div className="divide-y">
           <ShikiJsonBlock
             defaultWrapLines={wrapLines}
             filename={`${title.toLowerCase()}-headers.json`}
@@ -1240,7 +1226,7 @@ function ShikiJsonBlock({
 
   return (
     <CodeBlock
-      className="overflow-hidden rounded-md border-border bg-card shadow-md"
+      className="h-auto overflow-hidden rounded-none border-0 bg-card"
       data={[{ code, filename, language: "json" }]}
       defaultDarkTheme="github-dark-high-contrast"
       defaultLightTheme="github-light-high-contrast"
@@ -1248,31 +1234,32 @@ function ShikiJsonBlock({
       storageKey={`traffic-log-detail-${filename}`}
     >
       <CodeBlockHeader className="border-border bg-muted/60 px-3 py-2">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-success" />
-          <span className="truncate font-medium text-foreground text-xs">
-            {title}
-          </span>
-          <span className="truncate font-mono text-muted-foreground text-xs">
-            {filename}
-          </span>
+        <div className="min-w-0 flex-1">
+          <span className="font-medium text-xs">{title}</span>
         </div>
-        <CodeBlockCopyButton size="icon-7" variant="ghost-slate" />
+        <CodeBlockCopyButton
+          aria-label={`${messages.endpoints.trafficLogsCopyButton} ${title}`}
+          size="icon-7"
+          variant="ghost-slate"
+        />
         <label
-          className="ml-1 inline-flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1 font-medium text-foreground text-xs"
+          className="ml-2 inline-flex items-center gap-2 text-muted-foreground text-xs"
           htmlFor={`wrap-lines-${filename}`}
         >
           <span>{messages.endpoints.trafficLogWrapLabel}</span>
           <Switch
             checked={wrapLines}
-            className="scale-75"
             id={`wrap-lines-${filename}`}
             onCheckedChange={setWrapLines}
           />
         </label>
       </CodeBlockHeader>
-      <div className="h-80 overflow-y-auto overflow-x-hidden">
-        <div className="overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <ScrollArea
+        className="max-h-72"
+        variant="fit"
+        viewportClassName="max-h-72"
+      >
+        <div className="min-w-0">
           <CodeBlockBody>
             {(item) => (
               <CodeBlockItem
@@ -1290,7 +1277,8 @@ function ShikiJsonBlock({
             )}
           </CodeBlockBody>
         </div>
-      </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </CodeBlock>
   );
 }
@@ -1326,82 +1314,72 @@ function TrafficLogDetailContent({
   } else if (selectedLogDetail) {
     const requestMeta = [
       {
-        label: messages.endpoints.trafficLogMeta.method,
-        value: selectedLogDetail.method,
-      },
-      {
-        label: messages.endpoints.trafficLogMeta.path,
-        value: selectedLogDetail.path,
-      },
-      {
         label: messages.endpoints.trafficLogMeta.source,
         value: formatIp(
           selectedLogDetail.sourceIp,
           selectedLogDetail.sourcePort
         ),
       },
-      {
-        label: messages.endpoints.trafficLogMeta.forwarded,
-        value: selectedLogDetail.forwardedFor ?? "-",
-      },
+      ...(selectedLogDetail.forwardedFor
+        ? [
+            {
+              label: messages.endpoints.trafficLogMeta.forwarded,
+              value: selectedLogDetail.forwardedFor,
+            },
+          ]
+        : []),
     ];
     const responseMeta = [
-      {
-        label: messages.endpoints.trafficLogMeta.http,
-        value: selectedLogDetail.httpStatusCode ?? "-",
-      },
-      {
-        label: messages.endpoints.trafficLogMeta.duration,
-        value: `${selectedLogDetail.durationMs ?? "-"} ms`,
-      },
       {
         label: messages.endpoints.trafficLogMeta.response,
         value: selectedLogDetail.responseName ?? "-",
       },
-      {
-        label: messages.endpoints.trafficLogMeta.delay,
-        value: selectedLogDetail.delayMs
-          ? `${selectedLogDetail.delayMs} ms`
-          : "-",
-      },
+      ...(selectedLogDetail.delayMs
+        ? [
+            {
+              label: messages.endpoints.trafficLogMeta.delay,
+              value: `${selectedLogDetail.delayMs} ms`,
+            },
+          ]
+        : []),
     ];
 
     detailContent = (
       <div className="flex min-h-0 flex-1 flex-col gap-4">
-        <div className="relative grid gap-3 border-b bg-muted/60 px-5 py-4 text-foreground md:grid-cols-[minmax(0,1fr)_auto] dark:border-border dark:bg-card">
-          <div className="min-w-0">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="inline-flex select-none items-center rounded-lg border border-info/40 bg-info/15 px-2 py-0.5 font-bold font-mono text-info text-xs dark:bg-info/20">
+        <div className="relative flex flex-wrap items-start justify-between gap-3 border-b px-5 py-4 pr-16">
+          <div className="min-w-0 space-y-1.5">
+            <h3 className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-semibold text-base">
+              <span className={getMethodColor(selectedLogDetail.method).text}>
                 {selectedLogDetail.method}
               </span>
-              <span className="inline-flex select-none items-center rounded-lg border border-border bg-muted px-2 py-0.5 font-mono text-muted-foreground text-xs">
-                {selectedLogDetail.hitStatus}
+              <span className="break-all font-mono">
+                {selectedLogDetail.path}
               </span>
-              {selectedLogDetail.simulateTimeout && (
-                <span className="inline-flex select-none items-center rounded-lg border border-warning/40 bg-warning/15 px-2 py-0.5 font-mono text-warning text-xs dark:bg-warning/20">
-                  {messages.endpoints.trafficLogTimeoutSimulationLabel}
-                </span>
-              )}
-            </div>
-            <h3 className="truncate font-bold font-mono text-base">
-              {selectedLogDetail.path}
+              <span
+                className={STATUS_TONE_CLASS_NAMES[selectedLogDetail.hitStatus]}
+                title={STATUS_LABELS[selectedLogDetail.hitStatus]}
+              >
+                {selectedLogDetail.httpStatusCode ?? "—"}
+              </span>
+              <span className="font-normal text-muted-foreground text-sm tabular-nums">
+                {selectedLogDetail.durationMs ?? "—"} ms
+              </span>
             </h3>
-            <p className="truncate text-muted-foreground text-xs">
-              {selectedLogDetail.requestId} /{" "}
+            <p className="break-all text-muted-foreground text-xs">
+              {selectedLogDetail.requestId} ·{" "}
               {formatJakartaTimestamp(selectedLogDetail.occurredAt)}
             </p>
+            {selectedLogDetail.simulateTimeout && (
+              <p className="text-warning text-xs">
+                {messages.endpoints.trafficLogTimeoutSimulationLabel}
+              </p>
+            )}
           </div>
-          <div className="grid min-w-0 gap-2 pr-12 text-right text-xs">
-            <span className="font-mono font-semibold text-muted-foreground">
-              {messages.endpoints.trafficLogUserAgentLabel}
-            </span>
-            <UserAgentClientBadge
-              className="justify-self-end"
-              userAgent={selectedLogDetail.userAgent}
-            />
-            <span className="max-w-[420px] truncate text-foreground">
-              {selectedLogDetail.userAgent ?? "-"}
-            </span>
+          <div className="flex min-w-0 flex-col items-end gap-1.5">
+            <UserAgentClientBadge userAgent={selectedLogDetail.userAgent} />
+            <p className="max-w-80 break-all text-right text-muted-foreground text-xs">
+              {selectedLogDetail.userAgent ?? "—"}
+            </p>
           </div>
           <DialogClose asChild>
             <button
@@ -1420,27 +1398,24 @@ function TrafficLogDetailContent({
 
         <div className="min-h-0 flex-1 px-5 pb-5">
           <ResizablePanelGroup
-            className="min-h-[620px] overflow-hidden"
+            className="h-full min-h-0 overflow-hidden"
             direction="horizontal"
-            variant="bordered"
           >
             <ResizablePanel defaultSize={50} minSize={28}>
               <LogExchangePane
                 body={selectedLogDetail.requestBody}
                 headers={selectedLogDetail.requestHeaders}
-                icon={<MonitorUp className="size-4" />}
                 meta={requestMeta}
                 title={messages.endpoints.trafficLogRequestTitle}
                 tone="request"
                 wrapLines={wrapLines}
               />
             </ResizablePanel>
-            <ResizableHandle variant="colored" withHandle />
+            <ResizableHandle withHandle />
             <ResizablePanel defaultSize={50} minSize={28}>
               <LogExchangePane
                 body={selectedLogDetail.responseBody}
                 headers={selectedLogDetail.responseHeaders}
-                icon={<MonitorDown className="size-4" />}
                 meta={responseMeta}
                 title={messages.endpoints.trafficLogResponseTitle}
                 tone="response"
