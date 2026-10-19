@@ -312,6 +312,7 @@ export function DashboardLayout() {
                   "flex flex-col",
                   usesFixedWorkspace ? "h-full min-h-0" : "min-h-full",
                   (location.pathname === "/dashboard/servers" ||
+                    location.pathname === "/dashboard/endpoints" ||
                     location.pathname ===
                       "/dashboard/developer-tools/qris-creator" ||
                     location.pathname ===
@@ -610,7 +611,7 @@ function BillerBreadcrumbSelector({
     requestEndpointNavigation,
   } = useDashboardNavigation();
   const { data: billers = [], isPending: isLoadingBillers } = useGetBillers();
-  const { endpoints: endpointQuery } = useEndpointCatalog();
+  const { endpoints: endpointQuery } = useEndpointCatalog(undefined, true);
   const { data: endpoints = [], isPending: isLoadingEndpoints } = endpointQuery;
   const billersWithEndpoints = billers.filter((biller) =>
     endpoints.some((endpoint) => endpoint.billerSlug === biller.slug)
@@ -771,7 +772,7 @@ function EndpointBreadcrumbSelector({
     rememberEndpoint,
     requestEndpointNavigation,
   } = useDashboardNavigation();
-  const { endpoints: endpointQuery } = useEndpointCatalog();
+  const { endpoints: endpointQuery } = useEndpointCatalog(undefined, true);
   const { data: endpoints = [], isPending: isLoadingEndpoints } = endpointQuery;
   const billerEndpoints = endpoints.filter(
     (endpoint) => endpoint.billerSlug === billerSlug

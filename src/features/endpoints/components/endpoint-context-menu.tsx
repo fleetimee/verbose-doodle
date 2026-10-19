@@ -18,26 +18,26 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
-import type { Endpoint } from "@/features/endpoints/types";
+import type { Endpoint, EndpointListItem } from "@/features/endpoints/types";
 import { messages } from "@/lib/i18n";
 
-type EndpointContextMenuProps = {
+type EndpointContextMenuProps<T extends Endpoint | EndpointListItem> = {
   canEdit: boolean;
   children: ReactElement;
-  endpoint: Endpoint;
-  onDelete: (endpoint: Endpoint) => void;
-  onEdit: (endpoint: Endpoint) => void;
+  endpoint: T;
+  onDelete: (endpoint: T) => void;
+  onEdit: (endpoint: T) => void;
 };
 
 const TRAILING_SLASHES_PATTERN = /\/+$/;
 
-export function EndpointContextMenu({
+export function EndpointContextMenu<T extends Endpoint | EndpointListItem>({
   canEdit,
   children,
   endpoint,
   onDelete,
   onEdit,
-}: EndpointContextMenuProps) {
+}: EndpointContextMenuProps<T>) {
   const navigate = useNavigate();
   const { updateEndpoint } = useEndpointCatalog();
 

@@ -4,30 +4,30 @@ import {
   Pen01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { motion, useReducedMotion } from "motion/react";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
-import { Layers3, Plug } from "@/components/hugeicons";
+import { toast } from "sonner";
+import { Check, ChevronDown, ListFilter } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
-import { type TourStep, useTour } from "@/components/tour";
-import { Badge } from "@/components/ui/badge";
+import { useTour } from "@/components/tour";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 import { Postman } from "@/components/ui/svgs/postman";
 import {
   Tooltip,
@@ -43,591 +43,327 @@ import type { Biller } from "@/features/billers/types";
 import { AddEndpointSheet } from "@/features/endpoints/components/add-endpoint-sheet";
 import { DeleteEndpointDialog } from "@/features/endpoints/components/delete-endpoint-dialog";
 import { EditEndpointSheet } from "@/features/endpoints/components/edit-endpoint-sheet";
-import { EndpointCard } from "@/features/endpoints/components/endpoint-card";
-import { EndpointCardSkeleton } from "@/features/endpoints/components/endpoint-card-skeleton";
-import { EndpointContextMenu } from "@/features/endpoints/components/endpoint-context-menu";
-import { EndpointListItem } from "@/features/endpoints/components/endpoint-list-item";
-import { EndpointListSkeleton } from "@/features/endpoints/components/endpoint-list-skeleton";
+import { EndpointTable } from "@/features/endpoints/components/endpoint-table";
 import { EndpointsSearchControls } from "@/features/endpoints/components/endpoints-search-controls";
 import { ExportEndpointsDialog } from "@/features/endpoints/components/export-endpoints-dialog";
+import { httpEndpointAdapter } from "@/features/endpoints/data/http-endpoint-adapter";
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
-import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
-import type { Endpoint, GroupedEndpoints } from "@/features/endpoints/types";
 import {
-  filterEndpoints,
-  groupEndpointsByBiller,
-} from "@/features/endpoints/utils";
+  defaultEndpointQuery,
+  useEndpointPage,
+} from "@/features/endpoints/hooks/use-endpoint-page";
+import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
+import type {
+  Endpoint,
+  EndpointListItem,
+  EndpointListQuery,
+  EndpointViewMode,
+  GroupedEndpoints,
+} from "@/features/endpoints/types";
+import { groupEndpointsByBiller } from "@/features/endpoints/utils";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { formatMessage, messages } from "@/lib/i18n";
-import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
+import { formatMessage } from "@/lib/i18n";
 
-// Skeleton loading constants
-const SKELETON_TOTAL_COUNT = 18;
-const SKELETON_GROUP_1_START = 0;
-const SKELETON_GROUP_1_END = 9;
-const SKELETON_GROUP_2_START = 9;
-const SKELETON_GROUP_2_END = 13;
-const SKELETON_GROUP_3_START = 13;
-const SKELETON_GROUP_3_END = 18;
+const initialQuery = defaultEndpointQuery;
 
-const SKELETON_KEYS = Array.from(
-  { length: SKELETON_TOTAL_COUNT },
-  (_, i) => `skeleton-${i}`
-);
-
-const ENDPOINTS_TOUR_ID = "endpoints-intro";
-const ENDPOINTS_TOUR_TARGETS = {
-  addEndpoint: "endpoints-tour-add-endpoint",
-  createFirstEndpoint: "endpoints-tour-create-first-endpoint",
-  export: "endpoints-tour-export",
-  firstEndpoint: "endpoints-tour-first-endpoint",
-  header: "endpoints-tour-header",
-  search: "endpoints-tour-search",
-  viewMode: "endpoints-tour-view-mode",
-} as const;
-type EndpointViewMode = "grid" | "list";
-
-function parseBillerSlug(value: string | null): string | null {
-  const slug = value?.trim();
-  return slug ? slug : null;
-}
-
-function filterEndpointsByBiller(
-  endpoints: Endpoint[],
-  billerSlug: string | null,
-  isBillerScoped: boolean
-): Endpoint[] {
-  if (!isBillerScoped) {
-    return endpoints;
-  }
-
-  if (billerSlug === null) {
-    return [];
-  }
-
-  return endpoints.filter((endpoint) => endpoint.billerSlug === billerSlug);
-}
-
-function getEmptyStateCopy(
-  isUnknownBillerScope: boolean,
-  isBillerScoped: boolean,
-  hasSearchTerm: boolean
-) {
-  if (isUnknownBillerScope) {
-    return {
-      description: messages.endpoints.billerNotFoundDescription,
-      title: messages.endpoints.billerNotFoundTitle,
-    };
-  }
-
-  if (isBillerScoped && !hasSearchTerm) {
-    return {
-      description: messages.endpoints.scopedEmptyDescription,
-      title: messages.endpoints.scopedEmptyTitle,
-    };
-  }
-
-  return {
-    description: messages.endpoints.noSearchResultsDescription,
-    title: messages.endpoints.noSearchResultsTitle,
+function EndpointFilter({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (value: string) => void;
+}) {
+  const { messages } = useI18n();
+  const [open, setOpen] = useState(false);
+  const select = (next: string) => {
+    onChange(next);
+    setOpen(false);
   };
-}
-
-function TourStepContent({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
   return (
-    <div className="flex flex-col gap-2 pr-10">
-      <h2 className="font-semibold text-base">{title}</h2>
-      <p className="text-muted-foreground text-sm leading-relaxed">
-        {description}
-      </p>
-    </div>
-  );
-}
-
-type AnimatedEndpointGroupProps = {
-  readonly group: GroupedEndpoints;
-  readonly groupIndex: number;
-  readonly onDeleteEndpoint: (endpoint: Endpoint) => void;
-  readonly onEditEndpoint: (endpoint: Endpoint) => void;
-  readonly prefersReducedMotion: boolean;
-  readonly viewMode: EndpointViewMode;
-  readonly canEditEndpoint: boolean;
-};
-
-function getEndpointTourId(groupIndex: number, endpointIndex: number) {
-  return groupIndex === 0 && endpointIndex === 0
-    ? ENDPOINTS_TOUR_TARGETS.firstEndpoint
-    : undefined;
-}
-
-const ENDPOINT_ITEM_STAGGER = 0.045;
-const ENDPOINT_ITEM_MAX_DELAY = 0.45;
-
-function AnimatedEndpointItem({
-  children,
-  index,
-  prefersReducedMotion,
-}: {
-  readonly children: ReactNode;
-  readonly index: number;
-  readonly prefersReducedMotion: boolean;
-}) {
-  return (
-    <motion.div
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      initial={{
-        opacity: prefersReducedMotion ? 1 : 0,
-        scale: prefersReducedMotion ? 1 : 0.98,
-        y: prefersReducedMotion ? 0 : 14,
-      }}
-      layout={!prefersReducedMotion}
-      transition={{
-        delay: prefersReducedMotion
-          ? MOTION_DURATION.instant
-          : Math.min(index * ENDPOINT_ITEM_STAGGER, ENDPOINT_ITEM_MAX_DELAY),
-        duration: prefersReducedMotion
-          ? MOTION_DURATION.instant
-          : MOTION_DURATION.standard,
-        ease: MOTION_EASE.out,
-        layout: {
-          duration: MOTION_DURATION.standard,
-          ease: MOTION_EASE.out,
-        },
-      }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function GridEndpoints({
-  canEditEndpoint,
-  group,
-  groupIndex,
-  onDeleteEndpoint,
-  onEditEndpoint,
-  prefersReducedMotion,
-}: Omit<AnimatedEndpointGroupProps, "viewMode">) {
-  return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {group.endpoints.map((endpoint, endpointIndex) => (
-        <EndpointContextMenu
-          canEdit={canEditEndpoint}
-          endpoint={endpoint}
-          key={endpoint.slug}
-          onDelete={onDeleteEndpoint}
-          onEdit={onEditEndpoint}
+    <Popover onOpenChange={setOpen} open={open}>
+      <PopoverTrigger asChild>
+        <Button
+          aria-expanded={open}
+          aria-label={label}
+          className="min-w-0 max-w-full"
+          data-active={!!value}
+          role="combobox"
+          size="sm"
+          variant="inventory-filter"
         >
-          <div>
-            <AnimatedEndpointItem
-              index={endpointIndex}
-              prefersReducedMotion={prefersReducedMotion}
-            >
-              <EndpointCard
-                endpoint={endpoint}
-                tourId={getEndpointTourId(groupIndex, endpointIndex)}
-              />
-            </AnimatedEndpointItem>
-          </div>
-        </EndpointContextMenu>
-      ))}
-    </div>
+          <ListFilter />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="truncate">
+                {options.find((option) => option.value === value)?.label ??
+                  (value || label)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              {label}
+              {value
+                ? `: ${options.find((option) => option.value === value)?.label ?? value}`
+                : ""}
+            </TooltipContent>
+          </Tooltip>
+          <ChevronDown data-icon="inline-end" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-(--anchor-width) min-w-64"
+        size="none"
+      >
+        <Command>
+          <CommandInput aria-label={label} placeholder={label} />
+          <CommandList>
+            <CommandEmpty>{messages.common.noResults}</CommandEmpty>
+            <CommandGroup>
+              <CommandItem onSelect={() => select("")} value={label}>
+                {label}
+                {!value && <Check className="ml-auto" />}
+              </CommandItem>
+              {options.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  onSelect={() => select(option.value)}
+                  value={`${option.label} ${option.value}`}
+                >
+                  {option.label}
+                  {value === option.value && <Check className="ml-auto" />}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
 
-function ListEndpoints({
-  canEditEndpoint,
-  group,
-  groupIndex,
-  onDeleteEndpoint,
-  onEditEndpoint,
-  prefersReducedMotion,
-}: Omit<AnimatedEndpointGroupProps, "viewMode">) {
+function matchesExport(endpoint: Endpoint, query: EndpointListQuery) {
+  const search = query.search.trim().toLowerCase();
+  const matchesSearch =
+    !search ||
+    [
+      endpoint.url,
+      endpoint.method,
+      endpoint.billerSlug,
+      endpoint.billerName ?? "",
+      ...endpoint.responses.flatMap((response) => [
+        response.name,
+        response.json,
+      ]),
+    ].some((value) => value.toLowerCase().includes(search));
+  const active = endpoint.responses.some((response) => response.activated);
   return (
-    <div className="space-y-3">
-      {group.endpoints.map((endpoint, endpointIndex) => (
-        <EndpointContextMenu
-          canEdit={canEditEndpoint}
-          endpoint={endpoint}
-          key={endpoint.slug}
-          onDelete={onDeleteEndpoint}
-          onEdit={onEditEndpoint}
-        >
-          <div>
-            <AnimatedEndpointItem
-              index={endpointIndex}
-              prefersReducedMotion={prefersReducedMotion}
-            >
-              <EndpointListItem
-                endpoint={endpoint}
-                tourId={getEndpointTourId(groupIndex, endpointIndex)}
-              />
-            </AnimatedEndpointItem>
-          </div>
-        </EndpointContextMenu>
-      ))}
-    </div>
-  );
-}
-
-function AnimatedEndpointGroup({
-  group,
-  groupIndex,
-  canEditEndpoint,
-  onDeleteEndpoint,
-  onEditEndpoint,
-  prefersReducedMotion,
-  viewMode,
-}: AnimatedEndpointGroupProps) {
-  return (
-    <motion.div
-      animate={{ opacity: 1 }}
-      className="rounded-lg"
-      initial={{ opacity: prefersReducedMotion ? 1 : 0 }}
-      key={viewMode}
-      transition={{
-        duration: prefersReducedMotion
-          ? MOTION_DURATION.instant
-          : MOTION_DURATION.fast,
-        ease: MOTION_EASE.out,
-      }}
-    >
-      {viewMode === "grid" ? (
-        <GridEndpoints
-          canEditEndpoint={canEditEndpoint}
-          group={group}
-          groupIndex={groupIndex}
-          onDeleteEndpoint={onDeleteEndpoint}
-          onEditEndpoint={onEditEndpoint}
-          prefersReducedMotion={prefersReducedMotion}
-        />
-      ) : (
-        <ListEndpoints
-          canEditEndpoint={canEditEndpoint}
-          group={group}
-          groupIndex={groupIndex}
-          onDeleteEndpoint={onDeleteEndpoint}
-          onEditEndpoint={onEditEndpoint}
-          prefersReducedMotion={prefersReducedMotion}
-        />
-      )}
-    </motion.div>
+    matchesSearch &&
+    (!query.billerSlug || endpoint.billerSlug === query.billerSlug) &&
+    (!query.method || endpoint.method === query.method) &&
+    (!query.enabled || String(endpoint.enabled !== false) === query.enabled) &&
+    (!query.responseStatus || active === (query.responseStatus === "active"))
   );
 }
 
 export function EndpointsPage() {
-  useI18n();
+  const { messages } = useI18n();
+  const copy = messages.endpoints.table;
   useDocumentMeta({
     description: messages.endpoints.documentDescription,
-    keywords: ["api endpoints", "integrations", "api management", "endpoints"],
     title: messages.endpoints.documentTitle,
   });
-
-  const {
-    endpoints: endpointsQuery,
-    createEndpoint: createEndpointMutation,
-    deleteEndpoint: deleteEndpointMutation,
-    updateEndpoint: updateEndpointMutation,
-  } = useEndpointCatalog();
-  const { data: endpoints = [], isPending: isLoadingEndpoints } =
-    endpointsQuery;
-  const [searchParams] = useSearchParams();
-  const { data: billers = [], isPending: isLoadingBillers } = useGetBillers();
+  const [params, setParams] = useSearchParams();
+  const billerSlug = params.get("billerSlug") ?? "";
+  const [queryState, setQueryState] = useState(initialQuery);
+  const [search, setSearch] = useState("");
+  const [storedViewMode, setViewMode] = useLocalStorage<EndpointViewMode>(
+    "endpoints-view-mode",
+    "table"
+  );
+  const viewMode =
+    storedViewMode === "grid" || storedViewMode === "list"
+      ? storedViewMode
+      : "table";
+  const query = useMemo(
+    () => ({ ...queryState, billerSlug }),
+    [queryState, billerSlug]
+  );
+  const entries = useEndpointPage(query);
+  const { data: billers = [], isPending: loadingBillers } = useGetBillers();
   const { session } = useAuth();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [initialBillerSlug, setInitialBillerSlug] = useState<
+  const canEdit = session.can("canEditEndpoint");
+  const catalog = useEndpointCatalog(undefined, false);
+  const updateBiller = useUpdateBiller();
+  const [addOpen, setAddOpen] = useState(false);
+  const [createBillerSlug, setCreateBillerSlug] = useState<
     string | undefined
   >();
-  const [billerToEdit, setBillerToEdit] = useState<Biller | null>(null);
   const [endpointToEdit, setEndpointToEdit] = useState<Endpoint | null>(null);
   const [endpointToDelete, setEndpointToDelete] = useState<Endpoint | null>(
     null
   );
-  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useLocalStorage<"grid" | "list">(
-    "endpoints-view-mode",
-    "grid"
-  );
-  const [hasSeenEndpointsTour, setHasSeenEndpointsTour] = useLocalStorage(
-    "endpoints-tour-seen",
-    false
-  );
-  const hasAutoStartedTour = useRef(false);
-  const shouldMarkTourSeenOnEnd = useRef(false);
-  const { activeTourId, isActive, setSteps, startTour } = useTour();
-  const prefersReducedMotion = useReducedMotion();
-  const shouldReduceMotion = prefersReducedMotion ?? false;
+  const [billerToEdit, setBillerToEdit] = useState<Biller | null>(null);
+  const [loadingAction, setLoadingAction] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportGroups, setExportGroups] = useState<GroupedEndpoints[]>([]);
+  const [exportOpen, setExportOpen] = useState(false);
+  const { setSteps, startTour } = useTour();
+  const selectedBiller = billers.find((biller) => biller.slug === billerSlug);
+  const unknownBiller =
+    Boolean(billerSlug) && !loadingBillers && !selectedBiller;
 
-  const billerSlugParam = searchParams.get("billerSlug");
-  const selectedBillerSlug = parseBillerSlug(billerSlugParam);
-  const isBillerScoped = billerSlugParam !== null;
-  const hasKnownBiller =
-    selectedBillerSlug !== null &&
-    billers.some((biller) => biller.slug === selectedBillerSlug);
-  const isUnknownBillerScope =
-    isBillerScoped && !isLoadingBillers && !hasKnownBiller;
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () =>
+        setQueryState((current) =>
+          current.search === search.trim()
+            ? current
+            : { ...current, search: search.trim(), page: 0 }
+        ),
+      300
+    );
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
-  const { mutate: createEndpoint, isPending: isCreatingEndpoint } =
-    createEndpointMutation;
-  const { mutate: updateEndpoint, isPending: isUpdatingEndpoint } =
-    updateEndpointMutation;
-  const { mutate: deleteEndpoint, isPending: isDeletingEndpoint } =
-    deleteEndpointMutation;
-  const { mutate: updateBiller, isPending: isUpdatingBiller } =
-    useUpdateBiller();
+  useEffect(() => {
+    setQueryState((current) =>
+      current.page === 0 ? current : { ...current, page: 0 }
+    );
+  }, [billerSlug]);
 
-  const scopedEndpoints = useMemo(
-    () =>
-      filterEndpointsByBiller(endpoints, selectedBillerSlug, isBillerScoped),
-    [endpoints, isBillerScoped, selectedBillerSlug]
-  );
+  useEffect(() => {
+    if (
+      entries.data &&
+      !entries.isPlaceholderData &&
+      !entries.isFetching &&
+      query.page > 0 &&
+      query.page >= entries.data.totalPages
+    ) {
+      setQueryState((current) => ({
+        ...current,
+        page: Math.max(0, (entries.data?.totalPages ?? 1) - 1),
+      }));
+    }
+  }, [entries.data, entries.isFetching, entries.isPlaceholderData, query.page]);
 
-  const filteredEndpoints = useMemo(
-    () => filterEndpoints(scopedEndpoints, searchTerm),
-    [scopedEndpoints, searchTerm]
-  );
+  const openCreateEndpoint = (slug = selectedBiller?.slug) => {
+    setCreateBillerSlug(slug);
+    setAddOpen(true);
+  };
 
-  const groupedEndpoints = useMemo(
-    () => groupEndpointsByBiller(filteredEndpoints),
-    [filteredEndpoints]
-  );
-
-  const hasEndpoints = scopedEndpoints.length > 0;
-  const hasFilteredEndpoints = groupedEndpoints.length > 0;
-  const hasSearchTerm = searchTerm.trim().length > 0;
-  const shouldShowCatalog = isBillerScoped || hasEndpoints || hasSearchTerm;
-  const canAddEndpoint = session.can("canAddEndpoint");
-  const canEditEndpoint = session.can("canEditEndpoint");
-
-  const handleCreateEndpoint = (
-    billerSlug = selectedBillerSlug ?? undefined
+  const changeQuery = (next: EndpointListQuery) => {
+    setQueryState(next);
+    if (next.billerSlug !== billerSlug) {
+      setParams((current) => {
+        const result = new URLSearchParams(current);
+        if (next.billerSlug) {
+          result.set("billerSlug", next.billerSlug);
+        } else {
+          result.delete("billerSlug");
+        }
+        return result;
+      });
+    }
+  };
+  const filter = (changes: Partial<EndpointListQuery>) =>
+    changeQuery({ ...query, ...changes, page: 0 });
+  const reset = () => {
+    setSearch("");
+    changeQuery({ ...initialQuery, size: query.size });
+  };
+  const loadAction = async (
+    item: EndpointListItem,
+    action: "edit" | "delete"
   ) => {
-    setInitialBillerSlug(billerSlug);
-    setIsDialogOpen(true);
-  };
-
-  const handleAddEndpoint = (data: EndpointFormData) => {
-    createEndpoint(data, {
-      onSuccess: () => {
-        setIsDialogOpen(false);
-      },
-    });
-  };
-
-  const handleEditEndpoint = (data: EndpointFormData) => {
-    if (!endpointToEdit) {
-      return;
-    }
-
-    updateEndpoint(
-      {
-        changes: {
-          method: data.method,
-          url: data.url,
-        },
-        endpointSlug: endpointToEdit.slug,
-      },
-      {
-        onSuccess: () => {
-          setEndpointToEdit(null);
-        },
+    setLoadingAction(true);
+    try {
+      const endpoint = await httpEndpointAdapter.getEndpoint(item.slug);
+      if (!endpoint) {
+        toast.error(messages.endpoints.endpointNoLongerExists);
+        return;
       }
-    );
-  };
-
-  const handleEditBiller = (billerName: string) => {
-    if (!billerToEdit) {
-      return;
-    }
-
-    updateBiller(
-      { billerName, slug: billerToEdit.slug },
-      {
-        onSuccess: () => {
-          setBillerToEdit(null);
-        },
+      if (action === "edit") {
+        setEndpointToEdit(endpoint);
+      } else {
+        setEndpointToDelete(endpoint);
       }
-    );
-  };
-
-  const handleDeleteEndpoint = () => {
-    if (!endpointToDelete) {
-      return;
+    } catch {
+      toast.error(copy.error);
+    } finally {
+      setLoadingAction(false);
     }
-
-    deleteEndpoint(endpointToDelete.slug, {
-      onSuccess: () => {
-        setEndpointToDelete(null);
-      },
-    });
   };
-
-  const handleOpenExportDialog = () => {
-    setIsExportDialogOpen(true);
-  };
-
-  const tourSteps = useMemo<TourStep[]>(() => {
-    const baseSteps: TourStep[] = [
-      {
-        content: (
-          <TourStepContent
-            description={messages.endpoints.tour.workspaceDescription}
-            title={messages.endpoints.tour.workspaceTitle}
-          />
-        ),
-        position: "bottom",
-        selectorId: ENDPOINTS_TOUR_TARGETS.header,
-      },
-    ];
-
-    if (!(hasEndpoints || isUnknownBillerScope) && canAddEndpoint) {
-      return [
-        ...baseSteps,
-        {
-          content: (
-            <TourStepContent
-              description={messages.endpoints.tour.createFirstDescription}
-              title={messages.endpoints.tour.createFirstTitle}
-            />
-          ),
-          position: "top",
-          selectorId: ENDPOINTS_TOUR_TARGETS.createFirstEndpoint,
-        },
-      ];
+  const exportEndpoints = async () => {
+    setExporting(true);
+    try {
+      const endpoints = await httpEndpointAdapter.listEndpoints();
+      setExportGroups(
+        groupEndpointsByBiller(
+          endpoints.filter((endpoint) => matchesExport(endpoint, query))
+        )
+      );
+      setExportOpen(true);
+    } catch {
+      toast.error(copy.error);
+    } finally {
+      setExporting(false);
     }
-
-    return [
-      ...baseSteps,
-      ...(canAddEndpoint
-        ? [
-            {
-              content: (
-                <TourStepContent
-                  description={messages.endpoints.tour.addEndpointDescription}
-                  title={messages.endpoints.tour.addEndpointTitle}
-                />
-              ),
-              position: "left" as const,
-              selectorId: ENDPOINTS_TOUR_TARGETS.addEndpoint,
-            },
-          ]
-        : []),
+  };
+  const startIntro = () => {
+    setSteps([
       {
-        content: (
-          <TourStepContent
-            description={messages.endpoints.tour.searchDescription}
-            title={messages.endpoints.tour.searchTitle}
-          />
-        ),
+        selectorId: "endpoints-tour-header",
         position: "bottom",
-        selectorId: ENDPOINTS_TOUR_TARGETS.search,
+        content: <p>{messages.endpoints.tour.workspaceDescription}</p>,
       },
       {
-        content: (
-          <TourStepContent
-            description={messages.endpoints.tour.viewModeDescription}
-            title={messages.endpoints.tour.viewModeTitle}
-          />
-        ),
+        selectorId: "endpoints-tour-search",
         position: "bottom",
-        selectorId: ENDPOINTS_TOUR_TARGETS.viewMode,
+        content: <p>{messages.endpoints.tour.searchDescription}</p>,
       },
       {
-        content: (
-          <TourStepContent
-            description={messages.endpoints.tour.exportDescription}
-            title={messages.endpoints.tour.exportTitle}
-          />
-        ),
+        selectorId: "endpoints-tour-view-mode",
+        position: "bottom",
+        content: <p>{messages.endpoints.tour.viewModeDescription}</p>,
+      },
+      {
+        selectorId: "endpoints-tour-export",
         position: "left",
-        selectorId: ENDPOINTS_TOUR_TARGETS.export,
+        content: <p>{copy.exportScope}</p>,
       },
-      ...(hasFilteredEndpoints
+      ...(entries.data?.endpoints.length
         ? [
             {
-              content: (
-                <TourStepContent
-                  description={messages.endpoints.tour.detailsDescription}
-                  title={messages.endpoints.tour.detailsTitle}
-                />
-              ),
+              selectorId: "endpoints-tour-first-endpoint",
               position: "top" as const,
-              selectorId: ENDPOINTS_TOUR_TARGETS.firstEndpoint,
+              content: <p>{messages.endpoints.tour.detailsDescription}</p>,
             },
           ]
         : []),
-    ];
-  }, [
-    canAddEndpoint,
-    hasEndpoints,
-    hasFilteredEndpoints,
-    isUnknownBillerScope,
-  ]);
-
-  const handleStartTour = useCallback(() => {
-    setSteps(tourSteps);
-    startTour(ENDPOINTS_TOUR_ID);
-  }, [setSteps, startTour, tourSteps]);
-
-  const emptyStateCopy = getEmptyStateCopy(
-    isUnknownBillerScope,
-    isBillerScoped,
-    hasSearchTerm
-  );
-
-  useEffect(() => {
-    if (
-      isLoadingEndpoints ||
-      hasSeenEndpointsTour ||
-      hasAutoStartedTour.current ||
-      tourSteps.length === 0
-    ) {
-      return;
+    ]);
+    startTour("endpoints-intro");
+  };
+  const submitEdit = (data: EndpointFormData) => {
+    if (endpointToEdit) {
+      catalog.updateEndpoint.mutate(
+        {
+          endpointSlug: endpointToEdit.slug,
+          changes: { method: data.method, url: data.url },
+        },
+        { onSuccess: () => setEndpointToEdit(null) }
+      );
     }
-
-    hasAutoStartedTour.current = true;
-
-    const timeoutId = window.setTimeout(() => {
-      shouldMarkTourSeenOnEnd.current = true;
-      handleStartTour();
-    }, 350);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [
-    handleStartTour,
-    hasSeenEndpointsTour,
-    isLoadingEndpoints,
-    setHasSeenEndpointsTour,
-    tourSteps.length,
-  ]);
-
-  useEffect(() => {
-    if (
-      shouldMarkTourSeenOnEnd.current &&
-      activeTourId === ENDPOINTS_TOUR_ID &&
-      !isActive
-    ) {
-      shouldMarkTourSeenOnEnd.current = false;
-      setHasSeenEndpointsTour(true);
-    }
-  }, [activeTourId, isActive, setHasSeenEndpointsTour]);
-
+  };
   return (
-    <div className="space-y-6">
-      <motion.div
-        animate={{ opacity: 1 }}
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-        id={ENDPOINTS_TOUR_TARGETS.header}
-        initial={{ opacity: 0 }}
-        transition={{ duration: MOTION_DURATION.fast, ease: MOTION_EASE.out }}
+    <div className="flex min-w-0 flex-col gap-6 lg:min-h-0 lg:flex-1 lg:overflow-hidden">
+      <div
+        className="flex shrink-0 flex-col justify-between gap-4 sm:flex-row sm:items-center"
+        id="endpoints-tour-header"
       >
         <div>
           <h1 className="font-bold text-3xl tracking-tight">
@@ -638,384 +374,254 @@ export function EndpointsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            onClick={handleStartTour}
-            size="sm"
-            type="button"
-            variant="outline"
-          >
-            <HugeiconsIcon
-              data-icon="inline-start"
-              icon={HelpCircleIcon}
-              strokeWidth={2}
-            />
+          <Button onClick={startIntro} size="sm" variant="outline">
+            <HugeiconsIcon icon={HelpCircleIcon} strokeWidth={2} />
             {messages.endpoints.tour.startButton}
           </Button>
           <ProtectedAction ability="canAddEndpoint">
-            <div
-              id={hasEndpoints ? ENDPOINTS_TOUR_TARGETS.addEndpoint : undefined}
+            <AddEndpointSheet
+              initialBillerSlug={createBillerSlug}
+              isSubmitting={catalog.createEndpoint.isPending}
+              onOpenChange={setAddOpen}
+              onSubmit={(data) =>
+                catalog.createEndpoint.mutate(data, {
+                  onSuccess: () => setAddOpen(false),
+                })
+              }
+              onTriggerClick={() => openCreateEndpoint()}
+              open={addOpen}
+              showTrigger={false}
+            />
+            <Button
+              disabled={unknownBiller}
+              onClick={() => openCreateEndpoint()}
             >
-              <AddEndpointSheet
-                initialBillerSlug={initialBillerSlug}
-                isSubmitting={isCreatingEndpoint}
-                onOpenChange={setIsDialogOpen}
-                onSubmit={handleAddEndpoint}
-                onTriggerClick={() => handleCreateEndpoint()}
-                open={isDialogOpen}
-                showTrigger={hasEndpoints}
-              />
-            </div>
-          </ProtectedAction>
-          <ProtectedAction ability="canAddBiller">
-            <EditBillerDialog
-              biller={billerToEdit}
-              isSubmitting={isUpdatingBiller}
-              onOpenChange={(open) => {
-                if (!open) {
-                  setBillerToEdit(null);
-                }
-              }}
-              onSubmit={handleEditBiller}
-              open={billerToEdit !== null}
-            />
-          </ProtectedAction>
-          <ProtectedAction ability="canEditEndpoint">
-            <EditEndpointSheet
-              endpoint={endpointToEdit}
-              isSubmitting={isUpdatingEndpoint}
-              onOpenChange={(open) => {
-                if (!open) {
-                  setEndpointToEdit(null);
-                }
-              }}
-              onSubmit={handleEditEndpoint}
-              open={endpointToEdit !== null}
-            />
-            <DeleteEndpointDialog
-              endpoint={endpointToDelete}
-              isDeleting={isDeletingEndpoint}
-              onConfirm={handleDeleteEndpoint}
-              onOpenChange={(open) => {
-                if (!open) {
-                  setEndpointToDelete(null);
-                }
-              }}
-              open={endpointToDelete !== null}
-            />
+              <HugeiconsIcon icon={Add01Icon} strokeWidth={2} />
+              {messages.endpoints.addEndpoint}
+            </Button>
           </ProtectedAction>
         </div>
-      </motion.div>
-
-      {isLoadingEndpoints && (
-        <>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="flex-1">
-              <EndpointsSearchControls
-                onSearchChange={setSearchTerm}
-                onViewModeChange={setViewMode}
-                searchId={ENDPOINTS_TOUR_TARGETS.search}
-                searchValue={searchTerm}
-                viewMode={viewMode}
-                viewModeId={ENDPOINTS_TOUR_TARGETS.viewMode}
-              />
+      </div>
+      <EndpointTable
+        actionPending={loadingAction || catalog.updateEndpoint.isPending}
+        canEdit={canEdit}
+        data={entries.data}
+        error={entries.isError}
+        fetching={entries.isFetching}
+        loading={entries.isPending}
+        onAddEndpoint={
+          session.can("canAddEndpoint") ? openCreateEndpoint : undefined
+        }
+        onCreate={
+          session.can("canAddEndpoint") && !unknownBiller
+            ? () => openCreateEndpoint()
+            : undefined
+        }
+        onDelete={(item) => loadAction(item, "delete")}
+        onEdit={(item) => loadAction(item, "edit")}
+        onEditBiller={
+          session.can("canAddBiller")
+            ? (slug, name) =>
+                setBillerToEdit(
+                  billers.find((biller) => biller.slug === slug) ?? {
+                    slug,
+                    name,
+                  }
+                )
+            : undefined
+        }
+        onQueryChange={changeQuery}
+        onReset={reset}
+        onRetry={() => entries.refetch()}
+        query={query}
+        toolbar={
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="contents">
+              <div className="contents">
+                <EndpointsSearchControls
+                  actions={
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          disabled={
+                            exporting ||
+                            entries.isFetching ||
+                            entries.isError ||
+                            !entries.data?.totalElements
+                          }
+                          id="endpoints-tour-export"
+                          onClick={exportEndpoints}
+                          size="sm"
+                          variant="outline"
+                        >
+                          {exporting ? (
+                            <Spinner />
+                          ) : (
+                            <Postman className="size-4" />
+                          )}
+                          {messages.endpoints.exportToPostman}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        {copy.exportScope}
+                      </TooltipContent>
+                    </Tooltip>
+                  }
+                  onSearchChange={setSearch}
+                  onViewModeChange={setViewMode}
+                  searchId="endpoints-tour-search"
+                  searchPlaceholder={copy.search}
+                  searchValue={search}
+                  viewMode={viewMode}
+                  viewModeId="endpoints-tour-view-mode"
+                />
+              </div>
             </div>
-            <Button disabled variant="outline">
-              <Postman className="mr-2 h-4 w-4" />
-              {messages.endpoints.exportToPostman}
-            </Button>
-          </div>
-
-          <div className="space-y-8">
-            {/* First group skeleton - 9 items */}
-            <section className="space-y-4">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <Skeleton className="h-7 w-32" />
-                <Skeleton className="h-5 w-24" />
+            <div className="flex max-w-full shrink-0 items-center gap-2">
+              <div className="h-6 shrink-0">
+                <Separator orientation="vertical" />
               </div>
-              {viewMode === "grid" ? (
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {SKELETON_KEYS.slice(
-                    SKELETON_GROUP_1_START,
-                    SKELETON_GROUP_1_END
-                  ).map((key) => (
-                    <EndpointCardSkeleton key={key} />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {SKELETON_KEYS.slice(
-                    SKELETON_GROUP_1_START,
-                    SKELETON_GROUP_1_END
-                  ).map((key) => (
-                    <EndpointListSkeleton key={key} />
-                  ))}
-                </div>
+              <ButtonGroup
+                aria-label={copy.filters}
+                className="min-w-0 overflow-x-auto"
+              >
+                <EndpointFilter
+                  label={copy.allBillers}
+                  onChange={(value) => filter({ billerSlug: value })}
+                  options={billers.map((biller) => ({
+                    value: biller.slug,
+                    label: biller.name,
+                  }))}
+                  value={billerSlug}
+                />
+                <EndpointFilter
+                  label={copy.allMethods}
+                  onChange={(value) => filter({ method: value })}
+                  options={[
+                    "GET",
+                    "POST",
+                    "PUT",
+                    "PATCH",
+                    "DELETE",
+                    "HEAD",
+                    "OPTIONS",
+                  ].map((value) => ({ value, label: value }))}
+                  value={query.method}
+                />
+
+                <EndpointFilter
+                  label={copy.allStatuses}
+                  onChange={(value) => filter({ enabled: value })}
+                  options={[
+                    { value: "true", label: messages.common.enabled },
+                    { value: "false", label: messages.common.disabled },
+                  ]}
+                  value={query.enabled}
+                />
+                <EndpointFilter
+                  label={copy.allResponses}
+                  onChange={(value) => filter({ responseStatus: value })}
+                  options={[
+                    { value: "active", label: copy.active },
+                    { value: "inactive", label: copy.inactive },
+                  ]}
+                  value={query.responseStatus}
+                />
+              </ButtonGroup>
+              {(search ||
+                billerSlug ||
+                query.method ||
+                query.enabled ||
+                query.responseStatus) && (
+                <Button onClick={reset} size="sm" variant="ghost">
+                  {copy.reset}
+                </Button>
               )}
-            </section>
-
-            {/* Second group skeleton - 4 items */}
-            <section className="space-y-4">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <Skeleton className="h-7 w-28" />
-                <Skeleton className="h-5 w-20" />
-              </div>
-              {viewMode === "grid" ? (
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {SKELETON_KEYS.slice(
-                    SKELETON_GROUP_2_START,
-                    SKELETON_GROUP_2_END
-                  ).map((key) => (
-                    <EndpointCardSkeleton key={key} />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {SKELETON_KEYS.slice(
-                    SKELETON_GROUP_2_START,
-                    SKELETON_GROUP_2_END
-                  ).map((key) => (
-                    <EndpointListSkeleton key={key} />
-                  ))}
-                </div>
-              )}
-            </section>
-
-            {/* Third group skeleton - 5 items */}
-            <section className="space-y-4">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <Skeleton className="h-7 w-36" />
-                <Skeleton className="h-5 w-24" />
-              </div>
-              {viewMode === "grid" ? (
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {SKELETON_KEYS.slice(
-                    SKELETON_GROUP_3_START,
-                    SKELETON_GROUP_3_END
-                  ).map((key) => (
-                    <EndpointCardSkeleton key={key} />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {SKELETON_KEYS.slice(
-                    SKELETON_GROUP_3_START,
-                    SKELETON_GROUP_3_END
-                  ).map((key) => (
-                    <EndpointListSkeleton key={key} />
-                  ))}
-                </div>
-              )}
-            </section>
-          </div>
-        </>
-      )}
-
-      {!isLoadingEndpoints && shouldShowCatalog && (
-        <>
-          <motion.div
-            animate={{ opacity: 1 }}
-            className="flex flex-col gap-4 sm:flex-row sm:items-center"
-            initial={{ opacity: 0 }}
-            transition={{
-              duration: MOTION_DURATION.fast,
-              ease: MOTION_EASE.out,
-            }}
-          >
-            <div className="flex-1">
-              <EndpointsSearchControls
-                onSearchChange={setSearchTerm}
-                onViewModeChange={setViewMode}
-                searchId={ENDPOINTS_TOUR_TARGETS.search}
-                searchValue={searchTerm}
-                viewMode={viewMode}
-                viewModeId={ENDPOINTS_TOUR_TARGETS.viewMode}
-              />
-            </div>
-            <Button
-              disabled={groupedEndpoints.length === 0}
-              id={ENDPOINTS_TOUR_TARGETS.export}
-              onClick={handleOpenExportDialog}
-              variant="outline"
-            >
-              <Postman className="mr-2 h-4 w-4" />
-              {messages.endpoints.exportToPostman}
-            </Button>
-          </motion.div>
-
-          <ExportEndpointsDialog
-            groupedEndpoints={groupedEndpoints}
-            onOpenChange={setIsExportDialogOpen}
-            open={isExportDialogOpen}
-          />
-
-          {hasFilteredEndpoints ? (
-            <motion.div
-              animate={{ opacity: 1 }}
-              className="space-y-8"
-              initial={{ opacity: 0 }}
-              transition={{
-                duration: MOTION_DURATION.fast,
-                ease: MOTION_EASE.out,
-              }}
-            >
-              {groupedEndpoints.map((group, index) => (
-                <section className="space-y-4" key={group.billerSlug}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-bold text-lg tracking-tight">
-                        {group.billerName}
-                      </h2>
-                      <ProtectedAction ability="canAddEndpoint">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              aria-label={formatMessage(
-                                messages.endpoints.addEndpointForBiller,
-                                { billerName: group.billerName }
-                              )}
-                              onClick={() =>
-                                handleCreateEndpoint(group.billerSlug)
-                              }
-                              size="icon-xs"
-                              type="button"
-                              variant="panel-muted"
-                            >
-                              <HugeiconsIcon
-                                className="size-3.5"
-                                icon={Add01Icon}
-                                strokeWidth={2.5}
-                              />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {formatMessage(
-                              messages.endpoints.addEndpointForBiller,
-                              { billerName: group.billerName }
-                            )}
-                          </TooltipContent>
-                        </Tooltip>
-                      </ProtectedAction>
-                      <ProtectedAction ability="canAddBiller">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              aria-label={formatMessage(
-                                messages.endpoints.editBillerTooltip,
-                                { billerName: group.billerName }
-                              )}
-                              onClick={() => {
-                                const biller = billers.find(
-                                  (candidate) =>
-                                    candidate.slug === group.billerSlug
-                                );
-                                setBillerToEdit(
-                                  biller ?? {
-                                    name: group.billerName,
-                                    slug: group.billerSlug,
-                                  }
-                                );
-                              }}
-                              size="icon-xs"
-                              type="button"
-                              variant="panel-muted"
-                            >
-                              <HugeiconsIcon
-                                className="size-3.5"
-                                icon={Pen01Icon}
-                                strokeWidth={2.5}
-                              />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {formatMessage(
-                              messages.endpoints.editBillerTooltip,
-                              { billerName: group.billerName }
-                            )}
-                          </TooltipContent>
-                        </Tooltip>
-                      </ProtectedAction>
-                    </div>
-                    <Badge variant="outline-muted">
-                      <Layers3 className="h-3.5 w-3.5" />
-                      {formatMessage(messages.endpoints.endpointCount, {
-                        count: group.endpoints.length,
-                      })}
-                    </Badge>
-                  </div>
-                  <AnimatedEndpointGroup
-                    canEditEndpoint={canEditEndpoint}
-                    group={group}
-                    groupIndex={index}
-                    onDeleteEndpoint={setEndpointToDelete}
-                    onEditEndpoint={setEndpointToEdit}
-                    prefersReducedMotion={shouldReduceMotion}
-                    viewMode={viewMode}
-                  />
-                </section>
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              animate={{ opacity: 1 }}
-              initial={{ opacity: 0 }}
-              transition={{
-                duration: MOTION_DURATION.fast,
-                ease: MOTION_EASE.out,
-              }}
-            >
-              <Empty variant="bordered">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <Plug />
-                  </EmptyMedia>
-                  <EmptyTitle>{emptyStateCopy.title}</EmptyTitle>
-                  <EmptyDescription>
-                    {emptyStateCopy.description}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            </motion.div>
-          )}
-        </>
-      )}
-
-      {!(isLoadingEndpoints || shouldShowCatalog) && (
-        <motion.div
-          animate={{ opacity: 1 }}
-          initial={{ opacity: 0 }}
-          transition={{ duration: MOTION_DURATION.fast, ease: MOTION_EASE.out }}
-        >
-          <Empty className="min-h-[60vh]" variant="bordered">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Plug />
-              </EmptyMedia>
-              <EmptyTitle>{messages.endpoints.emptyTitle}</EmptyTitle>
-              <EmptyDescription>
-                {messages.endpoints.emptyDescription}
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              {!isUnknownBillerScope && (
-                <ProtectedAction ability="canAddEndpoint">
+              {selectedBiller && (
+                <ProtectedAction ability="canAddBiller">
                   <Button
-                    id={ENDPOINTS_TOUR_TARGETS.createFirstEndpoint}
-                    onClick={() => handleCreateEndpoint()}
-                    type="button"
+                    aria-label={formatMessage(
+                      messages.endpoints.editBillerTooltip,
+                      {
+                        billerName: selectedBiller.name,
+                      }
+                    )}
+                    onClick={() => setBillerToEdit(selectedBiller)}
+                    size="sm"
+                    variant="outline"
                   >
-                    <HugeiconsIcon
-                      className="mr-2 h-4 w-4"
-                      icon={Add01Icon}
-                      strokeWidth={2}
-                    />
-                    {messages.endpoints.createFirstButton}
+                    <HugeiconsIcon icon={Pen01Icon} strokeWidth={2} />
+                    {selectedBiller.name}
                   </Button>
                 </ProtectedAction>
               )}
-            </EmptyContent>
-          </Empty>
-        </motion.div>
-      )}
+            </div>
+            {unknownBiller && (
+              <Alert>
+                <AlertDescription>
+                  {messages.endpoints.billerNotFoundDescription}
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        }
+        viewMode={viewMode}
+      />
+      <ProtectedAction ability="canEditEndpoint">
+        <EditEndpointSheet
+          endpoint={endpointToEdit}
+          isSubmitting={catalog.updateEndpoint.isPending}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEndpointToEdit(null);
+            }
+          }}
+          onSubmit={submitEdit}
+          open={endpointToEdit !== null}
+        />
+        <DeleteEndpointDialog
+          endpoint={endpointToDelete}
+          isDeleting={catalog.deleteEndpoint.isPending}
+          onConfirm={() => {
+            if (endpointToDelete) {
+              catalog.deleteEndpoint.mutate(endpointToDelete.slug, {
+                onSuccess: () => setEndpointToDelete(null),
+              });
+            }
+          }}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEndpointToDelete(null);
+            }
+          }}
+          open={endpointToDelete !== null}
+        />
+      </ProtectedAction>
+      <ProtectedAction ability="canAddBiller">
+        <EditBillerDialog
+          biller={billerToEdit}
+          isSubmitting={updateBiller.isPending}
+          onOpenChange={(open) => {
+            if (!open) {
+              setBillerToEdit(null);
+            }
+          }}
+          onSubmit={(data) => {
+            if (billerToEdit) {
+              updateBiller.mutate(
+                { slug: billerToEdit.slug, billerName: data },
+                { onSuccess: () => setBillerToEdit(null) }
+              );
+            }
+          }}
+          open={billerToEdit !== null}
+        />
+      </ProtectedAction>
+      <ExportEndpointsDialog
+        groupedEndpoints={exportGroups}
+        onOpenChange={setExportOpen}
+        open={exportOpen}
+      />
     </div>
   );
 }

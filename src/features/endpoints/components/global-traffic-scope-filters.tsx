@@ -45,7 +45,7 @@ export function GlobalTrafficScopeFilters({
   const { messages } = useI18n();
   const controlId = useId();
   const billers = useGetBillers();
-  const { endpoints } = useEndpointCatalog();
+  const { endpoints } = useEndpointCatalog(undefined, true);
   const selectedBiller = billers.data?.find(
     (biller) => biller.slug === billerSlug
   );

@@ -14,13 +14,16 @@ import { EndpointMetaStrip } from "@/features/endpoints/components/endpoint-meta
 import { EndpointPathTitle } from "@/features/endpoints/components/endpoint-path-title";
 import { HttpMethodBadge } from "@/features/endpoints/components/http-method-badge";
 import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
-import type { Endpoint } from "@/features/endpoints/types";
+import type {
+  Endpoint,
+  EndpointListItem as EndpointSummary,
+} from "@/features/endpoints/types";
 import { getMethodColor } from "@/features/endpoints/utils/http-method-colors";
 import { messages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type EndpointListItemProps = {
-  endpoint: Endpoint;
+  endpoint: Endpoint | EndpointSummary;
   onClick?: () => void;
   tourId?: string;
 };
@@ -86,7 +89,11 @@ export function EndpointListItem({
           <ItemDescription className="text-left">
             <EndpointMetaStrip
               billerSlug={endpoint.billerSlug}
-              responseCount={endpoint.responses.length}
+              responseCount={
+                "responseCount" in endpoint
+                  ? endpoint.responseCount
+                  : endpoint.responses.length
+              }
             />
           </ItemDescription>
           {endpoint.enabled === false && (

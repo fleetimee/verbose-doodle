@@ -71,7 +71,7 @@ import {
   DEVELOPER_TOOL_COUNT,
   getDeveloperToolHref,
 } from "@/features/developer-tools/catalog";
-import { useEndpointCatalog } from "@/features/endpoints/hooks/use-endpoint-catalog";
+import { usePrefetchEndpointPage } from "@/features/endpoints/hooks/use-endpoint-page";
 import { usePrefetchOverview } from "@/features/overview/hooks/use-prefetch-overview";
 import { SocketBridgeStatus } from "@/features/socket-tester/components/socket-bridge-floating-status";
 
@@ -451,7 +451,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   // Prefetch hooks for hover behavior
   const { prefetchOverview } = usePrefetchOverview();
-  const { prefetchEndpoints } = useEndpointCatalog();
+  const prefetchEndpoints = usePrefetchEndpointPage();
 
   // Construct user object for NavUser component
   const user = snapshot.user

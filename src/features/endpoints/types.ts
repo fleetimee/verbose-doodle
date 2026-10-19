@@ -191,3 +191,31 @@ export type EndpointMetric = {
 export type EndpointHourlyMetric = EndpointMetric & {
   readonly bucketStart: string;
 };
+
+export type EndpointListItem = Omit<Endpoint, "responses" | "id"> & {
+  id: number;
+  responseCount: number;
+  activeResponseName: string | null;
+};
+
+export type EndpointListQuery = {
+  page: number;
+  size: number;
+  search: string;
+  billerSlug: string;
+  method: string;
+  enabled: string;
+  responseStatus: string;
+  sortBy: string;
+  direction: "asc" | "desc";
+};
+
+export type EndpointPage = {
+  endpoints: EndpointListItem[];
+  totalElements: number;
+  totalPages: number;
+  page: number;
+  size: number;
+};
+
+export type EndpointViewMode = "table" | "grid" | "list";

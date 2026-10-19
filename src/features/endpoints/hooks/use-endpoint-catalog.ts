@@ -20,10 +20,12 @@ type CatalogAdapter = EndpointDataAdapter;
  * The adapter, request DTOs, query keys, cache policy, and invalidation remain module-private.
  */
 export function useEndpointCatalog(
-  adapter: CatalogAdapter = httpEndpointAdapter
+  adapter: CatalogAdapter = httpEndpointAdapter,
+  enabled = false
 ) {
   const queryClient = useQueryClient();
   const endpoints = useQuery<Endpoint[], ApiError>({
+    enabled,
     queryFn: adapter.listEndpoints,
     queryKey: endpointDataQueryKeys.catalog,
     staleTime: 5 * 60 * 1000,
