@@ -24,6 +24,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -336,18 +337,22 @@ export function ResponsePreview({
                   </div>
                   <CodeBlockCopyButton />
                 </CodeBlockHeader>
-                <CodeBlockBody className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-                  {(item) => (
-                    <CodeBlockItem key={item.language} value="json">
-                      <CodeBlockContent
-                        className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
-                        language="json"
-                      >
-                        {item.code}
-                      </CodeBlockContent>
-                    </CodeBlockItem>
-                  )}
-                </CodeBlockBody>
+                <div className="min-h-0 flex-1 bg-background">
+                  <ScrollArea className="h-full" variant="fit">
+                    <CodeBlockBody>
+                      {(item) => (
+                        <CodeBlockItem key={item.language} value="json">
+                          <CodeBlockContent
+                            className="[&_.line]:max-w-full [&_.line]:break-all [&_code]:max-w-full [&_code]:whitespace-pre-wrap [&_pre]:max-w-full [&_pre]:whitespace-pre-wrap"
+                            language="json"
+                          >
+                            {item.code}
+                          </CodeBlockContent>
+                        </CodeBlockItem>
+                      )}
+                    </CodeBlockBody>
+                  </ScrollArea>
+                </div>
               </CodeBlock>
             </div>
           </motion.div>

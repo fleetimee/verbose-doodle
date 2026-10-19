@@ -166,8 +166,22 @@ export function DashboardLayout() {
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const scrollPathRef = useRef(location.pathname);
   const shouldReduceMotion = useReducedMotion() ?? false;
   const routedPage = useOutlet();
+
+  React.useLayoutEffect(() => {
+    if (scrollPathRef.current === location.pathname) {
+      return;
+    }
+
+    scrollPathRef.current = location.pathname;
+    scrollViewportRef.current?.scrollTo({
+      behavior: "instant",
+      left: 0,
+      top: 0,
+    });
+  }, [location.pathname]);
 
   useEffect(() => {
     const viewport = scrollViewportRef.current;

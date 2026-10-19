@@ -1,7 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Clock01Icon, Clock03Icon, ZapIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { forwardRef, useImperativeHandle } from "react";
 import { Controller, type UseFormReturn, useForm } from "react-hook-form";
 import { useI18n } from "@/components/i18n-provider";
@@ -10,8 +7,8 @@ import {
   ChoiceboxIndicator,
   ChoiceboxItem,
 } from "@/components/kibo-ui/choicebox";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import {
   Field,
   FieldContent,
@@ -21,7 +18,12 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Form } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
 import {
   DELAY_PRESETS,
   MAX_DELAY_MS,
@@ -29,10 +31,8 @@ import {
   type SimulationFormValues,
   simulationFormSchema,
 } from "@/features/endpoints/schemas/simulation-schema";
-import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 const MS_PER_SECOND = 1000;
-const DELAY_DISPLAY_DECIMAL_PLACES = 2;
 
 type SimulationFormProps = {
   defaultValues?: SimulationFormValues;
@@ -68,7 +68,6 @@ export const SimulationForm = forwardRef<
 
   const simulationType = form.watch("type");
   const delayMs = form.watch("delayMs");
-  const shouldReduceMotion = useReducedMotion();
 
   const handleSubmit = (data: SimulationFormValues) => {
     // Validate delay if DELAY type is selected
@@ -88,11 +87,11 @@ export const SimulationForm = forwardRef<
   return (
     <Form {...form}>
       <form
-        className="flex h-full flex-col"
+        className="flex min-h-0 flex-1 flex-col"
         onSubmit={form.handleSubmit(handleSubmit)}
       >
-        <div className="flex-1 space-y-6 overflow-y-auto">
-          <FieldGroup>
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-4 sm:px-6">
+          <FieldGroup size="compact">
             {/* Step 1: Simulation Type Selection */}
             <Controller
               control={form.control}
@@ -107,82 +106,78 @@ export const SimulationForm = forwardRef<
                       {messages.endpoints.simulationTypeDescription}
                     </FieldDescription>
                     <Choicebox
+                      aria-label={messages.endpoints.simulationTypeLabel}
                       onValueChange={field.onChange}
+                      size="sm"
                       value={field.value}
                     >
                       <ChoiceboxItem id="none" value={SIMULATION_TYPE.NONE}>
-                        <ChoiceboxIndicator className="sr-only" />
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
-                          <HugeiconsIcon
-                            className="size-5 text-muted-foreground"
-                            icon={ZapIcon}
-                            strokeWidth={2}
-                          />
-                        </div>
+                        <img
+                          alt=""
+                          aria-hidden="true"
+                          className="pointer-events-none size-16 shrink-0 object-contain sm:size-20"
+                          height={80}
+                          src="/brand/endpoint-behavior-normal.webp"
+                          width={80}
+                        />
                         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center">
                             <span className="font-medium text-sm">
                               {messages.endpoints.simulationNormalTitle}
                             </span>
-                            <Badge variant="secondary">
-                              {messages.endpoints.simulationNormalBadge}
-                            </Badge>
                           </div>
-                          <p className="text-muted-foreground text-sm">
+                          <p className="font-normal text-muted-foreground text-sm leading-relaxed">
                             {messages.endpoints.simulationNormalDescription}
                           </p>
                         </div>
+                        <ChoiceboxIndicator className="shrink-0 self-center" />
                       </ChoiceboxItem>
 
                       <ChoiceboxItem id="delay" value={SIMULATION_TYPE.DELAY}>
-                        <ChoiceboxIndicator className="sr-only" />
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
-                          <HugeiconsIcon
-                            className="size-5 text-muted-foreground"
-                            icon={Clock01Icon}
-                            strokeWidth={2}
-                          />
-                        </div>
+                        <img
+                          alt=""
+                          aria-hidden="true"
+                          className="pointer-events-none size-16 shrink-0 object-contain sm:size-20"
+                          height={80}
+                          src="/brand/endpoint-behavior-delay.webp"
+                          width={80}
+                        />
                         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center">
                             <span className="font-medium text-sm">
                               {messages.endpoints.simulationDelayTitle}
                             </span>
-                            <Badge variant="secondary">
-                              {messages.endpoints.simulationDelayBadge}
-                            </Badge>
                           </div>
-                          <p className="text-muted-foreground text-sm">
+                          <p className="font-normal text-muted-foreground text-sm leading-relaxed">
                             {messages.endpoints.simulationDelayDescription}
                           </p>
                         </div>
+                        <ChoiceboxIndicator className="shrink-0 self-center" />
                       </ChoiceboxItem>
 
                       <ChoiceboxItem
                         id="timeout"
                         value={SIMULATION_TYPE.TIMEOUT}
                       >
-                        <ChoiceboxIndicator className="sr-only" />
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted/50">
-                          <HugeiconsIcon
-                            className="size-5 text-muted-foreground"
-                            icon={Clock03Icon}
-                            strokeWidth={2}
-                          />
-                        </div>
+                        <img
+                          alt=""
+                          aria-hidden="true"
+                          className="pointer-events-none size-16 shrink-0 object-contain sm:size-20"
+                          height={80}
+                          src="/brand/endpoint-behavior-timeout.webp"
+                          width={80}
+                        />
                         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center">
                             <span className="font-medium text-sm">
                               {messages.endpoints.simulationTimeoutTitle}
                             </span>
-                            <Badge variant="secondary">
-                              {messages.endpoints.simulationTimeoutBadge}
-                            </Badge>
                           </div>
-                          <p className="text-muted-foreground text-sm">
+                          <p className="font-normal text-muted-foreground text-sm leading-relaxed">
                             {messages.endpoints.simulationTimeoutDescription}
                           </p>
                         </div>
+                        <ChoiceboxIndicator className="shrink-0 self-center" />
                       </ChoiceboxItem>
                     </Choicebox>
                   </FieldContent>
@@ -194,18 +189,9 @@ export const SimulationForm = forwardRef<
             />
 
             {/* Step 2: Delay Configuration (Conditional) */}
-            <AnimatePresence initial={false}>
-              {simulationType === SIMULATION_TYPE.DELAY && (
-                <motion.div
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  initial={{ opacity: 0 }}
-                  key="delay-config"
-                  transition={{
-                    duration: MOTION_DURATION.fast,
-                    ease: MOTION_EASE.out,
-                  }}
-                >
+            <Collapsible open={simulationType === SIMULATION_TYPE.DELAY}>
+              <CollapsibleContent>
+                <div className="pb-1">
                   <Controller
                     control={form.control}
                     name="delayMs"
@@ -223,90 +209,79 @@ export const SimulationForm = forwardRef<
                           </FieldDescription>
 
                           {/* Preset Buttons */}
-                          <div className="mb-4 grid grid-cols-3 gap-2">
+                          <div className="flex flex-wrap gap-2">
                             {DELAY_PRESETS.map((preset) => (
-                              <div key={preset.value}>
-                                <Button
-                                  className="w-full"
-                                  onClick={() => field.onChange(preset.value)}
-                                  size="sm"
-                                  type="button"
-                                  variant={
-                                    delayMs === preset.value
-                                      ? "default"
-                                      : "outline"
-                                  }
-                                >
-                                  {preset.label}
-                                </Button>
-                              </div>
+                              <Button
+                                aria-pressed={delayMs === preset.value}
+                                key={preset.value}
+                                onClick={() => field.onChange(preset.value)}
+                                size="sm"
+                                type="button"
+                                variant={
+                                  delayMs === preset.value
+                                    ? "default"
+                                    : "outline"
+                                }
+                              >
+                                {preset.label}
+                              </Button>
                             ))}
                           </div>
 
-                          {/* Custom Delay Input */}
-                          <div className="flex items-end gap-2">
-                            <div className="flex-1">
+                          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-4">
+                            <div className="w-full space-y-2 sm:w-48">
                               <FieldLabel htmlFor="custom-delay">
                                 {messages.endpoints.simulationCustomDelay}
                               </FieldLabel>
-                              <Input
-                                id="custom-delay"
-                                max={MAX_DELAY_MS}
-                                min={0}
-                                onChange={(e) => {
-                                  const value = Number.parseInt(
-                                    e.target.value,
-                                    10
-                                  );
-                                  if (!Number.isNaN(value)) {
-                                    field.onChange(value);
+                              <InputGroup>
+                                <InputGroupInput
+                                  aria-describedby="delay-preview"
+                                  aria-invalid={fieldState.invalid}
+                                  className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                  id="custom-delay"
+                                  inputMode="numeric"
+                                  max={MAX_DELAY_MS}
+                                  min={1}
+                                  name={field.name}
+                                  onBlur={field.onBlur}
+                                  onChange={(event) => {
+                                    const value = event.target.value;
+                                    field.onChange(
+                                      value === "" ? undefined : Number(value)
+                                    );
+                                  }}
+                                  placeholder={
+                                    messages.endpoints
+                                      .simulationCustomDelayPlaceholder
                                   }
-                                }}
-                                placeholder={
-                                  messages.endpoints
-                                    .simulationCustomDelayPlaceholder
-                                }
-                                type="number"
-                                value={field.value || ""}
-                              />
+                                  ref={field.ref}
+                                  type="number"
+                                  value={field.value ?? ""}
+                                />
+                                <InputGroupAddon align="inline-end">
+                                  <InputGroupText>ms</InputGroupText>
+                                </InputGroupAddon>
+                              </InputGroup>
                             </div>
-                            <div className="text-muted-foreground text-sm">
-                              ms
-                            </div>
-                          </div>
-
-                          {/* Preview */}
-                          <AnimatePresence initial={false}>
-                            {delayMs && delayMs > 0 && (
-                              <motion.div
-                                animate={{ opacity: 1 }}
-                                className="mt-4 rounded-lg border bg-muted/50 p-4"
-                                exit={{ opacity: 0 }}
-                                initial={{ opacity: 0 }}
-                                key="delay-preview"
-                                transition={{
-                                  duration: shouldReduceMotion
-                                    ? MOTION_DURATION.instant
-                                    : MOTION_DURATION.fast,
-                                  ease: MOTION_EASE.out,
-                                }}
-                              >
-                                <p className="font-medium text-sm">
-                                  {messages.endpoints.simulationPreviewTitle}
-                                </p>
-                                <p className="mt-1 text-muted-foreground text-sm">
+                            <p
+                              className="text-muted-foreground text-sm sm:pb-2"
+                              id="delay-preview"
+                            >
+                              {delayMs !== undefined && delayMs > 0 ? (
+                                <>
                                   {messages.endpoints.simulationPreviewPrefix}{" "}
-                                  <span className="font-semibold">
+                                  <span className="font-medium text-foreground tabular-nums">
                                     {delayMs >= MS_PER_SECOND
-                                      ? `${(delayMs / MS_PER_SECOND).toFixed(
-                                          DELAY_DISPLAY_DECIMAL_PLACES
-                                        )}s`
+                                      ? `${delayMs / MS_PER_SECOND}s`
                                       : `${delayMs}ms`}
                                   </span>
-                                </p>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
+                                </>
+                              ) : (
+                                messages.endpoints
+                                  .simulationCustomDelayPlaceholder
+                              )}
+                            </p>
+                          </div>
                         </FieldContent>
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
@@ -314,14 +289,14 @@ export const SimulationForm = forwardRef<
                       </Field>
                     )}
                   />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </FieldGroup>
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 flex justify-end gap-2 border-t pt-4">
+        <div className="flex shrink-0 justify-end gap-2 border-t bg-muted/20 px-5 py-4 sm:px-6">
           {onCancel && (
             <Button onClick={onCancel} type="button" variant="outline">
               {messages.common.cancel}

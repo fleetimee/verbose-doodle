@@ -47,3 +47,32 @@ Existing variants: [Thinking](../public/brand/biller-operator-mascot-thinking.we
 - Use genuine alpha transparency for background artwork. A painted checkerboard is not transparency.
 - Preserve original colors in both light and dark themes. Adjust opacity when needed; do not invert colors, apply grayscale, or use screen blending to hide a background.
 - Keep search results, selection states, and descriptions readable over decorative artwork.
+
+## Endpoint behavior selection
+
+The response simulation dialog uses three small transparent WebP illustrations
+of the existing chibi mascot. Normal response gives a thumbs-up with her tablet;
+latency holds an hourglass; timeout sleeps against her tablet. Keep the poses
+static, decorative, and outside keyboard interaction. Visible radio controls and
+localized descriptions carry the behavior meaning. Do not add status badges to
+these choices.
+
+Assets: [Normal](../public/brand/endpoint-behavior-normal.webp),
+[Latency](../public/brand/endpoint-behavior-delay.webp), and
+[Timeout](../public/brand/endpoint-behavior-timeout.webp).
+
+Generated with the built-in image generation tool using the chibi reference.
+Shared prompt: small polished chibi UI illustration of the reference mascot,
+brown horse ears, brown side ponytail with mint streaks, amber-green eyes,
+receipt hair clip, cream utility jacket, charcoal operator outfit and teal
+hardware, brown tail with mint tip. Oversized head, compact body, clean cel
+shading, silhouette readable at 80px. Full body centered, tight framing, safe
+edge padding, genuine transparency; no checkerboard, scene, text, or watermark.
+Pose prompts:
+
+- Normal: cheerful confident smile, code tablet in one hand, thumbs-up with the
+  other, small mint lightning symbol beside the tablet for immediate response.
+- Latency: patient focused expression, large hourglass with amber sand in both
+  hands, looking at the timer, tablet tucked at her side.
+- Timeout: peacefully asleep sitting down, closed eyes, cheek resting on the
+  tablet, relaxed ears, tail curled beside her feet, small crescent moon.

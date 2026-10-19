@@ -3,7 +3,6 @@
 import * as React from "react"
 import { Radio as RadioPrimitive } from "@base-ui/react/radio"
 import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group"
-import { CircleIcon } from "@/components/hugeicons"
 
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
@@ -52,9 +51,9 @@ function RadioGroupItem({
     >
       <RadioPrimitive.Indicator
         data-slot="radio-group-indicator"
-        className="relative flex items-center justify-center"
+        className="flex size-full items-center justify-center"
       >
-        <CircleIcon className="fill-primary absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2" />
+        <span className="size-2 rounded-full bg-primary" />
       </RadioPrimitive.Indicator>
     </RadioPrimitive.Root>
   )

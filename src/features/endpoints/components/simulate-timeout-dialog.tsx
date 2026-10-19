@@ -93,14 +93,21 @@ export function SimulateTimeoutDialog({
 
   return (
     <Dialog onOpenChange={handleClose} open={open}>
-      <DialogContent className="sm:max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>{messages.endpoints.simulationDialogTitle}</DialogTitle>
-          <DialogDescription>
-            {formatMessage(messages.endpoints.simulationDialogDescription, {
-              name: response.name,
-            })}
-          </DialogDescription>
+      <DialogContent
+        className="max-h-[calc(100dvh-2rem)] sm:max-w-2xl"
+        variant="pane"
+      >
+        <DialogHeader className="shrink-0" size="compact" variant="banner">
+          <div className="space-y-1.5">
+            <DialogTitle>
+              {messages.endpoints.simulationDialogTitle}
+            </DialogTitle>
+            <DialogDescription>
+              {formatMessage(messages.endpoints.simulationDialogDescription, {
+                name: response.name,
+              })}
+            </DialogDescription>
+          </div>
         </DialogHeader>
 
         <SimulationForm

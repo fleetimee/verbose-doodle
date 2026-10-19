@@ -155,10 +155,7 @@ export function ResponseList({
           {messages.endpoints.postmanExport.responsesLabel}
         </h2>
       </div>
-      <ScrollArea
-        className="min-h-0 flex-1"
-        viewportClassName="overscroll-contain"
-      >
+      <ScrollArea className="min-h-0 flex-1">
         {responses.length === 0 ? (
           <Empty className="min-h-[300px]" variant="plain">
             <EmptyHeader>
