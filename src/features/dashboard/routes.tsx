@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import { Navigate, Route } from "react-router";
 import { ProtectedRoute } from "@/components/protected-route";
 import { DashboardLayout } from "@/features/dashboard/components/dashboard-layout";
@@ -11,6 +12,12 @@ import { simulatorDbRoutes } from "@/features/simulator-db/routes";
 import { socketTesterRoutes } from "@/features/socket-tester/routes";
 import { socksRelayRoutes } from "@/features/socks-relay/routes";
 
+const QrisTapReaderPage = lazy(() =>
+  import("@/pages/dashboard/qris-tap-reader").then(({ QrisTapReaderPage }) => ({
+    default: QrisTapReaderPage,
+  }))
+);
+
 export const dashboardRoutes = (
   <Route
     element={
@@ -21,6 +28,7 @@ export const dashboardRoutes = (
     path="/dashboard"
   >
     <Route element={<Navigate replace to="/dashboard/overview" />} index />
+    <Route element={<QrisTapReaderPage />} path="qris-tap-reader" />
     {gameRoutes}
     {overviewRoutes}
     {endpointRoutes}

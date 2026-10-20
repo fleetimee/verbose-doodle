@@ -18,6 +18,7 @@ import { jsonYamlConverterMessages as idJsonYamlConverterMessages } from "@/lib/
 import { jwtInspectorMessages as idJwtInspectorMessages } from "@/lib/i18n/messages/id-id/jwt-inspector";
 import { numberBaseConverterMessages as idNumberBaseConverterMessages } from "@/lib/i18n/messages/id-id/number-base-converter";
 import { overviewMessages as idOverviewMessages } from "@/lib/i18n/messages/id-id/overview";
+import { qrisTapReaderMessages } from "@/lib/i18n/messages/id-id/qris-tap-reader";
 import { retryBackoffCalculatorMessages } from "@/lib/i18n/messages/id-id/retry-backoff-calculator";
 import { scheduleOverlapCheckerMessages } from "@/lib/i18n/messages/id-id/schedule-overlap-checker";
 import { serversMessages as idServersMessages } from "@/lib/i18n/messages/id-id/servers";
@@ -29,6 +30,7 @@ import { usersMessages as idUsersMessages } from "@/lib/i18n/messages/id-id/user
 
 export const idIdMessages = {
   ...enUsMessages,
+  qrisTapReader: qrisTapReaderMessages,
   simulatorDb: simulatorDbMessages,
   employees: idEmployeesMessages,
   hmacGenerator: hmacGeneratorMessages,

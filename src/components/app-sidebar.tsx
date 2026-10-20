@@ -242,6 +242,13 @@ export function getSidebarData(
         title: "QRIS",
         items: [
           {
+            description: messages.qrisTapReader.description,
+            icon: TapParserIcon,
+            keywords: ["Eimi", "Android", "NFC", "QRIS", "TAP", "Reader"],
+            title: messages.qrisTapReader.menu,
+            url: "/dashboard/qris-tap-reader",
+          },
+          {
             description: messages.developerTools.qris.description,
             icon: MpmParserIcon,
             keywords: ["QRIS", "MPM", "QR", "EMVCo", "TLV", "CRC"],

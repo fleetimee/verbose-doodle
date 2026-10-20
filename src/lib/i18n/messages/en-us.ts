@@ -17,6 +17,7 @@ import { jsonYamlConverterMessages } from "@/lib/i18n/messages/en-us/json-yaml-c
 import { jwtInspectorMessages } from "@/lib/i18n/messages/en-us/jwt-inspector";
 import { numberBaseConverterMessages } from "@/lib/i18n/messages/en-us/number-base-converter";
 import { overviewMessages } from "@/lib/i18n/messages/en-us/overview";
+import { qrisTapReaderMessages } from "@/lib/i18n/messages/en-us/qris-tap-reader";
 import { retryBackoffCalculatorMessages } from "@/lib/i18n/messages/en-us/retry-backoff-calculator";
 import { scheduleOverlapCheckerMessages } from "@/lib/i18n/messages/en-us/schedule-overlap-checker";
 import { serversMessages } from "@/lib/i18n/messages/en-us/servers";
@@ -27,6 +28,7 @@ import { themeMessages } from "@/lib/i18n/messages/en-us/theme";
 import { usersMessages } from "@/lib/i18n/messages/en-us/users";
 
 export const enUsMessages = {
+  qrisTapReader: qrisTapReaderMessages,
   simulatorDb: simulatorDbMessages,
   hmacGenerator: hmacGeneratorMessages,
   jsonTextDiff: jsonTextDiffMessages,

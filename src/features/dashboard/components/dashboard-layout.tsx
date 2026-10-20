@@ -79,6 +79,7 @@ function getRouteLabels(
     "developer-tools": messages.developerTools.navigationGroup,
     endpoints: messages.common.navEndpoints,
     games: messages.common.navFunGames,
+    "qris-tap-reader": messages.qrisTapReader.menu,
     "fall-line": messages.common.fallLineTitle,
     terrabrowser: messages.common.terrabrowserTitle,
     "ponpoko-kart": messages.common.ponpokoKartTitle,
