@@ -134,3 +134,22 @@ export interface EmployeePresencePage {
   records: EmployeePresence[];
   years: number[];
 }
+
+export interface EmployeeSalary {
+  bulan: number | null;
+  id: string;
+  jnsSlip: string | null;
+  jnsSlipText: string | null;
+  nrp: number;
+  rowNum: number;
+  slip: string;
+  tahun: number | null;
+  tanggal: string | null;
+  tanggal2: string | null;
+}
+
+export interface EmployeeSalaryPage {
+  hasMore: boolean;
+  listPenghasilan: EmployeeSalary[];
+  page: number;
+}

@@ -1,4 +1,27 @@
 export const employeesMessages = {
+  salaryLocked: "Gaji terkunci",
+  salaryLockHint:
+    "Gambar pola bersama untuk melihat slip penghasilan selama lima menit. Anda juga dapat memilih titik dengan Tab dan Spasi, lalu pilih Buka kunci gaji.",
+  salaryLockNotice:
+    "Kunci privasi browser ini membantu mencegah tampilan terbuka tanpa sengaja. Akses administrator tetap diperlukan.",
+  salaryPatternDot: "Titik pola {dot}",
+  salaryPatternSelected: "{count} titik dipilih",
+  salaryPatternClear: "Hapus",
+  salaryUnlock: "Buka kunci gaji",
+  salaryPatternError: "Pola salah. Silakan coba lagi.",
+  salaryRelocksIn: "Terkunci kembali dalam {time}",
+  salaryLockNow: "Kunci sekarang",
+
+  salary: "Gaji",
+  salaryHint:
+    "Slip penghasilan HRMIS, terbaru lebih dahulu. Pilih bulan berdasarkan tanggal slip atau periode penggajian.",
+  salaryError: "Slip penghasilan gagal dimuat. Silakan coba lagi.",
+  noSalary: "Tidak ada slip penghasilan untuk periode ini.",
+  salaryPeriod: "Bulan penggajian",
+  salaryOpen: "Lihat slip",
+  salaryClose: "Tutup slip",
+  salaryClear: "Semua bulan",
+
   birthDetails: "Tempat, tanggal lahir",
   birthYear: "Tahun lahir",
   age: "Usia",

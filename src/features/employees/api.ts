@@ -4,6 +4,7 @@ import type {
   EmployeePage,
   EmployeePresencePage,
   EmployeeQuery,
+  EmployeeSalaryPage,
 } from "@/features/employees/types";
 import { apiGet } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
@@ -69,6 +70,23 @@ export async function fetchEmployeePresence(
   }
   const response = await apiGet<{ data: EmployeePresencePage }>(
     `${API_ENDPOINTS.admin.employees.detail(nrp)}/presence?${params}`,
+    { signal, cache: "no-store" }
+  );
+  return response.data;
+}
+
+export async function fetchEmployeeSalary(
+  nrp: number,
+  month: string,
+  page: number,
+  signal: AbortSignal
+) {
+  const params = new URLSearchParams({ page: String(page) });
+  if (month) {
+    params.set("tanggal", `${month}-01`);
+  }
+  const response = await apiGet<{ data: EmployeeSalaryPage }>(
+    `${API_ENDPOINTS.admin.employees.detail(nrp)}/salary?${params}`,
     { signal, cache: "no-store" }
   );
   return response.data;

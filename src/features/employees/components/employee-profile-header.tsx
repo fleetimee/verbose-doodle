@@ -87,6 +87,7 @@ export function EmployeeProfileTabs({
     { value: "employment", label: copy.employment },
     { value: "contact", label: copy.contact },
     { value: "presence", label: copy.presence },
+    { value: "salary", label: copy.salary },
     { value: "work-history", label: copy.workHistory },
     { value: "training", label: copy.training },
     { value: "certifications", label: copy.certifications },

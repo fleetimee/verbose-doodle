@@ -14,6 +14,7 @@ import {
   EmployeeProfileHeader,
   EmployeeProfileTabs,
 } from "@/features/employees/components/employee-profile-header";
+import { EmployeeSalary } from "@/features/employees/components/employee-salary";
 import type {
   EmployeeDetails,
   EmployeeSupervisor,
@@ -243,6 +244,13 @@ export function EmployeeProfile({
                   />
                 </dl>
               </section>
+            </div>
+          </ScrollArea>
+        </TabsContent>
+        <TabsContent className="min-h-0 overflow-hidden" value="salary">
+          <ScrollArea className="h-full min-h-0" variant="fit">
+            <div className="p-4 sm:p-5">
+              <EmployeeSalary key={employee.nrp} nrp={employee.nrp} />
             </div>
           </ScrollArea>
         </TabsContent>

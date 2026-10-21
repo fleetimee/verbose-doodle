@@ -1,4 +1,27 @@
 export const employeesMessages = {
+  salaryLocked: "Salary is locked",
+  salaryLockHint:
+    "Draw the shared pattern to view income slips for five minutes. You can also select dots with Tab and Space, then choose Unlock salary.",
+  salaryLockNotice:
+    "This browser privacy lock helps prevent casual viewing. Administrator access is still required.",
+  salaryPatternDot: "Pattern dot {dot}",
+  salaryPatternSelected: "{count} dots selected",
+  salaryPatternClear: "Clear",
+  salaryUnlock: "Unlock salary",
+  salaryPatternError: "Incorrect pattern. Try again.",
+  salaryRelocksIn: "Locks again in {time}",
+  salaryLockNow: "Lock now",
+
+  salary: "Salary",
+  salaryHint:
+    "Income slips from HRMIS, newest first. Choose a month to filter by slip date or payroll period.",
+  salaryError: "Income slips could not be loaded. Try again.",
+  noSalary: "No income slips for this period.",
+  salaryPeriod: "Payroll month",
+  salaryOpen: "View slip",
+  salaryClose: "Close slip",
+  salaryClear: "All months",
+
   birthDetails: "Place and date of birth",
   birthYear: "Birth year",
   age: "Age",

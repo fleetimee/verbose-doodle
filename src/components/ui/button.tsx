@@ -8,6 +8,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        "pattern-dot": "rounded-full hover:bg-accent aria-pressed:bg-primary/10 aria-pressed:text-primary",
         "qr-upload": "rounded-xl border border-dashed font-medium text-xs hover:border-primary/50 hover:bg-muted/50 data-[drag-active=true]:ring-2 data-[drag-active=true]:ring-ring",
         "biller-group-action": "biller-group-action rounded-full border border-border/50 bg-background/40 text-muted-foreground shadow-none hover:border-primary/40 hover:bg-primary/10 hover:text-primary focus-visible:border-primary/50",
         "inventory-filter": "inventory-filter border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
