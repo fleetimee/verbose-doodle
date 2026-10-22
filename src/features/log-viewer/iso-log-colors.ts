@@ -1,4 +1,10 @@
 export function isoFieldColor(field: number, value: string): string {
+  if (field === 0) {
+    return "iso8583-syntax-mti";
+  }
+  if (field === 1) {
+    return "iso8583-syntax-field";
+  }
   if (field === 39) {
     return value.trim() === "00" ? "iso8583-syntax-value" : "text-destructive";
   }
@@ -12,7 +18,7 @@ export function isoFieldColor(field: number, value: string): string {
     return "iso8583-syntax-field";
   }
   if ([11, 32, 33, 37, 38, 41, 42, 98, 100].includes(field)) {
-    return "text-primary";
+    return "iso8583-syntax-identifier";
   }
   return "iso8583-syntax-value";
 }

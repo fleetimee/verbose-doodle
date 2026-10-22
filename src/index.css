@@ -3410,6 +3410,9 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 .iso8583-syntax-value {
   color: #047857;
 }
+.iso8583-syntax-identifier {
+  color: #0e7490;
+}
 .iso8583-syntax-length {
   color: #1d4ed8;
 }
@@ -3422,6 +3425,9 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
 }
 .dark .iso8583-syntax-value {
   color: #6ee7b7;
+}
+.dark .iso8583-syntax-identifier {
+  color: #67e8f9;
 }
 .dark .iso8583-syntax-length {
   color: #93c5fd;

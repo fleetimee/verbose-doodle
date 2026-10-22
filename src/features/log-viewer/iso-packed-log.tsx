@@ -6,7 +6,8 @@ const PACKED_LINE =
 const HEX_16 = /^[0-9a-f]{16}$/i;
 const DUMP_LINE =
   /^[ \t]*\[(MTI|\d{1,3})\][ \t]*:[ \t]*(['"])(.*)\2(?:[ \t]+\(\d+\))?[ \t]*\r?$/gim;
-const NEXT_MESSAGE = /^\[[^\]\r\n]+\][ \t]+/m;
+const NEXT_MESSAGE =
+  /^\[(?:\d{2}\/\d{2}\/\d{4}[ \t]+)?\d{2}:\d{2}:\d{2}(?:\.\d+)?\][ \t]+/m;
 
 interface DumpField {
   number: number;
@@ -113,11 +114,11 @@ export function highlightPackedLogs(
     output.push(
       <span key={match.index}>
         {prefix}
-        <span className="iso8583-syntax-mti" title="MTI">
+        <span className={isoFieldColor(0, mti)} title="MTI">
           {mti}
         </span>
         <span
-          className="iso8583-syntax-field"
+          className={isoFieldColor(1, bitmap)}
           title={`Bitmap · ${presentFields(bitmap).join(", ")}`}
         >
           {bitmap}

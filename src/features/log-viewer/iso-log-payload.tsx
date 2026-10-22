@@ -41,16 +41,16 @@ function describeField(identifier: string, value: string, copy: IsoCopy) {
   const field = Number(identifier);
   if (identifier.toUpperCase() === "MTI" || field === 0) {
     return {
-      labelClass: "iso8583-syntax-mti",
-      valueClass: "iso8583-syntax-value",
+      labelClass: isoFieldColor(0, value),
+      valueClass: isoFieldColor(0, value),
       hint: copy.isoMti,
     };
   }
   if (identifier.toUpperCase() === "BITMAP" || field === 1) {
     const bits = bitmapFields(value);
     return {
-      labelClass: "iso8583-syntax-field",
-      valueClass: "iso8583-syntax-length",
+      labelClass: isoFieldColor(1, value),
+      valueClass: isoFieldColor(1, value),
       hint: bits
         ? `${copy.isoBitmap} · ${copy.isoBits}: ${bits}`
         : copy.isoBitmap,
@@ -60,7 +60,7 @@ function describeField(identifier: string, value: string, copy: IsoCopy) {
     return null;
   }
   return {
-    labelClass: "iso8583-syntax-field",
+    labelClass: isoFieldColor(field, value),
     valueClass: isoFieldColor(field, value),
     hint: `${copy.isoField} ${field} · ${ISO8583_FIELD_DICTIONARY[field]?.label || copy.isoCustomField}`,
   };
