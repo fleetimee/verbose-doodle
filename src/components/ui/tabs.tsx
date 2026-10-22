@@ -40,6 +40,7 @@ const tabsListVariants = cva(
         subtle: "bg-muted/60 rounded-md p-0.5",
         solid: "bg-muted/80",
         transparent: "bg-transparent p-0 rounded-md",
+        stream: "relative justify-start bg-transparent p-0 rounded-none",
       },
       size: {
         default: "",
@@ -79,6 +80,7 @@ const tabsTriggerVariants = cva(
       variant: {
         default: "",
         compact: "data-active:shadow-xs",
+        stream: "relative flex-none shrink-0 rounded-none border-0 px-3 font-mono text-xs tracking-wide text-muted-foreground data-active:bg-transparent data-active:text-foreground data-active:shadow-none dark:data-active:bg-transparent dark:data-active:border-transparent",
         tile: "flex-col gap-0 rounded-md px-3 data-active:bg-background data-active:shadow-xs",
       },
       size: {

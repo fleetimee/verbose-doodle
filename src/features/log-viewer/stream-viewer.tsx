@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from "motion/react";
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import {
   ChevronDown,
@@ -24,6 +25,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { useLogStream } from "@/features/log-viewer/use-log-stream";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const FONT_SIZE_CLASSES = [
@@ -76,6 +78,7 @@ export function StreamViewer({
   } | null>(null);
   const olderPending = useRef(false);
   const first = pages[0];
+  const reduceMotion = useReducedMotion();
   const hasContent = pages.some((page) => page.segments.length > 0);
 
   useLayoutEffect(() => {
@@ -267,7 +270,17 @@ export function StreamViewer({
           }}
           viewportRef={viewport}
         >
-          <div className="min-w-0 px-4 pb-5 md:px-5">
+          <motion.div
+            animate={{ opacity: hasContent ? 1 : 0.65 }}
+            className="min-w-0 px-4 pb-5 md:px-5"
+            initial={false}
+            transition={{
+              duration: reduceMotion
+                ? MOTION_DURATION.instant
+                : MOTION_DURATION.fast,
+              ease: MOTION_EASE.out,
+            }}
+          >
             {hasContent
               ? segments.map((segment, index) => (
                   <div
@@ -322,7 +335,7 @@ export function StreamViewer({
                 </EmptyHeader>
               </Empty>
             )}
-          </div>
+          </motion.div>
         </ScrollArea>
       </div>
       <Separator />

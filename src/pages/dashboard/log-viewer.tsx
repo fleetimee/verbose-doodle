@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { FileTerminal, FileText, Plus } from "@/components/hugeicons";
@@ -21,7 +22,13 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsIndicator,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import {
   deleteLogSource,
   fetchLogCatalog,
@@ -36,6 +43,8 @@ import { StreamViewer } from "@/features/log-viewer/stream-viewer";
 import type { LogSource } from "@/features/log-viewer/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
+
 const SOURCES_KEY = ["log-sources"];
 
 function initialDate() {
@@ -47,6 +56,7 @@ function initialDate() {
 export function LogViewerPage() {
   const { messages } = useI18n();
   const copy = messages.logViewer;
+  const reduceMotion = useReducedMotion();
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState("");
   const [editing, setEditing] = useState<LogSource | "new" | null>(null);
@@ -93,20 +103,7 @@ export function LogViewerPage() {
 
   return (
     <div className="mx-auto flex h-full min-h-0 w-full min-w-0 max-w-[1600px] flex-1 flex-col gap-3 overflow-hidden">
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <h1 className="font-semibold text-xl tracking-tight">{copy.title}</h1>
-          <p className="sr-only">{copy.description}</p>
-        </div>
-        <Button
-          disabled={editing !== null}
-          onClick={() => setEditing("new")}
-          size="sm"
-        >
-          <Plus data-icon="inline-start" />
-          {copy.add}
-        </Button>
-      </div>
+      <h1 className="sr-only">{copy.title}</h1>
       {sources.isPending && (
         <div
           aria-label={copy.loading}
@@ -183,6 +180,7 @@ export function LogViewerPage() {
             editing={editing !== null}
             failed={catalog.isError}
             from={from}
+            onAdd={() => setEditing("new")}
             onCheck={() => catalog.refetch()}
             onDelete={() => remove.mutate(selected.id)}
             onEdit={() => setEditing(selected)}
@@ -223,86 +221,122 @@ export function LogViewerPage() {
               className="flex min-h-0 flex-1 flex-col overflow-hidden"
               size="none"
             >
-              {catalog.isPending && (
-                <div
-                  aria-label={copy.loading}
-                  className="flex min-h-0 flex-1 flex-col gap-3 p-4"
-                  role="status"
+              <AnimatePresence initial={false} mode="wait">
+                <motion.div
+                  animate={{ opacity: 1 }}
+                  className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+                  exit={{ opacity: 0 }}
+                  initial={{ opacity: 0 }}
+                  key={`${selected.id}:${selected.updatedAt}:${from}:${to}:${catalog.isPending}`}
+                  transition={{
+                    duration: reduceMotion
+                      ? MOTION_DURATION.instant
+                      : MOTION_DURATION.fast,
+                    ease: MOTION_EASE.out,
+                  }}
                 >
-                  <Skeleton className="h-8 w-72 max-w-full" />
-                  <Skeleton className="min-h-0 w-full flex-1" />
-                  <span className="sr-only">{copy.loading}</span>
-                </div>
-              )}
-              {catalog.isError && !catalog.data && (
-                <LogErrorState
-                  error={catalog.error}
-                  onConfigure={() => setEditing(selected)}
-                  onRetry={() => catalog.refetch()}
-                  retrying={catalog.isFetching}
-                  scope="catalog"
-                />
-              )}
-              {catalog.data?.streams.length === 0 && (
-                <Empty className="min-h-0 flex-1 overflow-auto">
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <FileText />
-                    </EmptyMedia>
-                    <EmptyTitle>{copy.noFiles}</EmptyTitle>
-                    <EmptyDescription>{copy.noFilesHint}</EmptyDescription>
-                  </EmptyHeader>
-                  <Button
-                    onClick={() => setEditing(selected)}
-                    size="sm"
-                    variant="outline"
-                  >
-                    {copy.edit}
-                  </Button>
-                </Empty>
-              )}
-              {activeStream && (
-                <Tabs
-                  className="min-h-0 flex-1"
-                  onValueChange={(value) => setStream(String(value))}
-                  value={activeStream}
-                  variant="flush"
-                >
-                  <div className="flex shrink-0 items-center justify-between gap-3 px-3 py-2">
-                    <div className="min-w-0 overflow-x-auto">
-                      <TabsList aria-label={copy.streams} size="sm">
-                        {catalog.data?.streams.map((type) => (
-                          <TabsTrigger key={type} value={type}>
-                            {type}
-                          </TabsTrigger>
-                        ))}
-                      </TabsList>
-                    </div>
-                    {catalog.data && (
-                      <Badge variant="secondary">
-                        {catalog.data.files.length} {copy.fileCount}
-                      </Badge>
-                    )}
-                  </div>
-                  {catalog.data?.streams.map((type) => (
-                    <TabsContent
-                      className="min-h-0 flex-1 overflow-hidden"
-                      key={type}
-                      value={type}
+                  {catalog.isPending && (
+                    <div
+                      aria-label={copy.loading}
+                      className="flex min-h-0 flex-1 flex-col gap-3 p-4"
+                      role="status"
                     >
-                      {type === activeStream && (
-                        <StreamViewer
-                          from={from}
-                          id={selected.id}
-                          key={`${selected.id}:${selected.updatedAt}:${type}:${from}:${to}`}
-                          stream={type}
-                          to={to}
-                        />
-                      )}
-                    </TabsContent>
-                  ))}
-                </Tabs>
-              )}
+                      <Skeleton className="h-8 w-72 max-w-full" />
+                      <Skeleton className="min-h-0 w-full flex-1" />
+                      <span className="sr-only">{copy.loading}</span>
+                    </div>
+                  )}
+                  {catalog.isError && !catalog.data && (
+                    <LogErrorState
+                      error={catalog.error}
+                      onConfigure={() => setEditing(selected)}
+                      onRetry={() => catalog.refetch()}
+                      retrying={catalog.isFetching}
+                      scope="catalog"
+                    />
+                  )}
+                  {catalog.data?.streams.length === 0 && (
+                    <Empty className="min-h-0 flex-1 overflow-auto">
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <FileText />
+                        </EmptyMedia>
+                        <EmptyTitle>{copy.noFiles}</EmptyTitle>
+                        <EmptyDescription>{copy.noFilesHint}</EmptyDescription>
+                      </EmptyHeader>
+                      <Button
+                        onClick={() => setEditing(selected)}
+                        size="sm"
+                        variant="outline"
+                      >
+                        {copy.edit}
+                      </Button>
+                    </Empty>
+                  )}
+                  {activeStream && (
+                    <Tabs
+                      className="min-h-0 flex-1"
+                      onValueChange={(value) => setStream(String(value))}
+                      value={activeStream}
+                      variant="flush"
+                    >
+                      <div className="flex shrink-0 items-center justify-between gap-3 px-3 py-2">
+                        <div className="min-w-0 overflow-x-auto">
+                          <TabsList
+                            aria-label={copy.streams}
+                            size="sm"
+                            variant="stream"
+                          >
+                            {catalog.data?.streams.map((type) => (
+                              <TabsTrigger
+                                key={type}
+                                value={type}
+                                variant="stream"
+                              >
+                                {type}
+                              </TabsTrigger>
+                            ))}
+                            <TabsIndicator />
+                          </TabsList>
+                        </div>
+                        {catalog.data && (
+                          <Badge variant="secondary">
+                            {catalog.data.files.length} {copy.fileCount}
+                          </Badge>
+                        )}
+                      </div>
+                      <TabsContent
+                        className="min-h-0 flex-1 overflow-hidden"
+                        value={activeStream}
+                      >
+                        <AnimatePresence initial={false} mode="wait">
+                          <motion.div
+                            animate={{ opacity: 1 }}
+                            className="flex h-full min-h-0 flex-col"
+                            exit={{ opacity: 0 }}
+                            initial={{ opacity: 0 }}
+                            key={activeStream}
+                            transition={{
+                              duration: reduceMotion
+                                ? MOTION_DURATION.instant
+                                : MOTION_DURATION.fast,
+                              ease: MOTION_EASE.out,
+                            }}
+                          >
+                            <StreamViewer
+                              from={from}
+                              id={selected.id}
+                              key={`${selected.id}:${selected.updatedAt}:${activeStream}:${from}:${to}`}
+                              stream={activeStream}
+                              to={to}
+                            />
+                          </motion.div>
+                        </AnimatePresence>
+                      </TabsContent>
+                    </Tabs>
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </CardContent>
           </Card>
         </>

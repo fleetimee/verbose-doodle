@@ -1,5 +1,6 @@
 import {
   Clock3,
+  Plus,
   RefreshCw,
   SlidersHorizontal,
   Trash2,
@@ -88,6 +89,7 @@ export function SourceControls({
   setTo,
   onSelect,
   onEdit,
+  onAdd,
   onCheck,
   onDelete,
 }: {
@@ -104,6 +106,7 @@ export function SourceControls({
   setTo: (value: string) => void;
   onSelect: (id: string) => void;
   onEdit: () => void;
+  onAdd: () => void;
   onCheck: () => void;
   onDelete: () => void;
 }) {
@@ -127,7 +130,7 @@ export function SourceControls({
                     <span className="truncate">{selected.name}</span>
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent align="start" className="w-(--anchor-width)">
                   <SelectGroup>
                     {sources.map((source) => (
                       <SelectItem key={source.id} value={source.id}>
@@ -137,6 +140,16 @@ export function SourceControls({
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              <Button
+                aria-label={copy.add}
+                disabled={editing}
+                onClick={onAdd}
+                size="icon-sm"
+                title={copy.add}
+                variant="outline"
+              >
+                <Plus />
+              </Button>
               <Button
                 aria-label={copy.edit}
                 disabled={editing}

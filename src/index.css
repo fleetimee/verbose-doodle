@@ -4128,3 +4128,17 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     transform: none;
   }
 }
+
+[data-slot="tabs-list"][data-variant="stream"] [data-slot="tabs-indicator"] {
+  clip-path: inset(
+    0 calc(100% - var(--active-tab-left) - var(--active-tab-width)) 0
+      var(--active-tab-left)
+  );
+  transition: clip-path 180ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="tabs-list"][data-variant="stream"] [data-slot="tabs-indicator"] {
+    transition: none;
+  }
+}
