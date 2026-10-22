@@ -82,6 +82,7 @@ export const API_ENDPOINTS = {
       updateSimulation: (id: string | number) =>
         `/api/response/${id}/simulation`,
     },
+    logSources: "/api/log-sources",
     servers: {
       accessTypes: "/api/servers/access-types",
       detail: (id: string) => `/api/servers/${encodeURIComponent(id)}`,

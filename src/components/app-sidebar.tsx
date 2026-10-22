@@ -23,6 +23,7 @@ import {
   Code2,
   Compass,
   Database,
+  FileText,
   type HugeIcon,
   Info,
   LayoutDashboard,
@@ -124,6 +125,14 @@ export function getSidebarData(
         description: messages.servers.navigationDescription,
         title: messages.servers.title,
         url: "/dashboard/servers",
+      },
+      {
+        adminOnly: true,
+        groupLabel: messages.common.navWorkspace,
+        icon: FileText,
+        title: messages.logViewer.title,
+        description: messages.logViewer.description,
+        url: "/dashboard/logs",
       },
       {
         adminOnly: true,

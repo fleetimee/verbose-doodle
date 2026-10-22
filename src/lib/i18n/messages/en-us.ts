@@ -15,6 +15,7 @@ import { jsonSchemaValidatorMessages } from "@/lib/i18n/messages/en-us/json-sche
 import { jsonTextDiffMessages } from "@/lib/i18n/messages/en-us/json-text-diff";
 import { jsonYamlConverterMessages } from "@/lib/i18n/messages/en-us/json-yaml-converter";
 import { jwtInspectorMessages } from "@/lib/i18n/messages/en-us/jwt-inspector";
+import { logViewerMessages } from "@/lib/i18n/messages/en-us/log-viewer";
 import { numberBaseConverterMessages } from "@/lib/i18n/messages/en-us/number-base-converter";
 import { overviewMessages } from "@/lib/i18n/messages/en-us/overview";
 import { qrisTapReaderMessages } from "@/lib/i18n/messages/en-us/qris-tap-reader";
@@ -64,6 +65,7 @@ export const enUsMessages = {
   numberBaseConverter: numberBaseConverterMessages,
   overview: overviewMessages,
   socketTester: socketTesterMessages,
+  logViewer: logViewerMessages,
   servers: serversMessages,
   socksRelay: socksRelayMessages,
   theme: themeMessages,

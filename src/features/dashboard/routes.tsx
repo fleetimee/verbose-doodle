@@ -6,6 +6,7 @@ import { developerToolRoutes } from "@/features/developer-tools/routes";
 import { employeeRoutes } from "@/features/employees/routes";
 import { endpointRoutes } from "@/features/endpoints/routes";
 import { gameRoutes } from "@/features/games/routes";
+import { logViewerRoutes } from "@/features/log-viewer/routes";
 import { overviewRoutes } from "@/features/overview/routes";
 import { serverInventoryRoutes } from "@/features/server-inventory/routes";
 import { simulatorDbRoutes } from "@/features/simulator-db/routes";
@@ -33,6 +34,7 @@ export const dashboardRoutes = (
     {overviewRoutes}
     {endpointRoutes}
     {serverInventoryRoutes}
+    {logViewerRoutes}
     {simulatorDbRoutes}
     {employeeRoutes}
     {socketTesterRoutes}
