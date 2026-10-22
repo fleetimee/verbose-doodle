@@ -109,6 +109,7 @@ function SelectTrigger({
 }
 
 function SelectContent({
+  portalContainer,
   className,
   children,
   alignItemWithTrigger = false,
@@ -118,12 +119,13 @@ function SelectContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Popup> &
+  { portalContainer?: React.ComponentProps<typeof SelectPrimitive.Portal>["container"] } &
   Pick<
     SelectPrimitive.Positioner.Props,
     "align" | "alignItemWithTrigger" | "alignOffset" | "side" | "sideOffset"
   >) {
   return (
-    <SelectPrimitive.Portal>
+    <SelectPrimitive.Portal container={portalContainer}>
       <SelectPrimitive.Positioner
         align={align}
         alignItemWithTrigger={alignItemWithTrigger}
