@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { Check, RefreshCw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { browseLogFolder } from "@/features/log-viewer/api";
 import { getLogErrorMessage as getErrorMessage } from "@/features/log-viewer/error-message";
 import { SourceFieldLabel } from "@/features/log-viewer/source-field-label";
 import { SourceFolderBrowser } from "@/features/log-viewer/source-folder-browser";
@@ -86,6 +88,15 @@ export function SourceForm({
   );
   const [inventory, setInventory] = useState<ServerEntry | null>(null);
   const [pending, setPending] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const checkController = useRef<AbortController | null>(null);
+  const [checkResult, setCheckResult] = useState<{
+    request: LogSourceRequest;
+    success: boolean;
+    message: string;
+  } | null>(null);
+  const busy = pending || checking;
+  useEffect(() => () => checkController.current?.abort(), [form]);
   const [error, setError] = useState<string | null>(null);
   const errorRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -125,7 +136,7 @@ export function SourceForm({
       | "domain"
       | "timezone"
   ) => (
-    <Field data-disabled={pending} key={key}>
+    <Field data-disabled={busy} key={key}>
       <SourceFieldLabel
         field={key}
         htmlFor={`${prefix}-${key}`}
@@ -133,7 +144,7 @@ export function SourceForm({
       />
       <Input
         autoComplete={key === "username" ? "username" : "off"}
-        disabled={pending}
+        disabled={busy}
         id={`${prefix}-${key}`}
         maxLength={key === "basePath" ? 2048 : 255}
         onChange={(event) => update(key, event.target.value)}
@@ -173,9 +184,9 @@ export function SourceForm({
   return (
     <Drawer
       direction="right"
-      dismissible={!pending}
+      dismissible={!busy}
       onOpenChange={(open) => {
-        if (!(open || pending)) {
+        if (!(open || busy)) {
           onCancel();
         }
       }}
@@ -226,7 +237,7 @@ export function SourceForm({
                     size="compact"
                   >
                     <SourceServerPicker
-                      disabled={pending}
+                      disabled={busy}
                       host={form.host}
                       onHostChange={(host) => update("host", host)}
                       onSelect={(server) => {
@@ -260,14 +271,14 @@ export function SourceForm({
                       value={inventory}
                     />
 
-                    <Field data-disabled={pending}>
+                    <Field data-disabled={busy}>
                       <SourceFieldLabel
                         field="port"
                         htmlFor={`${prefix}-port`}
                         portalContainer={drawerContent}
                       />
                       <Input
-                        disabled={pending}
+                        disabled={busy}
                         id={`${prefix}-port`}
                         inputMode="numeric"
                         maxLength={5}
@@ -292,7 +303,7 @@ export function SourceForm({
                     </Field>
                   </FieldGroup>
                   <SourceSharePicker
-                    disabled={pending}
+                    disabled={busy}
                     onChange={changeShare}
                     onDetected={detectShare}
                     portalContainer={drawerContent}
@@ -312,7 +323,7 @@ export function SourceForm({
                     {textField("username")}
                     {textField("domain")}
                   </FieldGroup>
-                  <Field data-disabled={pending}>
+                  <Field data-disabled={busy}>
                     <SourceFieldLabel
                       field="password"
                       htmlFor={`${prefix}-password`}
@@ -320,7 +331,7 @@ export function SourceForm({
                     />
                     <Input
                       autoComplete="new-password"
-                      disabled={pending}
+                      disabled={busy}
                       id={`${prefix}-password`}
                       maxLength={4096}
                       onChange={(event) =>
@@ -353,7 +364,7 @@ export function SourceForm({
                 <FieldGroup size="compact">
                   {textField("basePath")}
                   <SourceFolderBrowser
-                    disabled={pending}
+                    disabled={busy}
                     onApply={(layout) => {
                       const parts = layout.basePath.split("/").filter(Boolean);
                       const last = parts.at(-1) ?? "";
@@ -374,14 +385,14 @@ export function SourceForm({
                     request={form}
                     source={source}
                   />
-                  <Field data-disabled={pending}>
+                  <Field data-disabled={busy}>
                     <SourceFieldLabel
                       field="folderPattern"
                       htmlFor={`${prefix}-folder`}
                       portalContainer={drawerContent}
                     />
                     <Select
-                      disabled={pending}
+                      disabled={busy}
                       onValueChange={(value) =>
                         update("folderPattern", value === "flat" ? "" : value)
                       }
@@ -414,14 +425,14 @@ export function SourceForm({
                   {copy.preferencesDescription}
                 </FieldDescription>
                 <FieldGroup className="grid sm:grid-cols-2" size="compact">
-                  <Field data-disabled={pending}>
+                  <Field data-disabled={busy}>
                     <SourceFieldLabel
                       field="encoding"
                       htmlFor={`${prefix}-encoding`}
                       portalContainer={drawerContent}
                     />
                     <Select
-                      disabled={pending}
+                      disabled={busy}
                       onValueChange={(value) => update("encoding", value)}
                       value={form.encoding}
                     >
@@ -452,16 +463,81 @@ export function SourceForm({
             </div>
           </ScrollArea>
           <DrawerFooter className="shrink-0" size="lg" variant="bordered">
-            <div className="flex items-center justify-end gap-2">
+            {checkResult?.request === form && (
+              <Alert variant={checkResult.success ? "default" : "destructive"}>
+                {checkResult.success && <Check />}
+                <AlertDescription>{checkResult.message}</AlertDescription>
+              </Alert>
+            )}
+            <div className="flex flex-wrap items-center justify-end gap-2">
               <Button
-                disabled={pending}
+                disabled={busy}
+                onClick={async (event) => {
+                  if (!event.currentTarget.form?.reportValidity()) {
+                    return;
+                  }
+                  checkController.current?.abort();
+                  const controller = new AbortController();
+                  checkController.current = controller;
+                  const request = form;
+                  setChecking(true);
+                  setCheckResult(null);
+                  try {
+                    await browseLogFolder(
+                      {
+                        sourceId: source?.id,
+                        serverEntryId: request.serverEntryId,
+                        host: request.host,
+                        port: request.port,
+                        shareName: request.shareName,
+                        username: request.username,
+                        domain: request.domain,
+                        password: request.password || undefined,
+                        path: request.basePath,
+                      },
+                      controller.signal
+                    );
+                    if (!controller.signal.aborted) {
+                      setCheckResult({
+                        request,
+                        success: true,
+                        message: copy.checkSuccess,
+                      });
+                    }
+                  } catch (cause) {
+                    if (!controller.signal.aborted) {
+                      setCheckResult({
+                        request,
+                        success: false,
+                        message: getErrorMessage(cause),
+                      });
+                    }
+                  } finally {
+                    if (checkController.current === controller) {
+                      checkController.current = null;
+                      setChecking(false);
+                    }
+                  }
+                }}
+                type="button"
+                variant="outline"
+              >
+                {checking ? (
+                  <Spinner />
+                ) : (
+                  <RefreshCw data-icon="inline-start" />
+                )}
+                {checking ? copy.checking : copy.checkConnection}
+              </Button>
+              <Button
+                disabled={busy}
                 onClick={onCancel}
                 type="button"
                 variant="outline"
               >
                 {copy.cancel}
               </Button>
-              <Button disabled={pending} type="submit">
+              <Button disabled={busy} type="submit">
                 {pending && <Spinner />}
                 {pending ? copy.saving : copy.save}
               </Button>

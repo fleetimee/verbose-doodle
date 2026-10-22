@@ -1,4 +1,7 @@
 export const logViewerMessages = {
+  checkConnection: "Check connection",
+  checkSuccess:
+    "Connection verified. The share and base folder are readable. Nothing has been saved.",
   errorAuth:
     "Windows rejected the login. Check the username, domain, and password in Configure source.",
   errorAccess:

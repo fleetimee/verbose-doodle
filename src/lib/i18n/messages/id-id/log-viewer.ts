@@ -1,4 +1,7 @@
 export const logViewerMessages = {
+  checkConnection: "Periksa koneksi",
+  checkSuccess:
+    "Koneksi terverifikasi. Share dan folder dasar dapat dibaca. Belum ada yang disimpan.",
   errorAuth:
     "Windows menolak login. Periksa nama pengguna, domain, dan kata sandi pada konfigurasi sumber.",
   errorAccess:
