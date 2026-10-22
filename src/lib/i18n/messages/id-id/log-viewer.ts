@@ -1,4 +1,6 @@
 export const logViewerMessages = {
+  timezoneDefaultHint:
+    "Sumber baru menggunakan zona waktu browser. Pilih zona waktu server Windows jika berbeda.",
   checkConnection: "Periksa koneksi",
   checkSuccess:
     "Koneksi terverifikasi. Share dan folder dasar dapat dibaca. Belum ada yang disimpan.",

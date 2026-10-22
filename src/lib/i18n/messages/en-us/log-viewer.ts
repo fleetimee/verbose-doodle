@@ -1,4 +1,6 @@
 export const logViewerMessages = {
+  timezoneDefaultHint:
+    "New sources default to your browser timezone. Choose the timezone used by the Windows server if it differs.",
   checkConnection: "Check connection",
   checkSuccess:
     "Connection verified. The share and base folder are readable. Nothing has been saved.",

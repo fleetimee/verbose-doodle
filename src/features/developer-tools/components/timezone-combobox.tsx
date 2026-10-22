@@ -21,6 +21,8 @@ import { cn } from "@/lib/utils";
 
 type TimezoneComboboxProps = {
   readonly emptyMessage: string;
+  readonly disabled?: boolean;
+  readonly portalContainer?: HTMLElement | null;
   readonly id: string;
   readonly onChange: (timeZone: string) => void;
   readonly options: readonly string[];
@@ -31,6 +33,8 @@ type TimezoneComboboxProps = {
 
 export function TimezoneCombobox({
   emptyMessage,
+  disabled = false,
+  portalContainer,
   id,
   onChange,
   options,
@@ -57,6 +61,7 @@ export function TimezoneCombobox({
         <Button
           aria-expanded={open}
           className="w-full justify-between"
+          disabled={disabled}
           id={id}
           role="combobox"
           type="button"
@@ -73,6 +78,7 @@ export function TimezoneCombobox({
       <PopoverContent
         align="start"
         className="w-[var(--anchor-width)]"
+        portalContainer={portalContainer}
         size="none"
       >
         <Command>

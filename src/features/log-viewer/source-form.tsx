@@ -30,6 +30,11 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { TimezoneCombobox } from "@/features/developer-tools/components/timezone-combobox";
+import {
+  getBrowserTimeZone,
+  getTimeZoneOptions,
+} from "@/features/developer-tools/timezones";
 import { browseLogFolder } from "@/features/log-viewer/api";
 import { getLogErrorMessage as getErrorMessage } from "@/features/log-viewer/error-message";
 import { SourceFieldLabel } from "@/features/log-viewer/source-field-label";
@@ -65,7 +70,7 @@ export function SourceForm({
         domain: "",
         password: "",
         encoding: "UTF-8",
-        timezone: "",
+        timezone: getBrowserTimeZone(),
       };
     }
     return {
@@ -457,7 +462,29 @@ export function SourceForm({
                       </SelectContent>
                     </Select>
                   </Field>
-                  {textField("timezone")}
+                  <Field data-disabled={busy}>
+                    <SourceFieldLabel
+                      field="timezone"
+                      htmlFor={`${prefix}-timezone`}
+                      portalContainer={drawerContent}
+                    />
+                    <TimezoneCombobox
+                      disabled={busy}
+                      emptyMessage={messages.dateConverter.timezoneEmpty}
+                      id={`${prefix}-timezone`}
+                      onChange={(timezone) => update("timezone", timezone)}
+                      options={getTimeZoneOptions(form.timezone)}
+                      portalContainer={drawerContent}
+                      searchPlaceholder={messages.dateConverter.timezoneSearch}
+                      useQueryLabel={(timezone) =>
+                        `${copy.timezone}: ${timezone}`
+                      }
+                      value={form.timezone}
+                    />
+                    <FieldDescription>
+                      {copy.timezoneDefaultHint}
+                    </FieldDescription>
+                  </Field>
                 </FieldGroup>
               </FieldSet>
             </div>
