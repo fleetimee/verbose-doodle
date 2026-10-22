@@ -101,6 +101,8 @@ export function SourceForm({
     message: string;
   } | null>(null);
   const busy = pending || checking;
+  const connectionVerified =
+    checkResult?.request === form && checkResult.success;
   useEffect(() => () => checkController.current?.abort(), [form]);
   const [error, setError] = useState<string | null>(null);
   const errorRef = useRef<HTMLDivElement>(null);
@@ -212,6 +214,13 @@ export function SourceForm({
           data-vaul-no-drag
           onSubmit={async (event) => {
             event.preventDefault();
+            if (busy) {
+              return;
+            }
+            if (!connectionVerified) {
+              setError(copy.checkRequired);
+              return;
+            }
             setPending(true);
             setError(null);
             try {
@@ -490,6 +499,11 @@ export function SourceForm({
             </div>
           </ScrollArea>
           <DrawerFooter className="shrink-0" size="lg" variant="bordered">
+            {!connectionVerified && (
+              <p className="text-muted-foreground text-xs">
+                {copy.checkRequired}
+              </p>
+            )}
             {checkResult?.request === form && (
               <Alert variant={checkResult.success ? "default" : "destructive"}>
                 {checkResult.success && <Check />}
@@ -508,6 +522,7 @@ export function SourceForm({
                   checkController.current = controller;
                   const request = form;
                   setChecking(true);
+                  setError(null);
                   setCheckResult(null);
                   try {
                     await browseLogFolder(
@@ -564,7 +579,7 @@ export function SourceForm({
               >
                 {copy.cancel}
               </Button>
-              <Button disabled={busy} type="submit">
+              <Button disabled={busy || !connectionVerified} type="submit">
                 {pending && <Spinner />}
                 {pending ? copy.saving : copy.save}
               </Button>

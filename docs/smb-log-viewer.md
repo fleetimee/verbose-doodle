@@ -144,3 +144,5 @@ Source-list failures use a full workspace recovery state; catalog failures keep 
 Expanded `[MTI]` and numbered field dump lines are highlighted automatically, preserving the exact text and whitespace. Hover field labels for standard field names; bitmap labels list active fields. Amounts use blue, dates amber, account fields purple, identifiers teal, other values green, and non-`00` response codes red. Profile-specific field meanings may differ.
 
 Timestamped `R`/`S` packed ISO lines highlight the MTI and primary/secondary bitmap. Packed field ranges are colored only when the following expanded dump matches every bitmap field and reconstructs the complete packed body without ambiguity, including variable-length prefixes. Missing, truncated, or incompatible dumps leave the packed body unchanged. No payload content is inserted as HTML.
+
+The Add and Configure source drawers require a successful **Check connection** before enabling **Save source**. The check applies to the exact current settings; changing any setting invalidates it. Submitting the form with Enter follows the same guard.

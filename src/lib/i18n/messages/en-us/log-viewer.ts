@@ -1,4 +1,6 @@
 export const logViewerMessages = {
+  checkRequired:
+    "Check the connection successfully before saving. Any settings change requires a new check.",
   isoMti: "ISO message type (MTI)",
   isoBitmap: "ISO bitmap",
   isoBits: "Present fields",

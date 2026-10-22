@@ -1,4 +1,6 @@
 export const logViewerMessages = {
+  checkRequired:
+    "Periksa koneksi hingga berhasil sebelum menyimpan. Perubahan pengaturan memerlukan pemeriksaan ulang.",
   isoMti: "Jenis pesan ISO (MTI)",
   isoBitmap: "Bitmap ISO",
   isoBits: "Field aktif",
