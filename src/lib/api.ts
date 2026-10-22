@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * API utility functions for data fetching
  * These utilities provide a consistent interface for making HTTP requests
@@ -125,9 +127,14 @@ function parseResponse<T>(response: Response): Promise<T> {
  */
 async function createApiError(response: Response): Promise<ApiError> {
   let message = `Request failed with status ${response.status}`;
+  let code = response.status.toString();
 
   try {
     const data = await response.json();
+    const logCode = z.string().startsWith("LOG_").safeParse(data.responseCode);
+    if (logCode.success) {
+      code = logCode.data;
+    }
     // Check for both 'message' and 'responseDesc' fields
     // responseDesc is commonly used in the biller API responses
     if (data.responseDesc) {
@@ -140,7 +147,7 @@ async function createApiError(response: Response): Promise<ApiError> {
   }
 
   return {
-    code: response.status.toString(),
+    code,
     message,
     status: response.status,
   };
