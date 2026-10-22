@@ -1,4 +1,9 @@
 export const logViewerMessages = {
+  isoMti: "Jenis pesan ISO (MTI)",
+  isoBitmap: "Bitmap ISO",
+  isoBits: "Field aktif",
+  isoField: "Field ISO",
+  isoCustomField: "Field khusus profil",
   wordWrap: "Bungkus baris",
   timezoneDefaultHint:
     "Sumber baru menggunakan zona waktu browser. Pilih zona waktu server Windows jika berbeda.",

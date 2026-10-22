@@ -138,3 +138,9 @@ Backend share-discovery endpoint: `POST /api/log-sources/shares`, restricted to 
 ### Error and recovery states
 
 Source-list failures use a full workspace recovery state; catalog failures keep source controls and provide Retry and Configure source actions. Refresh failures preserve cached sources and logs. Error messages distinguish backend/network availability, database storage, Windows login, read permissions, missing shares or paths, and timeouts. The backend returns scoped `LOG_*` response codes and logs technical exceptions server-side. Unexpected failures use a safe generic message.
+
+### ISO message highlighting
+
+Expanded `[MTI]` and numbered field dump lines are highlighted automatically, preserving the exact text and whitespace. Hover field labels for standard field names; bitmap labels list active fields. Amounts use blue, dates amber, account fields purple, identifiers teal, other values green, and non-`00` response codes red. Profile-specific field meanings may differ.
+
+Timestamped `R`/`S` packed ISO lines highlight the MTI and primary/secondary bitmap. Packed field ranges are colored only when the following expanded dump matches every bitmap field and reconstructs the complete packed body without ambiguity, including variable-length prefixes. Missing, truncated, or incompatible dumps leave the packed body unchanged. No payload content is inserted as HTML.

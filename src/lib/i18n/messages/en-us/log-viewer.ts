@@ -1,4 +1,9 @@
 export const logViewerMessages = {
+  isoMti: "ISO message type (MTI)",
+  isoBitmap: "ISO bitmap",
+  isoBits: "Present fields",
+  isoField: "ISO field",
+  isoCustomField: "Profile-specific field",
   wordWrap: "Word wrap",
   timezoneDefaultHint:
     "New sources default to your browser timezone. Choose the timezone used by the Windows server if it differs.",

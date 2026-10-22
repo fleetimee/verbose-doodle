@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
+import { IsoLogPayload } from "@/features/log-viewer/iso-log-payload";
 import { useLogStream } from "@/features/log-viewer/use-log-stream";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
@@ -333,7 +334,7 @@ export function StreamViewer({
                         FONT_SIZE_CLASSES[fontSize - 9]
                       )}
                     >
-                      {segment.text}
+                      <IsoLogPayload text={segment.text} />
                     </pre>
                   </div>
                 ))
