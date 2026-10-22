@@ -4148,3 +4148,15 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     transition: none;
   }
 }
+
+::highlight(log-search-matches) {
+  color: var(--accent-foreground);
+  text-decoration: underline;
+  background-color: var(--accent);
+}
+
+::highlight(log-search-current) {
+  color: var(--primary-foreground);
+  text-decoration: underline;
+  background-color: var(--primary);
+}

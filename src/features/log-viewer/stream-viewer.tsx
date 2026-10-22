@@ -1,29 +1,22 @@
 import { motion, useReducedMotion } from "motion/react";
-import { useId, useLayoutEffect, useRef, useState } from "react";
-import {
-  ChevronDown,
-  FileClock,
-  FileText,
-  ShieldCheck,
-} from "@/components/hugeicons";
+import { useLayoutEffect, useRef, useState } from "react";
+import { FileText, ShieldCheck } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Field, FieldLabel } from "@/components/ui/field";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
-import { Switch } from "@/components/ui/switch";
 import { IsoLogPayload } from "@/features/log-viewer/iso-log-payload";
+import { LogToolbar } from "@/features/log-viewer/log-toolbar";
+import { useLogSearch } from "@/features/log-viewer/use-log-search";
 import { useLogStream } from "@/features/log-viewer/use-log-stream";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
@@ -63,7 +56,8 @@ export function StreamViewer({
       deserializer: (value) => value === "true",
     }
   );
-  const wrapId = useId();
+  const [query, setQuery] = useState("");
+  const searchInput = useRef<HTMLInputElement>(null);
   const [fontSize, setFontSize] = useLocalStorage("log-viewer-font-size", 10, {
     deserializer: (value) => {
       const size = Number(JSON.parse(value));
@@ -78,7 +72,7 @@ export function StreamViewer({
     follow
   );
   const viewport = useRef<HTMLDivElement>(null);
-  const followId = useId();
+  const search = useLogSearch(viewport, pages, query);
   const segments = pages.flatMap((page) => page.segments);
   const anchor = useRef<{
     pages: typeof pages;
@@ -142,102 +136,51 @@ export function StreamViewer({
     olderPending.current = false;
   }
 
-  const followVariant = follow ? "primary-subtle" : "secondary";
-  const followLabel = follow ? copy.live : copy.paused;
-
   return (
     <section
       aria-label={`${copy.content}: ${stream}`}
       className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
     >
       <Separator />
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 px-3 py-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            disabled={loading || !first?.hasOlder}
-            onClick={older}
-            size="sm"
-            variant="outline"
-          >
-            <FileClock data-icon="inline-start" />
-            {copy.older}
-          </Button>
-          <Button
-            disabled={loading}
-            onClick={() => {
-              anchor.current = null;
-              setFollow(true);
-              load("latest");
-            }}
-            size="sm"
-            variant="ghost"
-          >
-            <ChevronDown data-icon="inline-start" />
-            {copy.latest}
-          </Button>
-          {loading && <Spinner aria-label={copy.loading} />}
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <ButtonGroup aria-label={copy.fontSize}>
-            <Button
-              aria-label={copy.decreaseFont}
-              disabled={fontSize <= 9}
-              onClick={() => setFontSize((size) => Math.max(9, size - 1))}
-              size="sm"
-              title={copy.decreaseFont}
-              variant="outline"
-            >
-              A−
-            </Button>
-            <Button
-              aria-label={copy.resetFont}
-              onClick={() => setFontSize(10)}
-              size="sm"
-              title={copy.resetFont}
-              variant="outline"
-            >
-              {fontSize}px
-            </Button>
-            <Button
-              aria-label={copy.increaseFont}
-              disabled={fontSize >= 18}
-              onClick={() => setFontSize((size) => Math.min(18, size + 1))}
-              size="sm"
-              title={copy.increaseFont}
-              variant="outline"
-            >
-              A+
-            </Button>
-          </ButtonGroup>
-          <Field className="w-auto" orientation="horizontal">
-            <Switch
-              checked={wordWrap}
-              id={wrapId}
-              onCheckedChange={(checked) => {
-                setWordWrap(checked);
-                if (checked && viewport.current) {
-                  viewport.current.scrollLeft = 0;
-                }
-              }}
-            />
-            <FieldLabel htmlFor={wrapId}>{copy.wordWrap}</FieldLabel>
-          </Field>
-          <Badge variant={error ? "destructive" : followVariant}>
-            {error ? copy.unavailable : followLabel}
-          </Badge>
-          <Field className="w-auto" orientation="horizontal">
-            <Switch
-              checked={follow}
-              id={followId}
-              onCheckedChange={(checked) => {
-                anchor.current = null;
-                setFollow(checked);
-              }}
-            />
-            <FieldLabel htmlFor={followId}>{copy.follow}</FieldLabel>
-          </Field>
-        </div>
-      </div>
+      <LogToolbar
+        canLoadOlder={!!first?.hasOlder}
+        follow={follow}
+        fontSize={fontSize}
+        loading={loading}
+        onFollow={(checked) => {
+          anchor.current = null;
+          if (checked) {
+            setQuery("");
+          }
+          setFollow(checked);
+        }}
+        onFontSize={setFontSize}
+        onLatest={() => {
+          anchor.current = null;
+          setQuery("");
+          setFollow(true);
+          load("latest");
+        }}
+        onOlder={older}
+        onWordWrap={(checked) => {
+          setWordWrap(checked);
+          if (checked && viewport.current) {
+            viewport.current.scrollLeft = 0;
+          }
+        }}
+        search={{
+          ...search,
+          query,
+          inputRef: searchInput,
+          onChange: (value) => {
+            setQuery(value);
+            if (value) {
+              setFollow(false);
+            }
+          },
+        }}
+        wordWrap={wordWrap}
+      />
       {error && (
         <div className="shrink-0 px-4 pb-3 md:px-5">
           <Alert variant="destructive">
@@ -287,7 +230,7 @@ export function StreamViewer({
             ) {
               setFollow(false);
             }
-            if (element.scrollTop === 0) {
+            if (!query && element.scrollTop === 0) {
               older();
             }
           }}
@@ -333,6 +276,7 @@ export function StreamViewer({
                           : "whitespace-pre",
                         FONT_SIZE_CLASSES[fontSize - 9]
                       )}
+                      data-log-text={segment.filename}
                     >
                       <IsoLogPayload text={segment.text} />
                     </pre>

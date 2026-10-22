@@ -1,4 +1,12 @@
 export const logViewerMessages = {
+  toolbar: "Log toolbar",
+  searchLogs: "Find in loaded logs…",
+  previousMatch: "Previous match (Shift+Enter)",
+  nextMatch: "Next match (Enter)",
+  clearSearch: "Clear search",
+  searchScope: "Searches loaded logs only. Load older to search more.",
+  searchLimited: "Showing the first 2,000 matches. Refine your search.",
+  searchUnsupported: "Search highlighting requires a newer browser.",
   checkRequired:
     "Check the connection successfully before saving. Any settings change requires a new check.",
   isoMti: "ISO message type (MTI)",

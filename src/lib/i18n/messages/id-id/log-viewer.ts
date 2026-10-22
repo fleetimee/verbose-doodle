@@ -1,4 +1,13 @@
 export const logViewerMessages = {
+  toolbar: "Toolbar log",
+  searchLogs: "Cari di log yang dimuat…",
+  previousMatch: "Hasil sebelumnya (Shift+Enter)",
+  nextMatch: "Hasil berikutnya (Enter)",
+  clearSearch: "Hapus pencarian",
+  searchScope:
+    "Mencari hanya pada log yang dimuat. Muat log lama untuk mencari lebih banyak.",
+  searchLimited: "Menampilkan 2.000 hasil pertama. Persempit pencarian.",
+  searchUnsupported: "Penyorotan pencarian memerlukan browser yang lebih baru.",
   checkRequired:
     "Periksa koneksi hingga berhasil sebelum menyimpan. Perubahan pengaturan memerlukan pemeriksaan ulang.",
   isoMti: "Jenis pesan ISO (MTI)",
