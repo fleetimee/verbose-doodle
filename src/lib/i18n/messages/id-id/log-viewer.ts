@@ -1,4 +1,5 @@
 export const logViewerMessages = {
+  wordWrap: "Bungkus baris",
   timezoneDefaultHint:
     "Sumber baru menggunakan zona waktu browser. Pilih zona waktu server Windows jika berbeda.",
   checkConnection: "Periksa koneksi",

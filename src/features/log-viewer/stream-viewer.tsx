@@ -18,7 +18,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -55,6 +55,14 @@ export function StreamViewer({
   const { messages } = useI18n();
   const copy = messages.logViewer;
   const [follow, setFollow] = useState(true);
+  const [wordWrap, setWordWrap] = useLocalStorage(
+    "log-viewer-word-wrap",
+    false,
+    {
+      deserializer: (value) => value === "true",
+    }
+  );
+  const wrapId = useId();
   const [fontSize, setFontSize] = useLocalStorage("log-viewer-font-size", 10, {
     deserializer: (value) => {
       const size = Number(JSON.parse(value));
@@ -200,6 +208,19 @@ export function StreamViewer({
               A+
             </Button>
           </ButtonGroup>
+          <Field className="w-auto" orientation="horizontal">
+            <Switch
+              checked={wordWrap}
+              id={wrapId}
+              onCheckedChange={(checked) => {
+                setWordWrap(checked);
+                if (checked && viewport.current) {
+                  viewport.current.scrollLeft = 0;
+                }
+              }}
+            />
+            <FieldLabel htmlFor={wrapId}>{copy.wordWrap}</FieldLabel>
+          </Field>
           <Badge variant={error ? "destructive" : followVariant}>
             {error ? copy.unavailable : followLabel}
           </Badge>
@@ -253,6 +274,7 @@ export function StreamViewer({
           aria-busy={loading}
           aria-label={copy.content}
           className="min-h-0 flex-1"
+          contentClassName={wordWrap ? "w-full min-w-0" : "min-w-full"}
           onScrollCapture={(event) => {
             const element = viewport.current;
             if (!element || event.target !== element) {
@@ -304,7 +326,10 @@ export function StreamViewer({
                     )}
                     <pre
                       className={cn(
-                        "whitespace-pre-wrap break-all font-mono leading-relaxed",
+                        "font-mono leading-relaxed",
+                        wordWrap
+                          ? "whitespace-pre-wrap break-all"
+                          : "whitespace-pre",
                         FONT_SIZE_CLASSES[fontSize - 9]
                       )}
                     >
@@ -336,6 +361,7 @@ export function StreamViewer({
               </Empty>
             )}
           </motion.div>
+          {!wordWrap && <ScrollBar orientation="horizontal" />}
         </ScrollArea>
       </div>
       <Separator />

@@ -1,4 +1,5 @@
 export const logViewerMessages = {
+  wordWrap: "Word wrap",
   timezoneDefaultHint:
     "New sources default to your browser timezone. Choose the timezone used by the Windows server if it differs.",
   checkConnection: "Check connection",
