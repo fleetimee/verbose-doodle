@@ -55,9 +55,10 @@ export function LogDatePicker({
         <span className="sr-only">{label}</span>
         <ChevronDown data-icon="inline-end" />
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto" size="none">
+      <PopoverContent align="start" className="w-(--anchor-width)" size="none">
         <CalendarPicker
           captionLayout="dropdown"
+          classNames={{ root: "w-full" }}
           defaultMonth={selected}
           disabled={(date) =>
             (min ? date < parseISO(min) : false) ||
