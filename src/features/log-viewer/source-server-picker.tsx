@@ -14,6 +14,12 @@ import { SourceFieldLabel } from "@/features/log-viewer/source-field-label";
 import { fetchServerEntries } from "@/features/server-inventory/api";
 import type { ServerEntry } from "@/features/server-inventory/types";
 
+interface HostOption {
+  entry: ServerEntry | null;
+  host: string;
+  key: string;
+}
+
 export function SourceServerPicker({
   disabled,
   host,
@@ -53,6 +59,19 @@ export function SourceServerPicker({
       page.page + 1 < page.totalPages ? page.page + 1 : undefined,
   });
   const servers = query.data?.pages.flatMap((page) => page.servers) ?? [];
+  const manualOption: HostOption = { key: "manual", host, entry: null };
+  const inventoryOptions: HostOption[] = servers.map((entry) => ({
+    key: entry.id,
+    host: entry.host,
+    entry,
+  }));
+  const options = host.trim()
+    ? [...inventoryOptions, manualOption]
+    : inventoryOptions;
+  let selectedOption: HostOption | null = host.trim() ? manualOption : null;
+  if (value) {
+    selectedOption = { key: value.id, host: value.host, entry: value };
+  }
   return (
     <Field data-disabled={disabled}>
       <SourceFieldLabel
@@ -63,8 +82,8 @@ export function SourceServerPicker({
       <Combobox
         filter={null}
         inputValue={host}
-        isItemEqualToValue={(a, b) => a.id === b.id}
-        items={servers}
+        isItemEqualToValue={(a, b) => a.key === b.key}
+        items={options}
         itemToStringLabel={(server) => server.host}
         onInputValueChange={(next, details) => {
           if (
@@ -81,13 +100,19 @@ export function SourceServerPicker({
             setSearch("");
           }
         }}
-        onValueChange={(server) => {
-          if (server) {
-            onSelect(server);
+        onValueChange={(option) => {
+          if (!option) {
+            return;
+          }
+          if (option.entry) {
+            onSelect(option.entry);
+          } else {
+            onSelect(null);
+            onHostChange(option.host);
           }
         }}
         open={open}
-        value={value}
+        value={selectedOption}
       >
         <ComboboxInput
           autoComplete="off"
@@ -100,14 +125,18 @@ export function SourceServerPicker({
         />
         <ComboboxContent portalContainer={portalContainer}>
           <ComboboxList>
-            {(server: ServerEntry) => (
-              <ComboboxItem key={server.id} value={server}>
+            {(option: HostOption) => (
+              <ComboboxItem key={option.key} value={option}>
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate">
-                    {server.name} · {server.host}
+                    {option.entry
+                      ? `${option.entry.name} · ${option.host}`
+                      : option.host}
                   </span>
                   <span className="truncate text-muted-foreground text-xs">
-                    {server.accessType} · {server.username || "—"}
+                    {option.entry
+                      ? `${option.entry.accessType} · ${option.entry.username || "—"}`
+                      : copy.inventoryManual}
                   </span>
                 </div>
               </ComboboxItem>
