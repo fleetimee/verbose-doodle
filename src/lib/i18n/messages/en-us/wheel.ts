@@ -3,6 +3,62 @@ export const wheelMessages = {
   backToBeginning: "Back to beginning",
   sessionDetails: "Session details",
   evidenceTab: "Evidence",
+  hashTitle: "Evidence fingerprint (SHA-256)",
+  copyHash: "Copy hash",
+  hashCopied: "Evidence hash copied",
+  hashCopyFailed: "Could not copy. Select and copy the hash manually.",
+  hashHint:
+    "Keep a copy to compare later. Verification trusts this server and its signing key.",
+  hashInput: "Hash to compare",
+  hashPlaceholder: "Paste the 64-character evidence hash",
+  checkHash: "Check integrity",
+  hashMatch: "Hash matches. Saved session integrity verified.",
+  hashMismatch: "Hash does not match or session integrity verification failed.",
+  hashCompleteFirst:
+    "Complete and seal this session to copy its final evidence hash.",
+  sharedTitle: "Shared wheel results",
+  sharedHint:
+    "View the final results or replay the saved draws from the beginning.",
+  shareTitle: "Participant result link",
+  shareHint:
+    "Anyone with the link can view participants, results, and replays without signing in.",
+  copyShare: "Copy result link",
+  shareCopied: "Result link copied",
+  shareRevoked: "Result link disabled",
+  revokeShare: "Disable result link",
+  shareUnavailable: "This result link is unavailable",
+  shareUnavailableHint:
+    "The link may be disabled, or the session cannot be verified. Ask the organizer for a current link.",
+  publicEvidenceHint:
+    "This fingerprint identifies the final session. Integrity verification trusts the server and its signing key.",
+  publicReadOnly: "Saved results · replay only",
+  results: "Results",
+  winnerTitle: "We have a winner!",
+  winnerSaved: "Saved result",
+  continueReplay: "Next draw",
+  done: "Done",
+  awardRemaining: "Award remaining entry",
+  remainingSaved: "Only remaining entry · saved result",
+  loadingSession: "Loading wheel session",
+  gridLoadFailed: "Your wheels could not be loaded",
+  gridLoadHint:
+    "The service is temporarily unavailable. Try loading your saved wheels again.",
+  detailLoadFailed: "This wheel could not be loaded",
+  detailLoadHint:
+    "Try loading this session again, or return to your saved wheels.",
+  connectionLost: "Unable to connect",
+  connectionHint:
+    "Check your connection and try again. The wheel service may be temporarily offline.",
+  wheelMissing: "Wheel not found",
+  wheelMissingHint:
+    "This link may be outdated. Return to saved wheels to choose another session.",
+  wheelAccessDenied: "This wheel is not available to you",
+  wheelAccessHint:
+    "Your account may not have access. Return to saved wheels or contact the organizer.",
+  refreshFailed: "Could not refresh",
+  refreshFailedHint:
+    "Showing the last loaded data. Try again to get the latest version.",
+  retrying: "Retrying…",
   title: "Spin wheel",
   description:
     "Run locked draws, keep signed evidence, and replay every result.",

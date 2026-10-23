@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiDelete, apiGet, apiPost } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 export const wheelModeSchema = z.enum([
@@ -130,4 +130,49 @@ export function downloadWheelEvidence(view: WheelView) {
   anchor.click();
   anchor.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export async function verifyWheelHash(id: string, hash: string) {
+  const result = await apiPost<{ data: unknown }>(
+    `${root}/${encodeURIComponent(id)}/verify-hash`,
+    { hash }
+  );
+  return z.object({ verified: z.boolean() }).parse(result.data).verified;
+}
+
+const SHARE_TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
+const sharedWheelSchema = z.object({
+  title: z.string(),
+  entries: z.array(z.string()).min(2).max(100),
+  mode: wheelModeSchema,
+  completedAt: z.string(),
+  draws: z
+    .array(drawSchema.omit({ requestId: true, by: true, previousHash: true }))
+    .max(200),
+  hash: z.string(),
+  verified: z.literal(true),
+});
+export type SharedWheel = z.infer<typeof sharedWheelSchema>;
+export async function fetchSharedWheel(token: string) {
+  const result = await apiGet<{ data: unknown }>(
+    `/api/public/wheels/${encodeURIComponent(token)}`,
+    {
+      auth: false,
+      cache: "no-store",
+      emitUnauthorized: false,
+      retryOnUnauthorized: false,
+    }
+  );
+  return sharedWheelSchema.parse(result.data);
+}
+export async function shareWheel(id: string) {
+  const result = await apiPost<{ data: unknown }>(
+    `${root}/${encodeURIComponent(id)}/share`
+  );
+  return z
+    .object({ token: z.string().regex(SHARE_TOKEN_PATTERN) })
+    .parse(result.data).token;
+}
+export async function revokeWheelShare(id: string) {
+  await apiDelete(`${root}/${encodeURIComponent(id)}/share`);
 }

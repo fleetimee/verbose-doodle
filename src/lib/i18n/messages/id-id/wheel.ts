@@ -3,6 +3,60 @@ export const wheelMessages = {
   backToBeginning: "Kembali ke awal",
   sessionDetails: "Detail sesi",
   evidenceTab: "Bukti",
+  hashTitle: "Sidik jari bukti (SHA-256)",
+  copyHash: "Salin hash",
+  hashCopied: "Hash bukti disalin",
+  hashCopyFailed: "Tidak dapat menyalin. Pilih dan salin hash secara manual.",
+  hashHint:
+    "Simpan salinan untuk dibandingkan nanti. Verifikasi mempercayai server dan kunci penandatangannya.",
+  hashInput: "Hash pembanding",
+  hashPlaceholder: "Tempel hash bukti sepanjang 64 karakter",
+  checkHash: "Periksa integritas",
+  hashMatch: "Hash cocok. Integritas sesi tersimpan terverifikasi.",
+  hashMismatch: "Hash tidak cocok atau verifikasi integritas sesi gagal.",
+  hashCompleteFirst:
+    "Selesaikan dan segel sesi untuk menyalin hash bukti final.",
+  sharedTitle: "Hasil roda bersama",
+  sharedHint: "Lihat hasil akhir atau putar ulang undian tersimpan dari awal.",
+  shareTitle: "Tautan hasil peserta",
+  shareHint:
+    "Siapa pun dengan tautan ini dapat melihat peserta, hasil, dan putar ulang tanpa masuk.",
+  copyShare: "Salin tautan hasil",
+  shareCopied: "Tautan hasil disalin",
+  shareRevoked: "Tautan hasil dinonaktifkan",
+  revokeShare: "Nonaktifkan tautan hasil",
+  shareUnavailable: "Tautan hasil tidak tersedia",
+  shareUnavailableHint:
+    "Tautan mungkin dinonaktifkan atau sesi tidak dapat diverifikasi. Minta tautan terbaru kepada penyelenggara.",
+  publicEvidenceHint:
+    "Sidik jari ini mengidentifikasi sesi final. Verifikasi integritas mempercayai server dan kunci penandatangannya.",
+  publicReadOnly: "Hasil tersimpan · hanya putar ulang",
+  results: "Hasil",
+  winnerTitle: "Pemenangnya adalah!",
+  winnerSaved: "Hasil tersimpan",
+  continueReplay: "Undian berikutnya",
+  done: "Selesai",
+  awardRemaining: "Tetapkan peserta terakhir",
+  remainingSaved: "Satu peserta tersisa · hasil tersimpan",
+  loadingSession: "Memuat sesi roda",
+  gridLoadFailed: "Roda Anda belum dapat dimuat",
+  gridLoadHint:
+    "Layanan sementara tidak tersedia. Coba muat kembali roda tersimpan.",
+  detailLoadFailed: "Roda ini belum dapat dimuat",
+  detailLoadHint: "Coba muat kembali sesi ini, atau kembali ke roda tersimpan.",
+  connectionLost: "Tidak dapat terhubung",
+  connectionHint:
+    "Periksa koneksi lalu coba lagi. Layanan roda mungkin sementara tidak tersedia.",
+  wheelMissing: "Roda tidak ditemukan",
+  wheelMissingHint:
+    "Tautan ini mungkin sudah tidak berlaku. Pilih sesi lain dari roda tersimpan.",
+  wheelAccessDenied: "Roda ini tidak tersedia untuk Anda",
+  wheelAccessHint:
+    "Akun Anda mungkin tidak memiliki akses. Kembali ke roda tersimpan atau hubungi penyelenggara.",
+  refreshFailed: "Gagal memperbarui",
+  refreshFailedHint:
+    "Menampilkan data terakhir yang dimuat. Coba lagi untuk memperoleh versi terbaru.",
+  retrying: "Mencoba lagi…",
   title: "Roda undian",
   description:
     "Jalankan undian terkunci, simpan bukti bertanda tangan, dan putar ulang hasilnya.",
