@@ -10,7 +10,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,12 +21,15 @@ import {
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   downloadWheelEvidence,
   type WheelDraw,
   type WheelView,
 } from "@/features/wheel/api";
+import { WheelFingerprint } from "@/features/wheel/wheel-fingerprint";
+import { WheelShare } from "@/features/wheel/wheel-share";
 
 export function WheelSessionRecords({
   view,
@@ -54,9 +56,9 @@ export function WheelSessionRecords({
       <CardHeader size="panel" variant="panel">
         <div className="flex items-center justify-between gap-2">
           <CardTitle size="sm">{copy.sessionDetails}</CardTitle>
-          <Badge variant="secondary">
+          <span className="text-muted-foreground text-xs">
             {view.draws.length}/{view.config.drawLimit} {copy.draws}
-          </Badge>
+          </span>
         </div>
         <CardDescription>
           {copy.locked} · {view.config.entries.length} {copy.entries}
@@ -146,7 +148,21 @@ export function WheelSessionRecords({
           </TabsContent>
           <TabsContent className="min-h-0 overflow-hidden" value="evidence">
             <ScrollArea className="h-full">
-              <div className="flex flex-col gap-4 py-3">
+              <div className="flex flex-col gap-6 py-5 pr-4">
+                {canManage && view.seal && (
+                  <section>
+                    <WheelShare
+                      disabled={busy || !view.verified}
+                      id={view.config.id}
+                    />
+                  </section>
+                )}
+                <p className="text-muted-foreground text-xs">{copy.verified}</p>
+                <Separator />
+                <section>
+                  <WheelFingerprint view={view} />
+                </section>
+                <Separator />
                 <dl className="grid gap-4 text-xs">
                   <div className="grid gap-1">
                     <dt className="text-muted-foreground">{copy.createdBy}</dt>
@@ -161,14 +177,11 @@ export function WheelSessionRecords({
                     <dd className="break-all font-mono">{view.config.id}</dd>
                   </div>
                 </dl>
-                <p className="text-muted-foreground text-xs">
-                  {copy.evidenceHint}
-                </p>
               </div>
             </ScrollArea>
           </TabsContent>
         </Tabs>
-        <div className="flex shrink-0 flex-col gap-2 pt-3">
+        <div className="flex shrink-0 flex-col gap-3 pt-5">
           <Button
             disabled={!(view.verified && view.seal) || busy}
             onClick={() => downloadWheelEvidence(view)}

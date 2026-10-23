@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Play, ShieldCheck } from "@/components/hugeicons";
+import { Play } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,12 +16,15 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import {
   completeWheel,
+  fetchWheel,
   spinWheel,
   type WheelDraw,
   type WheelView,
 } from "@/features/wheel/api";
 import { WheelDisc } from "@/features/wheel/wheel-disc";
+import { WheelLoadFailure } from "@/features/wheel/wheel-load-failure";
 import { WheelSessionRecords } from "@/features/wheel/wheel-session-records";
+import { WheelWinnerDialog } from "@/features/wheel/wheel-winner-dialog";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { getErrorMessage } from "@/lib/error-handler";
 import { generateUUID } from "@/lib/utils";
@@ -85,6 +87,21 @@ function wheelControls(
   return { showSpin, showBeginning, canSpin };
 }
 
+function wheelEntries(view: WheelView, draw: WheelDraw | null) {
+  const removed = new Set(
+    view.config.mode === "WITHOUT_REPLACEMENT"
+      ? view.draws.map((value) => value.winnerIndex)
+      : []
+  );
+  const all = view.config.entries.map((_, index) => index);
+  const remaining = all.filter((index) => !removed.has(index));
+  const initial = view.seal ? all : remaining;
+  return {
+    eligible: draw?.eligible || initial,
+    remainingCount: remaining.length,
+  };
+}
+
 export function WheelSessionPanel({
   view,
   canManage,
@@ -98,6 +115,7 @@ export function WheelSessionPanel({
     messages: { wheel: copy },
   } = useI18n();
   const [draw, setDraw] = useState<WheelDraw | null>(null);
+  const [winnerOpen, setWinnerOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [pending, setPending] = useState(false);
   const [replay, setReplay] = useState(0);
@@ -111,25 +129,10 @@ export function WheelSessionPanel({
         z.string().uuid().catch("").parse(JSON.parse(value)),
     }
   );
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(
-    () => () => {
-      if (timer.current) {
-        clearTimeout(timer.current);
-      }
-    },
-    []
-  );
-  const busy = pending || playing || sequence !== null;
-  const removed = new Set(
-    view.config.mode === "WITHOUT_REPLACEMENT"
-      ? view.draws.map((value) => value.winnerIndex)
-      : []
-  );
-  const allEntries = view.config.entries.map((_, index) => index);
-  const remainingEntries = allEntries.filter((index) => !removed.has(index));
-  const initialEntries = view.seal ? allEntries : remainingEntries;
-  const eligible = draw?.eligible || initialEntries;
+  const busy = pending || playing || sequence !== null || winnerOpen;
+  const { eligible, remainingCount } = wheelEntries(view, draw);
+  const nextActionLabel =
+    remainingCount === 1 ? copy.awardRemaining : copy.spin;
   const { showSpin, showBeginning, canSpin } = wheelControls(
     view,
     canManage,
@@ -140,7 +143,9 @@ export function WheelSessionPanel({
   const startReplay = (item: WheelDraw) => {
     setDraw(item);
     setReplay((value) => value + 1);
-    setPlaying(true);
+    const automatic = item.eligible.length === 1;
+    setPlaying(!automatic);
+    setWinnerOpen(automatic);
   };
   async function spin() {
     const request = requestId || generateUUID();
@@ -171,38 +176,43 @@ export function WheelSessionPanel({
       return;
     }
     setPlaying(false);
+    setWinnerOpen(true);
+  }
+  function continueReplay() {
+    setWinnerOpen(false);
     if (sequence !== null && sequence + 1 < view.draws.length) {
       const next = sequence + 1;
-      timer.current = setTimeout(() => {
-        setSequence(next);
-        startReplay(view.draws[next]);
-      }, 900);
+      setSequence(next);
+      startReplay(view.draws[next]);
     } else {
       setSequence(null);
     }
   }
   if (!view.verified) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>{copy.integrityFailedHint}</AlertDescription>
-      </Alert>
+      <WheelLoadFailure
+        onRetry={async () => {
+          setPending(true);
+          try {
+            onUpdate(await fetchWheel(view.config.id));
+          } catch (cause) {
+            toast.error(getErrorMessage(cause));
+          } finally {
+            setPending(false);
+          }
+        }}
+        pending={pending}
+        scope="integrity"
+      />
     );
   }
   return (
-    <div className="grid min-h-0 min-w-0 flex-1 grid-rows-[minmax(0,1fr)_14rem] gap-3 overflow-hidden lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-1">
+    <div className="grid min-h-0 min-w-0 flex-1 grid-rows-[minmax(0,1fr)_14rem] gap-3 overflow-hidden lg:grid-cols-[minmax(0,1fr)_24rem] lg:grid-rows-1">
       <Card className="min-h-0 overflow-hidden" size="none" variant="outline">
         <CardHeader size="panel" variant="panel">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <CardTitle>{view.config.title}</CardTitle>
-            <Badge variant="secondary">
-              {view.seal ? copy.completed : copy.active}
-            </Badge>
-            <Badge variant="success">
-              <ShieldCheck />
-              {copy.verified}
-            </Badge>
-          </div>
+          <CardTitle>{view.config.title}</CardTitle>
           <CardDescription>
+            {view.seal ? copy.completed : copy.active} ·{" "}
             {copy.modes[view.config.mode]} · {view.draws.length}/
             {view.config.drawLimit} {copy.draws} · {copy.locked}
           </CardDescription>
@@ -242,7 +252,7 @@ export function WheelSessionPanel({
               {showSpin && (
                 <Button disabled={!canSpin} onClick={spin}>
                   {pending && <Spinner />}
-                  {requestId ? copy.retryDraw : copy.spin}
+                  {requestId ? copy.retryDraw : nextActionLabel}
                 </Button>
               )}
               {draw && (
@@ -286,9 +296,6 @@ export function WheelSessionPanel({
               {sequence !== null && (
                 <Button
                   onClick={() => {
-                    if (timer.current) {
-                      clearTimeout(timer.current);
-                    }
                     setSequence(null);
                     setPlaying(false);
                   }}
@@ -305,6 +312,18 @@ export function WheelSessionPanel({
         </CardContent>
       </Card>
 
+      {winnerOpen && draw && (
+        <WheelWinnerDialog
+          hasNext={sequence !== null && sequence + 1 < view.draws.length}
+          name={view.config.entries[draw.winnerIndex]}
+          number={draw.number}
+          onClose={() => {
+            setWinnerOpen(false);
+            setSequence(null);
+          }}
+          onContinue={continueReplay}
+        />
+      )}
       <WheelSessionRecords
         busy={busy}
         canManage={canManage}
@@ -320,6 +339,7 @@ export function WheelSessionPanel({
         }}
         onInspect={(item) => {
           setDraw(item);
+          setWinnerOpen(true);
           setReplay((value) => value + 1);
         }}
         requestId={requestId}

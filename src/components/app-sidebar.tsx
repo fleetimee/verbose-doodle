@@ -20,7 +20,6 @@ import {
 } from "@/components/game-icons";
 import {
   Cable,
-  CircleDashed,
   Code2,
   Compass,
   Database,
@@ -55,6 +54,7 @@ import {
   TapParserIcon,
 } from "@/components/payment-tool-icons";
 import { SessionTimer } from "@/components/session-timer";
+import { SpinWheelIcon } from "@/components/spin-wheel-icon";
 import { Logo } from "@/components/ui/logo";
 import {
   Sidebar,
@@ -137,7 +137,7 @@ export function getSidebarData(
       },
       {
         groupLabel: messages.common.navWorkspace,
-        icon: CircleDashed,
+        icon: SpinWheelIcon,
         title: messages.wheel.title,
         description: messages.wheel.description,
         url: "/dashboard/wheel",

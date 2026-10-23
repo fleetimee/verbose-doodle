@@ -1,12 +1,10 @@
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
-import { toast } from "sonner";
-import { z } from "zod";
 import { Plus, RefreshCw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -18,17 +16,83 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/features/auth/context";
 import {
   createWheel,
-  evidenceSchema,
   fetchWheel,
   fetchWheelSessions,
-  verifyWheelEvidence,
   type WheelView,
 } from "@/features/wheel/api";
 import { CreateWheelDrawer } from "@/features/wheel/create-wheel-drawer";
+import { WheelDetailSkeleton } from "@/features/wheel/wheel-detail-skeleton";
 import { WheelDisc } from "@/features/wheel/wheel-disc";
+import { WheelQueryFeedback } from "@/features/wheel/wheel-load-failure";
 import { WheelSessionPanel } from "@/features/wheel/wheel-session-panel";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
-import { getErrorMessage } from "@/lib/error-handler";
+
+function WheelToolbar({
+  admin,
+  selected,
+  refreshing,
+  onBack,
+  onRefresh,
+  onCreate,
+}: {
+  admin: boolean;
+  selected: boolean;
+  refreshing: boolean;
+  onBack: () => void;
+  onRefresh: () => void;
+  onCreate: () => void;
+}) {
+  const {
+    messages: { wheel: copy },
+  } = useI18n();
+  return (
+    <header className="flex shrink-0 flex-wrap items-center justify-between gap-3">
+      <div className="flex min-w-0 items-center gap-3">
+        {selected && (
+          <Button
+            aria-label={copy.backToSessions}
+            onClick={onBack}
+            size="icon-sm"
+            title={copy.backToSessions}
+            variant="ghost"
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} />
+          </Button>
+        )}
+        <div>
+          <h1 className="font-semibold text-xl tracking-tight">{copy.title}</h1>
+          {!selected && (
+            <p className="mt-1 text-muted-foreground text-sm">
+              {copy.description}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button
+          aria-label={copy.refresh}
+          disabled={refreshing}
+          onClick={onRefresh}
+          size="icon-sm"
+          title={copy.refresh}
+          variant="ghost"
+        >
+          <RefreshCw />
+        </Button>
+        {admin && (
+          <Button
+            onClick={onCreate}
+            size="sm"
+            variant={selected ? "outline" : "default"}
+          >
+            <Plus data-icon="inline-start" />
+            {copy.create}
+          </Button>
+        )}
+      </div>
+    </header>
+  );
+}
 
 export function WheelPage() {
   const {
@@ -47,8 +111,6 @@ export function WheelPage() {
   });
   const grid = useRef<HTMLDivElement>(null);
   const [creating, setCreating] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const input = useRef<HTMLInputElement>(null);
   const sessions = useQuery({
     queryKey: ["wheel-sessions", page],
     queryFn: () => fetchWheelSessions(page),
@@ -98,170 +160,121 @@ export function WheelPage() {
   });
   return (
     <div className="mx-auto flex h-full min-h-0 w-full max-w-[1400px] flex-1 flex-col gap-3 overflow-hidden">
-      <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="font-semibold text-2xl tracking-tight">
-            {copy.title}
-          </h1>
-          <p className="mt-1 text-muted-foreground text-sm">
-            {copy.description}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            disabled={verifying}
-            onClick={() => input.current?.click()}
-            variant="outline"
-          >
-            {copy.verifyFile}
-          </Button>
-          {admin && (
-            <Button onClick={() => setCreating(true)}>
-              <Plus data-icon="inline-start" />
-              {copy.create}
-            </Button>
-          )}
-        </div>
-      </div>
-      <input
-        accept="application/json,.json"
-        aria-label={copy.verifyFile}
-        className="sr-only"
-        onChange={async (event) => {
-          const file = event.target.files?.[0];
-          event.target.value = "";
-          if (!file) {
-            return;
-          }
-          if (file.size > 1_000_000) {
-            toast.error(copy.fileTooLarge);
-            return;
-          }
-          setVerifying(true);
-          try {
-            const evidence = evidenceSchema.parse(
-              JSON.parse(await file.text())
-            );
-            if (!(await verifyWheelEvidence(evidence))) {
-              toast.error(copy.fileInvalid);
-              return;
-            }
-            const config = z
-              .object({ id: z.string().uuid() })
-              .parse(JSON.parse(evidence.configuration.payload));
-            setParams({ session: config.id });
-            await client.invalidateQueries({
-              queryKey: ["wheel-session", config.id],
-            });
-            toast.success(copy.fileVerified);
-          } catch {
-            toast.error(copy.fileInvalid);
-          } finally {
-            setVerifying(false);
+      <WheelToolbar
+        admin={admin}
+        onBack={() => setParams({})}
+        onCreate={() => setCreating(true)}
+        onRefresh={() => {
+          sessions.refetch();
+          if (id) {
+            selected.refetch();
           }
         }}
-        ref={input}
-        type="file"
+        refreshing={sessions.isFetching || selected.isFetching}
+        selected={!!id}
       />
-      <div className="flex shrink-0 items-center justify-between gap-2">
-        {id ? (
-          <Button onClick={() => setParams({})} size="sm" variant="outline">
-            {copy.backToSessions}
-          </Button>
-        ) : (
+      {!id && (
+        <div className="flex shrink-0 items-center justify-between gap-2">
           <h2 className="font-medium text-sm">{copy.savedSessions}</h2>
-        )}
-        <div className="flex items-center gap-2">
-          <Button
-            aria-label={copy.refresh}
-            onClick={() => {
-              sessions.refetch();
-              if (id) {
-                selected.refetch();
-              }
-            }}
-            size="icon-sm"
-            title={copy.refresh}
-            variant="outline"
-          >
-            <RefreshCw />
-          </Button>
-          {!id && (
-            <>
-              <Button
-                disabled={page === 0 && offset === 0}
-                onClick={() => {
-                  if (offset > 0) {
-                    setOffset(Math.max(0, offset - gridSize.capacity));
-                  } else {
-                    setPage((value) => value - 1);
-                    setOffset(
-                      Math.floor(24 / gridSize.capacity) * gridSize.capacity
-                    );
-                  }
-                }}
-                size="sm"
-                variant="outline"
-              >
-                {copy.previous}
-              </Button>
-              <Button
-                disabled={
-                  !sessions.data ||
-                  (offset + gridSize.capacity >= sessions.data.items.length &&
-                    page + 1 >= sessions.data.totalPages)
+          <div className="flex items-center gap-2">
+            <Button
+              disabled={page === 0 && offset === 0}
+              onClick={() => {
+                if (offset > 0) {
+                  setOffset(Math.max(0, offset - gridSize.capacity));
+                } else {
+                  setPage((value) => value - 1);
+                  setOffset(
+                    Math.floor(24 / gridSize.capacity) * gridSize.capacity
+                  );
                 }
-                onClick={() => {
-                  if (
-                    sessions.data &&
-                    offset + gridSize.capacity < sessions.data.items.length
-                  ) {
-                    setOffset((value) => value + gridSize.capacity);
-                  } else {
-                    setPage((value) => value + 1);
-                    setOffset(0);
-                  }
-                }}
-                size="sm"
-                variant="outline"
-              >
-                {copy.next}
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-      {sessions.error && (
-        <Alert variant="destructive">
-          <AlertDescription>{getErrorMessage(sessions.error)}</AlertDescription>
-        </Alert>
-      )}
-      {selected.error && (
-        <Alert variant="destructive">
-          <AlertDescription>
-            {getErrorMessage(selected.error)}
-            <Button onClick={() => selected.refetch()} variant="outline">
-              {copy.retry}
+              }}
+              size="sm"
+              variant="outline"
+            >
+              {copy.previous}
             </Button>
-          </AlertDescription>
-        </Alert>
+            <Button
+              disabled={
+                !sessions.data ||
+                (offset + gridSize.capacity >= sessions.data.items.length &&
+                  page + 1 >= sessions.data.totalPages)
+              }
+              onClick={() => {
+                if (
+                  sessions.data &&
+                  offset + gridSize.capacity < sessions.data.items.length
+                ) {
+                  setOffset((value) => value + gridSize.capacity);
+                } else {
+                  setPage((value) => value + 1);
+                  setOffset(0);
+                }
+              }}
+              size="sm"
+              variant="outline"
+            >
+              {copy.next}
+            </Button>
+          </div>
+        </div>
       )}
-      {(sessions.isPending || selected.isFetching) && (
-        <Skeleton className="h-12 w-full" />
-      )}
+      <WheelQueryFeedback
+        active={!!id}
+        cause={selected.error}
+        hasData={!!selected.data}
+        onBack={() => setParams({})}
+        onRetry={() => selected.refetch()}
+        pending={selected.isFetching}
+        scope="detail"
+      />
+      {id && !selected.data && selected.isPending && <WheelDetailSkeleton />}
       {id && selected.data && (
-        <WheelSessionPanel
-          canManage={admin}
+        <div
+          className="wheel-view-enter flex min-h-0 flex-1 flex-col"
           key={selected.data.config.id}
-          onUpdate={update}
-          view={selected.data}
-        />
+        >
+          <WheelSessionPanel
+            canManage={admin}
+            key={selected.data.config.id}
+            onUpdate={update}
+            view={selected.data}
+          />
+        </div>
       )}
       {!id && (
-        <div className="min-h-0 flex-1" ref={grid}>
+        <div
+          className="wheel-view-enter flex min-h-0 flex-1 flex-col gap-3"
+          ref={grid}
+        >
+          <WheelQueryFeedback
+            active={!id}
+            cause={sessions.error}
+            hasData={!!sessions.data}
+            onRetry={() => sessions.refetch()}
+            pending={sessions.isFetching}
+            scope="grid"
+          />
+
+          {sessions.isPending && (
+            <div
+              aria-busy="true"
+              className="grid h-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              <Skeleton className="h-full w-full" variant="xl" />
+              <Skeleton
+                className="hidden h-full w-full sm:block"
+                variant="xl"
+              />
+              <Skeleton
+                className="hidden h-full w-full lg:block"
+                variant="xl"
+              />
+            </div>
+          )}
           {!!sessions.data?.items.length && (
             <div
-              className="grid h-full grid-cols-[repeat(var(--wheel-grid-columns),minmax(0,1fr))] grid-rows-[repeat(var(--wheel-grid-rows),minmax(0,1fr))] gap-4"
+              className="grid min-h-0 flex-1 grid-cols-[repeat(var(--wheel-grid-columns),minmax(0,1fr))] grid-rows-[repeat(var(--wheel-grid-rows),minmax(0,1fr))] gap-4"
               style={gridStyle}
             >
               {sessions.data.items
@@ -278,13 +291,6 @@ export function WheelPage() {
                       aria-hidden="true"
                       className="wheel-stage relative grid min-h-0 w-full flex-1 place-items-center bg-muted/20 p-3"
                     >
-                      <div className="absolute top-3 right-3 z-10">
-                        <Badge
-                          variant={session.completed ? "secondary" : "success"}
-                        >
-                          {session.completed ? copy.completed : copy.active}
-                        </Badge>
-                      </div>
                       <WheelDisc
                         draw={null}
                         eligible={session.entries.map((_, index) => index)}
