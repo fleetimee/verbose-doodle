@@ -1,4 +1,8 @@
 export const logViewerMessages = {
+  enterFullscreen: "Penampil log layar penuh",
+  exitFullscreen: "Keluar layar penuh (Esc)",
+  fullscreenFailed:
+    "Layar penuh tidak dapat dibuka. Periksa izin browser lalu coba lagi.",
   toolbar: "Toolbar log",
   searchLogs: "Cari di log yang dimuat…",
   previousMatch: "Hasil sebelumnya (Shift+Enter)",

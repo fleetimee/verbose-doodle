@@ -1,6 +1,8 @@
 import {
   ArrowUp01Icon,
   Cancel01Icon,
+  MaximizeScreenIcon,
+  MinimizeScreenIcon,
   Search01Icon,
   TextWrapIcon,
 } from "@hugeicons/core-free-icons";
@@ -32,7 +34,13 @@ export function LogToolbar({
   follow,
   onFollow,
   search,
+  fullscreen,
+  fullscreenSupported,
+  onFullscreen,
 }: {
+  fullscreen: boolean;
+  fullscreenSupported: boolean;
+  onFullscreen: () => void;
   loading: boolean;
   canLoadOlder: boolean;
   onOlder: () => void;
@@ -200,6 +208,18 @@ export function LogToolbar({
           <Radio />
           {copy.live}
         </Toggle>
+        <Button
+          aria-label={fullscreen ? copy.exitFullscreen : copy.enterFullscreen}
+          disabled={!fullscreenSupported}
+          onClick={onFullscreen}
+          size="icon-xs"
+          title={fullscreen ? copy.exitFullscreen : copy.enterFullscreen}
+          variant="ghost"
+        >
+          <HugeiconsIcon
+            icon={fullscreen ? MinimizeScreenIcon : MaximizeScreenIcon}
+          />
+        </Button>
         {loading && <Spinner aria-label={copy.loading} />}
       </div>
       {!search.supported && search.query && (

@@ -40,11 +40,17 @@ export function StreamViewer({
   stream,
   from,
   to,
+  fullscreen,
+  fullscreenSupported,
+  onFullscreen,
 }: {
   id: string;
   stream: string;
   from: string;
   to: string;
+  fullscreen: boolean;
+  fullscreenSupported: boolean;
+  onFullscreen: () => void;
 }) {
   const { messages } = useI18n();
   const copy = messages.logViewer;
@@ -108,7 +114,7 @@ export function StreamViewer({
     } else if (follow) {
       element.scrollTop = element.scrollHeight;
     }
-  }, [pages, follow, fontSize]);
+  }, [pages, follow, fontSize, fullscreen]);
 
   async function older() {
     if (olderPending.current || loading || !first?.hasOlder) {
@@ -146,6 +152,8 @@ export function StreamViewer({
         canLoadOlder={!!first?.hasOlder}
         follow={follow}
         fontSize={fontSize}
+        fullscreen={fullscreen}
+        fullscreenSupported={fullscreenSupported}
         loading={loading}
         onFollow={(checked) => {
           anchor.current = null;
@@ -155,6 +163,7 @@ export function StreamViewer({
           setFollow(checked);
         }}
         onFontSize={setFontSize}
+        onFullscreen={onFullscreen}
         onLatest={() => {
           anchor.current = null;
           setQuery("");

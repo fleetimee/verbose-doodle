@@ -1,4 +1,8 @@
 export const logViewerMessages = {
+  enterFullscreen: "Fullscreen log viewer",
+  exitFullscreen: "Exit fullscreen (Esc)",
+  fullscreenFailed:
+    "Unable to open fullscreen. Check your browser permissions and try again.",
   toolbar: "Log toolbar",
   searchLogs: "Find in loaded logs…",
   previousMatch: "Previous match (Shift+Enter)",
