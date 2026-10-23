@@ -92,5 +92,73 @@ All responses use the existing API envelope and `Cache-Control: no-store`.
 | POST | `/api/wheel-sessions/{id}/complete` | ADMIN |
 | POST | `/api/wheel-sessions/verify` | Authenticated |
 
-The import UI accepts evidence JSON files below 1 MB. Active sessions may be
-viewed and replayed, but only completed sessions have a final export.
+The interface verifies evidence using a pasted hash in the session Evidence tab.
+Active sessions may be viewed and replayed, but only completed sessions have a
+final export or a final hash. The file verification API remains available for
+existing integrations.
+
+## Compare an evidence hash
+
+After completing a session, open its Evidence tab and use **Copy hash** to keep
+its final SHA-256 fingerprint separately. Later, paste that hash into **Hash to
+compare** for the same session and choose **Check integrity**. No file download
+is required. The server re-reads the session, verifies all signatures and the
+history chain, confirms it is sealed, then compares the signed checkpoint hash.
+A mismatch or failed signature check cannot pass verification. Like file
+verification, this trusts the server and its signing key; a retained hash is an
+external comparison value, not independent proof of fairness.
+
+`POST /api/wheel-sessions/{id}/verify-hash` accepts `{ "hash": "<64 hex characters>" }`
+and returns `{ "verified": true | false }` inside the standard data envelope.
+Authenticated users can verify; administrator access is not required.
+
+## Share results with participants
+
+After sealing a verified session, an administrator can open Evidence and choose
+**Copy result link**. This explicitly enables an unlisted microsite at
+`/wheel/results/<random-token>`; no login is required. The link reveals the
+session title, participant names, results, draw times, replay timings, and final
+fingerprint. It does not expose account names, request identifiers, signing
+records, or administrative controls. Replays use only the saved results and
+never create draws. The page starts with the original full wheel.
+
+Sharing uses a random 256-bit bearer token, stored separately from signed
+session evidence. **Disable result link** revokes future requests immediately;
+creating another link after revocation generates a new token. Previously viewed
+or copied results cannot be recalled. The API re-verifies integrity before
+serving a shared result and rejects unsealed or invalid sessions. Responses use
+`Cache-Control: no-store`; the microsite asks crawlers not to index it.
+
+- `POST /api/wheel-sessions/{id}/share`: ADMIN; enables or retrieves the token.
+- `DELETE /api/wheel-sessions/{id}/share`: ADMIN; revokes the token.
+- `GET /api/public/wheels/{token}`: public, read-only result and replay data.
+
+Restart the backend to apply the nullable, unique `share_token` column through
+its existing Hibernate schema update. The frontend host must route the public
+microsite path to the SPA, and participants must be able to reach the deployed
+frontend and API.
+
+## Winner announcement
+
+Live draws, saved replays, and the participant microsite use the same winner
+dialog after the wheel animation finishes. It shows the saved winner name and
+draw number with a short confetti burst. Session replay pauses at every winner;
+**Next draw** continues, while dismissing the dialog stops the sequence. Viewing
+a result in history also opens its announcement. Reduced-motion preferences
+suppress confetti, and announcements never create or change results.
+
+When only one eligible entry remains, **Award remaining entry** saves that result
+without a spin animation. The winner dialog explains that it was the only
+remaining entry. Replays and shared results also skip this deterministic spin;
+they still use the saved draw and preserve its evidence. The award is explicit,
+so a session can still be sealed early rather than awarding everyone.
+
+## Wheel settling motion
+
+The visual spin decelerates, overshoots by at most 3 degrees, rolls back gently, and settles at the
+exact saved angle. New draws place the landing safely inside the winning sector
+near its boundary so a small rollback can cross the neighboring sector. The
+winner is still chosen uniformly before the landing offset. Existing signed
+records keep their original angles; their rollback is bounded to avoid a large
+reversal. Replay and public results derive the same motion from the saved angle
+and duration. Reduced-motion mode skips this animation.
