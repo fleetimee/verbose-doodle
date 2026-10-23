@@ -146,3 +146,13 @@ Expanded `[MTI]` and numbered field dump lines are highlighted automatically, pr
 Timestamped `R`/`S` packed ISO lines highlight the MTI and primary/secondary bitmap. Packed field ranges are colored only when the following expanded dump matches every bitmap field and reconstructs the complete packed body without ambiguity, including variable-length prefixes. Missing, truncated, or incompatible dumps leave the packed body unchanged. No payload content is inserted as HTML.
 
 The Add and Configure source drawers require a successful **Check connection** before enabling **Save source**. The check applies to the exact current settings; changing any setting invalidates it. Submitting the form with Enter follows the same guard.
+
+### Finding text in loaded logs
+
+The compact log toolbar includes a case-insensitive literal search, current/total match count, previous/next buttons, and clear action. Enter advances to the next match; Shift+Enter goes back; Escape clears the query. Search pauses live following. Turning Live back on or jumping to the latest logs clears search. Load older to extend the searchable buffer; search does not query unloaded server files.
+
+Highlights preserve the existing ISO syntax spans and can cross adjacent chunks of the same file. They do not cross file boundaries. Navigation is limited to the first 2,000 matches. Modern browsers use the CSS Custom Highlight API; older browsers show an availability hint. The stylesheet optimizer may warn about the standard `::highlight()` selector; production output retains those rules.
+
+### Fullscreen viewing
+
+The log toolbar fullscreen button expands the viewer panel using browser fullscreen, hiding the source settings and dashboard chrome. Stream tabs, search, wrapping, font size, and live controls remain available. The exit button or Escape restores the normal view and source settings. The viewer remains mounted so the log buffer, stream selection, and search are retained. Fullscreen is disabled when unsupported by the browser.
