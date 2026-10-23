@@ -125,9 +125,9 @@ export function CreateWheelDrawer({
             }
           }}
         >
-          <ScrollArea className="min-h-0 flex-1">
-            <div className="grid gap-6 p-6 lg:grid-cols-2">
-              <FieldGroup size="compact">
+          <ScrollArea className="min-h-0 flex-1" contentClassName="lg:h-full">
+            <div className="grid gap-6 p-6 lg:h-full lg:min-h-128 lg:grid-cols-2">
+              <FieldGroup className="min-h-0" size="compact">
                 {error && (
                   <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
@@ -147,11 +147,12 @@ export function CreateWheelDrawer({
                     value={title}
                   />
                 </Field>
-                <Field>
+                <Field className="min-h-0 flex-1">
                   <FieldLabel htmlFor={`${prefix}-entries`}>
                     {copy.entries}
                   </FieldLabel>
                   <Textarea
+                    className="field-sizing-fixed min-h-40 flex-1 resize-none"
                     disabled={pending}
                     id={`${prefix}-entries`}
                     maxLength={10_100}
@@ -177,7 +178,7 @@ export function CreateWheelDrawer({
                     value={mode}
                   >
                     <SelectTrigger className="w-full" id={`${prefix}-mode`}>
-                      <SelectValue />
+                      <SelectValue>{copy.modes[mode]}</SelectValue>
                     </SelectTrigger>
                     <SelectContent portalContainer={container}>
                       <SelectGroup>

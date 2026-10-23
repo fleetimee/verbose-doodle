@@ -4195,3 +4195,86 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   width: min(100cqw, 100cqh);
   height: min(100cqw, 100cqh);
 }
+
+.wheel-preview-spin {
+  animation: wheel-preview-spin 45s linear infinite;
+}
+
+@keyframes wheel-preview-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wheel-preview-spin {
+    animation: none;
+  }
+}
+
+.wheel-winner-confetti {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  width: 6px;
+  height: 12px;
+  background: var(--confetti-color);
+  opacity: 0;
+  animation: wheel-winner-confetti 1600ms ease-out var(--confetti-delay) both;
+}
+
+@keyframes wheel-winner-confetti {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--confetti-x), var(--confetti-y))
+      rotate(var(--confetti-rotation));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wheel-winner-confetti {
+    display: none;
+    animation: none;
+  }
+}
+
+.wheel-view-enter {
+  animation: wheel-view-enter 180ms var(--ease-out) both;
+}
+
+@keyframes wheel-view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wheel-view-enter {
+    animation: none;
+  }
+}
+
+.wheel-pointer-flap {
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 25%));
+  transform: rotate(calc(var(--wheel-pointer-angle, 0) * 1deg));
+  transform-origin: 250px 10px;
+  transform-box: view-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wheel-pointer-flap {
+    transform: none;
+  }
+}

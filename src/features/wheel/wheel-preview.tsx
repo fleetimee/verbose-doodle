@@ -18,17 +18,19 @@ export function WheelPreview({ entries }: { entries: string }) {
   return (
     <section
       aria-labelledby={heading}
-      className="rounded-xl border bg-muted/20 p-4 lg:sticky lg:top-0 lg:self-start"
+      className="flex min-h-0 flex-col rounded-xl border bg-muted/20 p-4"
     >
       <h3 className="font-semibold text-sm" id={heading}>
         {copy.previewTitle}
       </h3>
       <p className="mt-1 text-muted-foreground text-sm">{copy.previewHint}</p>
-      <div className="mx-auto my-4 w-full max-w-xs">
+      <div className="wheel-stage my-4 grid h-64 min-h-48 place-items-center lg:h-auto lg:flex-1">
         <WheelDisc
           draw={null}
           eligible={previewEntries.map((_, index) => index)}
           entries={previewEntries}
+          fit
+          idleSpin
           playing={false}
           replay={0}
         />
