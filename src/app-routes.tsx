@@ -8,6 +8,12 @@ import { aboutRoutes } from "@/features/about/routes";
 import { authRoutes } from "@/features/auth/routes";
 import { dashboardRoutes } from "@/features/dashboard/routes";
 
+const WheelResultPage = lazy(() =>
+  import("@/pages/wheel-result").then(({ WheelResultPage }) => ({
+    default: WheelResultPage,
+  }))
+);
+
 const ServerTerminalPage = lazy(() =>
   import("@/pages/server-terminal").then(({ ServerTerminalPage }) => ({
     default: ServerTerminalPage,
@@ -27,6 +33,7 @@ export function AppRoutes() {
     <Suspense fallback={<div className="min-h-screen bg-background" />}>
       <Routes key={locale}>
         <Route element={<AuthRedirect />} path="/" />
+        <Route element={<WheelResultPage />} path="/wheel/results/:token" />
         {authRoutes}
         {aboutRoutes}
         {dashboardRoutes}
