@@ -12,6 +12,7 @@ import { serverInventoryRoutes } from "@/features/server-inventory/routes";
 import { simulatorDbRoutes } from "@/features/simulator-db/routes";
 import { socketTesterRoutes } from "@/features/socket-tester/routes";
 import { socksRelayRoutes } from "@/features/socks-relay/routes";
+import { wheelRoutes } from "@/features/wheel/routes";
 
 const QrisTapReaderPage = lazy(() =>
   import("@/pages/dashboard/qris-tap-reader").then(({ QrisTapReaderPage }) => ({
@@ -35,6 +36,7 @@ export const dashboardRoutes = (
     {endpointRoutes}
     {serverInventoryRoutes}
     {logViewerRoutes}
+    {wheelRoutes}
     {simulatorDbRoutes}
     {employeeRoutes}
     {socketTesterRoutes}

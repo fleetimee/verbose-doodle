@@ -4167,3 +4167,31 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   background: var(--background);
   border-radius: 0;
 }
+
+:root {
+  --wheel-color-1: #dc2626;
+  --wheel-color-2: #15803d;
+  --wheel-color-3: #2563eb;
+  --wheel-color-4: #facc15;
+  --wheel-color-5: #c2410c;
+  --wheel-color-6: #9333ea;
+  --wheel-color-7: #06b6d4;
+  --wheel-color-8: #db2777;
+  --wheel-on-color-1: #fff;
+  --wheel-on-color-2: #fff;
+  --wheel-on-color-3: #fff;
+  --wheel-on-color-4: #172033;
+  --wheel-on-color-5: #fff;
+  --wheel-on-color-6: #fff;
+  --wheel-on-color-7: #172033;
+  --wheel-on-color-8: #fff;
+}
+
+.wheel-stage {
+  container-type: size;
+}
+
+.wheel-disc-fit {
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+}

@@ -106,6 +106,7 @@ function getRouteLabels(
     "rest-api": messages.common.navRestApi,
     servers: messages.servers.title,
     logs: messages.logViewer.title,
+    wheel: messages.wheel.title,
     employees: messages.employees.title,
     settings: messages.common.navSettings,
     "simulator-db": "ISOBillerSim",
@@ -144,6 +145,7 @@ export function DashboardLayout() {
     "/dashboard/employees",
     "/dashboard/simulator-db",
     "/dashboard/logs",
+    "/dashboard/wheel",
   ].includes(location.pathname);
   const hasOwnPageEntrance = location.pathname.startsWith(
     "/dashboard/socket-test/"
@@ -405,8 +407,10 @@ export function DashboardLayout() {
                     isOverview && "dashboard-overview-main",
                     { "overflow-hidden p-0 sm:p-0 md:p-0": isSimulatorDb },
                     {
-                      "overflow-hidden":
-                        location.pathname === "/dashboard/logs",
+                      "overflow-hidden": [
+                        "/dashboard/logs",
+                        "/dashboard/wheel",
+                      ].includes(location.pathname),
                     }
                   )}
                 >

@@ -28,6 +28,7 @@ import { socketTesterMessages as idSocketTesterMessages } from "@/lib/i18n/messa
 import { socksRelayMessages as idSocksRelayMessages } from "@/lib/i18n/messages/id-id/socks-relay";
 import { themeMessages as idThemeMessages } from "@/lib/i18n/messages/id-id/theme";
 import { usersMessages as idUsersMessages } from "@/lib/i18n/messages/id-id/users";
+import { wheelMessages } from "@/lib/i18n/messages/id-id/wheel";
 
 export const idIdMessages = {
   ...enUsMessages,
@@ -68,6 +69,7 @@ export const idIdMessages = {
   overview: idOverviewMessages,
   socketTester: idSocketTesterMessages,
   logViewer: logViewerMessages,
+  wheel: wheelMessages,
   servers: idServersMessages,
   socksRelay: idSocksRelayMessages,
   theme: idThemeMessages,

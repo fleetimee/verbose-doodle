@@ -27,6 +27,7 @@ import { socketTesterMessages } from "@/lib/i18n/messages/en-us/socket-tester";
 import { socksRelayMessages } from "@/lib/i18n/messages/en-us/socks-relay";
 import { themeMessages } from "@/lib/i18n/messages/en-us/theme";
 import { usersMessages } from "@/lib/i18n/messages/en-us/users";
+import { wheelMessages } from "@/lib/i18n/messages/en-us/wheel";
 
 export const enUsMessages = {
   qrisTapReader: qrisTapReaderMessages,
@@ -66,6 +67,7 @@ export const enUsMessages = {
   overview: overviewMessages,
   socketTester: socketTesterMessages,
   logViewer: logViewerMessages,
+  wheel: wheelMessages,
   servers: serversMessages,
   socksRelay: socksRelayMessages,
   theme: themeMessages,

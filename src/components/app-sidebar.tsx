@@ -20,6 +20,7 @@ import {
 } from "@/components/game-icons";
 import {
   Cable,
+  CircleDashed,
   Code2,
   Compass,
   Database,
@@ -133,6 +134,13 @@ export function getSidebarData(
         title: messages.logViewer.title,
         description: messages.logViewer.description,
         url: "/dashboard/logs",
+      },
+      {
+        groupLabel: messages.common.navWorkspace,
+        icon: CircleDashed,
+        title: messages.wheel.title,
+        description: messages.wheel.description,
+        url: "/dashboard/wheel",
       },
       {
         adminOnly: true,
