@@ -3,10 +3,16 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useSyncExternalStore } from "react";
 import { Link, useSearchParams } from "react-router";
-import { FileTerminal, Info } from "@/components/hugeicons";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileTerminal,
+  Info,
+  Pause,
+  Play,
+} from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -63,7 +69,13 @@ function usagePercent(used: number | null, total: number | null) {
   return (100 * used) / total;
 }
 
-function Measurements({ metrics }: { metrics: ServerMetrics }) {
+function Measurements({
+  metrics,
+  large,
+}: {
+  metrics: ServerMetrics;
+  large: boolean;
+}) {
   const copy = useI18n().messages.servers.metrics;
   return (
     <div className="grid @min-[22rem]:grid-cols-5 grid-cols-3 gap-x-3 gap-y-4">
@@ -74,6 +86,7 @@ function Measurements({ metrics }: { metrics: ServerMetrics }) {
             : formatMessage(copy.cores, { count: metrics.cores })
         }
         label={copy.cpu}
+        large={large}
         percent={metrics.cpuPercent}
       />
       <MetricGauge
@@ -90,6 +103,7 @@ function Measurements({ metrics }: { metrics: ServerMetrics }) {
           </>
         }
         label={copy.memory}
+        large={large}
         percent={usagePercent(
           metrics.memoryUsedBytes,
           metrics.memoryTotalBytes
@@ -109,6 +123,7 @@ function Measurements({ metrics }: { metrics: ServerMetrics }) {
           </>
         }
         label={copy.disk}
+        large={large}
         percent={usagePercent(metrics.diskUsedBytes, metrics.diskTotalBytes)}
       />
       <MetricRates
@@ -186,9 +201,15 @@ function HostCardHeader({
       </div>
       <CardAction className="relative z-10">
         <div className="flex items-center gap-2">
-          <Badge variant={ready && !paused ? "success" : "secondary"}>
+          <span
+            className={
+              ready && !paused
+                ? "text-success text-xs"
+                : "text-muted-foreground text-xs"
+            }
+          >
             {statusLabel}
-          </Badge>
+          </span>
           {eligible && !detail && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -291,8 +312,7 @@ export function ServerHostCard({
         ))}
       {ready && (
         <>
-          <Measurements metrics={data} />
-          <Separator />
+          <Measurements large={detail} metrics={data} />
           <MetricsFooter metrics={data} />
         </>
       )}
@@ -391,8 +411,8 @@ export function ServerMetricsPanel() {
     }
   }
   return (
-    <div className="flex min-w-0 flex-col gap-5">
-      <div className="server-monitor-toolbar sticky top-16 z-10 flex shrink-0 flex-col gap-3 rounded-2xl border border-border/60 bg-background/90 p-3 backdrop-blur-xl sm:flex-row sm:items-center">
+    <div className="flex min-w-0 flex-col gap-3 lg:min-h-0 lg:flex-1">
+      <div className="server-monitor-toolbar sticky top-16 z-10 flex shrink-0 flex-col gap-3 rounded-xl border border-border/60 bg-background/90 p-2 backdrop-blur-xl sm:flex-row sm:items-center">
         <InputGroup>
           <InputGroupAddon>
             <HugeiconsIcon aria-hidden="true" icon={Search01Icon} />
@@ -431,13 +451,23 @@ export function ServerMetricsPanel() {
                 { replace: true }
               )
             }
+            size="sm"
             variant="outline"
           >
+            {paused ? (
+              <Play data-icon="inline-start" />
+            ) : (
+              <Pause data-icon="inline-start" />
+            )}
             {paused ? copy.resume : copy.pause}
           </Button>
           <Popover>
             <PopoverTrigger asChild>
-              <Button aria-label={copy.details} size="icon" variant="outline">
+              <Button
+                aria-label={copy.details}
+                size="icon-sm"
+                variant="outline"
+              >
                 <Info />
               </Button>
             </PopoverTrigger>
@@ -470,7 +500,7 @@ export function ServerMetricsPanel() {
           </EmptyHeader>
         </Empty>
       )}
-      <div className="grid items-stretch gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+      <div className="grid items-stretch gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-2 lg:content-start lg:overflow-y-auto 2xl:grid-cols-3">
         {[...hosts.values()].map((entry) => (
           <ServerHostCard
             entry={entry}
@@ -495,6 +525,7 @@ export function ServerMetricsPanel() {
               size="sm"
               variant="outline"
             >
+              <ChevronLeft data-icon="inline-start" />
               {copy.previous}
             </Button>
             <Button
@@ -504,6 +535,7 @@ export function ServerMetricsPanel() {
               variant="outline"
             >
               {copy.next}
+              <ChevronRight data-icon="inline-end" />
             </Button>
           </div>
         </div>

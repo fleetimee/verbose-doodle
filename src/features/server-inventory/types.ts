@@ -30,6 +30,26 @@ export interface ServerMetrics {
   uptimeSeconds: number | null;
 }
 
+export interface ServerSpecInfo {
+  aesNi: boolean | null;
+  architecture: string | null;
+  collectedAt: string | null;
+  cores: number | null;
+  cpuMhz: number | null;
+  cpuModel: string | null;
+  diskTotalBytes: number | null;
+  hostname: string | null;
+  kernel: string | null;
+  loadAverage: string | null;
+  machine: string | null;
+  memoryTotalBytes: number | null;
+  operatingSystem: string | null;
+  status: string;
+  swapTotalBytes: number | null;
+  uptimeSeconds: number | null;
+  virtualized: boolean | null;
+}
+
 export interface ServerContainer {
   blockIo: string | null;
   cpuPercent: number | null;
@@ -71,6 +91,7 @@ export interface ServerContainerDetail {
   created: string | null;
   id: string | null;
   image: string | null;
+  installedSoftware?: string[] | null;
   mounts: {
     destination: string;
     source: string;
@@ -79,6 +100,7 @@ export interface ServerContainerDetail {
   }[];
   name: string | null;
   networks: { ipv4: string; ipv6: string; name: string }[];
+  operatingSystem?: string | null;
   path: string | null;
   ports: {
     containerPort: string;

@@ -1,23 +1,31 @@
 import { useI18n } from "@/components/i18n-provider";
 import { MetricGauge } from "@/features/server-inventory/components/server-metric-values";
 import type { ServerContainer } from "@/features/server-inventory/types";
+import { cn } from "@/lib/utils";
 
 function TransferValues({
   label,
   value,
   first,
   second,
+  detailed = false,
 }: {
   label: string;
   value: string | null;
   first: string;
   second: string;
+  detailed?: boolean;
 }) {
   const parts = value?.split(" / ");
   return (
-    <div className="flex min-w-0 flex-col gap-2">
+    <div className={cn("flex min-w-0 flex-col gap-2", detailed && "gap-4")}>
       <span className="text-muted-foreground text-xs">{label}</span>
-      <dl className="flex flex-col gap-0.5 text-xs">
+      <dl
+        className={cn(
+          "flex flex-col gap-0.5 text-xs",
+          detailed && "gap-2 text-sm [&_dd]:mb-2 [&_dd]:text-lg"
+        )}
+      >
         <dt className="text-muted-foreground">{first}</dt>
         <dd className="font-mono tabular-nums">{parts?.[0] || "—"}</dd>
         <dt className="text-muted-foreground">{second}</dt>
@@ -27,17 +35,30 @@ function TransferValues({
   );
 }
 
-export function ServerContainerReadings({ item }: { item: ServerContainer }) {
+export function ServerContainerReadings({
+  item,
+  detailed = false,
+}: {
+  item: ServerContainer;
+  detailed?: boolean;
+}) {
   const { messages } = useI18n();
   const copy = messages.servers.containers;
   const memory = item.memoryUsage?.split(" / ");
   return (
-    <div className="grid grid-cols-4 gap-3">
+    <div
+      className={cn(
+        "grid grid-cols-4 gap-3",
+        detailed &&
+          "grid-cols-2 items-start gap-x-6 gap-y-8 py-4 sm:grid-cols-4 sm:gap-8"
+      )}
+    >
       <MetricGauge
         detail={
           item.cpuPercent === null ? "—" : `${item.cpuPercent.toFixed(2)}%`
         }
         label={messages.servers.metrics.cpu}
+        large={detailed}
         percent={item.cpuPercent}
       />
       <MetricGauge
@@ -50,15 +71,18 @@ export function ServerContainerReadings({ item }: { item: ServerContainer }) {
           </>
         }
         label={messages.servers.metrics.memory}
+        large={detailed}
         percent={item.memoryPercent}
       />
       <TransferValues
+        detailed={detailed}
         first={messages.servers.metrics.receive}
         label={copy.networkTotal}
         second={messages.servers.metrics.transmit}
         value={item.networkIo}
       />
       <TransferValues
+        detailed={detailed}
         first={messages.servers.metrics.read}
         label={copy.ioTotal}
         second={messages.servers.metrics.write}

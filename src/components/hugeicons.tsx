@@ -4,6 +4,8 @@ import {
   AiNetworkIcon,
   AlertCircleIcon,
   ArrowDown01Icon,
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
   ArrowUpDownIcon,
   BarChartIcon,
   BinaryIcon,
@@ -60,6 +62,7 @@ import {
   Money03Icon,
   MoonIcon,
   MoreHorizontalCircle01Icon,
+  PauseIcon,
   Pen01Icon,
   PlayIcon,
   Plug01Icon,
@@ -105,6 +108,9 @@ export const BarChart3 = createHugeIcon(BarChartIcon);
 export const Banknote = createHugeIcon(Money03Icon);
 export const CreditCard = createHugeIcon(CreditCardIcon);
 export const ChevronDown = createHugeIcon(ArrowDown01Icon);
+export const ChevronLeft = createHugeIcon(ArrowLeft01Icon);
+export const ChevronRight = createHugeIcon(ArrowRight01Icon);
+export const Pause = createHugeIcon(PauseIcon);
 export const QrCode = createHugeIcon(QrCodeIcon);
 export const Binary = createHugeIcon(BinaryIcon);
 export const Braces = createHugeIcon(BracesIcon);

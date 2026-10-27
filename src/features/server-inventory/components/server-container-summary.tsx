@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { SiDocker } from "react-icons/si";
 import { useI18n } from "@/components/i18n-provider";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchServerContainerSummary } from "@/features/server-inventory/api";
 import { useContainerError } from "@/features/server-inventory/components/server-container-status";
@@ -100,6 +100,8 @@ export function ServerDockerSummary({
   const data = query.data;
   const ready = data?.status === "OK" && !query.isError;
   const error = useContainerError(data?.status, query.error);
+  const dockerMissing =
+    data?.status === "DOCKER_NOT_INSTALLED" && !query.isError;
   let statusLabel = messages.servers.metrics.unavailable;
   if (ready) {
     statusLabel = `Docker ${data.version || "—"}`;
@@ -112,7 +114,7 @@ export function ServerDockerSummary({
     <section aria-label={copy.title} className="flex min-w-0 flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-medium text-sm">{copy.title}</h3>
-        <Badge variant={ready ? "secondary" : "outline"}>{statusLabel}</Badge>
+        <span className="text-muted-foreground text-xs">{statusLabel}</span>
       </div>
       {ready && <SummaryValues data={data} />}
       {!eligible && (
@@ -123,7 +125,18 @@ export function ServerDockerSummary({
       {eligible && !data && !query.isError && !paused && (
         <Skeleton className="h-12 w-full" />
       )}
-      {error && (
+      {dockerMissing && (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-2 py-5 text-center">
+          <SiDocker
+            aria-hidden="true"
+            className="h-12 w-16 shrink-0 text-primary"
+          />
+          <p className="max-w-xs text-muted-foreground text-xs leading-relaxed">
+            {error}
+          </p>
+        </div>
+      )}
+      {error && !dockerMissing && (
         <p className="text-muted-foreground text-xs leading-relaxed">{error}</p>
       )}
       {ready && <SummaryFooter data={data} paused={paused} />}

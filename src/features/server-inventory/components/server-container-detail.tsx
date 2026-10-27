@@ -1,5 +1,6 @@
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import { Fragment, type ReactNode } from "react";
+import { SiDocker } from "react-icons/si";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import {
   fetchServerContainerStats,
 } from "@/features/server-inventory/api";
 import { ServerContainerActions } from "@/features/server-inventory/components/server-container-actions";
+import { ServerContainerLogs } from "@/features/server-inventory/components/server-container-logs";
 import { ServerContainerReadings } from "@/features/server-inventory/components/server-container-readings";
 import {
   containerVariant,
@@ -63,6 +65,10 @@ function DetailValues({ data }: { data: ServerContainerDetail }) {
     { label: copy.path, value: data.path || "—" },
     { label: copy.image, value: data.image || "—" },
     {
+      label: messages.servers.metrics.specOs,
+      value: data.operatingSystem || "—",
+    },
+    {
       label: copy.created,
       value: data.created ? new Date(data.created).toLocaleString(locale) : "—",
     },
@@ -108,6 +114,33 @@ function DetailValues({ data }: { data: ServerContainerDetail }) {
           </CardContent>
         </Card>
       ))}
+      <Card size="monitor" variant="monitor">
+        <CardHeader size="none">
+          <CardTitle size="sm">{copy.installedSoftware}</CardTitle>
+        </CardHeader>
+        <CardContent size="none">
+          <div className="flex flex-col gap-3">
+            <p className="text-muted-foreground text-sm">
+              {copy.softwareDescription}
+            </p>
+            {data.installedSoftware && data.installedSoftware.length > 0 ? (
+              <ul className="flex flex-wrap gap-2">
+                {data.installedSoftware.map((software) => (
+                  <li key={software}>
+                    <Badge variant="secondary">{software}</Badge>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                {data.installedSoftware
+                  ? copy.softwareEmpty
+                  : copy.softwareUnavailable}
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
       <p className="text-muted-foreground text-xs">
         {formatMessage(messages.servers.metrics.updated, {
           time: data.collectedAt
@@ -152,7 +185,7 @@ function ContainerLiveMetrics({
           {query.isPending && !paused && eligible && (
             <Skeleton className="h-28 w-full" />
           )}
-          {item && <ServerContainerReadings item={item} />}
+          {item && <ServerContainerReadings detailed item={item} />}
           {item && item.state !== "running" && (
             <p className="text-muted-foreground text-xs">
               {copy.stoppedMetrics}
@@ -185,6 +218,7 @@ export function ServerContainerDetailPanel({
 }) {
   const { messages } = useI18n();
   const copy = messages.servers.containers;
+  const states: Record<string, string> = copy.states;
   const query = useQuery({
     queryKey: [
       "server-inventory",
@@ -222,11 +256,31 @@ export function ServerContainerDetailPanel({
   const error = useContainerError(data?.status, query.error);
   const ready = data?.status === "OK" && !query.isError;
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
+    <div className="flex w-full min-w-0 flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="min-w-0 break-all font-semibold text-xl tracking-tight">
-          {data?.name ?? copy.detailTitle}
-        </h2>
+        <div className="flex min-w-0 flex-1 items-center gap-4">
+          <SiDocker
+            aria-hidden="true"
+            className="size-10 shrink-0 text-primary"
+          />
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="min-w-0 break-all font-semibold text-2xl tracking-tight">
+                {data?.name ?? copy.detailTitle}
+              </h2>
+              {ready && data.state && (
+                <Badge variant={containerVariant(data.state, "")}>
+                  {states[data.state] ?? data.state}
+                </Badge>
+              )}
+            </div>
+            {ready && data.image && (
+              <p className="break-all font-mono text-muted-foreground text-xs leading-relaxed">
+                {data.image}
+              </p>
+            )}
+          </div>
+        </div>
         <ServerContainerActions
           containerId={containerId}
           entry={entry}
@@ -255,6 +309,13 @@ export function ServerContainerDetailPanel({
         paused={paused}
         query={stats}
       />
+      {ready && (
+        <ServerContainerLogs
+          containerId={containerId}
+          paused={paused}
+          serverId={entry.id}
+        />
+      )}
       {ready && <DetailValues data={data} />}
       <p className="text-muted-foreground text-xs">{copy.managementHint}</p>
     </div>

@@ -3,7 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router";
-import { Play, RefreshCw } from "@/components/hugeicons";
+import { ChevronLeft, Play, RefreshCw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -19,8 +19,43 @@ import { fetchServerEntry } from "@/features/server-inventory/api";
 import { ServerContainerDetailPanel } from "@/features/server-inventory/components/server-container-detail";
 import { ServerContainerGrid } from "@/features/server-inventory/components/server-container-grid";
 import { ServerHostCard } from "@/features/server-inventory/components/server-metrics";
+import {
+  ServerSpec,
+  useDockerMissing,
+} from "@/features/server-inventory/components/server-spec";
+import type { ServerEntry } from "@/features/server-inventory/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { getErrorMessage } from "@/lib/error-handler";
+
+function HostSections({
+  entry,
+  paused,
+}: {
+  entry: ServerEntry;
+  paused: boolean;
+}) {
+  const copy = useI18n().messages.servers.containers;
+  const noDocker = useDockerMissing(entry, paused);
+  return (
+    <>
+      <section aria-label={copy.overview}>
+        <ServerHostCard detail entry={entry} paused={paused} />
+      </section>
+      <ServerSpec entry={entry} paused={paused} />
+      {!noDocker && (
+        <section className="flex min-w-0 flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <h2 className="font-semibold text-xl tracking-tight">
+              {copy.title}
+            </h2>
+            <p className="text-muted-foreground text-sm">{copy.description}</p>
+          </div>
+          <ServerContainerGrid entry={entry} paused={paused} />
+        </section>
+      )}
+    </>
+  );
+}
 
 export function ServerHostDetailPage() {
   const { messages } = useI18n();
@@ -67,6 +102,7 @@ export function ServerHostDetailPage() {
       <div className="flex flex-col gap-5">
         <div>
           <Button render={<Link to={back} />} size="sm" variant="ghost">
+            <ChevronLeft data-icon="inline-start" />
             {containerId ? copy.backToHost : copy.backToHosts}
           </Button>
         </div>
@@ -202,22 +238,7 @@ export function ServerHostDetailPage() {
             paused={paused}
           />
         ) : (
-          <>
-            <section aria-label={copy.overview}>
-              <ServerHostCard detail entry={entry} paused={paused} />
-            </section>
-            <section className="flex min-w-0 flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <h2 className="font-semibold text-xl tracking-tight">
-                  {copy.title}
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  {copy.description}
-                </p>
-              </div>
-              <ServerContainerGrid entry={entry} paused={paused} />
-            </section>
-          </>
+          <HostSections entry={entry} paused={paused} />
         ))}
     </div>
   );

@@ -5,6 +5,7 @@ import {
   UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useOutlet, useParams } from "react-router";
@@ -59,6 +60,10 @@ import { useEndpointWorkspace } from "@/features/endpoints/hooks/use-endpoint-wo
 import type { EndpointFormData } from "@/features/endpoints/schemas/endpoint-schema";
 import type { HttpMethod } from "@/features/endpoints/types";
 import { selectEndpointForBiller } from "@/features/endpoints/utils/endpoint-selection";
+import {
+  fetchServerContainerDetail,
+  fetchServerEntry,
+} from "@/features/server-inventory/api";
 import { SocketBridgeProvider } from "@/features/socket-tester/context/socket-bridge-context";
 import { formatMessage } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
@@ -133,6 +138,35 @@ type DashboardBreadcrumbItem = {
   readonly endpointSlug?: string;
   readonly url?: string;
 };
+
+function useServerBreadcrumbNames(pathSegments: string[]) {
+  const serverId =
+    pathSegments[1] === "server-metrics" ? pathSegments[2] : undefined;
+  const query = useQuery({
+    queryKey: ["server-inventory", "detail", serverId],
+    queryFn: ({ signal }) => fetchServerEntry(serverId ?? "", signal),
+    enabled: Boolean(serverId),
+    retry: false,
+  });
+  const containerId = pathSegments[4];
+  const containerQuery = useQuery({
+    queryKey: [
+      "server-inventory",
+      "container-detail",
+      serverId,
+      query.data?.updatedAt,
+      containerId,
+    ],
+    queryFn: ({ signal }) =>
+      fetchServerContainerDetail(serverId ?? "", containerId ?? "", signal),
+    enabled: false,
+    gcTime: 0,
+  });
+  return {
+    serverName: query.data?.name,
+    containerName: containerQuery.data?.name,
+  };
+}
 
 export function DashboardLayout() {
   const { locale, messages } = useI18n();
@@ -241,6 +275,7 @@ export function DashboardLayout() {
   const pathSegments = location.pathname
     .split("/")
     .filter((segment) => segment !== "");
+  const { serverName, containerName } = useServerBreadcrumbNames(pathSegments);
 
   const breadcrumbItems: DashboardBreadcrumbItem[] = pathSegments
     .map((segment, index) => {
@@ -267,8 +302,8 @@ export function DashboardLayout() {
       if (pathSegments[1] === "server-metrics" && index > 1) {
         label =
           index === 2
-            ? messages.servers.containers.hostDetails
-            : messages.servers.containers.detailTitle;
+            ? (serverName ?? messages.servers.containers.hostDetails)
+            : containerName || messages.servers.containers.detailTitle;
       }
       const isLast = index === pathSegments.length - 1;
       const isNavigable =

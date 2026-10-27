@@ -1,5 +1,27 @@
 export const serversMessages = {
   containers: {
+    logsTitle: "Log container",
+    logsIdle: "Mulai streaming untuk melihat keluaran container.",
+    logsConnecting: "Menghubungkan ke aliran log…",
+    logsLive: "Langsung · mengikuti keluaran container",
+    logsEnded:
+      "Aliran log berakhir. Jeda lalu mulai lagi untuk menghubungkan ulang.",
+    logsFailed:
+      "Log tidak tersedia. Periksa container dan driver logging Docker.",
+    logsFollow: "Ikuti log",
+    logsClear: "Bersihkan",
+    logsPause: "Jeda streaming",
+    logsStart: "Mulai streaming",
+    logsEmpty: "Belum ada keluaran log untuk ditampilkan.",
+    logsHint:
+      "Menampilkan 200 baris log terakhir, lalu mengalirkan keluaran baru dengan waktu. Menyimpan 200.000 karakter terbaru. Menjeda atau menyembunyikan tab memutus aliran; melanjutkan memuat ulang log terbaru.",
+
+    installedSoftware: "Perangkat lunak terpasang",
+    softwareDescription:
+      "Alat umum yang tersedia pada PATH pengguna container.",
+    softwareEmpty: "Tidak ada alat umum yang diperiksa terdeteksi.",
+    softwareUnavailable:
+      "Deteksi perangkat lunak tidak tersedia. Container harus berjalan dengan shell sh yang berfungsi.",
     hostTerminal: "SSH host",
     liveMetrics: "Penggunaan sumber daya terkini",
     stoppedMetrics:
@@ -126,7 +148,7 @@ export const serversMessages = {
     paused: "Dijeda",
     live: "Langsung",
     unavailable: "Tidak tersedia",
-    collecting: "Mengambil dua sampel…",
+    collecting: "Memuat metrik…",
     cpu: "CPU",
     memory: "Memori",
     disk: "Disk (/)",
@@ -139,6 +161,23 @@ export const serversMessages = {
     cores: "{count} inti",
     uptime: "Aktif {days} hari {hours} jam",
     uptimeUnavailable: "Waktu aktif tidak tersedia",
+    uptimeLabel: "Waktu aktif",
+    specTitle: "Spesifikasi server",
+    specDescription: "Detail sistem yang dilaporkan melalui SSH.",
+    specOs: "Sistem operasi",
+    specKernel: "Kernel",
+    specArch: "Arsitektur",
+    specHostname: "Nama host",
+    specCpu: "CPU",
+    specAes: "AES-NI",
+    specVirt: "Virtualisasi",
+    specVm: "Mesin virtual",
+    specBare: "Bare metal",
+    specSwap: "Swap",
+    specLoad: "Rata-rata beban",
+    specYes: "Aktif",
+    specNo: "Nonaktif",
+    specNone: "Tidak ada",
     updated: "Diambil {time}",
     hostKeyRequired:
       "Buka terminal dan tinjau kunci host SSH server ini sebelum mengambil metrik. Jika sudah dipercaya, periksa konfigurasi known_hosts backend.",

@@ -87,7 +87,7 @@ section for other states, including paused or restarting containers. Search matc
 name, image, full ID and ports locally. Container details show full ID, state,
 executable path, image, creation time, networks and IP addresses, published/exposed
 ports, and mounts with read/write access. The host terminal shortcut remains
-independent. Container lifecycle actions and container exec remain outside scope.
+independent. Container lifecycle and interactive shell controls are available to administrators as described below.
 
 Host search, pagination and pause state use URL parameters. Container search and
 Include stopped use separate parameters, carried through container-detail links
@@ -121,8 +121,8 @@ have a five-second TTL, 128 slots, 15-second lock wait, two-minute lazy eviction
 and inventory revision invalidation. They share eight concurrent SSH collectors.
 
 Summaries and host metrics poll for the visible hosts or active host detail page.
-Container stats poll only on the host detail page; inspect data polls only on the
-container detail page.
+The host grid polls the list/stats collector. Container details poll both inspect
+data and `/containers/{containerId}/stats`, which samples only that container.
 All polling respects pause and browser visibility. Manual refresh may request one
 update while paused; the backend cache still applies. In-flight work can finish
 after navigating away. No historical data is stored.
@@ -157,3 +157,96 @@ after navigating away. No historical data is stored.
 - Verify detail-to-host Back retains search and Include stopped, and direct links
   and reload work for both routes. Remove a container outside the app and verify the explicit
   unavailable-detail state. Confirm there are no container management controls.
+
+## Container controls and terminal
+
+The detail action group visibly separates **Container shell** from the page-level
+**Host SSH** action. Restart has a distinct icon and label; Refresh remains a
+separate icon. All controls have localized accessible names and tooltips.
+
+`POST /api/servers/{id}/containers/{containerId}/{action}` accepts only `start`,
+`stop`, or `restart`. The request requires ADMIN and existing SSH credentials.
+The backend checks a fresh Docker state: start accepts created/exited, while
+stop/restart require running. Stop and Restart require confirmation identifying
+the container and host; their Docker shutdown timeout is 10 seconds. Actions are
+not cached or automatically retried. At most two mutations run alongside the
+shared collector limit, with a 35-second SSH read timeout. Results invalidate the
+host summary, list, inspect, and selected-container stats caches. Errors and
+timeouts trigger a refresh; a failed response does not imply unchanged state.
+Operation logs record actor, server/container IDs, action, and result.
+
+**Container shell** opens `/servers/{serverId}/containers/{containerId}/terminal`
+in a separate tab. The page checks the selected container, then uses a single-use
+ADMIN `server-ssh` ticket at **`/api/servers/container-terminal`**. The connect
+message requires `mode: "container"`, a full 64-character lowercase container ID,
+and `shell: "sh"` or `"bash"`. The backend runs a fixed `docker exec -it` command
+against the standard local Docker socket with the image's configured user. It
+does not request a privileged or root override. Shells/images without the selected
+executable, stopped containers, and Docker permission errors end explicitly.
+There is no fallback to a host shell and host file transfers are disabled.
+Terminal output/input, resize, host-key approval, heartbeats, disconnect, capacity
+limits, and cleanup reuse the existing SSH terminal implementation.
+
+For separately hosted WebSockets, set `VITE_SERVER_CONTAINER_WS_URL` to a URL ending
+with `/container-terminal`. If only `VITE_SERVER_SSH_WS_URL` is configured and ends
+in `/terminal`, the client derives the sibling `/container-terminal` endpoint.
+Other override paths are rejected. Deploy the matching backend: older backends
+should fail the new endpoint rather than interpreting container mode as host SSH.
+
+Manual validation: use a disposable container to start, stop, restart, check
+invalid-state and malformed input rejection, and verify sh/bash input/output.
+Verify Stop/Restart cancel sends no POST, pending actions disable duplicates,
+stopped containers show no live usage, and selected stats keep updating until
+paused/hidden or leaving the page. Verify unauthenticated/USER requests cannot
+mutate or obtain terminal tickets; ticketless WebSocket handshakes must fail.
+
+## Container operating system
+
+Container details include `operatingSystem`, taken from `PRETTY_NAME` in the
+container’s `/etc/os-release` (falling back to `/usr/lib/os-release`) using a
+fixed Docker exec command with the configured container user. Release contents
+are parsed as data and never sourced as shell code. No benchmark scripts are
+downloaded or executed. Stopped containers, images without `cat` or release
+metadata, and denied exec access return null without hiding inspect details.
+This is the container distribution, not the host operating system or kernel.
+Deploy the matching backend to populate the frontend Operating system row.
+
+## Container software detection
+
+Container detail responses include nullable `installedSoftware`: an array of
+common command names found on the configured container user's PATH. A fixed
+`sh` script checks curl, wget, git, bash, python3, python, node, npm, java, php,
+ruby, go, nginx, apache2, httpd, psql, mysql, redis-cli, and sqlite3 using
+`command -v`. It does not launch those programs, install packages, or download
+scripts. This is a curated tool check, not a full package inventory or version
+report. An empty array means no checked tools were found; null means detection
+was unavailable (including stopped containers or missing sh). Existing detail
+polling and caching apply. Deploy the matching backend to populate the section.
+
+## Live container logs
+
+Container details automatically start streaming when opened and offer pause/resume controls. The read-only
+`/api/servers/container-logs` WebSocket consumes a single-use ADMIN `server-ssh`
+ticket and accepts only `connect` with `mode: "logs"`, server/container IDs,
+and heartbeat `ping`. Container IDs retain full hexadecimal validation. Input,
+resize, file operations, and terminal modes are rejected on this endpoint.
+The fixed command uses the local Docker socket and `docker logs --follow
+--timestamps --tail 200`; stdout and stderr are combined without a PTY.
+Existing SSH credentials, known-host checks, capacity limits, and cleanup apply.
+Unknown keys must first be reviewed through Host SSH; logs cannot approve keys.
+No log archive is stored by the application.
+
+The browser batches output every 150 ms, retains at most 200,000 characters,
+and renders logs as plain text. Follow logs controls scrolling; Clear clears the
+visible buffer. Pause stream, page-level pause, hiding the tab, and navigation
+close the connection. Resume reloads the latest tail rather than promising
+lossless delivery across disconnects. Ended/failed streams require a manual
+restart. Unsupported Docker logging drivers surface an error. Existing container
+or SSH WebSocket overrides derive the sibling `/container-logs` URL; proxies
+must forward that endpoint too. Deploy/restart the matching backend.
+
+Manual validation: stream a container writing stdout/stderr, verify timestamps
+and new output, pause/resume, clear, disable Follow logs and scroll, hide the tab,
+and navigate away. Verify stopped containers and unsupported logging drivers,
+unknown/changed host keys, network failures, and buffer truncation. Confirm that
+USER/ticketless requests fail and log sockets reject input/file/terminal commands.

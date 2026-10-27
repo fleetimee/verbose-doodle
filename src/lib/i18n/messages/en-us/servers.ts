@@ -1,5 +1,25 @@
 export const serversMessages = {
   containers: {
+    logsTitle: "Container logs",
+    logsIdle: "Start streaming to view container output.",
+    logsConnecting: "Connecting to log stream…",
+    logsLive: "Live · following container output",
+    logsEnded: "Log stream ended. Pause and start again to reconnect.",
+    logsFailed:
+      "Logs are unavailable. Check the container and its Docker logging driver.",
+    logsFollow: "Follow logs",
+    logsClear: "Clear",
+    logsPause: "Pause stream",
+    logsStart: "Start streaming",
+    logsEmpty: "No log output to display.",
+    logsHint:
+      "Shows the last 200 log lines, then streams new output with timestamps. Keeps the latest 200,000 characters. Pausing or hiding this tab disconnects the stream; resuming reloads the latest logs.",
+
+    installedSoftware: "Installed software",
+    softwareDescription: "Common tools available on the container user’s PATH.",
+    softwareEmpty: "None of the common tools checked were detected.",
+    softwareUnavailable:
+      "Software detection is unavailable. The container must be running with a working sh shell.",
     hostTerminal: "Host SSH",
     liveMetrics: "Live resource usage",
     stoppedMetrics:
@@ -124,7 +144,7 @@ export const serversMessages = {
     paused: "Paused",
     live: "Live",
     unavailable: "Unavailable",
-    collecting: "Collecting two samples…",
+    collecting: "Loading metrics…",
     cpu: "CPU",
     memory: "Memory",
     disk: "Disk (/)",
@@ -137,6 +157,23 @@ export const serversMessages = {
     cores: "{count} cores",
     uptime: "Uptime {days}d {hours}h",
     uptimeUnavailable: "Uptime unavailable",
+    uptimeLabel: "Uptime",
+    specTitle: "Server specification",
+    specDescription: "System details reported over SSH.",
+    specOs: "Operating system",
+    specKernel: "Kernel",
+    specArch: "Architecture",
+    specHostname: "Hostname",
+    specCpu: "CPU",
+    specAes: "AES-NI",
+    specVirt: "Virtualization",
+    specVm: "Virtual machine",
+    specBare: "Bare metal",
+    specSwap: "Swap",
+    specLoad: "Load average",
+    specYes: "Enabled",
+    specNo: "Disabled",
+    specNone: "None",
     updated: "Collected {time}",
     hostKeyRequired:
       "Open the terminal and review this server’s SSH host key before collecting metrics. If already trusted, check the backend known_hosts configuration.",

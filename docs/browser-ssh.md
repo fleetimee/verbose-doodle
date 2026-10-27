@@ -158,3 +158,11 @@ SFTP; check SFTP Escape/back confirms exit and keeps focus in the nested dialog.
 Verify returning from the browser to SSH stays connected, and tab close/reload
 shows the native warning after interacting with the page. Confirm no warning
 remains after disconnection.
+
+### Container shells
+
+Container-specific exec uses the separate `/api/servers/container-terminal`
+WebSocket endpoint and the existing ADMIN `server-ssh` ticket audience. Host
+terminal mode and container mode cannot be mixed across endpoints. See
+[container monitoring and controls](server-metrics.md#container-controls-and-terminal)
+for the fixed shell allowlist, socket configuration, and deployment requirements.

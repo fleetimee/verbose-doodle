@@ -19,16 +19,18 @@ export function MetricGauge({
   label,
   percent,
   detail,
+  large = false,
 }: {
   label: string;
   percent: number | null;
   detail: ReactNode;
+  large?: boolean;
 }) {
   const value = percent === null ? null : Math.max(0, Math.min(100, percent));
   return (
     <div className="flex min-w-0 flex-col items-center gap-1.5">
       <span className="text-muted-foreground text-xs">{label}</span>
-      <div className="relative size-10">
+      <div className={cn("relative", large ? "size-24" : "size-10")}>
         <svg
           aria-hidden="true"
           className="size-full -rotate-90"
@@ -60,7 +62,12 @@ export function MetricGauge({
             />
           )}
         </svg>
-        <span className="absolute inset-0 flex items-center justify-center font-mono text-xs tabular-nums">
+        <span
+          className={cn(
+            "absolute inset-0 flex items-center justify-center font-mono tabular-nums",
+            large ? "font-semibold text-xl" : "text-xs"
+          )}
+        >
           {percent === null ? "—" : `${Math.round(percent)}%`}
         </span>
       </div>

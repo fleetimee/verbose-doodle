@@ -7,6 +7,7 @@ import type {
   ServerEntryRequest,
   ServerInventoryQuery,
   ServerMetrics,
+  ServerSpecInfo,
 } from "@/features/server-inventory/types";
 import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
@@ -80,6 +81,17 @@ export async function fetchServerMetrics(
 ): Promise<ServerMetrics> {
   const response = await apiGet<{ data: ServerMetrics }>(
     `${endpoints.detail(id)}/metrics`,
+    { cache: "no-store", signal }
+  );
+  return response.data;
+}
+
+export async function fetchServerSpec(
+  id: string,
+  signal: AbortSignal
+): Promise<ServerSpecInfo> {
+  const response = await apiGet<{ data: ServerSpecInfo }>(
+    `${endpoints.detail(id)}/spec`,
     { cache: "no-store", signal }
   );
   return response.data;
