@@ -1,13 +1,62 @@
 import type {
+  ServerContainerDetail,
+  ServerContainerSummary,
+  ServerContainers,
   ServerEntry,
   ServerEntryPage,
   ServerEntryRequest,
   ServerInventoryQuery,
+  ServerMetrics,
 } from "@/features/server-inventory/types";
 import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 const endpoints = API_ENDPOINTS.admin.servers;
+
+export async function fetchServerContainerSummary(
+  id: string,
+  signal: AbortSignal
+): Promise<ServerContainerSummary> {
+  const response = await apiGet<{ data: ServerContainerSummary }>(
+    `${endpoints.detail(id)}/containers/summary`,
+    { cache: "no-store", signal }
+  );
+  return response.data;
+}
+
+export async function fetchServerContainerDetail(
+  id: string,
+  containerId: string,
+  signal: AbortSignal
+): Promise<ServerContainerDetail> {
+  const response = await apiGet<{ data: ServerContainerDetail }>(
+    `${endpoints.detail(id)}/containers/${encodeURIComponent(containerId)}`,
+    { cache: "no-store", signal }
+  );
+  return response.data;
+}
+
+export async function fetchServerContainers(
+  id: string,
+  signal: AbortSignal
+): Promise<ServerContainers> {
+  const response = await apiGet<{ data: ServerContainers }>(
+    `${endpoints.detail(id)}/containers`,
+    { cache: "no-store", signal }
+  );
+  return response.data;
+}
+
+export async function fetchServerMetrics(
+  id: string,
+  signal: AbortSignal
+): Promise<ServerMetrics> {
+  const response = await apiGet<{ data: ServerMetrics }>(
+    `${endpoints.detail(id)}/metrics`,
+    { cache: "no-store", signal }
+  );
+  return response.data;
+}
 
 export async function fetchServerEntries(
   query: ServerInventoryQuery
@@ -73,9 +122,13 @@ export async function revealServerPassword(id: string): Promise<string> {
   return response.data.password;
 }
 
-export async function fetchServerEntry(id: string): Promise<ServerEntry> {
+export async function fetchServerEntry(
+  id: string,
+  signal?: AbortSignal
+): Promise<ServerEntry> {
   const response = await apiGet<{ data: { server: ServerEntry } }>(
-    endpoints.detail(id)
+    endpoints.detail(id),
+    { signal }
   );
   return response.data.server;
 }

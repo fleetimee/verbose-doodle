@@ -19,6 +19,7 @@ import {
   YetAnotherVoxelcraftIcon,
 } from "@/components/game-icons";
 import {
+  Activity,
   Cable,
   Code2,
   Compass,
@@ -126,6 +127,16 @@ export function getSidebarData(
         description: messages.servers.navigationDescription,
         title: messages.servers.title,
         url: "/dashboard/servers",
+      },
+      {
+        adminOnly: true,
+        groupLabel: messages.common.navWorkspace,
+        icon: Activity,
+        deferShortcut: true,
+        description: messages.servers.metrics.description,
+        title: messages.servers.metrics.title,
+        keywords: ["SSH", "CPU", "RAM", "disk", "network", "monitoring"],
+        url: "/dashboard/server-metrics",
       },
       {
         adminOnly: true,

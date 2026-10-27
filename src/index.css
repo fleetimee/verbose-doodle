@@ -4278,3 +4278,16 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
     transform: none;
   }
 }
+
+/* System typography and a functional scroll material for server monitoring. */
+.server-monitor-workspace {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-optical-sizing: auto;
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .server-monitor-toolbar {
+    background: var(--background);
+    backdrop-filter: none;
+  }
+}

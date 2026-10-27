@@ -9,6 +9,7 @@ const cardVariants = cva(
     variants: {
       variant: {
         default: "border bg-card shadow-sm",
+        monitor: "border border-border/60 bg-card shadow-none transition-[border-color,box-shadow] duration-200 hover:border-border hover:shadow-sm motion-reduce:transition-none",
         elevated: "rounded-2xl border-2 border-border/80 border-b-4 bg-card shadow-sm",
         "elevated-subtle": "rounded-2xl border-2 border-border/80 border-b-4 bg-card/90 shadow-sm",
         subtle: "rounded-lg border border-border/70 bg-card/90 shadow-sm",
@@ -32,6 +33,7 @@ const cardVariants = cva(
       size: {
         default: "gap-6 rounded-xl py-6",
         compact: "gap-4 rounded-xl p-4",
+        monitor: "gap-5 rounded-2xl p-5",
         sm: "gap-3 rounded-lg p-3.5",
         panel: "py-0",
         none: "gap-0 p-0",
@@ -237,11 +239,16 @@ function CardContent({
   )
 }
 
-function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+const cardFooterVariants = cva("flex items-center [.border-t]:pt-6", {
+  variants: { size: { default: "px-6", none: "p-0" } },
+  defaultVariants: { size: "default" },
+})
+
+function CardFooter({ className, size = "default", ...props }: React.ComponentProps<"div"> & VariantProps<typeof cardFooterVariants>) {
   return (
     <div
       data-slot="card-footer"
-      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
+      className={cn(cardFooterVariants({ size }), className)}
       {...props}
     />
   )

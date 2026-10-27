@@ -105,6 +105,7 @@ function getRouteLabels(
     overview: messages.common.navOverview,
     "rest-api": messages.common.navRestApi,
     servers: messages.servers.title,
+    "server-metrics": messages.servers.metrics.title,
     logs: messages.logViewer.title,
     wheel: messages.wheel.title,
     employees: messages.employees.title,
@@ -241,8 +242,8 @@ export function DashboardLayout() {
     .split("/")
     .filter((segment) => segment !== "");
 
-  const breadcrumbItems: DashboardBreadcrumbItem[] = pathSegments.map(
-    (segment, index) => {
+  const breadcrumbItems: DashboardBreadcrumbItem[] = pathSegments
+    .map((segment, index) => {
       const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
       let label =
         routeLabels[segment] ||
@@ -263,8 +264,16 @@ export function DashboardLayout() {
         url = endpoint.url;
       }
 
+      if (pathSegments[1] === "server-metrics" && index > 1) {
+        label =
+          index === 2
+            ? messages.servers.containers.hostDetails
+            : messages.servers.containers.detailTitle;
+      }
       const isLast = index === pathSegments.length - 1;
-      const isNavigable = segment !== "socket-test";
+      const isNavigable =
+        segment !== "socket-test" &&
+        !(pathSegments[1] === "server-metrics" && index === 3);
 
       return {
         billerSlug,
@@ -277,8 +286,13 @@ export function DashboardLayout() {
         method,
         url,
       };
-    }
-  );
+    })
+    .filter(
+      (_, index) =>
+        pathSegments[1] !== "server-metrics" ||
+        index !== 3 ||
+        pathSegments.length <= 3
+    );
 
   const endpointBreadcrumbIndex = breadcrumbItems.findIndex(
     (item) => item.label === messages.common.navEndpoints

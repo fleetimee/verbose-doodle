@@ -35,6 +35,7 @@ bun run preview     # Serve the production build locally
 
 - [Deployment guide](docs/deployment.md)
 - [Browser SSH terminal setup](docs/browser-ssh.md)
+- [SSH server metrics](docs/server-metrics.md)
 - [Browser RDP desktop setup](docs/browser-rdp.md)
 - [SMB log viewer setup](docs/smb-log-viewer.md)
 - [Spin wheel sessions and evidence](docs/spin-wheel.md)
