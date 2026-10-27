@@ -108,6 +108,11 @@ export function ServerInventoryPage() {
     totalPages: 0,
   };
   const data = entries.data?.servers ?? [];
+  const hasFilters = [
+    query.search,
+    query.accessType,
+    query.databaseEngine,
+  ].some(Boolean);
 
   return (
     <div className="flex min-w-0 flex-col gap-6 lg:min-h-0 lg:flex-1 lg:overflow-hidden">
@@ -140,9 +145,7 @@ export function ServerInventoryPage() {
       )}
       {!(entries.isPending || entries.isError) &&
         data.length === 0 &&
-        !query.search &&
-        !query.accessType &&
-        !query.databaseEngine && (
+        !hasFilters && (
           <Empty variant="bordered">
             <EmptyHeader>
               <EmptyMedia variant="icon">
