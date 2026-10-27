@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { SiDocker } from "react-icons/si";
 import { useI18n } from "@/components/i18n-provider";
-import { Skeleton } from "@/components/ui/skeleton";
 import { fetchServerContainerSummary } from "@/features/server-inventory/api";
 import { useContainerError } from "@/features/server-inventory/components/server-container-status";
+import { DockerSummarySkeleton } from "@/features/server-inventory/components/server-metrics-skeleton";
 import type {
   ServerContainerSummary,
   ServerEntry,
@@ -123,7 +123,7 @@ export function ServerDockerSummary({
         </p>
       )}
       {eligible && !data && !query.isError && !paused && (
-        <Skeleton className="h-12 w-full" />
+        <DockerSummarySkeleton />
       )}
       {dockerMissing && (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-2 py-5 text-center">

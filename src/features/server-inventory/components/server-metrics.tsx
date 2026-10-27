@@ -39,7 +39,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -55,6 +54,10 @@ import {
   MetricRates,
   metricBytes,
 } from "@/features/server-inventory/components/server-metric-values";
+import {
+  MeasurementsSkeleton,
+  ServerHostCardSkeleton,
+} from "@/features/server-inventory/components/server-metrics-skeleton";
 import type {
   ServerEntry,
   ServerMetrics,
@@ -304,8 +307,8 @@ export function ServerHostCard({
           <p className="text-muted-foreground text-sm">{copy.paused}</p>
         ) : (
           <>
-            <Skeleton className="h-28 w-full" />
-            <p className="text-muted-foreground text-xs" role="status">
+            <MeasurementsSkeleton large={detail} />
+            <p className="sr-only" role="status">
               {copy.collecting}
             </p>
           </>
@@ -491,7 +494,11 @@ export function ServerMetricsPanel() {
           </AlertDescription>
         </Alert>
       )}
-      {entries.isPending && <Skeleton className="h-48 w-full" />}
+      {entries.isPending && (
+        <p className="sr-only" role="status">
+          {copy.collecting}
+        </p>
+      )}
       {entries.data && hosts.size === 0 && (
         <Empty variant="bordered">
           <EmptyHeader>
@@ -501,6 +508,10 @@ export function ServerMetricsPanel() {
         </Empty>
       )}
       <div className="grid items-stretch gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-2 lg:content-start lg:overflow-y-auto 2xl:grid-cols-3">
+        {entries.isPending &&
+          ["host-1", "host-2", "host-3", "host-4", "host-5", "host-6"]
+            .slice(0, size)
+            .map((id) => <ServerHostCardSkeleton key={id} />)}
         {[...hosts.values()].map((entry) => (
           <ServerHostCard
             entry={entry}
