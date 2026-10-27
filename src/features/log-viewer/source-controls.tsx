@@ -32,16 +32,9 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { LogDatePicker } from "@/features/log-viewer/log-date-picker";
+import { SourcePicker } from "@/features/log-viewer/source-picker";
 import type { LogCatalog, LogSource } from "@/features/log-viewer/types";
 
 function SourceStatus({
@@ -124,22 +117,13 @@ export function SourceControls({
           <Field className="col-span-2 min-w-0 md:col-span-6">
             <FieldLabel htmlFor="log-source">{copy.source}</FieldLabel>
             <div className="flex min-w-0 items-center gap-2">
-              <Select onValueChange={onSelect} value={selected.id}>
-                <SelectTrigger className="min-w-0 flex-1" id="log-source">
-                  <SelectValue>
-                    <span className="truncate">{selected.name}</span>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent align="start" className="w-(--anchor-width)">
-                  <SelectGroup>
-                    {sources.map((source) => (
-                      <SelectItem key={source.id} value={source.id}>
-                        {source.name} · {source.host}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <div className="min-w-0 flex-1">
+                <SourcePicker
+                  onSelect={onSelect}
+                  selected={selected}
+                  sources={sources}
+                />
+              </div>
               <Button
                 aria-label={copy.add}
                 disabled={editing}

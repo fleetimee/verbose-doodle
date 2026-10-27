@@ -4,6 +4,8 @@ export const logViewerMessages = {
   fullscreenFailed:
     "Layar penuh tidak dapat dibuka. Periksa izin browser lalu coba lagi.",
   toolbar: "Toolbar log",
+  searchSources: "Cari sumber berdasarkan nama atau IP…",
+  noSourcesFound: "Tidak ada sumber log yang cocok.",
   searchLogs: "Cari di log yang dimuat…",
   previousMatch: "Hasil sebelumnya (Shift+Enter)",
   nextMatch: "Hasil berikutnya (Enter)",

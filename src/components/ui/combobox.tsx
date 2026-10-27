@@ -128,12 +128,13 @@ function ComboboxContent({
   )
 }
 
-function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
+function ComboboxList({ className, variant = "default", ...props }: ComboboxPrimitive.List.Props & { variant?: "default" | "scrollable" }) {
   return (
     <ComboboxPrimitive.List
       data-slot="combobox-list"
       className={cn(
-        "max-h-[min(calc(--spacing(96)---spacing(9)),calc(var(--available-height)---spacing(9)))] scroll-py-1 overflow-y-auto p-1 data-empty:p-0",
+        "scroll-py-1 p-1 data-empty:p-0",
+        variant === "default" && "max-h-[min(calc(--spacing(96)---spacing(9)),calc(var(--available-height)---spacing(9)))] overflow-y-auto",
         className
       )}
       {...props}

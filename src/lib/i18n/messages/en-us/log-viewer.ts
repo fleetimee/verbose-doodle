@@ -4,6 +4,8 @@ export const logViewerMessages = {
   fullscreenFailed:
     "Unable to open fullscreen. Check your browser permissions and try again.",
   toolbar: "Log toolbar",
+  searchSources: "Find source by name or IP…",
+  noSourcesFound: "No matching log sources.",
   searchLogs: "Find in loaded logs…",
   previousMatch: "Previous match (Shift+Enter)",
   nextMatch: "Next match (Enter)",

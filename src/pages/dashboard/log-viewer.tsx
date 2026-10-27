@@ -21,6 +21,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tabs,
@@ -42,6 +43,7 @@ import { SourceForm } from "@/features/log-viewer/source-form";
 import { StreamViewer } from "@/features/log-viewer/stream-viewer";
 import type { LogSource } from "@/features/log-viewer/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
@@ -86,7 +88,10 @@ export function LogViewerPage() {
     }
   }
   const queryClient = useQueryClient();
-  const [selectedId, setSelectedId] = useState("");
+  const [selectedId, setSelectedId] = useLocalStorage(
+    "log-viewer-selected-source",
+    ""
+  );
   const [editing, setEditing] = useState<LogSource | "new" | null>(null);
   const [from, setFrom] = useState(initialDate);
   const [to, setTo] = useState("");
@@ -317,7 +322,11 @@ export function LogViewerPage() {
                         variant="flush"
                       >
                         <div className="flex shrink-0 items-center justify-between gap-3 px-3 py-2">
-                          <div className="min-w-0 overflow-x-auto">
+                          <ScrollArea
+                            className="min-w-0 flex-1"
+                            contentClassName="w-max"
+                            contentSize="table"
+                          >
                             <TabsList
                               aria-label={copy.streams}
                               size="sm"
@@ -334,7 +343,8 @@ export function LogViewerPage() {
                               ))}
                               <TabsIndicator />
                             </TabsList>
-                          </div>
+                            <ScrollBar orientation="horizontal" />
+                          </ScrollArea>
                           {catalog.data && (
                             <Badge variant="secondary">
                               {catalog.data.files.length} {copy.fileCount}
