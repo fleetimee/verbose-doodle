@@ -1,19 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import { Fragment, type ReactNode } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchServerContainerDetail } from "@/features/server-inventory/api";
+import {
+  fetchServerContainerDetail,
+  fetchServerContainerStats,
+} from "@/features/server-inventory/api";
+import { ServerContainerActions } from "@/features/server-inventory/components/server-container-actions";
+import { ServerContainerReadings } from "@/features/server-inventory/components/server-container-readings";
 import {
   containerVariant,
   useContainerError,
 } from "@/features/server-inventory/components/server-container-status";
 import type {
   ServerContainerDetail,
+  ServerContainers,
   ServerEntry,
 } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
@@ -114,6 +119,61 @@ function DetailValues({ data }: { data: ServerContainerDetail }) {
   );
 }
 
+function ContainerLiveMetrics({
+  query,
+  containerId,
+  paused,
+  eligible,
+}: {
+  query: UseQueryResult<ServerContainers, Error>;
+  containerId: string;
+  paused: boolean;
+  eligible: boolean;
+}) {
+  const copy = useI18n().messages.servers.containers;
+  const data = query.data;
+  const error = useContainerError(data?.status, query.error);
+  const ready = data?.status === "OK" && !query.isError;
+  const item = ready
+    ? data.containers.find((value) => value.id === containerId)
+    : undefined;
+  return (
+    <Card size="monitor" variant="monitor">
+      <CardHeader size="none">
+        <CardTitle size="sm">{copy.liveMetrics}</CardTitle>
+      </CardHeader>
+      <CardContent size="none">
+        <div className="flex flex-col gap-3">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          {query.isPending && !paused && eligible && (
+            <Skeleton className="h-28 w-full" />
+          )}
+          {item && <ServerContainerReadings item={item} />}
+          {item && item.state !== "running" && (
+            <p className="text-muted-foreground text-xs">
+              {copy.stoppedMetrics}
+            </p>
+          )}
+          {ready && !data.statsAvailable && (
+            <p className="text-muted-foreground text-xs">
+              {copy.statsUnavailable}
+            </p>
+          )}
+          {ready && !item && (
+            <p className="text-muted-foreground text-xs">
+              {copy.statsUnavailable}
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function ServerContainerDetailPanel({
   entry,
   containerId,
@@ -141,6 +201,23 @@ export function ServerContainerDetailPanel({
     retry: false,
     gcTime: 0,
   });
+  const eligible = Boolean(entry.hasPassword && entry.username);
+  const stats = useQuery({
+    queryKey: [
+      "server-inventory",
+      "container-stats",
+      entry.id,
+      entry.updatedAt,
+      containerId,
+    ],
+    queryFn: ({ signal }) =>
+      fetchServerContainerStats(entry.id, containerId, signal),
+    enabled: eligible && !paused,
+    refetchInterval: paused ? false : 5000,
+    refetchIntervalInBackground: false,
+    retry: false,
+    gcTime: 0,
+  });
   const data = query.data;
   const error = useContainerError(data?.status, query.error);
   const ready = data?.status === "OK" && !query.isError;
@@ -150,14 +227,16 @@ export function ServerContainerDetailPanel({
         <h2 className="min-w-0 break-all font-semibold text-xl tracking-tight">
           {data?.name ?? copy.detailTitle}
         </h2>
-        <Button
-          disabled={query.isFetching}
-          onClick={() => query.refetch()}
-          size="sm"
-          variant="outline"
-        >
-          {copy.refreshDetails}
-        </Button>
+        <ServerContainerActions
+          containerId={containerId}
+          entry={entry}
+          name={data?.name ?? containerId.slice(0, 12)}
+          onRefresh={async () => {
+            await Promise.all([query.refetch(), stats.refetch()]);
+          }}
+          refreshing={query.isFetching || stats.isFetching}
+          state={ready ? data.state : null}
+        />
       </div>
       {paused && (
         <p className="text-muted-foreground text-sm">
@@ -170,8 +249,14 @@ export function ServerContainerDetailPanel({
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+      <ContainerLiveMetrics
+        containerId={containerId}
+        eligible={eligible}
+        paused={paused}
+        query={stats}
+      />
       {ready && <DetailValues data={data} />}
-      <p className="text-muted-foreground text-xs">{copy.readOnlyDetails}</p>
+      <p className="text-muted-foreground text-xs">{copy.managementHint}</p>
     </div>
   );
 }

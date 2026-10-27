@@ -13,6 +13,21 @@ import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 const endpoints = API_ENDPOINTS.admin.servers;
 
+export async function runServerContainerAction(
+  id: string,
+  containerId: string,
+  action: "start" | "stop" | "restart"
+): Promise<{ status: string; completedAt: string | null }> {
+  const response = await apiPost<{
+    data: { status: string; completedAt: string | null };
+  }>(
+    `${endpoints.detail(id)}/containers/${encodeURIComponent(containerId)}/${action}`,
+    undefined,
+    { cache: "no-store", timeout: 45_000 }
+  );
+  return response.data;
+}
+
 export async function fetchServerContainerSummary(
   id: string,
   signal: AbortSignal
@@ -31,6 +46,18 @@ export async function fetchServerContainerDetail(
 ): Promise<ServerContainerDetail> {
   const response = await apiGet<{ data: ServerContainerDetail }>(
     `${endpoints.detail(id)}/containers/${encodeURIComponent(containerId)}`,
+    { cache: "no-store", signal }
+  );
+  return response.data;
+}
+
+export async function fetchServerContainerStats(
+  id: string,
+  containerId: string,
+  signal: AbortSignal
+): Promise<ServerContainers> {
+  const response = await apiGet<{ data: ServerContainers }>(
+    `${endpoints.detail(id)}/containers/${encodeURIComponent(containerId)}/stats`,
     { cache: "no-store", signal }
   );
   return response.data;

@@ -25,6 +25,8 @@ export function useContainerError(
     ["BUSY", messages.servers.metrics.busy],
     ["LIMIT_EXCEEDED", copy.limitExceeded],
     ["CONTAINER_NOT_FOUND", copy.notFound],
+    ["INVALID_STATE", copy.invalidState],
+    ["ACTION_FAILED", copy.actionFailed],
   ]);
   if (error) {
     return getErrorMessage(error);

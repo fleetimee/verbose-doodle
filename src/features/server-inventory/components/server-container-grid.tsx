@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useId } from "react";
 import { useSearchParams } from "react-router";
+import { RefreshCw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { fetchServerContainers } from "@/features/server-inventory/api";
 import { ServerContainerCard } from "@/features/server-inventory/components/server-container-card";
 import { useContainerError } from "@/features/server-inventory/components/server-container-status";
@@ -110,14 +117,24 @@ export function ServerContainerGrid({
             {copy.includeStopped}
           </Label>
         </div>
-        <Button
-          disabled={!eligible || query.isFetching}
-          onClick={() => query.refetch()}
-          size="sm"
-          variant="outline"
-        >
-          {copy.refresh}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label={copy.refresh}
+              disabled={!eligible || query.isFetching}
+              onClick={() => query.refetch()}
+              size="icon-sm"
+              variant="outline"
+            >
+              {query.isFetching ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <RefreshCw data-icon="inline-start" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{copy.refresh}</TooltipContent>
+        </Tooltip>
       </div>
       <div className="flex min-w-0 flex-col gap-5">
         <div

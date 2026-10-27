@@ -29,7 +29,9 @@ type TerminalCommand =
       serverId: string;
       cols: number;
       rows: number;
-      mode: "terminal" | "files";
+      mode: "terminal" | "files" | "container";
+      containerId?: string;
+      shell?: "sh" | "bash";
     }
   | { type: "resize"; cols: number; rows: number }
   | { type: "input" | "binary-input"; data: string }
@@ -68,11 +70,34 @@ function isPasswordPromptText(text: string): boolean {
   );
 }
 
+function terminalSocketUrl(ticket: string, containerMode: boolean) {
+  const path = containerMode
+    ? "/api/servers/container-terminal"
+    : "/api/servers/terminal";
+  const configured = containerMode
+    ? import.meta.env.VITE_SERVER_CONTAINER_WS_URL ||
+      import.meta.env.VITE_SERVER_SSH_WS_URL
+    : import.meta.env.VITE_SERVER_SSH_WS_URL;
+  const url = new URL(buildTicketWebSocketUrl(path, ticket, configured));
+  if (containerMode && url.pathname.endsWith("/terminal")) {
+    url.pathname = `${url.pathname.slice(0, -"/terminal".length)}/container-terminal`;
+  }
+  if (containerMode && !url.pathname.endsWith("/container-terminal")) {
+    throw new Error(
+      "Container WebSocket URL must end with /container-terminal"
+    );
+  }
+  return url.toString();
+}
+
 export function useServerTerminal(
   serverId: string,
   attempt: number,
-  mode: "terminal" | "files" = "terminal"
+  mode: "terminal" | "files" | "container" = "terminal",
+  container?: { id: string; shell: "sh" | "bash" }
 ) {
+  const containerId = container?.id;
+  const containerShell = container?.shell;
   const { messages } = useI18n();
   const copy = messages.servers;
   const browserRef = useRef<ReturnType<
@@ -336,6 +361,7 @@ export function useServerTerminal(
         ["KNOWN_HOSTS_WRITE_FAILED", copy.sshKnownHostsWriteFailed],
         ["HOST_KEY_APPROVAL_EXPIRED", copy.sshHostKeyApprovalExpired],
         ["CAPACITY_EXCEEDED", copy.sshCapacityExceeded],
+        ["CONTAINER_EXEC_FAILED", copy.containers.execFailed],
       ]);
       setHostKey(null);
       setTrustPending(false);
@@ -394,13 +420,7 @@ export function useServerTerminal(
         if (disposed || cancelled) {
           return;
         }
-        socket = new WebSocket(
-          buildTicketWebSocketUrl(
-            "/api/servers/terminal",
-            ticket,
-            import.meta.env.VITE_SERVER_SSH_WS_URL
-          )
-        );
+        socket = new WebSocket(terminalSocketUrl(ticket, mode === "container"));
         socket.binaryType = "arraybuffer";
 
         socket.onopen = () => {
@@ -413,6 +433,8 @@ export function useServerTerminal(
             type: "connect",
             serverId,
             mode,
+            containerId,
+            shell: containerShell,
             cols: Math.min(terminal.cols, 500),
             rows: Math.min(terminal.rows, 200),
           });
@@ -488,7 +510,7 @@ export function useServerTerminal(
       resizeRef.current = () => undefined;
       trustRef.current = () => undefined;
     };
-  }, [serverId, attempt, copy, mode]);
+  }, [serverId, attempt, copy, mode, containerId, containerShell]);
 
   return {
     containerRef,

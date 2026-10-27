@@ -12,35 +12,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ServerContainerReadings } from "@/features/server-inventory/components/server-container-readings";
 import { containerVariant } from "@/features/server-inventory/components/server-container-status";
-import { MetricGauge } from "@/features/server-inventory/components/server-metric-values";
 import type { ServerContainer } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
-
-function TransferValues({
-  label,
-  value,
-  first,
-  second,
-}: {
-  label: string;
-  value: string | null;
-  first: string;
-  second: string;
-}) {
-  const parts = value?.split(" / ");
-  return (
-    <div className="flex min-w-0 flex-col gap-2">
-      <span className="text-muted-foreground text-xs">{label}</span>
-      <dl className="flex flex-col gap-0.5 text-xs">
-        <dt className="text-muted-foreground">{first}</dt>
-        <dd className="font-mono tabular-nums">{parts?.[0] || "—"}</dd>
-        <dt className="text-muted-foreground">{second}</dt>
-        <dd className="font-mono tabular-nums">{parts?.[1] || "—"}</dd>
-      </dl>
-    </div>
-  );
-}
 
 export function ServerContainerCard({
   item,
@@ -52,7 +27,6 @@ export function ServerContainerCard({
   const { messages } = useI18n();
   const copy = messages.servers.containers;
   const states: Record<string, string> = copy.states;
-  const memory = item.memoryUsage?.split(" / ");
   return (
     <Card className="relative isolate min-w-0" size="monitor" variant="monitor">
       <Link
@@ -84,39 +58,7 @@ export function ServerContainerCard({
       </CardHeader>
       <Separator />
       <CardContent size="none">
-        <div className="grid grid-cols-4 gap-3">
-          <MetricGauge
-            detail={
-              item.cpuPercent === null ? "—" : `${item.cpuPercent.toFixed(2)}%`
-            }
-            label={messages.servers.metrics.cpu}
-            percent={item.cpuPercent}
-          />
-          <MetricGauge
-            detail={
-              <>
-                <span>{memory?.[0] || "—"}</span>
-                <span className="text-muted-foreground">
-                  {memory?.[1] ? `/${memory[1]}` : "—"}
-                </span>
-              </>
-            }
-            label={messages.servers.metrics.memory}
-            percent={item.memoryPercent}
-          />
-          <TransferValues
-            first={messages.servers.metrics.receive}
-            label={copy.networkTotal}
-            second={messages.servers.metrics.transmit}
-            value={item.networkIo}
-          />
-          <TransferValues
-            first={messages.servers.metrics.read}
-            label={copy.ioTotal}
-            second={messages.servers.metrics.write}
-            value={item.blockIo}
-          />
-        </div>
+        <ServerContainerReadings item={item} />
       </CardContent>
       <CardFooter size="none">
         <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2">

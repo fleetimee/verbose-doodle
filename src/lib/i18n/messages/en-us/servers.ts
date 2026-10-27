@@ -1,5 +1,35 @@
 export const serversMessages = {
   containers: {
+    hostTerminal: "Host SSH",
+    liveMetrics: "Live resource usage",
+    stoppedMetrics:
+      "Live usage is unavailable while this container is stopped.",
+    start: "Start container",
+    stop: "Stop container",
+    restart: "Restart container",
+    exec: "Container shell",
+    stopTitle: "Stop this container?",
+    restartTitle: "Restart this container?",
+    stopDescription:
+      "Stop {name} on {host}? Active connections will be interrupted. Docker allows 10 seconds for shutdown before forcing it to stop.",
+    restartDescription:
+      "Restart {name} on {host}? Active connections will be interrupted. Docker allows 10 seconds for shutdown before starting it again.",
+    actionWorking: "Applying…",
+    actionSuccess: "Container action completed",
+    invalidState:
+      "The container state does not allow this action. Refresh its details and try again.",
+    actionFailed:
+      "The container action failed or timed out. Refresh its state before trying again.",
+    managementHint:
+      "Start is available for stopped containers. Stop, restart, and terminal are available while running.",
+    execFailed:
+      "Could not run the container shell. Check that the container is running, Docker is accessible, and /bin/sh or /bin/bash exists. Host shell access is never used as a fallback.",
+    shell: "Container shell",
+    backToContainer: "Back to container",
+    terminalEnded:
+      "Container shell session ended. Reconnect to open another shell.",
+    terminalHelp:
+      "Commands run inside the selected container as its configured user. Exit or disconnect ends this shell session; the container keeps running. No host file browser is available.",
     hostDetails: "Host details",
     hostDetailDescription: "Live system metrics and containers, together.",
     backToHosts: "Back to hosts",

@@ -26,6 +26,14 @@ const ServerDesktopPage = lazy(() =>
   }))
 );
 
+const ServerContainerTerminalPage = lazy(() =>
+  import("@/pages/server-container-terminal").then(
+    ({ ServerContainerTerminalPage }) => ({
+      default: ServerContainerTerminalPage,
+    })
+  )
+);
+
 export function AppRoutes() {
   const { locale } = useI18n();
 
@@ -60,6 +68,14 @@ export function AppRoutes() {
             </ProtectedRoute>
           }
           path="/servers/:serverId/desktop"
+        />
+        <Route
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <ServerContainerTerminalPage />
+            </ProtectedRoute>
+          }
+          path="/servers/:serverId/containers/:containerId/terminal"
         />
         <Route element={<NotFoundPage />} path="*" />
       </Routes>

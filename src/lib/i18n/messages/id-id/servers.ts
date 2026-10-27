@@ -1,5 +1,35 @@
 export const serversMessages = {
   containers: {
+    hostTerminal: "SSH host",
+    liveMetrics: "Penggunaan sumber daya terkini",
+    stoppedMetrics:
+      "Penggunaan terkini tidak tersedia saat kontainer berhenti.",
+    start: "Jalankan kontainer",
+    stop: "Hentikan kontainer",
+    restart: "Mulai ulang kontainer",
+    exec: "Shell kontainer",
+    stopTitle: "Hentikan kontainer ini?",
+    restartTitle: "Mulai ulang kontainer ini?",
+    stopDescription:
+      "Hentikan {name} pada {host}? Koneksi aktif akan terputus. Docker memberi waktu 10 detik untuk berhenti sebelum menghentikannya secara paksa.",
+    restartDescription:
+      "Mulai ulang {name} pada {host}? Koneksi aktif akan terputus. Docker memberi waktu 10 detik untuk berhenti sebelum menjalankannya kembali.",
+    actionWorking: "Memproses…",
+    actionSuccess: "Tindakan kontainer selesai",
+    invalidState:
+      "Status kontainer tidak mengizinkan tindakan ini. Muat ulang detail dan coba lagi.",
+    actionFailed:
+      "Tindakan kontainer gagal atau melewati batas waktu. Muat ulang status sebelum mencoba lagi.",
+    managementHint:
+      "Jalankan tersedia untuk kontainer yang berhenti. Hentikan, mulai ulang, dan terminal tersedia saat berjalan.",
+    execFailed:
+      "Shell kontainer tidak dapat dijalankan. Pastikan kontainer berjalan, Docker dapat diakses, dan /bin/sh atau /bin/bash tersedia. Shell host tidak digunakan sebagai pengganti.",
+    shell: "Shell kontainer",
+    backToContainer: "Kembali ke kontainer",
+    terminalEnded:
+      "Sesi shell kontainer berakhir. Hubungkan kembali untuk membuka shell lain.",
+    terminalHelp:
+      "Perintah berjalan di dalam kontainer terpilih sebagai pengguna yang dikonfigurasi. Keluar atau putuskan koneksi mengakhiri sesi shell; kontainer tetap berjalan. Browser file host tidak tersedia.",
     hostDetails: "Detail host",
     hostDetailDescription:
       "Metrik sistem dan kontainer terkini dalam satu tempat.",

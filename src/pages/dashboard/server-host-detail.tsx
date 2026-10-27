@@ -1,10 +1,20 @@
+import { ComputerTerminal01Icon, PauseIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router";
+import { Play, RefreshCw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { fetchServerEntry } from "@/features/server-inventory/api";
 import { ServerContainerDetailPanel } from "@/features/server-inventory/components/server-container-detail";
 import { ServerContainerGrid } from "@/features/server-inventory/components/server-container-grid";
@@ -79,47 +89,97 @@ export function ServerHostDetailPage() {
               )}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <ButtonGroup aria-label={messages.servers.actions}>
             {entry?.hasPassword && entry.username && (
-              <Button
-                render={
-                  <Link
-                    rel="noopener noreferrer"
-                    target="_blank"
-                    to={`/servers/${entry.id}/terminal`}
-                  />
-                }
-                variant="outline"
-              >
-                {messages.servers.sshOpenTerminal}
-              </Button>
-            )}
-            <Button
-              aria-pressed={paused}
-              onClick={() =>
-                setParams(
-                  (current) => {
-                    const next = new URLSearchParams(current);
-                    if (paused) {
-                      next.delete("paused");
-                    } else {
-                      next.set("paused", "1");
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label={copy.hostTerminal}
+                    render={
+                      <Link
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        to={`/servers/${entry.id}/terminal`}
+                      />
                     }
-                    return next;
-                  },
-                  { replace: true }
-                )
-              }
-              variant="outline"
-            >
-              {paused
-                ? messages.servers.metrics.resume
-                : messages.servers.metrics.pause}
-            </Button>
-            <Button disabled={refreshing} onClick={refresh} variant="outline">
-              {messages.servers.refresh}
-            </Button>
-          </div>
+                    size="sm"
+                    variant="outline"
+                  >
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      data-icon="inline-start"
+                      icon={ComputerTerminal01Icon}
+                    />
+                    {copy.hostTerminal}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{copy.hostTerminal}</TooltipContent>
+              </Tooltip>
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label={
+                    paused
+                      ? messages.servers.metrics.resume
+                      : messages.servers.metrics.pause
+                  }
+                  aria-pressed={paused}
+                  onClick={() =>
+                    setParams(
+                      (current) => {
+                        const next = new URLSearchParams(current);
+                        if (paused) {
+                          next.delete("paused");
+                        } else {
+                          next.set("paused", "1");
+                        }
+                        return next;
+                      },
+                      { replace: true }
+                    )
+                  }
+                  size="icon-sm"
+                  variant="outline"
+                >
+                  {paused ? (
+                    <Play data-icon="inline-start" />
+                  ) : (
+                    <HugeiconsIcon
+                      aria-hidden="true"
+                      data-icon="inline-start"
+                      icon={PauseIcon}
+                    />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {paused
+                  ? messages.servers.metrics.resume
+                  : messages.servers.metrics.pause}
+              </TooltipContent>
+            </Tooltip>
+            {!containerId && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label={messages.servers.refresh}
+                    disabled={refreshing}
+                    onClick={refresh}
+                    size="icon-sm"
+                    variant="outline"
+                  >
+                    {refreshing ? (
+                      <Spinner data-icon="inline-start" />
+                    ) : (
+                      <RefreshCw data-icon="inline-start" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{messages.servers.refresh}</TooltipContent>
+              </Tooltip>
+            )}
+          </ButtonGroup>
         </div>
       </div>
       {query.isPending && <Skeleton className="h-64 w-full" />}

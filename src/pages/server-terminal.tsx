@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { useI18n } from "@/components/i18n-provider";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   fetchServerEntries,
@@ -19,6 +18,7 @@ import {
 } from "@/features/server-inventory/api";
 import { ServerFileBrowser } from "@/features/server-inventory/components/server-file-browser";
 import { ServerSessionExitDialog } from "@/features/server-inventory/components/server-session-exit-dialog";
+import { ServerSshHostKeyReview } from "@/features/server-inventory/components/server-ssh-host-key-review";
 import {
   ServerTerminalFiles,
   type TerminalFileAction,
@@ -226,30 +226,12 @@ function TerminalSession({
         transfer={fileTransfer}
       />
       {hostKey && (
-        <Alert className="shrink-0">
-          <AlertTitle>{copy.sshHostKeyTitle}</AlertTitle>
-          <AlertDescription>
-            <p>{copy.sshHostKeyDescription}</p>
-            <dl className="grid min-w-0 gap-2 sm:grid-cols-[auto_1fr]">
-              <dt>{copy.host}</dt>
-              <dd className="break-all font-mono">
-                {hostKey.host}:{hostKey.port}
-              </dd>
-              <dt>{copy.sshHostKeyAlgorithm}</dt>
-              <dd className="break-all font-mono">{hostKey.algorithm}</dd>
-              <dt>{copy.sshHostKeyFingerprint}</dt>
-              <dd className="break-all font-mono">{hostKey.fingerprint}</dd>
-            </dl>
-            <div className="flex flex-wrap gap-2">
-              <Button disabled={trustPending} onClick={trustHostKey} size="sm">
-                {trustPending ? copy.sshHostKeySaving : copy.sshHostKeyTrust}
-              </Button>
-              <Button onClick={disconnect} size="sm" variant="outline">
-                {copy.sshHostKeyCancel}
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
+        <ServerSshHostKeyReview
+          onCancel={disconnect}
+          onTrust={trustHostKey}
+          pending={trustPending}
+          review={hostKey}
+        />
       )}
       {error && (
         <p
