@@ -51,17 +51,21 @@ function ReportRow({
   value,
   detail,
   command,
+  cleanupCommand,
+  cleanupHint,
 }: {
   icon: HugeIcon;
   title: string;
   value: string;
   detail?: string;
   command: string;
+  cleanupCommand?: string;
+  cleanupHint?: string;
 }) {
   const { messages } = useI18n();
-  const copyCommand = async () => {
+  const copyCommand = async (value: string) => {
     try {
-      if (await copyToClipboard(command)) {
+      if (await copyToClipboard(value)) {
         toast.success(messages.servers.copied);
       } else {
         toast.error(messages.servers.copyFailed);
@@ -85,12 +89,38 @@ function ReportRow({
             {detail}
           </p>
         )}
+        {cleanupHint && (
+          <p className="text-muted-foreground text-xs leading-relaxed">
+            {cleanupHint}
+          </p>
+        )}
+        {cleanupCommand && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                aria-label={`${messages.servers.cleanup.copyCleanupCommand}: ${title}`}
+                className="mt-1 self-start"
+                onClick={() => copyCommand(cleanupCommand)}
+                size="sm"
+                variant="outline"
+              >
+                <ClipboardCopy aria-hidden="true" />
+                {messages.servers.cleanup.copyCleanupCommand}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <code className="block max-w-sm whitespace-pre-wrap break-all font-mono text-xs">
+                {cleanupCommand}
+              </code>
+            </TooltipContent>
+          </Tooltip>
+        )}
       </div>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
             aria-label={`${messages.servers.cleanup.copyCommand}: ${title}`}
-            onClick={copyCommand}
+            onClick={() => copyCommand(command)}
             size="icon-sm"
             variant="ghost"
           >
@@ -134,9 +164,22 @@ function StorageReport({
     ["Local Volumes", copy.volumes],
     ["Build Cache", copy.buildCache],
   ]);
+  const dockerCleanup = new Map([
+    ["Images", { command: "image prune --all", hint: copy.imagesCleanup }],
+    [
+      "Containers",
+      { command: "container prune", hint: copy.containersCleanup },
+    ],
+    ["Local Volumes", { command: "volume prune", hint: copy.volumesCleanup }],
+    [
+      "Build Cache",
+      { command: "builder prune --all", hint: copy.buildCacheCleanup },
+    ],
+  ]);
   return (
     <div className="divide-y divide-border/50">
       <ReportRow
+        cleanupHint={copy.diskCleanup}
         command="printf 'Scanning root filesystem; large directories may take several minutes...\n'; du -xh --max-depth=1 /"
         detail={hasDisk && used / total >= 0.75 ? copy.pressure : undefined}
         icon={Gauge}
@@ -144,6 +187,8 @@ function StorageReport({
         value={diskValue}
       />
       <ReportRow
+        cleanupCommand="journalctl --rotate --vacuum-time=14d"
+        cleanupHint={copy.journalCleanup}
         command="journalctl --disk-usage"
         detail={copy.journalHint}
         icon={FileClock}
@@ -152,6 +197,12 @@ function StorageReport({
       />
       {data.storage.map((item) => (
         <ReportRow
+          cleanupCommand={
+            dockerCleanup.has(item.type)
+              ? `docker --host unix:///var/run/docker.sock ${dockerCleanup.get(item.type)?.command}`
+              : undefined
+          }
+          cleanupHint={dockerCleanup.get(item.type)?.hint}
           command="docker --host unix:///var/run/docker.sock system df --verbose"
           detail={
             item.totalCount !== null && item.activeCount !== null

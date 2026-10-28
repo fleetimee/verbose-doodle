@@ -1,11 +1,25 @@
 export const serversMessages = {
   cleanup: {
+    copyCleanupCommand: "Copy cleanup command",
+    diskCleanup:
+      "Inspect large directories first, then choose files or application-specific cleanup. There is no general disk prune command.",
+    journalCleanup:
+      "Cleanup rotates the journal and deletes archived logs older than 14 days. Requires journal management permission; runs without a confirmation prompt.",
+    imagesCleanup:
+      "Cleanup removes all images unused by any container, including tagged images. They may need downloading or rebuilding later. Docker asks for confirmation.",
+    containersCleanup:
+      "Cleanup deletes all stopped containers and their writable data. Docker asks for confirmation.",
+    volumesCleanup:
+      "Cleanup deletes unused anonymous volumes and their data. Named volumes are kept on Docker Engine 23+. Review the Docker confirmation prompt before proceeding.",
+    buildCacheCleanup:
+      "Cleanup removes all unused build cache. Future builds may take longer. Docker asks for confirmation.",
+
     copyCommand: "Copy inspection command",
     button: "Cleanup",
     title: "Cleanup review",
     description: "Inspect storage use before deciding what to remove.",
     scope:
-      "Copied commands only inspect usage; they do not delete data. Docker reclaimable space is an estimate, not guaranteed savings.",
+      "Commands are copied only; nothing runs automatically. Inspection commands report usage. Cleanup commands delete the data described above when run in SSH. Docker reclaimable space is an estimate, not guaranteed savings.",
     journal: "System journal",
     journalHint: "Usage visible to the saved SSH account.",
     diskUsage: "{used} of {total} used · {free} free",

@@ -1,12 +1,26 @@
 export const serversMessages = {
   cleanup: {
+    copyCleanupCommand: "Salin perintah pembersihan",
+    diskCleanup:
+      "Periksa direktori besar terlebih dahulu, lalu pilih file atau pembersihan khusus aplikasi. Tidak ada perintah prune disk umum.",
+    journalCleanup:
+      "Pembersihan merotasi journal dan menghapus arsip log yang lebih lama dari 14 hari. Memerlukan izin pengelolaan journal; berjalan tanpa konfirmasi.",
+    imagesCleanup:
+      "Pembersihan menghapus semua image yang tidak digunakan container mana pun, termasuk image bertag. Image mungkin perlu diunduh atau dibangun ulang. Docker meminta konfirmasi.",
+    containersCleanup:
+      "Pembersihan menghapus semua container yang berhenti beserta data pada lapisan tulisnya. Docker meminta konfirmasi.",
+    volumesCleanup:
+      "Pembersihan menghapus volume anonim yang tidak digunakan beserta datanya. Volume bernama tetap disimpan pada Docker Engine 23+. Periksa konfirmasi Docker sebelum melanjutkan.",
+    buildCacheCleanup:
+      "Pembersihan menghapus semua cache build yang tidak digunakan. Build berikutnya mungkin lebih lama. Docker meminta konfirmasi.",
+
     copyCommand: "Salin perintah pemeriksaan",
     button: "Pembersihan",
     title: "Tinjauan pembersihan",
     description:
       "Periksa penggunaan penyimpanan sebelum menentukan yang akan dihapus.",
     scope:
-      "Perintah yang disalin hanya memeriksa penggunaan; tidak menghapus data. Ruang yang dapat dibebaskan adalah perkiraan Docker, bukan jaminan.",
+      "Perintah hanya disalin; tidak ada yang dijalankan otomatis. Perintah pemeriksaan menampilkan penggunaan. Perintah pembersihan menghapus data sesuai penjelasan di atas saat dijalankan di SSH. Ruang yang dapat dibebaskan adalah perkiraan Docker, bukan jaminan.",
     journal: "Journal sistem",
     journalHint: "Penggunaan yang dapat dilihat akun SSH tersimpan.",
     diskUsage: "{used} dari {total} terpakai · sisa {free}",
