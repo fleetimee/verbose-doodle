@@ -12,10 +12,90 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ServerContainerReadings } from "@/features/server-inventory/components/server-container-readings";
 import { containerVariant } from "@/features/server-inventory/components/server-container-status";
 import type { ServerContainer } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
+
+export function ServerContainerCardSkeleton() {
+  return (
+    <Card
+      aria-hidden="true"
+      className="min-w-0"
+      size="monitor"
+      variant="monitor"
+    >
+      <CardHeader size="none">
+        <div className="flex min-w-0 items-center gap-2">
+          <Skeleton className="size-4 shrink-0" variant="table" />
+          <Skeleton className="h-5 w-28 max-w-full" variant="table" />
+        </div>
+        <CardAction>
+          <Skeleton className="h-4 w-16" variant="table" />
+        </CardAction>
+      </CardHeader>
+      <Separator />
+      <CardContent size="none">
+        <div className="grid grid-cols-4 gap-3">
+          {["cpu", "memory"].map((metric) => (
+            <div
+              className="flex min-w-0 flex-col items-center gap-1.5"
+              key={metric}
+            >
+              <Skeleton className="h-4 w-10 max-w-full" variant="table" />
+              <div className="relative size-10">
+                <svg
+                  aria-hidden="true"
+                  className="size-full animate-pulse motion-reduce:animate-none"
+                  viewBox="0 0 64 64"
+                >
+                  <circle
+                    className="stroke-accent"
+                    cx="32"
+                    cy="32"
+                    fill="none"
+                    r="27"
+                    strokeWidth="5"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Skeleton className="h-3 w-4" variant="table" />
+                </div>
+              </div>
+              <div className="flex max-w-full flex-col items-center gap-0.5">
+                <Skeleton className="h-4 w-12 max-w-full" variant="table" />
+                {metric === "memory" && (
+                  <Skeleton className="h-4 w-14 max-w-full" variant="table" />
+                )}
+              </div>
+            </div>
+          ))}
+          {["network", "io"].map((metric) => (
+            <div className="flex min-w-0 flex-col gap-2" key={metric}>
+              <Skeleton className="h-4 w-12 max-w-full" variant="table" />
+              <div className="flex flex-col gap-0.5">
+                <Skeleton className="h-4 w-10 max-w-full" variant="table" />
+                <Skeleton className="h-4 w-12 max-w-full" variant="table" />
+                <Skeleton className="h-4 w-8 max-w-full" variant="table" />
+                <Skeleton className="h-4 w-12 max-w-full" variant="table" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter size="none">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2">
+          <Skeleton className="h-4 w-40 max-w-full" variant="table" />
+          <Skeleton className="h-5 w-16" variant="table" />
+          <div className="w-full">
+            <Skeleton className="h-4 w-24" variant="table" />
+          </div>
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
 
 export function ServerContainerCard({
   item,

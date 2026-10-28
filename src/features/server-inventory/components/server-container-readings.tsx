@@ -1,4 +1,5 @@
 import { useI18n } from "@/components/i18n-provider";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MetricGauge } from "@/features/server-inventory/components/server-metric-values";
 import type { ServerContainer } from "@/features/server-inventory/types";
 import { cn } from "@/lib/utils";
@@ -9,12 +10,14 @@ function TransferValues({
   first,
   second,
   detailed = false,
+  loading = false,
 }: {
   label: string;
   value: string | null;
   first: string;
   second: string;
   detailed?: boolean;
+  loading?: boolean;
 }) {
   const parts = value?.split(" / ");
   return (
@@ -27,9 +30,29 @@ function TransferValues({
         )}
       >
         <dt className="text-muted-foreground">{first}</dt>
-        <dd className="font-mono tabular-nums">{parts?.[0] || "—"}</dd>
+        <dd className="font-mono tabular-nums">
+          {loading ? (
+            <Skeleton
+              aria-hidden="true"
+              className={detailed ? "h-7 w-20" : "h-4 w-12"}
+              variant="table"
+            />
+          ) : (
+            parts?.[0] || "—"
+          )}
+        </dd>
         <dt className="text-muted-foreground">{second}</dt>
-        <dd className="font-mono tabular-nums">{parts?.[1] || "—"}</dd>
+        <dd className="font-mono tabular-nums">
+          {loading ? (
+            <Skeleton
+              aria-hidden="true"
+              className={detailed ? "h-7 w-20" : "h-4 w-12"}
+              variant="table"
+            />
+          ) : (
+            parts?.[1] || "—"
+          )}
+        </dd>
       </dl>
     </div>
   );
@@ -38,13 +61,18 @@ function TransferValues({
 export function ServerContainerReadings({
   item,
   detailed = false,
+  loading = false,
 }: {
-  item: ServerContainer;
+  item?: ServerContainer;
   detailed?: boolean;
+  loading?: boolean;
 }) {
   const { messages } = useI18n();
   const copy = messages.servers.containers;
-  const memory = item.memoryUsage?.split(" / ");
+  const memory = item?.memoryUsage?.split(" / ");
+  const cpuPercent = item?.cpuPercent ?? null;
+  const cpuDetail = cpuPercent === null ? "—" : `${cpuPercent.toFixed(2)}%`;
+  const memoryTotal = memory?.[1] ? `/${memory[1]}` : "—";
   return (
     <div
       className={cn(
@@ -55,38 +83,64 @@ export function ServerContainerReadings({
     >
       <MetricGauge
         detail={
-          item.cpuPercent === null ? "—" : `${item.cpuPercent.toFixed(2)}%`
+          loading ? (
+            <Skeleton aria-hidden="true" className="h-4 w-12" variant="table" />
+          ) : (
+            cpuDetail
+          )
         }
         label={messages.servers.metrics.cpu}
         large={detailed}
-        percent={item.cpuPercent}
+        loading={loading}
+        percent={item?.cpuPercent ?? null}
       />
       <MetricGauge
         detail={
           <>
-            <span>{memory?.[0] || "—"}</span>
-            <span className="text-muted-foreground">
-              {memory?.[1] ? `/${memory[1]}` : "—"}
-            </span>
+            <div>
+              {loading ? (
+                <Skeleton
+                  aria-hidden="true"
+                  className="h-4 w-16"
+                  variant="table"
+                />
+              ) : (
+                memory?.[0] || "—"
+              )}
+            </div>
+            <div className="text-muted-foreground">
+              {loading ? (
+                <Skeleton
+                  aria-hidden="true"
+                  className="h-4 w-20"
+                  variant="table"
+                />
+              ) : (
+                memoryTotal
+              )}
+            </div>
           </>
         }
         label={messages.servers.metrics.memory}
         large={detailed}
-        percent={item.memoryPercent}
+        loading={loading}
+        percent={item?.memoryPercent ?? null}
       />
       <TransferValues
         detailed={detailed}
         first={messages.servers.metrics.receive}
         label={copy.networkTotal}
+        loading={loading}
         second={messages.servers.metrics.transmit}
-        value={item.networkIo}
+        value={item?.networkIo ?? null}
       />
       <TransferValues
         detailed={detailed}
         first={messages.servers.metrics.read}
         label={copy.ioTotal}
+        loading={loading}
         second={messages.servers.metrics.write}
-        value={item.blockIo}
+        value={item?.blockIo ?? null}
       />
     </div>
   );

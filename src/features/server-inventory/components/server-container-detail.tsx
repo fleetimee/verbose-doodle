@@ -1,17 +1,17 @@
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
-import { Fragment, type ReactNode } from "react";
 import { SiDocker } from "react-icons/si";
+import { Gauge } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   fetchServerContainerDetail,
   fetchServerContainerStats,
 } from "@/features/server-inventory/api";
 import { ServerContainerActions } from "@/features/server-inventory/components/server-container-actions";
+import { ServerContainerDetailValues } from "@/features/server-inventory/components/server-container-detail-values";
 import { ServerContainerLogs } from "@/features/server-inventory/components/server-container-logs";
 import { ServerContainerReadings } from "@/features/server-inventory/components/server-container-readings";
 import {
@@ -23,134 +23,6 @@ import type {
   ServerContainers,
   ServerEntry,
 } from "@/features/server-inventory/types";
-import { formatMessage } from "@/lib/i18n";
-
-function DetailFields({
-  rows,
-}: {
-  rows: { label: string; value: ReactNode }[];
-}) {
-  return (
-    <dl className="flex flex-col gap-3">
-      {rows.map((row, index) => (
-        <Fragment key={row.label}>
-          {index > 0 && <Separator />}
-          <div className="grid gap-2 text-sm sm:grid-cols-3">
-            <dt className="text-muted-foreground">{row.label}</dt>
-            <dd className="min-w-0 whitespace-pre-wrap break-all font-mono text-xs leading-relaxed sm:col-span-2 sm:text-right">
-              {row.value}
-            </dd>
-          </div>
-        </Fragment>
-      ))}
-    </dl>
-  );
-}
-
-function DetailValues({ data }: { data: ServerContainerDetail }) {
-  const { messages, locale } = useI18n();
-  const copy = messages.servers.containers;
-  const states: Record<string, string> = copy.states;
-  const rows = [
-    { label: copy.containerName, value: data.name || "—" },
-    {
-      label: copy.state,
-      value: (
-        <Badge variant={containerVariant(data.state ?? "", "")}>
-          {states[data.state ?? ""] ?? data.state ?? "—"}
-        </Badge>
-      ),
-    },
-    { label: copy.containerId, value: data.id || "—" },
-    { label: copy.path, value: data.path || "—" },
-    { label: copy.image, value: data.image || "—" },
-    {
-      label: messages.servers.metrics.specOs,
-      value: data.operatingSystem || "—",
-    },
-    {
-      label: copy.created,
-      value: data.created ? new Date(data.created).toLocaleString(locale) : "—",
-    },
-  ];
-  const networkRows = data.networks.map((network) => ({
-    label: network.name,
-    value:
-      [network.ipv4, network.ipv6].filter(Boolean).join("\n") || copy.noAddress,
-  }));
-  const portRows = data.ports.map((port, index) => {
-    const address = port.hostIp || "*";
-    const host = address.includes(":") ? `[${address}]` : address;
-    return {
-      label: `${port.containerPort} · ${index + 1}`,
-      value: port.hostPort
-        ? `${host}:${port.hostPort} → ${port.containerPort}`
-        : `${port.containerPort} (${copy.notPublished})`,
-    };
-  });
-  const mountRows = data.mounts.map((mount, index) => ({
-    label: `${mount.type} · ${index + 1}`,
-    value: `${mount.source} → ${mount.destination}\n${mount.writable ? copy.readWrite : copy.readOnly}`,
-  }));
-  const sections = [
-    { title: copy.basicInfo, rows, empty: "" },
-    { title: copy.networks, rows: networkRows, empty: copy.noNetworks },
-    { title: copy.ports, rows: portRows, empty: copy.noPorts },
-    { title: copy.mounts, rows: mountRows, empty: copy.noMounts },
-  ];
-  return (
-    <>
-      {sections.map((section) => (
-        <Card key={section.title} size="monitor" variant="monitor">
-          <CardHeader size="none">
-            <CardTitle size="sm">{section.title}</CardTitle>
-          </CardHeader>
-          <CardContent size="none">
-            {section.rows.length ? (
-              <DetailFields rows={section.rows} />
-            ) : (
-              <p className="text-muted-foreground text-sm">{section.empty}</p>
-            )}
-          </CardContent>
-        </Card>
-      ))}
-      <Card size="monitor" variant="monitor">
-        <CardHeader size="none">
-          <CardTitle size="sm">{copy.installedSoftware}</CardTitle>
-        </CardHeader>
-        <CardContent size="none">
-          <div className="flex flex-col gap-3">
-            <p className="text-muted-foreground text-sm">
-              {copy.softwareDescription}
-            </p>
-            {data.installedSoftware && data.installedSoftware.length > 0 ? (
-              <ul className="flex flex-wrap gap-2">
-                {data.installedSoftware.map((software) => (
-                  <li key={software}>
-                    <Badge variant="secondary">{software}</Badge>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground text-sm">
-                {data.installedSoftware
-                  ? copy.softwareEmpty
-                  : copy.softwareUnavailable}
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      <p className="text-muted-foreground text-xs">
-        {formatMessage(messages.servers.metrics.updated, {
-          time: data.collectedAt
-            ? new Date(data.collectedAt).toLocaleTimeString(locale)
-            : "—",
-        })}
-      </p>
-    </>
-  );
-}
 
 function ContainerLiveMetrics({
   query,
@@ -173,7 +45,12 @@ function ContainerLiveMetrics({
   return (
     <Card size="monitor" variant="monitor">
       <CardHeader size="none">
-        <CardTitle size="sm">{copy.liveMetrics}</CardTitle>
+        <CardTitle size="sm" variant="inline">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Gauge aria-hidden="true" className="size-5" />
+          </span>
+          {copy.liveMetrics}
+        </CardTitle>
       </CardHeader>
       <CardContent size="none">
         <div className="flex flex-col gap-3">
@@ -183,7 +60,7 @@ function ContainerLiveMetrics({
             </Alert>
           )}
           {query.isPending && !paused && eligible && (
-            <Skeleton className="h-28 w-full" />
+            <ServerContainerReadings detailed loading />
           )}
           {item && <ServerContainerReadings detailed item={item} />}
           {item && item.state !== "running" && (
@@ -207,6 +84,59 @@ function ContainerLiveMetrics({
   );
 }
 
+function ContainerIdentity({
+  data,
+  loading,
+}: {
+  data?: ServerContainerDetail;
+  loading: boolean;
+}) {
+  const copy = useI18n().messages.servers.containers;
+  const states: Record<string, string> = copy.states;
+  return (
+    <div className="flex min-w-0 flex-1 items-center gap-4">
+      <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <SiDocker aria-hidden="true" className="size-10" />
+      </div>
+      <div className="flex min-w-0 flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="min-w-0 break-words font-semibold text-2xl tracking-tight">
+            {loading ? (
+              <Skeleton
+                aria-hidden="true"
+                className="h-8 w-48"
+                variant="table"
+              />
+            ) : (
+              (data?.name ?? copy.detailTitle)
+            )}
+          </h2>
+          {loading && (
+            <Skeleton aria-hidden="true" className="h-5 w-16" variant="table" />
+          )}
+          {data?.state && (
+            <Badge variant={containerVariant(data.state, "")}>
+              {states[data.state] ?? data.state}
+            </Badge>
+          )}
+        </div>
+        {loading && (
+          <Skeleton
+            aria-hidden="true"
+            className="h-4 w-64 max-w-full"
+            variant="table"
+          />
+        )}
+        {data?.image && (
+          <p className="break-all font-mono text-muted-foreground text-xs leading-relaxed">
+            {data.image}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ServerContainerDetailPanel({
   entry,
   containerId,
@@ -218,7 +148,6 @@ export function ServerContainerDetailPanel({
 }) {
   const { messages } = useI18n();
   const copy = messages.servers.containers;
-  const states: Record<string, string> = copy.states;
   const query = useQuery({
     queryKey: [
       "server-inventory",
@@ -255,32 +184,12 @@ export function ServerContainerDetailPanel({
   const data = query.data;
   const error = useContainerError(data?.status, query.error);
   const ready = data?.status === "OK" && !query.isError;
+  const loading = query.isPending && !paused;
+  const showDetails = ready || loading;
   return (
     <div className="flex w-full min-w-0 flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 flex-1 items-center gap-4">
-          <SiDocker
-            aria-hidden="true"
-            className="size-10 shrink-0 text-primary"
-          />
-          <div className="flex min-w-0 flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-3">
-              <h2 className="min-w-0 break-all font-semibold text-2xl tracking-tight">
-                {data?.name ?? copy.detailTitle}
-              </h2>
-              {ready && data.state && (
-                <Badge variant={containerVariant(data.state, "")}>
-                  {states[data.state] ?? data.state}
-                </Badge>
-              )}
-            </div>
-            {ready && data.image && (
-              <p className="break-all font-mono text-muted-foreground text-xs leading-relaxed">
-                {data.image}
-              </p>
-            )}
-          </div>
-        </div>
+        <ContainerIdentity data={ready ? data : undefined} loading={loading} />
         <ServerContainerActions
           containerId={containerId}
           entry={entry}
@@ -297,7 +206,11 @@ export function ServerContainerDetailPanel({
           {messages.servers.metrics.paused}
         </p>
       )}
-      {query.isPending && !paused && <Skeleton className="h-64 w-full" />}
+      {loading && (
+        <p className="sr-only" role="status">
+          {copy.loading}
+        </p>
+      )}
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -309,14 +222,20 @@ export function ServerContainerDetailPanel({
         paused={paused}
         query={stats}
       />
-      {ready && (
+      {showDetails && (
         <ServerContainerLogs
           containerId={containerId}
+          loading={!ready}
           paused={paused}
           serverId={entry.id}
         />
       )}
-      {ready && <DetailValues data={data} />}
+      {showDetails && (
+        <ServerContainerDetailValues
+          data={ready ? data : undefined}
+          loading={!ready}
+        />
+      )}
       <p className="text-muted-foreground text-xs">{copy.managementHint}</p>
     </div>
   );

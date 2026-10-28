@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 export function metricBytes(value: number | null, compact = false) {
@@ -20,13 +21,16 @@ export function MetricGauge({
   percent,
   detail,
   large = false,
+  loading = false,
 }: {
   label: string;
   percent: number | null;
   detail: ReactNode;
   large?: boolean;
+  loading?: boolean;
 }) {
   const value = percent === null ? null : Math.max(0, Math.min(100, percent));
+  const percentLabel = percent === null ? "—" : `${Math.round(percent)}%`;
   return (
     <div className="flex min-w-0 flex-col items-center gap-1.5">
       <span className="text-muted-foreground text-xs">{label}</span>
@@ -62,18 +66,26 @@ export function MetricGauge({
             />
           )}
         </svg>
-        <span
+        <div
           className={cn(
             "absolute inset-0 flex items-center justify-center font-mono tabular-nums",
             large ? "font-semibold text-xl" : "text-xs"
           )}
         >
-          {percent === null ? "—" : `${Math.round(percent)}%`}
-        </span>
+          {loading ? (
+            <Skeleton
+              aria-hidden="true"
+              className={large ? "h-6 w-10" : "h-3 w-4"}
+              variant="table"
+            />
+          ) : (
+            percentLabel
+          )}
+        </div>
       </div>
-      <span className="flex max-w-full flex-col gap-0.5 text-center font-mono text-xs tabular-nums">
+      <div className="flex max-w-full flex-col gap-0.5 text-center font-mono text-xs tabular-nums">
         {detail}
-      </span>
+      </div>
     </div>
   );
 }

@@ -22,7 +22,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { fetchServerContainers } from "@/features/server-inventory/api";
-import { ServerContainerCard } from "@/features/server-inventory/components/server-container-card";
+import {
+  ServerContainerCard,
+  ServerContainerCardSkeleton,
+} from "@/features/server-inventory/components/server-container-card";
 import { useContainerError } from "@/features/server-inventory/components/server-container-status";
 import type { ServerEntry } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
@@ -156,7 +159,24 @@ export function ServerContainerGrid({
           </p>
         )}
         {eligible && query.isPending && !paused && (
-          <Skeleton className="h-48 w-full" />
+          <div className="flex flex-col gap-3">
+            <p className="sr-only" role="status">
+              {copy.loading}
+            </p>
+            <Skeleton aria-hidden="true" className="h-5 w-24" variant="table" />
+            <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {[
+                "container-1",
+                "container-2",
+                "container-3",
+                "container-4",
+                "container-5",
+                "container-6",
+              ].map((id) => (
+                <ServerContainerCardSkeleton key={id} />
+              ))}
+            </div>
+          </div>
         )}
         {error && (
           <Alert variant="destructive">

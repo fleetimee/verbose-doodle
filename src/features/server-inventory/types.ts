@@ -145,3 +145,19 @@ export interface ServerEntryPage {
   totalHosts: number;
   totalPages: number;
 }
+
+export interface ServerCleanupInspection {
+  collectedAt: string | null;
+  diskTotalBytes: number | null;
+  diskUsedBytes: number | null;
+  dockerStatus: string;
+  journalUsage: string | null;
+  status: string;
+  storage: {
+    activeCount: number | null;
+    reclaimable: string | null;
+    size: string | null;
+    totalCount: number | null;
+    type: string;
+  }[];
+}

@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { fetchServerEntry } from "@/features/server-inventory/api";
+import { ServerCleanupSuggestions } from "@/features/server-inventory/components/server-cleanup-suggestions";
 import { ServerContainerDetailPanel } from "@/features/server-inventory/components/server-container-detail";
 import { ServerContainerGrid } from "@/features/server-inventory/components/server-container-grid";
 import { ServerHostCard } from "@/features/server-inventory/components/server-metrics";
@@ -126,6 +127,10 @@ export function ServerHostDetailPage() {
             </p>
           </div>
           <ButtonGroup aria-label={messages.servers.actions}>
+            <ServerCleanupSuggestions
+              entry={entry}
+              hidden={Boolean(containerId)}
+            />
             {entry?.hasPassword && entry.username && (
               <Tooltip>
                 <TooltipTrigger asChild>

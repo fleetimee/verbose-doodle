@@ -1,4 +1,34 @@
 export const serversMessages = {
+  cleanup: {
+    copyCommand: "Salin perintah",
+    button: "Pembersihan",
+    title: "Tinjauan pembersihan",
+    description:
+      "Periksa penggunaan penyimpanan sebelum menentukan yang akan dihapus.",
+    scope:
+      "Hanya pemeriksaan. Ruang yang dapat dibebaskan adalah perkiraan Docker, bukan jaminan. Tidak ada data yang dihapus otomatis.",
+    journal: "Journal sistem",
+    journalHint: "Penggunaan yang dapat dilihat akun SSH tersimpan.",
+    diskUsage: "{used} dari {total} terpakai · sisa {free}",
+    pressure:
+      "Penggunaan disk di atas 75%; tinjau direktori besar dan retensi.",
+    images: "Image",
+    containers: "Container",
+    volumes: "Volume lokal",
+    buildCache: "Cache build",
+    used: "{size} terpakai",
+    reclaimable: "{size} dapat dibebaskan",
+    counts: "{active} aktif dari {total}",
+    unavailable:
+      "Pemeriksaan penyimpanan tidak tersedia. Periksa akses SSH dan coba lagi.",
+    dockerUnavailable:
+      "Penyimpanan Docker tidak dapat diperiksa pada host ini.",
+    missing: "Tidak tersedia",
+    loading: "Memeriksa penyimpanan…",
+    ssh: "Buka Host SSH",
+    sshHint: "Membuka terminal host di tab baru untuk pemeriksaan manual.",
+    refresh: "Perbarui pemeriksaan",
+  },
   containers: {
     logsTitle: "Log container",
     logsIdle: "Mulai streaming untuk melihat keluaran container.",
@@ -162,6 +192,9 @@ export const serversMessages = {
     uptime: "Aktif {days} hari {hours} jam",
     uptimeUnavailable: "Waktu aktif tidak tersedia",
     uptimeLabel: "Waktu aktif",
+    specSystem: "Sistem",
+    specProcessor: "Prosesor",
+    specResources: "Sumber daya",
     specTitle: "Spesifikasi server",
     specDescription: "Detail sistem yang dilaporkan melalui SSH.",
     specOs: "Sistem operasi",

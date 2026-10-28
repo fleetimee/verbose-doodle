@@ -1,4 +1,32 @@
 export const serversMessages = {
+  cleanup: {
+    copyCommand: "Copy command",
+    button: "Cleanup",
+    title: "Cleanup review",
+    description: "Inspect storage use before deciding what to remove.",
+    scope:
+      "Inspection only. Docker reports reclaimable estimates, not guaranteed savings. Nothing is deleted automatically.",
+    journal: "System journal",
+    journalHint: "Usage visible to the saved SSH account.",
+    diskUsage: "{used} of {total} used · {free} free",
+    pressure:
+      "Disk usage is 75% or higher; review large directories and retention.",
+    images: "Images",
+    containers: "Containers",
+    volumes: "Local volumes",
+    buildCache: "Build cache",
+    used: "{size} used",
+    reclaimable: "{size} reclaimable",
+    counts: "{active} active of {total}",
+    unavailable:
+      "Storage inspection is unavailable. Check SSH access and retry.",
+    dockerUnavailable: "Docker storage could not be inspected on this host.",
+    missing: "Not available",
+    loading: "Inspecting storage…",
+    ssh: "Open Host SSH",
+    sshHint: "Opens the host terminal in a new tab for manual inspection.",
+    refresh: "Refresh inspection",
+  },
   containers: {
     logsTitle: "Container logs",
     logsIdle: "Start streaming to view container output.",
@@ -158,6 +186,9 @@ export const serversMessages = {
     uptime: "Uptime {days}d {hours}h",
     uptimeUnavailable: "Uptime unavailable",
     uptimeLabel: "Uptime",
+    specSystem: "System",
+    specProcessor: "Processor",
+    specResources: "Resources",
     specTitle: "Server specification",
     specDescription: "System details reported over SSH.",
     specOs: "Operating system",

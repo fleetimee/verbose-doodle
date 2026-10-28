@@ -6,6 +6,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useRef, useState } from "react";
+import { FileTerminal } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -17,16 +18,22 @@ export function ServerContainerLogs({
   serverId,
   containerId,
   paused,
+  loading = false,
 }: {
   serverId: string;
   containerId: string;
   paused: boolean;
+  loading?: boolean;
 }) {
   const { messages } = useI18n();
   const copy = messages.servers.containers;
   const [streaming, setStreaming] = useState(true);
   const [follow, setFollow] = useState(true);
-  const logs = useContainerLogs(serverId, containerId, streaming && !paused);
+  const logs = useContainerLogs(
+    serverId,
+    containerId,
+    streaming && !paused && !loading
+  );
   const viewport = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (follow && viewport.current && logs.output) {
@@ -45,7 +52,9 @@ export function ServerContainerLogs({
   let status = copy.logsIdle;
   if (streaming) {
     status = errors.get(logs.status) ?? copy.logsEnded;
-    if (paused || !logs.visible) {
+    if (loading) {
+      status = copy.logsConnecting;
+    } else if (paused || !logs.visible) {
       status = messages.servers.metrics.paused;
     } else if (logs.status === "connecting") {
       status = copy.logsConnecting;
@@ -57,7 +66,12 @@ export function ServerContainerLogs({
     <Card size="monitor" variant="monitor">
       <CardHeader size="none">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CardTitle size="sm">{copy.logsTitle}</CardTitle>
+          <CardTitle size="sm" variant="inline">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <FileTerminal aria-hidden="true" className="size-5" />
+            </span>
+            {copy.logsTitle}
+          </CardTitle>
           <div className="max-w-full overflow-x-auto">
             <ButtonGroup aria-label={messages.servers.actions}>
               <Button
@@ -84,7 +98,7 @@ export function ServerContainerLogs({
                 {copy.logsClear}
               </Button>
               <Button
-                disabled={paused}
+                disabled={paused || loading}
                 onClick={() => setStreaming(!streaming)}
                 size="sm"
                 variant="outline"

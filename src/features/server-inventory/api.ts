@@ -1,4 +1,5 @@
 import type {
+  ServerCleanupInspection,
   ServerContainerDetail,
   ServerContainerSummary,
   ServerContainers,
@@ -82,6 +83,17 @@ export async function fetchServerMetrics(
   const response = await apiGet<{ data: ServerMetrics }>(
     `${endpoints.detail(id)}/metrics`,
     { cache: "no-store", signal }
+  );
+  return response.data;
+}
+
+export async function fetchServerCleanup(
+  id: string,
+  signal: AbortSignal
+): Promise<ServerCleanupInspection> {
+  const response = await apiGet<{ data: ServerCleanupInspection }>(
+    `${endpoints.detail(id)}/cleanup`,
+    { cache: "no-store", signal, timeout: 45_000 }
   );
   return response.data;
 }

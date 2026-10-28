@@ -250,3 +250,31 @@ and new output, pause/resume, clear, disable Follow logs and scroll, hide the ta
 and navigate away. Verify stopped containers and unsupported logging drivers,
 unknown/changed host keys, network failures, and buffer truncation. Confirm that
 USER/ticketless requests fail and log sockets reject input/file/terminal commands.
+
+## On-demand cleanup inspection
+
+The host header has a compact Cleanup button. Its dialog requests ADMIN-only
+`GET /api/servers/{id}/cleanup`, with `Cache-Control: no-store`. The backend uses
+saved SSH credentials, known-host verification, and the existing bounded collector
+pool/cache (five-second TTL). No background inspection polling occurs.
+
+Fixed probes read root filesystem usage, the system-journal usage visible to the
+SSH account, and Docker storage using the standard local socket. Journal and
+Docker probes require `timeout`; their command limits are 5 seconds for journal,
+5 seconds for Docker connectivity, and 12 seconds for Docker disk usage. Missing
+tools, access failures, unsupported probes, and timeouts leave those values
+unavailable rather than zero. The SSH read timeout is 30 seconds and the existing
+1 MiB output cap applies. No sudo, file deletion, pruning, or downloads occur.
+
+Docker's category sizes and reclaimable values retain their reported human units
+and estimates; they are not summed or advertised as guaranteed savings. Counts
+show active versus total resources. See [Docker system df](https://docs.docker.com/reference/cli/docker/system/df/).
+Each report row offers Copy command with a command preview on hover or keyboard
+focus. These are read-only inspection commands. Open Host SSH opens the existing
+terminal in a separate tab; no command is
+pre-filled or executed automatically. Deploy/restart the matching backend.
+
+Manually verify Docker and journal available/unavailable cases, a host without
+Docker or timeout, SSH failures, zero versus unknown sizes, dialog close during
+collection, Refresh, and opening the correct host terminal. Unauthenticated and
+USER requests must fail. The collector must never invoke prune or remove commands.
