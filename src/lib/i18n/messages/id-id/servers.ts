@@ -1,12 +1,12 @@
 export const serversMessages = {
   cleanup: {
-    copyCommand: "Salin perintah",
+    copyCommand: "Salin perintah pemeriksaan",
     button: "Pembersihan",
     title: "Tinjauan pembersihan",
     description:
       "Periksa penggunaan penyimpanan sebelum menentukan yang akan dihapus.",
     scope:
-      "Hanya pemeriksaan. Ruang yang dapat dibebaskan adalah perkiraan Docker, bukan jaminan. Tidak ada data yang dihapus otomatis.",
+      "Perintah yang disalin hanya memeriksa penggunaan; tidak menghapus data. Ruang yang dapat dibebaskan adalah perkiraan Docker, bukan jaminan.",
     journal: "Journal sistem",
     journalHint: "Penggunaan yang dapat dilihat akun SSH tersimpan.",
     diskUsage: "{used} dari {total} terpakai · sisa {free}",

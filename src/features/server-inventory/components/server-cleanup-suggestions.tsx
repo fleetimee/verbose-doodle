@@ -137,7 +137,7 @@ function StorageReport({
   return (
     <div className="divide-y divide-border/50">
       <ReportRow
-        command="du -xhd1 / 2>/dev/null | sort -h"
+        command="printf 'Scanning root filesystem; large directories may take several minutes...\n'; du -xh --max-depth=1 /"
         detail={hasDisk && used / total >= 0.75 ? copy.pressure : undefined}
         icon={Gauge}
         title={messages.servers.metrics.disk}

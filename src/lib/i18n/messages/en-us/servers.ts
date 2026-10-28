@@ -1,11 +1,11 @@
 export const serversMessages = {
   cleanup: {
-    copyCommand: "Copy command",
+    copyCommand: "Copy inspection command",
     button: "Cleanup",
     title: "Cleanup review",
     description: "Inspect storage use before deciding what to remove.",
     scope:
-      "Inspection only. Docker reports reclaimable estimates, not guaranteed savings. Nothing is deleted automatically.",
+      "Copied commands only inspect usage; they do not delete data. Docker reclaimable space is an estimate, not guaranteed savings.",
     journal: "System journal",
     journalHint: "Usage visible to the saved SSH account.",
     diskUsage: "{used} of {total} used · {free} free",
