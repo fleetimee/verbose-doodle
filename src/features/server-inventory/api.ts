@@ -123,7 +123,8 @@ export async function fetchServerSpec(
 }
 
 export async function fetchServerEntries(
-  query: ServerInventoryQuery
+  query: ServerInventoryQuery,
+  signal?: AbortSignal
 ): Promise<ServerEntryPage> {
   const params = new URLSearchParams({
     page: String(query.page),
@@ -135,7 +136,8 @@ export async function fetchServerEntries(
     direction: query.direction,
   });
   const response = await apiGet<{ data: ServerEntryPage }>(
-    `${endpoints.list}?${params}`
+    `${endpoints.list}?${params}`,
+    { signal }
   );
   return response.data;
 }

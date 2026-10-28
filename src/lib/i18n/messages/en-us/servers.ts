@@ -31,7 +31,7 @@ export const serversMessages = {
     title: "Cleanup review",
     description: "Inspect storage use before deciding what to remove.",
     scope:
-      "Commands are copied, not run. Cleanup deletes data when executed in SSH. Reclaimable space is an estimate.",
+      "One account per host. Linux hosts are read over SSH: memory excludes reclaimable cache, disk usage is for /, and I/O sums whole block devices. Windows hosts are read over WMI (DCOM) with an administrator account: disk usage is for the system drive and network totals include all adapters. No history is stored.",
     journal: "System journal",
     journalHint: "Usage visible to the saved SSH account.",
     diskUsage: "{used} of {total} used · {free} free",
@@ -189,10 +189,10 @@ export const serversMessages = {
     documentTitle: "Server metrics | Fleetime Labs",
     details: "Measurement details",
     inventory: "Inventory",
-    description: "Live system metrics and Docker, organized by host.",
+    description: "Live system metrics, organized by host.",
     scope:
-      "One SSH account per host. Memory excludes reclaimable cache; disk usage is for /. Network totals exclude loopback and may include virtual interfaces. I/O sums whole block devices, excluding loop, RAM, device-mapper, and RAID devices. No history is stored.",
-    search: "Search SSH servers…",
+      "One account per host. Linux hosts are read over SSH: memory excludes reclaimable cache, disk usage is for /, and I/O sums whole block devices. Windows hosts are read over WinRM: disk usage is for the system drive (C:) and network totals include all interfaces. No history is stored.",
+    search: "Search servers…",
     pause: "Pause updates",
     resume: "Resume updates",
     paused: "Paused",
@@ -202,6 +202,21 @@ export const serversMessages = {
     cpu: "CPU",
     memory: "Memory",
     disk: "Disk (/)",
+    diskWindows: "Disk (C:)",
+    diskNamed: "Disk ({name})",
+    diskAllDrives: "Disk (all drives)",
+    specBuild: "Build",
+    specDescriptionWindows: "System details reported over WMI.",
+    windowsDiskOnly:
+      "Disk only: WMI is unreachable, so live CPU, memory, network and I/O cannot be read.",
+    windowsCredentialsRequired:
+      "Save a Windows username and password in this RDP entry to read metrics.",
+    windowsAuthFailed:
+      "Windows authentication failed. Check the stored username and password.",
+    windowsConnectionFailed:
+      "Could not reach the Windows server. Check the address and that RPC port 135 (WMI/DCOM) or SMB port 445 is reachable from the backend.",
+    windowsCollectionFailed:
+      "Could not read this Windows server. Use an administrator account and allow remote WMI (DCOM, port 135 plus dynamic RPC ports) or SMB with Remote Registry.",
     network: "Network",
     io: "Disk I/O",
     receive: "Receive",
@@ -238,9 +253,9 @@ export const serversMessages = {
       "Could not read server metrics. Check access to /proc, /sys, and df, then resume updates.",
     unsupported: "Metrics currently support Linux over SSH only.",
     busy: "The metrics collector is busy. Collection will retry on the next refresh.",
-    empty: "No matching SSH servers",
+    empty: "No matching servers",
     emptyDescription:
-      "Add a Linux SSH entry with a stored username and password, or change your search.",
+      "Add an SSH or RDP entry with a stored username and password, or change your search.",
     previous: "Previous",
     next: "Next",
   },

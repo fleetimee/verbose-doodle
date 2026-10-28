@@ -9,10 +9,12 @@ import {
 } from "@/features/server-inventory/api";
 import { useContainerError } from "@/features/server-inventory/components/server-container-status";
 import { metricBytes } from "@/features/server-inventory/components/server-metric-values";
+import { metricErrors } from "@/features/server-inventory/components/server-metrics";
 import type {
   ServerEntry,
   ServerSpecInfo,
 } from "@/features/server-inventory/types";
+import { getErrorMessage } from "@/lib/error-handler";
 import { formatMessage } from "@/lib/i18n";
 
 const EMPTY = "—";
@@ -55,7 +57,8 @@ type SpecGroup = {
 
 function buildGroups(
   data: ServerSpecInfo | undefined,
-  copy: SpecCopy
+  copy: SpecCopy,
+  windows = false
 ): SpecGroup[] {
   const kind = flagLabel(data?.virtualized, copy.specVm, copy.specBare);
   const virtualization = data?.machine ? `${kind} (${data.machine})` : kind;
@@ -63,6 +66,12 @@ function buildGroups(
     data?.swapTotalBytes === null || data?.swapTotalBytes === undefined
       ? copy.specNone
       : metricBytes(data.swapTotalBytes, true);
+  const aesRows: [string, string][] = windows
+    ? []
+    : [[copy.specAes, flagLabel(data?.aesNi, copy.specYes, copy.specNo)]];
+  const loadRows: [string, string][] = windows
+    ? []
+    : [[copy.specLoad, data?.loadAverage ?? EMPTY]];
   return [
     {
       title: copy.specSystem,
@@ -70,7 +79,7 @@ function buildGroups(
       rows: [
         [copy.specOs, data?.operatingSystem ?? EMPTY],
         [copy.specHostname, data?.hostname ?? EMPTY],
-        [copy.specKernel, data?.kernel ?? EMPTY],
+        [windows ? copy.specBuild : copy.specKernel, data?.kernel ?? EMPTY],
         [copy.specArch, data?.architecture ?? EMPTY],
       ],
     },
@@ -79,9 +88,9 @@ function buildGroups(
       icon: Cpu,
       rows: [
         [copy.specCpu, formatCpu(data, copy.cores)],
-        [copy.specAes, flagLabel(data?.aesNi, copy.specYes, copy.specNo)],
+        ...aesRows,
         [copy.specVirt, virtualization],
-        [copy.specLoad, data?.loadAverage ?? EMPTY],
+        ...loadRows,
       ],
     },
     {
@@ -90,7 +99,10 @@ function buildGroups(
       rows: [
         [copy.memory, metricBytes(data?.memoryTotalBytes ?? null, true)],
         [copy.specSwap, data ? swap : EMPTY],
-        [copy.disk, metricBytes(data?.diskTotalBytes ?? null, true)],
+        [
+          windows ? copy.diskAllDrives : copy.disk,
+          metricBytes(data?.diskTotalBytes ?? null, true),
+        ],
         [
           copy.uptimeLabel,
           formatUptime(data?.uptimeSeconds ?? null, copy.uptime),
@@ -116,6 +128,23 @@ export function useDockerMissing(
   return query.data?.status === "DOCKER_NOT_INSTALLED";
 }
 
+function windowsSpecError(
+  messages: ReturnType<typeof useI18n>["messages"],
+  status: string | undefined,
+  error: Error | null
+) {
+  if (error) {
+    return getErrorMessage(error);
+  }
+  if (!status || status === "OK") {
+    return;
+  }
+  return (
+    metricErrors(messages, true).get(status) ??
+    messages.servers.metrics.windowsCollectionFailed
+  );
+}
+
 export function ServerSpec({
   entry,
   paused,
@@ -135,9 +164,13 @@ export function ServerSpec({
     gcTime: 0,
   });
   const data = query.data?.status === "OK" ? query.data : undefined;
-  const groups = buildGroups(data, copy);
+  const windows = entry.accessType === "RDP";
+  const groups = buildGroups(data, copy, windows);
   const loading = query.isPending && !paused;
-  const error = useContainerError(query.data?.status, query.error);
+  const containerError = useContainerError(query.data?.status, query.error);
+  const error = windows
+    ? windowsSpecError(messages, query.data?.status, query.error)
+    : containerError;
   return (
     <section
       aria-busy={loading}
@@ -150,7 +183,7 @@ export function ServerSpec({
             {copy.specTitle}
           </h2>
           <p className="text-muted-foreground text-sm">
-            {copy.specDescription}
+            {windows ? copy.specDescriptionWindows : copy.specDescription}
           </p>
         </div>
         {loading && (

@@ -34,7 +34,7 @@ export const serversMessages = {
     description:
       "Periksa penggunaan penyimpanan sebelum menentukan yang akan dihapus.",
     scope:
-      "Perintah hanya disalin, tidak dijalankan. Pembersihan menghapus data saat dijalankan di SSH. Ruang yang dapat dibebaskan adalah perkiraan.",
+      "Satu akun per host. Host Linux dibaca melalui SSH: memori tidak menghitung cache yang dapat diklaim kembali, penggunaan disk untuk /, dan I/O menjumlahkan perangkat blok utuh. Host Windows dibaca melalui WMI (DCOM) dengan akun administrator: penggunaan disk untuk drive sistem dan total jaringan mencakup semua adaptor. Riwayat tidak disimpan.",
     journal: "Journal sistem",
     journalHint: "Penggunaan yang dapat dilihat akun SSH tersimpan.",
     diskUsage: "{used} dari {total} terpakai · sisa {free}",
@@ -196,11 +196,10 @@ export const serversMessages = {
     documentTitle: "Metrik server | Fleetime Labs",
     details: "Detail pengukuran",
     inventory: "Inventaris",
-    description:
-      "Metrik sistem dan Docker terkini, dikelompokkan menurut host.",
+    description: "Metrik sistem terkini, dikelompokkan menurut host.",
     scope:
-      "Satu akun SSH per host. Memori tidak menghitung cache yang dapat diklaim kembali; penggunaan disk untuk /. Total jaringan mengecualikan loopback dan dapat mencakup antarmuka virtual. I/O menjumlahkan perangkat blok utuh, tanpa perangkat loop, RAM, device-mapper, dan RAID. Riwayat tidak disimpan.",
-    search: "Cari server SSH…",
+      "Satu akun per host. Host Linux dibaca melalui SSH: memori tidak menghitung cache yang dapat diklaim kembali, penggunaan disk untuk /, dan I/O menjumlahkan perangkat blok utuh. Host Windows dibaca melalui WinRM: penggunaan disk untuk drive sistem (C:) dan total jaringan mencakup semua antarmuka. Riwayat tidak disimpan.",
+    search: "Cari server…",
     pause: "Jeda pembaruan",
     resume: "Lanjutkan pembaruan",
     paused: "Dijeda",
@@ -210,6 +209,21 @@ export const serversMessages = {
     cpu: "CPU",
     memory: "Memori",
     disk: "Disk (/)",
+    diskWindows: "Disk (C:)",
+    diskNamed: "Disk ({name})",
+    diskAllDrives: "Disk (semua drive)",
+    specBuild: "Build",
+    specDescriptionWindows: "Detail sistem yang dilaporkan melalui WMI.",
+    windowsDiskOnly:
+      "Hanya disk: WMI tidak dapat dijangkau, sehingga CPU, memori, jaringan, dan I/O langsung tidak dapat dibaca.",
+    windowsCredentialsRequired:
+      "Simpan nama pengguna dan kata sandi Windows pada entri RDP ini untuk membaca metrik.",
+    windowsAuthFailed:
+      "Autentikasi Windows gagal. Periksa nama pengguna dan kata sandi yang tersimpan.",
+    windowsConnectionFailed:
+      "Tidak dapat menjangkau server Windows. Periksa alamat dan pastikan port RPC 135 (WMI/DCOM) atau port SMB 445 dapat dijangkau dari backend.",
+    windowsCollectionFailed:
+      "Server Windows ini tidak dapat dibaca. Gunakan akun administrator dan izinkan WMI jarak jauh (DCOM, port 135 serta port RPC dinamis) atau SMB dengan Remote Registry.",
     network: "Jaringan",
     io: "I/O disk",
     receive: "Terima",
@@ -246,9 +260,9 @@ export const serversMessages = {
       "Metrik server tidak dapat dibaca. Periksa akses ke /proc, /sys, dan df, lalu lanjutkan pembaruan.",
     unsupported: "Metrik saat ini hanya mendukung Linux melalui SSH.",
     busy: "Pengumpul metrik sedang sibuk. Pengambilan akan dicoba pada pembaruan berikutnya.",
-    empty: "Tidak ada server SSH yang cocok",
+    empty: "Tidak ada server yang cocok",
     emptyDescription:
-      "Tambahkan entri SSH Linux dengan nama pengguna dan kata sandi tersimpan, atau ubah pencarian.",
+      "Tambahkan entri SSH atau RDP dengan nama pengguna dan kata sandi tersimpan, atau ubah pencarian.",
     previous: "Sebelumnya",
     next: "Berikutnya",
   },

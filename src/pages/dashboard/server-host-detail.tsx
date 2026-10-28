@@ -1,4 +1,4 @@
-import { ComputerTerminal01Icon, PauseIcon } from "@hugeicons/core-free-icons";
+import { PauseIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -17,9 +17,11 @@ import {
 } from "@/components/ui/tooltip";
 import { fetchServerEntry } from "@/features/server-inventory/api";
 import { ServerCleanupSuggestions } from "@/features/server-inventory/components/server-cleanup-suggestions";
+import { ServerConnectionButton } from "@/features/server-inventory/components/server-connection-button";
 import { ServerContainerDetailPanel } from "@/features/server-inventory/components/server-container-detail";
 import { ServerContainerGrid } from "@/features/server-inventory/components/server-container-grid";
 import { ServerHostCard } from "@/features/server-inventory/components/server-metrics";
+import { ServerPlatformIcon } from "@/features/server-inventory/components/server-platform-icon";
 import {
   ServerSpec,
   useDockerMissing,
@@ -28,7 +30,7 @@ import type { ServerEntry } from "@/features/server-inventory/types";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
 import { getErrorMessage } from "@/lib/error-handler";
 
-function HostSections({
+function LinuxHostSections({
   entry,
   paused,
 }: {
@@ -54,6 +56,42 @@ function HostSections({
           <ServerContainerGrid entry={entry} paused={paused} />
         </section>
       )}
+    </>
+  );
+}
+
+function HostSections(props: { entry: ServerEntry; paused: boolean }) {
+  const copy = useI18n().messages.servers.containers;
+  if (props.entry.accessType !== "RDP") {
+    return <LinuxHostSections {...props} />;
+  }
+  return (
+    <>
+      <section aria-label={copy.overview}>
+        <ServerHostCard detail entry={props.entry} paused={props.paused} />
+      </section>
+      <ServerSpec entry={props.entry} paused={props.paused} />
+    </>
+  );
+}
+
+function displayPort(entry: ServerEntry) {
+  return entry.port ?? (entry.accessType === "RDP" ? 3389 : 22);
+}
+
+function HostTools({
+  entry,
+  hideCleanup,
+}: {
+  entry: ServerEntry | undefined;
+  hideCleanup: boolean;
+}) {
+  return (
+    <>
+      {entry?.accessType !== "RDP" && (
+        <ServerCleanupSuggestions entry={entry} hidden={hideCleanup} />
+      )}
+      {entry && <ServerConnectionButton entry={entry} />}
     </>
   );
 }
@@ -110,16 +148,22 @@ export function ServerHostDetailPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-2">
             <h1
-              className="break-words font-semibold text-3xl tracking-tight outline-none"
+              className="flex items-center gap-3 break-words font-semibold text-3xl tracking-tight outline-none"
               ref={titleRef}
               tabIndex={-1}
             >
-              {title}
+              {entry && !containerId && (
+                <ServerPlatformIcon
+                  className="size-7"
+                  windows={entry.accessType === "RDP"}
+                />
+              )}
+              <span className="min-w-0">{title}</span>
             </h1>
             <p className="text-muted-foreground text-sm">
               {entry ? (
                 <span className="break-all font-mono">
-                  {entry.host}:{entry.port ?? 22}
+                  {entry.host}:{displayPort(entry)}
                 </span>
               ) : (
                 copy.hostDetailDescription
@@ -127,36 +171,7 @@ export function ServerHostDetailPage() {
             </p>
           </div>
           <ButtonGroup aria-label={messages.servers.actions}>
-            <ServerCleanupSuggestions
-              entry={entry}
-              hidden={Boolean(containerId)}
-            />
-            {entry?.hasPassword && entry.username && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    aria-label={copy.hostTerminal}
-                    render={
-                      <Link
-                        rel="noopener noreferrer"
-                        target="_blank"
-                        to={`/servers/${entry.id}/terminal`}
-                      />
-                    }
-                    size="sm"
-                    variant="outline"
-                  >
-                    <HugeiconsIcon
-                      aria-hidden="true"
-                      data-icon="inline-start"
-                      icon={ComputerTerminal01Icon}
-                    />
-                    {copy.hostTerminal}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{copy.hostTerminal}</TooltipContent>
-              </Tooltip>
-            )}
+            <HostTools entry={entry} hideCleanup={Boolean(containerId)} />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

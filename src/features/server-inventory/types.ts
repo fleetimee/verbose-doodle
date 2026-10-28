@@ -14,11 +14,18 @@ export interface ServerEntry {
   username: string | null;
 }
 
+export interface ServerDiskUsage {
+  name: string;
+  totalBytes: number;
+  usedBytes: number;
+}
+
 export interface ServerMetrics {
   collectedAt: string | null;
   cores: number | null;
   cpuPercent: number | null;
   diskReadBytesPerSecond: number | null;
+  disks?: ServerDiskUsage[] | null;
   diskTotalBytes: number | null;
   diskUsedBytes: number | null;
   diskWriteBytesPerSecond: number | null;

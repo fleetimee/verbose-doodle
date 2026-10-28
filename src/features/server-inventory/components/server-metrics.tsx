@@ -1,12 +1,10 @@
 import { Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
-import { useSyncExternalStore } from "react";
 import { Link, useSearchParams } from "react-router";
 import {
   ChevronLeft,
   ChevronRight,
-  FileTerminal,
   Info,
   Pause,
   Play,
@@ -39,15 +37,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  fetchServerEntries,
-  fetchServerMetrics,
-} from "@/features/server-inventory/api";
+import { fetchServerMetrics } from "@/features/server-inventory/api";
+import { ServerConnectionButton } from "@/features/server-inventory/components/server-connection-button";
 import { ServerDockerSummary } from "@/features/server-inventory/components/server-container-summary";
 import {
   MetricGauge,
@@ -58,6 +49,8 @@ import {
   MeasurementsSkeleton,
   ServerHostCardSkeleton,
 } from "@/features/server-inventory/components/server-metrics-skeleton";
+import { ServerPlatformIcon } from "@/features/server-inventory/components/server-platform-icon";
+import { useMetricHosts } from "@/features/server-inventory/hooks/use-metric-hosts";
 import type {
   ServerEntry,
   ServerMetrics,
@@ -72,14 +65,82 @@ function usagePercent(used: number | null, total: number | null) {
   return (100 * used) / total;
 }
 
+export function metricErrors(
+  messages: ReturnType<typeof useI18n>["messages"],
+  windows: boolean
+) {
+  const copy = messages.servers.metrics;
+  if (windows) {
+    return new Map([
+      ["AUTH_FAILED", copy.windowsAuthFailed],
+      ["CONNECTION_FAILED", copy.windowsConnectionFailed],
+      ["COLLECTION_FAILED", ""],
+      ["BUSY", copy.busy],
+    ]);
+  }
+  return new Map([
+    ["HOST_KEY_REQUIRED", copy.hostKeyRequired],
+    ["HOST_KEY_REJECTED", messages.servers.sshHostKeyRejected],
+    ["AUTH_FAILED", messages.servers.sshAuthFailed],
+    ["CONNECTION_FAILED", messages.servers.sshConnectionFailed],
+    ["COLLECTION_FAILED", copy.collectionFailed],
+    ["UNSUPPORTED_OS", copy.unsupported],
+    ["BUSY", copy.busy],
+  ]);
+}
+
 function Measurements({
   metrics,
   large,
+  diskOnly = false,
+  windows = false,
 }: {
   metrics: ServerMetrics;
   large: boolean;
+  diskOnly?: boolean;
+  windows?: boolean;
 }) {
   const copy = useI18n().messages.servers.metrics;
+  const diskLabel = windows ? copy.diskWindows : copy.disk;
+  const diskList = metrics.disks?.length
+    ? metrics.disks.map((disk) => ({
+        label: formatMessage(copy.diskNamed, { name: disk.name }),
+        total: disk.totalBytes,
+        used: disk.usedBytes,
+      }))
+    : [
+        {
+          label: diskLabel,
+          total: metrics.diskTotalBytes,
+          used: metrics.diskUsedBytes,
+        },
+      ];
+  if (diskOnly) {
+    return (
+      <div className="grid @min-[22rem]:grid-cols-3 grid-cols-2 gap-x-3 gap-y-4">
+        {diskList.map((disk) => (
+          <MetricGauge
+            detail={
+              <>
+                <span className="whitespace-nowrap">
+                  {metricBytes(disk.used, true)}
+                </span>
+                <span className="whitespace-nowrap text-muted-foreground">
+                  {formatMessage(copy.totalCapacity, {
+                    total: metricBytes(disk.total, true),
+                  })}
+                </span>
+              </>
+            }
+            key={disk.label}
+            label={disk.label}
+            large={large}
+            percent={usagePercent(disk.used, disk.total)}
+          />
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="grid @min-[22rem]:grid-cols-5 grid-cols-3 gap-x-3 gap-y-4">
       <MetricGauge
@@ -112,23 +173,26 @@ function Measurements({
           metrics.memoryTotalBytes
         )}
       />
-      <MetricGauge
-        detail={
-          <>
-            <span className="whitespace-nowrap">
-              {metricBytes(metrics.diskUsedBytes, true)}
-            </span>
-            <span className="whitespace-nowrap text-muted-foreground">
-              {formatMessage(copy.totalCapacity, {
-                total: metricBytes(metrics.diskTotalBytes, true),
-              })}
-            </span>
-          </>
-        }
-        label={copy.disk}
-        large={large}
-        percent={usagePercent(metrics.diskUsedBytes, metrics.diskTotalBytes)}
-      />
+      {diskList.map((disk) => (
+        <MetricGauge
+          detail={
+            <>
+              <span className="whitespace-nowrap">
+                {metricBytes(disk.used, true)}
+              </span>
+              <span className="whitespace-nowrap text-muted-foreground">
+                {formatMessage(copy.totalCapacity, {
+                  total: metricBytes(disk.total, true),
+                })}
+              </span>
+            </>
+          }
+          key={disk.label}
+          label={disk.label}
+          large={large}
+          percent={usagePercent(disk.used, disk.total)}
+        />
+      ))}
       <MetricRates
         first={metrics.networkReceiveBytesPerSecond}
         firstLabel={copy.receive}
@@ -187,17 +251,20 @@ function HostCardHeader({
   statusLabel: string;
 }) {
   const { messages } = useI18n();
-  const copy = messages.servers.metrics;
   return (
     <CardHeader size="none">
       <div className="flex min-w-0 flex-col gap-1.5">
         <CardTitle className="break-words" size="sm">
-          {detail ? messages.servers.containers.overview : entry.name}
+          <span className="flex items-center gap-2">
+            <ServerPlatformIcon windows={entry.accessType === "RDP"} />
+            {detail ? messages.servers.containers.overview : entry.name}
+          </span>
         </CardTitle>
         {!detail && (
           <CardDescription className="break-all" size="xs">
             <span className="font-mono">
-              {entry.host}:{entry.port ?? 22}
+              {entry.host}:
+              {entry.port ?? (entry.accessType === "RDP" ? 3389 : 22)}
             </span>
           </CardDescription>
         )}
@@ -214,29 +281,7 @@ function HostCardHeader({
             {statusLabel}
           </span>
           {eligible && !detail && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  aria-label={formatMessage(copy.terminalFor, {
-                    name: entry.name,
-                  })}
-                  render={
-                    <Link
-                      rel="noopener noreferrer"
-                      target="_blank"
-                      to={`/servers/${entry.id}/terminal`}
-                    />
-                  }
-                  size="icon-sm"
-                  variant="ghost"
-                >
-                  <FileTerminal />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {messages.servers.sshOpenTerminal}
-              </TooltipContent>
-            </Tooltip>
+            <ServerConnectionButton compact entry={entry} />
           )}
         </div>
       </CardAction>
@@ -258,6 +303,7 @@ export function ServerHostCard({
   const { messages } = useI18n();
   const copy = messages.servers.metrics;
   const eligible = Boolean(entry.hasPassword && entry.username);
+  const isRdp = entry.accessType === "RDP";
   const query = useQuery({
     queryKey: ["server-inventory", "metrics", entry.id, entry.updatedAt],
     queryFn: ({ signal }) => fetchServerMetrics(entry.id, signal),
@@ -269,19 +315,12 @@ export function ServerHostCard({
   });
   const data = query.data;
   const status = data?.status ?? "";
-  const errors = new Map([
-    ["HOST_KEY_REQUIRED", copy.hostKeyRequired],
-    ["HOST_KEY_REJECTED", messages.servers.sshHostKeyRejected],
-    ["AUTH_FAILED", messages.servers.sshAuthFailed],
-    ["CONNECTION_FAILED", messages.servers.sshConnectionFailed],
-    ["COLLECTION_FAILED", copy.collectionFailed],
-    ["UNSUPPORTED_OS", copy.unsupported],
-    ["BUSY", copy.busy],
-  ]);
+  const errors = metricErrors(messages, isRdp);
   const error = query.isError
     ? getErrorMessage(query.error)
     : errors.get(status);
   const ready = data?.status === "OK" && !query.isError;
+  const diskOnly = isRdp && data?.cpuPercent === null;
   let statusLabel = ready ? copy.live : copy.unavailable;
   if (paused) {
     statusLabel = copy.paused;
@@ -292,7 +331,9 @@ export function ServerHostCard({
     <div className="flex flex-col gap-3">
       {!eligible && (
         <p className="text-muted-foreground text-sm">
-          {messages.servers.sshCredentialsRequired}
+          {isRdp
+            ? copy.windowsCredentialsRequired
+            : messages.servers.sshCredentialsRequired}
         </p>
       )}
       {eligible && error && (
@@ -315,7 +356,12 @@ export function ServerHostCard({
         ))}
       {ready && (
         <>
-          <Measurements large={detail} metrics={data} />
+          <Measurements
+            diskOnly={diskOnly}
+            large={detail}
+            metrics={data}
+            windows={isRdp}
+          />
           <MetricsFooter metrics={data} />
         </>
       )}
@@ -347,25 +393,16 @@ export function ServerHostCard({
       <CardContent size="none">
         <div className="flex flex-col gap-5">
           {overview}
-          <Separator />
-          <ServerDockerSummary entry={entry} paused={paused} />
+          {!isRdp && (
+            <>
+              <Separator />
+              <ServerDockerSummary entry={entry} paused={paused} />
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
   );
-}
-
-function subscribePageSize(onChange: () => void) {
-  window.addEventListener("resize", onChange);
-  return () => window.removeEventListener("resize", onChange);
-}
-
-function getPageSize() {
-  if (window.innerWidth < 1024) {
-    return 6;
-  }
-  const columns = window.innerWidth >= 1536 ? 3 : 2;
-  return columns * (window.innerHeight >= 850 ? 2 : 1);
 }
 
 export function ServerMetricsPanel() {
@@ -374,10 +411,10 @@ export function ServerMetricsPanel() {
   const [params, setParams] = useSearchParams();
   const paused = params.get("paused") === "1";
   const search = params.get("search") ?? "";
-  const size = useSyncExternalStore(subscribePageSize, getPageSize, () => 6);
+  const size = 6;
   const requestedPage =
     params.get("size") === String(size) ? Number(params.get("page") ?? 0) : 0;
-  const page =
+  const validPage =
     Number.isSafeInteger(requestedPage) && requestedPage > 0
       ? requestedPage
       : 0;
@@ -388,31 +425,10 @@ export function ServerMetricsPanel() {
       next.set("size", String(size));
       return next;
     });
-  const entries = useQuery({
-    queryKey: ["server-inventory", "metrics-entries", search, page, size],
-    queryFn: () =>
-      fetchServerEntries({
-        accessType: "SSH",
-        databaseEngine: "",
-        direction: "asc",
-        page,
-        search,
-        size,
-        sortBy: "name",
-      }),
-  });
-  const hosts = new Map<string, ServerEntry>();
-  for (const entry of entries.data?.servers ?? []) {
-    const current = hosts.get(entry.host);
-    if (
-      !current ||
-      (!(current.hasPassword && current.username) &&
-        entry.hasPassword &&
-        entry.username)
-    ) {
-      hosts.set(entry.host, entry);
-    }
-  }
+  const entries = useMetricHosts(search, paused);
+  const totalPages = Math.ceil(entries.hosts.length / size);
+  const page = Math.min(validPage, Math.max(0, totalPages - 1));
+  const visibleHosts = entries.hosts.slice(page * size, (page + 1) * size);
   return (
     <div className="flex min-w-0 flex-col gap-3 lg:min-h-0 lg:flex-1">
       <div className="server-monitor-toolbar sticky top-16 z-10 flex shrink-0 flex-col gap-3 rounded-xl border border-border/60 bg-background/90 p-2 backdrop-blur-xl sm:flex-row sm:items-center">
@@ -499,7 +515,7 @@ export function ServerMetricsPanel() {
           {copy.collecting}
         </p>
       )}
-      {entries.data && hosts.size === 0 && (
+      {!entries.isPending && entries.data && entries.hosts.length === 0 && (
         <Empty variant="bordered">
           <EmptyHeader>
             <EmptyTitle>{copy.empty}</EmptyTitle>
@@ -512,21 +528,22 @@ export function ServerMetricsPanel() {
           ["host-1", "host-2", "host-3", "host-4", "host-5", "host-6"]
             .slice(0, size)
             .map((id) => <ServerHostCardSkeleton key={id} />)}
-        {[...hosts.values()].map((entry) => (
-          <ServerHostCard
-            entry={entry}
-            key={entry.id}
-            paused={paused}
-            search={params.size ? `?${params}` : ""}
-          />
-        ))}
+        {!entries.isPending &&
+          visibleHosts.map((entry) => (
+            <ServerHostCard
+              entry={entry}
+              key={entry.id}
+              paused={paused}
+              search={params.size ? `?${params}` : ""}
+            />
+          ))}
       </div>
-      {entries.data && entries.data.totalPages > 1 && (
+      {!entries.isPending && totalPages > 1 && (
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
           <p className="text-muted-foreground text-sm">
             {formatMessage(messages.servers.pageCount, {
               page: page + 1,
-              pages: entries.data.totalPages,
+              pages: totalPages,
             })}
           </p>
           <div className="flex gap-2">
@@ -540,7 +557,7 @@ export function ServerMetricsPanel() {
               {copy.previous}
             </Button>
             <Button
-              disabled={page + 1 >= entries.data.totalPages}
+              disabled={page + 1 >= totalPages}
               onClick={() => setPage(page + 1)}
               size="sm"
               variant="outline"
