@@ -90,11 +90,12 @@ export async function fetchServerMetrics(
 export async function fetchServerDirectories(
   id: string,
   path: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  fileOffset = 0
 ): Promise<ServerCleanupInspection> {
   const response = await apiGet<{ data: ServerCleanupInspection }>(
-    `${endpoints.detail(id)}/cleanup/directories?${new URLSearchParams({ path })}`,
-    { cache: "no-store", signal, timeout: 20_000 }
+    `${endpoints.detail(id)}/cleanup/directories?${new URLSearchParams({ path, fileOffset: String(fileOffset) })}`,
+    { cache: "no-store", signal, timeout: 25_000 }
   );
   return response.data;
 }

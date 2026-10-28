@@ -1,13 +1,16 @@
 export const serversMessages = {
   cleanup: {
+    filesPartial: "Some files could not be listed.",
+    loadMoreFolders: "Show more folders",
+    loadMoreFiles: "Load more files",
     folderSizeUnknown: "Size unknown",
     foldersLoading: "Scanning subfolders…",
     largestFolders: "Folders by disk usage",
     foldersScope:
-      "Expand folders to browse. Sizes depend on scan time limits and SSH permissions.",
+      "Expand folders to browse files and subfolders. Files load 100 at a time. Sizes depend on scan limits and SSH permissions.",
     foldersPartial: "Partial sizes — some usage may be missing.",
     foldersUnavailable: "Scan unavailable. Retry or inspect in SSH.",
-    foldersEmpty: "No folder sizes were reported.",
+    foldersEmpty: "No files or subfolders found.",
 
     copyCleanupCommand: "Copy cleanup command",
     diskCleanup:
@@ -28,7 +31,7 @@ export const serversMessages = {
     title: "Cleanup review",
     description: "Inspect storage use before deciding what to remove.",
     scope:
-      "Commands are copied only; nothing runs automatically. Inspection commands report usage. Cleanup commands delete the data described above when run in SSH. Docker reclaimable space is an estimate, not guaranteed savings.",
+      "Commands are copied, not run. Cleanup deletes data when executed in SSH. Reclaimable space is an estimate.",
     journal: "System journal",
     journalHint: "Usage visible to the saved SSH account.",
     diskUsage: "{used} of {total} used · {free} free",

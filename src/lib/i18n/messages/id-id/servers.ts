@@ -1,15 +1,18 @@
 export const serversMessages = {
   cleanup: {
+    filesPartial: "Sebagian file tidak dapat ditampilkan.",
+    loadMoreFolders: "Tampilkan folder lainnya",
+    loadMoreFiles: "Muat file lainnya",
     folderSizeUnknown: "Ukuran belum diketahui",
     foldersLoading: "Memindai subfolder…",
     largestFolders: "Folder menurut penggunaan disk",
     foldersScope:
-      "Buka folder untuk melihat isinya. Ukuran bergantung pada batas waktu pemindaian dan izin SSH.",
+      "Buka folder untuk melihat file dan subfolder. File dimuat 100 per halaman. Ukuran bergantung pada batas pemindaian dan izin SSH.",
     foldersPartial:
       "Ukuran belum lengkap — sebagian penggunaan mungkin belum terhitung.",
     foldersUnavailable:
       "Pemindaian tidak tersedia. Coba lagi atau periksa melalui SSH.",
-    foldersEmpty: "Tidak ada ukuran folder yang dilaporkan.",
+    foldersEmpty: "Tidak ada file atau subfolder.",
 
     copyCleanupCommand: "Salin perintah pembersihan",
     diskCleanup:
@@ -31,7 +34,7 @@ export const serversMessages = {
     description:
       "Periksa penggunaan penyimpanan sebelum menentukan yang akan dihapus.",
     scope:
-      "Perintah hanya disalin; tidak ada yang dijalankan otomatis. Perintah pemeriksaan menampilkan penggunaan. Perintah pembersihan menghapus data sesuai penjelasan di atas saat dijalankan di SSH. Ruang yang dapat dibebaskan adalah perkiraan Docker, bukan jaminan.",
+      "Perintah hanya disalin, tidak dijalankan. Pembersihan menghapus data saat dijalankan di SSH. Ruang yang dapat dibebaskan adalah perkiraan.",
     journal: "Journal sistem",
     journalHint: "Penggunaan yang dapat dilihat akun SSH tersimpan.",
     diskUsage: "{used} dari {total} terpakai · sisa {free}",

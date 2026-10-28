@@ -153,7 +153,10 @@ export interface ServerCleanupInspection {
   diskTotalBytes: number | null;
   diskUsedBytes: number | null;
   dockerStatus: string;
+  fileStatus?: string;
+  files?: { path: string; sizeBytes: number }[];
   journalUsage: string | null;
+  nextFileOffset?: number | null;
   status: string;
   storage: {
     activeCount: number | null;
