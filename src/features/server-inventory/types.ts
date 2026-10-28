@@ -148,6 +148,8 @@ export interface ServerEntryPage {
 
 export interface ServerCleanupInspection {
   collectedAt: string | null;
+  directories?: { path: string; sizeBytes: number | null }[];
+  directoryStatus?: string;
   diskTotalBytes: number | null;
   diskUsedBytes: number | null;
   dockerStatus: string;

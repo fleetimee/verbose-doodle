@@ -1,5 +1,14 @@
 export const serversMessages = {
   cleanup: {
+    folderSizeUnknown: "Size unknown",
+    foldersLoading: "Scanning subfolders…",
+    largestFolders: "Folders by disk usage",
+    foldersScope:
+      "Expand folders to browse. Sizes depend on scan time limits and SSH permissions.",
+    foldersPartial: "Partial sizes — some usage may be missing.",
+    foldersUnavailable: "Scan unavailable. Retry or inspect in SSH.",
+    foldersEmpty: "No folder sizes were reported.",
+
     copyCleanupCommand: "Copy cleanup command",
     diskCleanup:
       "Inspect large directories first, then choose files or application-specific cleanup. There is no general disk prune command.",

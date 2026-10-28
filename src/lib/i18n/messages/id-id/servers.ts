@@ -1,5 +1,16 @@
 export const serversMessages = {
   cleanup: {
+    folderSizeUnknown: "Ukuran belum diketahui",
+    foldersLoading: "Memindai subfolder…",
+    largestFolders: "Folder menurut penggunaan disk",
+    foldersScope:
+      "Buka folder untuk melihat isinya. Ukuran bergantung pada batas waktu pemindaian dan izin SSH.",
+    foldersPartial:
+      "Ukuran belum lengkap — sebagian penggunaan mungkin belum terhitung.",
+    foldersUnavailable:
+      "Pemindaian tidak tersedia. Coba lagi atau periksa melalui SSH.",
+    foldersEmpty: "Tidak ada ukuran folder yang dilaporkan.",
+
     copyCleanupCommand: "Salin perintah pembersihan",
     diskCleanup:
       "Periksa direktori besar terlebih dahulu, lalu pilih file atau pembersihan khusus aplikasi. Tidak ada perintah prune disk umum.",

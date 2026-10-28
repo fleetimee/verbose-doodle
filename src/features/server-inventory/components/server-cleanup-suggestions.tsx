@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import {
+  ChevronRight,
   ClipboardCopy,
   Database,
   Eraser,
@@ -16,6 +17,11 @@ import {
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +39,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { fetchServerCleanup } from "@/features/server-inventory/api";
+import {
+  fetchServerCleanup,
+  fetchServerDirectories,
+} from "@/features/server-inventory/api";
 import { useContainerError } from "@/features/server-inventory/components/server-container-status";
 import { metricBytes } from "@/features/server-inventory/components/server-metric-values";
 import type {
@@ -140,12 +149,104 @@ function ReportRow({
   );
 }
 
+function FolderBranch({
+  directory,
+  entryId,
+}: {
+  directory: { path: string; sizeBytes: number | null };
+  entryId: string;
+}) {
+  const { messages } = useI18n();
+  const [open, setOpen] = useState(false);
+  return (
+    <Collapsible onOpenChange={setOpen} open={open}>
+      <CollapsibleTrigger variant="folder">
+        <ChevronRight
+          aria-hidden="true"
+          className="size-4 shrink-0 transition-transform group-data-[panel-open]:rotate-90 motion-reduce:transition-none"
+        />
+        <span className="min-w-0 flex-1 break-all font-mono text-xs">
+          {directory.path}
+        </span>
+        <span className="shrink-0 text-sm tabular-nums">
+          {directory.sizeBytes === null
+            ? messages.servers.cleanup.folderSizeUnknown
+            : metricBytes(directory.sizeBytes)}
+        </span>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        {open && <FolderChildren entryId={entryId} path={directory.path} />}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+function FolderChildren({ entryId, path }: { entryId: string; path: string }) {
+  const { messages } = useI18n();
+  const copy = messages.servers.cleanup;
+  const query = useQuery({
+    queryKey: ["server-inventory", "cleanup-directories", entryId, path],
+    queryFn: ({ signal }) => fetchServerDirectories(entryId, path, signal),
+    refetchOnWindowFocus: false,
+    retry: false,
+    gcTime: 0,
+  });
+  const unavailable =
+    query.isError || (query.data && query.data.status !== "OK");
+  return (
+    <div className="ml-3 flex min-w-0 flex-col gap-1 border-l pl-3">
+      {query.isPending ? (
+        <p
+          className="flex items-center gap-2 py-2 text-muted-foreground text-xs"
+          role="status"
+        >
+          <Spinner />
+          {copy.foldersLoading}
+        </p>
+      ) : null}
+      {!query.isPending && unavailable && (
+        <div className="flex flex-col items-start gap-1 py-2">
+          <p className="text-muted-foreground text-xs" role="status">
+            {copy.foldersUnavailable}
+          </p>
+          <Button onClick={() => query.refetch()} size="sm" variant="ghost">
+            {copy.refresh}
+          </Button>
+        </div>
+      )}
+      {!(query.isPending || unavailable) && (
+        <>
+          {query.data?.directoryStatus !== "OK" && (
+            <p className="py-2 text-muted-foreground text-xs" role="status">
+              {copy.foldersPartial}
+            </p>
+          )}
+          {(query.data?.directories?.length ?? 0) === 0 && (
+            <p className="py-2 text-muted-foreground text-xs">
+              {copy.foldersEmpty}
+            </p>
+          )}
+          {query.data?.directories?.map((directory) => (
+            <FolderBranch
+              directory={directory}
+              entryId={entryId}
+              key={directory.path}
+            />
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
 function StorageReport({
   data,
   copy,
+  entryId,
 }: {
   data: ServerCleanupInspection;
   copy: CleanupCopy;
+  entryId: string;
 }) {
   const { messages } = useI18n();
   const used = data.diskUsedBytes;
@@ -186,6 +287,35 @@ function StorageReport({
         title={messages.servers.metrics.disk}
         value={diskValue}
       />
+      <section aria-label={copy.largestFolders} className="space-y-2 py-3">
+        <h3 className="font-medium text-sm">{copy.largestFolders}</h3>
+        <p className="text-muted-foreground text-xs leading-relaxed">
+          {copy.foldersScope}
+        </p>
+        {data.directoryStatus !== "OK" && (
+          <p
+            className="text-muted-foreground text-xs leading-relaxed"
+            role="status"
+          >
+            {data.directoryStatus === "PARTIAL"
+              ? copy.foldersPartial
+              : copy.foldersUnavailable}
+          </p>
+        )}
+        {(data.directories?.length ?? 0) > 0 ? (
+          <div className="flex flex-col gap-1">
+            {data.directories?.map((directory) => (
+              <FolderBranch
+                directory={directory}
+                entryId={entryId}
+                key={directory.path}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-xs">{copy.foldersEmpty}</p>
+        )}
+      </section>
       <ReportRow
         cleanupCommand="journalctl --rotate --vacuum-time=14d"
         cleanupHint={copy.journalCleanup}
@@ -272,7 +402,14 @@ function CleanupReport({ entry }: { entry: ServerEntry }) {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          {ready && <StorageReport copy={copy} data={data} />}
+          {ready && (
+            <StorageReport
+              copy={copy}
+              data={data}
+              entryId={entry.id}
+              key={query.dataUpdatedAt}
+            />
+          )}
         </div>
       </ScrollArea>
       <div className="flex flex-col gap-2 text-muted-foreground text-xs leading-relaxed">

@@ -87,6 +87,18 @@ export async function fetchServerMetrics(
   return response.data;
 }
 
+export async function fetchServerDirectories(
+  id: string,
+  path: string,
+  signal: AbortSignal
+): Promise<ServerCleanupInspection> {
+  const response = await apiGet<{ data: ServerCleanupInspection }>(
+    `${endpoints.detail(id)}/cleanup/directories?${new URLSearchParams({ path })}`,
+    { cache: "no-store", signal, timeout: 20_000 }
+  );
+  return response.data;
+}
+
 export async function fetchServerCleanup(
   id: string,
   signal: AbortSignal

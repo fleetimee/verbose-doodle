@@ -12,6 +12,8 @@ const collapsibleTriggerVariants = cva("", {
   variants: {
     variant: {
       default: "",
+      folder:
+        "group flex w-full items-center gap-2 rounded-md px-1 py-1.5 text-left hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring",
       header:
         "flex w-full items-center justify-between gap-3 border-b pb-3 text-left font-medium text-sm focus-visible:outline-2 focus-visible:outline-ring",
     },
