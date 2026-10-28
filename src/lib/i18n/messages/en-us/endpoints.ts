@@ -661,22 +661,23 @@ export const endpointsMessages = {
   stepperReviewReadyDescription:
     "Check the response contract before adding it to the endpoint.",
   simulationDialogTitle: "Simulate Response Behavior",
-  simulationDialogDescription: 'Configure network simulation for "{name}"',
+  simulationDialogDescription:
+    'Choose when to send the configured response for "{name}".',
   simulationTypeLabel: "Simulation Type",
   simulationTypeDescription:
-    "Select how you want to simulate the response behavior",
+    "All modes use this response’s configured HTTP status and JSON body.",
   simulationNormalTitle: "Normal Response",
   simulationNormalBadge: "No simulation",
   simulationNormalDescription:
-    "Return the response immediately without any delay or timeout simulation. Best for normal testing scenarios.",
-  simulationDelayTitle: "Latency Simulation",
+    "Send the configured response immediately, with no simulated wait.",
+  simulationDelayTitle: "Latency Simulation (Custom Delay)",
   simulationDelayBadge: "Add response delay",
   simulationDelayDescription:
-    "Add a configurable delay before sending the response. Useful for testing slow network conditions and loading states.",
-  simulationTimeoutTitle: "Timeout Simulation",
-  simulationTimeoutBadge: "Never respond",
+    "Wait for the delay you set below, then send the configured HTTP status and JSON body.",
+  simulationTimeoutTitle: "Timeout Simulation (Global Wait)",
+  simulationTimeoutBadge: "Use server timeout duration",
   simulationTimeoutDescription:
-    "Hold the connection indefinitely without sending any response. Client will timeout based on their timeout settings. Perfect for testing timeout handling.",
+    "Use the global server wait (2 minutes unless changed on the server), ignoring the custom delay. Set the caller’s timeout shorter than this wait to test timeout handling.",
   simulationDelayDuration: "Delay Duration",
   simulationDelayDurationDescription:
     "Choose a preset or enter a custom delay value",
@@ -688,12 +689,12 @@ export const endpointsMessages = {
   simulationDelayInvalidError: "Please enter a valid delay value",
   simulationTimeoutAlertTitle: "Timeout Simulation Active",
   simulationTimeoutAlertDescription:
-    "When this endpoint is called, the server will hold the connection indefinitely without sending a response. The client will eventually timeout based on their configured timeout settings. This is useful for testing timeout handling and error recovery logic.",
+    "Wait for the global server duration (2 minutes unless changed on the server), ignoring the custom delay. The caller times out only if its timeout is shorter. If it is still waiting, the server sends the configured HTTP status and JSON body; HTTP 408 is not automatic.",
   simulationDelayAlertTitle: "Latency Simulation Active",
   simulationDelayAlertPrefix:
     "When this endpoint is called, the server will wait for ",
   simulationDelayAlertSuffix:
-    " before sending the response. This simulates slow network conditions and is useful for testing loading states, spinners, and user experience under poor network conditions.",
+    " before sending the configured HTTP status and JSON body. The caller may time out first if its timeout is shorter than this delay.",
   simulationNormalAlertTitle: "Normal Response Mode",
   simulationNormalAlertDescription:
     "When this endpoint is called, the server will respond immediately with the JSON payload shown below. No delays or timeouts are simulated. This is the standard behavior for testing normal application flows.",

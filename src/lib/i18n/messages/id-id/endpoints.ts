@@ -666,22 +666,22 @@ export const endpointsMessages = {
     "Periksa kontrak respons sebelum menambahkannya ke endpoint.",
   simulationDialogTitle: "Simulasikan Perilaku Respons",
   simulationDialogDescription:
-    'Konfigurasikan simulasi jaringan untuk "{name}"',
+    'Pilih kapan respons yang dikonfigurasi untuk "{name}" dikirim.',
   simulationTypeLabel: "Jenis Simulasi",
   simulationTypeDescription:
-    "Pilih cara Anda ingin mensimulasikan perilaku respons",
+    "Semua mode menggunakan status HTTP dan body JSON yang dikonfigurasi untuk respons ini.",
   simulationNormalTitle: "Respons Normal",
   simulationNormalBadge: "Tanpa simulasi",
   simulationNormalDescription:
-    "Kembalikan respons segera tanpa simulasi delay atau timeout. Terbaik untuk skenario pengujian normal.",
-  simulationDelayTitle: "Simulasi Latensi",
+    "Kirim respons yang dikonfigurasi segera, tanpa simulasi waktu tunggu.",
+  simulationDelayTitle: "Simulasi Latensi (Delay Kustom)",
   simulationDelayBadge: "Tambah delay respons",
   simulationDelayDescription:
-    "Tambahkan delay yang dapat dikonfigurasi sebelum mengirim respons. Berguna untuk menguji kondisi jaringan lambat dan status pemuatan (loading state).",
-  simulationTimeoutTitle: "Simulasi Timeout",
-  simulationTimeoutBadge: "Tidak pernah merespons",
+    "Tunggu sesuai delay yang Anda atur di bawah, lalu kirim status HTTP dan body JSON yang dikonfigurasi.",
+  simulationTimeoutTitle: "Simulasi Timeout (Waktu Tunggu Global)",
+  simulationTimeoutBadge: "Gunakan durasi timeout server",
   simulationTimeoutDescription:
-    "Tahan koneksi tanpa batas waktu tanpa mengirim respons apa pun. Klien akan kehabisan waktu berdasarkan pengaturan timeout mereka. Sangat cocok untuk menguji penanganan timeout.",
+    "Gunakan waktu tunggu global server (2 menit kecuali diubah di server), dengan mengabaikan delay kustom. Atur timeout klien lebih singkat dari waktu tunggu ini untuk menguji penanganan timeout.",
   simulationDelayDuration: "Durasi Delay",
   simulationDelayDurationDescription:
     "Pilih preset atau masukkan nilai delay khusus",
@@ -693,12 +693,12 @@ export const endpointsMessages = {
   simulationDelayInvalidError: "Harap masukkan nilai delay yang valid",
   simulationTimeoutAlertTitle: "Simulasi Timeout Aktif",
   simulationTimeoutAlertDescription:
-    "Saat endpoint ini dipanggil, server akan menahan koneksi tanpa batas waktu tanpa mengirimkan respons. Klien pada akhirnya akan mengalami timeout berdasarkan pengaturan timeout yang dikonfigurasi. Ini berguna untuk menguji penanganan timeout dan logika pemulihan kesalahan.",
+    "Tunggu sesuai durasi global server (2 menit kecuali diubah di server), dengan mengabaikan delay kustom. Klien hanya mengalami timeout jika batas waktunya lebih singkat. Jika klien masih menunggu, server mengirim status HTTP dan body JSON yang dikonfigurasi; HTTP 408 tidak dikirim secara otomatis.",
   simulationDelayAlertTitle: "Simulasi Latensi Aktif",
   simulationDelayAlertPrefix:
     "Saat endpoint ini dipanggil, server akan menunggu selama ",
   simulationDelayAlertSuffix:
-    " sebelum mengirimkan respons. Ini mensimulasikan kondisi jaringan yang lambat dan berguna untuk menguji loading state, spinner, dan pengalaman pengguna dalam kondisi jaringan yang buruk.",
+    " sebelum mengirim status HTTP dan body JSON yang dikonfigurasi. Klien dapat mengalami timeout lebih dahulu jika batas waktunya lebih singkat dari delay ini.",
   simulationNormalAlertTitle: "Mode Respons Normal",
   simulationNormalAlertDescription:
     "Saat endpoint ini dipanggil, server akan merespons langsung dengan payload JSON di bawah ini. Tidak ada delay atau timeout yang disimulasikan. Ini adalah perilaku standar untuk pengujian alur aplikasi normal.",
