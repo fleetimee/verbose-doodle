@@ -20,6 +20,10 @@ export const logViewerMessages = {
     "Trust this server’s SSH host key using the Server Inventory terminal or file browser first. If its key changed, verify it before reconnecting.",
   errorSftp:
     "The server could not complete the SFTP request. Check that SFTP is enabled and the account can read the log folder.",
+  expandViewer: "Expand to window",
+  restoreViewer: "Restore window size (Esc)",
+  exportTxt: "Export logs (.txt)",
+  exportFilteredTxt: "Export matching lines (.txt)",
   enterFullscreen: "Fullscreen log viewer",
   exitFullscreen: "Exit fullscreen (Esc)",
   fullscreenFailed:
@@ -27,7 +31,11 @@ export const logViewerMessages = {
   toolbar: "Log toolbar",
   searchSources: "Find source by name, IP, or protocol…",
   noSourcesFound: "No matching log sources.",
-  searchLogs: "Find in loaded logs…",
+  searchLogs: "Search…",
+  filterMatches: "Match only",
+  filterMatchesHint:
+    "Show only matching log entries, or uncheck to show all logs with matches highlighted in yellow.",
+  noSearchMatches: "No matching log entries in loaded logs.",
   previousMatch: "Previous match (Shift+Enter)",
   nextMatch: "Next match (Enter)",
   clearSearch: "Clear search",
@@ -243,6 +251,8 @@ export const logViewerMessages = {
   decreaseFont: "Decrease log font size",
   increaseFont: "Increase log font size",
   resetFont: "Reset log font size to 10px",
+  fontSizeChanged: "Log font size: {size}px",
+  fontSizeReset: "Log font size reset to {size}px",
 
   connectionErrorHint:
     "Check the server connection or source settings, then try again.",

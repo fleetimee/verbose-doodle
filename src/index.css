@@ -4149,22 +4149,78 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   }
 }
 
+:root {
+  --log-highlight-bg: #fde047;
+  --log-highlight-fg: #171717;
+  --log-highlight-current-bg: #ea580c;
+  --log-highlight-current-fg: #fff;
+}
+
+.dark {
+  --log-highlight-bg: #facc15;
+  --log-highlight-fg: #171717;
+  --log-highlight-current-bg: #f97316;
+  --log-highlight-current-fg: #171717;
+}
+
 ::highlight(log-search-matches) {
-  color: var(--accent-foreground);
-  text-decoration: underline;
-  background-color: var(--accent);
+  color: var(--log-highlight-fg);
+  background-color: var(--log-highlight-bg);
 }
 
 ::highlight(log-search-current) {
-  color: var(--primary-foreground);
+  color: var(--log-highlight-current-fg);
   text-decoration: underline;
-  background-color: var(--primary);
+  background-color: var(--log-highlight-current-bg);
+}
+
+.dashboard-page-transition:has(
+  .log-viewer-workspace[data-maximized="true"],
+  .log-viewer-workspace[data-restoring="true"]
+) {
+  transform: none !important;
+}
+
+[data-slot="sidebar-inset"]:has(.log-viewer-workspace[data-restoring="true"]) {
+  z-index: 40;
+  overflow: visible !important;
+}
+
+[data-slot="scroll-area"]:has(.log-viewer-workspace[data-restoring="true"]),
+[data-slot="scroll-area"]:has(.log-viewer-workspace[data-restoring="true"])
+  > [data-slot="scroll-area-viewport"],
+main:has(.log-viewer-workspace[data-restoring="true"]) {
+  overflow: visible !important;
+}
+
+.log-viewer-workspace[data-maximized="true"] {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  padding: 0.75rem;
+  background: var(--background);
+  will-change: transform;
+}
+
+.log-viewer-workspace[data-restoring="true"] {
+  position: relative;
+  z-index: 40;
+  background: var(--background);
+  will-change: transform;
 }
 
 .log-viewer-panel:fullscreen {
   width: 100%;
   height: 100%;
   background: var(--background);
+  border-radius: 0;
+}
+
+.log-viewer-panel:fullscreen > [data-slot="card"] {
+  border: 0;
   border-radius: 0;
 }
 

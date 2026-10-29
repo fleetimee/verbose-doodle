@@ -20,6 +20,10 @@ export const logViewerMessages = {
     "Percayai kunci host SSH server melalui terminal atau penjelajah berkas Inventaris Server terlebih dahulu. Jika kunci berubah, verifikasi sebelum menghubungkan ulang.",
   errorSftp:
     "Server tidak dapat menyelesaikan permintaan SFTP. Pastikan SFTP aktif dan akun dapat membaca folder log.",
+  expandViewer: "Perluas ke jendela",
+  restoreViewer: "Kembalikan ukuran jendela (Esc)",
+  exportTxt: "Ekspor log (.txt)",
+  exportFilteredTxt: "Ekspor baris yang cocok (.txt)",
   enterFullscreen: "Penampil log layar penuh",
   exitFullscreen: "Keluar layar penuh (Esc)",
   fullscreenFailed:
@@ -27,7 +31,11 @@ export const logViewerMessages = {
   toolbar: "Toolbar log",
   searchSources: "Cari sumber berdasarkan nama, IP, atau protokol…",
   noSourcesFound: "Tidak ada sumber log yang cocok.",
-  searchLogs: "Cari di log yang dimuat…",
+  searchLogs: "Cari…",
+  filterMatches: "Hanya cocok",
+  filterMatchesHint:
+    "Tampilkan hanya entri log yang cocok, atau matikan untuk menampilkan semua log dengan sorotan kuning.",
+  noSearchMatches: "Tidak ada entri log yang cocok pada log yang dimuat.",
   previousMatch: "Hasil sebelumnya (Shift+Enter)",
   nextMatch: "Hasil berikutnya (Enter)",
   clearSearch: "Hapus pencarian",
@@ -243,6 +251,8 @@ export const logViewerMessages = {
   decreaseFont: "Perkecil huruf log",
   increaseFont: "Perbesar huruf log",
   resetFont: "Atur ulang ukuran huruf log ke 10px",
+  fontSizeChanged: "Ukuran huruf log: {size}px",
+  fontSizeReset: "Ukuran huruf log diatur ulang ke {size}px",
 
   connectionErrorHint:
     "Periksa koneksi server atau pengaturan sumber, lalu coba lagi.",

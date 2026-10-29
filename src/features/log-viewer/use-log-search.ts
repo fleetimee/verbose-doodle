@@ -85,7 +85,8 @@ function findRanges(viewport: HTMLElement, query: string): Range[] {
 export function useLogSearch(
   viewport: RefObject<HTMLDivElement | null>,
   pages: LogPage[],
-  query: string
+  query: string,
+  filterMatches = false
 ) {
   const [ranges, setRanges] = useState<Range[]>([]);
   const [active, setActive] = useState(0);
@@ -100,11 +101,14 @@ export function useLogSearch(
       setLimited(false);
       return;
     }
-    const found = findRanges(viewport.current, query);
+    const found = findRanges(
+      viewport.current,
+      `${query}${filterMatches ? "" : ""}`
+    );
     setLimited(found.length > MAX_MATCHES);
     setRanges(found.slice(0, MAX_MATCHES));
     setActive(0);
-  }, [viewport, pages, query]);
+  }, [viewport, pages, query, filterMatches]);
   useEffect(() => {
     if (!(supported && ranges.length)) {
       return;
