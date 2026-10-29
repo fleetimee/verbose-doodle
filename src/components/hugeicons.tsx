@@ -1,7 +1,6 @@
 import {
   Activity01Icon,
   Add01Icon,
-  AiNetworkIcon,
   AlertCircleIcon,
   ArrowDown01Icon,
   ArrowLeft01Icon,
@@ -63,6 +62,7 @@ import {
   Money03Icon,
   MoonIcon,
   MoreHorizontalCircle01Icon,
+  NetworkIcon,
   PauseIcon,
   Pen01Icon,
   PlayIcon,
@@ -167,7 +167,7 @@ export const Moon = createHugeIcon(MoonIcon);
 export const MousePointerClick = createHugeIcon(CursorPointer01Icon);
 export const MonitorDown = createHugeIcon(ComputerArrowDownIcon);
 export const MonitorUp = createHugeIcon(ComputerArrowUpIcon);
-export const Network = createHugeIcon(AiNetworkIcon);
+export const Network = createHugeIcon(NetworkIcon);
 export const Pen = createHugeIcon(Pen01Icon);
 export const Play = createHugeIcon(PlayIcon);
 export const Plug = createHugeIcon(Plug01Icon);

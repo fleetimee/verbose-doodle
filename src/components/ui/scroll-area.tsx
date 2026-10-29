@@ -6,7 +6,7 @@ import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
-const scrollAreaVariants = cva("relative group/scroll-area", {
+const scrollAreaVariants = cva("relative overflow-hidden group/scroll-area", {
   variants: {
     variant: {
         "traffic": "rounded-lg border border-border bg-background text-foreground shadow-inner dark:border-[#2f2f2f] dark:bg-[#151515]",
@@ -67,7 +67,7 @@ function ScrollArea({
       <ScrollAreaPrimitive.Viewport
         data-slot="scroll-area-viewport"
         data-vaul-no-drag
-        className={cn("focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1", viewportClassName)}
+        className={cn("focus-visible:ring-ring/50 size-full max-h-[inherit] rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1", viewportClassName)}
         ref={viewportRef}
       >
         <ScrollAreaPrimitive.Content className={cn(scrollAreaContentVariants({ contentSize }), contentClassName)}>
