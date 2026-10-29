@@ -15,6 +15,7 @@ import {
   Field,
   FieldDescription,
   FieldGroup,
+  FieldLabel,
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
@@ -30,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { TimezoneCombobox } from "@/features/developer-tools/components/timezone-combobox";
 import {
   getBrowserTimeZone,
@@ -44,6 +46,81 @@ import { SourceSharePicker } from "@/features/log-viewer/source-share-picker";
 import type { LogSource, LogSourceRequest } from "@/features/log-viewer/types";
 import type { ServerEntry } from "@/features/server-inventory/types";
 
+function applyInventoryServer(
+  current: LogSourceRequest,
+  server: ServerEntry
+): LogSourceRequest {
+  const login = (server.username || "").trim();
+  const access = server.accessType.toUpperCase();
+  const protocol = ["SSH", "SFTP"].includes(access) ? "SFTP" : "SMB";
+  const separator = protocol === "SMB" ? login.indexOf("\\") : -1;
+  const defaultPort = protocol === "SFTP" ? 22 : 445;
+  const defaultPath = protocol === "SFTP" ? "/" : "";
+  return {
+    ...current,
+    protocol,
+    host: server.host,
+    port:
+      server.port && ["SSH", "SFTP", "SMB"].includes(access)
+        ? server.port
+        : defaultPort,
+    shareName: protocol === current.protocol ? current.shareName : "",
+    basePath: protocol === current.protocol ? current.basePath : defaultPath,
+    username: separator < 0 ? login : login.slice(separator + 1),
+    domain: separator < 0 ? "" : login.slice(0, separator),
+    password: "",
+    serverEntryId: server.hasPassword && login ? server.id : undefined,
+  };
+}
+
+function canKeepPassword(source: LogSource | null, form: LogSourceRequest) {
+  return (
+    !!source?.hasPassword &&
+    (source.protocol || "SMB") === form.protocol &&
+    source.port === form.port &&
+    source.host.toLowerCase() === form.host.trim().toLowerCase() &&
+    source.username === form.username.trim() &&
+    source.domain === form.domain.trim()
+  );
+}
+
+function initialForm(source: LogSource | null): LogSourceRequest {
+  if (!source) {
+    return {
+      dateFormat: "ddMMyyyy",
+      protocol: "SMB",
+      name: "",
+      host: "",
+      port: 445,
+      shareName: "",
+      basePath: "",
+      folderPattern: "",
+      filenamePattern: "",
+      username: "",
+      domain: "",
+      password: "",
+      encoding: "UTF-8",
+      timezone: getBrowserTimeZone(),
+    };
+  }
+  return {
+    dateFormat: source.dateFormat || "ddMMyyyy",
+    protocol: source.protocol || "SMB",
+    name: source.name,
+    host: source.host,
+    port: source.port,
+    shareName: source.shareName,
+    basePath: source.basePath,
+    folderPattern: source.folderPattern,
+    filenamePattern: source.filenamePattern,
+    username: source.username,
+    domain: source.domain,
+    encoding: source.encoding,
+    timezone: source.timezone,
+    password: "",
+  };
+}
+
 export function SourceForm({
   source,
   onSave,
@@ -56,38 +133,7 @@ export function SourceForm({
   const { messages } = useI18n();
   const copy = messages.logViewer;
   const prefix = useId();
-  const [form, setForm] = useState<LogSourceRequest>(() => {
-    if (!source) {
-      return {
-        name: "",
-        host: "",
-        port: 445,
-        shareName: "",
-        basePath: "",
-        folderPattern: "",
-        filenamePattern: "",
-        username: "",
-        domain: "",
-        password: "",
-        encoding: "UTF-8",
-        timezone: getBrowserTimeZone(),
-      };
-    }
-    return {
-      name: source.name,
-      host: source.host,
-      port: source.port,
-      shareName: source.shareName,
-      basePath: source.basePath,
-      folderPattern: source.folderPattern,
-      filenamePattern: source.filenamePattern,
-      username: source.username,
-      domain: source.domain,
-      encoding: source.encoding,
-      timezone: source.timezone,
-      password: "",
-    };
-  });
+  const [form, setForm] = useState<LogSourceRequest>(() => initialForm(source));
   const [drawerContent, setDrawerContent] = useState<HTMLDivElement | null>(
     null
   );
@@ -100,6 +146,7 @@ export function SourceForm({
     success: boolean;
     message: string;
   } | null>(null);
+  const isSftp = form.protocol === "SFTP";
   const busy = pending || checking;
   const connectionVerified =
     checkResult?.request === form && checkResult.success;
@@ -155,7 +202,11 @@ export function SourceForm({
         id={`${prefix}-${key}`}
         maxLength={key === "basePath" ? 2048 : 255}
         onChange={(event) => update(key, event.target.value)}
-        placeholder={copy.fieldHelp[key].placeholder}
+        placeholder={
+          key === "basePath" && isSftp
+            ? "/var/log/myapp"
+            : copy.fieldHelp[key].placeholder
+        }
         required={!["basePath", "domain"].includes(key)}
         value={form[key]}
         variant={
@@ -171,7 +222,9 @@ export function SourceForm({
         }
       />
       {key === "basePath" && (
-        <FieldDescription>{copy.pathHint}</FieldDescription>
+        <FieldDescription>
+          {isSftp ? copy.sftpPathHint : copy.pathHint}
+        </FieldDescription>
       )}
       {key === "filenamePattern" && (
         <FieldDescription>{copy.patternHint}</FieldDescription>
@@ -179,14 +232,8 @@ export function SourceForm({
     </Field>
   );
 
-  const hasSavedPassword =
-    !!source?.hasPassword &&
-    source.host.toLowerCase() === form.host.trim().toLowerCase() &&
-    source.username === form.username.trim() &&
-    source.domain === form.domain.trim();
-  const passwordPlaceholder = hasSavedPassword
-    ? copy.keepPassword
-    : copy.fieldHelp.password.placeholder;
+  const hasSavedPassword = canKeepPassword(source, form);
+  const passwordPlaceholder = copy.fieldHelp.password.placeholder;
 
   return (
     <Drawer
@@ -246,6 +293,37 @@ export function SourceForm({
                 </FieldDescription>
                 <FieldGroup size="compact">
                   {textField("name")}
+                  <Field data-disabled={busy}>
+                    <FieldLabel id={`${prefix}-protocol`}>
+                      {copy.protocol}
+                    </FieldLabel>
+                    <ToggleGroup
+                      aria-labelledby={`${prefix}-protocol`}
+                      disabled={busy}
+                      onValueChange={(values) => {
+                        const protocol = values[0];
+                        if (protocol !== "SMB" && protocol !== "SFTP") {
+                          return;
+                        }
+                        setInventory(null);
+                        setForm((current) => ({
+                          ...current,
+                          protocol,
+                          port: protocol === "SFTP" ? 22 : 445,
+                          shareName: "",
+                          domain: "",
+                          basePath: protocol === "SFTP" ? "/" : "",
+                          password: "",
+                          serverEntryId: undefined,
+                        }));
+                      }}
+                      value={[form.protocol]}
+                      variant="outline"
+                    >
+                      <ToggleGroupItem value="SMB">SMB</ToggleGroupItem>
+                      <ToggleGroupItem value="SFTP">SFTP / SSH</ToggleGroupItem>
+                    </ToggleGroup>
+                  </Field>
                   <FieldGroup
                     className="grid grid-cols-[minmax(0,1fr)_7rem]"
                     size="compact"
@@ -263,23 +341,9 @@ export function SourceForm({
                           }));
                           return;
                         }
-                        const login = (server.username || "").trim();
-                        const separator = login.indexOf("\\");
-                        setForm((current) => ({
-                          ...current,
-                          host: server.host,
-                          port:
-                            server.accessType.toUpperCase() === "SMB"
-                              ? server.port || 445
-                              : 445,
-                          username:
-                            separator < 0 ? login : login.slice(separator + 1),
-                          domain:
-                            separator < 0 ? "" : login.slice(0, separator),
-                          password: "",
-                          serverEntryId:
-                            server.hasPassword && login ? server.id : undefined,
-                        }));
+                        setForm((current) =>
+                          applyInventoryServer(current, server)
+                        );
                       }}
                       portalContainer={drawerContent}
                       value={inventory}
@@ -316,14 +380,16 @@ export function SourceForm({
                       />
                     </Field>
                   </FieldGroup>
-                  <SourceSharePicker
-                    disabled={busy}
-                    onChange={changeShare}
-                    onDetected={detectShare}
-                    portalContainer={drawerContent}
-                    request={form}
-                    source={source}
-                  />
+                  {!isSftp && (
+                    <SourceSharePicker
+                      disabled={busy}
+                      onChange={changeShare}
+                      onDetected={detectShare}
+                      portalContainer={drawerContent}
+                      request={form}
+                      source={source}
+                    />
+                  )}
                 </FieldGroup>
               </FieldSet>
               <Separator />
@@ -335,7 +401,7 @@ export function SourceForm({
                 <FieldGroup size="compact">
                   <FieldGroup className="grid sm:grid-cols-2" size="compact">
                     {textField("username")}
-                    {textField("domain")}
+                    {!isSftp && textField("domain")}
                   </FieldGroup>
                   <Field data-disabled={busy}>
                     <SourceFieldLabel
@@ -394,6 +460,7 @@ export function SourceForm({
                         basePath: layout.basePath,
                         folderPattern: layout.folderPattern,
                         filenamePattern: layout.filenamePattern,
+                        dateFormat: layout.dateFormat,
                       }));
                     }}
                     request={form}
@@ -429,6 +496,38 @@ export function SourceForm({
                     </Select>
                   </Field>
                   {textField("filenamePattern")}
+                  <Field data-disabled={busy}>
+                    <SourceFieldLabel
+                      field="dateFormat"
+                      htmlFor={`${prefix}-date-format`}
+                      portalContainer={drawerContent}
+                    />
+                    <Select
+                      disabled={busy}
+                      onValueChange={(value) => update("dateFormat", value)}
+                      value={form.dateFormat}
+                    >
+                      <SelectTrigger
+                        className="w-full"
+                        id={`${prefix}-date-format`}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent portalContainer={drawerContent}>
+                        <SelectGroup>
+                          <SelectItem value="ddMMyyyy">
+                            ddMMyyyy · 29102026
+                          </SelectItem>
+                          <SelectItem value="yyyy-MM-dd">
+                            yyyy-MM-dd · 2026-10-29
+                          </SelectItem>
+                          <SelectItem value="yyyyMMdd">
+                            yyyyMMdd · 20261029
+                          </SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </Field>
                 </FieldGroup>
               </FieldSet>
 
@@ -527,6 +626,7 @@ export function SourceForm({
                   try {
                     await browseLogFolder(
                       {
+                        protocol: request.protocol,
                         sourceId: source?.id,
                         serverEntryId: request.serverEntryId,
                         host: request.host,

@@ -1,4 +1,12 @@
 export const logViewerMessages = {
+  dateFormat: "Filename date format",
+  protocol: "Connection type",
+  sftpPathHint:
+    "Absolute path on the SSH server, for example /var/log/myapp. Browse from / to find the log folder.",
+  errorHostKey:
+    "Trust this server’s SSH host key using the Server Inventory terminal or file browser first. If its key changed, verify it before reconnecting.",
+  errorSftp:
+    "The server could not complete the SFTP request. Check that SFTP is enabled and the account can read the log folder.",
   enterFullscreen: "Fullscreen log viewer",
   exitFullscreen: "Exit fullscreen (Esc)",
   fullscreenFailed:
@@ -22,20 +30,20 @@ export const logViewerMessages = {
   isoCustomField: "Profile-specific field",
   wordWrap: "Word wrap",
   timezoneDefaultHint:
-    "New sources default to your browser timezone. Choose the timezone used by the Windows server if it differs.",
+    "New sources default to your browser timezone. Choose the timezone used by the server if it differs.",
   checkConnection: "Check connection",
   checkSuccess:
-    "Connection verified. The share and base folder are readable. Nothing has been saved.",
+    "Connection verified. The base folder is readable. Nothing has been saved.",
   errorAuth:
-    "Windows rejected the login. Check the username, domain, and password in Configure source.",
+    "The server rejected the login. Check the username, password, and SMB domain if applicable in Configure source.",
   errorAccess:
-    "This Windows account cannot read the share or folder. Check its read permissions.",
+    "This account cannot read the log folder or SMB share. Check its read permissions.",
   errorShare:
     "The share was not found. Discover shares again or enter the correct share name.",
   errorPath:
     "The log folder or file was not found. Browse the folder and review the saved path.",
   errorConnect:
-    "Cannot reach the Windows server. Check its host, SMB port, and network connection.",
+    "Cannot reach the server. Check its host, port, and network connection.",
   errorTimeout:
     "The server took too long to respond. Check its availability, then retry.",
   errorStorage:
@@ -43,7 +51,7 @@ export const logViewerMessages = {
   errorBackend:
     "The log service could not complete this request. Check the backend is running and review its logs, then retry.",
   errorCredentials:
-    "The saved SMB password could not be read. Enter the password again and save the source.",
+    "The saved password could not be read. Enter the password again and save the source.",
   errorSourceMissing:
     "This source no longer exists. Reload the source list to continue.",
   errorValidation:
@@ -79,7 +87,7 @@ export const logViewerMessages = {
   inventorySearch: "Search name, host, or username…",
   inventoryManual: "Enter connection manually",
   inventoryHint:
-    "Type a host or choose a saved server to fill its login. Non-SMB entries use port 445.",
+    "Type a host or choose a saved server to fill its login. SSH/SFTP entries use SFTP; SMB entries use SMB.",
   inventoryPassword:
     "Saved inventory password will be used. Enter a password here to override it.",
   inventoryLoading: "Loading servers…",
@@ -89,7 +97,7 @@ export const logViewerMessages = {
   browse: "Browse folders",
   closeBrowser: "Close browser",
   browsePrerequisite:
-    "Enter the host, share, username, and password first. Re-enter the password if connection details have changed.",
+    "Enter the host, username, and password first; SMB also requires a share. Re-enter the password if connection details have changed.",
   browsePath: "Folder within the share",
   browseRoot: "Share root",
   browseParent: "Parent folder",
@@ -118,23 +126,30 @@ export const logViewerMessages = {
   fieldHelpLabel: "Help for {field}",
   fieldHelpExamples: "Examples & accepted values",
   fieldHelp: {
+    dateFormat: {
+      placeholder: "Choose a filename date format",
+      description:
+        "How {date} is written in filenames. Detection fills this automatically; it does not change timestamps inside the log text.",
+      examples:
+        "ddMMyyyy: 29102026\nyyyy-MM-dd: 2026-10-29\nyyyyMMdd: 20261029",
+    },
     name: {
       placeholder: "e.g. JavaCMSInterface",
       description:
-        "A display name for this saved source. It does not need to match a Windows folder or service. Up to 150 characters.",
+        "A display name for this saved source. It does not need to match a folder or service. Up to 150 characters.",
       examples: "JavaCMSInterface\nPayment gateway logs",
     },
     host: {
       placeholder: "e.g. 192.168.4.45",
       description:
-        "The Windows server IP address or hostname reachable from the backend. Enter only the host, without smb://, a share name, or a folder path.",
+        "The server IP address or hostname reachable from the backend. Enter only the host, without a protocol prefix or folder path.",
       examples: "192.168.4.45\nwindows-logs.example",
     },
     port: {
       placeholder: "445",
       description:
-        "The SMB listening port on that server. Usually 445; any whole number from 1 to 65535 is accepted.",
-      examples: "445",
+        "The server port: usually 445 for SMB or 22 for SFTP/SSH. Any whole number from 1 to 65535 is accepted.",
+      examples: "445 (SMB)\n22 (SFTP)",
     },
     shareName: {
       placeholder: "e.g. C$ or AppLogs",
@@ -145,7 +160,7 @@ export const logViewerMessages = {
     basePath: {
       placeholder: "e.g. Simulator/EChannelInterface/JavaCMSInterface/log",
       description:
-        "The log folder relative to the share. Use / or backslash separators, without a drive letter, host prefix, or parent (..) segments. Leave empty if logs are at the share root.",
+        "For SMB, use a path relative to the share, or leave empty for its root. For SFTP, use an absolute path such as /var/log/myapp. Parent (..) segments are not accepted.",
       examples:
         "For C$:\nSimulator/EChannelInterface/JavaCMSInterface/log\n\nFor a share pointing directly to the log folder:\nLeave empty",
     },
@@ -159,14 +174,14 @@ export const logViewerMessages = {
     filenamePattern: {
       placeholder: "e.g. {date}_{stream}.log",
       description:
-        "Include exactly one {date} and one {stream}. {date} is an eight-digit ddMMyyyy date. {stream} groups files by log type; an MSG_ prefix is removed from the displayed stream name. Do not include folders or wildcard characters.",
+        "Include exactly one {date} and one {stream}. {date} uses the selected filename date format. {stream} groups files by log type; an MSG_ prefix is removed from the displayed stream name. Do not include folders or wildcard characters.",
       examples:
-        "Pattern: {date}_{stream}.log\nMatches: 22102026_APP.log\nMatches: 22102026_MSG_VA.log\nMatches: 22102026_MSG_CBS_KO.log",
+        "Pattern: {date}_{stream}.log\nMatches: 22102026_APP.log\nMatches: 22102026_MSG_VA.log\nMatches: 22102026_MSG_CBS_KO.log\nPattern: {stream}.log.{date} (yyyy-MM-dd)\nMatches: api-request.log.2026-10-29",
     },
     username: {
       placeholder: "e.g. log-reader",
       description:
-        "The Windows account used to authenticate to SMB. It must be able to read the share and log files. If the account belongs to a domain, enter that domain in the separate Domain field.",
+        "The server account used to authenticate. It must be able to read the log folder and files. For SMB domain accounts, enter the domain separately.",
       examples: "log-reader\nAdministrator",
     },
     domain: {
@@ -176,9 +191,9 @@ export const logViewerMessages = {
       examples: "Empty: local account\nCORP: domain account",
     },
     password: {
-      placeholder: "Enter the SMB account password",
+      placeholder: "Enter the server account password",
       description:
-        "Use the password for the Windows account above. It is required for a new source, encrypted when stored, and never returned in source metadata. When editing, leave empty to keep the existing password.",
+        "Use the password for the server account above. It is required for a new source, encrypted when stored, and never returned in source metadata. When editing, leave empty to keep the existing password.",
       examples:
         "New source: account password required\nExisting source: blank keeps saved password",
     },
@@ -206,7 +221,7 @@ export const logViewerMessages = {
   connectionTitle: "Source & date range",
   sourceHint: "Choose where to read and how far back to look.",
   connectionGroup: "Connection",
-  connectionDescription: "Connect to a Windows share on any server.",
+  connectionDescription: "Connect through SMB or SFTP over SSH.",
   filesGroup: "Log files",
   filesDescription:
     "Tell the viewer how folders and daily files are organized.",
@@ -226,7 +241,7 @@ export const logViewerMessages = {
 
   title: "Log viewer",
   description:
-    "Read continuous SMB log streams across daily files and month folders.",
+    "Read continuous SMB or SFTP log streams across daily files and month folders.",
   add: "Add source",
   edit: "Configure source",
   cancel: "Cancel",
@@ -234,7 +249,7 @@ export const logViewerMessages = {
   saving: "Saving…",
   name: "Source name",
   host: "Host",
-  port: "SMB port",
+  port: "Port",
   shareName: "Share name",
   basePath: "Base folder",
   folderPattern: "Folder layout",
@@ -249,7 +264,7 @@ export const logViewerMessages = {
   yearMonth: "Year / month (yyyy/MM)",
   month: "Month only (MM)",
   patternHint:
-    "{date} matches ddMMyyyy; {stream} matches APP, MSG_VA, MSG_CBS_KO, and other types.",
+    "{date} uses the selected date format; {stream} groups files such as APP or api-request.",
   pathHint:
     "Relative to the share. For C$, start with Simulator, without C:\\.",
   emptyTitle: "Connect your first log source",

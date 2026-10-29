@@ -1,4 +1,12 @@
 export const logViewerMessages = {
+  dateFormat: "Format tanggal nama berkas",
+  protocol: "Jenis koneksi",
+  sftpPathHint:
+    "Path absolut pada server SSH, misalnya /var/log/myapp. Jelajahi dari / untuk mencari folder log.",
+  errorHostKey:
+    "Percayai kunci host SSH server melalui terminal atau penjelajah berkas Inventaris Server terlebih dahulu. Jika kunci berubah, verifikasi sebelum menghubungkan ulang.",
+  errorSftp:
+    "Server tidak dapat menyelesaikan permintaan SFTP. Pastikan SFTP aktif dan akun dapat membaca folder log.",
   enterFullscreen: "Penampil log layar penuh",
   exitFullscreen: "Keluar layar penuh (Esc)",
   fullscreenFailed:
@@ -23,20 +31,20 @@ export const logViewerMessages = {
   isoCustomField: "Field khusus profil",
   wordWrap: "Bungkus baris",
   timezoneDefaultHint:
-    "Sumber baru menggunakan zona waktu browser. Pilih zona waktu server Windows jika berbeda.",
+    "Sumber baru menggunakan zona waktu browser. Pilih zona waktu server jika berbeda.",
   checkConnection: "Periksa koneksi",
   checkSuccess:
-    "Koneksi terverifikasi. Share dan folder dasar dapat dibaca. Belum ada yang disimpan.",
+    "Koneksi terverifikasi. Folder dasar dapat dibaca. Belum ada yang disimpan.",
   errorAuth:
-    "Windows menolak login. Periksa nama pengguna, domain, dan kata sandi pada konfigurasi sumber.",
+    "Server menolak login. Periksa nama pengguna, kata sandi, dan domain SMB jika digunakan pada konfigurasi sumber.",
   errorAccess:
-    "Akun Windows tidak dapat membaca share atau folder. Periksa izin bacanya.",
+    "Akun tidak dapat membaca folder log atau share SMB. Periksa izin bacanya.",
   errorShare:
     "Share tidak ditemukan. Cari share lagi atau isi nama share yang benar.",
   errorPath:
     "Folder atau berkas log tidak ditemukan. Jelajahi folder dan periksa jalur tersimpan.",
   errorConnect:
-    "Server Windows tidak dapat dijangkau. Periksa host, port SMB, dan koneksi jaringan.",
+    "Server tidak dapat dijangkau. Periksa host, port, dan koneksi jaringan.",
   errorTimeout:
     "Server terlalu lama merespons. Periksa ketersediaannya lalu coba lagi.",
   errorStorage:
@@ -44,7 +52,7 @@ export const logViewerMessages = {
   errorBackend:
     "Layanan log tidak dapat menyelesaikan permintaan. Pastikan backend berjalan dan periksa lognya lalu coba lagi.",
   errorCredentials:
-    "Kata sandi SMB tersimpan tidak dapat dibaca. Isi ulang kata sandi lalu simpan sumber.",
+    "Kata sandi tersimpan tidak dapat dibaca. Isi ulang kata sandi lalu simpan sumber.",
   errorSourceMissing:
     "Sumber ini sudah tidak tersedia. Muat ulang daftar sumber untuk melanjutkan.",
   errorValidation:
@@ -78,7 +86,7 @@ export const logViewerMessages = {
   inventorySearch: "Cari nama, host, atau pengguna…",
   inventoryManual: "Isi koneksi secara manual",
   inventoryHint:
-    "Ketik host atau pilih server tersimpan untuk mengisi login. Entri non-SMB menggunakan port 445.",
+    "Ketik host atau pilih server tersimpan untuk mengisi login. Entri SSH/SFTP menggunakan SFTP; entri SMB menggunakan SMB.",
   inventoryPassword:
     "Kata sandi inventaris tersimpan akan digunakan. Isi kata sandi di sini untuk menggantinya.",
   inventoryLoading: "Memuat server…",
@@ -88,7 +96,7 @@ export const logViewerMessages = {
   browse: "Jelajahi folder",
   closeBrowser: "Tutup penjelajah",
   browsePrerequisite:
-    "Isi host, share, nama pengguna, dan kata sandi terlebih dahulu. Masukkan ulang kata sandi jika detail koneksi berubah.",
+    "Isi host, nama pengguna, dan kata sandi terlebih dahulu; SMB juga memerlukan share. Masukkan ulang kata sandi jika detail koneksi berubah.",
   browsePath: "Folder di dalam share",
   browseRoot: "Root share",
   browseParent: "Folder induk",
@@ -117,23 +125,30 @@ export const logViewerMessages = {
   fieldHelpLabel: "Bantuan untuk {field}",
   fieldHelpExamples: "Contoh & nilai yang diterima",
   fieldHelp: {
+    dateFormat: {
+      placeholder: "Pilih format tanggal nama berkas",
+      description:
+        "Format {date} pada nama berkas. Deteksi mengisinya otomatis; stempel waktu di dalam log tidak diubah.",
+      examples:
+        "ddMMyyyy: 29102026\nyyyy-MM-dd: 2026-10-29\nyyyyMMdd: 20261029",
+    },
     name: {
       placeholder: "Mis. JavaCMSInterface",
       description:
-        "Nama tampilan untuk sumber tersimpan ini. Tidak harus sama dengan nama folder atau layanan Windows. Maksimal 150 karakter.",
+        "Nama tampilan untuk sumber tersimpan ini. Tidak harus sama dengan nama folder atau layanan. Maksimal 150 karakter.",
       examples: "JavaCMSInterface\nLog payment gateway",
     },
     host: {
       placeholder: "Mis. 192.168.4.45",
       description:
-        "Alamat IP atau hostname server Windows yang dapat dijangkau backend. Isi host saja, tanpa smb://, nama share, atau path folder.",
+        "Alamat IP atau hostname server yang dapat dijangkau backend. Isi host saja, tanpa awalan protokol atau path folder.",
       examples: "192.168.4.45\nwindows-logs.example",
     },
     port: {
       placeholder: "445",
       description:
-        "Port SMB yang digunakan server. Biasanya 445; menerima bilangan bulat dari 1 sampai 65535.",
-      examples: "445",
+        "Port server: biasanya 445 untuk SMB atau 22 untuk SFTP/SSH. Menerima bilangan bulat dari 1 sampai 65535.",
+      examples: "445 (SMB)\n22 (SFTP)",
     },
     shareName: {
       placeholder: "Mis. C$ atau AppLogs",
@@ -144,7 +159,7 @@ export const logViewerMessages = {
     basePath: {
       placeholder: "Mis. Simulator/EChannelInterface/JavaCMSInterface/log",
       description:
-        "Folder log relatif terhadap share. Gunakan pemisah / atau backslash, tanpa huruf drive, awalan host, atau segmen induk (..). Kosongkan jika log berada langsung di root share.",
+        "Untuk SMB, gunakan path relatif terhadap share atau kosongkan untuk root share. Untuk SFTP, gunakan path absolut seperti /var/log/myapp. Segmen induk (..) tidak diterima.",
       examples:
         "Untuk C$:\nSimulator/EChannelInterface/JavaCMSInterface/log\n\nJika share langsung mengarah ke folder log:\nKosongkan",
     },
@@ -158,14 +173,14 @@ export const logViewerMessages = {
     filenamePattern: {
       placeholder: "Mis. {date}_{stream}.log",
       description:
-        "Sertakan tepat satu {date} dan satu {stream}. {date} adalah tanggal delapan digit ddMMyyyy. {stream} mengelompokkan berkas berdasarkan jenis log; awalan MSG_ dihapus dari nama aliran yang ditampilkan. Jangan sertakan folder atau wildcard.",
+        "Sertakan tepat satu {date} dan satu {stream}. {date} menggunakan format tanggal nama berkas yang dipilih. {stream} mengelompokkan berkas berdasarkan jenis log; awalan MSG_ dihapus dari nama aliran yang ditampilkan. Jangan sertakan folder atau wildcard.",
       examples:
-        "Pola: {date}_{stream}.log\nCocok: 22102026_APP.log\nCocok: 22102026_MSG_VA.log\nCocok: 22102026_MSG_CBS_KO.log",
+        "Pola: {date}_{stream}.log\nCocok: 22102026_APP.log\nCocok: 22102026_MSG_VA.log\nCocok: 22102026_MSG_CBS_KO.log\nPola: {stream}.log.{date} (yyyy-MM-dd)\nCocok: api-request.log.2026-10-29",
     },
     username: {
       placeholder: "Mis. log-reader",
       description:
-        "Akun Windows untuk autentikasi SMB. Akun harus dapat membaca share dan berkas log. Jika akun berada dalam domain, isi domain tersebut pada kolom Domain terpisah.",
+        "Akun server untuk autentikasi harus dapat membaca folder dan berkas log. Untuk akun domain SMB, isi domain secara terpisah.",
       examples: "log-reader\nAdministrator",
     },
     domain: {
@@ -175,9 +190,9 @@ export const logViewerMessages = {
       examples: "Kosong: akun lokal\nCORP: akun domain",
     },
     password: {
-      placeholder: "Masukkan kata sandi akun SMB",
+      placeholder: "Masukkan kata sandi akun server",
       description:
-        "Gunakan kata sandi akun Windows di atas. Wajib untuk sumber baru, dienkripsi saat disimpan, dan tidak dikembalikan dalam metadata sumber. Saat mengedit, kosongkan untuk mempertahankan kata sandi tersimpan.",
+        "Gunakan kata sandi akun server di atas. Wajib untuk sumber baru, dienkripsi saat disimpan, dan tidak dikembalikan dalam metadata sumber. Saat mengedit, kosongkan untuk mempertahankan kata sandi tersimpan.",
       examples:
         "Sumber baru: kata sandi akun wajib\nSumber tersimpan: kosong mempertahankan kata sandi",
     },
@@ -205,7 +220,7 @@ export const logViewerMessages = {
   connectionTitle: "Sumber & rentang tanggal",
   sourceHint: "Pilih sumber dan rentang waktu log yang ingin dibaca.",
   connectionGroup: "Koneksi",
-  connectionDescription: "Hubungkan ke share Windows di server mana pun.",
+  connectionDescription: "Hubungkan melalui SMB atau SFTP melalui SSH.",
   filesGroup: "Berkas log",
   filesDescription: "Atur struktur folder dan pola berkas harian.",
   credentialsGroup: "Autentikasi",
@@ -224,7 +239,7 @@ export const logViewerMessages = {
 
   title: "Penampil log",
   description:
-    "Baca aliran log SMB berkelanjutan dari berkas harian dan folder bulanan.",
+    "Baca aliran log SMB atau SFTP berkelanjutan dari berkas harian dan folder bulanan.",
   add: "Tambah sumber",
   edit: "Konfigurasi sumber",
   cancel: "Batal",
@@ -232,7 +247,7 @@ export const logViewerMessages = {
   saving: "Menyimpan…",
   name: "Nama sumber",
   host: "Host",
-  port: "Port SMB",
+  port: "Port",
   shareName: "Nama share",
   basePath: "Folder dasar",
   folderPattern: "Struktur folder",

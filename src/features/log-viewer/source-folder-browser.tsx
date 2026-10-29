@@ -27,11 +27,26 @@ function canUseSavedPassword(
 ) {
   return (
     !!source?.hasPassword &&
+    (source.protocol || "SMB") === request.protocol &&
     source.host.toLowerCase() === request.host.trim().toLowerCase() &&
     source.port === request.port &&
     source.shareName.toLowerCase() === request.shareName.trim().toLowerCase() &&
     source.username === request.username.trim() &&
     source.domain === request.domain.trim()
+  );
+}
+
+function canBrowse(request: LogSourceRequest, source: LogSource | null) {
+  return (
+    !!request.host.trim() &&
+    (request.protocol === "SFTP" || !!request.shareName.trim()) &&
+    !!request.username.trim() &&
+    Number.isInteger(request.port) &&
+    request.port >= 1 &&
+    request.port <= 65_535 &&
+    (!!request.password ||
+      !!request.serverEntryId ||
+      canUseSavedPassword(request, source))
   );
 }
 
@@ -58,16 +73,18 @@ export function SourceFolderBrowser({
   const [error, setError] = useState<string | null>(null);
   const controller = useRef<AbortController | null>(null);
   const sourceId = source?.id;
-  const { host, port, shareName, username, domain, password, serverEntryId } =
-    request;
-  const ready =
-    !!host.trim() &&
-    !!shareName.trim() &&
-    !!username.trim() &&
-    Number.isInteger(port) &&
-    port >= 1 &&
-    port <= 65_535 &&
-    (!!password || !!serverEntryId || canUseSavedPassword(request, source));
+  const {
+    protocol,
+    host,
+    port,
+    shareName,
+    username,
+    domain,
+    password,
+    serverEntryId,
+  } = request;
+  const ready = canBrowse(request, source);
+  const rootLabel = protocol === "SFTP" ? "/" : copy.browseRoot;
 
   const load = useCallback(
     async (folder: string) => {
@@ -80,6 +97,7 @@ export function SourceFolderBrowser({
       try {
         const found = await browseLogFolder(
           {
+            protocol,
             sourceId,
             serverEntryId,
             host,
@@ -107,7 +125,17 @@ export function SourceFolderBrowser({
         }
       }
     },
-    [sourceId, serverEntryId, host, port, shareName, username, domain, password]
+    [
+      protocol,
+      sourceId,
+      serverEntryId,
+      host,
+      port,
+      shareName,
+      username,
+      domain,
+      password,
+    ]
   );
 
   useEffect(() => {
@@ -122,7 +150,7 @@ export function SourceFolderBrowser({
   }, [load]);
 
   let browseHint = ready ? copy.browseNote : copy.browsePrerequisite;
-  if (!shareName.trim()) {
+  if (protocol === "SMB" && !shareName.trim()) {
     browseHint = copy.browseShareRequired;
   }
 
@@ -161,7 +189,9 @@ export function SourceFolderBrowser({
           className="flex min-w-0 flex-col gap-3 rounded-lg border p-3"
         >
           <Field>
-            <FieldLabel htmlFor={pathId}>{copy.browsePath}</FieldLabel>
+            <FieldLabel htmlFor={pathId}>
+              {protocol === "SFTP" ? copy.basePath : copy.browsePath}
+            </FieldLabel>
             <div className="flex gap-2">
               <Input
                 disabled={disabled || loading}
@@ -173,7 +203,7 @@ export function SourceFolderBrowser({
                     load(path);
                   }
                 }}
-                placeholder={copy.browseRoot}
+                placeholder={rootLabel}
                 value={path}
                 variant="mono"
               />
@@ -199,15 +229,17 @@ export function SourceFolderBrowser({
               type="button"
               variant="ghost"
             >
-              {copy.browseRoot}
+              {rootLabel}
             </Button>
             <Button
               aria-label={copy.browseParent}
-              disabled={disabled || loading || !result?.path}
+              disabled={
+                disabled || loading || !result?.path || result.path === "/"
+              }
               onClick={() => {
                 const parts = (result?.path ?? "").split("/");
                 parts.pop();
-                load(parts.join("/"));
+                load(parts.join("/") || (protocol === "SFTP" ? "/" : ""));
               }}
               size="icon-sm"
               title={copy.browseParent}
@@ -319,7 +351,7 @@ export function SourceFolderBrowser({
               {result.layouts.map((layout) => (
                 <div
                   className="flex flex-col gap-2 rounded-md border p-3"
-                  key={`${layout.basePath}:${layout.folderPattern}:${layout.filenamePattern}`}
+                  key={`${layout.basePath}:${layout.folderPattern}:${layout.filenamePattern}:${layout.dateFormat}`}
                 >
                   <dl className="flex flex-col gap-2 text-xs">
                     <div>
@@ -341,6 +373,12 @@ export function SourceFolderBrowser({
                       <dd className="break-all font-mono">
                         {layout.filenamePattern}
                       </dd>
+                    </div>
+                    <div>
+                      <dt className="text-muted-foreground">
+                        {copy.dateFormat}
+                      </dt>
+                      <dd className="font-mono">{layout.dateFormat}</dd>
                     </div>
                   </dl>
                   <div className="flex flex-wrap gap-1">

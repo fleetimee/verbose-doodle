@@ -1,4 +1,4 @@
-# SMB log viewer
+# SMB and SFTP log viewer
 
 Administrators can open **Workspace → Log viewer** at `/dashboard/logs`.
 Each source has its own host, port, share, credentials, and path settings, so
@@ -27,6 +27,37 @@ Use an SMB account with read access to the configured share and folder.
 The backend must be able to reach the server's SMB port. No operating-system SMB
 mount is required. The browser communicates only with the authenticated backend.
 
+## Linux / Unix sources through SFTP
+
+Choose **SFTP / SSH** in **Add source**, or select an SSH/SFTP Server Inventory
+entry. Use the SSH host and port (usually `22`), username, password, and an
+absolute base folder such as `/var/log/myapp`. Share and Domain apply only to SMB.
+Inventory passwords can be reused without exposing them to the browser.
+
+SFTP must be enabled on the server, and the account needs read access to the log
+files and permission to list/traverse their folders. No mount or remote shell
+command is used. Password authentication is supported; private-key login is not
+part of this source form.
+
+Before connecting, trust the server's SSH host key through the existing Server
+Inventory terminal or file browser, or provision it in the backend's
+`app.ssh.known-hosts` file. Unknown and changed keys are rejected.
+
+**Browse folders** works before saving: open `/`, navigate into folders, move to
+the parent, refresh, or enter an absolute path. Layout detection and **Use these
+settings** work for the same dated filenames and flat/month/year-month layouts
+as SMB. Browsing is read-only and skips symbolic links and special files. Select
+**Check connection**, then **Save source** after reviewing the detected settings.
+
+Existing sources and requests without `protocol` remain SMB. New requests and
+responses include `protocol: "SMB" | "SFTP"` and `dateFormat`. Deploy the backend with the frontend;
+Hibernate adds nullable `log_sources.protocol` and `log_sources.date_format` columns;
+old null values are interpreted as SMB and `ddMMyyyy`.
+
+SFTP follows appended bytes and detects truncation or a missing current file.
+The SFTP attributes do not provide a stable file identity: replacing a file with
+one of equal or greater size at the same path may require **Jump to latest**.
+
 ## Browse and detect source settings
 
 In **Add source** or **Configure source**, enter the host, port, share, and
@@ -38,12 +69,14 @@ password again.
 Navigate folders, open the share root, move to the parent, or enter a relative
 folder path. The browser shows folders and file metadata without opening or
 changing log contents. Detection checks the selected folder and nearby numeric
-year/month folders for valid `ddMMyyyy_TYPE.log` or `.txt` files (underscore or
-hyphen separator). It offers flat, `MM`, or `yyyy/MM` configurations with matching
+year/month folders for dated `.log` or `.txt` files. Supported filename dates are `ddMMyyyy`,
+`yyyy-MM-dd`, and `yyyyMMdd`, before or after the stream name. For example,
+`29102026_APP.log`, `api-request.log.2026-10-29`, and `app-20261029.log`. It offers flat, `MM`, or `yyyy/MM` configurations with matching
 sample filenames and stream names. Selecting a year or month folder can also
 suggest its log-root parent automatically.
 
-**Use these settings** fills the base folder, folder layout, and filename pattern.
+**Use these settings** fills the base folder, folder layout, filename pattern,
+and filename date format.
 It also suggests a source name from the folder when the name is empty. Encoding
 and timezone remain unchanged for manual review. Nothing is persisted until
 **Save source** is selected.
@@ -66,10 +99,20 @@ A missing date folder is skipped. A missing base folder, failed connection, or
 permission failure is an error. Discovery visits only date folders within the
 selected range; it does not recursively crawl the share.
 
-`{date}` matches a strict `ddMMyyyy` filename date. `{stream}` matches the log type.
+`{date}` matches the selected filename date format (strict `ddMMyyyy`,
+`yyyy-MM-dd`, or `yyyyMMdd`). Existing sources default to `ddMMyyyy`. `{stream}`
+matches the log type and may contain letters, digits, spaces, dots, underscores,
+and hyphens.
+
+For Linux-style rolling logs such as `api-request.log.2026-10-29`, detection
+suggests `{stream}.log.{date}` with date format `yyyy-MM-dd`; files such as
+`api-response.log.2026-10-29` become a separate stream under the same settings.
+For `api-request-2026-10-29.log`, it suggests `{stream}-{date}.log`. Invalid dates
+are ignored. Detection is derived from filenames, not log contents. Undated
+active files and numbered/compressed archives are not included by these patterns.
 For JavaCMSInterface, `MSG_` is removed from the display name, giving APP, TRC,
 SIG, VA, XLINK, CBS_SY, and CBS_KO. Daily files are ordered by filename date and
-joined virtually; the Windows files are never modified.
+joined virtually; remote files are never modified.
 
 ## Reading and following
 

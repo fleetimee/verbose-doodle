@@ -16,7 +16,7 @@ export function SourceFieldLabel({
   htmlFor,
   portalContainer,
 }: {
-  field: Exclude<keyof LogSourceRequest, "serverEntryId">;
+  field: Exclude<keyof LogSourceRequest, "serverEntryId" | "protocol">;
   htmlFor: string;
   portalContainer: HTMLDivElement | null;
 }) {

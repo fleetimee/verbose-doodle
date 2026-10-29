@@ -635,3 +635,16 @@ until its exit ends, keeping the result pane occupied; exiting content is inert.
 Rapid selections resolve to the latest choice. The initial load does not animate,
 and reduced motion switches immediately. Toolbar, pagination, query, and biller
 collapse state remain outside the animated panel.
+
+
+### Remote log sources
+
+The log-source drawer keeps Connection, Authentication, Log files, and Reading
+preferences in the existing compact Field groups. Its labeled SMB / SFTP toggle
+sets the default port and reveals only protocol-specific controls: share and
+domain for SMB, absolute paths for SFTP. Inventory SSH/SFTP entries prefill SFTP
+connections. Both use the read-only folder browser, detected layout cards, and
+Check connection before saving. Detected settings include filename date format
+(`ddMMyyyy`, `yyyy-MM-dd`, or `yyyyMMdd`), alongside folder and filename patterns.
+Keep English and Indonesian copy aligned and preserve the drawer's scroll area
+and fixed footer on narrow screens.

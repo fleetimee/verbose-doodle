@@ -90,7 +90,7 @@ export async function browseLogFolder(
 }
 
 export async function discoverLogShares(
-  request: Omit<LogBrowseRequest, "shareName" | "path">,
+  request: Omit<LogBrowseRequest, "shareName" | "path" | "protocol">,
   signal: AbortSignal
 ): Promise<{ shares: string[]; limited: boolean }> {
   const result = await apiPost<{

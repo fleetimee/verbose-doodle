@@ -16,6 +16,8 @@ export function getLogErrorMessage(cause: unknown): string {
   }
   const error = parsed.data;
   const mapped = new Map([
+    ["LOG_HOST_KEY", copy.errorHostKey],
+    ["LOG_SFTP", copy.errorSftp],
     ["LOG_AUTH", copy.errorAuth],
     ["LOG_ACCESS", copy.errorAccess],
     ["LOG_SHARE", copy.errorShare],

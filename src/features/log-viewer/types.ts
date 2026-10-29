@@ -1,5 +1,6 @@
 export interface LogSourceRequest {
   basePath: string;
+  dateFormat: "ddMMyyyy" | "yyyy-MM-dd" | "yyyyMMdd";
   domain: string;
   encoding: string;
   filenamePattern: string;
@@ -8,6 +9,7 @@ export interface LogSourceRequest {
   name: string;
   password?: string;
   port: number;
+  protocol: "SMB" | "SFTP";
   serverEntryId?: string;
   shareName: string;
   timezone: string;
@@ -49,6 +51,7 @@ export interface LogBrowseRequest {
   password?: string;
   path: string;
   port: number;
+  protocol: "SMB" | "SFTP";
   serverEntryId?: string;
   shareName: string;
   sourceId?: string;
@@ -57,6 +60,7 @@ export interface LogBrowseRequest {
 
 export interface DetectedLogLayout {
   basePath: string;
+  dateFormat: "ddMMyyyy" | "yyyy-MM-dd" | "yyyyMMdd";
   filenamePattern: string;
   folderPattern: string;
   matchedFiles: number;
