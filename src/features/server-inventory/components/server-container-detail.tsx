@@ -1,6 +1,6 @@
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import { SiDocker } from "react-icons/si";
-import { Gauge } from "@/components/hugeicons";
+import { Activity } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,11 @@ import { ServerContainerActions } from "@/features/server-inventory/components/s
 import { ServerContainerDetailValues } from "@/features/server-inventory/components/server-container-detail-values";
 import { ServerContainerLogs } from "@/features/server-inventory/components/server-container-logs";
 import { ServerContainerReadings } from "@/features/server-inventory/components/server-container-readings";
+import {
+  ServerContainerProcessesCard,
+  ServerContainerStatisticsCharts,
+  ServerContainerStatisticsChartsSkeleton,
+} from "@/features/server-inventory/components/server-container-statistics";
 import {
   containerVariant,
   useContainerError,
@@ -45,10 +50,15 @@ function ContainerLiveMetrics({
   return (
     <Card size="monitor" variant="monitor">
       <CardHeader size="none">
-        <CardTitle size="sm" variant="inline">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Gauge aria-hidden="true" className="size-5" />
-          </span>
+        <CardTitle
+          className="text-sm tracking-[-0.01em]"
+          size="sm"
+          variant="inline"
+        >
+          <Activity
+            aria-hidden="true"
+            className="size-4 shrink-0 text-muted-foreground"
+          />
           {copy.liveMetrics}
         </CardTitle>
       </CardHeader>
@@ -60,9 +70,18 @@ function ContainerLiveMetrics({
             </Alert>
           )}
           {query.isPending && !paused && eligible && (
-            <ServerContainerReadings detailed loading />
+            <>
+              <ServerContainerReadings detailed loading />
+              <ServerContainerStatisticsChartsSkeleton />
+            </>
           )}
           {item && <ServerContainerReadings detailed item={item} />}
+          {item && (
+            <ServerContainerStatisticsCharts
+              collectedAt={data?.collectedAt}
+              item={item}
+            />
+          )}
           {item && item.state !== "running" && (
             <p className="text-muted-foreground text-xs">
               {copy.stoppedMetrics}
@@ -94,17 +113,17 @@ function ContainerIdentity({
   const copy = useI18n().messages.servers.containers;
   const states: Record<string, string> = copy.states;
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-4">
-      <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <SiDocker aria-hidden="true" className="size-10" />
+    <div className="flex min-w-0 flex-1 items-center gap-3.5">
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-[14px] border border-border/60 bg-gradient-to-b from-primary/15 to-primary/5 text-primary shadow-2xs">
+        <SiDocker aria-hidden="true" className="size-7" />
       </div>
-      <div className="flex min-w-0 flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 className="min-w-0 break-words font-semibold text-2xl tracking-tight">
+      <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <h2 className="min-w-0 break-words font-semibold text-xl tracking-[-0.02em] sm:text-2xl">
             {loading ? (
               <Skeleton
                 aria-hidden="true"
-                className="h-8 w-48"
+                className="h-7 w-48"
                 variant="table"
               />
             ) : (
@@ -223,6 +242,12 @@ export function ServerContainerDetailPanel({
         query={stats}
       />
       {showDetails && (
+        <ServerContainerProcessesCard
+          loading={!ready}
+          processes={ready ? data.processes : undefined}
+        />
+      )}
+      {showDetails && (
         <ServerContainerLogs
           containerId={containerId}
           loading={!ready}
@@ -232,6 +257,7 @@ export function ServerContainerDetailPanel({
       )}
       {showDetails && (
         <ServerContainerDetailValues
+          containerId={containerId}
           data={ready ? data : undefined}
           loading={!ready}
         />

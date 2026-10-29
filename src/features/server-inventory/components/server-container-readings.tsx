@@ -78,7 +78,7 @@ export function ServerContainerReadings({
       className={cn(
         "grid grid-cols-4 gap-3",
         detailed &&
-          "grid-cols-2 items-start gap-x-6 gap-y-8 py-4 sm:grid-cols-4 sm:gap-8"
+          "grid-cols-2 items-start gap-x-6 gap-y-6 rounded-xl border border-border/50 bg-muted/15 p-4 sm:grid-cols-4 sm:gap-8"
       )}
     >
       <MetricGauge

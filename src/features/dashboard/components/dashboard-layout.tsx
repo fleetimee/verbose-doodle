@@ -160,7 +160,8 @@ function useServerBreadcrumbNames(pathSegments: string[]) {
     ],
     queryFn: ({ signal }) =>
       fetchServerContainerDetail(serverId ?? "", containerId ?? "", signal),
-    enabled: false,
+    enabled: Boolean(serverId && query.data && containerId),
+    retry: false,
     gcTime: 0,
   });
   return {

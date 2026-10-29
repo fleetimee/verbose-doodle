@@ -93,11 +93,23 @@ export interface ServerContainerSummary {
   version: string | null;
 }
 
+export interface ServerContainerProcess {
+  c: string;
+  cmd: string;
+  pid: string;
+  ppid: string;
+  stime: string;
+  time: string;
+  tty: string;
+  uid: string;
+}
+
 export interface ServerContainerDetail {
   collectedAt: string | null;
   created: string | null;
   id: string | null;
   image: string | null;
+  inspect?: Record<string, unknown> | null;
   installedSoftware?: string[] | null;
   mounts: {
     destination: string;
@@ -114,6 +126,7 @@ export interface ServerContainerDetail {
     hostIp: string | null;
     hostPort: string | null;
   }[];
+  processes?: ServerContainerProcess[] | null;
   state: string | null;
   status: string;
 }

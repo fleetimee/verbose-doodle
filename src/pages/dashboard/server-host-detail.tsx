@@ -15,7 +15,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { fetchServerEntry } from "@/features/server-inventory/api";
+import {
+  fetchServerContainerDetail,
+  fetchServerEntry,
+} from "@/features/server-inventory/api";
 import { ServerCleanupSuggestions } from "@/features/server-inventory/components/server-cleanup-suggestions";
 import { ServerConnectionButton } from "@/features/server-inventory/components/server-connection-button";
 import { ServerContainerDetailPanel } from "@/features/server-inventory/components/server-container-detail";
@@ -96,6 +99,40 @@ function HostTools({
   );
 }
 
+function useHostDocumentTitle(
+  serverId: string,
+  entry: ServerEntry | undefined,
+  containerId: string | undefined,
+  defaultHostTitle: string,
+  defaultContainerTitle: string
+) {
+  const containerQuery = useQuery({
+    queryKey: [
+      "server-inventory",
+      "container-detail",
+      entry?.id ?? serverId,
+      entry?.updatedAt,
+      containerId,
+    ],
+    queryFn: ({ signal }) =>
+      fetchServerContainerDetail(
+        entry?.id ?? serverId,
+        containerId ?? "",
+        signal
+      ),
+    enabled: Boolean(entry && containerId),
+    retry: false,
+    gcTime: 0,
+  });
+  const title = containerId
+    ? defaultContainerTitle
+    : (entry?.name ?? defaultHostTitle);
+  const documentTitle = containerId
+    ? (containerQuery.data?.name ?? defaultContainerTitle)
+    : title;
+  return { title, documentTitle };
+}
+
 export function ServerHostDetailPage() {
   const { messages } = useI18n();
   const copy = messages.servers.containers;
@@ -112,9 +149,13 @@ export function ServerHostDetailPage() {
     gcTime: 0,
   });
   const entry = query.data;
-  const title = containerId
-    ? copy.detailTitle
-    : (entry?.name ?? copy.hostDetails);
+  const { title, documentTitle } = useHostDocumentTitle(
+    serverId,
+    entry,
+    containerId,
+    copy.hostDetails,
+    copy.detailTitle
+  );
   const hostParams = new URLSearchParams(params);
   hostParams.delete("containerSearch");
   hostParams.delete("includeStopped");
@@ -122,7 +163,7 @@ export function ServerHostDetailPage() {
     ? `/dashboard/server-metrics/${serverId}${params.size ? `?${params}` : ""}`
     : `/dashboard/server-metrics${hostParams.size ? `?${hostParams}` : ""}`;
   useDocumentMeta({
-    title: `${title} | Fleetime Labs`,
+    title: `${documentTitle} | Fleetime Labs`,
     description: copy.hostDetailDescription,
   });
   useEffect(() => {
