@@ -34,7 +34,10 @@ export function useLogStream(
   follow: boolean
 ) {
   const [pages, setPages] = useState<LogPage[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingDirection, setLoadingDirection] = useState<
+    "latest" | "older" | "forward" | null
+  >(null);
+  const loading = loadingDirection !== null;
   const [error, setError] = useState<string | null>(null);
   const [reset, setReset] = useState(false);
   const [failedDirection, setFailedDirection] = useState<
@@ -50,7 +53,7 @@ export function useLogStream(
       }
       const controller = new AbortController();
       request.current = controller;
-      setLoading(true);
+      setLoadingDirection(direction);
       try {
         const first = current.current[0];
         const last = current.current.at(-1);
@@ -88,7 +91,7 @@ export function useLogStream(
       } finally {
         if (request.current === controller) {
           request.current = null;
-          setLoading(false);
+          setLoadingDirection(null);
         }
       }
     },
@@ -115,5 +118,13 @@ export function useLogStream(
     return () => window.clearInterval(timer);
   }, [follow, load]);
 
-  return { pages, loading, error, reset, failedDirection, load };
+  return {
+    pages,
+    loading,
+    loadingDirection,
+    error,
+    reset,
+    failedDirection,
+    load,
+  };
 }

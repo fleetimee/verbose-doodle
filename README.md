@@ -39,6 +39,7 @@ bun run preview     # Serve the production build locally
 - [SSH server metrics](docs/server-metrics.md)
 - [Browser RDP desktop setup](docs/browser-rdp.md)
 - [SMB and SFTP log viewer setup](docs/smb-log-viewer.md)
+- [Log filename convention research](docs/log-filename-pattern-research.md)
 - [Spin wheel sessions and evidence](docs/spin-wheel.md)
 - [Product scope and terminology](PRODUCT.md)
 - [Design system](DESIGN.md)

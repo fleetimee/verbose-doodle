@@ -1,19 +1,33 @@
-import { ArrowUp01Icon, Folder01Icon } from "@hugeicons/core-free-icons";
+import { Folder01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { FileText, RefreshCw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { browseLogFolder } from "@/features/log-viewer/api";
 import { getLogErrorMessage as getErrorMessage } from "@/features/log-viewer/error-message";
+import {
+  FolderBrowserNavigation,
+  type FolderNavigation,
+} from "@/features/log-viewer/source-folder-browser-navigation";
+import {
+  BrowseWarnings,
+  FolderBrowserEntries,
+  FolderBrowserLayouts,
+} from "@/features/log-viewer/source-folder-browser-results";
 import type {
   DetectedLogLayout,
   LogBrowseResult,
@@ -55,19 +69,26 @@ export function SourceFolderBrowser({
   source,
   disabled,
   onApply,
+  onOpenChange,
+  portalContainer,
 }: {
   request: LogSourceRequest;
   source: LogSource | null;
   disabled: boolean;
   onApply: (layout: DetectedLogLayout) => void;
+  onOpenChange: (open: boolean) => void;
+  portalContainer: HTMLDivElement | null;
 }) {
   const {
-    locale,
     messages: { logViewer: copy },
   } = useI18n();
-  const pathId = useId();
   const [open, setOpen] = useState(false);
   const [path, setPath] = useState("");
+  const [search, setSearch] = useState("");
+  const [navigation, setNavigation] = useState<FolderNavigation>({
+    paths: [],
+    index: -1,
+  });
   const [result, setResult] = useState<LogBrowseResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,10 +105,11 @@ export function SourceFolderBrowser({
     serverEntryId,
   } = request;
   const ready = canBrowse(request, source);
-  const rootLabel = protocol === "SFTP" ? "/" : copy.browseRoot;
+  const rootLabel = protocol === "SFTP" ? "/" : shareName;
+  const currentPath = navigation.paths[navigation.index] ?? request.basePath;
 
   const load = useCallback(
-    async (folder: string) => {
+    async (folder: string, historyIndex?: number) => {
       controller.current?.abort();
       const current = new AbortController();
       controller.current = current;
@@ -113,6 +135,22 @@ export function SourceFolderBrowser({
         if (!current.signal.aborted) {
           setResult(found);
           setPath(found.path);
+          setSearch("");
+          setNavigation((previous) => {
+            if (historyIndex !== undefined) {
+              return { ...previous, index: historyIndex };
+            }
+            if (previous.paths[previous.index] === found.path) {
+              return previous;
+            }
+            return {
+              paths: [
+                ...previous.paths.slice(0, previous.index + 1),
+                found.path,
+              ],
+              index: previous.index + 1,
+            };
+          });
         }
       } catch (cause) {
         if (!current.signal.aborted) {
@@ -140,6 +178,7 @@ export function SourceFolderBrowser({
 
   useEffect(() => {
     setOpen(false);
+    onOpenChange(false);
     setResult(null);
     setError(null);
     setLoading(false);
@@ -147,280 +186,135 @@ export function SourceFolderBrowser({
       controller.current?.abort();
       controller.current = null;
     };
-  }, [load]);
+  }, [load, onOpenChange]);
 
+  const changeOpen = (next: boolean) => {
+    setOpen(next);
+    onOpenChange(next);
+    if (next) {
+      setPath(request.basePath);
+      setSearch("");
+      setNavigation({ paths: [], index: -1 });
+      load(request.basePath);
+    } else {
+      controller.current?.abort();
+      controller.current = null;
+      setLoading(false);
+    }
+  };
   let browseHint = ready ? copy.browseNote : copy.browsePrerequisite;
   if (protocol === "SMB" && !shareName.trim()) {
     browseHint = copy.browseShareRequired;
   }
-
-  function close() {
-    controller.current?.abort();
-    controller.current = null;
-    setLoading(false);
-    setOpen(false);
-  }
-
+  const entries =
+    result?.entries.filter((entry) =>
+      entry.name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())
+    ) ?? [];
   return (
-    <div className="flex min-w-0 flex-col gap-3">
-      <div className="flex flex-col gap-2">
-        <Button
-          disabled={disabled || !ready}
-          onClick={() => {
-            if (open) {
-              close();
-              return;
-            }
-            setOpen(true);
-            setPath(request.basePath);
-            load(request.basePath);
-          }}
-          type="button"
-          variant="outline"
+    <div className="flex min-w-0 flex-col gap-2">
+      <Dialog onOpenChange={changeOpen} open={open}>
+        <DialogTrigger
+          render={
+            <Button
+              disabled={disabled || !ready}
+              type="button"
+              variant="outline"
+            />
+          }
         >
           <HugeiconsIcon data-icon="inline-start" icon={Folder01Icon} />
-          {open ? copy.closeBrowser : copy.browse}
-        </Button>
-        <p className="text-muted-foreground text-xs">{browseHint}</p>
-      </div>
-      {open && (
-        <section
-          aria-label={copy.browse}
-          className="flex min-w-0 flex-col gap-3 rounded-lg border p-3"
+          {copy.browse}
+        </DialogTrigger>
+        <DialogContent
+          className="h-[min(90dvh,56rem)]"
+          portalContainer={portalContainer}
+          size="5xl"
+          variant="pane"
         >
-          <Field>
-            <FieldLabel htmlFor={pathId}>
-              {protocol === "SFTP" ? copy.basePath : copy.browsePath}
-            </FieldLabel>
-            <div className="flex gap-2">
-              <Input
-                disabled={disabled || loading}
-                id={pathId}
-                onChange={(event) => setPath(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    load(path);
-                  }
-                }}
-                placeholder={rootLabel}
-                value={path}
-                variant="mono"
-              />
-              <Button
-                disabled={disabled || loading}
-                onClick={() => load(path)}
-                size="sm"
-                type="button"
-                variant="outline"
-              >
-                {copy.browseGo}
-              </Button>
-            </div>
-          </Field>
-          <div className="flex items-center gap-2">
-            <Button
-              disabled={disabled || loading}
-              onClick={() => {
-                setPath("");
-                load("");
-              }}
-              size="sm"
-              type="button"
-              variant="ghost"
-            >
-              {rootLabel}
-            </Button>
-            <Button
-              aria-label={copy.browseParent}
-              disabled={
-                disabled || loading || !result?.path || result.path === "/"
-              }
-              onClick={() => {
-                const parts = (result?.path ?? "").split("/");
-                parts.pop();
-                load(parts.join("/") || (protocol === "SFTP" ? "/" : ""));
-              }}
-              size="icon-sm"
-              title={copy.browseParent}
-              type="button"
-              variant="outline"
-            >
-              <HugeiconsIcon icon={ArrowUp01Icon} />
-            </Button>
-            <Button
-              aria-label={copy.browseRefresh}
-              disabled={disabled || loading}
-              onClick={() => load(result?.path ?? path)}
-              size="icon-sm"
-              title={copy.browseRefresh}
-              type="button"
-              variant="outline"
-            >
-              <RefreshCw />
-            </Button>
+          <div className="shrink-0 p-4">
+            <DialogHeader size="compact">
+              <DialogTitle>{copy.browse}</DialogTitle>
+              <DialogDescription>
+                {host} · {copy.browseDialogDescription}
+              </DialogDescription>
+            </DialogHeader>
           </div>
-          {loading && (
-            <div
-              aria-live="polite"
-              className="flex items-center gap-2 text-muted-foreground text-xs"
-            >
-              <Spinner />
-              {copy.browseLoading}
-            </div>
-          )}
-          {error && (
-            <Alert variant="destructive">
-              <AlertTitle>{copy.browseError}</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          {result && (
-            <>
-              <p className="text-muted-foreground text-xs">
-                {copy.browseFiles}
-              </p>
-              <ScrollArea className="h-52" variant="bordered">
-                <div className="flex flex-col gap-1 p-2">
-                  {result.entries.length === 0 && (
-                    <p className="p-2 text-muted-foreground text-sm">
-                      {copy.browseEmpty}
-                    </p>
-                  )}
-                  {result.entries.map((entry) =>
-                    entry.directory ? (
-                      <Button
-                        className="w-full justify-start"
-                        disabled={disabled || loading}
-                        key={entry.path}
-                        onClick={() => load(entry.path)}
-                        size="sm"
-                        title={entry.name}
-                        type="button"
-                        variant="ghost"
-                      >
-                        <HugeiconsIcon
-                          data-icon="inline-start"
-                          icon={Folder01Icon}
-                        />
-                        <span className="truncate">{entry.name}</span>
-                      </Button>
-                    ) : (
-                      <div
-                        className="flex min-w-0 items-center gap-2 px-2 py-1.5"
-                        key={entry.path}
-                      >
-                        <FileText
-                          aria-hidden="true"
-                          className="size-4 shrink-0 text-muted-foreground"
-                        />
-                        <span
-                          className="min-w-0 flex-1 truncate font-mono text-xs"
-                          title={entry.name}
-                        >
-                          {entry.name}
-                        </span>
-                        <span className="shrink-0 text-muted-foreground text-xs">
-                          {new Intl.NumberFormat(locale, {
-                            maximumFractionDigits: 1,
-                          }).format(entry.size / 1024)}{" "}
-                          KB
-                        </span>
-                      </div>
-                    )
-                  )}
-                </div>
-              </ScrollArea>
-              {result.limited && (
-                <Alert>
-                  <AlertDescription>{copy.browseLimited}</AlertDescription>
-                </Alert>
-              )}
-              <Separator />
-              <div className="flex flex-col gap-1">
-                <h3 className="font-medium text-sm">{copy.browseDetected}</h3>
-                <p className="text-muted-foreground text-xs">
-                  {copy.browseDetectionHint}
-                </p>
+          <Separator />
+          <FolderBrowserNavigation
+            absolute={protocol === "SFTP"}
+            currentPath={currentPath}
+            disabled={disabled || loading}
+            navigation={navigation}
+            onNavigate={load}
+            onPathChange={setPath}
+            onSearch={setSearch}
+            path={path}
+            rootLabel={rootLabel}
+            search={search}
+          />
+          <Separator />
+          <div aria-busy={loading} className="flex min-h-0 flex-1 flex-col">
+            {loading && (
+              <div
+                aria-live="polite"
+                className="flex items-center gap-2 p-4 text-muted-foreground text-sm"
+              >
+                <Spinner />
+                {copy.browseLoading}
               </div>
-              {result.layouts.length === 0 && (
-                <p className="text-muted-foreground text-sm">
-                  {copy.browseNoDetection}
-                </p>
-              )}
-              {result.layouts.map((layout) => (
-                <div
-                  className="flex flex-col gap-2 rounded-md border p-3"
-                  key={`${layout.basePath}:${layout.folderPattern}:${layout.filenamePattern}:${layout.dateFormat}`}
-                >
-                  <dl className="flex flex-col gap-2 text-xs">
-                    <div>
-                      <dt className="text-muted-foreground">{copy.basePath}</dt>
-                      <dd className="break-all font-mono">
-                        {layout.basePath || copy.browseRoot}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">
-                        {copy.folderPattern}
-                      </dt>
-                      <dd>{layout.folderPattern || copy.flat}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">
-                        {copy.filenamePattern}
-                      </dt>
-                      <dd className="break-all font-mono">
-                        {layout.filenamePattern}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">
-                        {copy.dateFormat}
-                      </dt>
-                      <dd className="font-mono">{layout.dateFormat}</dd>
-                    </div>
-                  </dl>
-                  <div className="flex flex-wrap gap-1">
-                    {layout.streams.map((stream) => (
-                      <Badge key={stream} mono size="sm" variant="secondary">
-                        {stream}
-                      </Badge>
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground text-xs">
-                    {layout.matchedFiles} {copy.browseMatched}
+            )}
+            {error && (
+              <div className="p-4">
+                <Alert variant="destructive">
+                  <AlertTitle>{copy.browseError}</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </div>
+            )}
+            {result && (
+              <div className="grid min-h-0 flex-1 grid-rows-2 lg:grid-cols-2 lg:grid-rows-1">
+                <div className="flex min-h-0 min-w-0 flex-col border-b lg:border-r lg:border-b-0">
+                  <p className="px-4 py-2 text-muted-foreground text-xs">
+                    {copy.browseFiles} · {copy.browseSearchScope}
                   </p>
-                  <details>
-                    <summary className="cursor-pointer text-muted-foreground text-xs">
-                      {copy.browseSamples}
-                    </summary>
-                    <ul className="mt-2 flex flex-col gap-1">
-                      {layout.sampleFiles.map((file) => (
-                        <li className="break-all font-mono text-xs" key={file}>
-                          {file}
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                  <Button
-                    disabled={disabled}
-                    onClick={() => {
-                      onApply(layout);
-                      close();
-                      toast.success(copy.browseApplied);
-                    }}
-                    size="sm"
-                    type="button"
-                  >
-                    {copy.browseApply}
-                  </Button>
+                  <ScrollArea className="min-h-0 flex-1" variant="visible">
+                    <FolderBrowserEntries
+                      disabled={disabled || loading}
+                      entries={entries}
+                      onNavigate={load}
+                      search={search.trim()}
+                    />
+                  </ScrollArea>
                 </div>
-              ))}
-            </>
-          )}
-        </section>
-      )}
+                <ScrollArea className="min-h-0 min-w-0" variant="visible">
+                  <div className="flex flex-col gap-3 p-4">
+                    <BrowseWarnings result={result} />
+                    <FolderBrowserLayouts
+                      disabled={disabled || loading}
+                      onApply={(layout) => {
+                        onApply(layout);
+                        changeOpen(false);
+                        toast.success(copy.browseApplied);
+                      }}
+                      result={result}
+                    />
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+          </div>
+          <DialogFooter className="shrink-0" variant="pane">
+            <Button
+              onClick={() => changeOpen(false)}
+              type="button"
+              variant="outline"
+            >
+              {copy.closeBrowser}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <p className="text-muted-foreground text-xs">{browseHint}</p>
     </div>
   );
 }

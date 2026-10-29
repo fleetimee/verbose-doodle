@@ -40,6 +40,7 @@ import {
 import { browseLogFolder } from "@/features/log-viewer/api";
 import { getLogErrorMessage as getErrorMessage } from "@/features/log-viewer/error-message";
 import { SourceFieldLabel } from "@/features/log-viewer/source-field-label";
+import { SourceFilePatternOptions } from "@/features/log-viewer/source-file-pattern-options";
 import { SourceFolderBrowser } from "@/features/log-viewer/source-folder-browser";
 import { SourceServerPicker } from "@/features/log-viewer/source-server-picker";
 import { SourceSharePicker } from "@/features/log-viewer/source-share-picker";
@@ -88,6 +89,7 @@ function initialForm(source: LogSource | null): LogSourceRequest {
   if (!source) {
     return {
       dateFormat: "ddMMyyyy",
+      rotationOrder: "auto",
       protocol: "SMB",
       name: "",
       host: "",
@@ -105,6 +107,7 @@ function initialForm(source: LogSource | null): LogSourceRequest {
   }
   return {
     dateFormat: source.dateFormat || "ddMMyyyy",
+    rotationOrder: source.rotationOrder || "auto",
     protocol: source.protocol || "SMB",
     name: source.name,
     host: source.host,
@@ -119,6 +122,25 @@ function initialForm(source: LogSource | null): LogSourceRequest {
     timezone: source.timezone,
     password: "",
   };
+}
+
+function SourcePasswordHint({
+  inventory,
+  saved,
+}: {
+  inventory: boolean;
+  saved: boolean;
+}) {
+  const {
+    messages: { logViewer: copy },
+  } = useI18n();
+  if (inventory) {
+    return <FieldDescription>{copy.inventoryPassword}</FieldDescription>;
+  }
+  if (saved) {
+    return <FieldDescription>{copy.keepPassword}</FieldDescription>;
+  }
+  return null;
 }
 
 export function SourceForm({
@@ -137,6 +159,7 @@ export function SourceForm({
   const [drawerContent, setDrawerContent] = useState<HTMLDivElement | null>(
     null
   );
+  const [folderBrowserOpen, setFolderBrowserOpen] = useState(false);
   const [inventory, setInventory] = useState<ServerEntry | null>(null);
   const [pending, setPending] = useState(false);
   const [checking, setChecking] = useState(false);
@@ -148,6 +171,7 @@ export function SourceForm({
   } | null>(null);
   const isSftp = form.protocol === "SFTP";
   const busy = pending || checking;
+  const drawerBusy = busy || folderBrowserOpen;
   const connectionVerified =
     checkResult?.request === form && checkResult.success;
   useEffect(() => () => checkController.current?.abort(), [form]);
@@ -238,9 +262,9 @@ export function SourceForm({
   return (
     <Drawer
       direction="right"
-      dismissible={!busy}
+      dismissible={!drawerBusy}
       onOpenChange={(open) => {
-        if (!(open || busy)) {
+        if (!(open || drawerBusy)) {
           onCancel();
         }
       }}
@@ -248,7 +272,8 @@ export function SourceForm({
       shouldScaleBackground={false}
     >
       <DrawerContent
-        className="overflow-hidden data-[vaul-drawer-direction=right]:w-[calc(100%-1rem)] data-[vaul-drawer-direction=right]:sm:max-w-lg"
+        className="data-[folder-browser-open=true]:transform-none! overflow-hidden data-[vaul-drawer-direction=right]:w-[calc(100%-1rem)] data-[folder-browser-open=true]:will-change-auto! data-[vaul-drawer-direction=right]:sm:max-w-lg"
+        data-folder-browser-open={folderBrowserOpen}
         ref={setDrawerContent}
         showSwipeHandle={false}
       >
@@ -299,6 +324,7 @@ export function SourceForm({
                     </FieldLabel>
                     <ToggleGroup
                       aria-labelledby={`${prefix}-protocol`}
+                      className="grid w-full grid-cols-2"
                       disabled={busy}
                       onValueChange={(values) => {
                         const protocol = values[0];
@@ -320,8 +346,12 @@ export function SourceForm({
                       value={[form.protocol]}
                       variant="outline"
                     >
-                      <ToggleGroupItem value="SMB">SMB</ToggleGroupItem>
-                      <ToggleGroupItem value="SFTP">SFTP / SSH</ToggleGroupItem>
+                      <ToggleGroupItem className="w-full" value="SMB">
+                        SMB
+                      </ToggleGroupItem>
+                      <ToggleGroupItem className="w-full" value="SFTP">
+                        SFTP / SSH
+                      </ToggleGroupItem>
                     </ToggleGroup>
                   </Field>
                   <FieldGroup
@@ -331,6 +361,7 @@ export function SourceForm({
                     <SourceServerPicker
                       disabled={busy}
                       host={form.host}
+                      key={form.protocol}
                       onHostChange={(host) => update("host", host)}
                       onSelect={(server) => {
                         setInventory(server);
@@ -346,6 +377,7 @@ export function SourceForm({
                         );
                       }}
                       portalContainer={drawerContent}
+                      protocol={form.protocol}
                       value={inventory}
                     />
 
@@ -426,14 +458,10 @@ export function SourceForm({
                       type="password"
                       value={form.password}
                     />
-                    {form.serverEntryId && (
-                      <FieldDescription>
-                        {copy.inventoryPassword}
-                      </FieldDescription>
-                    )}
-                    {!form.serverEntryId && hasSavedPassword && (
-                      <FieldDescription>{copy.keepPassword}</FieldDescription>
-                    )}
+                    <SourcePasswordHint
+                      inventory={!!form.serverEntryId}
+                      saved={hasSavedPassword}
+                    />
                   </Field>
                 </FieldGroup>
               </FieldSet>
@@ -463,6 +491,8 @@ export function SourceForm({
                         dateFormat: layout.dateFormat,
                       }));
                     }}
+                    onOpenChange={setFolderBrowserOpen}
+                    portalContainer={drawerContent}
                     request={form}
                     source={source}
                   />
@@ -496,38 +526,13 @@ export function SourceForm({
                     </Select>
                   </Field>
                   {textField("filenamePattern")}
-                  <Field data-disabled={busy}>
-                    <SourceFieldLabel
-                      field="dateFormat"
-                      htmlFor={`${prefix}-date-format`}
-                      portalContainer={drawerContent}
-                    />
-                    <Select
-                      disabled={busy}
-                      onValueChange={(value) => update("dateFormat", value)}
-                      value={form.dateFormat}
-                    >
-                      <SelectTrigger
-                        className="w-full"
-                        id={`${prefix}-date-format`}
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent portalContainer={drawerContent}>
-                        <SelectGroup>
-                          <SelectItem value="ddMMyyyy">
-                            ddMMyyyy · 29102026
-                          </SelectItem>
-                          <SelectItem value="yyyy-MM-dd">
-                            yyyy-MM-dd · 2026-10-29
-                          </SelectItem>
-                          <SelectItem value="yyyyMMdd">
-                            yyyyMMdd · 20261029
-                          </SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </Field>
+                  <SourceFilePatternOptions
+                    disabled={busy}
+                    onChange={update}
+                    portalContainer={drawerContent}
+                    prefix={prefix}
+                    request={form}
+                  />
                 </FieldGroup>
               </FieldSet>
 

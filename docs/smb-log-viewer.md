@@ -51,8 +51,9 @@ as SMB. Browsing is read-only and skips symbolic links and special files. Select
 
 Existing sources and requests without `protocol` remain SMB. New requests and
 responses include `protocol: "SMB" | "SFTP"` and `dateFormat`. Deploy the backend with the frontend;
-Hibernate adds nullable `log_sources.protocol` and `log_sources.date_format` columns;
-old null values are interpreted as SMB and `ddMMyyyy`.
+Hibernate adds nullable `log_sources.protocol`, `log_sources.date_format`, and
+`log_sources.rotation_order` columns;
+old null values are interpreted as SMB, `ddMMyyyy`, and automatic rotation order.
 
 SFTP follows appended bytes and detects truncation or a missing current file.
 The SFTP attributes do not provide a stable file identity: replacing a file with
@@ -66,11 +67,18 @@ before entering a name, filename pattern, or timezone. Existing saved credential
 can be reused only when the connection details are unchanged; otherwise enter the
 password again.
 
-Navigate folders, open the share root, move to the parent, or enter a relative
-folder path. The browser shows folders and file metadata without opening or
+The browser opens in a dialog above the source form. Navigate through clickable
+breadcrumbs, use Back/Forward history, open the root or parent, refresh, or enter
+a folder path (relative for SMB, absolute for SFTP). Search filters the listed
+folder/file names in the current folder; it does not recursively search the
+server or search file contents. Detection continues to inspect the current
+folder regardless of the name filter. Moving to another folder clears search.
+Closing the browser retains the source draft, and **Use these settings** fills
+the draft and closes the browser without saving the source. The browser shows folders and file metadata without opening or
 changing log contents. Detection checks the selected folder and nearby numeric
 year/month folders for dated `.log` or `.txt` files. Supported filename dates are `ddMMyyyy`,
-`yyyy-MM-dd`, and `yyyyMMdd`, before or after the stream name. For example,
+`yyyy-MM-dd`, and `yyyyMMdd`, plus the additional formats listed below, before,
+after, or attached to the stream name. For example,
 `29102026_APP.log`, `api-request.log.2026-10-29`, and `app-20261029.log`. It offers flat, `MM`, or `yyyy/MM` configurations with matching
 sample filenames and stream names. Selecting a year or month folder can also
 suggest its log-root parent automatically.
@@ -99,8 +107,8 @@ A missing date folder is skipped. A missing base folder, failed connection, or
 permission failure is an error. Discovery visits only date folders within the
 selected range; it does not recursively crawl the share.
 
-`{date}` matches the selected filename date format (strict `ddMMyyyy`,
-`yyyy-MM-dd`, or `yyyyMMdd`). Existing sources default to `ddMMyyyy`. `{stream}`
+`{date}` matches the selected filename date/time format. Existing sources
+default to `ddMMyyyy`. `{stream}`
 matches the log type and may contain letters, digits, spaces, dots, underscores,
 and hyphens.
 
@@ -108,16 +116,85 @@ For Linux-style rolling logs such as `api-request.log.2026-10-29`, detection
 suggests `{stream}.log.{date}` with date format `yyyy-MM-dd`; files such as
 `api-response.log.2026-10-29` become a separate stream under the same settings.
 For `api-request-2026-10-29.log`, it suggests `{stream}-{date}.log`. Invalid dates
-are ignored. Detection is derived from filenames, not log contents. Undated
-active files and numbered/compressed archives are not included by these patterns.
+are ignored. Detection is derived from filenames, not log contents. Undated files use file modification dates, and numbered files use `{index}` as
+described below. Compressed archives are listed but not readable.
 For JavaCMSInterface, `MSG_` is removed from the display name, giving APP, TRC,
 SIG, VA, XLINK, CBS_SY, and CBS_KO. Daily files are ordered by filename date and
 joined virtually; remote files are never modified.
 
+## Additional filename conventions
+
+Detection and reading share the same parser for SMB and SFTP. The parser derives
+settings from filename structure rather than guessing from a product name.
+See [official-source research](log-filename-pattern-research.md) for framework
+examples and ordering caveats.
+
+| Example | Detected template | Date format |
+| --- | --- | --- |
+| `log-2026-10-09.php` | `{stream}-{date}.php` | `yyyy-MM-dd` |
+| `api-hrmis.2026-10-19.1.log` | `{stream}.{date}.{index}.log` | `yyyy-MM-dd` |
+| `app-2026-10-29_002.txt` | `{stream}-{date}_{index}.txt` | `yyyy-MM-dd` |
+| `app.2026-10-29.log.10` | `{stream}.{date}.log.{index}` | `yyyy-MM-dd` |
+| `app.log.2026-10-29.1` | `{stream}.log.{date}.{index}` | `yyyy-MM-dd` |
+| `app.1.2026-10-29.log` | `{stream}.{index}.{date}.log` | `yyyy-MM-dd` |
+| `app20261029_001.log` | `{stream}{date}_{index}.log` | `yyyyMMdd` |
+| `api-out__2026-10-29_14-30-00.log` | `{stream}__{date}.log` | `yyyy-MM-dd_HH-mm-ss` |
+| `app.log.2026-10-29_14` | `{stream}.log.{date}` | `yyyy-MM-dd_HH` |
+| `access.log-2026102914` | `{stream}.log-{date}` | `yyyyMMddHH` |
+| `messages-20261029` | `{stream}-{date}` | `yyyyMMdd` |
+| `2026-10-29.2.log` | `{date}.{index}.log` | `yyyy-MM-dd`; stream `LOG` |
+| `app.log.1` | `{stream}.log.{index}` | File modification date |
+| `app.2.log` | `{stream}.{index}.log` | File modification date |
+| `app.log` | `{stream}.log` | File modification date |
+| `syslog.1` | `syslog.{index}` | File modification date; stream `LOG` |
+
+The usual `.log`, `.txt`, `.out`, `.json`, `.jsonl`, `.ndjson`, and `.php` extensions are
+recognized. PHP log files are read as plain text; no PHP code is executed.
+Extensionless dated files and the conventional undated system names
+`syslog`, `messages`, `secure`, `maillog`, `kern`, and `auth` are also detected.
+A literal filename may be entered manually. Each of `{date}`, `{stream}`, and
+`{index}` may appear at most once; names without `{stream}` use one `LOG` stream.
+Each detected layout covers its exact literal punctuation and token positions;
+active and archive names with different structures require separate settings.
+
+Date formats include `ddMMyyyy`, `yyyyMMdd`, `yyyy-MM-dd`, `yyyy_MM_dd`,
+`yyyy.MM.dd`, `dd-MM-yyyy`, `MM-dd-yyyy`, `dd.MM.yyyy`, and English `dd-MMM-yyyy`.
+Time-bearing choices are `yyyy-MM-dd_HH`, `yyyy-MM-dd-HH`,
+`yyyy-MM-dd_HH-mm`, `yyyy-MM-dd_HH-mm-ss`, `yyyy-MM-dd'T'HH-mm-ss`,
+`yyyyMMddHH`, and `yyyyMMddHHmmss`. Dates and times are validated strictly.
+Ambiguous day/month orders and hour-versus-index suffixes are offered as separate
+candidates. Review the samples and date format; the detector cannot know the
+producer's configuration from an ambiguous name.
+
+`{index}` matches up to 18 digits, including zero padding. Files sort by date,
+then filename time, then numeric rotation index (`2` before `10` when ascending).
+**Rotation index order** can be Automatic, larger indexes newer, or smaller
+indexes newer. Automatic assumes ascending for dated names (typical Logback and
+Log4j default) and descending for undated numbered backups (typical Python and
+logrotate). Set the direction explicitly for another rotation policy.
+
+Without `{date}`, choose **File modification date**. Date filters then select
+whole files by the last-modified date in the configured server timezone; they do
+not filter individual log-entry timestamps. Copying or touching a file may
+change its date classification. Undated archives still sort by their selected
+modification date before rotation order.
+
+Compressed `.gz`, `.zip`, `.bz2`, `.xz`, `.zst`, `.zstd`, and `.lz4` archives are
+counted with a notice and are excluded from detection and reading. Their byte
+offsets cannot be paged as uncompressed text. Missing-year dates, custom tokens,
+and arbitrary producer-specific filename rules are not inferred automatically;
+this is a documented set of common conventions, not universal filename support.
+
 ## Reading and following
 
-The initial view reads the latest chunk. **Load older** or scrolling to the top
-loads earlier chunks and then previous daily files. **Jump to latest** returns to
+The initial view reads the latest chunk from the newest nonempty file in the
+selected stream and date range. Empty trailing files are skipped until they
+receive content; following continues across them as new data arrives. Each
+file’s filename and date stay visible in a sticky header while its content is
+on screen. **Load older** or scrolling to the top
+loads earlier chunks and then previous daily files. A status strip at the top
+of the log viewport shows when older history is loading, while the loaded
+content and scroll position are retained. **Jump to latest** returns to
 the newest file. **Follow new entries** checks for appended bytes every three
 seconds while the page is visible. Scrolling away from the bottom pauses follow.
 

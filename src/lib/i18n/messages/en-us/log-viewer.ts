@@ -1,4 +1,13 @@
 export const logViewerMessages = {
+  rotationOrder: "Rotation index order",
+  rotationAuto: "Automatic",
+  rotationAscending: "Larger indexes are newer",
+  rotationDescending: "Smaller indexes are newer",
+  modifiedDate: "File modification date",
+  dateFormatHint:
+    "For filenames without {date}, use the file modification date. It filters files by last modification, not the dates of individual log entries. Ambiguous dates need the correct day/month order.",
+  browseCompressed:
+    "{count} compressed archives found. Compressed files are listed but cannot be read or used for automatic source settings.",
   dateFormat: "Filename date format",
   protocol: "Connection type",
   sftpPathHint:
@@ -12,7 +21,7 @@ export const logViewerMessages = {
   fullscreenFailed:
     "Unable to open fullscreen. Check your browser permissions and try again.",
   toolbar: "Log toolbar",
-  searchSources: "Find source by name or IP…",
+  searchSources: "Find source by name, IP, or protocol…",
   noSourcesFound: "No matching log sources.",
   searchLogs: "Find in loaded logs…",
   previousMatch: "Previous match (Shift+Enter)",
@@ -87,13 +96,22 @@ export const logViewerMessages = {
   inventorySearch: "Search name, host, or username…",
   inventoryManual: "Enter connection manually",
   inventoryHint:
-    "Type a host or choose a saved server to fill its login. SSH/SFTP entries use SFTP; SMB entries use SMB.",
+    "Choose a saved SSH entry for SFTP or RDP entry for SMB, or enter a host manually. SMB uses port 445, not the RDP port.",
   inventoryPassword:
     "Saved inventory password will be used. Enter a password here to override it.",
   inventoryLoading: "Loading servers…",
   inventoryMore: "Load more servers",
   browseShareRequired:
     "Enter a share name above (for example C$ or AppLogs) to browse folders.",
+  browseBack: "Back to previous folder",
+  browseForward: "Forward to next folder",
+  browseBreadcrumb: "Folder location",
+  browseSearch: "Search this folder",
+  browseSearchPlaceholder: "Filter folders and files by name…",
+  browseSearchScope: "Search filters the listed entries in this folder only.",
+  browseNoMatches: "No folders or files match your search.",
+  browseDialogDescription:
+    "Navigate folders and apply detected log settings. Browsing is read-only.",
   browse: "Browse folders",
   closeBrowser: "Close browser",
   browsePrerequisite:
@@ -109,7 +127,7 @@ export const logViewerMessages = {
   browseFiles: "Folders & files",
   browseDetected: "Detected log settings",
   browseNoDetection:
-    "No supported dated log files found here. Open a log folder or its year/month parent, or enter settings manually.",
+    "No supported log filename patterns found here. Open a log folder or its year/month parent, or enter settings manually.",
   browseApply: "Use these settings",
   browseApplied:
     "Folder and filename settings applied. Review the timezone and encoding before saving.",
@@ -126,10 +144,17 @@ export const logViewerMessages = {
   fieldHelpLabel: "Help for {field}",
   fieldHelpExamples: "Examples & accepted values",
   fieldHelp: {
+    rotationOrder: {
+      placeholder: "Choose rotation order",
+      description:
+        "Controls numeric {index} order within each date/time. Logback and Log4j’s usual dated rotation increment toward newer files. Python/logrotate numbered backups usually make .1 newest. Automatic uses ascending for dated names and descending for undated names; override it to match the producer.",
+      examples:
+        "Ascending: app.2026-10-29.1.log → app.2026-10-29.10.log\nDescending: app.log.10 → app.log.2 → app.log.1",
+    },
     dateFormat: {
       placeholder: "Choose a filename date format",
       description:
-        "How {date} is written in filenames. Detection fills this automatically; it does not change timestamps inside the log text.",
+        "How {date} is written in filenames, including an optional hour, minute, or second. For undated files choose file modification date. Detection offers both day/month orders when ambiguous; choose the one used by your application.",
       examples:
         "ddMMyyyy: 29102026\nyyyy-MM-dd: 2026-10-29\nyyyyMMdd: 20261029",
     },
@@ -174,9 +199,9 @@ export const logViewerMessages = {
     filenamePattern: {
       placeholder: "e.g. {date}_{stream}.log",
       description:
-        "Include exactly one {date} and one {stream}. {date} uses the selected filename date format. {stream} groups files by log type; an MSG_ prefix is removed from the displayed stream name. Do not include folders or wildcard characters.",
+        "Use {stream} for the log name, {date} for the selected date/time format, and optional {index} for a numeric rotation. Each token may appear once; fixed filenames and date-only filenames are also supported. Without {date}, choose file modification date. {stream} groups files by log type; an MSG_ prefix is removed from the displayed stream name. Do not include folders or wildcard characters.",
       examples:
-        "Pattern: {date}_{stream}.log\nMatches: 22102026_APP.log\nMatches: 22102026_MSG_VA.log\nMatches: 22102026_MSG_CBS_KO.log\nPattern: {stream}.log.{date} (yyyy-MM-dd)\nMatches: api-request.log.2026-10-29",
+        "Pattern: {date}_{stream}.log\nMatches: 22102026_APP.log\nMatches: 22102026_MSG_VA.log\nMatches: 22102026_MSG_CBS_KO.log\nPattern: {stream}.log.{date} (yyyy-MM-dd)\nMatches: api-request.log.2026-10-29\nPattern: {stream}.{date}.{index}.log\nMatches: api-hrmis.2026-10-19.1.log\nUndated: {stream}.log.{index} (file modification date)",
     },
     username: {
       placeholder: "e.g. log-reader",
@@ -232,7 +257,7 @@ export const logViewerMessages = {
   preferencesDescription:
     "Match the encoding and timezone used by the log producer.",
   formDescription: "Save an independent connection for this log source.",
-  streamHint: "Daily files, joined chronologically by stream.",
+  streamHint: "Files, joined chronologically by stream.",
   live: "Live",
   today: "Today · follows new logs",
   useToday: "Follow today",
@@ -264,7 +289,7 @@ export const logViewerMessages = {
   yearMonth: "Year / month (yyyy/MM)",
   month: "Month only (MM)",
   patternHint:
-    "{date} uses the selected date format; {stream} groups files such as APP or api-request.",
+    "Tokens: {stream} groups log types, {date} matches the selected date/time format, and {index} matches a numeric rotation. Compressed archives are not readable.",
   pathHint:
     "Relative to the share. For C$, start with Simulator, without C:\\.",
   emptyTitle: "Connect your first log source",
@@ -281,6 +306,7 @@ export const logViewerMessages = {
   noFilesHint:
     "Check the folder layout, filename pattern, or choose an earlier start date.",
   loading: "Reading logs…",
+  loadingOlder: "Loading older logs…",
   older: "Load older",
   latest: "Jump to latest",
   follow: "Follow new entries",

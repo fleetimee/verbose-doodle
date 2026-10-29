@@ -1,6 +1,28 @@
+export const LOG_DATE_FORMATS = [
+  "ddMMyyyy",
+  "yyyy-MM-dd",
+  "yyyyMMdd",
+  "yyyy_MM_dd",
+  "yyyy.MM.dd",
+  "dd-MM-yyyy",
+  "MM-dd-yyyy",
+  "dd.MM.yyyy",
+  "dd-MMM-yyyy",
+  "yyyy-MM-dd_HH",
+  "yyyy-MM-dd-HH",
+  "yyyy-MM-dd_HH-mm",
+  "yyyy-MM-dd_HH-mm-ss",
+  "yyyy-MM-dd'T'HH-mm-ss",
+  "yyyyMMddHH",
+  "yyyyMMddHHmmss",
+  "modified",
+] as const;
+
+export type LogDateFormat = (typeof LOG_DATE_FORMATS)[number];
+
 export interface LogSourceRequest {
   basePath: string;
-  dateFormat: "ddMMyyyy" | "yyyy-MM-dd" | "yyyyMMdd";
+  dateFormat: LogDateFormat;
   domain: string;
   encoding: string;
   filenamePattern: string;
@@ -10,6 +32,7 @@ export interface LogSourceRequest {
   password?: string;
   port: number;
   protocol: "SMB" | "SFTP";
+  rotationOrder: "auto" | "ascending" | "descending";
   serverEntryId?: string;
   shareName: string;
   timezone: string;
@@ -60,7 +83,7 @@ export interface LogBrowseRequest {
 
 export interface DetectedLogLayout {
   basePath: string;
-  dateFormat: "ddMMyyyy" | "yyyy-MM-dd" | "yyyyMMdd";
+  dateFormat: LogDateFormat;
   filenamePattern: string;
   folderPattern: string;
   matchedFiles: number;
@@ -69,6 +92,7 @@ export interface DetectedLogLayout {
 }
 
 export interface LogBrowseResult {
+  compressedFiles: number;
   entries: { name: string; path: string; directory: boolean; size: number }[];
   layouts: DetectedLogLayout[];
   limited: boolean;

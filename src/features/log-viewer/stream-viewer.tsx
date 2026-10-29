@@ -1,9 +1,8 @@
 import { motion, useReducedMotion } from "motion/react";
 import { useLayoutEffect, useRef, useState } from "react";
-import { FileText, ShieldCheck } from "@/components/hugeicons";
+import { ShieldCheck } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -13,9 +12,12 @@ import {
 } from "@/components/ui/empty";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { IsoLogPayload } from "@/features/log-viewer/iso-log-payload";
+import { LogFileHeader } from "@/features/log-viewer/log-file-header";
 import { LogToolbar } from "@/features/log-viewer/log-toolbar";
+import { LogContentSkeleton } from "@/features/log-viewer/log-viewer-skeleton";
+import type { LogSegment } from "@/features/log-viewer/types";
 import { useLogSearch } from "@/features/log-viewer/use-log-search";
 import { useLogStream } from "@/features/log-viewer/use-log-stream";
 import { useLocalStorage } from "@/hooks/use-local-storage";
@@ -34,6 +36,24 @@ const FONT_SIZE_CLASSES = [
   "text-[17px]",
   "text-[18px]",
 ];
+
+function groupLogSegments(segments: LogSegment[]) {
+  const files: { filename: string; date: string; segments: LogSegment[] }[] =
+    [];
+  for (const segment of segments) {
+    const previous = files.at(-1);
+    if (previous?.filename === segment.filename) {
+      previous.segments.push(segment);
+    } else {
+      files.push({
+        filename: segment.filename,
+        date: segment.date,
+        segments: [segment],
+      });
+    }
+  }
+  return files;
+}
 
 export function StreamViewer({
   id,
@@ -70,16 +90,18 @@ export function StreamViewer({
       return Number.isInteger(size) && size >= 9 && size <= 18 ? size : 10;
     },
   });
-  const { pages, loading, error, reset, failedDirection, load } = useLogStream(
-    id,
-    stream,
-    from,
-    to,
-    follow
-  );
+  const {
+    pages,
+    loading,
+    loadingDirection,
+    error,
+    reset,
+    failedDirection,
+    load,
+  } = useLogStream(id, stream, from, to, follow);
   const viewport = useRef<HTMLDivElement>(null);
   const search = useLogSearch(viewport, pages, query);
-  const segments = pages.flatMap((page) => page.segments);
+  const files = groupLogSegments(pages.flatMap((page) => page.segments));
   const anchor = useRef<{
     pages: typeof pages;
     segment: string;
@@ -111,10 +133,10 @@ export function StreamViewer({
           anchor.current.top;
       }
       anchor.current = null;
-    } else if (follow) {
+    } else if (follow && hasContent) {
       element.scrollTop = element.scrollHeight;
     }
-  }, [pages, follow, fontSize, fullscreen]);
+  }, [pages, follow, fontSize, fullscreen, hasContent]);
 
   async function older() {
     if (olderPending.current || loading || !first?.hasOlder) {
@@ -223,6 +245,16 @@ export function StreamViewer({
       )}
       <Separator />
       <div className="flex min-h-0 flex-1 flex-col bg-muted/15">
+        {loadingDirection === "older" && (
+          <div
+            aria-live="polite"
+            className="flex shrink-0 items-center justify-center gap-2 border-b py-2 text-muted-foreground text-xs"
+            role="status"
+          >
+            <Spinner />
+            {copy.loadingOlder}
+          </div>
+        )}
         <ScrollArea
           aria-busy={loading}
           aria-label={copy.content}
@@ -257,54 +289,35 @@ export function StreamViewer({
             }}
           >
             {hasContent
-              ? segments.map((segment, index) => (
-                  <div
-                    data-log-segment={`${segment.filename}:${segment.offset}`}
-                    key={`${segment.filename}:${segment.offset}`}
-                  >
-                    {(index === 0 ||
-                      segments[index - 1].filename !== segment.filename) && (
-                      <div className="flex flex-wrap items-center gap-2 py-4">
-                        <Badge mono radius="rounded" variant="outline-muted">
-                          {segment.date}
-                        </Badge>
-                        <FileText
-                          aria-hidden="true"
-                          className="size-3.5 text-muted-foreground"
-                        />
-                        <span className="break-all font-mono text-muted-foreground text-xs">
-                          {segment.filename}
-                        </span>
+              ? files.map((file) => (
+                  <div key={`${file.filename}:${file.segments[0].offset}`}>
+                    <LogFileHeader file={file} />
+                    {file.segments.map((segment) => (
+                      <div
+                        data-log-segment={`${segment.filename}:${segment.offset}`}
+                        key={`${segment.filename}:${segment.offset}`}
+                      >
+                        <pre
+                          className={cn(
+                            "font-mono leading-relaxed",
+                            wordWrap
+                              ? "whitespace-pre-wrap break-all"
+                              : "whitespace-pre",
+                            FONT_SIZE_CLASSES[fontSize - 9]
+                          )}
+                          data-log-text={segment.filename}
+                        >
+                          <IsoLogPayload text={segment.text} />
+                        </pre>
                       </div>
-                    )}
-                    <pre
-                      className={cn(
-                        "font-mono leading-relaxed",
-                        wordWrap
-                          ? "whitespace-pre-wrap break-all"
-                          : "whitespace-pre",
-                        FONT_SIZE_CLASSES[fontSize - 9]
-                      )}
-                      data-log-text={segment.filename}
-                    >
-                      <IsoLogPayload text={segment.text} />
-                    </pre>
+                    ))}
                   </div>
                 ))
               : null}
             {!hasContent && loading && (
-              <div
-                aria-label={copy.loading}
-                className="flex flex-col gap-3 py-5"
-                role="status"
-              >
-                <Skeleton className="h-5 w-56" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-5/6" />
-                <span className="sr-only">{copy.loading}</span>
-              </div>
+              <LogContentSkeleton
+                fontClassName={FONT_SIZE_CLASSES[fontSize - 9]}
+              />
             )}
             {!(hasContent || loading) && (
               <Empty className="min-h-0">

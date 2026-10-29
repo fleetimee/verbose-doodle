@@ -10,7 +10,11 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 import { Field, FieldDescription } from "@/components/ui/field";
+import { InputGroupAddon } from "@/components/ui/input-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { SourceFieldLabel } from "@/features/log-viewer/source-field-label";
+import { SourceProtocolIcon } from "@/features/log-viewer/source-protocol-icon";
+import type { LogSourceRequest } from "@/features/log-viewer/types";
 import { fetchServerEntries } from "@/features/server-inventory/api";
 import type { ServerEntry } from "@/features/server-inventory/types";
 
@@ -25,6 +29,7 @@ export function SourceServerPicker({
   host,
   onHostChange,
   portalContainer,
+  protocol,
   value,
   onSelect,
 }: {
@@ -32,6 +37,7 @@ export function SourceServerPicker({
   host: string;
   onHostChange: (host: string) => void;
   portalContainer: HTMLDivElement | null;
+  protocol: LogSourceRequest["protocol"];
   value: ServerEntry | null;
   onSelect: (server: ServerEntry | null) => void;
 }) {
@@ -41,20 +47,24 @@ export function SourceServerPicker({
   const id = useId();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const accessType = protocol === "SFTP" ? "SSH" : "RDP";
   const query = useInfiniteQuery({
-    queryKey: ["log-source-inventory", search],
+    queryKey: ["log-source-inventory", accessType, search],
     enabled: open,
     initialPageParam: 0,
-    queryFn: ({ pageParam }) =>
-      fetchServerEntries({
-        page: pageParam,
-        size: 25,
-        search,
-        accessType: "",
-        databaseEngine: "",
-        sortBy: "name",
-        direction: "asc",
-      }),
+    queryFn: ({ pageParam, signal }) =>
+      fetchServerEntries(
+        {
+          page: pageParam,
+          size: 25,
+          search,
+          accessType,
+          databaseEngine: "",
+          sortBy: "name",
+          direction: "asc",
+        },
+        signal
+      ),
     getNextPageParam: (page) =>
       page.page + 1 < page.totalPages ? page.page + 1 : undefined,
   });
@@ -122,55 +132,65 @@ export function SourceServerPicker({
           placeholder={copy.inventoryChoose}
           required
           triggerLabel={copy.inventoryServer}
-        />
+        >
+          <InputGroupAddon align="inline-start">
+            <SourceProtocolIcon protocol={protocol} />
+          </InputGroupAddon>
+        </ComboboxInput>
         <ComboboxContent portalContainer={portalContainer}>
-          <ComboboxList>
-            {(option: HostOption) => (
-              <ComboboxItem key={option.key} value={option}>
-                <div className="flex min-w-0 flex-col">
-                  <span className="truncate">
-                    {option.entry
-                      ? `${option.entry.name} · ${option.host}`
-                      : option.host}
-                  </span>
-                  <span className="truncate text-muted-foreground text-xs">
-                    {option.entry
-                      ? `${option.entry.accessType} · ${option.entry.username || "—"}`
-                      : copy.inventoryManual}
-                  </span>
-                </div>
-              </ComboboxItem>
+          <ScrollArea
+            className="h-72 max-h-[calc(var(--available-height)-3rem)]"
+            variant="visible"
+          >
+            <ComboboxList variant="scrollable">
+              {(option: HostOption) => (
+                <ComboboxItem key={option.key} value={option}>
+                  <SourceProtocolIcon protocol={protocol} />
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate">
+                      {option.entry
+                        ? `${option.entry.name} · ${option.host}`
+                        : option.host}
+                    </span>
+                    <span className="truncate text-muted-foreground text-xs">
+                      {option.entry
+                        ? `${option.entry.accessType} · ${option.entry.username || "—"}`
+                        : copy.inventoryManual}
+                    </span>
+                  </div>
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+            {query.isSuccess && servers.length === 0 && (
+              <p className="p-3 text-muted-foreground text-sm">
+                {copy.inventoryEmpty}
+              </p>
             )}
-          </ComboboxList>
-          {query.isSuccess && servers.length === 0 && (
-            <p className="p-3 text-muted-foreground text-sm">
-              {copy.inventoryEmpty}
-            </p>
-          )}
-          {query.isFetching && (
-            <p className="p-3 text-muted-foreground text-sm">
-              {copy.inventoryLoading}
-            </p>
-          )}
-          {query.isError && (
-            <Button
-              onClick={() => query.refetch()}
-              type="button"
-              variant="ghost"
-            >
-              {copy.retry}
-            </Button>
-          )}
-          {query.hasNextPage && (
-            <Button
-              disabled={query.isFetching}
-              onClick={() => query.fetchNextPage()}
-              type="button"
-              variant="ghost"
-            >
-              {copy.inventoryMore}
-            </Button>
-          )}
+            {query.isFetching && (
+              <p className="p-3 text-muted-foreground text-sm">
+                {copy.inventoryLoading}
+              </p>
+            )}
+            {query.isError && (
+              <Button
+                onClick={() => query.refetch()}
+                type="button"
+                variant="ghost"
+              >
+                {copy.retry}
+              </Button>
+            )}
+            {query.hasNextPage && (
+              <Button
+                disabled={query.isFetching}
+                onClick={() => query.fetchNextPage()}
+                type="button"
+                variant="ghost"
+              >
+                {copy.inventoryMore}
+              </Button>
+            )}
+          </ScrollArea>
         </ComboboxContent>
       </Combobox>
       <FieldDescription>

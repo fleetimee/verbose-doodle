@@ -22,7 +22,6 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tabs,
   TabsContent,
@@ -38,6 +37,10 @@ import {
 } from "@/features/log-viewer/api";
 import { getLogErrorMessage as getErrorMessage } from "@/features/log-viewer/error-message";
 import { LogErrorState } from "@/features/log-viewer/error-state";
+import {
+  LogSourcesSkeleton,
+  LogViewerSkeleton,
+} from "@/features/log-viewer/log-viewer-skeleton";
 import { SourceControls } from "@/features/log-viewer/source-controls";
 import { SourceForm } from "@/features/log-viewer/source-form";
 import { StreamViewer } from "@/features/log-viewer/stream-viewer";
@@ -137,17 +140,7 @@ export function LogViewerPage() {
   return (
     <div className="mx-auto flex h-full min-h-0 w-full min-w-0 max-w-[1600px] flex-1 flex-col gap-3 overflow-hidden">
       <h1 className="sr-only">{copy.title}</h1>
-      {sources.isPending && (
-        <div
-          aria-label={copy.loading}
-          className="flex min-h-0 flex-1 flex-col gap-3"
-          role="status"
-        >
-          <Skeleton className="h-28 w-full shrink-0" variant="xl" />
-          <Skeleton className="min-h-0 w-full flex-1" variant="xl" />
-          <span className="sr-only">{copy.loading}</span>
-        </div>
-      )}
+      {sources.isPending && <LogSourcesSkeleton />}
       {sources.error && !sources.data && (
         <LogErrorState
           error={sources.error}
@@ -274,17 +267,7 @@ export function LogViewerPage() {
                       ease: MOTION_EASE.out,
                     }}
                   >
-                    {catalog.isPending && (
-                      <div
-                        aria-label={copy.loading}
-                        className="flex min-h-0 flex-1 flex-col gap-3 p-4"
-                        role="status"
-                      >
-                        <Skeleton className="h-8 w-72 max-w-full" />
-                        <Skeleton className="min-h-0 w-full flex-1" />
-                        <span className="sr-only">{copy.loading}</span>
-                      </div>
-                    )}
+                    {catalog.isPending && <LogViewerSkeleton />}
                     {catalog.isError && !catalog.data && (
                       <LogErrorState
                         error={catalog.error}

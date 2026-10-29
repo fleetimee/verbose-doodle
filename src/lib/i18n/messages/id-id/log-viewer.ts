@@ -1,4 +1,13 @@
 export const logViewerMessages = {
+  rotationOrder: "Urutan indeks rotasi",
+  rotationAuto: "Otomatis",
+  rotationAscending: "Indeks besar lebih baru",
+  rotationDescending: "Indeks kecil lebih baru",
+  modifiedDate: "Tanggal modifikasi berkas",
+  dateFormatHint:
+    "Untuk nama tanpa {date}, gunakan tanggal modifikasi berkas. Filter mengikuti modifikasi terakhir, bukan tanggal tiap entri log. Pilih urutan hari/bulan yang benar untuk tanggal ambigu.",
+  browseCompressed:
+    "Ditemukan {count} arsip terkompresi. Berkas tetap ditampilkan, tetapi tidak dapat dibaca atau digunakan untuk deteksi pengaturan sumber.",
   dateFormat: "Format tanggal nama berkas",
   protocol: "Jenis koneksi",
   sftpPathHint:
@@ -12,7 +21,7 @@ export const logViewerMessages = {
   fullscreenFailed:
     "Layar penuh tidak dapat dibuka. Periksa izin browser lalu coba lagi.",
   toolbar: "Toolbar log",
-  searchSources: "Cari sumber berdasarkan nama atau IP…",
+  searchSources: "Cari sumber berdasarkan nama, IP, atau protokol…",
   noSourcesFound: "Tidak ada sumber log yang cocok.",
   searchLogs: "Cari di log yang dimuat…",
   previousMatch: "Hasil sebelumnya (Shift+Enter)",
@@ -86,13 +95,23 @@ export const logViewerMessages = {
   inventorySearch: "Cari nama, host, atau pengguna…",
   inventoryManual: "Isi koneksi secara manual",
   inventoryHint:
-    "Ketik host atau pilih server tersimpan untuk mengisi login. Entri SSH/SFTP menggunakan SFTP; entri SMB menggunakan SMB.",
+    "Pilih entri SSH untuk SFTP atau entri RDP untuk SMB, atau isi host secara manual. SMB menggunakan port 445, bukan port RDP.",
   inventoryPassword:
     "Kata sandi inventaris tersimpan akan digunakan. Isi kata sandi di sini untuk menggantinya.",
   inventoryLoading: "Memuat server…",
   inventoryMore: "Muat server lainnya",
   browseShareRequired:
     "Isi nama share di atas (misalnya C$ atau AppLogs) untuk menjelajahi folder.",
+  browseBack: "Kembali ke folder sebelumnya",
+  browseForward: "Maju ke folder berikutnya",
+  browseBreadcrumb: "Lokasi folder",
+  browseSearch: "Cari di folder ini",
+  browseSearchPlaceholder: "Filter folder dan berkas berdasarkan nama…",
+  browseSearchScope:
+    "Pencarian hanya memfilter entri yang ditampilkan di folder ini.",
+  browseNoMatches: "Tidak ada folder atau berkas yang cocok dengan pencarian.",
+  browseDialogDescription:
+    "Jelajahi folder dan terapkan pengaturan log yang terdeteksi. Penjelajahan hanya membaca.",
   browse: "Jelajahi folder",
   closeBrowser: "Tutup penjelajah",
   browsePrerequisite:
@@ -125,10 +144,17 @@ export const logViewerMessages = {
   fieldHelpLabel: "Bantuan untuk {field}",
   fieldHelpExamples: "Contoh & nilai yang diterima",
   fieldHelp: {
+    rotationOrder: {
+      placeholder: "Pilih urutan rotasi",
+      description:
+        "Mengatur urutan numerik {index} pada tiap tanggal/waktu. Rotasi bertanggal Logback dan Log4j umumnya menaikkan indeks untuk berkas baru. Cadangan bernomor Python/logrotate biasanya menempatkan .1 paling baru. Otomatis memakai urutan naik untuk nama bertanggal dan turun untuk nama tanpa tanggal; sesuaikan dengan aplikasi penulis log.",
+      examples:
+        "Naik: app.2026-10-29.1.log → app.2026-10-29.10.log\nTurun: app.log.10 → app.log.2 → app.log.1",
+    },
     dateFormat: {
       placeholder: "Pilih format tanggal nama berkas",
       description:
-        "Format {date} pada nama berkas. Deteksi mengisinya otomatis; stempel waktu di dalam log tidak diubah.",
+        "Format {date} pada nama berkas, termasuk jam, menit, atau detik opsional. Untuk nama tanpa tanggal, pilih tanggal modifikasi berkas. Deteksi menawarkan kedua urutan hari/bulan jika ambigu; pilih sesuai aplikasi.",
       examples:
         "ddMMyyyy: 29102026\nyyyy-MM-dd: 2026-10-29\nyyyyMMdd: 20261029",
     },
@@ -173,9 +199,9 @@ export const logViewerMessages = {
     filenamePattern: {
       placeholder: "Mis. {date}_{stream}.log",
       description:
-        "Sertakan tepat satu {date} dan satu {stream}. {date} menggunakan format tanggal nama berkas yang dipilih. {stream} mengelompokkan berkas berdasarkan jenis log; awalan MSG_ dihapus dari nama aliran yang ditampilkan. Jangan sertakan folder atau wildcard.",
+        "Gunakan {stream} untuk jenis log, {date} untuk format tanggal/waktu, dan {index} opsional untuk nomor rotasi. Setiap token boleh dipakai sekali; nama tetap dan nama yang hanya berisi tanggal juga didukung. Tanpa {date}, pilih tanggal modifikasi berkas. {stream} mengelompokkan berkas berdasarkan jenis log; awalan MSG_ dihapus dari nama aliran yang ditampilkan. Jangan sertakan folder atau wildcard.",
       examples:
-        "Pola: {date}_{stream}.log\nCocok: 22102026_APP.log\nCocok: 22102026_MSG_VA.log\nCocok: 22102026_MSG_CBS_KO.log\nPola: {stream}.log.{date} (yyyy-MM-dd)\nCocok: api-request.log.2026-10-29",
+        "Pola: {date}_{stream}.log\nCocok: 22102026_APP.log\nCocok: 22102026_MSG_VA.log\nCocok: 22102026_MSG_CBS_KO.log\nPola: {stream}.log.{date} (yyyy-MM-dd)\nCocok: api-request.log.2026-10-29\nPola: {stream}.{date}.{index}.log\nCocok: api-hrmis.2026-10-19.1.log\nTanpa tanggal: {stream}.log.{index} (tanggal modifikasi berkas)",
     },
     username: {
       placeholder: "Mis. log-reader",
@@ -279,6 +305,7 @@ export const logViewerMessages = {
   noFilesHint:
     "Periksa struktur folder, pola nama berkas, atau pilih tanggal mulai lebih awal.",
   loading: "Membaca log…",
+  loadingOlder: "Memuat log sebelumnya…",
   older: "Muat sebelumnya",
   latest: "Ke log terbaru",
   follow: "Ikuti entri baru",

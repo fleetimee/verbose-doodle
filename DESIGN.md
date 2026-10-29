@@ -645,6 +645,43 @@ sets the default port and reveals only protocol-specific controls: share and
 domain for SMB, absolute paths for SFTP. Inventory SSH/SFTP entries prefill SFTP
 connections. Both use the read-only folder browser, detected layout cards, and
 Check connection before saving. Detected settings include filename date format
-(`ddMMyyyy`, `yyyy-MM-dd`, or `yyyyMMdd`), alongside folder and filename patterns.
+(daily and hourly formats or file modification date), alongside folder and
+filename patterns. Optional `{index}` tokens have a labeled rotation-order
+control; ambiguous patterns remain separate choices. Compressed archives show a
+readability notice rather than a source candidate.
 Keep English and Indonesian copy aligned and preserve the drawer's scroll area
 and fixed footer on narrow screens.
+
+The single searchable source picker shows the filled blue Windows logo for SMB and a Tux
+penguin for SFTP, with an SMB or SFTP label beside its host. The selected input keeps the same protocol
+icon and label visible. Search matches source name, host, and protocol; sources
+without protocol metadata are displayed as SMB for compatibility.
+
+The source form's saved-host picker filters inventory to SSH entries for SFTP
+and RDP entries for SMB, retaining manual host entry. The host input and options
+reuse the colored Windows and Tux protocol icons. Its options and load-more
+states scroll in the shared shadcn ScrollArea. SMB always starts on port 445
+when populated from an RDP inventory entry.
+
+Browse folders opens a nested dialog above the source drawer. Keep the source
+draft intact and restore focus when it closes. The dialog provides a bounded,
+scrollable breadcrumb trail, Back/Forward history, parent and refresh actions,
+an editable folder path, and search limited to listed entries in the current
+folder. Successful navigation alone updates history; moving to another folder
+clears search. File entries and detected settings use independent shadcn
+ScrollAreas, side by side on desktop and stacked on narrow screens. Applying a
+layout fills the draft and closes only the browser; saving remains explicit.
+
+Log streams show each file's filename and date in a sticky header inside the
+scroll area. Consecutive chunks of one file share that header, keeping it
+visible when the initial view follows the tail and while older chunks load.
+
+While older log chunks are fetched, show a localized spinner/status strip above
+the log viewport. Keep existing content visible and preserve its scroll anchor;
+background forward polling does not show the older-history loader.
+
+Log loading placeholders mirror the source/date controls, status row, stream
+tabs, toolbar, shared file/date header, dense text lines, and footer. Content
+loading reuses the same file-header component as loaded logs, with line spacing
+matching the chosen font size. Skeletons are limited to initial loads; older
+history loading retains the actual rows beneath its status strip.

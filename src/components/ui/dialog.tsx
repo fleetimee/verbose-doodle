@@ -138,13 +138,15 @@ function DialogContent({
   showCloseButton = true,
   variant = "default",
   size = "default",
+  portalContainer,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Popup> &
   VariantProps<typeof dialogContentVariants> & {
     showCloseButton?: boolean
+    portalContainer?: React.ComponentProps<typeof DialogPrimitive.Portal>["container"]
   }) {
   return (
-    <DialogPortal data-slot="dialog-portal">
+    <DialogPortal data-slot="dialog-portal" container={portalContainer}>
       <DialogOverlay />
       <DialogPrimitive.Popup
         data-slot="dialog-content"

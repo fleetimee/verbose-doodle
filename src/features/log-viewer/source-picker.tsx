@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import {
   Combobox,
@@ -7,7 +8,9 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import { InputGroupAddon, InputGroupText } from "@/components/ui/input-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SourceProtocolIcon } from "@/features/log-viewer/source-protocol-icon";
 import type { LogSource } from "@/features/log-viewer/types";
 
 export function SourcePicker({
@@ -22,10 +25,12 @@ export function SourcePicker({
   const {
     messages: { logViewer: copy },
   } = useI18n();
+  const protocolId = useId();
+  const selectedProtocol = selected.protocol || "SMB";
   return (
     <Combobox
       filter={(source, query) =>
-        `${source.name} ${source.host}`
+        `${source.name} ${source.host} ${source.protocol || "SMB"}`
           .toLocaleLowerCase()
           .includes(query.trim().toLocaleLowerCase())
       }
@@ -40,12 +45,20 @@ export function SourcePicker({
       value={selected}
     >
       <ComboboxInput
+        aria-describedby={protocolId}
         autoComplete="off"
         className="w-full"
         id="log-source"
         placeholder={copy.searchSources}
         triggerLabel={copy.source}
-      />
+      >
+        <InputGroupAddon align="inline-start">
+          <InputGroupText id={protocolId}>
+            <SourceProtocolIcon protocol={selectedProtocol} />
+            {selectedProtocol}
+          </InputGroupText>
+        </InputGroupAddon>
+      </ComboboxInput>
       <ComboboxContent>
         <ComboboxEmpty>{copy.noSourcesFound}</ComboboxEmpty>
         <ScrollArea
@@ -55,10 +68,11 @@ export function SourcePicker({
           <ComboboxList variant="scrollable">
             {(source: LogSource) => (
               <ComboboxItem key={source.id} value={source}>
+                <SourceProtocolIcon protocol={source.protocol || "SMB"} />
                 <div className="flex min-w-0 flex-col">
                   <span className="break-words">{source.name}</span>
-                  <span className="text-muted-foreground text-xs">
-                    {source.host}
+                  <span className="break-all text-muted-foreground text-xs">
+                    {source.protocol || "SMB"} · {source.host}
                   </span>
                 </div>
               </ComboboxItem>
