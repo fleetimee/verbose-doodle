@@ -9,7 +9,7 @@ let activeChecks = 0;
 const waitingChecks: (() => void)[] = [];
 
 async function checkWindowsMetrics(entry: ServerEntry, signal: AbortSignal) {
-  if (activeChecks >= 4) {
+  if (activeChecks >= 6) {
     await new Promise<void>((resolve) => waitingChecks.push(resolve));
   } else {
     activeChecks += 1;
@@ -107,14 +107,13 @@ export function useMetricHosts(search: string, paused: boolean) {
     hosts: hosts.filter(
       (entry) => entry.accessType !== "RDP" || available.has(entry.id)
     ),
-    isPending:
-      entries.isPending ||
-      checks.some(
-        (check, index) =>
-          !paused &&
-          windows[index].hasPassword &&
-          windows[index].username &&
-          check.isPending
-      ),
+    isPending: entries.isPending,
+    isChecking: checks.some(
+      (check, index) =>
+        !paused &&
+        windows[index].hasPassword &&
+        windows[index].username &&
+        check.isPending
+    ),
   };
 }

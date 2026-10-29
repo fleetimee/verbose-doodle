@@ -515,14 +515,16 @@ export function ServerMetricsPanel() {
           {copy.collecting}
         </p>
       )}
-      {!entries.isPending && entries.data && entries.hosts.length === 0 && (
-        <Empty variant="bordered">
-          <EmptyHeader>
-            <EmptyTitle>{copy.empty}</EmptyTitle>
-            <EmptyDescription>{copy.emptyDescription}</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      )}
+      {!(entries.isPending || entries.isChecking) &&
+        entries.data &&
+        entries.hosts.length === 0 && (
+          <Empty variant="bordered">
+            <EmptyHeader>
+              <EmptyTitle>{copy.empty}</EmptyTitle>
+              <EmptyDescription>{copy.emptyDescription}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
       <div className="grid items-stretch gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-2 lg:content-start lg:overflow-y-auto 2xl:grid-cols-3">
         {entries.isPending &&
           ["host-1", "host-2", "host-3", "host-4", "host-5", "host-6"]

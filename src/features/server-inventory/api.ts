@@ -82,7 +82,7 @@ export async function fetchServerMetrics(
 ): Promise<ServerMetrics> {
   const response = await apiGet<{ data: ServerMetrics }>(
     `${endpoints.detail(id)}/metrics`,
-    { cache: "no-store", signal }
+    { cache: "no-store", signal, timeout: 20_000 }
   );
   return response.data;
 }
