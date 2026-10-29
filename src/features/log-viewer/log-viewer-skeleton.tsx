@@ -38,10 +38,7 @@ export function LogContentSkeleton({
     messages: { logViewer: copy },
   } = useI18n();
   return (
-    <div
-      className="min-h-0 overflow-hidden"
-      role={announce ? "status" : undefined}
-    >
+    <div className="min-h-0" role={announce ? "status" : undefined}>
       <LogFileHeader />
       <div
         aria-hidden="true"
@@ -79,7 +76,6 @@ export function LogViewerSkeleton() {
           <Skeleton className="h-8 w-20" />
           <Skeleton className="h-8 w-16" />
         </div>
-        <Skeleton className="h-5 w-24 shrink-0" />
       </div>
       <Separator />
       <div
@@ -95,14 +91,6 @@ export function LogViewerSkeleton() {
       <Separator />
       <div className="min-h-0 flex-1 overflow-hidden bg-muted/15 px-4 pb-5 md:px-5">
         <LogContentSkeleton announce={false} />
-      </div>
-      <Separator />
-      <div
-        aria-hidden="true"
-        className="flex shrink-0 items-center justify-between gap-3 px-3 py-2"
-      >
-        <Skeleton className="hidden h-4 w-72 max-w-full sm:block" />
-        <Skeleton className="h-4 w-20" />
       </div>
       <span className="sr-only">{copy.loading}</span>
     </div>
@@ -130,10 +118,7 @@ export function LogSourcesSkeleton() {
               <FieldLabel>{copy.source}</FieldLabel>
               <div className="flex gap-2">
                 <Skeleton className="h-9 min-w-0 flex-1" />
-                <Skeleton className="size-8" />
-                <Skeleton className="size-8" />
-                <Skeleton className="size-8" />
-                <Skeleton className="size-8" />
+                <Skeleton className="h-9 w-36" />
               </div>
             </Field>
             <Field className="min-w-0 md:col-span-3">
@@ -147,8 +132,7 @@ export function LogSourcesSkeleton() {
           </FieldGroup>
           <div aria-hidden="true" className="mt-2 flex items-center gap-3">
             <Skeleton className="h-4 min-w-0 flex-1" />
-            <Skeleton className="hidden h-4 w-24 sm:block" />
-            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-4 w-20" />
           </div>
         </CardContent>
       </Card>

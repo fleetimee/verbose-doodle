@@ -1,6 +1,5 @@
 import { motion, useReducedMotion } from "motion/react";
 import { useLayoutEffect, useRef, useState } from "react";
-import { ShieldCheck } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -111,6 +110,7 @@ export function StreamViewer({
   const first = pages[0];
   const reduceMotion = useReducedMotion();
   const hasContent = pages.some((page) => page.segments.length > 0);
+  const showEmpty = !(hasContent || loading);
 
   useLayoutEffect(() => {
     const element = viewport.current;
@@ -244,7 +244,23 @@ export function StreamViewer({
         </div>
       )}
       <Separator />
-      <div className="flex min-h-0 flex-1 flex-col bg-muted/15">
+      <div className="relative isolate flex min-h-0 flex-1 flex-col overflow-hidden bg-muted/15">
+        <img
+          alt=""
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute right-3 bottom-2 h-auto max-w-[45%] select-none object-contain object-right-bottom opacity-10 dark:opacity-15",
+            fullscreen
+              ? "max-h-[85%] w-56 sm:w-80 lg:w-112"
+              : "max-h-[75%] w-40 sm:w-56 lg:w-80"
+          )}
+          decoding="async"
+          draggable={false}
+          height={960}
+          loading="lazy"
+          src="/brand/biller-operator-mascot-log-viewer.webp"
+          width={640}
+        />
         {loadingDirection === "older" && (
           <div
             aria-live="polite"
@@ -258,7 +274,7 @@ export function StreamViewer({
         <ScrollArea
           aria-busy={loading}
           aria-label={copy.content}
-          className="min-h-0 flex-1"
+          className={cn("min-h-0 flex-1", showEmpty && "hidden")}
           contentClassName={wordWrap ? "w-full min-w-0" : "min-w-full"}
           onScrollCapture={(event) => {
             const element = viewport.current;
@@ -319,27 +335,17 @@ export function StreamViewer({
                 fontClassName={FONT_SIZE_CLASSES[fontSize - 9]}
               />
             )}
-            {!(hasContent || loading) && (
-              <Empty className="min-h-0">
-                <EmptyHeader>
-                  <EmptyTitle>{copy.noFiles}</EmptyTitle>
-                  <EmptyDescription>{copy.noFilesHint}</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            )}
           </motion.div>
           {!wordWrap && <ScrollBar orientation="horizontal" />}
         </ScrollArea>
-      </div>
-      <Separator />
-      <div className="flex shrink-0 items-center justify-between gap-3 px-3 py-2">
-        <p className="hidden truncate text-muted-foreground text-xs sm:block">
-          {copy.bufferHint}
-        </p>
-        <span className="flex shrink-0 items-center gap-1.5 text-muted-foreground text-xs">
-          <ShieldCheck aria-hidden="true" className="size-3.5" />
-          {copy.readOnly}
-        </span>
+        {showEmpty && (
+          <Empty className="relative min-h-0">
+            <EmptyHeader>
+              <EmptyTitle>{copy.noFiles}</EmptyTitle>
+              <EmptyDescription>{copy.noFilesHint}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
       </div>
     </section>
   );

@@ -3,7 +3,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { FileText } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type {
   DetectedLogLayout,
@@ -114,7 +113,6 @@ export function FolderBrowserLayouts({
   } = useI18n();
   return (
     <>
-      {" "}
       <div className="flex flex-col gap-1">
         <h3 className="font-medium text-sm">{copy.browseDetected}</h3>
         <p className="text-muted-foreground text-xs">
@@ -155,15 +153,8 @@ export function FolderBrowserLayouts({
               </dd>
             </div>
           </dl>
-          <div className="flex flex-wrap gap-1">
-            {layout.streams.map((stream) => (
-              <Badge key={stream} mono size="sm" variant="secondary">
-                {stream}
-              </Badge>
-            ))}
-          </div>
-          <p className="text-muted-foreground text-xs">
-            {layout.matchedFiles} {copy.browseMatched}
+          <p className="break-words font-mono text-muted-foreground text-xs">
+            {layout.streams.join(" · ")}
           </p>
           <details>
             <summary className="cursor-pointer text-muted-foreground text-xs">

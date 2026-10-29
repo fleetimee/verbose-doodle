@@ -1,5 +1,4 @@
 import { FileText } from "@/components/hugeicons";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { LogSegment } from "@/features/log-viewer/types";
 
@@ -9,15 +8,21 @@ export function LogFileHeader({
   file?: Pick<LogSegment, "date" | "filename">;
 }) {
   return (
-    <div className="sticky top-0 flex flex-wrap items-center gap-2 border-b bg-background py-3">
+    <div className="sticky top-0 -mx-4 flex flex-wrap items-center gap-2 border-border/40 border-b bg-card px-4 py-1.5 md:-mx-5 md:px-5">
       {file ? (
-        <Badge mono radius="rounded" variant="outline-muted">
+        <time
+          className="font-mono text-muted-foreground/80 text-xs"
+          dateTime={file.date}
+        >
           {file.date}
-        </Badge>
+        </time>
       ) : (
-        <Skeleton aria-hidden="true" className="h-5 w-24" />
+        <Skeleton aria-hidden="true" className="h-4 w-20" />
       )}
-      <FileText aria-hidden="true" className="size-3.5 text-muted-foreground" />
+      <FileText
+        aria-hidden="true"
+        className="size-3 text-muted-foreground/70"
+      />
       {file ? (
         <span className="break-all font-mono text-muted-foreground text-xs">
           {file.filename}

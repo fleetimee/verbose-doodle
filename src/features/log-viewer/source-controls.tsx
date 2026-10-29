@@ -1,5 +1,6 @@
 import {
-  Clock3,
+  Check,
+  CircleAlert,
   Plus,
   RefreshCw,
   SlidersHorizontal,
@@ -17,8 +18,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Card,
   CardContent,
@@ -36,8 +37,9 @@ import { Spinner } from "@/components/ui/spinner";
 import { LogDatePicker } from "@/features/log-viewer/log-date-picker";
 import { SourcePicker } from "@/features/log-viewer/source-picker";
 import type { LogCatalog, LogSource } from "@/features/log-viewer/types";
+import { cn } from "@/lib/utils";
 
-function SourceStatus({
+function SourceConnectionStatus({
   checking,
   failed,
   connected,
@@ -49,22 +51,28 @@ function SourceStatus({
   const {
     messages: { logViewer: copy },
   } = useI18n();
-  if (failed) {
-    return <Badge variant="destructive">{copy.unavailable}</Badge>;
-  }
-  if (!connected) {
-    return (
-      <Badge variant="secondary">
-        <Spinner />
-        {copy.checking}
-      </Badge>
-    );
+  let icon = <Check aria-hidden="true" className="size-3.5" />;
+  let text = copy.connectionConnected;
+  if (checking) {
+    icon = <Spinner aria-hidden="true" />;
+    text = copy.connectionConnecting;
+  } else if (failed) {
+    icon = <CircleAlert aria-hidden="true" className="size-3.5" />;
+    text = copy.unavailable;
+  } else if (!connected) {
+    return null;
   }
   return (
-    <Badge variant="success">
-      {checking && <Spinner />}
-      {copy.connected}
-    </Badge>
+    <span
+      className={cn(
+        "flex shrink-0 items-center gap-1.5 text-muted-foreground text-xs",
+        failed && !checking && "text-destructive"
+      )}
+      role="status"
+    >
+      {icon}
+      {text}
+    </span>
   );
 }
 
@@ -73,8 +81,8 @@ export function SourceControls({
   sources,
   catalog,
   checking,
-  failed,
   editing,
+  failed,
   deleting,
   from,
   to,
@@ -90,8 +98,8 @@ export function SourceControls({
   sources: LogSource[];
   catalog?: LogCatalog;
   checking: boolean;
-  failed: boolean;
   editing: boolean;
+  failed: boolean;
   deleting: boolean;
   from: string;
   to: string;
@@ -124,65 +132,67 @@ export function SourceControls({
                   sources={sources}
                 />
               </div>
-              <Button
-                aria-label={copy.add}
-                disabled={editing}
-                onClick={onAdd}
-                size="icon-sm"
-                title={copy.add}
-                variant="outline"
-              >
-                <Plus />
-              </Button>
-              <Button
-                aria-label={copy.edit}
-                disabled={editing}
-                onClick={onEdit}
-                size="icon-sm"
-                title={copy.edit}
-                variant="outline"
-              >
-                <SlidersHorizontal />
-              </Button>
-              <Button
-                aria-label={copy.refresh}
-                disabled={checking || !from}
-                onClick={onCheck}
-                size="icon-sm"
-                title={copy.refresh}
-                variant="outline"
-              >
-                {checking ? <Spinner /> : <RefreshCw />}
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger
-                  render={
-                    <Button
-                      aria-label={copy.delete}
-                      disabled={deleting}
-                      size="icon-sm"
-                      title={copy.delete}
-                      variant="ghost-destructive"
-                    />
-                  }
+              <ButtonGroup aria-label={copy.sourceActions}>
+                <Button
+                  aria-label={copy.add}
+                  disabled={editing}
+                  onClick={onAdd}
+                  size="icon"
+                  title={copy.add}
+                  variant="tool-action"
                 >
-                  <Trash2 />
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{copy.deleteTitle}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {copy.deleteDescription}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{copy.cancel}</AlertDialogCancel>
-                    <AlertDialogAction onClick={onDelete}>
-                      {copy.delete}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                  <Plus />
+                </Button>
+                <Button
+                  aria-label={copy.edit}
+                  disabled={editing}
+                  onClick={onEdit}
+                  size="icon"
+                  title={copy.edit}
+                  variant="tool-action"
+                >
+                  <SlidersHorizontal />
+                </Button>
+                <Button
+                  aria-label={copy.refresh}
+                  disabled={checking || !from}
+                  onClick={onCheck}
+                  size="icon"
+                  title={copy.refresh}
+                  variant="tool-action"
+                >
+                  {checking ? <Spinner /> : <RefreshCw />}
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger
+                    render={
+                      <Button
+                        aria-label={copy.delete}
+                        disabled={deleting}
+                        size="icon"
+                        title={copy.delete}
+                        variant="tool-destructive"
+                      />
+                    }
+                  >
+                    <Trash2 />
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{copy.deleteTitle}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {copy.deleteDescription}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{copy.cancel}</AlertDialogCancel>
+                      <AlertDialogAction onClick={onDelete}>
+                        {copy.delete}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </ButtonGroup>
             </div>
           </Field>
           <Field className="min-w-0 md:col-span-3">
@@ -212,14 +222,9 @@ export function SourceControls({
             className="min-w-0 flex-1 truncate font-mono text-muted-foreground text-xs"
             title={catalog?.resolvedPath ?? selected.basePath}
           >
-            {catalog?.resolvedPath ??
-              `\\\\${selected.host}\\${selected.shareName}\\${selected.basePath.replaceAll("/", "\\")}`}
+            {catalog?.resolvedPath ?? selected.basePath}
           </code>
-          <span className="hidden shrink-0 items-center gap-1.5 text-muted-foreground text-xs sm:flex">
-            <Clock3 aria-hidden="true" className="size-3.5" />
-            {selected.timezone}
-          </span>
-          <SourceStatus
+          <SourceConnectionStatus
             checking={checking}
             connected={!!catalog}
             failed={failed}

@@ -1,4 +1,8 @@
 export const logViewerMessages = {
+  sourceActions: "Source actions",
+  connectionConnected: "Connected",
+  connectionConnecting: "Connecting…",
+
   rotationOrder: "Rotation index order",
   rotationAuto: "Automatic",
   rotationAscending: "Larger indexes are newer",

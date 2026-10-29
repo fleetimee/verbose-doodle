@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { FileTerminal, FileText, Plus } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -328,11 +327,6 @@ export function LogViewerPage() {
                             </TabsList>
                             <ScrollBar orientation="horizontal" />
                           </ScrollArea>
-                          {catalog.data && (
-                            <Badge variant="secondary">
-                              {catalog.data.files.length} {copy.fileCount}
-                            </Badge>
-                          )}
                         </div>
                         <TabsContent
                           className="min-h-0 flex-1 overflow-hidden"
