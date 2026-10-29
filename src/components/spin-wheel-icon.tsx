@@ -5,48 +5,17 @@ const WHEEL_ICON: IconSvgElement = [
   [
     "path",
     {
-      d: "M12 13V4.5A8.5 8.5 0 0 1 20.5 13Z",
-      fill: "var(--wheel-color-1)",
+      d: "M12 5.5a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm0 6.3a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4Z",
+      fill: "currentColor",
+      fillRule: "evenodd",
       stroke: "none",
-      key: "red",
+      key: "wheel",
     },
   ],
   [
     "path",
     {
-      d: "M12 13H20.5A8.5 8.5 0 0 1 12 21.5Z",
-      fill: "var(--wheel-color-3)",
-      stroke: "none",
-      key: "blue",
-    },
-  ],
-  [
-    "path",
-    {
-      d: "M12 13V21.5A8.5 8.5 0 0 1 3.5 13Z",
-      fill: "var(--wheel-color-4)",
-      stroke: "none",
-      key: "yellow",
-    },
-  ],
-  [
-    "path",
-    {
-      d: "M12 13H3.5A8.5 8.5 0 0 1 12 4.5Z",
-      fill: "var(--wheel-color-2)",
-      stroke: "none",
-      key: "green",
-    },
-  ],
-  ["circle", { cx: "12", cy: "13", r: "8.5", fill: "none", key: "rim" }],
-  [
-    "circle",
-    { cx: "12", cy: "13", r: "1.7", fill: "var(--background)", key: "hub" },
-  ],
-  [
-    "path",
-    {
-      d: "M10 1.5h4L12 6Z",
+      d: "M9.5 1.5h5L12 5Z",
       fill: "currentColor",
       stroke: "none",
       key: "pointer",

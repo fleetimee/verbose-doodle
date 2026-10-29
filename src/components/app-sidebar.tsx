@@ -149,13 +149,6 @@ export function getSidebarData(
       },
       {
         groupLabel: messages.common.navWorkspace,
-        icon: SpinWheelIcon,
-        title: messages.wheel.title,
-        description: messages.wheel.description,
-        url: "/dashboard/wheel",
-      },
-      {
-        groupLabel: messages.common.navWorkspace,
         icon: FileClock,
         title: messages.tempFiles.title,
         description: messages.tempFiles.description,
@@ -380,6 +373,13 @@ export function getSidebarData(
         ],
         title: category.name,
       })).filter((category) => category.items.length > 0),
+      {
+        groupLabel: messages.common.navFun,
+        icon: SpinWheelIcon,
+        title: messages.wheel.title,
+        description: messages.wheel.description,
+        url: "/dashboard/wheel",
+      },
       {
         groupLabel: messages.common.navFun,
         icon: GamesIcon,
