@@ -571,7 +571,7 @@ export function ServerContainerProcessesCard({
             />
             {search && (
               <button
-                aria-label={messages.common.clear}
+                aria-label={copy.logsClear}
                 className="absolute right-1.5 flex size-4 items-center justify-center rounded text-muted-foreground hover:text-foreground"
                 onClick={() => setSearch("")}
                 type="button"
