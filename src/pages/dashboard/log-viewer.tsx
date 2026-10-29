@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { FileTerminal, FileText, Plus } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
@@ -57,13 +57,38 @@ function initialDate() {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-export function LogViewerPage() {
-  const { messages } = useI18n();
-  const copy = messages.logViewer;
-  const reduceMotion = useReducedMotion();
+const EXPAND_EASING = "cubic-bezier(0.23, 1, 0.32, 1)";
+const EXPAND_DURATION_MS = 240;
+const EXPAND_REDUCED_MS = 120;
+
+function animateWorkspace(
+  workspace: HTMLDivElement,
+  keyframes: Keyframe[],
+  duration: number,
+  animationRef: React.RefObject<Animation | null>
+) {
+  animationRef.current?.cancel();
+  const animation = workspace.animate(keyframes, {
+    duration,
+    easing: EXPAND_EASING,
+  });
+  animationRef.current = animation;
+  return animation;
+}
+
+function useLogViewerDisplayMode(
+  fullscreenFailedMessage: string,
+  reduceMotion: boolean
+) {
+  const workspaceRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
+  const previousRectRef = useRef<DOMRect | null>(null);
+  const animationRef = useRef<Animation | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
   const [fullscreenSupported, setFullscreenSupported] = useState(false);
+  const [maximized, setMaximized] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+
   useEffect(() => {
     setFullscreenSupported(document.fullscreenEnabled);
     const update = () =>
@@ -74,6 +99,87 @@ export function LogViewerPage() {
     document.addEventListener("fullscreenchange", update);
     return () => document.removeEventListener("fullscreenchange", update);
   }, []);
+
+  useLayoutEffect(() => {
+    const first = previousRectRef.current;
+    const workspace = workspaceRef.current;
+    if (!(first && workspace)) {
+      return;
+    }
+    previousRectRef.current = null;
+    if (reduceMotion) {
+      const animation = animateWorkspace(
+        workspace,
+        [{ opacity: 0 }, { opacity: 1 }],
+        EXPAND_REDUCED_MS,
+        animationRef
+      );
+      animation.onfinish = () => {
+        if (animationRef.current === animation) {
+          animationRef.current = null;
+          setRestoring(false);
+        }
+      };
+      return;
+    }
+    const last = workspace.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    const sx = first.width / last.width;
+    const sy = first.height / last.height;
+    const animation = animateWorkspace(
+      workspace,
+      [
+        {
+          transformOrigin: "0 0",
+          transform: `translate3d(${dx}px, ${dy}px, 0) scale(${sx}, ${sy})`,
+        },
+        {
+          transformOrigin: "0 0",
+          transform: "translate3d(0, 0, 0) scale(1, 1)",
+        },
+      ],
+      EXPAND_DURATION_MS,
+      animationRef
+    );
+    animation.onfinish = () => {
+      if (animationRef.current === animation) {
+        animationRef.current = null;
+        setRestoring(false);
+      }
+    };
+  }, [maximized, reduceMotion]);
+
+  function toggleMaximized() {
+    if (workspaceRef.current) {
+      previousRectRef.current = workspaceRef.current.getBoundingClientRect();
+    }
+    if (maximized) {
+      setRestoring(true);
+      setMaximized(false);
+    } else {
+      setRestoring(false);
+      setMaximized(true);
+    }
+  }
+
+  useEffect(() => {
+    if (!maximized || fullscreen) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !event.defaultPrevented) {
+        animationRef.current?.cancel();
+        animationRef.current = null;
+        previousRectRef.current = null;
+        setRestoring(false);
+        setMaximized(false);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [maximized, fullscreen]);
+
   async function toggleFullscreen() {
     const viewer = viewerRef.current;
     if (!viewer) {
@@ -86,9 +192,38 @@ export function LogViewerPage() {
         await viewer.requestFullscreen();
       }
     } catch {
-      toast.error(copy.fullscreenFailed);
+      toast.error(fullscreenFailedMessage);
     }
   }
+
+  return {
+    workspaceRef,
+    viewerRef,
+    fullscreen,
+    fullscreenSupported,
+    maximized,
+    maximizedAttr: maximized ? true : undefined,
+    restoringAttr: restoring ? true : undefined,
+    toggleFullscreen,
+    toggleMaximized,
+  };
+}
+
+export function LogViewerPage() {
+  const { messages } = useI18n();
+  const copy = messages.logViewer;
+  const reduceMotion = useReducedMotion();
+  const {
+    workspaceRef,
+    viewerRef,
+    fullscreen,
+    fullscreenSupported,
+    maximized,
+    maximizedAttr,
+    restoringAttr,
+    toggleFullscreen,
+    toggleMaximized,
+  } = useLogViewerDisplayMode(copy.fullscreenFailed, Boolean(reduceMotion));
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useLocalStorage(
     "log-viewer-selected-source",
@@ -137,7 +272,12 @@ export function LogViewerPage() {
   });
 
   return (
-    <div className="mx-auto flex h-full min-h-0 w-full min-w-0 max-w-[1600px] flex-1 flex-col gap-3 overflow-hidden">
+    <div
+      className="log-viewer-workspace mx-auto flex h-full min-h-0 w-full min-w-0 max-w-[1600px] flex-1 flex-col gap-3 overflow-hidden"
+      data-maximized={maximizedAttr}
+      data-restoring={restoringAttr}
+      ref={workspaceRef}
+    >
       <h1 className="sr-only">{copy.title}</h1>
       {sources.isPending && <LogSourcesSkeleton />}
       {sources.error && !sources.data && (
@@ -303,11 +443,10 @@ export function LogViewerPage() {
                         value={activeStream}
                         variant="flush"
                       >
-                        <div className="flex shrink-0 items-center justify-between gap-3 px-3 py-2">
+                        <div className="flex shrink-0 items-center justify-between gap-2 px-2.5 py-1">
                           <ScrollArea
                             className="min-w-0 flex-1"
                             contentClassName="w-max"
-                            contentSize="table"
                           >
                             <TabsList
                               aria-label={copy.streams}
@@ -352,7 +491,9 @@ export function LogViewerPage() {
                                 fullscreenSupported={fullscreenSupported}
                                 id={selected.id}
                                 key={`${selected.id}:${selected.updatedAt}:${activeStream}:${from}:${to}`}
+                                maximized={maximized}
                                 onFullscreen={toggleFullscreen}
+                                onMaximize={toggleMaximized}
                                 stream={activeStream}
                                 to={to}
                               />

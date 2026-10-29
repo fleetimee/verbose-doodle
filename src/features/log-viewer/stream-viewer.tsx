@@ -36,6 +36,33 @@ const FONT_SIZE_CLASSES = [
   "text-[18px]",
 ];
 
+function downloadLogText(
+  files: { filename: string; date: string; segments: LogSegment[] }[],
+  stream: string,
+  from: string,
+  to: string,
+  filtered: boolean
+) {
+  const parts = files.map((file) => {
+    const body = file.segments.map((segment) => segment.text).join("");
+    return files.length > 1
+      ? `=== ${file.date} · ${file.filename} ===\n${body}`
+      : body;
+  });
+  const blob = new Blob([parts.join("\n")], {
+    type: "text/plain;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const safeStream = stream.replace(/[^a-zA-Z0-9._-]+/g, "_");
+  const range = to ? `${from}_to_${to}` : from;
+  link.href = url;
+  link.download = `${safeStream}-${range}${filtered ? "-filtered" : ""}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
 function groupLogSegments(segments: LogSegment[]) {
   const files: { filename: string; date: string; segments: LogSegment[] }[] =
     [];
@@ -54,6 +81,70 @@ function groupLogSegments(segments: LogSegment[]) {
   return files;
 }
 
+const LOG_ENTRY_START =
+  /^(?:\[(?:\d{2}[/-]\d{2}[/-]\d{4}[ \t]+|\d{4}[/-]\d{2}[/-]\d{2}[ \tT]+)?\d{2}:\d{2}:\d{2}|(?:\d{4}[/-]\d{2}[/-]\d{2}|\d{2}[/-]\d{2}[/-]\d{4})[ \tT]+\d{2}:\d{2}:\d{2}|\d{2}:\d{2}:\d{2}(?:[.,]\d+)?[ \t]+|[A-Z][a-z]{2}[ \t]+\d{1,2}[ \t]+\d{2}:\d{2}:\d{2})/;
+
+function splitLogEntries(text: string): string[] {
+  const lines = text.split("\n");
+  if (lines.at(-1) === "") {
+    lines.pop();
+  }
+  const hasTimestampedEntries = lines.some((line) =>
+    LOG_ENTRY_START.test(line)
+  );
+  if (!hasTimestampedEntries) {
+    return lines.map((line) => `${line}\n`);
+  }
+  const entries: string[] = [];
+  let current: string[] = [];
+  for (const line of lines) {
+    if (LOG_ENTRY_START.test(line) && current.length > 0) {
+      entries.push(`${current.join("\n")}\n`);
+      current = [line];
+    } else {
+      current.push(line);
+    }
+  }
+  if (current.length > 0) {
+    entries.push(`${current.join("\n")}\n`);
+  }
+  return entries;
+}
+
+function filterLogFiles(
+  files: { filename: string; date: string; segments: LogSegment[] }[],
+  query: string
+) {
+  const needle = query.toLocaleLowerCase();
+  if (!needle) {
+    return files;
+  }
+  const filtered: { filename: string; date: string; segments: LogSegment[] }[] =
+    [];
+  for (const file of files) {
+    const firstSegment = file.segments[0];
+    if (!firstSegment) {
+      continue;
+    }
+    const fullText = file.segments.map((segment) => segment.text).join("");
+    const matchingEntries = splitLogEntries(fullText).filter((entry) =>
+      entry.toLocaleLowerCase().includes(needle)
+    );
+    if (matchingEntries.length > 0) {
+      filtered.push({
+        ...file,
+        segments: [
+          {
+            ...firstSegment,
+            text: matchingEntries.join(""),
+          },
+        ],
+      });
+    }
+  }
+  return filtered;
+}
+
 export function StreamViewer({
   id,
   stream,
@@ -61,7 +152,9 @@ export function StreamViewer({
   to,
   fullscreen,
   fullscreenSupported,
+  maximized,
   onFullscreen,
+  onMaximize,
 }: {
   id: string;
   stream: string;
@@ -69,7 +162,9 @@ export function StreamViewer({
   to: string;
   fullscreen: boolean;
   fullscreenSupported: boolean;
+  maximized: boolean;
   onFullscreen: () => void;
+  onMaximize: () => void;
 }) {
   const { messages } = useI18n();
   const copy = messages.logViewer;
@@ -82,6 +177,13 @@ export function StreamViewer({
     }
   );
   const [query, setQuery] = useState("");
+  const [filterMatches, setFilterMatches] = useLocalStorage(
+    "log-viewer-filter-matches",
+    false,
+    {
+      deserializer: (value) => value === "true",
+    }
+  );
   const searchInput = useRef<HTMLInputElement>(null);
   const [fontSize, setFontSize] = useLocalStorage("log-viewer-font-size", 10, {
     deserializer: (value) => {
@@ -99,8 +201,10 @@ export function StreamViewer({
     load,
   } = useLogStream(id, stream, from, to, follow);
   const viewport = useRef<HTMLDivElement>(null);
-  const search = useLogSearch(viewport, pages, query);
-  const files = groupLogSegments(pages.flatMap((page) => page.segments));
+  const search = useLogSearch(viewport, pages, query, filterMatches);
+  const allFiles = groupLogSegments(pages.flatMap((page) => page.segments));
+  const files =
+    filterMatches && query ? filterLogFiles(allFiles, query) : allFiles;
   const anchor = useRef<{
     pages: typeof pages;
     segment: string;
@@ -111,6 +215,8 @@ export function StreamViewer({
   const reduceMotion = useReducedMotion();
   const hasContent = pages.some((page) => page.segments.length > 0);
   const showEmpty = !(hasContent || loading);
+  const showFilteredEmpty =
+    hasContent && Boolean(filterMatches && query) && files.length === 0;
 
   useLayoutEffect(() => {
     const element = viewport.current;
@@ -136,7 +242,7 @@ export function StreamViewer({
     } else if (follow && hasContent) {
       element.scrollTop = element.scrollHeight;
     }
-  }, [pages, follow, fontSize, fullscreen, hasContent]);
+  }, [pages, follow, fontSize, fullscreen, maximized, hasContent]);
 
   async function older() {
     if (olderPending.current || loading || !first?.hasOlder) {
@@ -171,12 +277,23 @@ export function StreamViewer({
     >
       <Separator />
       <LogToolbar
+        canExport={files.length > 0}
         canLoadOlder={!!first?.hasOlder}
         follow={follow}
         fontSize={fontSize}
         fullscreen={fullscreen}
         fullscreenSupported={fullscreenSupported}
         loading={loading}
+        maximized={maximized}
+        onExport={() =>
+          downloadLogText(
+            files,
+            stream,
+            from,
+            to,
+            Boolean(filterMatches && query)
+          )
+        }
         onFollow={(checked) => {
           anchor.current = null;
           if (checked) {
@@ -192,6 +309,7 @@ export function StreamViewer({
           setFollow(true);
           load("latest");
         }}
+        onMaximize={onMaximize}
         onOlder={older}
         onWordWrap={(checked) => {
           setWordWrap(checked);
@@ -202,7 +320,9 @@ export function StreamViewer({
         search={{
           ...search,
           query,
+          filterMatches,
           inputRef: searchInput,
+          onFilterMatchesChange: setFilterMatches,
           onChange: (value) => {
             setQuery(value);
             if (value) {
@@ -250,7 +370,7 @@ export function StreamViewer({
           aria-hidden="true"
           className={cn(
             "pointer-events-none absolute right-3 bottom-2 h-auto max-w-[45%] select-none object-contain object-right-bottom opacity-10 dark:opacity-15",
-            fullscreen
+            fullscreen || maximized
               ? "max-h-[85%] w-56 sm:w-80 lg:w-112"
               : "max-h-[75%] w-40 sm:w-56 lg:w-80"
           )}
@@ -274,7 +394,10 @@ export function StreamViewer({
         <ScrollArea
           aria-busy={loading}
           aria-label={copy.content}
-          className={cn("min-h-0 flex-1", showEmpty && "hidden")}
+          className={cn(
+            "min-h-0 flex-1",
+            (showEmpty || showFilteredEmpty) && "hidden"
+          )}
           contentClassName={wordWrap ? "w-full min-w-0" : "min-w-full"}
           onScrollCapture={(event) => {
             const element = viewport.current;
@@ -343,6 +466,14 @@ export function StreamViewer({
             <EmptyHeader>
               <EmptyTitle>{copy.noFiles}</EmptyTitle>
               <EmptyDescription>{copy.noFilesHint}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
+        {showFilteredEmpty && (
+          <Empty className="relative min-h-0">
+            <EmptyHeader>
+              <EmptyTitle>{copy.noSearchMatches}</EmptyTitle>
+              <EmptyDescription>{copy.searchScope}</EmptyDescription>
             </EmptyHeader>
           </Empty>
         )}
