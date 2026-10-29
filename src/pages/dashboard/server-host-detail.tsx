@@ -22,6 +22,7 @@ import { ServerContainerDetailPanel } from "@/features/server-inventory/componen
 import { ServerContainerGrid } from "@/features/server-inventory/components/server-container-grid";
 import { ServerHostCard } from "@/features/server-inventory/components/server-metrics";
 import { ServerPlatformIcon } from "@/features/server-inventory/components/server-platform-icon";
+import { ServerProcesses } from "@/features/server-inventory/components/server-processes";
 import {
   ServerSpec,
   useDockerMissing,
@@ -44,6 +45,7 @@ function LinuxHostSections({
       <section aria-label={copy.overview}>
         <ServerHostCard detail entry={entry} paused={paused} />
       </section>
+      <ServerProcesses entry={entry} paused={paused} />
       <ServerSpec entry={entry} paused={paused} />
       {!noDocker && (
         <section className="flex min-w-0 flex-col gap-4">

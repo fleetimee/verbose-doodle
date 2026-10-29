@@ -173,3 +173,35 @@ export interface ServerCleanupInspection {
     type: string;
   }[];
 }
+
+export interface ServerProcess {
+  command: string;
+  cpuPercent: number;
+  memoryBytes: number;
+  memoryPercent: number;
+  name: string;
+  pid: number;
+  threads: number;
+  user: string;
+}
+
+export interface ServerProcesses {
+  collectedAt: string | null;
+  cores: number | null;
+  cpuPercent: number | null;
+  diskReadBytesPerSecond: number | null;
+  diskWriteBytesPerSecond: number | null;
+  loadAverage: string | null;
+  memoryAvailableBytes: number | null;
+  memoryCachedBytes: number | null;
+  memoryFreeBytes: number | null;
+  memoryTotalBytes: number | null;
+  memoryUsedBytes: number | null;
+  networkReceiveBytesPerSecond: number | null;
+  networkTransmitBytesPerSecond: number | null;
+  perCore: number[] | null;
+  processes: ServerProcess[] | null;
+  status: string;
+  taskCount: number | null;
+  uptimeSeconds: number | null;
+}
