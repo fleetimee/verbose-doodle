@@ -331,6 +331,19 @@ export function TempFilesWorkspace() {
             ) : null}
           </div>
         </ScrollArea>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none relative hidden h-96 max-h-[60%] shrink-0 select-none lg:block xl:h-112 [@media(max-height:700px)]:hidden"
+        >
+          <img
+            alt=""
+            className="absolute right-4 bottom-0 h-full w-auto max-w-full object-contain opacity-30"
+            draggable={false}
+            height={768}
+            src="/brand/biller-operator-mascot-file-sharing.webp"
+            width={512}
+          />
+        </div>
       </section>
     </DeveloperToolLayout>
   );

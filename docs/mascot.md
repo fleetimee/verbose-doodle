@@ -76,3 +76,24 @@ Pose prompts:
   hands, looking at the timer, tablet tucked at her side.
 - Timeout: peacefully asleep sitting down, closed eyes, cheek resting on the
   tablet, relaxed ears, tail curled beside her feet, small crescent moon.
+
+## Temporary file sharing
+
+The temporary-files workspace uses a transparent illustration of the standard
+mascot in its desktop file-panel corner. She presents the upload area with one
+open hand and holds a charcoal tablet with a mint upload symbol. Preserve her
+character identity and original colors. The decorative footer reserves its own
+space, ignores pointer input, and is hidden on narrow or short viewports to keep
+file actions accessible without page scrolling.
+
+Asset: [File-sharing mascot](../public/brand/biller-operator-mascot-file-sharing.webp).
+Generated with the built-in image generation tool using the standard mascot as
+the identity reference, then edited with the same tool to remove background glow.
+
+Prompt: original polished anime cutout of the reference adult horse-girl operator,
+brown ponytail with mint streaks, amber-green eyes, cream jacket, charcoal outfit,
+receipt hair clip, ears and tail preserved. Friendly smile, open hand presenting
+screen-left, other hand holding a charcoal file tablet with a mint upload arrow.
+Three-quarter figure, clean cel shading, transparent background, no text or scene.
+Cleanup prompt: preserve the character exactly; remove all background glow, haze,
+halo and shadow; outside the character use alpha zero with clean natural edges.
