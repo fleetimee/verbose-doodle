@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { CopyIcon, Download, FileText, Trash2 } from "@/components/hugeicons";
+import { CopyIcon, Download, Trash2 } from "@/components/hugeicons";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -22,6 +22,7 @@ import {
   type TempFile,
   tempFileDownloadUrl,
 } from "@/features/temp-files/api";
+import { FileTypeIcon } from "@/features/temp-files/file-type-icon";
 import { copyToClipboard } from "@/lib/clipboard";
 import { formatMessage, messages } from "@/lib/i18n";
 
