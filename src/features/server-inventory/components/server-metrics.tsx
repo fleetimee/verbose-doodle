@@ -102,19 +102,20 @@ function Measurements({
 }) {
   const copy = useI18n().messages.servers.metrics;
   const diskLabel = windows ? copy.diskWindows : copy.disk;
-  const diskList = metrics.disks?.length
-    ? metrics.disks.map((disk) => ({
-        label: formatMessage(copy.diskNamed, { name: disk.name }),
-        total: disk.totalBytes,
-        used: disk.usedBytes,
-      }))
-    : [
-        {
-          label: diskLabel,
-          total: metrics.diskTotalBytes,
-          used: metrics.diskUsedBytes,
-        },
-      ];
+  const diskList =
+    metrics.disks?.length && (large || windows)
+      ? metrics.disks.map((disk) => ({
+          label: formatMessage(copy.diskNamed, { name: disk.name }),
+          total: disk.totalBytes,
+          used: disk.usedBytes,
+        }))
+      : [
+          {
+            label: diskLabel,
+            total: metrics.diskTotalBytes,
+            used: metrics.diskUsedBytes,
+          },
+        ];
   if (diskOnly) {
     return (
       <div className="grid @min-[22rem]:grid-cols-3 grid-cols-2 gap-x-3 gap-y-4">
@@ -141,72 +142,80 @@ function Measurements({
       </div>
     );
   }
+  const diskGauge = (disk: (typeof diskList)[number]) => (
+    <MetricGauge
+      detail={
+        <>
+          <span className="whitespace-nowrap">
+            {metricBytes(disk.used, true)}
+          </span>
+          <span className="whitespace-nowrap text-muted-foreground">
+            {formatMessage(copy.totalCapacity, {
+              total: metricBytes(disk.total, true),
+            })}
+          </span>
+        </>
+      }
+      key={disk.label}
+      label={disk.label}
+      large={large}
+      percent={usagePercent(disk.used, disk.total)}
+    />
+  );
   return (
-    <div className="grid @min-[22rem]:grid-cols-5 grid-cols-3 gap-x-3 gap-y-4">
-      <MetricGauge
-        detail={
-          metrics.cores === null
-            ? "—"
-            : formatMessage(copy.cores, { count: metrics.cores })
-        }
-        label={copy.cpu}
-        large={large}
-        percent={metrics.cpuPercent}
-      />
-      <MetricGauge
-        detail={
-          <>
-            <span className="whitespace-nowrap">
-              {metricBytes(metrics.memoryUsedBytes, true)}
-            </span>
-            <span className="whitespace-nowrap text-muted-foreground">
-              {formatMessage(copy.totalCapacity, {
-                total: metricBytes(metrics.memoryTotalBytes, true),
-              })}
-            </span>
-          </>
-        }
-        label={copy.memory}
-        large={large}
-        percent={usagePercent(
-          metrics.memoryUsedBytes,
-          metrics.memoryTotalBytes
-        )}
-      />
-      {diskList.map((disk) => (
+    <div className="flex flex-col gap-4">
+      <div className="grid @min-[22rem]:grid-cols-5 grid-cols-3 gap-x-3 gap-y-4">
+        <MetricGauge
+          detail={
+            metrics.cores === null
+              ? "—"
+              : formatMessage(copy.cores, { count: metrics.cores })
+          }
+          label={copy.cpu}
+          large={large}
+          percent={metrics.cpuPercent}
+        />
         <MetricGauge
           detail={
             <>
               <span className="whitespace-nowrap">
-                {metricBytes(disk.used, true)}
+                {metricBytes(metrics.memoryUsedBytes, true)}
               </span>
               <span className="whitespace-nowrap text-muted-foreground">
                 {formatMessage(copy.totalCapacity, {
-                  total: metricBytes(disk.total, true),
+                  total: metricBytes(metrics.memoryTotalBytes, true),
                 })}
               </span>
             </>
           }
-          key={disk.label}
-          label={disk.label}
+          label={copy.memory}
           large={large}
-          percent={usagePercent(disk.used, disk.total)}
+          percent={usagePercent(
+            metrics.memoryUsedBytes,
+            metrics.memoryTotalBytes
+          )}
         />
-      ))}
-      <MetricRates
-        first={metrics.networkReceiveBytesPerSecond}
-        firstLabel={copy.receive}
-        label={copy.network}
-        second={metrics.networkTransmitBytesPerSecond}
-        secondLabel={copy.transmit}
-      />
-      <MetricRates
-        first={metrics.diskReadBytesPerSecond}
-        firstLabel={copy.read}
-        label={copy.io}
-        second={metrics.diskWriteBytesPerSecond}
-        secondLabel={copy.write}
-      />
+        {diskGauge(diskList[0])}
+        <MetricRates
+          first={metrics.networkReceiveBytesPerSecond}
+          firstLabel={copy.receive}
+          label={copy.network}
+          second={metrics.networkTransmitBytesPerSecond}
+          secondLabel={copy.transmit}
+        />
+        <MetricRates
+          first={metrics.diskReadBytesPerSecond}
+          firstLabel={copy.read}
+          label={copy.io}
+          second={metrics.diskWriteBytesPerSecond}
+          secondLabel={copy.write}
+        />
+      </div>
+      {diskList.length > 1 && (
+        <div className="grid @min-[22rem]:grid-cols-5 grid-cols-3 gap-x-3 gap-y-4">
+          {diskList.slice(1).map(diskGauge)}
+        </div>
+      )}
     </div>
   );
 }
