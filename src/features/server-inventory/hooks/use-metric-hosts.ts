@@ -9,7 +9,7 @@ let activeChecks = 0;
 const waitingChecks: (() => void)[] = [];
 
 async function checkWindowsMetrics(entry: ServerEntry, signal: AbortSignal) {
-  if (activeChecks >= 6) {
+  if (activeChecks >= 2) {
     await new Promise<void>((resolve) => waitingChecks.push(resolve));
   } else {
     activeChecks += 1;
@@ -82,11 +82,10 @@ export function useMetricHosts(search: string, paused: boolean) {
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         checkWindowsMetrics(entry, signal),
       enabled: Boolean(entry.hasPassword && entry.username) && !paused,
-      refetchInterval: paused ? (false as const) : 30_000,
-      refetchIntervalInBackground: false,
-      staleTime: 5000,
+      refetchOnWindowFocus: false,
+      staleTime: 60_000,
       retry: false,
-      gcTime: 0,
+      gcTime: 300_000,
     })),
   });
   const available = new Set(

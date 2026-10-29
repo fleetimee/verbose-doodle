@@ -112,6 +112,32 @@ function buildGroups(
   ];
 }
 
+export function containerPollInterval(
+  paused: boolean,
+  status: string | undefined
+) {
+  if (paused) {
+    return false as const;
+  }
+  if (
+    status === "DOCKER_NOT_INSTALLED" ||
+    status === "UNSUPPORTED_OS" ||
+    status === "HOST_KEY_REQUIRED" ||
+    status === "HOST_KEY_REJECTED" ||
+    status === "AUTH_FAILED"
+  ) {
+    return false as const;
+  }
+  if (
+    status === "DOCKER_UNAVAILABLE" ||
+    status === "CONNECTION_FAILED" ||
+    status === "COLLECTION_FAILED"
+  ) {
+    return 20_000;
+  }
+  return 5000;
+}
+
 export function useDockerMissing(
   entry: ServerEntry | undefined,
   paused: boolean
@@ -120,10 +146,11 @@ export function useDockerMissing(
     queryKey: ["server-inventory", "containers", entry?.id, entry?.updatedAt],
     queryFn: ({ signal }) => fetchServerContainers(entry?.id ?? "", signal),
     enabled: Boolean(entry?.hasPassword && entry.username) && !paused,
-    refetchInterval: paused ? false : 5000,
+    refetchInterval: (current) =>
+      containerPollInterval(paused, current.state.data?.status),
     refetchIntervalInBackground: false,
     retry: false,
-    gcTime: 0,
+    gcTime: 30_000,
   });
   return query.data?.status === "DOCKER_NOT_INSTALLED";
 }

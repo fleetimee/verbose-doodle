@@ -317,10 +317,30 @@ export function ServerHostCard({
     queryKey: ["server-inventory", "metrics", entry.id, entry.updatedAt],
     queryFn: ({ signal }) => fetchServerMetrics(entry.id, signal),
     enabled: eligible && !paused,
-    refetchInterval: paused ? false : 5000,
+    refetchInterval: (current) => {
+      if (paused) {
+        return false;
+      }
+      const currentStatus = current.state.data?.status;
+      if (
+        currentStatus === "HOST_KEY_REQUIRED" ||
+        currentStatus === "HOST_KEY_REJECTED" ||
+        currentStatus === "AUTH_FAILED" ||
+        currentStatus === "UNSUPPORTED_OS"
+      ) {
+        return false;
+      }
+      if (
+        currentStatus === "CONNECTION_FAILED" ||
+        currentStatus === "COLLECTION_FAILED"
+      ) {
+        return 20_000;
+      }
+      return 5000;
+    },
     refetchIntervalInBackground: false,
     retry: false,
-    gcTime: 0,
+    gcTime: 30_000,
   });
   const data = query.data;
   const status = data?.status ?? "";

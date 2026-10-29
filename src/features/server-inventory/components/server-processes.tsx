@@ -968,10 +968,30 @@ export function ServerProcesses({
     queryKey: ["server-inventory", "processes", entry.id, entry.updatedAt],
     queryFn: ({ signal }) => fetchServerProcesses(entry.id, signal),
     enabled: Boolean(entry.hasPassword && entry.username) && !paused,
-    refetchInterval: paused ? false : 3000,
+    refetchInterval: (current) => {
+      if (paused) {
+        return false;
+      }
+      const currentStatus = current.state.data?.status;
+      if (
+        currentStatus === "UNSUPPORTED_OS" ||
+        currentStatus === "HOST_KEY_REQUIRED" ||
+        currentStatus === "HOST_KEY_REJECTED" ||
+        currentStatus === "AUTH_FAILED"
+      ) {
+        return false;
+      }
+      if (
+        currentStatus === "CONNECTION_FAILED" ||
+        currentStatus === "COLLECTION_FAILED"
+      ) {
+        return 15_000;
+      }
+      return 3000;
+    },
     refetchIntervalInBackground: false,
     retry: false,
-    gcTime: 0,
+    gcTime: 30_000,
   });
 
   const data = query.data?.status === "OK" ? query.data : undefined;

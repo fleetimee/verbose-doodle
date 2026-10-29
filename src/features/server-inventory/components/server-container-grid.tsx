@@ -27,6 +27,7 @@ import {
   ServerContainerCardSkeleton,
 } from "@/features/server-inventory/components/server-container-card";
 import { useContainerError } from "@/features/server-inventory/components/server-container-status";
+import { containerPollInterval } from "@/features/server-inventory/components/server-spec";
 import type { ServerEntry } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
 
@@ -48,10 +49,11 @@ export function ServerContainerGrid({
     queryKey: ["server-inventory", "containers", entry.id, entry.updatedAt],
     queryFn: ({ signal }) => fetchServerContainers(entry.id, signal),
     enabled: eligible && !paused,
-    refetchInterval: paused ? false : 5000,
+    refetchInterval: (current) =>
+      containerPollInterval(paused, current.state.data?.status),
     refetchIntervalInBackground: false,
     retry: false,
-    gcTime: 0,
+    gcTime: 30_000,
   });
   const data = query.data;
   const ready = data?.status === "OK" && !query.isError;

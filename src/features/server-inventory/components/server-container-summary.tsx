@@ -92,10 +92,32 @@ export function ServerDockerSummary({
     ],
     queryFn: ({ signal }) => fetchServerContainerSummary(entry.id, signal),
     enabled: eligible && !paused,
-    refetchInterval: paused ? false : 5000,
+    refetchInterval: (current) => {
+      if (paused) {
+        return false;
+      }
+      const status = current.state.data?.status;
+      if (
+        status === "DOCKER_NOT_INSTALLED" ||
+        status === "UNSUPPORTED_OS" ||
+        status === "HOST_KEY_REQUIRED" ||
+        status === "HOST_KEY_REJECTED" ||
+        status === "AUTH_FAILED"
+      ) {
+        return false;
+      }
+      if (
+        status === "DOCKER_UNAVAILABLE" ||
+        status === "CONNECTION_FAILED" ||
+        status === "COLLECTION_FAILED"
+      ) {
+        return 30_000;
+      }
+      return 10_000;
+    },
     refetchIntervalInBackground: false,
     retry: false,
-    gcTime: 0,
+    gcTime: 60_000,
   });
   const data = query.data;
   const ready = data?.status === "OK" && !query.isError;
