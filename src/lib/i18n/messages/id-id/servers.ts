@@ -8,10 +8,14 @@ export const serversMessages = {
     largestFolders: "Folder menurut penggunaan disk",
     foldersScope:
       "Buka folder untuk melihat file dan subfolder. File dimuat 100 per halaman. Ukuran bergantung pada batas pemindaian dan izin SSH.",
+    foldersScopeWindows:
+      "Buka folder untuk melihat file dan subfolder. File dimuat 100 per halaman. Ukuran bergantung pada batas pemindaian dan izin share administratif SMB (C$).",
     foldersPartial:
       "Ukuran belum lengkap — sebagian penggunaan mungkin belum terhitung.",
     foldersUnavailable:
       "Pemindaian tidak tersedia. Coba lagi atau periksa melalui SSH.",
+    foldersUnavailableWindows:
+      "Pemindaian tidak tersedia. Coba lagi atau periksa melalui Desktop Jarak Jauh.",
     foldersEmpty: "Tidak ada file atau subfolder.",
 
     copyCleanupCommand: "Salin perintah pembersihan",
@@ -35,6 +39,8 @@ export const serversMessages = {
       "Periksa penggunaan penyimpanan sebelum menentukan yang akan dihapus.",
     scope:
       "Satu akun per host. Host Linux dibaca melalui SSH: memori tidak menghitung cache yang dapat diklaim kembali, penggunaan disk untuk /, dan I/O menjumlahkan perangkat blok utuh. Host Windows dibaca melalui WMI (DCOM) dengan akun administrator: penggunaan disk untuk drive sistem dan total jaringan mencakup semua adaptor. Riwayat tidak disimpan.",
+    scopeWindows:
+      "Satu akun per host. Penyimpanan Windows diperiksa melalui share administratif SMB (C$..Z$, port 445) dengan akun administrator. Ukuran direktori dibatasi untuk menghindari beban I/O disk berlebih. Buka Desktop Jarak Jauh untuk meninjau atau menghapus file secara manual.",
     journal: "Journal sistem",
     journalHint: "Penggunaan yang dapat dilihat akun SSH tersimpan.",
     diskUsage: "{used} dari {total} terpakai · sisa {free}",
@@ -49,12 +55,17 @@ export const serversMessages = {
     counts: "{active} aktif dari {total}",
     unavailable:
       "Pemeriksaan penyimpanan tidak tersedia. Periksa akses SSH dan coba lagi.",
+    unavailableWindows:
+      "Pemeriksaan penyimpanan tidak tersedia. Periksa akses share administratif SMB (C$, port 445) dan coba lagi.",
     dockerUnavailable:
       "Penyimpanan Docker tidak dapat diperiksa pada host ini.",
     missing: "Tidak tersedia",
     loading: "Memeriksa penyimpanan…",
     ssh: "Buka Host SSH",
     sshHint: "Membuka terminal host di tab baru untuk pemeriksaan manual.",
+    rdp: "Buka Desktop Jarak Jauh",
+    rdpHint:
+      "Membuka desktop jarak jauh di jendela baru untuk pemeriksaan manual.",
     refresh: "Perbarui pemeriksaan",
   },
   containers: {

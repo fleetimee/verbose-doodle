@@ -90,9 +90,7 @@ function HostTools({
 }) {
   return (
     <>
-      {entry?.accessType !== "RDP" && (
-        <ServerCleanupSuggestions entry={entry} hidden={hideCleanup} />
-      )}
+      <ServerCleanupSuggestions entry={entry} hidden={hideCleanup} />
       {entry && <ServerConnectionButton entry={entry} />}
     </>
   );

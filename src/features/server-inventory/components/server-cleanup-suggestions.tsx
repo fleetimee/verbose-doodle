@@ -1,3 +1,5 @@
+import { ComputerIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   useInfiniteQuery,
   useQuery,
@@ -50,11 +52,13 @@ import {
 } from "@/features/server-inventory/api";
 import { useContainerError } from "@/features/server-inventory/components/server-container-status";
 import { metricBytes } from "@/features/server-inventory/components/server-metric-values";
+import { metricErrors } from "@/features/server-inventory/components/server-metrics";
 import type {
   ServerCleanupInspection,
   ServerEntry,
 } from "@/features/server-inventory/types";
 import { copyToClipboard } from "@/lib/clipboard";
+import { getErrorMessage } from "@/lib/error-handler";
 import { formatMessage } from "@/lib/i18n";
 
 type CleanupCopy = ReturnType<typeof useI18n>["messages"]["servers"]["cleanup"];
@@ -154,12 +158,23 @@ function ReportRow({
   );
 }
 
+const WINDOWS_DRIVE_PREFIX = /^\/([A-Za-z]:)/;
+
+function formatDisplayPath(path: string, windows: boolean) {
+  if (!windows) {
+    return path;
+  }
+  return path.replace(WINDOWS_DRIVE_PREFIX, "$1").replaceAll("/", "\\");
+}
+
 function FolderBranch({
   directory,
   entryId,
+  windows,
 }: {
   directory: { path: string; sizeBytes: number | null };
   entryId: string;
+  windows: boolean;
 }) {
   const { messages } = useI18n();
   const [open, setOpen] = useState(false);
@@ -171,7 +186,7 @@ function FolderBranch({
           className="size-4 shrink-0 transition-transform group-data-[panel-open]:rotate-90 motion-reduce:transition-none"
         />
         <span className="min-w-0 flex-1 break-all font-mono text-xs">
-          {directory.path}
+          {formatDisplayPath(directory.path, windows)}
         </span>
         <span className="shrink-0 text-sm tabular-nums">
           {directory.sizeBytes === null
@@ -180,13 +195,27 @@ function FolderBranch({
         </span>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        {open && <FolderChildren entryId={entryId} path={directory.path} />}
+        {open && (
+          <FolderChildren
+            entryId={entryId}
+            path={directory.path}
+            windows={windows}
+          />
+        )}
       </CollapsibleContent>
     </Collapsible>
   );
 }
 
-function FolderChildren({ entryId, path }: { entryId: string; path: string }) {
+function FolderChildren({
+  entryId,
+  path,
+  windows,
+}: {
+  entryId: string;
+  path: string;
+  windows: boolean;
+}) {
   const { messages } = useI18n();
   const copy = messages.servers.cleanup;
   const query = useInfiniteQuery({
@@ -236,7 +265,7 @@ function FolderChildren({ entryId, path }: { entryId: string; path: string }) {
       {!query.isPending && unavailable && (
         <div className="flex flex-col items-start gap-1 py-2">
           <p className="text-muted-foreground text-xs" role="status">
-            {copy.foldersUnavailable}
+            {windows ? copy.foldersUnavailableWindows : copy.foldersUnavailable}
           </p>
           <Button onClick={() => query.refetch()} size="sm" variant="ghost">
             {copy.refresh}
@@ -260,6 +289,7 @@ function FolderChildren({ entryId, path }: { entryId: string; path: string }) {
               directory={directory}
               entryId={entryId}
               key={directory.path}
+              windows={windows}
             />
           ))}
           {folders.length > folderLimit && (
@@ -295,7 +325,9 @@ function FolderChildren({ entryId, path }: { entryId: string; path: string }) {
           )}
           {query.isFetchNextPageError && (
             <p className="text-muted-foreground text-xs" role="status">
-              {copy.foldersUnavailable}
+              {windows
+                ? copy.foldersUnavailableWindows
+                : copy.foldersUnavailable}
             </p>
           )}
           {query.hasNextPage && (
@@ -320,10 +352,12 @@ function StorageReport({
   data,
   copy,
   entryId,
+  windows,
 }: {
   data: ServerCleanupInspection;
   copy: CleanupCopy;
   entryId: string;
+  windows: boolean;
 }) {
   const { messages } = useI18n();
   const used = data.diskUsedBytes;
@@ -358,16 +392,24 @@ function StorageReport({
     <div className="divide-y divide-border/50">
       <ReportRow
         cleanupHint={copy.diskCleanup}
-        command="printf 'Scanning root filesystem; large directories may take several minutes...\n'; du -xh --max-depth=1 /"
+        command={
+          windows
+            ? "Get-PSDrive -PSProvider FileSystem"
+            : "printf 'Scanning root filesystem; large directories may take several minutes...\n'; du -xh --max-depth=1 /"
+        }
         detail={hasDisk && used / total >= 0.75 ? copy.pressure : undefined}
         icon={Gauge}
-        title={messages.servers.metrics.disk}
+        title={
+          windows
+            ? messages.servers.metrics.diskAllDrives
+            : messages.servers.metrics.disk
+        }
         value={diskValue}
       />
       <section aria-label={copy.largestFolders} className="space-y-2 py-3">
         <h3 className="font-medium text-sm">{copy.largestFolders}</h3>
         <p className="text-muted-foreground text-xs leading-relaxed">
-          {copy.foldersScope}
+          {windows ? copy.foldersScopeWindows : copy.foldersScope}
         </p>
         {data.directoryStatus !== "OK" && (
           <p
@@ -376,70 +418,97 @@ function StorageReport({
           >
             {data.directoryStatus === "PARTIAL"
               ? copy.foldersPartial
-              : copy.foldersUnavailable}
+              : formatUnavailable(copy, windows)}
           </p>
         )}
-        {(data.directories?.length ?? 0) > 0 ? (
+        {(data.directories?.length ?? 0) > 0 ||
+        (data.files?.length ?? 0) > 0 ? (
           <div className="flex flex-col gap-1">
             {data.directories?.map((directory) => (
               <FolderBranch
                 directory={directory}
                 entryId={entryId}
                 key={directory.path}
+                windows={windows}
               />
+            ))}
+            {data.files?.map((file) => (
+              <div
+                className="flex items-center gap-2 px-1 py-1.5"
+                key={file.path}
+              >
+                <FileText
+                  aria-hidden="true"
+                  className="size-4 shrink-0 text-muted-foreground"
+                />
+                <span className="min-w-0 flex-1 break-all font-mono text-xs">
+                  {formatDisplayPath(file.path, windows)}
+                </span>
+                <span className="shrink-0 text-sm tabular-nums">
+                  {metricBytes(file.sizeBytes)}
+                </span>
+              </div>
             ))}
           </div>
         ) : (
           <p className="text-muted-foreground text-xs">{copy.foldersEmpty}</p>
         )}
       </section>
-      <ReportRow
-        cleanupCommand="journalctl --rotate --vacuum-time=14d"
-        cleanupHint={copy.journalCleanup}
-        command="journalctl --disk-usage"
-        detail={copy.journalHint}
-        icon={FileClock}
-        title={copy.journal}
-        value={data.journalUsage ?? copy.missing}
-      />
-      {data.storage.map((item) => (
-        <ReportRow
-          cleanupCommand={
-            dockerCleanup.has(item.type)
-              ? `docker --host unix:///var/run/docker.sock ${dockerCleanup.get(item.type)?.command}`
-              : undefined
-          }
-          cleanupHint={dockerCleanup.get(item.type)?.hint}
-          command="docker --host unix:///var/run/docker.sock system df --verbose"
-          detail={
-            item.totalCount !== null && item.activeCount !== null
-              ? formatMessage(copy.counts, {
-                  active: item.activeCount,
-                  total: item.totalCount,
-                })
-              : undefined
-          }
-          icon={item.type === "Containers" ? Layers3 : Database}
-          key={item.type}
-          title={labels.get(item.type) ?? item.type}
-          value={
-            [
-              item.size && formatMessage(copy.used, { size: item.size }),
-              item.reclaimable &&
-                formatMessage(copy.reclaimable, { size: item.reclaimable }),
-            ]
-              .filter(Boolean)
-              .join(" · ") || copy.missing
-          }
-        />
-      ))}
-      {data.dockerStatus !== "OK" && (
-        <p className="py-3 text-muted-foreground text-xs leading-relaxed">
-          {copy.dockerUnavailable}
-        </p>
+      {!windows && (
+        <>
+          <ReportRow
+            cleanupCommand="journalctl --rotate --vacuum-time=14d"
+            cleanupHint={copy.journalCleanup}
+            command="journalctl --disk-usage"
+            detail={copy.journalHint}
+            icon={FileClock}
+            title={copy.journal}
+            value={data.journalUsage ?? copy.missing}
+          />
+          {data.storage.map((item) => (
+            <ReportRow
+              cleanupCommand={
+                dockerCleanup.has(item.type)
+                  ? `docker --host unix:///var/run/docker.sock ${dockerCleanup.get(item.type)?.command}`
+                  : undefined
+              }
+              cleanupHint={dockerCleanup.get(item.type)?.hint}
+              command="docker --host unix:///var/run/docker.sock system df --verbose"
+              detail={
+                item.totalCount !== null && item.activeCount !== null
+                  ? formatMessage(copy.counts, {
+                      active: item.activeCount,
+                      total: item.totalCount,
+                    })
+                  : undefined
+              }
+              icon={item.type === "Containers" ? Layers3 : Database}
+              key={item.type}
+              title={labels.get(item.type) ?? item.type}
+              value={
+                [
+                  item.size && formatMessage(copy.used, { size: item.size }),
+                  item.reclaimable &&
+                    formatMessage(copy.reclaimable, { size: item.reclaimable }),
+                ]
+                  .filter(Boolean)
+                  .join(" · ") || copy.missing
+              }
+            />
+          ))}
+          {data.dockerStatus !== "OK" && (
+            <p className="py-3 text-muted-foreground text-xs leading-relaxed">
+              {copy.dockerUnavailable}
+            </p>
+          )}
+        </>
       )}
     </div>
   );
+}
+
+function formatUnavailable(copy: CleanupCopy, windows: boolean) {
+  return windows ? copy.foldersUnavailableWindows : copy.foldersUnavailable;
 }
 
 function CleanupRowSkeleton({ cleanup = false }: { cleanup?: boolean }) {
@@ -459,7 +528,13 @@ function CleanupRowSkeleton({ cleanup = false }: { cleanup?: boolean }) {
   );
 }
 
-function CleanupReportSkeleton({ label }: { label: string }) {
+function CleanupReportSkeleton({
+  label,
+  windows,
+}: {
+  label: string;
+  windows: boolean;
+}) {
   return (
     <div aria-busy="true" role="status">
       <span className="sr-only">{label}</span>
@@ -478,11 +553,32 @@ function CleanupReportSkeleton({ label }: { label: string }) {
             ))}
           </div>
         </div>
-        {["journal", "images", "containers", "volumes", "cache"].map((key) => (
-          <CleanupRowSkeleton cleanup key={key} />
-        ))}
+        {!windows &&
+          ["journal", "images", "containers", "volumes", "cache"].map((key) => (
+            <CleanupRowSkeleton cleanup key={key} />
+          ))}
       </div>
     </div>
+  );
+}
+
+function windowsCleanupError(
+  messages: ReturnType<typeof useI18n>["messages"],
+  status: string | undefined,
+  error: Error | null
+) {
+  if (error) {
+    return getErrorMessage(error);
+  }
+  if (!status || status === "OK") {
+    return;
+  }
+  if (status === "COLLECTION_FAILED") {
+    return messages.servers.cleanup.unavailableWindows;
+  }
+  return (
+    metricErrors(messages, true).get(status) ||
+    messages.servers.cleanup.unavailableWindows
   );
 }
 
@@ -490,6 +586,7 @@ function CleanupReport({ entry }: { entry: ServerEntry }) {
   const queryClient = useQueryClient();
   const { messages, locale } = useI18n();
   const copy = messages.servers.cleanup;
+  const windows = entry.accessType === "RDP";
   const query = useQuery({
     queryKey: ["server-inventory", "cleanup", entry.id, entry.updatedAt],
     queryFn: ({ signal }) => fetchServerCleanup(entry.id, signal),
@@ -499,14 +596,31 @@ function CleanupReport({ entry }: { entry: ServerEntry }) {
   });
   const data = query.data;
   const collectionError = useContainerError(data?.status, query.error);
-  const error =
+  const sshError =
     data?.status === "COLLECTION_FAILED" ? copy.unavailable : collectionError;
+  const error = windows
+    ? windowsCleanupError(messages, data?.status, query.error)
+    : sshError;
   const ready = data?.status === "OK" && !query.isError;
+  const openDesktop = () => {
+    const desktop = window.open(
+      `/servers/${encodeURIComponent(entry.id)}/desktop`,
+      "_blank",
+      "popup,width=1280,height=800"
+    );
+    if (desktop) {
+      desktop.opener = null;
+    } else {
+      toast.error(messages.servers.sshPopupBlocked);
+    }
+  };
   return (
     <>
       <ScrollArea className="min-h-0 flex-1" viewportClassName="h-full">
         <div className="px-5 py-3">
-          {query.isPending && <CleanupReportSkeleton label={copy.loading} />}
+          {query.isPending && (
+            <CleanupReportSkeleton label={copy.loading} windows={windows} />
+          )}
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -518,13 +632,14 @@ function CleanupReport({ entry }: { entry: ServerEntry }) {
               data={data}
               entryId={entry.id}
               key={query.dataUpdatedAt}
+              windows={windows}
             />
           )}
         </div>
       </ScrollArea>
       <SheetFooter className="shrink-0" variant="bordered">
         <div className="flex flex-col gap-1 text-muted-foreground text-xs leading-relaxed">
-          <p>{copy.scope}</p>
+          <p>{windows ? copy.scopeWindows : copy.scope}</p>
           {query.data?.collectedAt && (
             <p>
               {formatMessage(messages.servers.metrics.updated, {
@@ -555,21 +670,30 @@ function CleanupReport({ entry }: { entry: ServerEntry }) {
             )}
             {copy.refresh}
           </Button>
-          <Button
-            render={
-              <Link
-                rel="noopener noreferrer"
-                target="_blank"
-                to={`/servers/${entry.id}/terminal`}
-              />
-            }
-            size="sm"
-          >
-            <FileTerminal data-icon="inline-start" />
-            {copy.ssh}
-          </Button>
+          {windows ? (
+            <Button onClick={openDesktop} size="sm">
+              <HugeiconsIcon data-icon="inline-start" icon={ComputerIcon} />
+              {copy.rdp}
+            </Button>
+          ) : (
+            <Button
+              render={
+                <Link
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  to={`/servers/${entry.id}/terminal`}
+                />
+              }
+              size="sm"
+            >
+              <FileTerminal data-icon="inline-start" />
+              {copy.ssh}
+            </Button>
+          )}
         </div>
-        <p className="text-muted-foreground text-xs">{copy.sshHint}</p>
+        <p className="text-muted-foreground text-xs">
+          {windows ? copy.rdpHint : copy.sshHint}
+        </p>
       </SheetFooter>
     </>
   );

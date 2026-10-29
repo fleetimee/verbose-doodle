@@ -8,8 +8,12 @@ export const serversMessages = {
     largestFolders: "Folders by disk usage",
     foldersScope:
       "Expand folders to browse files and subfolders. Files load 100 at a time. Sizes depend on scan limits and SSH permissions.",
+    foldersScopeWindows:
+      "Expand folders to browse files and subfolders. Files load 100 at a time. Sizes depend on scan limits and SMB administrative share (C$) permissions.",
     foldersPartial: "Partial sizes — some usage may be missing.",
     foldersUnavailable: "Scan unavailable. Retry or inspect in SSH.",
+    foldersUnavailableWindows:
+      "Scan unavailable. Retry or inspect in Remote Desktop.",
     foldersEmpty: "No files or subfolders found.",
 
     copyCleanupCommand: "Copy cleanup command",
@@ -32,6 +36,8 @@ export const serversMessages = {
     description: "Inspect storage use before deciding what to remove.",
     scope:
       "One account per host. Linux hosts are read over SSH: memory excludes reclaimable cache, disk usage is for /, and I/O sums whole block devices. Windows hosts are read over WMI (DCOM) with an administrator account: disk usage is for the system drive and network totals include all adapters. No history is stored.",
+    scopeWindows:
+      "One account per host. Windows storage is inspected over SMB administrative shares (C$..Z$, port 445) with an administrator account. Directory sizes are bounded to avoid heavy disk I/O. Open Remote Desktop to review or remove files manually.",
     journal: "System journal",
     journalHint: "Usage visible to the saved SSH account.",
     diskUsage: "{used} of {total} used · {free} free",
@@ -46,11 +52,15 @@ export const serversMessages = {
     counts: "{active} active of {total}",
     unavailable:
       "Storage inspection is unavailable. Check SSH access and retry.",
+    unavailableWindows:
+      "Storage inspection is unavailable. Check SMB administrative share (C$, port 445) access and retry.",
     dockerUnavailable: "Docker storage could not be inspected on this host.",
     missing: "Not available",
     loading: "Inspecting storage…",
     ssh: "Open Host SSH",
     sshHint: "Opens the host terminal in a new tab for manual inspection.",
+    rdp: "Open Remote Desktop",
+    rdpHint: "Opens remote desktop in a new window for manual inspection.",
     refresh: "Refresh inspection",
   },
   containers: {
