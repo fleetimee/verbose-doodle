@@ -1,6 +1,8 @@
 // @ts-nocheck - Vercel serverless function (types loaded at runtime)
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
+export const config = { api: { bodyParser: false } };
+
 const HTTP_INTERNAL_SERVER_ERROR = 500;
 const TRAILING_SLASH_REGEX = /\/$/;
 const HEADERS_NOT_TO_FORWARD = new Set([
@@ -51,18 +53,17 @@ function createForwardHeaders(req: VercelRequest): Headers {
   return headers;
 }
 
-function isStringBody(body: unknown): body is string {
-  return typeof body === "string";
-}
-
-function createForwardBody(req: VercelRequest): BodyInit | undefined {
-  if (req.method === "GET" || req.method === "HEAD" || req.body === undefined) {
+async function createForwardBody(
+  req: VercelRequest
+): Promise<BodyInit | undefined> {
+  if (req.method === "GET" || req.method === "HEAD") {
     return;
   }
-  if (isStringBody(req.body) || req.body instanceof Uint8Array) {
-    return req.body;
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   }
-  return JSON.stringify(req.body);
+  return chunks.length > 0 ? Buffer.concat(chunks) : undefined;
 }
 
 function copyResponseHeaders(response: Response, res: VercelResponse): void {
@@ -90,17 +91,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Prepare headers for forwarding (filter out problematic headers)
     const forwardHeaders = createForwardHeaders(req);
-    const body = createForwardBody(req);
-    const serializedJsonBody =
-      body !== undefined &&
-      !isStringBody(req.body) &&
-      !(req.body instanceof Uint8Array);
-    if (
-      serializedJsonBody ||
-      (body !== undefined && !forwardHeaders.has("content-type"))
-    ) {
-      forwardHeaders.set("content-type", "application/json");
-    }
+    const body = await createForwardBody(req);
 
     // Forward the request to the backend
     const response = await fetch(targetUrl, {
@@ -113,7 +104,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     copyResponseHeaders(response, res);
 
     // Send the response
-    const data = await response.text();
+    const data = Buffer.from(await response.arrayBuffer());
     res.status(response.status).send(data);
   } catch (error) {
     console.error("Proxy error:", error);

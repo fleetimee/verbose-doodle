@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createUploadFetch } from "@/lib/upload-fetch";
 
 /**
  * API utility functions for data fetching
@@ -26,6 +27,7 @@ export type FetchConfig = RequestInit & {
   emitUnauthorized?: boolean;
   retryOnUnauthorized?: boolean;
   timeout?: number;
+  onUploadProgress?: (percent: number) => void;
 };
 
 export type ApiClientOptions = {
@@ -153,6 +155,21 @@ async function createApiError(response: Response): Promise<ApiError> {
   };
 }
 
+function createRequestHeaders(
+  headers: HeadersInit,
+  body: BodyInit | null | undefined,
+  accessToken: string | null
+) {
+  const requestHeaders = new Headers(headers);
+  if (!(body instanceof FormData || requestHeaders.has("Content-Type"))) {
+    requestHeaders.set("Content-Type", "application/json");
+  }
+  if (accessToken && !requestHeaders.has("Authorization")) {
+    requestHeaders.set("Authorization", `Bearer ${accessToken}`);
+  }
+  return requestHeaders;
+}
+
 export function createApiClient({
   session,
   fetch,
@@ -210,19 +227,20 @@ export function createApiClient({
       retryOnUnauthorized = true,
       timeout = DEFAULT_TIMEOUT,
       headers = {},
+      onUploadProgress,
       ...rest
     } = config;
 
     const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint;
 
     const accessToken = auth ? session.getSnapshot().accessToken : null;
-    const requestHeaders: HeadersInit = {
-      "Content-Type": "application/json",
-      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-      ...headers,
-    };
+    const requestHeaders = createRequestHeaders(
+      headers,
+      rest.body,
+      accessToken
+    );
     const response = await fetchWithTimeout(
-      fetch,
+      onUploadProgress ? createUploadFetch(onUploadProgress) : fetch,
       url,
       { ...rest, headers: requestHeaders },
       timeout
