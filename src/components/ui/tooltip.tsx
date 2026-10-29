@@ -88,8 +88,14 @@ function TooltipContent({
     TooltipPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
   >) {
+  const fullscreenContainer =
+    typeof document !== "undefined" &&
+    document.fullscreenElement instanceof HTMLElement
+      ? document.fullscreenElement
+      : undefined
+
   return (
-    <TooltipPrimitive.Portal>
+    <TooltipPrimitive.Portal container={fullscreenContainer}>
       <TooltipPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}

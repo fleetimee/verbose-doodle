@@ -34,6 +34,11 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { LogDatePicker } from "@/features/log-viewer/log-date-picker";
 import { SourcePicker } from "@/features/log-viewer/source-picker";
 import type { LogCatalog, LogSource } from "@/features/log-viewer/types";
@@ -133,50 +138,78 @@ export function SourceControls({
                 />
               </div>
               <ButtonGroup aria-label={copy.sourceActions}>
-                <Button
-                  aria-label={copy.add}
-                  disabled={editing}
-                  onClick={onAdd}
-                  size="icon"
-                  title={copy.add}
-                  variant="tool-action"
-                >
-                  <Plus />
-                </Button>
-                <Button
-                  aria-label={copy.edit}
-                  disabled={editing}
-                  onClick={onEdit}
-                  size="icon"
-                  title={copy.edit}
-                  variant="tool-action"
-                >
-                  <SlidersHorizontal />
-                </Button>
-                <Button
-                  aria-label={copy.refresh}
-                  disabled={checking || !from}
-                  onClick={onCheck}
-                  size="icon"
-                  title={copy.refresh}
-                  variant="tool-action"
-                >
-                  {checking ? <Spinner /> : <RefreshCw />}
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger
+                <Tooltip>
+                  <TooltipTrigger
                     render={
                       <Button
-                        aria-label={copy.delete}
-                        disabled={deleting}
+                        aria-label={copy.add}
+                        disabled={editing}
+                        focusableWhenDisabled
+                        onClick={onAdd}
                         size="icon"
-                        title={copy.delete}
-                        variant="tool-destructive"
+                        variant="tool-action"
                       />
                     }
                   >
-                    <Trash2 />
-                  </AlertDialogTrigger>
+                    <Plus />
+                  </TooltipTrigger>
+                  <TooltipContent>{copy.add}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        aria-label={copy.edit}
+                        disabled={editing}
+                        focusableWhenDisabled
+                        onClick={onEdit}
+                        size="icon"
+                        variant="tool-action"
+                      />
+                    }
+                  >
+                    <SlidersHorizontal />
+                  </TooltipTrigger>
+                  <TooltipContent>{copy.edit}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        aria-label={copy.refresh}
+                        disabled={checking || !from}
+                        focusableWhenDisabled
+                        onClick={onCheck}
+                        size="icon"
+                        variant="tool-action"
+                      />
+                    }
+                  >
+                    {checking ? <Spinner /> : <RefreshCw />}
+                  </TooltipTrigger>
+                  <TooltipContent>{copy.refresh}</TooltipContent>
+                </Tooltip>
+                <AlertDialog>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <AlertDialogTrigger
+                          render={
+                            <Button
+                              aria-label={copy.delete}
+                              disabled={deleting}
+                              focusableWhenDisabled
+                              size="icon"
+                              variant="tool-destructive"
+                            />
+                          }
+                        />
+                      }
+                    >
+                      <Trash2 />
+                    </TooltipTrigger>
+                    <TooltipContent>{copy.delete}</TooltipContent>
+                  </Tooltip>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>{copy.deleteTitle}</AlertDialogTitle>
