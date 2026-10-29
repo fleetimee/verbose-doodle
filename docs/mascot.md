@@ -82,9 +82,10 @@ Pose prompts:
 The temporary-files workspace uses a transparent illustration of the standard
 mascot in its desktop file-panel corner. She presents the upload area with one
 open hand and holds a charcoal tablet with a mint upload symbol. Preserve her
-character identity and original colors. The decorative footer reserves its own
-space, ignores pointer input, and is hidden on narrow or short viewports to keep
-file actions accessible without page scrolling.
+character identity and original colors. The decorative illustration sits behind the scrolling file list in an absolute
+background layer, ignores pointer input, and uses subtle opacity. File rows and
+actions render above it. It is hidden on narrow or short viewports to keep the
+workspace compact without page scrolling.
 
 Asset: [File-sharing mascot](../public/brand/biller-operator-mascot-file-sharing.webp).
 Generated with the built-in image generation tool using the standard mascot as
@@ -97,3 +98,25 @@ screen-left, other hand holding a charcoal file tablet with a mint upload arrow.
 Three-quarter figure, clean cel shading, transparent background, no text or scene.
 Cleanup prompt: preserve the character exactly; remove all background glow, haze,
 halo and shadow; outside the character use alpha zero with clean natural edges.
+
+### File-sending chibi vignette
+
+The unused desktop space below upload controls contains a wide, transparent
+illustration of the same chibi mascot sending a paper-plane file. The mascot sits
+on the left, the plane travels right, and a simple grassy strip with a few daisies
+runs along the bottom. Keep the area outside those elements genuinely transparent;
+there is no solid sky, distant scenery, or rectangular backdrop. Keep the chibi
+face and sending gesture as the focus. The vignette ignores input and hides on
+narrow or short viewports.
+
+Asset: [File-sending chibi vignette](../public/brand/biller-operator-chibi-file-send-wide.webp).
+Generated and edited with the built-in image generation tool using the existing
+chibi mascot as the identity reference.
+Prompt: original Fleetime Labs chibi horse-girl operator, oversized expressive
+head, compact full body, cheerful file-sending pose with a paper airplane and
+charcoal folder, mint-and-brown hair, cream jacket, charcoal outfit, receipt clip.
+Playful fantasy RPG event-news illustration. Wide 2:1 horizontal composition,
+character on the left third and plane toward the right. Simple low grass strip
+with three or four tiny daisies. All ears, feet, tail and plane visible. Genuine
+transparent background outside character, plane and grass. No sky, clouds,
+hills, detailed scenery, text, watermark, glow or rectangular backdrop.

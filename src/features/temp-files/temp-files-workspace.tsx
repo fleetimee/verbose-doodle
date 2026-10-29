@@ -149,132 +149,153 @@ export function TempFilesWorkspace() {
       mainClassName="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(340px,0.8fr)_minmax(0,1.2fr)] lg:grid-rows-1"
       title={text.title}
     >
-      <section
-        aria-labelledby="temp-upload-title"
-        className="flex min-h-0 min-w-0 flex-col gap-3 rounded-lg bg-muted/20 p-3 sm:p-4 lg:gap-4 lg:self-start"
-      >
-        <h2 className="font-medium text-sm" id="temp-upload-title">
-          {text.uploadTitle}
-        </h2>
-        <input
-          {...getInputProps({
-            "aria-label": text.choose,
-            "aria-describedby": "temp-upload-limits",
-          })}
-        />
-        <Button
-          {...getRootProps({ role: "button", tabIndex: 0 })}
-          aria-describedby="temp-upload-limits"
-          className="min-h-24 w-full shrink-0 justify-center whitespace-normal"
-          disabled={disabled}
-          onClick={open}
-          size="upload"
-          type="button"
-          variant={isDragActive ? "secondary" : "outline"}
+      <div className="flex min-h-0 min-w-0 flex-col gap-4">
+        <section
+          aria-labelledby="temp-upload-title"
+          className="flex min-w-0 shrink-0 flex-col gap-3 rounded-lg bg-muted/20 p-3 sm:p-4 lg:gap-4"
         >
-          <MonitorUp data-icon="inline-start" />
-          <span>{text.selectOrDrop}</span>
-        </Button>
-        <p className="text-muted-foreground text-xs" id="temp-upload-limits">
-          {data
-            ? formatMessage(text.limits, {
-                size: formatFileBytes(data.maxFileBytes, locale),
-                count: data.maxFiles,
-              })
-            : text.runtime}
-        </p>
-        <FieldGroup>
-          <Field size="sm">
-            <FieldLabel id="temp-expiry-label">{text.expiry}</FieldLabel>
-            <ToggleGroup
-              aria-labelledby="temp-expiry-label"
-              className="w-full"
-              disabled={Boolean(current)}
-              onValueChange={(values) => {
-                if (values.length) {
-                  setRetention(values[0]);
-                }
-              }}
-              size="lg"
-              value={[retention]}
-              variant="outline"
-            >
-              <ToggleGroupItem className="flex-1" value="1">
-                {text.hour}
-              </ToggleGroupItem>
-              <ToggleGroupItem className="flex-1" value="24">
-                {text.day}
-              </ToggleGroupItem>
-              <ToggleGroupItem className="flex-1" value="168">
-                {text.week}
-              </ToggleGroupItem>
-            </ToggleGroup>
-            <FieldDescription>{text.privacy}</FieldDescription>
-          </Field>
-        </FieldGroup>
-        {data ? (
-          <div className="flex flex-col gap-1.5">
-            <p className="text-xs tabular-nums">
-              {formatMessage(text.usage, {
-                used: formatFileBytes(data.usedBytes, locale),
-                total: formatFileBytes(data.quotaBytes, locale),
-              })}
-            </p>
-            <Progress
-              aria-label={text.title}
-              className="h-1.5"
-              max={data.quotaBytes}
-              value={data.usedBytes}
-            />
-            <p className="text-muted-foreground text-xs leading-relaxed">
-              {text.cleanup}
-            </p>
-          </div>
-        ) : null}
-        {current ? (
-          <div aria-live="polite" className="flex flex-col gap-2" role="status">
-            <div className="flex items-center justify-between gap-2">
-              <p className="min-w-0 truncate text-xs">
-                {current.percent === 100
-                  ? text.processing
-                  : formatMessage(text.uploading, { name: current.name })}
-              </p>
-              <Button
-                onClick={() => controller.current?.abort()}
-                size="sm"
+          <h2 className="font-medium text-sm" id="temp-upload-title">
+            {text.uploadTitle}
+          </h2>
+          <input
+            {...getInputProps({
+              "aria-label": text.choose,
+              "aria-describedby": "temp-upload-limits",
+            })}
+          />
+          <Button
+            {...getRootProps({ role: "button", tabIndex: 0 })}
+            aria-describedby="temp-upload-limits"
+            className="min-h-24 w-full shrink-0 justify-center whitespace-normal"
+            disabled={disabled}
+            onClick={open}
+            size="upload"
+            type="button"
+            variant={isDragActive ? "secondary" : "outline"}
+          >
+            <MonitorUp data-icon="inline-start" />
+            <span>{text.selectOrDrop}</span>
+          </Button>
+          <p className="text-muted-foreground text-xs" id="temp-upload-limits">
+            {data
+              ? formatMessage(text.limits, {
+                  size: formatFileBytes(data.maxFileBytes, locale),
+                  count: data.maxFiles,
+                })
+              : text.runtime}
+          </p>
+          <FieldGroup>
+            <Field size="sm">
+              <FieldLabel id="temp-expiry-label">{text.expiry}</FieldLabel>
+              <ToggleGroup
+                aria-labelledby="temp-expiry-label"
+                className="w-full"
+                disabled={Boolean(current)}
+                onValueChange={(values) => {
+                  if (values.length) {
+                    setRetention(values[0]);
+                  }
+                }}
+                size="lg"
+                value={[retention]}
                 variant="outline"
               >
-                {text.cancel}
-              </Button>
+                <ToggleGroupItem className="flex-1" value="1">
+                  {text.hour}
+                </ToggleGroupItem>
+                <ToggleGroupItem className="flex-1" value="24">
+                  {text.day}
+                </ToggleGroupItem>
+                <ToggleGroupItem className="flex-1" value="168">
+                  {text.week}
+                </ToggleGroupItem>
+              </ToggleGroup>
+              <FieldDescription>{text.privacy}</FieldDescription>
+            </Field>
+          </FieldGroup>
+          {data ? (
+            <div className="flex flex-col gap-1.5">
+              <p className="text-xs tabular-nums">
+                {formatMessage(text.usage, {
+                  used: formatFileBytes(data.usedBytes, locale),
+                  total: formatFileBytes(data.quotaBytes, locale),
+                })}
+              </p>
+              <Progress
+                aria-label={text.title}
+                className="h-1.5"
+                max={data.quotaBytes}
+                value={data.usedBytes}
+              />
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                {text.cleanup}
+              </p>
             </div>
-            <Progress
-              aria-label={formatMessage(text.uploading, { name: current.name })}
-              className="h-1.5"
-              max={100}
-              value={current.percent}
-            />
-          </div>
-        ) : null}
-        {uploadError || full ? (
-          <Alert variant="destructive">
-            <AlertTitle>{full ? text.quota : text.uploadError}</AlertTitle>
-            {uploadError ? (
-              <AlertDescription>{uploadError}</AlertDescription>
-            ) : null}
-          </Alert>
-        ) : null}
-      </section>
+          ) : null}
+          {current ? (
+            <div
+              aria-live="polite"
+              className="flex flex-col gap-2"
+              role="status"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <p className="min-w-0 truncate text-xs">
+                  {current.percent === 100
+                    ? text.processing
+                    : formatMessage(text.uploading, { name: current.name })}
+                </p>
+                <Button
+                  onClick={() => controller.current?.abort()}
+                  size="sm"
+                  variant="outline"
+                >
+                  {text.cancel}
+                </Button>
+              </div>
+              <Progress
+                aria-label={formatMessage(text.uploading, {
+                  name: current.name,
+                })}
+                className="h-1.5"
+                max={100}
+                value={current.percent}
+              />
+            </div>
+          ) : null}
+          {uploadError || full ? (
+            <Alert variant="destructive">
+              <AlertTitle>{full ? text.quota : text.uploadError}</AlertTitle>
+              {uploadError ? (
+                <AlertDescription>{uploadError}</AlertDescription>
+              ) : null}
+            </Alert>
+          ) : null}
+        </section>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none relative hidden min-h-0 flex-1 select-none lg:block [@media(max-height:700px)]:hidden"
+        >
+          <img
+            alt=""
+            className="absolute inset-0 size-full rounded-lg object-contain object-bottom opacity-80"
+            draggable={false}
+            height={600}
+            src="/brand/biller-operator-chibi-file-send-wide.webp"
+            width={1200}
+          />
+        </div>
+      </div>
       <section
         aria-labelledby="temp-files-title"
-        className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-border/60"
+        className="relative isolate flex min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-border/60"
       >
         <h2
-          className="shrink-0 border-border/60 border-b px-4 py-3 font-medium text-sm"
+          className="relative z-10 shrink-0 border-border/60 border-b px-4 py-3 font-medium text-sm"
           id="temp-files-title"
         >
           {text.myFiles}
         </h2>
-        <ScrollArea className="min-h-0 flex-1" variant="fit">
+        <ScrollArea className="relative z-10 min-h-0 flex-1" variant="fit">
           <div className="px-4">
             {listing.isPending ? (
               <div aria-busy="true" className="flex flex-col gap-4 py-4">
@@ -333,7 +354,7 @@ export function TempFilesWorkspace() {
         </ScrollArea>
         <div
           aria-hidden="true"
-          className="pointer-events-none relative hidden h-96 max-h-[60%] shrink-0 select-none lg:block xl:h-112 [@media(max-height:700px)]:hidden"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 hidden h-96 max-h-[60%] select-none lg:block xl:h-112 [@media(max-height:700px)]:hidden"
         >
           <img
             alt=""
