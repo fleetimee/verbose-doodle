@@ -78,6 +78,7 @@ function getRouteLabels(
 ): RouteLabelRegistry {
   return {
     "hmac-generator": messages.hmacGenerator.title,
+    "temp-files": messages.tempFiles.title,
     "cron-parser": messages.cronParser.title,
     "schedule-overlap-checker": messages.scheduleOverlapChecker.title,
     "date-converter": messages.dateConverter.title,
@@ -176,6 +177,7 @@ export function DashboardLayout() {
   const isOverview = location.pathname === "/dashboard/overview";
   const isSimulatorDb = location.pathname === "/dashboard/simulator-db";
   const usesFixedWorkspace = [
+    "/dashboard/temp-files",
     "/dashboard/overview",
     "/dashboard/employees",
     "/dashboard/simulator-db",
@@ -457,6 +459,7 @@ export function DashboardLayout() {
                     { "overflow-hidden p-0 sm:p-0 md:p-0": isSimulatorDb },
                     {
                       "overflow-hidden": [
+                        "/dashboard/temp-files",
                         "/dashboard/logs",
                         "/dashboard/wheel",
                       ].includes(location.pathname),

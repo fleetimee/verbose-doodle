@@ -25,11 +25,13 @@ import { serversMessages } from "@/lib/i18n/messages/en-us/servers";
 import { simulatorDbMessages } from "@/lib/i18n/messages/en-us/simulator-db";
 import { socketTesterMessages } from "@/lib/i18n/messages/en-us/socket-tester";
 import { socksRelayMessages } from "@/lib/i18n/messages/en-us/socks-relay";
+import { tempFilesMessages } from "@/lib/i18n/messages/en-us/temp-files";
 import { themeMessages } from "@/lib/i18n/messages/en-us/theme";
 import { usersMessages } from "@/lib/i18n/messages/en-us/users";
 import { wheelMessages } from "@/lib/i18n/messages/en-us/wheel";
 
 export const enUsMessages = {
+  tempFiles: tempFilesMessages,
   qrisTapReader: qrisTapReaderMessages,
   simulatorDb: simulatorDbMessages,
   hmacGenerator: hmacGeneratorMessages,

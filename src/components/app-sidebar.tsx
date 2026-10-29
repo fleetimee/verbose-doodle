@@ -24,6 +24,7 @@ import {
   Code2,
   Compass,
   Database,
+  FileClock,
   FileText,
   type HugeIcon,
   Info,
@@ -152,6 +153,15 @@ export function getSidebarData(
         title: messages.wheel.title,
         description: messages.wheel.description,
         url: "/dashboard/wheel",
+      },
+      {
+        groupLabel: messages.common.navWorkspace,
+        icon: FileClock,
+        title: messages.tempFiles.title,
+        description: messages.tempFiles.description,
+        keywords: ["upload", "share", "files", "temporary"],
+        onPrefetch: () => import("@/pages/dashboard/temp-files"),
+        url: "/dashboard/temp-files",
       },
       {
         adminOnly: true,

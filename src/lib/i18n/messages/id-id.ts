@@ -26,12 +26,14 @@ import { serversMessages as idServersMessages } from "@/lib/i18n/messages/id-id/
 import { simulatorDbMessages } from "@/lib/i18n/messages/id-id/simulator-db";
 import { socketTesterMessages as idSocketTesterMessages } from "@/lib/i18n/messages/id-id/socket-tester";
 import { socksRelayMessages as idSocksRelayMessages } from "@/lib/i18n/messages/id-id/socks-relay";
+import { tempFilesMessages } from "@/lib/i18n/messages/id-id/temp-files";
 import { themeMessages as idThemeMessages } from "@/lib/i18n/messages/id-id/theme";
 import { usersMessages as idUsersMessages } from "@/lib/i18n/messages/id-id/users";
 import { wheelMessages } from "@/lib/i18n/messages/id-id/wheel";
 
 export const idIdMessages = {
   ...enUsMessages,
+  tempFiles: tempFilesMessages,
   qrisTapReader: qrisTapReaderMessages,
   simulatorDb: simulatorDbMessages,
   employees: idEmployeesMessages,

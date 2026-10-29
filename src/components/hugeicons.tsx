@@ -35,6 +35,7 @@ import {
   Database01Icon,
   Delete02Icon,
   DoorClosedIcon as DoorClosedDefinition,
+  Download01Icon,
   EraserIcon,
   EyeIcon,
   File01Icon,
@@ -138,6 +139,7 @@ export const Database = createHugeIcon(Database01Icon);
 export const DoorClosedIcon = createHugeIcon(DoorClosedDefinition);
 export const Eraser = createHugeIcon(EraserIcon);
 export const Eye = createHugeIcon(EyeIcon);
+export const Download = createHugeIcon(Download01Icon);
 export const FileClock = createHugeIcon(FileClockIcon);
 export const FileJson = createHugeIcon(FileCodeIcon);
 export const FileTerminal = createHugeIcon(FileTerminalIcon);

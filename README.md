@@ -34,6 +34,7 @@ bun run preview     # Serve the production build locally
 ## Documentation
 
 - [Deployment guide](docs/deployment.md)
+- [Temporary file sharing](docs/temp-files.md)
 - [Browser SSH terminal setup](docs/browser-ssh.md)
 - [SSH server metrics](docs/server-metrics.md)
 - [Browser RDP desktop setup](docs/browser-rdp.md)

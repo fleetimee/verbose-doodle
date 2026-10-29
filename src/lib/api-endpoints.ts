@@ -84,6 +84,7 @@ export const API_ENDPOINTS = {
     },
     logSources: "/api/log-sources",
     wheelSessions: "/api/wheel-sessions",
+    tempFiles: "/api/temp-files",
     servers: {
       accessTypes: "/api/servers/access-types",
       detail: (id: string) => `/api/servers/${encodeURIComponent(id)}`,

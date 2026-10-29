@@ -12,6 +12,7 @@ import { serverInventoryRoutes } from "@/features/server-inventory/routes";
 import { simulatorDbRoutes } from "@/features/simulator-db/routes";
 import { socketTesterRoutes } from "@/features/socket-tester/routes";
 import { socksRelayRoutes } from "@/features/socks-relay/routes";
+import { tempFileRoutes } from "@/features/temp-files/routes";
 import { wheelRoutes } from "@/features/wheel/routes";
 
 const QrisTapReaderPage = lazy(() =>
@@ -40,6 +41,7 @@ export const dashboardRoutes = (
     {simulatorDbRoutes}
     {employeeRoutes}
     {socketTesterRoutes}
+    {tempFileRoutes}
     {developerToolRoutes}
     {socksRelayRoutes}
     <Route

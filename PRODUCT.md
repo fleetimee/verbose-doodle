@@ -27,6 +27,7 @@ Fleetime Labs is an umbrella workspace, not a single-purpose API mocker. Its mod
 - **Server Inventory** records server connection metadata with a separate entry for each access method.
 - **Spin Wheel** runs locked, configurable draw sessions with signed evidence and recorded replay.
 - **Developer Tools** provides focused conversion, validation, parsing, and inspection utilities.
+- **Temporary Files** is a main Workspace module for uploading files and sharing expiring download links.
 
 Internal integration teams can move between these related but separate jobs in one authenticated interface.
 
@@ -52,6 +53,7 @@ Within the Biller Simulator domain, a **Biller** is a billing service represente
 - Browse SSH and SFTP inventory files in a Termius-inspired fullscreen browser with local and remote panes that stack on smaller screens. Administrators can open a standalone SFTP session from inventory details or browse files from the SSH Files menu. Remote navigation includes breadcrumbs, history, editable paths, refresh, filtering, hidden files, sorting, and file metadata. Local files or folders require explicit selection; virtual folders omit empty directories. Transfer one file at a time with progress and cancellation, without overwriting existing remote files.
 - Configure independent SMB log sources and read continuous streams across daily files, year/month folders, month folders, or a flat folder as an administrator. Source settings are saved in PostgreSQL; log files stay on the remote server.
 - Create locked spin-wheel sessions as an administrator, choose single or multiple draws with configurable repeat behavior, and inspect, replay, export, and verify signed results. Authenticated users can inspect and replay saved sessions.
+- Upload temporary files as an authenticated user, share expiring public download links, view personal storage usage, and revoke links by deleting files. File bytes live in backend-managed storage and are cleaned up on a schedule.
 - Use developer utilities for JSON/YAML conversion, JSON Schema validation, JWT inspection, cron parsing, number-base conversion, date conversion, and related integration tasks.
 - Preserve role-based access and the distinction between `ADMIN` and `USER` capabilities.
 - Treat each module as a distinct tool within Fleetime Labs rather than presenting every capability as part of the Biller Simulator module.

@@ -117,3 +117,7 @@ docker network inspect biller-simulator-json-net
 ```
 
 If a port is already in use, change the host-side port in the relevant Compose file. If API requests fail, verify `VITE_ENDPOINT_URL`, the nginx proxy target, and backend connectivity from the container.
+
+## Temporary file sharing
+
+See [Temporary file sharing](temp-files.md) for upload limits, backend storage, cleanup, and the direct HTTPS transfer origin required for large files on Vercel.
