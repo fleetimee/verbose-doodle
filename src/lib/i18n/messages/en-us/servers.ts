@@ -140,6 +140,8 @@ export const serversMessages = {
     serversTitle: "Container servers",
     hostMetrics: "Host metrics",
     stopped: "Stopped",
+    healthy: "Healthy",
+    unhealthy: "Unhealthy",
     total: "Total",
     coreCount: "{count} cores",
     images: "Images",

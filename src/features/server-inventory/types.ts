@@ -82,6 +82,7 @@ export interface ServerContainers {
 export interface ServerContainerSummary {
   collectedAt: string | null;
   cores: number | null;
+  healthy?: number | null;
   images: number | null;
   memoryTotalBytes: number | null;
   operatingSystem: string | null;
@@ -90,6 +91,7 @@ export interface ServerContainerSummary {
   status: string;
   stopped: number | null;
   total: number | null;
+  unhealthy?: number | null;
   version: string | null;
 }
 

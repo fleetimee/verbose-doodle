@@ -66,18 +66,34 @@ export function MeasurementsSkeleton({ large = false }: { large?: boolean }) {
 export function DockerSummarySkeleton() {
   return (
     <>
-      <div aria-hidden="true" className="grid grid-cols-4 gap-x-2 gap-y-4">
-        {["running", "stopped", "total", "images"].map((metric) => (
-          <div className="flex min-w-0 flex-col gap-1" key={metric}>
-            <Skeleton className="h-4 w-12 max-w-full" variant="table" />
-            <Skeleton className="h-5 w-7" variant="table" />
-          </div>
-        ))}
-      </div>
       <div
         aria-hidden="true"
-        className="mt-4 flex flex-wrap justify-between gap-1"
+        className="flex @min-[36rem]:flex-row flex-col @min-[36rem]:items-center justify-between @min-[36rem]:gap-6 gap-3 rounded-xl border border-border/50 bg-muted/15 px-4 py-3"
       >
+        <div className="grid grid-cols-2 gap-x-8 gap-y-2.5">
+          {["running", "stopped", "healthy", "unhealthy"].map((metric) => (
+            <div className="flex min-w-0 items-center gap-2" key={metric}>
+              <Skeleton
+                className="size-4 shrink-0 rounded-full"
+                variant="table"
+              />
+              <Skeleton className="h-4 w-20 max-w-full" variant="table" />
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-border/40 border-t @min-[36rem]:border-t-0 @min-[36rem]:border-l @min-[36rem]:pt-0 pt-2.5 @min-[36rem]:pl-6">
+          {["total", "images"].map((metric) => (
+            <div className="flex min-w-0 items-center gap-2" key={metric}>
+              <Skeleton
+                className="size-4 shrink-0 rounded-md"
+                variant="table"
+              />
+              <Skeleton className="h-4 w-16 max-w-full" variant="table" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div aria-hidden="true" className="flex flex-wrap justify-between gap-1">
         <Skeleton className="h-4 w-28" variant="table" />
         <Skeleton className="h-4 w-24" variant="table" />
       </div>

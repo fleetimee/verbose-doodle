@@ -1,9 +1,10 @@
+import { FavouriteIcon, ShutDownIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import { SiDocker } from "react-icons/si";
 import { Activity } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -20,7 +21,8 @@ import {
   ServerContainerStatisticsChartsSkeleton,
 } from "@/features/server-inventory/components/server-container-statistics";
 import {
-  containerVariant,
+  inspectHealthStatus,
+  resolveContainerStatus,
   useContainerError,
 } from "@/features/server-inventory/components/server-container-status";
 import type {
@@ -28,6 +30,7 @@ import type {
   ServerContainers,
   ServerEntry,
 } from "@/features/server-inventory/types";
+import { cn } from "@/lib/utils";
 
 function ContainerLiveMetrics({
   query,
@@ -111,7 +114,15 @@ function ContainerIdentity({
   loading: boolean;
 }) {
   const copy = useI18n().messages.servers.containers;
-  const states: Record<string, string> = copy.states;
+  const resolved = data?.state
+    ? resolveContainerStatus(data.state, inspectHealthStatus(data), copy)
+    : null;
+  const isPositive =
+    resolved?.kind === "healthy" || resolved?.kind === "running";
+  const statusIcon =
+    resolved?.kind === "healthy" || resolved?.kind === "unhealthy"
+      ? FavouriteIcon
+      : ShutDownIcon;
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3.5">
       <div className="flex size-12 shrink-0 items-center justify-center rounded-[14px] border border-border/60 bg-gradient-to-b from-primary/15 to-primary/5 text-primary shadow-2xs">
@@ -131,12 +142,23 @@ function ContainerIdentity({
             )}
           </h2>
           {loading && (
-            <Skeleton aria-hidden="true" className="h-5 w-16" variant="table" />
+            <Skeleton aria-hidden="true" className="h-4 w-16" variant="table" />
           )}
-          {data?.state && (
-            <Badge variant={containerVariant(data.state, "")}>
-              {states[data.state] ?? data.state}
-            </Badge>
+          {resolved && (
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 font-medium text-xs",
+                isPositive ? "text-emerald-500" : "text-destructive"
+              )}
+            >
+              <HugeiconsIcon
+                aria-hidden="true"
+                className="size-3.5 shrink-0"
+                icon={statusIcon}
+                strokeWidth={2}
+              />
+              {resolved.label}
+            </span>
           )}
         </div>
         {loading && (

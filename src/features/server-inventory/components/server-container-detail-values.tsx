@@ -11,6 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ServerContainerInspect } from "@/features/server-inventory/components/server-container-inspect";
+import {
+  inspectHealthStatus,
+  resolveContainerStatus,
+} from "@/features/server-inventory/components/server-container-status";
 import type { ServerContainerDetail } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -142,7 +146,9 @@ function buildBasicRows(
   specOsLabel: string,
   locale: string
 ): DetailRow[] {
-  const states: Record<string, string> = copy.states;
+  const resolvedState = data?.state
+    ? resolveContainerStatus(data.state, inspectHealthStatus(data), copy).label
+    : "—";
   return [
     {
       id: "name",
@@ -152,7 +158,7 @@ function buildBasicRows(
     {
       id: "state",
       label: copy.state,
-      value: data?.state ? (states[data.state] ?? data.state) : "—",
+      value: resolvedState,
     },
     {
       id: "image",

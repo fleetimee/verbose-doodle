@@ -1,7 +1,8 @@
+import { FavouriteIcon, ShutDownIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Link } from "react-router";
 import { Layers3 } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
@@ -14,9 +15,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ServerContainerReadings } from "@/features/server-inventory/components/server-container-readings";
-import { containerVariant } from "@/features/server-inventory/components/server-container-status";
+import { resolveContainerStatus } from "@/features/server-inventory/components/server-container-status";
 import type { ServerContainer } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 export function ServerContainerCardSkeleton() {
   return (
@@ -87,7 +89,7 @@ export function ServerContainerCardSkeleton() {
       <CardFooter size="none">
         <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2">
           <Skeleton className="h-4 w-40 max-w-full" variant="table" />
-          <Skeleton className="h-5 w-16" variant="table" />
+          <Skeleton className="h-4 w-16" variant="table" />
           <div className="w-full">
             <Skeleton className="h-4 w-24" variant="table" />
           </div>
@@ -106,7 +108,12 @@ export function ServerContainerCard({
 }) {
   const { messages } = useI18n();
   const copy = messages.servers.containers;
-  const states: Record<string, string> = copy.states;
+  const resolved = resolveContainerStatus(item.state, item.status, copy);
+  const isPositive = resolved.kind === "healthy" || resolved.kind === "running";
+  const statusIcon =
+    resolved.kind === "healthy" || resolved.kind === "unhealthy"
+      ? FavouriteIcon
+      : ShutDownIcon;
   return (
     <Card className="relative isolate min-w-0" size="monitor" variant="monitor">
       <Link
@@ -150,9 +157,20 @@ export function ServerContainerCard({
               {item.image}
             </span>
           </CardDescription>
-          <Badge variant={containerVariant(item.state, item.status)}>
-            {states[item.state] ?? item.state}
-          </Badge>
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 font-medium text-xs",
+              isPositive ? "text-emerald-500" : "text-destructive"
+            )}
+          >
+            <HugeiconsIcon
+              aria-hidden="true"
+              className="size-3.5 shrink-0"
+              icon={statusIcon}
+              strokeWidth={2}
+            />
+            {resolved.label}
+          </span>
           <span
             className="w-full truncate text-muted-foreground text-xs"
             title={item.status}

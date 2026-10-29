@@ -1,3 +1,10 @@
+import {
+  FavouriteIcon,
+  Layers01Icon,
+  PackageIcon,
+  ShutDownIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { SiDocker } from "react-icons/si";
 import { useI18n } from "@/components/i18n-provider";
@@ -11,31 +18,83 @@ import type {
 import { formatMessage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
+function SummaryStatItem({
+  icon,
+  iconClassName,
+  value,
+  label,
+}: {
+  icon: IconSvgElement;
+  iconClassName: string;
+  value: number | null | undefined;
+  label: string;
+}) {
+  return (
+    <div className="flex min-w-0 items-center gap-2">
+      <HugeiconsIcon
+        aria-hidden="true"
+        className={cn("size-4 shrink-0", iconClassName)}
+        icon={icon}
+        strokeWidth={2}
+      />
+      <div className="flex min-w-0 items-baseline gap-1.5 text-sm">
+        <span className="font-mono font-semibold text-foreground tabular-nums">
+          {value ?? 0}
+        </span>
+        <span className="truncate text-muted-foreground text-xs lowercase">
+          {label}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function SummaryValues({ data }: { data: ServerContainerSummary }) {
   const { messages } = useI18n();
   const copy = messages.servers.containers;
-  const values = [
-    { label: copy.states.running, value: data.running, color: "text-success" },
-    { label: copy.stopped, value: data.stopped, color: "text-destructive" },
-    { label: copy.total, value: data.total, color: "text-foreground" },
-    { label: copy.images, value: data.images, color: "text-primary" },
-  ];
   return (
-    <dl className="grid grid-cols-4 gap-x-2 gap-y-4">
-      {values.map((item) => (
-        <div className="flex min-w-0 flex-col gap-1" key={item.label}>
-          <dt className="text-muted-foreground text-xs">{item.label}</dt>
-          <dd
-            className={cn(
-              "font-mono font-semibold text-sm tabular-nums",
-              item.color
-            )}
-          >
-            {item.value ?? "—"}
-          </dd>
-        </div>
-      ))}
-    </dl>
+    <div className="flex @min-[36rem]:flex-row flex-col @min-[36rem]:items-center justify-between @min-[36rem]:gap-6 gap-3 rounded-xl border border-border/50 bg-muted/15 px-4 py-3">
+      <div className="grid grid-cols-2 gap-x-8 gap-y-2.5">
+        <SummaryStatItem
+          icon={ShutDownIcon}
+          iconClassName="text-emerald-500"
+          label={copy.states.running}
+          value={data.running}
+        />
+        <SummaryStatItem
+          icon={ShutDownIcon}
+          iconClassName="text-destructive"
+          label={copy.stopped}
+          value={data.stopped}
+        />
+        <SummaryStatItem
+          icon={FavouriteIcon}
+          iconClassName="text-emerald-500"
+          label={copy.healthy}
+          value={data.healthy}
+        />
+        <SummaryStatItem
+          icon={FavouriteIcon}
+          iconClassName="text-destructive"
+          label={copy.unhealthy}
+          value={data.unhealthy}
+        />
+      </div>
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-border/40 border-t @min-[36rem]:border-t-0 @min-[36rem]:border-l @min-[36rem]:pt-0 pt-2.5 @min-[36rem]:pl-6">
+        <SummaryStatItem
+          icon={Layers01Icon}
+          iconClassName="text-muted-foreground"
+          label={copy.total}
+          value={data.total}
+        />
+        <SummaryStatItem
+          icon={PackageIcon}
+          iconClassName="text-primary"
+          label={copy.images}
+          value={data.images}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -50,7 +109,7 @@ function SummaryFooter({
   const copy = messages.servers.containers;
   return (
     <>
-      <div className="mt-4 flex flex-wrap justify-between gap-1 text-muted-foreground text-xs">
+      <div className="flex flex-wrap justify-between gap-1 text-muted-foreground text-xs">
         <span className="truncate" title={data.operatingSystem ?? undefined}>
           {data.operatingSystem || "—"}
         </span>
@@ -65,7 +124,7 @@ function SummaryFooter({
         </span>
       </div>
       {data.paused !== null && data.paused > 0 && (
-        <p className="mt-1 text-muted-foreground text-xs">
+        <p className="text-muted-foreground text-xs">
           {formatMessage(copy.pausedCount, { count: data.paused })}
         </p>
       )}
@@ -135,8 +194,16 @@ export function ServerDockerSummary({
   return (
     <section aria-label={copy.title} className="flex min-w-0 flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="font-medium text-sm">{copy.title}</h3>
-        <span className="text-muted-foreground text-xs">{statusLabel}</span>
+        <h3 className="flex items-center gap-2 font-medium text-sm tracking-[-0.01em]">
+          <SiDocker
+            aria-hidden="true"
+            className="size-4 shrink-0 text-primary"
+          />
+          {copy.title}
+        </h3>
+        <span className="font-mono text-muted-foreground text-xs">
+          {statusLabel}
+        </span>
       </div>
       {ready && <SummaryValues data={data} />}
       {!eligible && (
