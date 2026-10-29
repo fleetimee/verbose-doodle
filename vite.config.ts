@@ -72,6 +72,7 @@ export default defineConfig(({ mode }) => {
           secure: false,
           target: env.VITE_ENDPOINT_URL,
           ws: true,
+          xfwd: true,
         },
         "/simulate": {
           changeOrigin: true,
@@ -79,6 +80,7 @@ export default defineConfig(({ mode }) => {
             requestPath.replace(SIMULATE_PROXY_PREFIX_REGEX, ""),
           secure: false,
           target: env.VITE_ENDPOINT_URL,
+          xfwd: true,
         },
       },
     },
