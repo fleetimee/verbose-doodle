@@ -82,6 +82,7 @@ export const serversMessages = {
     description:
       "Browse images on this host and inspect their configuration and layers.",
     search: "Search repository, tag, or image ID…",
+    clearSearch: "Clear search",
     empty: "No images found",
     emptyHint: "Try another search or refresh the host.",
     inspect: "Inspect image",

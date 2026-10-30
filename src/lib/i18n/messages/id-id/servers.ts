@@ -87,6 +87,7 @@ export const serversMessages = {
     description:
       "Jelajahi image di host ini dan periksa konfigurasi serta lapisannya.",
     search: "Cari repositori, tag, atau ID image…",
+    clearSearch: "Hapus pencarian",
     empty: "Tidak ada image ditemukan",
     emptyHint: "Coba pencarian lain atau muat ulang host.",
     inspect: "Periksa image",

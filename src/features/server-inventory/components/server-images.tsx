@@ -1,4 +1,7 @@
+import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef } from "react";
 import { SiDocker } from "react-icons/si";
 import { Link, useLocation, useSearchParams } from "react-router";
@@ -14,7 +17,12 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   Table,
   TableBody,
@@ -190,20 +198,64 @@ export function ServerImagesPanel({
                 </p>
               </div>
             </div>
-            <div className="w-full shrink-0 sm:w-72">
-              <Input
-                aria-label={copy.search}
-                onChange={(event) => update("imageSearch", event.target.value)}
-                placeholder={copy.search}
-                value={search}
-              />
+            <div className="relative flex w-full items-center transition-all sm:w-60 focus-within:sm:w-72">
+              <InputGroup size="compact">
+                <InputGroupAddon align="inline-start">
+                  <HugeiconsIcon
+                    aria-hidden="true"
+                    className="size-3.5 text-muted-foreground transition-colors group-focus-within/input-group:text-foreground"
+                    icon={Search01Icon}
+                    strokeWidth={2}
+                  />
+                </InputGroupAddon>
+                <InputGroupInput
+                  aria-label={copy.search}
+                  onChange={(event) =>
+                    update("imageSearch", event.target.value)
+                  }
+                  placeholder={copy.search}
+                  value={search}
+                />
+                <AnimatePresence>
+                  {search && (
+                    <InputGroupAddon align="inline-end">
+                      <motion.div
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <InputGroupButton
+                          aria-label={copy.clearSearch}
+                          onClick={() => update("imageSearch", "")}
+                          size="icon-xs"
+                        >
+                          <HugeiconsIcon
+                            aria-hidden="true"
+                            className="size-3"
+                            icon={Cancel01Icon}
+                            strokeWidth={2}
+                          />
+                        </InputGroupButton>
+                      </motion.div>
+                    </InputGroupAddon>
+                  )}
+                </AnimatePresence>
+              </InputGroup>
             </div>
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
             {query.data?.status === "OK" && (
-              <p aria-live="polite" className="text-muted-foreground text-xs">
+              <motion.p
+                animate={{ opacity: 1 }}
+                aria-live="polite"
+                className="text-muted-foreground text-xs"
+                initial={{ opacity: 0 }}
+                key={rows.length}
+                transition={{ duration: 0.15 }}
+              >
                 {formatMessage(copy.results, { count: rows.length })}
-              </p>
+              </motion.p>
             )}
             <ServerImageCleanup
               disabled={
@@ -249,87 +301,100 @@ export function ServerImagesPanel({
           {query.data?.status === "OK" && (
             <>
               {rows.length ? (
-                <Table>
-                  <TableHeader variant="sticky">
-                    <TableRow>
-                      {[
-                        ["Repository", copy.repository],
-                        ["Tag", copy.tag],
-                        ["ID", copy.id],
-                        ["Size", copy.size],
-                        ["CreatedAt", copy.created],
-                      ].map(([column, label]) => (
-                        <ImageSortHead
-                          active={sort === column}
-                          descending={descending}
-                          key={column}
-                          label={label ?? ""}
-                          onSort={() => sortBy(column ?? "Repository")}
-                        />
-                      ))}
-                      <TableHead>
-                        <span className="sr-only">{copy.inspect}</span>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {rows.slice((page - 1) * 20, page * 20).map((row) => (
-                      <TableRow
-                        key={`${row.ID}-${row.Repository}-${row.Tag}-${row.Digest}`}
-                      >
-                        <TableCell className="max-w-72">
-                          <ImageRepository
-                            repository={row.Repository ?? "<none>"}
+                <motion.div
+                  animate={{ opacity: 1 }}
+                  initial={{ opacity: 0.7 }}
+                  key={search + page}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                >
+                  <Table>
+                    <TableHeader variant="sticky">
+                      <TableRow>
+                        {[
+                          ["Repository", copy.repository],
+                          ["Tag", copy.tag],
+                          ["ID", copy.id],
+                          ["Size", copy.size],
+                          ["CreatedAt", copy.created],
+                        ].map(([column, label]) => (
+                          <ImageSortHead
+                            active={sort === column}
+                            descending={descending}
+                            key={column}
+                            label={label ?? ""}
+                            onSort={() => sortBy(column ?? "Repository")}
                           />
-                        </TableCell>
-                        <TableCell className="max-w-56">
-                          <Badge
-                            className="max-w-full"
-                            mono
-                            radius="rounded"
-                            variant="muted"
-                          >
-                            <span className="truncate" title={row.Tag}>
-                              {row.Tag === "<none>" ? "—" : row.Tag}
-                            </span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell title={row.ID} variant="mono">
-                          {row.ID?.replace("sha256:", "").slice(0, 12)}
-                        </TableCell>
-                        <TableCell>{row.Size}</TableCell>
-                        <TableCell>
-                          <ImageCreated
-                            locale={locale}
-                            value={row.CreatedAt ?? ""}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            aria-label={`${copy.inspect}: ${row.Repository}:${row.Tag}`}
-                            render={
-                              <Link
-                                to={`/dashboard/server-metrics/${entry.id}/images/${encodeURIComponent(row.ID ?? "")}${detailParams.size ? `?${detailParams}` : ""}`}
-                              />
-                            }
-                            size="sm"
-                            variant="ghost"
-                          >
-                            {copy.inspect}
-                            <ChevronRight data-icon="inline-end" />
-                          </Button>
-                        </TableCell>
+                        ))}
+                        <TableHead>
+                          <span className="sr-only">{copy.inspect}</span>
+                        </TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {rows.slice((page - 1) * 20, page * 20).map((row) => (
+                        <TableRow
+                          key={`${row.ID}-${row.Repository}-${row.Tag}-${row.Digest}`}
+                        >
+                          <TableCell className="max-w-72">
+                            <ImageRepository
+                              repository={row.Repository ?? "<none>"}
+                            />
+                          </TableCell>
+                          <TableCell className="max-w-56">
+                            <Badge
+                              className="max-w-full"
+                              mono
+                              radius="rounded"
+                              variant="muted"
+                            >
+                              <span className="truncate" title={row.Tag}>
+                                {row.Tag === "<none>" ? "—" : row.Tag}
+                              </span>
+                            </Badge>
+                          </TableCell>
+                          <TableCell title={row.ID} variant="mono">
+                            {row.ID?.replace("sha256:", "").slice(0, 12)}
+                          </TableCell>
+                          <TableCell>{row.Size}</TableCell>
+                          <TableCell>
+                            <ImageCreated
+                              locale={locale}
+                              value={row.CreatedAt ?? ""}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              aria-label={`${copy.inspect}: ${row.Repository}:${row.Tag}`}
+                              render={
+                                <Link
+                                  to={`/dashboard/server-metrics/${entry.id}/images/${encodeURIComponent(row.ID ?? "")}${detailParams.size ? `?${detailParams}` : ""}`}
+                                />
+                              }
+                              size="sm"
+                              variant="ghost"
+                            >
+                              {copy.inspect}
+                              <ChevronRight data-icon="inline-end" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </motion.div>
               ) : (
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyTitle>{copy.empty}</EmptyTitle>
-                    <EmptyDescription>{copy.emptyHint}</EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
+                <motion.div
+                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                >
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyTitle>{copy.empty}</EmptyTitle>
+                      <EmptyDescription>{copy.emptyHint}</EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
+                </motion.div>
               )}
               {pages > 1 && (
                 <div className="flex items-center justify-end gap-3">
