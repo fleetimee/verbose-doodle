@@ -261,6 +261,24 @@ Source-list failures use a full workspace recovery state; catalog failures keep 
 
 ### ISO message highlighting
 
+Complete JSON objects and arrays in a loaded log chunk are detected and
+validated before highlighting, including inline `DATA={...}` payloads and
+multiline JSON. They use the endpoint log viewer's syntax colors: blue keys,
+green strings, amber numbers, primary-colored booleans/null, and muted
+punctuation. Numeric strings remain strings. Invalid or incomplete JSON stays
+plain text. Original whitespace and log prefixes are preserved; highlighting
+does not format or rewrite the log. JSON spanning separate chunks is not
+highlighted as one payload.
+
+Node.js-style object dumps are recognized separately from strict JSON. Supported
+forms include unquoted property names, single-quoted strings, nested objects and
+arrays, trailing commas, class labels such as `SocketTimeoutException { ... }`,
+and `undefined`, `NaN`, `Infinity`, and integer bigint values. Keys and values
+use the same syntax colors as JSON; class names use the primary color. Detection
+validates the container structure without evaluating JavaScript. The viewer
+renders the original tokens, so quoting, escapes, and whitespace stay unchanged.
+Incomplete or unsupported dump forms remain plain text.
+
 Expanded `[MTI]` and numbered field dump lines are highlighted automatically, preserving the exact text and whitespace. Hover field labels for standard field names; bitmap labels list active fields. Amounts use blue, dates amber, account fields purple, identifiers cyan, other values green, and non-`00` response codes red. Field labels and values share their category color in both packed and expanded views; MTIs are amber and bitmaps purple. Profile-specific field meanings may differ.
 
 Timestamped `R`/`S` packed ISO lines highlight the MTI and primary/secondary bitmap. Packed field ranges are colored only when the following expanded dump matches every bitmap field and reconstructs the complete packed body without ambiguity, including variable-length prefixes. Missing, truncated, or incompatible dumps leave the packed body unchanged. No payload content is inserted as HTML.

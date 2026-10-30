@@ -12,8 +12,8 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import { IsoLogPayload } from "@/features/log-viewer/iso-log-payload";
 import { LogFileHeader } from "@/features/log-viewer/log-file-header";
+import { LogPayload } from "@/features/log-viewer/log-payload";
 import { LogToolbar } from "@/features/log-viewer/log-toolbar";
 import { LogContentSkeleton } from "@/features/log-viewer/log-viewer-skeleton";
 import type { LogSegment } from "@/features/log-viewer/types";
@@ -456,7 +456,7 @@ export function StreamViewer({
                           )}
                           data-log-text={segment.filename}
                         >
-                          <IsoLogPayload text={segment.text} />
+                          <LogPayload text={segment.text} />
                         </pre>
                       </div>
                     ))}
