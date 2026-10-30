@@ -149,7 +149,8 @@ function useServerBreadcrumbNames(pathSegments: string[]) {
     enabled: Boolean(serverId),
     retry: false,
   });
-  const containerId = pathSegments[4];
+  const containerId =
+    pathSegments[3] === "containers" ? pathSegments[4] : undefined;
   const containerQuery = useQuery({
     queryKey: [
       "server-inventory",
@@ -307,6 +308,9 @@ export function DashboardLayout() {
           index === 2
             ? (serverName ?? messages.servers.containers.hostDetails)
             : containerName || messages.servers.containers.detailTitle;
+        if (index > 2 && pathSegments[3] === "images") {
+          label = messages.servers.images.details;
+        }
       }
       const isLast = index === pathSegments.length - 1;
       const isNavigable =

@@ -20,6 +20,12 @@ const ServerHostDetailPage = lazy(() =>
   )
 );
 
+const ServerImageDetailPage = lazy(() =>
+  import("@/pages/dashboard/server-image-detail").then(
+    ({ ServerImageDetailPage }) => ({ default: ServerImageDetailPage })
+  )
+);
+
 export const serverInventoryRoutes = (
   <>
     <Route element={<ServerInventoryPage />} path="servers" />
@@ -46,6 +52,14 @@ export const serverInventoryRoutes = (
         </ProtectedRoute>
       }
       path="server-metrics/:serverId/containers/:containerId"
+    />
+    <Route
+      element={
+        <ProtectedRoute requiredRole="ADMIN">
+          <ServerImageDetailPage />
+        </ProtectedRoute>
+      }
+      path="server-metrics/:serverId/images/:imageId"
     />
   </>
 );
