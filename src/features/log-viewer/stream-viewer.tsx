@@ -201,6 +201,7 @@ export function StreamViewer({
     load,
   } = useLogStream(id, stream, from, to, follow);
   const viewport = useRef<HTMLDivElement>(null);
+  const previousScrollTop = useRef(0);
   const search = useLogSearch(viewport, pages, query, filterMatches);
   const allFiles = groupLogSegments(pages.flatMap((page) => page.segments));
   const files =
@@ -242,6 +243,7 @@ export function StreamViewer({
     } else if (follow && hasContent) {
       element.scrollTop = element.scrollHeight;
     }
+    previousScrollTop.current = element.scrollTop;
   }, [pages, follow, fontSize, fullscreen, maximized, hasContent]);
 
   async function older() {
@@ -404,13 +406,19 @@ export function StreamViewer({
             if (!element || event.target !== element) {
               return;
             }
+            const scrollTop = Math.max(0, element.scrollTop);
+            const previousTop = previousScrollTop.current;
+            previousScrollTop.current = scrollTop;
+            if (scrollTop === previousTop) {
+              return;
+            }
             if (
               element.scrollHeight - element.scrollTop - element.clientHeight >
               80
             ) {
               setFollow(false);
             }
-            if (!query && element.scrollTop === 0) {
+            if (!query && scrollTop === 0 && scrollTop < previousTop) {
               older();
             }
           }}
