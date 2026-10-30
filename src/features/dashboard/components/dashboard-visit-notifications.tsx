@@ -1,8 +1,14 @@
-import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import {
+  Cancel01Icon,
+  MessageSquareCodeIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Bubble, BubbleContent } from "@/components/ui/bubble";
+import { Button } from "@/components/ui/button";
 import { useIsScreenLocked } from "@/features/auth/components/screen-lock";
 import { useAuth } from "@/features/auth/context";
 import {
@@ -184,6 +190,90 @@ function applyChatReadEventToCache(
   );
 }
 
+function showVisitorChatToast({
+  senderIp,
+  subtitle,
+  preview,
+  unreadCount,
+  toastId,
+}: {
+  senderIp: string;
+  subtitle: string;
+  preview: string | undefined;
+  unreadCount?: number;
+  toastId: string;
+}): void {
+  const copy = messages.dashboardActivity.presence;
+  toast.custom(
+    (id) => (
+      <div className="flex w-80 flex-col gap-2.5 rounded-xl border bg-popover p-3.5 text-popover-foreground shadow-lg">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="relative flex size-8 shrink-0 items-center justify-center rounded-lg border bg-primary/10 text-primary">
+              <HugeiconsIcon
+                className="size-4"
+                icon={MessageSquareCodeIcon}
+                strokeWidth={2}
+              />
+              <span
+                aria-hidden="true"
+                className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-success ring-2 ring-popover"
+              />
+            </div>
+            <div className="flex min-w-0 flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="truncate font-mono font-semibold text-xs">
+                  {senderIp}
+                </span>
+                {unreadCount && unreadCount > 1 ? (
+                  <Badge mono size="xs" variant="primary-subtle">
+                    {unreadCount}
+                  </Badge>
+                ) : null}
+              </div>
+              <span className="truncate text-muted-foreground text-xs">
+                {subtitle}
+              </span>
+            </div>
+          </div>
+          <Button
+            aria-label={messages.dashboardActivity.visitDismissLabel}
+            onClick={() => toast.dismiss(id)}
+            size="icon-xs"
+            type="button"
+            variant="ghost"
+          >
+            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+          </Button>
+        </div>
+
+        {preview ? (
+          <Bubble className="w-full max-w-full" variant="muted">
+            <BubbleContent className="w-full">{preview}</BubbleContent>
+          </Bubble>
+        ) : null}
+
+        <div className="flex items-center justify-end gap-1.5">
+          <Button
+            onClick={() => {
+              dispatchOpenVisitorChat(senderIp);
+              toast.dismiss(id);
+            }}
+            size="xs"
+            type="button"
+          >
+            <span>{copy.chatOpenReplyLabel}</span>
+          </Button>
+        </div>
+      </div>
+    ),
+    {
+      duration: 7000,
+      id: toastId,
+    }
+  );
+}
+
 function applyIncomingChatToCache(
   msg: DashboardIpChatMessage,
   myIp: string | null
@@ -236,13 +326,11 @@ function applyIncomingChatToCache(
   }
 
   const copy = messages.dashboardActivity.presence;
-  toast(formatMessage(copy.chatToastIncomingTitle, { ip: msg.senderIp }), {
-    action: {
-      label: copy.chatOpenReplyLabel,
-      onClick: () => dispatchOpenVisitorChat(msg.senderIp),
-    },
-    description: formatChatToastPreview(msg.message),
-    id: `visitor-chat-${msg.senderIp}-${msg.id}`,
+  showVisitorChatToast({
+    preview: formatChatToastPreview(msg.message),
+    senderIp: msg.senderIp,
+    subtitle: formatMessage(copy.chatToastIncomingTitle, { ip: msg.senderIp }),
+    toastId: `visitor-chat-${msg.senderIp}-${msg.id}`,
   });
 }
 
@@ -269,20 +357,16 @@ function announceOfflineUnreadChats(
       sender.unreadCount === 1
         ? copy.chatUnreadVisitBubbleSingle
         : copy.chatUnreadVisitBubblePlural;
-    toast(
-      formatMessage(titleTemplate, {
+    showVisitorChatToast({
+      preview: formatChatToastPreview(sender.lastChatMessage),
+      senderIp: sender.ipAddress,
+      subtitle: formatMessage(titleTemplate, {
         count: sender.unreadCount,
         ip: sender.ipAddress,
       }),
-      {
-        action: {
-          label: copy.chatOpenReplyLabel,
-          onClick: () => dispatchOpenVisitorChat(sender.ipAddress),
-        },
-        description: formatChatToastPreview(sender.lastChatMessage),
-        id: `visitor-unread-${sender.ipAddress}`,
-      }
-    );
+      toastId: `visitor-unread-${sender.ipAddress}`,
+      unreadCount: sender.unreadCount,
+    });
   }
 }
 
