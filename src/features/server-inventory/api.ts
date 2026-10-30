@@ -6,6 +6,7 @@ import type {
   ServerEntry,
   ServerEntryPage,
   ServerEntryRequest,
+  ServerImages,
   ServerInventoryQuery,
   ServerMetrics,
   ServerProcesses,
@@ -250,5 +251,30 @@ export async function reviewRdpSession(
     `${endpoints.detail(id)}/rdp-session`,
     { cache: "no-store" }
   );
+  return response.data;
+}
+
+export async function fetchServerImages(
+  id: string,
+  signal: AbortSignal,
+  imageId?: string
+): Promise<ServerImages> {
+  const suffix = imageId ? `/${encodeURIComponent(imageId)}` : "";
+  const response = await apiGet<{ data: ServerImages }>(
+    `${endpoints.detail(id)}/images${suffix}`,
+    { cache: "no-store", signal }
+  );
+  return response.data;
+}
+
+export async function pruneServerImages(
+  id: string
+): Promise<{ status: string; completedAt: string | null }> {
+  const response = await apiPost<{
+    data: { status: string; completedAt: string | null };
+  }>(`${endpoints.detail(id)}/images/prune`, undefined, {
+    cache: "no-store",
+    timeout: 45_000,
+  });
   return response.data;
 }

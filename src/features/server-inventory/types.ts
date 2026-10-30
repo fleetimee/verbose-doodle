@@ -232,3 +232,17 @@ export interface ServerProcesses {
   taskCount: number | null;
   uptimeSeconds: number | null;
 }
+
+export interface ServerImages {
+  collectedAt: string | null;
+  history: Record<string, string>[];
+  images: Record<string, string>[];
+  inspect:
+    | (ContainerInspectObject & {
+        Size: number;
+        Created: string;
+        Config: ContainerInspectObject;
+      })
+    | null;
+  status: string;
+}
