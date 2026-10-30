@@ -490,9 +490,16 @@ export function ServerImagesPanel({
                 </Table>
               </div>
               <ImageTablePagination
-                onPageChange={(nextPage) =>
-                  update("imagePage", String(nextPage))
-                }
+                onPageChange={(nextPage) => {
+                  update("imagePage", String(nextPage));
+                  const prefersReducedMotion = window.matchMedia(
+                    "(prefers-reduced-motion: reduce)"
+                  ).matches;
+                  sectionRef.current?.scrollIntoView({
+                    behavior: prefersReducedMotion ? "instant" : "smooth",
+                    block: "start",
+                  });
+                }}
                 page={page}
                 pages={pages}
               />
