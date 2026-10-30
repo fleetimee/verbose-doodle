@@ -25,7 +25,9 @@ import {
   parseDashboardChatReadEvent,
   parseDashboardPresenceEvent,
   parseDashboardVisitEvent,
+  playVisitorChatNotificationSound,
   recordDashboardVisit,
+  tryShowNativeVisitorChatNotification,
 } from "@/features/dashboard/dashboard-activity";
 import { createRealtimeTicket } from "@/features/realtime/ticket-client";
 import {
@@ -204,6 +206,12 @@ function showVisitorChatToast({
   toastId: string;
 }): void {
   const copy = messages.dashboardActivity.presence;
+  playVisitorChatNotificationSound();
+  tryShowNativeVisitorChatNotification({
+    body: preview,
+    senderIp,
+    title: subtitle,
+  });
   toast.custom(
     (id) => (
       <div className="flex w-80 flex-col gap-2.5 rounded-xl border bg-popover p-3.5 text-popover-foreground shadow-lg">

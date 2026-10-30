@@ -621,3 +621,66 @@ export function dispatchOpenVisitorChat(targetIp: string): void {
     listener(targetIp);
   }
 }
+
+let sharedAudioContext: AudioContext | null = null;
+
+export function playVisitorChatNotificationSound(): void {
+  try {
+    const AudioContextClass = window.AudioContext;
+    if (!AudioContextClass) {
+      return;
+    }
+    if (!sharedAudioContext) {
+      sharedAudioContext = new AudioContextClass();
+    }
+    const ctx = sharedAudioContext;
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => undefined);
+    }
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(587.33, now);
+    osc.frequency.setValueAtTime(880, now + 0.08);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.25);
+  } catch {
+    // Ignore audio context autoplay restrictions before first user gesture
+  }
+}
+
+export function tryShowNativeVisitorChatNotification({
+  title,
+  body,
+  senderIp,
+}: {
+  title: string;
+  body: string | undefined;
+  senderIp: string;
+}): void {
+  try {
+    if (!(document.hidden && "Notification" in window)) {
+      return;
+    }
+    if (Notification.permission === "granted") {
+      const notification = new Notification(title, {
+        body,
+        icon: "/brand/biller-app-icon.png",
+        tag: `visitor-chat-${senderIp}`,
+      });
+      notification.onclick = () => {
+        window.focus();
+        dispatchOpenVisitorChat(senderIp);
+        notification.close();
+      };
+    }
+  } catch {
+    // Ignore on non-secure HTTP contexts
+  }
+}

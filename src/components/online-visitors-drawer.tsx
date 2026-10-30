@@ -317,6 +317,129 @@ function describeVisitorPage(
   };
 }
 
+const UNREAD_TITLE_PREFIX_REGEX = /^\(\d+\)\s+/;
+const CHAT_FLASH_TITLE_PREFIX = "💬 ";
+
+function stripUnreadTitlePrefix(rawTitle: string): string {
+  const withoutFlash = rawTitle.startsWith(CHAT_FLASH_TITLE_PREFIX)
+    ? rawTitle.slice(CHAT_FLASH_TITLE_PREFIX.length)
+    : rawTitle;
+  return withoutFlash.replace(UNREAD_TITLE_PREFIX_REGEX, "");
+}
+
+function useUnreadChatTabTitle(
+  enabled: boolean,
+  visitors: readonly DashboardVisitorPresence[],
+  currentIp: string | undefined,
+  copy: Messages["dashboardActivity"]["presence"]
+): number {
+  const totalUnreadCount = visitors.reduce(
+    (sum, visitor) =>
+      visitor.ipAddress === currentIp ? sum : sum + (visitor.unreadCount ?? 0),
+    0
+  );
+  const latestUnreadSenderIp = visitors.find(
+    (visitor) =>
+      visitor.ipAddress !== currentIp && (visitor.unreadCount ?? 0) > 0
+  )?.ipAddress;
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+    const baseTitle = stripUnreadTitlePrefix(document.title);
+    if (totalUnreadCount <= 0) {
+      if (document.title !== baseTitle) {
+        document.title = baseTitle;
+      }
+      return;
+    }
+
+    const countPrefixTitle = `(${totalUnreadCount}) ${baseTitle}`;
+    const flashMessageTitle = latestUnreadSenderIp
+      ? `${CHAT_FLASH_TITLE_PREFIX}${formatMessage(copy.chatToastIncomingTitle, { ip: latestUnreadSenderIp })}`
+      : countPrefixTitle;
+
+    document.title = countPrefixTitle;
+    let showFlash = false;
+    const intervalId = window.setInterval(() => {
+      if (!document.hidden) {
+        document.title = `(${totalUnreadCount}) ${stripUnreadTitlePrefix(document.title)}`;
+        showFlash = false;
+        return;
+      }
+      showFlash = !showFlash;
+      document.title = showFlash ? flashMessageTitle : countPrefixTitle;
+    }, 1400);
+
+    return () => {
+      window.clearInterval(intervalId);
+      document.title = stripUnreadTitlePrefix(document.title);
+    };
+  }, [
+    copy.chatToastIncomingTitle,
+    enabled,
+    latestUnreadSenderIp,
+    totalUnreadCount,
+  ]);
+
+  return totalUnreadCount;
+}
+
+function OnlineVisitorsTriggerButton({
+  triggerLabel,
+  onlineCount,
+  totalUnreadCount,
+}: {
+  triggerLabel: string;
+  onlineCount: number;
+  totalUnreadCount: number;
+}) {
+  const indicatorColorClass =
+    totalUnreadCount > 0 ? "bg-primary" : "bg-success";
+  return (
+    <DrawerTrigger asChild>
+      <Button
+        aria-label={triggerLabel}
+        data-testid="online-visitors-trigger"
+        size="sm-compact"
+        title={triggerLabel}
+        variant="ghost"
+      >
+        <span className="relative flex size-2 items-center justify-center">
+          <span
+            aria-hidden="true"
+            className={cn(
+              "absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none",
+              indicatorColorClass
+            )}
+          />
+          <span
+            aria-hidden="true"
+            className={cn(
+              "relative inline-flex size-2 rounded-full",
+              indicatorColorClass
+            )}
+          />
+        </span>
+        <HugeiconsIcon
+          className="size-4 text-muted-foreground"
+          icon={UserGroupIcon}
+          strokeWidth={2}
+        />
+        <span className="font-mono font-semibold text-xs tabular-nums">
+          {onlineCount}
+        </span>
+        {totalUnreadCount > 0 && (
+          <Badge mono size="xs" variant="primary-subtle">
+            {totalUnreadCount}
+          </Badge>
+        )}
+      </Button>
+    </DrawerTrigger>
+  );
+}
+
 export function OnlineVisitorsDrawer({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
@@ -383,10 +506,11 @@ export function OnlineVisitorsDrawer({
   const presence = presenceQuery.data;
   const currentIp = presence?.currentIp;
   const visitors = presence?.visitors ?? [];
-  const totalUnreadCount = visitors.reduce(
-    (sum, visitor) =>
-      visitor.ipAddress === currentIp ? sum : sum + (visitor.unreadCount ?? 0),
-    0
+  const totalUnreadCount = useUnreadChatTabTitle(
+    !hideTrigger && snapshot.isAuthenticated,
+    visitors,
+    currentIp,
+    copy
   );
   const onlineVisitors = visitors.filter((visitor) => visitor.online);
   const recentVisitors = visitors.filter((visitor) => !visitor.online);
@@ -409,45 +533,11 @@ export function OnlineVisitorsDrawer({
   return (
     <Drawer direction="right" onOpenChange={handleOpenChange} open={isOpen}>
       {!hideTrigger && (
-        <DrawerTrigger asChild>
-          <Button
-            aria-label={triggerLabel}
-            data-testid="online-visitors-trigger"
-            size="sm-compact"
-            title={triggerLabel}
-            variant="ghost"
-          >
-            <span className="relative flex size-2 items-center justify-center">
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none",
-                  totalUnreadCount > 0 ? "bg-primary" : "bg-success"
-                )}
-              />
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "relative inline-flex size-2 rounded-full",
-                  totalUnreadCount > 0 ? "bg-primary" : "bg-success"
-                )}
-              />
-            </span>
-            <HugeiconsIcon
-              className="size-4 text-muted-foreground"
-              icon={UserGroupIcon}
-              strokeWidth={2}
-            />
-            <span className="font-mono font-semibold text-xs tabular-nums">
-              {onlineCount}
-            </span>
-            {totalUnreadCount > 0 && (
-              <Badge mono size="xs" variant="primary-subtle">
-                {totalUnreadCount}
-              </Badge>
-            )}
-          </Button>
-        </DrawerTrigger>
+        <OnlineVisitorsTriggerButton
+          onlineCount={onlineCount}
+          totalUnreadCount={totalUnreadCount}
+          triggerLabel={triggerLabel}
+        />
       )}
       <DrawerContent className="overflow-hidden" showSwipeHandle={false}>
         <DrawerHeader size="compact">
