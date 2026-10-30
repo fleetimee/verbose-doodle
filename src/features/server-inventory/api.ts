@@ -16,6 +16,7 @@ import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 const endpoints = API_ENDPOINTS.admin.servers;
+const PRUNE_ERROR_STATUS = /ERROR:\s*([A-Z_]+)/;
 
 export async function runServerContainerAction(
   id: string,
@@ -268,13 +269,63 @@ export async function fetchServerImages(
 }
 
 export async function pruneServerImages(
-  id: string
+  id: string,
+  onChunk?: (chunk: string) => void,
+  signal?: AbortSignal
 ): Promise<{ status: string; completedAt: string | null }> {
-  const response = await apiPost<{
-    data: { status: string; completedAt: string | null };
-  }>(`${endpoints.detail(id)}/images/prune`, undefined, {
-    cache: "no-store",
-    timeout: 45_000,
+  if (!onChunk) {
+    const response = await apiPost<{
+      data: { status: string; completedAt: string | null };
+    }>(`${endpoints.detail(id)}/images/prune`, undefined, {
+      cache: "no-store",
+      timeout: 45_000,
+    });
+    return response.data;
+  }
+
+  const headers = new Headers({
+    Accept: "text/plain",
   });
-  return response.data;
+  const token = localStorage.getItem("auth_token");
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  const response = await fetch(
+    `${endpoints.detail(id)}/images/prune?stream=true`,
+    {
+      method: "POST",
+      headers,
+      signal,
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Prune request failed with status ${response.status}`);
+  }
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error("Response body is not readable");
+  }
+  const decoder = new TextDecoder();
+  let fullOutput = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+    const text = decoder.decode(value, { stream: true });
+    fullOutput += text;
+    onChunk(text);
+  }
+  const finalChunk = decoder.decode();
+  if (finalChunk) {
+    fullOutput += finalChunk;
+    onChunk(finalChunk);
+  }
+  const isError = fullOutput.includes("ERROR:");
+  if (isError) {
+    const match = fullOutput.match(PRUNE_ERROR_STATUS);
+    const status = match ? match[1] : "ACTION_FAILED";
+    return { status, completedAt: null };
+  }
+  return { status: "OK", completedAt: new Date().toISOString() };
 }
