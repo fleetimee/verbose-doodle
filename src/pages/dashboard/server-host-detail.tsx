@@ -2,7 +2,7 @@ import { PauseIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router";
+import { Link, Navigate, useParams, useSearchParams } from "react-router";
 import { ChevronLeft, Play, RefreshCw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -23,6 +23,7 @@ import { ServerCleanupSuggestions } from "@/features/server-inventory/components
 import { ServerConnectionButton } from "@/features/server-inventory/components/server-connection-button";
 import { ServerContainerDetailPanel } from "@/features/server-inventory/components/server-container-detail";
 import { ServerContainerGrid } from "@/features/server-inventory/components/server-container-grid";
+import { ServerImagesPanel } from "@/features/server-inventory/components/server-images";
 import { ServerHostCard } from "@/features/server-inventory/components/server-metrics";
 import { ServerPlatformIcon } from "@/features/server-inventory/components/server-platform-icon";
 import { ServerProcesses } from "@/features/server-inventory/components/server-processes";
@@ -61,6 +62,7 @@ function LinuxHostSections({
           <ServerContainerGrid entry={entry} paused={paused} />
         </section>
       )}
+      {!noDocker && <ServerImagesPanel entry={entry} paused={paused} />}
     </>
   );
 }
@@ -133,6 +135,20 @@ function useHostDocumentTitle(
   return { title, documentTitle };
 }
 
+function getImageRedirect(
+  serverId: string,
+  containerId: string | undefined,
+  params: URLSearchParams
+) {
+  const imageId = params.get("image");
+  if (containerId || !imageId) {
+    return null;
+  }
+  const next = new URLSearchParams(params);
+  next.delete("image");
+  return `/dashboard/server-metrics/${serverId}/images/${encodeURIComponent(imageId)}${next.size ? `?${next}` : ""}`;
+}
+
 export function ServerHostDetailPage() {
   const { messages } = useI18n();
   const copy = messages.servers.containers;
@@ -159,6 +175,11 @@ export function ServerHostDetailPage() {
   const hostParams = new URLSearchParams(params);
   hostParams.delete("containerSearch");
   hostParams.delete("includeStopped");
+  hostParams.delete("image");
+  hostParams.delete("imageSearch");
+  hostParams.delete("imagePage");
+  hostParams.delete("imageSort");
+  hostParams.delete("imageDirection");
   const back = containerId
     ? `/dashboard/server-metrics/${serverId}${params.size ? `?${params}` : ""}`
     : `/dashboard/server-metrics${hostParams.size ? `?${hostParams}` : ""}`;
@@ -177,6 +198,10 @@ export function ServerHostDetailPage() {
       setRefreshing(false);
     }
   };
+  const imageRedirect = getImageRedirect(serverId, containerId, params);
+  if (imageRedirect) {
+    return <Navigate replace to={imageRedirect} />;
+  }
   return (
     <div className="server-monitor-workspace mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-8 pb-8">
       <div className="flex flex-col gap-5">
