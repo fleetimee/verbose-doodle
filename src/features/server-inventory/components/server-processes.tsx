@@ -609,6 +609,7 @@ function ProcessesPanel({
                 const next = values[0];
                 if (
                   next === "name" ||
+                  next === "pid" ||
                   next === "cpuPercent" ||
                   next === "memoryBytes"
                 ) {
@@ -706,8 +707,9 @@ function ProcessesPanel({
                       {row.pid}
                     </TableCell>
                     <TableCell
-                      className="max-w-40"
+                      className="max-w-36"
                       size="compact"
+                      title={row.name}
                       variant="truncate"
                     >
                       {row.name}
@@ -716,7 +718,7 @@ function ProcessesPanel({
                       className="hidden max-w-64 xl:table-cell"
                       size="compact"
                       title={row.command}
-                      variant="mono"
+                      variant="truncate"
                     >
                       {row.command}
                     </TableCell>
@@ -730,7 +732,8 @@ function ProcessesPanel({
                     <TableCell
                       className="hidden max-w-24 md:table-cell"
                       size="compact"
-                      variant="muted"
+                      title={row.user}
+                      variant="muted-truncate"
                     >
                       {row.user}
                     </TableCell>

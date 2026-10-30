@@ -117,6 +117,7 @@ const tableCellVariants = cva(
         truncate: "truncate font-mono text-xs text-muted-foreground",
         medium: "font-medium text-xs",
         muted: "text-muted-foreground",
+        "muted-truncate": "truncate text-muted-foreground",
         "host-group": "border-primary/60 border-l-2",
         ellipsis: "overflow-hidden text-ellipsis",
       },
