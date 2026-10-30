@@ -31,6 +31,8 @@ export const API_ENDPOINTS = {
       update: (slug: string) => `/api/biller/${slug}`,
     },
     dashboard: {
+      chatRead: "/api/dashboard/visits/chats/read",
+      chats: "/api/dashboard/visits/chats",
       visits: "/api/dashboard/visits",
     },
     employees: {

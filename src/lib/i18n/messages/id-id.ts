@@ -84,6 +84,26 @@ export const idIdMessages = {
       playingGameLabel: "Bermain {page}",
       sleepingPageLabel: "Tidur di {page}",
       lastVisitedPageLabel: "Terakhir di {page}",
+      chatActionLabel: "Chat",
+      chatBackLabel: "Semua pengunjung",
+      chatWithTitle: "Chat dengan {ip}",
+      chatInputPlaceholder: "Kirim pesan ke {ip}…",
+      chatSendLabel: "Kirim",
+      chatEmptyState:
+        "Belum ada pesan dengan {ip}. Pesan tersimpan dan akan memberi tahu mereka saat mengunjungi halaman ini.",
+      chatOfflineHint:
+        "{ip} sedang offline — pesan Anda tetap disimpan dan akan tampil saat mereka berkunjung.",
+      chatIncomingBubble: "{ip} mengirim pesan: “{message}”",
+      chatUnreadVisitBubbleSingle:
+        "Ada 1 pesan belum dibaca dari {ip} untuk IP Anda.",
+      chatUnreadVisitBubblePlural:
+        "Ada {count} pesan belum dibaca dari {ip} untuk IP Anda.",
+      chatOpenReplyLabel: "Balas",
+      chatToastIncomingTitle: "Pesan baru dari {ip}",
+      chatPreviewYouPrefix: "Anda: ",
+      chatReceiptPendingLabel: "Mengirim…",
+      chatReceiptSentLabel: "Terkirim",
+      chatReceiptReadLabel: "Dibaca",
     },
   },
   dateConverter: idDateConverterMessages,

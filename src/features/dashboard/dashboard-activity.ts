@@ -4,6 +4,41 @@ import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 export const DASHBOARD_VISIT_EVENT_TYPE = "dashboard_visited";
 export const DASHBOARD_PRESENCE_EVENT_TYPE = "dashboard_presence";
+export const DASHBOARD_CHAT_EVENT_TYPE = "dashboard_chat_message";
+export const DASHBOARD_CHAT_READ_EVENT_TYPE = "dashboard_chat_read";
+
+export type DashboardIpChatMessage = {
+  readonly createdAt: string;
+  readonly id: number;
+  readonly message: string;
+  readonly pending?: boolean;
+  readonly readAt?: string;
+  readonly recipientIp: string;
+  readonly senderIp: string;
+  readonly senderUsername: string;
+};
+
+export type DashboardIpChatReadPayload = {
+  readonly readAt: string;
+  readonly recipientIp: string;
+  readonly senderIp: string;
+};
+
+export type DashboardIpChatReadEvent = {
+  readonly payload: DashboardIpChatReadPayload;
+  readonly type: typeof DASHBOARD_CHAT_READ_EVENT_TYPE;
+};
+
+export type DashboardIpChatThread = {
+  readonly currentIp: string;
+  readonly messages: readonly DashboardIpChatMessage[];
+  readonly targetIp: string;
+};
+
+export type DashboardIpChatEvent = {
+  readonly payload: DashboardIpChatMessage;
+  readonly type: typeof DASHBOARD_CHAT_EVENT_TYPE;
+};
 
 export type DashboardVisitPayload = {
   readonly ipAddress?: string;
@@ -23,9 +58,13 @@ export type DashboardVisitorPresence = {
   readonly activeConnections: number;
   readonly currentPath?: string;
   readonly ipAddress: string;
+  readonly lastChatAt?: string;
+  readonly lastChatMessage?: string;
+  readonly lastChatSenderIp?: string;
   readonly lastSeenAt: string;
   readonly online: boolean;
   readonly sleeping: boolean;
+  readonly unreadCount: number;
   readonly userAgent?: string;
 };
 
@@ -97,6 +136,18 @@ function readString(
   return undefined;
 }
 
+function nonEmptyTrimmed(
+  primary: string | null | undefined,
+  secondary: string | null | undefined
+): string | undefined {
+  const raw = primary ?? secondary;
+  if (!raw) {
+    return undefined;
+  }
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 const rawVisitorPresenceSchema = z
   .object({
     activeConnections: z.number().optional(),
@@ -105,49 +156,61 @@ const rawVisitorPresenceSchema = z
     current_path: z.string().optional().nullable(),
     ipAddress: z.string().min(1).optional(),
     ip_address: z.string().min(1).optional(),
+    lastChatAt: z.string().optional().nullable(),
+    lastChatMessage: z.string().optional().nullable(),
+    lastChatSenderIp: z.string().optional().nullable(),
     lastSeenAt: z.string().min(1).optional(),
+    last_chat_at: z.string().optional().nullable(),
+    last_chat_message: z.string().optional().nullable(),
+    last_chat_sender_ip: z.string().optional().nullable(),
     last_seen_at: z.string().min(1).optional(),
     online: z.boolean(),
     sleeping: z.boolean().optional(),
+    unreadCount: z.number().optional(),
+    unread_count: z.number().optional(),
     userAgent: z.string().optional().nullable(),
     user_agent: z.string().optional().nullable(),
   })
   .transform((value): DashboardVisitorPresence | null => {
     const ipAddress = value.ipAddress ?? value.ip_address;
     const lastSeenAt = value.lastSeenAt ?? value.last_seen_at;
-    const currentPath =
-      value.currentPath ?? value.current_path ?? "/dashboard/overview";
-    const rawUserAgent = value.userAgent ?? value.user_agent;
-    const userAgent =
-      rawUserAgent && rawUserAgent.trim().length > 0
-        ? rawUserAgent.trim()
-        : undefined;
     if (!(ipAddress && lastSeenAt)) {
       return null;
     }
+    const currentPath =
+      nonEmptyTrimmed(value.currentPath, value.current_path) ??
+      "/dashboard/overview";
+    const userAgent = nonEmptyTrimmed(value.userAgent, value.user_agent);
+    const lastChatMessage = nonEmptyTrimmed(
+      value.lastChatMessage,
+      value.last_chat_message
+    );
+    const lastChatSenderIp = nonEmptyTrimmed(
+      value.lastChatSenderIp,
+      value.last_chat_sender_ip
+    );
+    const lastChatAt = nonEmptyTrimmed(value.lastChatAt, value.last_chat_at);
     const activeConnections =
       value.activeConnections ??
       value.active_connections ??
       (value.online ? 1 : 0);
     const sleeping = value.online && Boolean(value.sleeping);
-    if (userAgent) {
-      return {
-        activeConnections,
-        currentPath,
-        ipAddress,
-        lastSeenAt,
-        online: value.online,
-        sleeping,
-        userAgent,
-      };
-    }
+    const unreadCount = Math.max(
+      0,
+      value.unreadCount ?? value.unread_count ?? 0
+    );
     return {
       activeConnections,
       currentPath,
       ipAddress,
+      lastChatAt,
+      lastChatMessage,
+      lastChatSenderIp,
       lastSeenAt,
       online: value.online,
       sleeping,
+      unreadCount,
+      userAgent,
     };
   });
 
@@ -347,4 +410,214 @@ export async function fetchDashboardPresence(): Promise<DashboardPresenceSnapsho
     peakOnlineCount,
     visitors,
   };
+}
+
+const rawChatMessageSchema = z
+  .object({
+    createdAt: z.string().optional(),
+    created_at: z.string().optional(),
+    id: z.number(),
+    message: z.string(),
+    readAt: z.string().optional().nullable(),
+    read_at: z.string().optional().nullable(),
+    recipientIp: z.string().optional(),
+    recipient_ip: z.string().optional(),
+    senderIp: z.string().optional(),
+    sender_ip: z.string().optional(),
+    senderUsername: z.string().optional(),
+    sender_username: z.string().optional(),
+  })
+  .transform((value): DashboardIpChatMessage | null => {
+    const senderIp = value.senderIp ?? value.sender_ip;
+    const recipientIp = value.recipientIp ?? value.recipient_ip;
+    const createdAt = value.createdAt ?? value.created_at;
+    if (!(senderIp && recipientIp && createdAt)) {
+      return null;
+    }
+    const readAt = value.readAt ?? value.read_at ?? undefined;
+    const senderUsername =
+      value.senderUsername ?? value.sender_username ?? "visitor";
+    if (readAt) {
+      return {
+        createdAt,
+        id: value.id,
+        message: value.message,
+        readAt,
+        recipientIp,
+        senderIp,
+        senderUsername,
+      };
+    }
+    return {
+      createdAt,
+      id: value.id,
+      message: value.message,
+      recipientIp,
+      senderIp,
+      senderUsername,
+    };
+  });
+
+const rawChatThreadSchema = z.object({
+  currentIp: z.string().optional(),
+  current_ip: z.string().optional(),
+  messages: z.array(rawChatMessageSchema).optional(),
+  targetIp: z.string().optional(),
+  target_ip: z.string().optional(),
+});
+
+const rawChatEventSchema = z.object({
+  payload: rawChatMessageSchema,
+  type: z.literal(DASHBOARD_CHAT_EVENT_TYPE),
+});
+
+const rawChatReadPayloadSchema = z
+  .object({
+    readAt: z.string().optional(),
+    read_at: z.string().optional(),
+    recipientIp: z.string().optional(),
+    recipient_ip: z.string().optional(),
+    senderIp: z.string().optional(),
+    sender_ip: z.string().optional(),
+  })
+  .transform((value): DashboardIpChatReadPayload | null => {
+    const senderIp = value.senderIp ?? value.sender_ip;
+    const recipientIp = value.recipientIp ?? value.recipient_ip;
+    const readAt = value.readAt ?? value.read_at;
+    if (!(senderIp && recipientIp && readAt)) {
+      return null;
+    }
+    return {
+      readAt,
+      recipientIp,
+      senderIp,
+    };
+  });
+
+const rawChatReadEventSchema = z.object({
+  payload: rawChatReadPayloadSchema,
+  type: z.literal(DASHBOARD_CHAT_READ_EVENT_TYPE),
+});
+
+export function parseDashboardChatEvent(
+  raw: DashboardVisitEventRaw
+): DashboardIpChatEvent | null {
+  let parsed: unknown = raw;
+  if (isRawString(raw)) {
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+  const result = rawChatEventSchema.safeParse(parsed);
+  if (!(result.success && result.data.payload)) {
+    return null;
+  }
+  return {
+    payload: result.data.payload,
+    type: DASHBOARD_CHAT_EVENT_TYPE,
+  };
+}
+
+export function parseDashboardChatReadEvent(
+  raw: DashboardVisitEventRaw
+): DashboardIpChatReadEvent | null {
+  let parsed: unknown = raw;
+  if (isRawString(raw)) {
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+  const result = rawChatReadEventSchema.safeParse(parsed);
+  if (!(result.success && result.data.payload)) {
+    return null;
+  }
+  return {
+    payload: result.data.payload,
+    type: DASHBOARD_CHAT_READ_EVENT_TYPE,
+  };
+}
+
+type FetchDashboardChatThreadResponse = {
+  readonly data?: DashboardVisitEventRecord;
+};
+
+export async function fetchDashboardChatThread(
+  targetIp: string
+): Promise<DashboardIpChatThread | null> {
+  const params = new URLSearchParams({ targetIp });
+  const response = await apiGet<FetchDashboardChatThreadResponse | undefined>(
+    `${API_ENDPOINTS.admin.dashboard.chats}?${params}`
+  );
+  const result = rawChatThreadSchema.safeParse(response?.data);
+  if (!result.success) {
+    return null;
+  }
+  const currentIp =
+    result.data.currentIp ?? result.data.current_ip ?? "unknown";
+  const resolvedTargetIp =
+    result.data.targetIp ?? result.data.target_ip ?? targetIp;
+  const messages = (result.data.messages ?? []).filter(
+    (item): item is DashboardIpChatMessage => item !== null
+  );
+  return {
+    currentIp,
+    messages,
+    targetIp: resolvedTargetIp,
+  };
+}
+
+type SendDashboardChatResponse = {
+  readonly data?: DashboardVisitEventRecord;
+};
+
+export async function sendDashboardChatMessage(
+  targetIp: string,
+  message: string
+): Promise<DashboardIpChatMessage | null> {
+  const response = await apiPost<
+    SendDashboardChatResponse | undefined,
+    { readonly target_ip: string; readonly message: string }
+  >(API_ENDPOINTS.admin.dashboard.chats, {
+    message,
+    target_ip: targetIp,
+  });
+  const result = rawChatMessageSchema.safeParse(response?.data);
+  return result.success ? result.data : null;
+}
+
+export async function markDashboardChatRead(targetIp: string): Promise<void> {
+  await apiPost<unknown, { readonly target_ip: string }>(
+    API_ENDPOINTS.admin.dashboard.chatRead,
+    { target_ip: targetIp }
+  ).catch(() => undefined);
+}
+
+const openVisitorChatListeners = new Set<(targetIp: string) => void>();
+let activeVisitorChatTargetIp: string | null = null;
+
+export function setActiveVisitorChatTargetIp(targetIp: string | null): void {
+  activeVisitorChatTargetIp = targetIp;
+}
+
+export function getActiveVisitorChatTargetIp(): string | null {
+  return activeVisitorChatTargetIp;
+}
+
+export function subscribeOpenVisitorChat(
+  listener: (targetIp: string) => void
+): () => void {
+  openVisitorChatListeners.add(listener);
+  return () => {
+    openVisitorChatListeners.delete(listener);
+  };
+}
+
+export function dispatchOpenVisitorChat(targetIp: string): void {
+  for (const listener of openVisitorChatListeners) {
+    listener(targetIp);
+  }
 }

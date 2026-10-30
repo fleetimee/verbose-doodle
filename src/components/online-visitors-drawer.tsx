@@ -2,24 +2,30 @@ import {
   Activity01Icon,
   AndroidIcon,
   AppleIcon,
+  ArrowLeft01Icon,
   BrowserIcon,
   ChromeIcon,
   Clock03Icon,
   ComputerIcon,
   ComputerTerminal01Icon,
   GlobeIcon,
+  MailSend01Icon,
+  MessageSquareCodeIcon,
   MoonIcon,
   SafariIcon,
   SmartPhone01Icon,
+  Tick02Icon,
+  TickDouble02Icon,
   UserGroupIcon,
   WindowsNewIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
-import { useQuery } from "@tanstack/react-query";
-import { type CSSProperties, useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useI18n } from "@/components/i18n-provider";
 import { Badge } from "@/components/ui/badge";
+import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -31,16 +37,36 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+} from "@/components/ui/empty";
+import { Input } from "@/components/ui/input";
+import { Message, MessageContent } from "@/components/ui/message";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/features/auth/context";
-import { DASHBOARD_PRESENCE_QUERY_KEY } from "@/features/dashboard/components/dashboard-visit-notifications";
 import {
+  DASHBOARD_PRESENCE_QUERY_KEY,
+  dashboardChatThreadQueryKey,
+} from "@/features/dashboard/components/dashboard-visit-notifications";
+import {
+  type DashboardIpChatMessage,
+  type DashboardIpChatThread,
   type DashboardPresencePoint,
+  type DashboardPresenceSnapshot,
   type DashboardVisitorPresence,
+  fetchDashboardChatThread,
   fetchDashboardPresence,
+  markDashboardChatRead,
+  sendDashboardChatMessage,
+  setActiveVisitorChatTargetIp,
+  subscribeOpenVisitorChat,
 } from "@/features/dashboard/dashboard-activity";
 import { formatJakartaTimestamp } from "@/features/endpoints/utils/endpoint-time";
 import { type AppLocale, formatMessage, type Messages } from "@/lib/i18n";
+import { queryClient } from "@/lib/query-client";
 import { cn } from "@/lib/utils";
 
 function formatRelativeLastSeen(
@@ -304,13 +330,38 @@ export function OnlineVisitorsDrawer({
   const { snapshot } = useAuth();
   const copy = messages.dashboardActivity.presence;
   const [internalOpen, setInternalOpen] = useState(false);
+  const [selectedChatIp, setSelectedChatIp] = useState<string | null>(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   const isOpen = controlledOpen ?? internalOpen;
   const handleOpenChange = (nextOpen: boolean) => {
     setInternalOpen(nextOpen);
+    if (!nextOpen) {
+      setSelectedChatIp(null);
+    }
     controlledOnOpenChange?.(nextOpen);
   };
+
+  useEffect(() => {
+    if (hideTrigger) {
+      return;
+    }
+    return subscribeOpenVisitorChat((targetIp) => {
+      setSelectedChatIp(targetIp);
+      setInternalOpen(true);
+      controlledOnOpenChange?.(true);
+    });
+  }, [controlledOnOpenChange, hideTrigger]);
+
+  useEffect(() => {
+    if (hideTrigger) {
+      return;
+    }
+    setActiveVisitorChatTargetIp(isOpen ? selectedChatIp : null);
+    return () => {
+      setActiveVisitorChatTargetIp(null);
+    };
+  }, [hideTrigger, isOpen, selectedChatIp]);
 
   const presenceQuery = useQuery({
     queryKey: DASHBOARD_PRESENCE_QUERY_KEY,
@@ -332,6 +383,11 @@ export function OnlineVisitorsDrawer({
   const presence = presenceQuery.data;
   const currentIp = presence?.currentIp;
   const visitors = presence?.visitors ?? [];
+  const totalUnreadCount = visitors.reduce(
+    (sum, visitor) =>
+      visitor.ipAddress === currentIp ? sum : sum + (visitor.unreadCount ?? 0),
+    0
+  );
   const onlineVisitors = visitors.filter((visitor) => visitor.online);
   const recentVisitors = visitors.filter((visitor) => !visitor.online);
   const onlineCount = Math.max(
@@ -346,6 +402,9 @@ export function OnlineVisitorsDrawer({
   const triggerLabel = formatMessage(copy.triggerLabel, {
     count: onlineCount,
   });
+  const selectedVisitor = selectedChatIp
+    ? visitors.find((v) => v.ipAddress === selectedChatIp)
+    : undefined;
 
   return (
     <Drawer direction="right" onOpenChange={handleOpenChange} open={isOpen}>
@@ -361,11 +420,17 @@ export function OnlineVisitorsDrawer({
             <span className="relative flex size-2 items-center justify-center">
               <span
                 aria-hidden="true"
-                className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75 motion-reduce:animate-none"
+                className={cn(
+                  "absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none",
+                  totalUnreadCount > 0 ? "bg-primary" : "bg-success"
+                )}
               />
               <span
                 aria-hidden="true"
-                className="relative inline-flex size-2 rounded-full bg-success"
+                className={cn(
+                  "relative inline-flex size-2 rounded-full",
+                  totalUnreadCount > 0 ? "bg-primary" : "bg-success"
+                )}
               />
             </span>
             <HugeiconsIcon
@@ -376,13 +441,22 @@ export function OnlineVisitorsDrawer({
             <span className="font-mono font-semibold text-xs tabular-nums">
               {onlineCount}
             </span>
+            {totalUnreadCount > 0 && (
+              <Badge mono size="xs" variant="primary-subtle">
+                {totalUnreadCount}
+              </Badge>
+            )}
           </Button>
         </DrawerTrigger>
       )}
       <DrawerContent className="overflow-hidden" showSwipeHandle={false}>
         <DrawerHeader size="compact">
           <div className="flex items-center justify-between gap-2">
-            <DrawerTitle size="sm">{copy.title}</DrawerTitle>
+            <DrawerTitle size="sm">
+              {selectedChatIp
+                ? formatMessage(copy.chatWithTitle, { ip: selectedChatIp })
+                : copy.title}
+            </DrawerTitle>
             <Badge mono size="xs" variant="success">
               <span
                 aria-hidden="true"
@@ -403,83 +477,95 @@ export function OnlineVisitorsDrawer({
             </div>
           )}
         </DrawerHeader>
-        <ScrollArea
-          className="min-h-0 flex-1"
-          contentClassName="min-w-0 max-w-full overflow-x-hidden"
-          variant="fit"
-          viewportClassName="overflow-x-hidden"
-        >
-          <div className="min-w-0 space-y-4 px-4 pb-4">
-            <VisitorsSteamChart
-              copy={copy}
-              history={history}
-              onlineCount={onlineCount}
-              peakOnlineCount={peakOnlineCount}
-            />
+        {selectedChatIp ? (
+          <VisitorIpChatPanel
+            copy={copy}
+            currentIp={currentIp ?? "unknown"}
+            onBack={() => setSelectedChatIp(null)}
+            targetIp={selectedChatIp}
+            visitor={selectedVisitor}
+          />
+        ) : (
+          <ScrollArea
+            className="min-h-0 flex-1"
+            contentClassName="min-w-0 max-w-full overflow-x-hidden"
+            variant="fit"
+            viewportClassName="overflow-x-hidden"
+          >
+            <div className="min-w-0 space-y-4 px-4 pb-4">
+              <VisitorsSteamChart
+                copy={copy}
+                history={history}
+                onlineCount={onlineCount}
+                peakOnlineCount={peakOnlineCount}
+              />
 
-            <section className="min-w-0 space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  {copy.onlineSection}
-                </h3>
-                <span className="font-mono text-muted-foreground text-xs tabular-nums">
-                  {onlineVisitors.length}
-                </span>
-              </div>
-              {onlineVisitors.length === 0 ? (
-                <p className="rounded-lg border border-dashed px-3 py-3 text-center text-muted-foreground text-xs">
-                  {copy.emptyOnline}
-                </p>
-              ) : (
-                <div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card">
-                  {onlineVisitors.map((visitor) => (
-                    <VisitorPresenceRow
-                      copy={copy}
-                      isCurrentIp={visitor.ipAddress === currentIp}
-                      key={visitor.ipAddress}
-                      locale={locale}
-                      messages={messages}
-                      nowMs={nowMs}
-                      onNavigate={() => handleOpenChange(false)}
-                      visitor={visitor}
-                    />
-                  ))}
+              <section className="min-w-0 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                    {copy.onlineSection}
+                  </h3>
+                  <span className="font-mono text-muted-foreground text-xs tabular-nums">
+                    {onlineVisitors.length}
+                  </span>
                 </div>
-              )}
-            </section>
+                {onlineVisitors.length === 0 ? (
+                  <p className="rounded-lg border border-dashed px-3 py-3 text-center text-muted-foreground text-xs">
+                    {copy.emptyOnline}
+                  </p>
+                ) : (
+                  <div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card">
+                    {onlineVisitors.map((visitor) => (
+                      <VisitorPresenceRow
+                        copy={copy}
+                        isCurrentIp={visitor.ipAddress === currentIp}
+                        key={visitor.ipAddress}
+                        locale={locale}
+                        messages={messages}
+                        nowMs={nowMs}
+                        onNavigate={() => handleOpenChange(false)}
+                        onOpenChat={() => setSelectedChatIp(visitor.ipAddress)}
+                        visitor={visitor}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
 
-            <section className="min-w-0 space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  {copy.recentSection}
-                </h3>
-                <span className="font-mono text-muted-foreground text-xs tabular-nums">
-                  {recentVisitors.length}
-                </span>
-              </div>
-              {recentVisitors.length === 0 ? (
-                <p className="rounded-lg border border-dashed px-3 py-3 text-center text-muted-foreground text-xs">
-                  {copy.emptyRecent}
-                </p>
-              ) : (
-                <div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card">
-                  {recentVisitors.map((visitor) => (
-                    <VisitorPresenceRow
-                      copy={copy}
-                      isCurrentIp={visitor.ipAddress === currentIp}
-                      key={visitor.ipAddress}
-                      locale={locale}
-                      messages={messages}
-                      nowMs={nowMs}
-                      onNavigate={() => handleOpenChange(false)}
-                      visitor={visitor}
-                    />
-                  ))}
+              <section className="min-w-0 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                    {copy.recentSection}
+                  </h3>
+                  <span className="font-mono text-muted-foreground text-xs tabular-nums">
+                    {recentVisitors.length}
+                  </span>
                 </div>
-              )}
-            </section>
-          </div>
-        </ScrollArea>
+                {recentVisitors.length === 0 ? (
+                  <p className="rounded-lg border border-dashed px-3 py-3 text-center text-muted-foreground text-xs">
+                    {copy.emptyRecent}
+                  </p>
+                ) : (
+                  <div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card">
+                    {recentVisitors.map((visitor) => (
+                      <VisitorPresenceRow
+                        copy={copy}
+                        isCurrentIp={visitor.ipAddress === currentIp}
+                        key={visitor.ipAddress}
+                        locale={locale}
+                        messages={messages}
+                        nowMs={nowMs}
+                        onNavigate={() => handleOpenChange(false)}
+                        onOpenChat={() => setSelectedChatIp(visitor.ipAddress)}
+                        visitor={visitor}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            </div>
+          </ScrollArea>
+        )}
         <DrawerFooter size="compact" variant="bordered">
           <DrawerClose asChild>
             <Button size="sm" variant="outline">
@@ -704,6 +790,52 @@ function VisitorsSteamChart({
   );
 }
 
+function resolveVisitorStatusAppearance(
+  online: boolean,
+  sleeping: boolean,
+  copy: Messages["dashboardActivity"]["presence"]
+) {
+  if (online && sleeping) {
+    return {
+      activityIconColorClass: "text-warning",
+      statusBadgeText: copy.sleepingBadge,
+      statusDotClass: "bg-warning",
+      statusTextClass: "text-warning",
+    };
+  }
+  if (online) {
+    return {
+      activityIconColorClass: "text-primary",
+      statusBadgeText: copy.onlineBadge,
+      statusDotClass: "bg-success",
+      statusTextClass: "text-success",
+    };
+  }
+  return {
+    activityIconColorClass: "text-muted-foreground",
+    statusBadgeText: copy.offlineBadge,
+    statusDotClass: "bg-muted-foreground/40",
+    statusTextClass: "text-muted-foreground",
+  };
+}
+
+function resolveVisitorActivityText(
+  visitor: DashboardVisitorPresence,
+  pageInfo: VisitorPageDescription,
+  copy: Messages["dashboardActivity"]["presence"]
+): string {
+  if (visitor.online && visitor.sleeping) {
+    return formatMessage(copy.sleepingPageLabel, { page: pageInfo.label });
+  }
+  if (visitor.online) {
+    return formatMessage(
+      pageInfo.isGame ? copy.playingGameLabel : copy.viewingPageLabel,
+      { page: pageInfo.label }
+    );
+  }
+  return formatMessage(copy.lastVisitedPageLabel, { page: pageInfo.label });
+}
+
 function VisitorPresenceRow({
   visitor,
   isCurrentIp,
@@ -712,6 +844,7 @@ function VisitorPresenceRow({
   messages,
   copy,
   onNavigate,
+  onOpenChat,
 }: {
   visitor: DashboardVisitorPresence;
   isCurrentIp: boolean;
@@ -720,6 +853,7 @@ function VisitorPresenceRow({
   messages: Messages;
   copy: Messages["dashboardActivity"]["presence"];
   onNavigate: () => void;
+  onOpenChat: () => void;
 }) {
   const formattedAbsolute = formatJakartaTimestamp(visitor.lastSeenAt);
   const relativeTime = formatRelativeLastSeen(
@@ -736,39 +870,14 @@ function VisitorPresenceRow({
   const pageInfo = describeVisitorPage(visitor.currentPath, messages);
   const deviceInfo = describeVisitorUserAgent(visitor.userAgent, isCurrentIp);
   const isSleeping = visitor.online && visitor.sleeping;
-  let activityText: string;
-  if (isSleeping) {
-    activityText = formatMessage(copy.sleepingPageLabel, {
-      page: pageInfo.label,
-    });
-  } else if (visitor.online) {
-    activityText = formatMessage(
-      pageInfo.isGame ? copy.playingGameLabel : copy.viewingPageLabel,
-      { page: pageInfo.label }
-    );
-  } else {
-    activityText = formatMessage(copy.lastVisitedPageLabel, {
-      page: pageInfo.label,
-    });
-  }
-  let statusBadgeText = copy.offlineBadge;
-  let statusDotClass = "bg-muted-foreground/40";
-  let statusTextClass = "text-muted-foreground";
-  if (isSleeping) {
-    statusBadgeText = copy.sleepingBadge;
-    statusDotClass = "bg-warning";
-    statusTextClass = "text-warning";
-  } else if (visitor.online) {
-    statusBadgeText = copy.onlineBadge;
-    statusDotClass = "bg-success";
-    statusTextClass = "text-success";
-  }
-  let activityIconColorClass = "text-muted-foreground";
-  if (isSleeping) {
-    activityIconColorClass = "text-warning";
-  } else if (visitor.online) {
-    activityIconColorClass = "text-primary";
-  }
+  const activityText = resolveVisitorActivityText(visitor, pageInfo, copy);
+  const {
+    activityIconColorClass,
+    statusBadgeText,
+    statusDotClass,
+    statusTextClass,
+  } = resolveVisitorStatusAppearance(visitor.online, visitor.sleeping, copy);
+  const unreadCount = visitor.unreadCount ?? 0;
 
   return (
     <div className="min-w-0 space-y-1.5 px-3 py-2.5">
@@ -792,9 +901,32 @@ function VisitorPresenceRow({
             </Badge>
           )}
         </div>
-        <span className={cn("shrink-0 font-medium text-xs", statusTextClass)}>
-          {statusBadgeText}
-        </span>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span className={cn("font-medium text-xs", statusTextClass)}>
+            {statusBadgeText}
+          </span>
+          {!isCurrentIp && (
+            <Button
+              aria-label={`${copy.chatActionLabel} ${visitor.ipAddress}`}
+              onClick={onOpenChat}
+              size="xs"
+              type="button"
+              variant={unreadCount > 0 ? "default" : "outline"}
+            >
+              <HugeiconsIcon
+                className="size-3"
+                icon={MessageSquareCodeIcon}
+                strokeWidth={2}
+              />
+              <span>{copy.chatActionLabel}</span>
+              {unreadCount > 0 && (
+                <span className="rounded-full bg-background/20 px-1 font-mono text-xs tabular-nums">
+                  {unreadCount}
+                </span>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="min-w-0 pl-3.5">
@@ -859,6 +991,371 @@ function VisitorPresenceRow({
           {formattedAbsolute}
         </p>
       </div>
+    </div>
+  );
+}
+
+function ChatMessageDeliveryReceipt({
+  message,
+  copy,
+}: {
+  message: DashboardIpChatMessage;
+  copy: Messages["dashboardActivity"]["presence"];
+}) {
+  if (message.pending) {
+    return (
+      <span
+        aria-label={copy.chatReceiptPendingLabel}
+        className="inline-flex items-center text-muted-foreground/70"
+        role="img"
+        title={copy.chatReceiptPendingLabel}
+      >
+        <HugeiconsIcon className="size-3.5" icon={Tick02Icon} strokeWidth={2} />
+      </span>
+    );
+  }
+
+  if (message.readAt) {
+    return (
+      <span
+        aria-label={copy.chatReceiptReadLabel}
+        className="inline-flex items-center text-info"
+        role="img"
+        title={copy.chatReceiptReadLabel}
+      >
+        <HugeiconsIcon
+          className="size-3.5"
+          icon={TickDouble02Icon}
+          strokeWidth={2.2}
+        />
+      </span>
+    );
+  }
+
+  return (
+    <span
+      aria-label={copy.chatReceiptSentLabel}
+      className="inline-flex items-center text-muted-foreground/80"
+      role="img"
+      title={copy.chatReceiptSentLabel}
+    >
+      <HugeiconsIcon
+        className="size-3.5"
+        icon={TickDouble02Icon}
+        strokeWidth={2}
+      />
+    </span>
+  );
+}
+
+function VisitorIpChatPanel({
+  targetIp,
+  currentIp,
+  visitor,
+  copy,
+  onBack,
+}: {
+  targetIp: string;
+  currentIp: string;
+  visitor: DashboardVisitorPresence | undefined;
+  copy: Messages["dashboardActivity"]["presence"];
+  onBack: () => void;
+}) {
+  const [draft, setDraft] = useState("");
+  const endRef = useRef<HTMLDivElement | null>(null);
+  const optimisticIdRef = useRef(-1);
+
+  const threadQuery = useQuery({
+    queryKey: dashboardChatThreadQueryKey(targetIp),
+    queryFn: async () => {
+      const thread = await fetchDashboardChatThread(targetIp);
+      queryClient.setQueryData<DashboardPresenceSnapshot | null>(
+        DASHBOARD_PRESENCE_QUERY_KEY,
+        (previous) => {
+          if (!previous) {
+            return previous;
+          }
+          return {
+            ...previous,
+            visitors: previous.visitors.map((v) =>
+              v.ipAddress === targetIp ? { ...v, unreadCount: 0 } : v
+            ),
+          };
+        }
+      );
+      return thread;
+    },
+    refetchInterval: 10_000,
+    staleTime: 0,
+  });
+
+  const sendMutation = useMutation({
+    mutationFn: (text: string) => sendDashboardChatMessage(targetIp, text),
+    onMutate: (text) => {
+      const tempId = optimisticIdRef.current;
+      optimisticIdRef.current -= 1;
+      const optimisticMessage: DashboardIpChatMessage = {
+        createdAt: new Date().toISOString(),
+        id: tempId,
+        message: text,
+        pending: true,
+        recipientIp: targetIp,
+        senderIp: currentIp,
+        senderUsername: "you",
+      };
+      queryClient.setQueryData<DashboardIpChatThread | null>(
+        dashboardChatThreadQueryKey(targetIp),
+        (previous) => {
+          if (!previous) {
+            return {
+              currentIp,
+              messages: [optimisticMessage],
+              targetIp,
+            };
+          }
+          return {
+            ...previous,
+            messages: [...previous.messages, optimisticMessage],
+          };
+        }
+      );
+      return { tempId };
+    },
+    onError: (_err, _text, context) => {
+      if (!context) {
+        return;
+      }
+      queryClient.setQueryData<DashboardIpChatThread | null>(
+        dashboardChatThreadQueryKey(targetIp),
+        (previous) => {
+          if (!previous) {
+            return previous;
+          }
+          return {
+            ...previous,
+            messages: previous.messages.filter((m) => m.id !== context.tempId),
+          };
+        }
+      );
+    },
+    onSuccess: (sent, _text, context) => {
+      if (!sent) {
+        return;
+      }
+      queryClient.setQueryData<DashboardIpChatThread | null>(
+        dashboardChatThreadQueryKey(targetIp),
+        (previous) => {
+          if (!previous) {
+            return {
+              currentIp,
+              messages: [sent],
+              targetIp,
+            };
+          }
+          const withoutTemp = context
+            ? previous.messages.filter((m) => m.id !== context.tempId)
+            : previous.messages;
+          if (withoutTemp.some((existing) => existing.id === sent.id)) {
+            return {
+              ...previous,
+              messages: withoutTemp,
+            };
+          }
+          return {
+            ...previous,
+            messages: [...withoutTemp, sent],
+          };
+        }
+      );
+      queryClient.setQueryData<DashboardPresenceSnapshot | null>(
+        DASHBOARD_PRESENCE_QUERY_KEY,
+        (previous) => {
+          if (!previous) {
+            return previous;
+          }
+          return {
+            ...previous,
+            visitors: previous.visitors.map((v) =>
+              v.ipAddress === targetIp
+                ? {
+                    ...v,
+                    lastChatAt: sent.createdAt,
+                    lastChatMessage: sent.message,
+                    lastChatSenderIp: sent.senderIp,
+                  }
+                : v
+            ),
+          };
+        }
+      );
+    },
+  });
+
+  const chatMessages: readonly DashboardIpChatMessage[] =
+    threadQuery.data?.messages ?? [];
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    if (chatMessages.some((m) => m.senderIp === targetIp && !m.readAt)) {
+      markDashboardChatRead(targetIp).catch(() => undefined);
+      queryClient.setQueryData<DashboardPresenceSnapshot | null>(
+        DASHBOARD_PRESENCE_QUERY_KEY,
+        (previous) => {
+          if (!previous) {
+            return previous;
+          }
+          return {
+            ...previous,
+            visitors: previous.visitors.map((v) =>
+              v.ipAddress === targetIp ? { ...v, unreadCount: 0 } : v
+            ),
+          };
+        }
+      );
+    }
+  }, [chatMessages, targetIp]);
+
+  const isOnline = visitor?.online ?? false;
+  const isSleeping = isOnline && Boolean(visitor?.sleeping);
+  let statusLabel = copy.offlineBadge;
+  let statusDotClass = "bg-muted-foreground/40";
+  let statusTextClass = "text-muted-foreground";
+  if (isSleeping) {
+    statusLabel = copy.sleepingBadge;
+    statusDotClass = "bg-warning";
+    statusTextClass = "text-warning";
+  } else if (isOnline) {
+    statusLabel = copy.onlineBadge;
+    statusDotClass = "bg-success";
+    statusTextClass = "text-success";
+  }
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const trimmed = draft.trim();
+    if (!trimmed || sendMutation.isPending) {
+      return;
+    }
+    setDraft("");
+    sendMutation.mutate(trimmed);
+  };
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex items-center justify-between gap-3 border-b bg-muted/20 px-4 py-2.5">
+        <Button onClick={onBack} size="xs" type="button" variant="ghost">
+          <HugeiconsIcon
+            className="size-3.5"
+            icon={ArrowLeft01Icon}
+            strokeWidth={2}
+          />
+          <span>{copy.chatBackLabel}</span>
+        </Button>
+        <div className="flex items-center gap-1.5 text-xs">
+          <span
+            aria-hidden="true"
+            className={cn("size-2 rounded-full", statusDotClass)}
+          />
+          <span className="font-medium font-mono">{targetIp}</span>
+          <span className={cn("font-medium", statusTextClass)}>
+            ({statusLabel})
+          </span>
+        </div>
+      </div>
+
+      {!isOnline && (
+        <div className="border-b bg-muted/35 px-4 py-2.5 text-muted-foreground text-xs leading-relaxed">
+          {formatMessage(copy.chatOfflineHint, { ip: targetIp })}
+        </div>
+      )}
+
+      {chatMessages.length === 0 ? (
+        <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-8">
+          <Empty size="compact" variant="plain">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <HugeiconsIcon icon={MessageSquareCodeIcon} strokeWidth={2} />
+              </EmptyMedia>
+              <EmptyDescription>
+                {formatMessage(copy.chatEmptyState, { ip: targetIp })}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </div>
+      ) : (
+        <ScrollArea
+          className="min-h-0 flex-1"
+          contentClassName="min-w-0 max-w-full overflow-x-hidden"
+          variant="fit"
+          viewportClassName="overflow-x-hidden"
+        >
+          <div className="flex flex-col gap-4 px-4 py-5">
+            {chatMessages.map((msg) => {
+              const isMine = msg.senderIp === currentIp;
+              return (
+                <Message align={isMine ? "end" : "start"} key={msg.id}>
+                  <MessageContent>
+                    <Bubble
+                      align={isMine ? "end" : "start"}
+                      variant={isMine ? "default" : "muted"}
+                    >
+                      <BubbleContent>{msg.message}</BubbleContent>
+                      <div
+                        className={cn(
+                          "flex items-center gap-1 px-1 font-mono text-muted-foreground/80 text-xs",
+                          isMine && "self-end text-right"
+                        )}
+                      >
+                        <span>{formatJakartaTimestamp(msg.createdAt)}</span>
+                        {isMine && (
+                          <ChatMessageDeliveryReceipt
+                            copy={copy}
+                            message={msg}
+                          />
+                        )}
+                      </div>
+                    </Bubble>
+                  </MessageContent>
+                </Message>
+              );
+            })}
+            <div ref={endRef} />
+          </div>
+        </ScrollArea>
+      )}
+
+      <form
+        className="flex items-center gap-2.5 border-t bg-card/60 px-4 py-3.5"
+        onSubmit={handleSubmit}
+      >
+        <Input
+          aria-label={formatMessage(copy.chatInputPlaceholder, {
+            ip: targetIp,
+          })}
+          autoFocus
+          className="flex-1"
+          maxLength={500}
+          onChange={(event) => setDraft(event.target.value)}
+          placeholder={formatMessage(copy.chatInputPlaceholder, {
+            ip: targetIp,
+          })}
+          size="sm"
+          value={draft}
+        />
+        <Button
+          aria-label={copy.chatSendLabel}
+          disabled={!draft.trim() || sendMutation.isPending}
+          size="sm"
+          type="submit"
+        >
+          <HugeiconsIcon
+            className="size-3.5"
+            icon={MailSend01Icon}
+            strokeWidth={2}
+          />
+          <span>{copy.chatSendLabel}</span>
+        </Button>
+      </form>
     </div>
   );
 }

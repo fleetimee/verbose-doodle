@@ -82,6 +82,26 @@ export const enUsMessages = {
       playingGameLabel: "Playing {page}",
       sleepingPageLabel: "Away on {page}",
       lastVisitedPageLabel: "Last visited {page}",
+      chatActionLabel: "Chat",
+      chatBackLabel: "All visitors",
+      chatWithTitle: "Chat with {ip}",
+      chatInputPlaceholder: "Message {ip}…",
+      chatSendLabel: "Send",
+      chatEmptyState:
+        "No messages with {ip} yet. Messages are saved so they'll be notified even if they visit later.",
+      chatOfflineHint:
+        "{ip} is currently offline — your message will be saved and delivered when they visit.",
+      chatIncomingBubble: "{ip} sent a message: “{message}”",
+      chatUnreadVisitBubbleSingle:
+        "You have 1 unread message from {ip} while you were away.",
+      chatUnreadVisitBubblePlural:
+        "You have {count} unread messages from {ip}.",
+      chatOpenReplyLabel: "Reply",
+      chatToastIncomingTitle: "New message from {ip}",
+      chatPreviewYouPrefix: "You: ",
+      chatReceiptPendingLabel: "Sending…",
+      chatReceiptSentLabel: "Sent",
+      chatReceiptReadLabel: "Read",
     },
   },
   developerTools: developerToolsMessages,

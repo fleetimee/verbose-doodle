@@ -2,12 +2,21 @@ import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
+import { toast } from "sonner";
 import { useIsScreenLocked } from "@/features/auth/components/screen-lock";
 import { useAuth } from "@/features/auth/context";
 import {
+  type DashboardIpChatMessage,
+  type DashboardIpChatReadPayload,
+  type DashboardIpChatThread,
+  type DashboardPresenceEvent,
   type DashboardPresenceSnapshot,
   type DashboardVisitEvent,
+  dispatchOpenVisitorChat,
   fetchDashboardPresence,
+  getActiveVisitorChatTargetIp,
+  parseDashboardChatEvent,
+  parseDashboardChatReadEvent,
   parseDashboardPresenceEvent,
   parseDashboardVisitEvent,
   recordDashboardVisit,
@@ -27,8 +36,11 @@ const MAX_ACTIVE_VISIT_NOTICES = 4;
 const MAX_SEEN_VISIT_IDS = 1000;
 
 export const DASHBOARD_PRESENCE_QUERY_KEY = ["dashboard", "presence"] as const;
+export const dashboardChatThreadQueryKey = (targetIp: string) =>
+  ["dashboard", "chat", targetIp] as const;
 
 type DashboardVisitNotice = {
+  readonly chatTargetIp?: string;
   readonly copy: string;
   readonly visitId: string;
 };
@@ -55,6 +67,225 @@ function pickVisitMessage(
   return visitMessages[messageIndex] ?? visitMessages[0];
 }
 
+function applyPresenceEventToCache(
+  presenceEvent: DashboardPresenceEvent,
+  fallbackCurrentIp: string | null
+): void {
+  queryClient.setQueryData<DashboardPresenceSnapshot | null>(
+    DASHBOARD_PRESENCE_QUERY_KEY,
+    (previous) => {
+      const previousByIp = new Map(
+        (previous?.visitors ?? []).map((v) => [v.ipAddress, v])
+      );
+      const mergedVisitors = presenceEvent.payload.visitors.map((visitor) => {
+        const prev = previousByIp.get(visitor.ipAddress);
+        return {
+          ...visitor,
+          lastChatAt: visitor.lastChatAt ?? prev?.lastChatAt,
+          lastChatMessage: visitor.lastChatMessage ?? prev?.lastChatMessage,
+          lastChatSenderIp: visitor.lastChatSenderIp ?? prev?.lastChatSenderIp,
+          unreadCount: Math.max(visitor.unreadCount, prev?.unreadCount ?? 0),
+        };
+      });
+      return {
+        currentIp: previous?.currentIp ?? fallbackCurrentIp ?? "unknown",
+        history: presenceEvent.payload.history,
+        onlineCount: presenceEvent.payload.onlineCount,
+        peakOnlineCount: presenceEvent.payload.peakOnlineCount,
+        visitors: mergedVisitors,
+      };
+    }
+  );
+}
+
+function updatePresenceVisitorForChat(
+  msg: DashboardIpChatMessage,
+  peerIp: string,
+  incrementUnread: boolean
+): void {
+  queryClient.setQueryData<DashboardPresenceSnapshot | null>(
+    DASHBOARD_PRESENCE_QUERY_KEY,
+    (previous) => {
+      if (!previous) {
+        return previous;
+      }
+      const exists = previous.visitors.some((v) => v.ipAddress === peerIp);
+      const nextVisitors = exists
+        ? previous.visitors.map((visitor) =>
+            visitor.ipAddress === peerIp
+              ? {
+                  ...visitor,
+                  lastChatAt: msg.createdAt,
+                  lastChatMessage: msg.message,
+                  lastChatSenderIp: msg.senderIp,
+                  unreadCount: incrementUnread
+                    ? visitor.unreadCount + 1
+                    : visitor.unreadCount,
+                }
+              : visitor
+          )
+        : [
+            {
+              activeConnections: 1,
+              currentPath: "/dashboard/overview",
+              ipAddress: peerIp,
+              lastChatAt: msg.createdAt,
+              lastChatMessage: msg.message,
+              lastChatSenderIp: msg.senderIp,
+              lastSeenAt: msg.createdAt,
+              online: true,
+              sleeping: false,
+              unreadCount: incrementUnread ? 1 : 0,
+            },
+            ...previous.visitors,
+          ];
+      return {
+        ...previous,
+        visitors: nextVisitors,
+      };
+    }
+  );
+}
+
+function formatChatToastPreview(
+  rawMessage: string | undefined
+): string | undefined {
+  if (!rawMessage) {
+    return undefined;
+  }
+  return rawMessage.length > 96 ? `${rawMessage.slice(0, 96)}…` : rawMessage;
+}
+
+function applyChatReadEventToCache(
+  readPayload: DashboardIpChatReadPayload,
+  myIp: string | null
+): void {
+  const peerIp =
+    readPayload.senderIp === myIp
+      ? readPayload.recipientIp
+      : readPayload.senderIp;
+  queryClient.setQueryData<DashboardIpChatThread | null>(
+    dashboardChatThreadQueryKey(peerIp),
+    (previous) => {
+      if (!previous) {
+        return previous;
+      }
+      return {
+        ...previous,
+        messages: previous.messages.map((message) =>
+          message.senderIp === readPayload.senderIp &&
+          message.recipientIp === readPayload.recipientIp &&
+          !message.readAt
+            ? { ...message, readAt: readPayload.readAt }
+            : message
+        ),
+      };
+    }
+  );
+}
+
+function applyIncomingChatToCache(
+  msg: DashboardIpChatMessage,
+  myIp: string | null
+): void {
+  const peerIp = msg.senderIp === myIp ? msg.recipientIp : msg.senderIp;
+  queryClient.setQueryData<DashboardIpChatThread | null>(
+    dashboardChatThreadQueryKey(peerIp),
+    (previous) => {
+      if (!previous) {
+        return previous;
+      }
+      if (previous.messages.some((existing) => existing.id === msg.id)) {
+        return previous;
+      }
+      const pendingIndex = previous.messages.findIndex(
+        (existing) =>
+          existing.pending &&
+          existing.senderIp === msg.senderIp &&
+          existing.message === msg.message
+      );
+      if (pendingIndex !== -1) {
+        const nextMessages = [...previous.messages];
+        nextMessages[pendingIndex] = msg;
+        return {
+          ...previous,
+          messages: nextMessages,
+        };
+      }
+      return {
+        ...previous,
+        messages: [...previous.messages, msg],
+      };
+    }
+  );
+
+  const isIncomingForMe = Boolean(
+    myIp && msg.recipientIp === myIp && msg.senderIp !== myIp
+  );
+  const isChatOpenWithSender =
+    isIncomingForMe && getActiveVisitorChatTargetIp() === msg.senderIp;
+
+  updatePresenceVisitorForChat(
+    msg,
+    peerIp,
+    isIncomingForMe && !isChatOpenWithSender
+  );
+
+  if (!isIncomingForMe || isChatOpenWithSender) {
+    return;
+  }
+
+  const copy = messages.dashboardActivity.presence;
+  toast(formatMessage(copy.chatToastIncomingTitle, { ip: msg.senderIp }), {
+    action: {
+      label: copy.chatOpenReplyLabel,
+      onClick: () => dispatchOpenVisitorChat(msg.senderIp),
+    },
+    description: formatChatToastPreview(msg.message),
+    id: `visitor-chat-${msg.senderIp}-${msg.id}`,
+  });
+}
+
+function announceOfflineUnreadChats(
+  presenceSnapshot: DashboardPresenceSnapshot,
+  announcedUnreadIps: Set<string>
+): void {
+  const activeChatIp = getActiveVisitorChatTargetIp();
+  const unreadSenders = presenceSnapshot.visitors.filter(
+    (visitor) =>
+      visitor.unreadCount > 0 &&
+      visitor.ipAddress !== presenceSnapshot.currentIp &&
+      visitor.ipAddress !== activeChatIp &&
+      !announcedUnreadIps.has(visitor.ipAddress)
+  );
+  if (unreadSenders.length === 0) {
+    return;
+  }
+
+  const copy = messages.dashboardActivity.presence;
+  for (const sender of unreadSenders) {
+    announcedUnreadIps.add(sender.ipAddress);
+    const titleTemplate =
+      sender.unreadCount === 1
+        ? copy.chatUnreadVisitBubbleSingle
+        : copy.chatUnreadVisitBubblePlural;
+    toast(
+      formatMessage(titleTemplate, {
+        count: sender.unreadCount,
+        ip: sender.ipAddress,
+      }),
+      {
+        action: {
+          label: copy.chatOpenReplyLabel,
+          onClick: () => dispatchOpenVisitorChat(sender.ipAddress),
+        },
+        description: formatChatToastPreview(sender.lastChatMessage),
+        id: `visitor-unread-${sender.ipAddress}`,
+      }
+    );
+  }
+}
+
 export function DashboardVisitNotifications() {
   const { snapshot } = useAuth();
   const isScreenLocked = useIsScreenLocked();
@@ -67,6 +298,7 @@ export function DashboardVisitNotifications() {
     useRef<Promise<DashboardVisitEvent | null> | null>(null);
   const currentVisitIdRef = useRef<string | null>(null);
   const currentIpAddressRef = useRef<string | null>(null);
+  const announcedUnreadIpsRef = useRef(new Set<string>());
   const currentPathnameRef = useRef<string>(location.pathname);
   currentPathnameRef.current = location.pathname;
   const isScreenLockedRef = useRef<boolean>(isScreenLocked);
@@ -79,19 +311,27 @@ export function DashboardVisitNotifications() {
       acquireTicket: () => createRealtimeTicket("dashboard-visits"),
       configuredUrl: import.meta.env.VITE_DASHBOARD_EVENTS_WS_URL,
       onMessage: (data) => {
+        const chatReadEvent = parseDashboardChatReadEvent(data);
+        if (chatReadEvent) {
+          applyChatReadEventToCache(
+            chatReadEvent.payload,
+            currentIpAddressRef.current
+          );
+          return;
+        }
+
+        const chatEvent = parseDashboardChatEvent(data);
+        if (chatEvent) {
+          applyIncomingChatToCache(
+            chatEvent.payload,
+            currentIpAddressRef.current
+          );
+          return;
+        }
+
         const presenceEvent = parseDashboardPresenceEvent(data);
         if (presenceEvent) {
-          queryClient.setQueryData<DashboardPresenceSnapshot | null>(
-            DASHBOARD_PRESENCE_QUERY_KEY,
-            (previous) => ({
-              currentIp:
-                previous?.currentIp ?? currentIpAddressRef.current ?? "unknown",
-              history: presenceEvent.payload.history,
-              onlineCount: presenceEvent.payload.onlineCount,
-              peakOnlineCount: presenceEvent.payload.peakOnlineCount,
-              visitors: presenceEvent.payload.visitors,
-            })
-          );
+          applyPresenceEventToCache(presenceEvent, currentIpAddressRef.current);
           return;
         }
 
@@ -198,6 +438,10 @@ export function DashboardVisitNotifications() {
           DASHBOARD_PRESENCE_QUERY_KEY,
           presenceSnapshot
         );
+        announceOfflineUnreadChats(
+          presenceSnapshot,
+          announcedUnreadIpsRef.current
+        );
       }
     };
     connectAfterVisit().catch(() => undefined);
@@ -302,7 +546,23 @@ function DashboardVisitBubble({ notice, onRemove }: DashboardVisitBubbleProps) {
     >
       <span aria-hidden="true" className="dashboard-visit-bubble-slash" />
       <span aria-hidden="true" className="dashboard-visit-bubble-burst" />
-      <p className="dashboard-visit-bubble-copy">{notice.copy}</p>
+      {notice.chatTargetIp ? (
+        <button
+          className="dashboard-visit-bubble-copy cursor-pointer text-left underline-offset-2 hover:underline"
+          onClick={() => {
+            if (notice.chatTargetIp) {
+              dispatchOpenVisitorChat(notice.chatTargetIp);
+            }
+            setIsDismissing(true);
+          }}
+          title={messages.dashboardActivity.presence.chatOpenReplyLabel}
+          type="button"
+        >
+          {notice.copy}
+        </button>
+      ) : (
+        <p className="dashboard-visit-bubble-copy">{notice.copy}</p>
+      )}
       <button
         aria-label={messages.dashboardActivity.visitDismissLabel}
         className="dashboard-visit-bubble-dismiss"
