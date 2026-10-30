@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { LogFileHeader } from "@/features/log-viewer/log-file-header";
 import { LogPayload } from "@/features/log-viewer/log-payload";
+import { LogSelectionAction } from "@/features/log-viewer/log-selection-action";
 import { LogToolbar } from "@/features/log-viewer/log-toolbar";
 import { LogContentSkeleton } from "@/features/log-viewer/log-viewer-skeleton";
 import type { LogSegment } from "@/features/log-viewer/types";
@@ -471,6 +472,7 @@ export function StreamViewer({
           </motion.div>
           {!wordWrap && <ScrollBar orientation="horizontal" />}
         </ScrollArea>
+        <LogSelectionAction viewportRef={viewport} />
         {showEmpty && (
           <Empty className="relative min-h-0">
             <EmptyHeader>

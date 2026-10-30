@@ -1,4 +1,10 @@
 export const logViewerMessages = {
+  copySelection: "Copy",
+  selectionCopiedShort: "Copied",
+  copySelectedText: "Copy selected log text",
+  selectionCopied: "Selected log text copied",
+  selectionCopyFailed:
+    "Could not copy. Use your browser’s copy shortcut to copy the selected text.",
   openInNewTab: "Open source in new tab",
   backToWorkspace: "Back to workspace",
   sourceNotFound: "Log source not found",

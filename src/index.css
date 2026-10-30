@@ -4349,6 +4349,15 @@ main:has(.log-viewer-workspace[data-restoring="true"]) {
 }
 
 @layer components {
+  .log-selection-action {
+    top: var(--selection-y);
+    left: clamp(0.5rem, var(--selection-x), calc(100% - 5.5rem));
+  }
+
+  .log-source-page .log-viewer-workspace {
+    max-width: none;
+  }
+
   .container-inspect-indent {
     padding-left: var(--inspect-indent);
   }
@@ -4356,11 +4365,5 @@ main:has(.log-viewer-workspace[data-restoring="true"]) {
   .container-series-swatch {
     background-color: color-mix(in oklab, var(--series-color) 35%, transparent);
     border-color: var(--series-color);
-  }
-}
-
-@layer components {
-  .log-source-page .log-viewer-workspace {
-    max-width: none;
   }
 }

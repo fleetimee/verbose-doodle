@@ -293,6 +293,12 @@ Highlights preserve the existing ISO syntax spans and can cross adjacent chunks 
 
 ### Fullscreen viewing
 
+Selecting log text offers a floating **Copy** action above the first visible
+selected line, with no right-click required. It copies the selection as plain
+text, preserving whitespace, and briefly shows **Copied** in place. Clearing
+the selection, scrolling, or pressing Escape dismisses the action. The popup
+stays within the viewer in fullscreen; reduced motion removes its lift/scale.
+
 The toolbar's **Open source in new tab** action opens a dedicated
 `/logs/{sourceId}` page without dashboard navigation. It preserves the selected
 source, stream, and date range. Stream and date changes update that tab's URL,

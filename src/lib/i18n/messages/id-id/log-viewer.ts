@@ -1,4 +1,10 @@
 export const logViewerMessages = {
+  copySelection: "Salin",
+  selectionCopiedShort: "Disalin",
+  copySelectedText: "Salin teks log yang dipilih",
+  selectionCopied: "Teks log yang dipilih disalin",
+  selectionCopyFailed:
+    "Tidak dapat menyalin. Gunakan pintasan salin browser untuk menyalin teks yang dipilih.",
   openInNewTab: "Buka sumber di tab baru",
   backToWorkspace: "Kembali ke ruang kerja",
   sourceNotFound: "Sumber log tidak ditemukan",

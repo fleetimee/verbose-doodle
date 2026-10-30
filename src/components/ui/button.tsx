@@ -80,6 +80,7 @@ const buttonVariants = cva(
           "text-muted-foreground underline-offset-4 hover:text-foreground hover:underline",
       },
       size: {
+        selection: "h-9 rounded-xl px-4 text-sm font-normal",
         "grid-icon": "size-5 rounded-sm p-0 [&_svg:not([class*='size-'])]:size-3",
         "database-cell": "database-cell-value",
         "column-resize": "h-full w-2 rounded-none p-0",
