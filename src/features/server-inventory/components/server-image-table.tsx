@@ -34,17 +34,23 @@ export function ImageSortHead({
       <Button
         aria-label={formatMessage(messages.servers.sortBy, { column: label })}
         onClick={onSort}
-        size="sm"
+        size="xs"
         variant={active ? "ghost" : "ghost-muted"}
       >
-        {label}
+        <span>{label}</span>
         {active ? (
           <ChevronDown
-            className={cn(!descending && "rotate-180")}
+            className={cn(
+              "size-3 transition-transform duration-200",
+              !descending && "rotate-180"
+            )}
             data-icon="inline-end"
           />
         ) : (
-          <ArrowUpDown data-icon="inline-end" />
+          <ArrowUpDown
+            className="size-3 opacity-40 transition-opacity"
+            data-icon="inline-end"
+          />
         )}
       </Button>
     </TableHead>

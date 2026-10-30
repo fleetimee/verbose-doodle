@@ -1,11 +1,15 @@
-import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import {
+  Cancel01Icon,
+  Layers01Icon,
+  Search01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SiDocker } from "react-icons/si";
 import { Link, useLocation, useSearchParams } from "react-router";
-import { ChevronRight } from "@/components/hugeicons";
+import { ChevronLeft, ChevronRight } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +45,7 @@ import {
 } from "@/features/server-inventory/components/server-image-table";
 import type { ServerEntry } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 const DOCKER_TIMEZONE = / ([+-]\d{2})(\d{2}) .*$/;
 
@@ -48,18 +53,18 @@ function ImageCreated({ value, locale }: { value: string; locale: string }) {
   const normalized = value.replace(DOCKER_TIMEZONE, "$1:$2").replace(" ", "T");
   const date = new Date(normalized);
   if (Number.isNaN(date.getTime())) {
-    return <span>{value}</span>;
+    return <span className="text-xs">{value}</span>;
   }
   return (
-    <div className="flex flex-col gap-1" title={value}>
-      <span>
+    <div className="flex flex-col gap-0.5" title={value}>
+      <span className="font-medium text-foreground/90 text-xs">
         {date.toLocaleDateString(locale, {
           day: "numeric",
           month: "short",
           year: "numeric",
         })}
       </span>
-      <span className="text-muted-foreground text-xs">
+      <span className="text-muted-foreground/70 text-xs tabular-nums">
         {date.toLocaleTimeString(locale, {
           hour: "2-digit",
           minute: "2-digit",
@@ -82,9 +87,39 @@ function ImageRepository({ repository }: { repository: string }) {
     source = copy.noRepository;
   }
   return (
-    <div className="flex min-w-0 flex-col gap-1 py-1.5" title={repository}>
-      <span className="truncate font-medium">{name}</span>
-      <span className="truncate text-muted-foreground text-xs">{source}</span>
+    <div className="flex min-w-0 items-center gap-3 py-1.5" title={repository}>
+      <div
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
+          untagged
+            ? "border-border/80 border-dashed bg-muted/40 text-muted-foreground/70"
+            : "border-border/60 bg-primary/10 text-primary"
+        )}
+      >
+        {untagged ? (
+          <HugeiconsIcon
+            aria-hidden="true"
+            className="size-4"
+            icon={Layers01Icon}
+            strokeWidth={2}
+          />
+        ) : (
+          <SiDocker aria-hidden="true" className="size-4" />
+        )}
+      </div>
+      <div className="flex min-w-0 flex-col">
+        <span
+          className={cn(
+            "truncate font-medium text-xs tracking-tight",
+            untagged && "text-muted-foreground"
+          )}
+        >
+          {name}
+        </span>
+        <span className="truncate text-muted-foreground/75 text-xs">
+          {source}
+        </span>
+      </div>
     </div>
   );
 }
@@ -106,7 +141,40 @@ export function ServerImagesPanel({
       sectionRef.current?.scrollIntoView({ block: "start" });
     }
   }, [location.hash]);
-  const search = params.get("imageSearch") ?? "";
+  const urlSearch = params.get("imageSearch") ?? "";
+  const [localSearch, setLocalSearch] = useState(urlSearch);
+
+  useEffect(() => {
+    setLocalSearch(urlSearch);
+  }, [urlSearch]);
+
+  const update = (key: string, value: string) =>
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        if (value) {
+          next.set(key, value);
+        } else {
+          next.delete(key);
+        }
+        if (key === "imageSearch") {
+          next.delete("imagePage");
+        }
+        return next;
+      },
+      { replace: true }
+    );
+
+  useEffect(() => {
+    if (localSearch === urlSearch) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      update("imageSearch", localSearch);
+    }, 200);
+    return () => window.clearTimeout(timer);
+  }, [localSearch, urlSearch]);
+
   const sort = params.get("imageSort") ?? "CreatedAt";
   const descending = params.get("imageDirection") !== "asc";
   const sortBy = (column: string) =>
@@ -133,25 +201,10 @@ export function ServerImagesPanel({
     gcTime: 60_000,
   });
   const error = useContainerError(query.data?.status, query.error);
-  const update = (key: string, value: string) =>
-    setParams(
-      (current) => {
-        const next = new URLSearchParams(current);
-        if (value) {
-          next.set(key, value);
-        } else {
-          next.delete(key);
-        }
-        if (key === "imageSearch") {
-          next.delete("imagePage");
-        }
-        return next;
-      },
-      { replace: true }
-    );
+  const searchFilter = localSearch.trim().toLowerCase();
   const rows = (query.data?.images ?? []).filter((row) =>
     [row.Repository, row.Tag, row.ID].some((value) =>
-      value?.toLowerCase().includes(search.toLowerCase())
+      value?.toLowerCase().includes(searchFilter)
     )
   );
   rows.sort((left, right) => {
@@ -210,14 +263,12 @@ export function ServerImagesPanel({
                 </InputGroupAddon>
                 <InputGroupInput
                   aria-label={copy.search}
-                  onChange={(event) =>
-                    update("imageSearch", event.target.value)
-                  }
+                  onChange={(event) => setLocalSearch(event.target.value)}
                   placeholder={copy.search}
-                  value={search}
+                  value={localSearch}
                 />
                 <AnimatePresence>
-                  {search && (
+                  {localSearch && (
                     <InputGroupAddon align="inline-end">
                       <motion.div
                         animate={{ opacity: 1, scale: 1 }}
@@ -227,7 +278,10 @@ export function ServerImagesPanel({
                       >
                         <InputGroupButton
                           aria-label={copy.clearSearch}
-                          onClick={() => update("imageSearch", "")}
+                          onClick={() => {
+                            setLocalSearch("");
+                            update("imageSearch", "");
+                          }}
                           size="icon-xs"
                         >
                           <HugeiconsIcon
@@ -298,13 +352,13 @@ export function ServerImagesPanel({
             ) : (
               <ServerImageListSkeleton />
             ))}
-          {query.data?.status === "OK" && (
-            <>
-              {rows.length ? (
+          {query.data?.status === "OK" &&
+            (rows.length ? (
+              <div className="overflow-hidden rounded-xl border border-border/50 bg-card/30 backdrop-blur-xs">
                 <motion.div
                   animate={{ opacity: 1 }}
                   initial={{ opacity: 0.7 }}
-                  key={search + page}
+                  key={urlSearch + page}
                   transition={{ duration: 0.15, ease: "easeOut" }}
                 >
                   <Table>
@@ -325,7 +379,7 @@ export function ServerImagesPanel({
                             onSort={() => sortBy(column ?? "Repository")}
                           />
                         ))}
-                        <TableHead>
+                        <TableHead className="w-28 text-right">
                           <span className="sr-only">{copy.inspect}</span>
                         </TableHead>
                       </TableRow>
@@ -340,41 +394,59 @@ export function ServerImagesPanel({
                               repository={row.Repository ?? "<none>"}
                             />
                           </TableCell>
-                          <TableCell className="max-w-56">
-                            <Badge
-                              className="max-w-full"
-                              mono
-                              radius="rounded"
-                              variant="muted"
-                            >
-                              <span className="truncate" title={row.Tag}>
-                                {row.Tag === "<none>" ? "—" : row.Tag}
+                          <TableCell className="max-w-48">
+                            {!row.Tag ||
+                            row.Tag === "<none>" ||
+                            row.Tag === "-" ? (
+                              <span className="select-none font-mono text-muted-foreground/40 text-xs">
+                                —
                               </span>
-                            </Badge>
+                            ) : (
+                              <Badge
+                                className="max-w-full"
+                                mono
+                                radius="rounded"
+                                variant="muted"
+                              >
+                                <span className="truncate" title={row.Tag}>
+                                  {row.Tag}
+                                </span>
+                              </Badge>
+                            )}
                           </TableCell>
-                          <TableCell title={row.ID} variant="mono">
-                            {row.ID?.replace("sha256:", "").slice(0, 12)}
+                          <TableCell title={row.ID}>
+                            <span className="rounded-md border border-border/40 bg-muted/30 px-1.5 py-0.5 font-mono text-muted-foreground/80 text-xs tracking-tight">
+                              {row.ID?.replace("sha256:", "").slice(0, 12)}
+                            </span>
                           </TableCell>
-                          <TableCell>{row.Size}</TableCell>
+                          <TableCell>
+                            <span className="font-medium text-foreground/90 text-xs tabular-nums">
+                              {row.Size}
+                            </span>
+                          </TableCell>
                           <TableCell>
                             <ImageCreated
                               locale={locale}
                               value={row.CreatedAt ?? ""}
                             />
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="text-right">
                             <Button
                               aria-label={`${copy.inspect}: ${row.Repository}:${row.Tag}`}
+                              className="group/btn h-7 px-2.5 text-muted-foreground text-xs transition-all hover:text-foreground active:scale-95"
                               render={
                                 <Link
                                   to={`/dashboard/server-metrics/${entry.id}/images/${encodeURIComponent(row.ID ?? "")}${detailParams.size ? `?${detailParams}` : ""}`}
                                 />
                               }
-                              size="sm"
+                              size="xs"
                               variant="ghost"
                             >
                               {copy.inspect}
-                              <ChevronRight data-icon="inline-end" />
+                              <ChevronRight
+                                className="size-3.5 transition-transform group-hover/btn:translate-x-0.5"
+                                data-icon="inline-end"
+                              />
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -382,45 +454,54 @@ export function ServerImagesPanel({
                     </TableBody>
                   </Table>
                 </motion.div>
-              ) : (
-                <motion.div
-                  animate={{ opacity: 1, y: 0 }}
-                  initial={{ opacity: 0, y: 6 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                >
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyTitle>{copy.empty}</EmptyTitle>
-                      <EmptyDescription>{copy.emptyHint}</EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                </motion.div>
-              )}
-              {pages > 1 && (
-                <div className="flex items-center justify-end gap-3">
-                  <Button
-                    disabled={page <= 1}
-                    onClick={() => update("imagePage", String(page - 1))}
-                    size="sm"
-                    variant="outline"
-                  >
-                    {copy.previous}
-                  </Button>
-                  <span className="text-muted-foreground text-sm">
-                    {page} / {pages}
-                  </span>
-                  <Button
-                    disabled={page >= pages}
-                    onClick={() => update("imagePage", String(page + 1))}
-                    size="sm"
-                    variant="outline"
-                  >
-                    {copy.next}
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
+                {pages > 1 && (
+                  <div className="flex items-center justify-between border-border/40 border-t px-4 py-2.5">
+                    <span className="text-muted-foreground text-xs tabular-nums">
+                      {page} / {pages}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        disabled={page <= 1}
+                        onClick={() => update("imagePage", String(page - 1))}
+                        size="xs"
+                        variant="outline"
+                      >
+                        <ChevronLeft
+                          className="size-3"
+                          data-icon="inline-start"
+                        />
+                        {copy.previous}
+                      </Button>
+                      <Button
+                        disabled={page >= pages}
+                        onClick={() => update("imagePage", String(page + 1))}
+                        size="xs"
+                        variant="outline"
+                      >
+                        {copy.next}
+                        <ChevronRight
+                          className="size-3"
+                          data-icon="inline-end"
+                        />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <motion.div
+                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyTitle>{copy.empty}</EmptyTitle>
+                    <EmptyDescription>{copy.emptyHint}</EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              </motion.div>
+            ))}
         </CardContent>
       </Card>
     </section>
