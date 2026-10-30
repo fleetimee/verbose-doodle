@@ -90,6 +90,9 @@ const tabsTriggerVariants = cva(
         md: "px-3 text-xs",
       },
     },
+    compoundVariants: [
+      { variant: "stream", size: "xs", className: "gap-2 px-3 [&_svg:not([class*='size-'])]:size-3" },
+    ],
     defaultVariants: {
       variant: "default",
       size: "default",

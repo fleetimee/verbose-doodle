@@ -20,14 +20,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import {
-  Tabs,
-  TabsContent,
-  TabsIndicator,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   deleteLogSource,
   fetchLogCatalog,
@@ -36,6 +29,7 @@ import {
 } from "@/features/log-viewer/api";
 import { getLogErrorMessage as getErrorMessage } from "@/features/log-viewer/error-message";
 import { LogErrorState } from "@/features/log-viewer/error-state";
+import { LogStreamTabs } from "@/features/log-viewer/log-stream-tabs";
 import {
   LogSourcesSkeleton,
   LogViewerSkeleton,
@@ -443,30 +437,10 @@ export function LogViewerPage() {
                         value={activeStream}
                         variant="flush"
                       >
-                        <div className="flex shrink-0 items-center justify-between gap-2 px-2.5 py-1">
-                          <ScrollArea
-                            className="min-w-0 flex-1"
-                            contentClassName="w-max"
-                          >
-                            <TabsList
-                              aria-label={copy.streams}
-                              size="sm"
-                              variant="stream"
-                            >
-                              {catalog.data?.streams.map((type) => (
-                                <TabsTrigger
-                                  key={type}
-                                  value={type}
-                                  variant="stream"
-                                >
-                                  {type}
-                                </TabsTrigger>
-                              ))}
-                              <TabsIndicator />
-                            </TabsList>
-                            <ScrollBar orientation="horizontal" />
-                          </ScrollArea>
-                        </div>
+                        <LogStreamTabs
+                          label={copy.streams}
+                          streams={catalog.data?.streams ?? []}
+                        />
                         <TabsContent
                           className="min-h-0 flex-1 overflow-hidden"
                           value={activeStream}
