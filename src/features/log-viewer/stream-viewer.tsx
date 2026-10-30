@@ -19,6 +19,7 @@ import { LogContentSkeleton } from "@/features/log-viewer/log-viewer-skeleton";
 import type { LogSegment } from "@/features/log-viewer/types";
 import { useLogSearch } from "@/features/log-viewer/use-log-search";
 import { useLogStream } from "@/features/log-viewer/use-log-stream";
+import { logSourceHref } from "@/features/log-viewer/use-log-viewer-location";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -281,6 +282,7 @@ export function StreamViewer({
       <LogToolbar
         canExport={files.length > 0}
         canLoadOlder={!!first?.hasOlder}
+        dedicatedHref={logSourceHref(id, from, to, stream)}
         follow={follow}
         fontSize={fontSize}
         fullscreen={fullscreen}

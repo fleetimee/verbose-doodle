@@ -275,4 +275,14 @@ Highlights preserve the existing ISO syntax spans and can cross adjacent chunks 
 
 ### Fullscreen viewing
 
+The toolbar's **Open source in new tab** action opens a dedicated
+`/logs/{sourceId}` page without dashboard navigation. It preserves the selected
+source, stream, and date range. Stream and date changes update that tab's URL,
+so refreshing or bookmarking it restores the same view. An empty end date
+continues to follow today. Source changes navigate within the dedicated tab;
+they do not change the source selected in other open viewers. **Back to
+workspace** returns to the dashboard log viewer. The dedicated page requires
+the same administrator access as the dashboard. Deleted or unknown sources
+show an unavailable state rather than opening a different source.
+
 The log toolbar fullscreen button expands the viewer panel using browser fullscreen, hiding the source settings and dashboard chrome. Stream tabs, search, wrapping, font size, and live controls remain available. The exit button or Escape restores the normal view and source settings. The viewer remains mounted so the log buffer, stream selection, and search are retained. Fullscreen is disabled when unsupported by the browser.

@@ -5,6 +5,7 @@ import {
   Cancel01Icon,
   Download01Icon,
   FullScreenIcon,
+  LinkSquare02Icon,
   LiveStreaming02Icon,
   MaximizeScreenIcon,
   MinimizeScreenIcon,
@@ -13,6 +14,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { RefObject } from "react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import { ChevronDown, FileClock } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
@@ -38,6 +40,7 @@ import { formatMessage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export function LogToolbar({
+  dedicatedHref,
   loading,
   canExport,
   canLoadOlder,
@@ -57,6 +60,7 @@ export function LogToolbar({
   onFullscreen,
   onMaximize,
 }: {
+  dedicatedHref: string;
   fullscreen: boolean;
   fullscreenSupported: boolean;
   maximized: boolean;
@@ -401,6 +405,28 @@ export function LogToolbar({
           <TooltipContent>{exportLabel}</TooltipContent>
         </Tooltip>
         <ButtonGroup>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  aria-label={copy.openInNewTab}
+                  className="[&_svg:not([class*='size-'])]:size-3.5"
+                  render={
+                    <Link
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      to={dedicatedHref}
+                    />
+                  }
+                  size="icon-7"
+                  variant="ghost"
+                />
+              }
+            >
+              <HugeiconsIcon icon={LinkSquare02Icon} />
+            </TooltipTrigger>
+            <TooltipContent>{copy.openInNewTab}</TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger
               render={

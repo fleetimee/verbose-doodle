@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { aboutRoutes } from "@/features/about/routes";
 import { authRoutes } from "@/features/auth/routes";
 import { dashboardRoutes } from "@/features/dashboard/routes";
+import { logSourceRoutes } from "@/features/log-viewer/routes";
 
 const WheelResultPage = lazy(() =>
   import("@/pages/wheel-result").then(({ WheelResultPage }) => ({
@@ -45,6 +46,7 @@ export function AppRoutes() {
         {authRoutes}
         {aboutRoutes}
         {dashboardRoutes}
+        {logSourceRoutes}
         <Route
           element={
             <ProtectedRoute requiredRole="ADMIN">

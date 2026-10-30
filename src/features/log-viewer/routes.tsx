@@ -8,6 +8,23 @@ const LogViewerPage = lazy(() =>
   }))
 );
 
+const LogSourcePage = lazy(() =>
+  import("@/pages/log-source").then(({ LogSourcePage }) => ({
+    default: LogSourcePage,
+  }))
+);
+
+export const logSourceRoutes = (
+  <Route
+    element={
+      <ProtectedRoute requiredRole="ADMIN">
+        <LogSourcePage />
+      </ProtectedRoute>
+    }
+    path="/logs/:sourceId"
+  />
+);
+
 export const logViewerRoutes = (
   <Route
     element={

@@ -4358,3 +4358,9 @@ main:has(.log-viewer-workspace[data-restoring="true"]) {
     border-color: var(--series-color);
   }
 }
+
+@layer components {
+  .log-source-page .log-viewer-workspace {
+    max-width: none;
+  }
+}

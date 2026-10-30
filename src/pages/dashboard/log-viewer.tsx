@@ -38,18 +38,12 @@ import { SourceControls } from "@/features/log-viewer/source-controls";
 import { SourceForm } from "@/features/log-viewer/source-form";
 import { StreamViewer } from "@/features/log-viewer/stream-viewer";
 import type { LogSource } from "@/features/log-viewer/types";
+import { useLogViewerLocation } from "@/features/log-viewer/use-log-viewer-location";
 import { useDocumentMeta } from "@/hooks/use-document-meta";
-import { useLocalStorage } from "@/hooks/use-local-storage";
 
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 
 const SOURCES_KEY = ["log-sources"];
-
-function initialDate() {
-  const date = new Date();
-  date.setDate(date.getDate() - 30);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
 
 const EXPAND_EASING = "cubic-bezier(0.23, 1, 0.32, 1)";
 const EXPAND_DURATION_MS = 240;
@@ -203,6 +197,30 @@ function useLogViewerDisplayMode(
   };
 }
 
+function MissingSourceState({
+  dedicated,
+  sourcesLoaded,
+  sourceFound,
+}: {
+  dedicated: boolean;
+  sourcesLoaded: boolean;
+  sourceFound: boolean;
+}) {
+  const { messages } = useI18n();
+  const copy = messages.logViewer;
+  if (!(dedicated && sourcesLoaded) || sourceFound) {
+    return null;
+  }
+  return (
+    <Empty className="flex-1" variant="bordered">
+      <EmptyHeader>
+        <EmptyTitle>{copy.sourceNotFound}</EmptyTitle>
+        <EmptyDescription>{copy.sourceNotFoundHint}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  );
+}
+
 export function LogViewerPage() {
   const { messages } = useI18n();
   const copy = messages.logViewer;
@@ -219,14 +237,18 @@ export function LogViewerPage() {
     toggleMaximized,
   } = useLogViewerDisplayMode(copy.fullscreenFailed, Boolean(reduceMotion));
   const queryClient = useQueryClient();
-  const [selectedId, setSelectedId] = useLocalStorage(
-    "log-viewer-selected-source",
-    ""
-  );
+  const {
+    dedicated,
+    selectedId,
+    setSelectedId,
+    from,
+    setFrom,
+    to,
+    setTo,
+    stream,
+    setStream,
+  } = useLogViewerLocation();
   const [editing, setEditing] = useState<LogSource | "new" | null>(null);
-  const [from, setFrom] = useState(initialDate);
-  const [to, setTo] = useState("");
-  const [stream, setStream] = useState("");
   const sources = useQuery({
     queryKey: SOURCES_KEY,
     queryFn: ({ signal }) => fetchLogSources(signal),
@@ -234,7 +256,7 @@ export function LogViewerPage() {
   });
   const selected =
     sources.data?.find((source) => source.id === selectedId) ??
-    sources.data?.[0];
+    sources.data?.find(() => !dedicated);
   const catalog = useQuery({
     queryKey: ["log-catalog", selected?.id, selected?.updatedAt, from, to],
     queryFn: ({ signal }) => {
@@ -261,7 +283,9 @@ export function LogViewerPage() {
     onError: (error) => toast.error(getErrorMessage(error)),
   });
   useDocumentMeta({
-    title: `${copy.title} | Fleetime Labs`,
+    title: [selected?.name, copy.title, "Fleetime Labs"]
+      .filter(Boolean)
+      .join(" | "),
     description: copy.description,
   });
 
@@ -273,6 +297,11 @@ export function LogViewerPage() {
       ref={workspaceRef}
     >
       <h1 className="sr-only">{copy.title}</h1>
+      <MissingSourceState
+        dedicated={dedicated}
+        sourceFound={Boolean(selected)}
+        sourcesLoaded={sources.isSuccess}
+      />
       {sources.isPending && <LogSourcesSkeleton />}
       {sources.error && !sources.data && (
         <LogErrorState
@@ -298,7 +327,7 @@ export function LogViewerPage() {
           </AlertDescription>
         </Alert>
       )}
-      {sources.data?.length === 0 && (
+      {!dedicated && sources.data?.length === 0 && (
         <Empty className="min-h-0 flex-1 overflow-auto" variant="bordered">
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -344,10 +373,7 @@ export function LogViewerPage() {
               onCheck={() => catalog.refetch()}
               onDelete={() => remove.mutate(selected.id)}
               onEdit={() => setEditing(selected)}
-              onSelect={(value) => {
-                setSelectedId(value);
-                setStream("");
-              }}
+              onSelect={setSelectedId}
               selected={selected}
               setFrom={setFrom}
               setTo={setTo}

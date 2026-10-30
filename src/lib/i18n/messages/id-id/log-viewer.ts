@@ -1,4 +1,9 @@
 export const logViewerMessages = {
+  openInNewTab: "Buka sumber di tab baru",
+  backToWorkspace: "Kembali ke ruang kerja",
+  sourceNotFound: "Sumber log tidak ditemukan",
+  sourceNotFoundHint:
+    "Sumber ini mungkin telah dihapus. Kembali ke ruang kerja untuk memilih sumber lain.",
   sourceActions: "Tindakan sumber",
   connectionConnected: "Terhubung",
   connectionConnecting: "Menghubungkan…",

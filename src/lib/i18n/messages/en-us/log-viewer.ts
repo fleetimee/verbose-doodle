@@ -1,4 +1,9 @@
 export const logViewerMessages = {
+  openInNewTab: "Open source in new tab",
+  backToWorkspace: "Back to workspace",
+  sourceNotFound: "Log source not found",
+  sourceNotFoundHint:
+    "This source may have been deleted. Return to the workspace to choose another source.",
   sourceActions: "Source actions",
   connectionConnected: "Connected",
   connectionConnecting: "Connecting…",
