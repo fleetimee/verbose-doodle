@@ -9,10 +9,9 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { SiDocker } from "react-icons/si";
 import { Link, useLocation, useSearchParams } from "react-router";
-import { ChevronLeft, ChevronRight } from "@/components/hugeicons";
+import { ChevronRight } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -27,6 +26,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -40,8 +40,11 @@ import { useContainerError } from "@/features/server-inventory/components/server
 import { ServerImageCleanup } from "@/features/server-inventory/components/server-image-cleanup";
 import { ServerImageListSkeleton } from "@/features/server-inventory/components/server-image-skeleton";
 import {
+  compareImages,
   ImageSortHead,
-  imageSizeBytes,
+  ImageTablePagination,
+  ImageTableShimmer,
+  ImageTagBadge,
 } from "@/features/server-inventory/components/server-image-table";
 import type { ServerEntry } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
@@ -124,6 +127,76 @@ function ImageRepository({ repository }: { repository: string }) {
   );
 }
 
+function ImageSearchInput({
+  value,
+  isSearching,
+  onChange,
+  onCommit,
+  onClear,
+}: {
+  value: string;
+  isSearching: boolean;
+  onChange: (value: string) => void;
+  onCommit: (value: string) => void;
+  onClear: () => void;
+}) {
+  const copy = useI18n().messages.servers.images;
+  return (
+    <div className="relative flex w-full items-center transition-all sm:w-60 focus-within:sm:w-72">
+      <InputGroup size="compact">
+        <InputGroupAddon align="inline-start">
+          {isSearching ? (
+            <Spinner size="sm" variant="muted" />
+          ) : (
+            <HugeiconsIcon
+              aria-hidden="true"
+              className="size-3.5 text-muted-foreground transition-colors group-focus-within/input-group:text-foreground"
+              icon={Search01Icon}
+              strokeWidth={2}
+            />
+          )}
+        </InputGroupAddon>
+        <InputGroupInput
+          aria-label={copy.search}
+          onChange={(event) => onChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              onCommit(value);
+            }
+          }}
+          placeholder={copy.search}
+          value={value}
+        />
+        <AnimatePresence>
+          {value && (
+            <InputGroupAddon align="inline-end">
+              <motion.div
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+              >
+                <InputGroupButton
+                  aria-label={copy.clearSearch}
+                  onClick={onClear}
+                  size="icon-xs"
+                >
+                  <HugeiconsIcon
+                    aria-hidden="true"
+                    className="size-3"
+                    icon={Cancel01Icon}
+                    strokeWidth={2}
+                  />
+                </InputGroupButton>
+              </motion.div>
+            </InputGroupAddon>
+          )}
+        </AnimatePresence>
+      </InputGroup>
+    </div>
+  );
+}
+
 export function ServerImagesPanel({
   entry,
   paused,
@@ -143,9 +216,12 @@ export function ServerImagesPanel({
   }, [location.hash]);
   const urlSearch = params.get("imageSearch") ?? "";
   const [localSearch, setLocalSearch] = useState(urlSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlSearch);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     setLocalSearch(urlSearch);
+    setDebouncedSearch(urlSearch);
   }, [urlSearch]);
 
   const update = (key: string, value: string) =>
@@ -166,14 +242,18 @@ export function ServerImagesPanel({
     );
 
   useEffect(() => {
-    if (localSearch === urlSearch) {
+    if (localSearch === debouncedSearch) {
+      setIsSearching(false);
       return;
     }
+    setIsSearching(true);
     const timer = window.setTimeout(() => {
+      setDebouncedSearch(localSearch);
       update("imageSearch", localSearch);
-    }, 200);
+      setIsSearching(false);
+    }, 250);
     return () => window.clearTimeout(timer);
-  }, [localSearch, urlSearch]);
+  }, [localSearch, debouncedSearch]);
 
   const sort = params.get("imageSort") ?? "CreatedAt";
   const descending = params.get("imageDirection") !== "asc";
@@ -201,26 +281,13 @@ export function ServerImagesPanel({
     gcTime: 60_000,
   });
   const error = useContainerError(query.data?.status, query.error);
-  const searchFilter = localSearch.trim().toLowerCase();
+  const searchFilter = debouncedSearch.trim().toLowerCase();
   const rows = (query.data?.images ?? []).filter((row) =>
     [row.Repository, row.Tag, row.ID].some((value) =>
       value?.toLowerCase().includes(searchFilter)
     )
   );
-  rows.sort((left, right) => {
-    const comparison =
-      sort === "Size"
-        ? imageSizeBytes(left.Size ?? "") - imageSizeBytes(right.Size ?? "")
-        : (left[sort] ?? "").localeCompare(right[sort] ?? "", undefined, {
-            numeric: true,
-          });
-    return (
-      (descending ? -comparison : comparison) ||
-      `${left.Repository}:${left.Tag}:${left.ID}`.localeCompare(
-        `${right.Repository}:${right.Tag}:${right.ID}`
-      )
-    );
-  });
+  rows.sort((left, right) => compareImages(left, right, sort, descending));
   const detailParams = new URLSearchParams(params);
   detailParams.delete("image");
   const pages = Math.max(1, Math.ceil(rows.length / 20));
@@ -251,52 +318,22 @@ export function ServerImagesPanel({
                 </p>
               </div>
             </div>
-            <div className="relative flex w-full items-center transition-all sm:w-60 focus-within:sm:w-72">
-              <InputGroup size="compact">
-                <InputGroupAddon align="inline-start">
-                  <HugeiconsIcon
-                    aria-hidden="true"
-                    className="size-3.5 text-muted-foreground transition-colors group-focus-within/input-group:text-foreground"
-                    icon={Search01Icon}
-                    strokeWidth={2}
-                  />
-                </InputGroupAddon>
-                <InputGroupInput
-                  aria-label={copy.search}
-                  onChange={(event) => setLocalSearch(event.target.value)}
-                  placeholder={copy.search}
-                  value={localSearch}
-                />
-                <AnimatePresence>
-                  {localSearch && (
-                    <InputGroupAddon align="inline-end">
-                      <motion.div
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <InputGroupButton
-                          aria-label={copy.clearSearch}
-                          onClick={() => {
-                            setLocalSearch("");
-                            update("imageSearch", "");
-                          }}
-                          size="icon-xs"
-                        >
-                          <HugeiconsIcon
-                            aria-hidden="true"
-                            className="size-3"
-                            icon={Cancel01Icon}
-                            strokeWidth={2}
-                          />
-                        </InputGroupButton>
-                      </motion.div>
-                    </InputGroupAddon>
-                  )}
-                </AnimatePresence>
-              </InputGroup>
-            </div>
+            <ImageSearchInput
+              isSearching={isSearching}
+              onChange={setLocalSearch}
+              onClear={() => {
+                setLocalSearch("");
+                setDebouncedSearch("");
+                update("imageSearch", "");
+                setIsSearching(false);
+              }}
+              onCommit={(val) => {
+                setDebouncedSearch(val);
+                update("imageSearch", val);
+                setIsSearching(false);
+              }}
+              value={localSearch}
+            />
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
             {query.data?.status === "OK" && (
@@ -352,40 +389,41 @@ export function ServerImagesPanel({
             ) : (
               <ServerImageListSkeleton />
             ))}
-          {query.data?.status === "OK" &&
-            (rows.length ? (
-              <div className="overflow-hidden rounded-xl border border-border/50 bg-card/30 backdrop-blur-xs">
-                <motion.div
-                  animate={{ opacity: 1 }}
-                  initial={{ opacity: 0.7 }}
-                  key={urlSearch + page}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
-                >
-                  <Table>
-                    <TableHeader variant="sticky">
-                      <TableRow>
-                        {[
-                          ["Repository", copy.repository],
-                          ["Tag", copy.tag],
-                          ["ID", copy.id],
-                          ["Size", copy.size],
-                          ["CreatedAt", copy.created],
-                        ].map(([column, label]) => (
-                          <ImageSortHead
-                            active={sort === column}
-                            descending={descending}
-                            key={column}
-                            label={label ?? ""}
-                            onSort={() => sortBy(column ?? "Repository")}
-                          />
-                        ))}
-                        <TableHead className="w-28 text-right">
-                          <span className="sr-only">{copy.inspect}</span>
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {rows.slice((page - 1) * 20, page * 20).map((row) => (
+          {query.data?.status === "OK" && (
+            <div className="flex min-h-[460px] flex-col overflow-hidden rounded-xl border border-border/50 bg-card/30 backdrop-blur-xs">
+              <ImageTableShimmer active={isSearching} />
+              <div
+                className={cn(
+                  "flex-1 transition-opacity duration-200",
+                  isSearching && "opacity-60"
+                )}
+              >
+                <Table>
+                  <TableHeader variant="sticky">
+                    <TableRow>
+                      {[
+                        ["Repository", copy.repository],
+                        ["Tag", copy.tag],
+                        ["ID", copy.id],
+                        ["Size", copy.size],
+                        ["CreatedAt", copy.created],
+                      ].map(([column, label]) => (
+                        <ImageSortHead
+                          active={sort === column}
+                          descending={descending}
+                          key={column}
+                          label={label ?? ""}
+                          onSort={() => sortBy(column ?? "Repository")}
+                        />
+                      ))}
+                      <TableHead className="w-28 text-right">
+                        <span className="sr-only">{copy.inspect}</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.length > 0 ? (
+                      rows.slice((page - 1) * 20, page * 20).map((row) => (
                         <TableRow
                           key={`${row.ID}-${row.Repository}-${row.Tag}-${row.Digest}`}
                         >
@@ -395,24 +433,7 @@ export function ServerImagesPanel({
                             />
                           </TableCell>
                           <TableCell className="max-w-48">
-                            {!row.Tag ||
-                            row.Tag === "<none>" ||
-                            row.Tag === "-" ? (
-                              <span className="select-none font-mono text-muted-foreground/40 text-xs">
-                                —
-                              </span>
-                            ) : (
-                              <Badge
-                                className="max-w-full"
-                                mono
-                                radius="rounded"
-                                variant="muted"
-                              >
-                                <span className="truncate" title={row.Tag}>
-                                  {row.Tag}
-                                </span>
-                              </Badge>
-                            )}
+                            <ImageTagBadge tag={row.Tag} />
                           </TableCell>
                           <TableCell title={row.ID}>
                             <span className="rounded-md border border-border/40 bg-muted/30 px-1.5 py-0.5 font-mono text-muted-foreground/80 text-xs tracking-tight">
@@ -450,58 +471,33 @@ export function ServerImagesPanel({
                             </Button>
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </motion.div>
-                {pages > 1 && (
-                  <div className="flex items-center justify-between border-border/40 border-t px-4 py-2.5">
-                    <span className="text-muted-foreground text-xs tabular-nums">
-                      {page} / {pages}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <Button
-                        disabled={page <= 1}
-                        onClick={() => update("imagePage", String(page - 1))}
-                        size="xs"
-                        variant="outline"
-                      >
-                        <ChevronLeft
-                          className="size-3"
-                          data-icon="inline-start"
-                        />
-                        {copy.previous}
-                      </Button>
-                      <Button
-                        disabled={page >= pages}
-                        onClick={() => update("imagePage", String(page + 1))}
-                        size="xs"
-                        variant="outline"
-                      >
-                        {copy.next}
-                        <ChevronRight
-                          className="size-3"
-                          data-icon="inline-end"
-                        />
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell className="h-72 text-center" colSpan={6}>
+                          <Empty>
+                            <EmptyHeader>
+                              <EmptyTitle>{copy.empty}</EmptyTitle>
+                              <EmptyDescription>
+                                {copy.emptyHint}
+                              </EmptyDescription>
+                            </EmptyHeader>
+                          </Empty>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </div>
-            ) : (
-              <motion.div
-                animate={{ opacity: 1, y: 0 }}
-                initial={{ opacity: 0, y: 6 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-              >
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyTitle>{copy.empty}</EmptyTitle>
-                    <EmptyDescription>{copy.emptyHint}</EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              </motion.div>
-            ))}
+              <ImageTablePagination
+                onPageChange={(nextPage) =>
+                  update("imagePage", String(nextPage))
+                }
+                page={page}
+                pages={pages}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     </section>
