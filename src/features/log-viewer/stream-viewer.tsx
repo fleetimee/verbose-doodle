@@ -219,14 +219,16 @@ export function StreamViewer({
     previousScrollTop.current = element.scrollTop;
   }, [pages, follow, fontSize, fullscreen, maximized, hasContent]);
 
-  async function older() {
+  async function older(pauseFollow = true) {
     if (olderPending.current || loading || !first?.hasOlder) {
       return;
     }
     olderPending.current = true;
-    setFollow(false);
+    if (pauseFollow) {
+      setFollow(false);
+    }
     const element = viewport.current;
-    if (element) {
+    if (element && !follow) {
       const top = element.getBoundingClientRect().top;
       const visible = Array.from(
         element.querySelectorAll<HTMLElement>("[data-log-segment]")
@@ -244,6 +246,40 @@ export function StreamViewer({
     }
     olderPending.current = false;
   }
+
+  useLayoutEffect(() => {
+    if (
+      loading ||
+      error ||
+      !first?.hasOlder ||
+      pages.length >= 32 ||
+      showEmpty ||
+      showFilteredEmpty
+    ) {
+      return;
+    }
+    const element = viewport.current;
+    if (
+      element &&
+      element.clientHeight > 0 &&
+      element.scrollHeight <= element.clientHeight
+    ) {
+      older(false);
+    }
+  }, [
+    error,
+    filterMatches,
+    first?.hasOlder,
+    fontSize,
+    fullscreen,
+    loading,
+    maximized,
+    pages,
+    query,
+    showEmpty,
+    showFilteredEmpty,
+    wordWrap,
+  ]);
 
   return (
     <section
@@ -286,7 +322,7 @@ export function StreamViewer({
           load("latest");
         }}
         onMaximize={onMaximize}
-        onOlder={older}
+        onOlder={() => older()}
         onWordWrap={(checked) => {
           setWordWrap(checked);
           if (checked && viewport.current) {
@@ -403,6 +439,21 @@ export function StreamViewer({
                 setFollow(false);
               }
               if (!query && scrollTop === 0 && scrollTop < previousTop) {
+                older();
+              }
+            }}
+            onWheelCapture={(event) => {
+              const element = viewport.current;
+              if (
+                !element ||
+                event.ctrlKey ||
+                event.metaKey ||
+                event.deltaY >= 0 ||
+                Math.abs(event.deltaX) > Math.abs(event.deltaY)
+              ) {
+                return;
+              }
+              if (element.scrollTop <= 0) {
                 older();
               }
             }}
