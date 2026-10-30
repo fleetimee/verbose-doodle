@@ -142,13 +142,13 @@ export function LogToolbar({
         </Tooltip>
       </ButtonGroup>
       <div className="flex min-w-52 flex-1 items-center gap-1.5 sm:max-w-lg">
-        <InputGroup className="h-7 flex-1 text-xs">
-          <InputGroupAddon className="py-0 pl-2.5 [&>svg:not([class*='size-'])]:size-3.5">
+        <InputGroup className="flex-1" size="compact">
+          <InputGroupAddon className="[&>svg:not([class*='size-'])]:size-3.5">
             <HugeiconsIcon icon={Search01Icon} />
           </InputGroupAddon>
           <InputGroupInput
             aria-label={copy.searchLogs}
-            className="h-full py-0 text-xs md:text-xs"
+            className="h-full"
             onChange={(event) => search.onChange(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
@@ -164,14 +164,14 @@ export function LogToolbar({
             ref={search.inputRef}
             value={search.query}
           />
-          <InputGroupAddon align="inline-end" className="gap-0.5 py-0 pr-1.5">
+          <InputGroupAddon align="inline-end">
             {search.query ? (
               <Tooltip>
                 <TooltipTrigger
                   render={
                     <InputGroupText
                       aria-live="polite"
-                      className="cursor-help px-1 text-[11px] tabular-nums"
+                      className="cursor-help"
                     />
                   }
                 >
@@ -244,8 +244,9 @@ export function LogToolbar({
           <TooltipTrigger
             render={
               <Label
-                className="inline-flex h-7 shrink-0 cursor-pointer select-none items-center gap-1.5 rounded-md border border-input bg-background px-2 font-medium text-xs shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:hover:bg-input/50"
                 htmlFor="log-search-filter-matches"
+                size="sm"
+                variant="control"
               />
             }
           >
@@ -269,7 +270,7 @@ export function LogToolbar({
               render={
                 <Button
                   aria-label={copy.decreaseFont}
-                  className="h-7 px-2 text-xs"
+                  className="h-7"
                   disabled={fontSize <= 9}
                   focusableWhenDisabled
                   onClick={() => {
@@ -297,7 +298,7 @@ export function LogToolbar({
               render={
                 <Button
                   aria-label={copy.resetFont}
-                  className="h-7 px-2 text-xs tabular-nums"
+                  className="h-7"
                   onClick={() => {
                     onFontSize(10);
                     toast.info(
@@ -322,7 +323,7 @@ export function LogToolbar({
               render={
                 <Button
                   aria-label={copy.increaseFont}
-                  className="h-7 px-2 text-xs"
+                  className="h-7"
                   disabled={fontSize >= 18}
                   focusableWhenDisabled
                   onClick={() => {
@@ -351,7 +352,7 @@ export function LogToolbar({
             render={
               <Toggle
                 aria-label={copy.wordWrap}
-                className="size-7 p-0 [&_svg:not([class*='size-'])]:size-3.5"
+                className="size-7 [&_svg:not([class*='size-'])]:size-3.5"
                 onPressedChange={onWordWrap}
                 pressed={wordWrap}
                 size="icon-xs"
@@ -367,15 +368,14 @@ export function LogToolbar({
             render={
               <Toggle
                 aria-label={copy.follow}
-                className="h-7 gap-1.5 px-2 text-xs"
                 onPressedChange={onFollow}
                 pressed={follow}
-                size="sm"
+                size="xs"
               />
             }
           >
             <HugeiconsIcon
-              className={cn("size-3.5", follow && "text-emerald-500")}
+              className={cn("size-3.5", follow && "text-success")}
               icon={LiveStreaming02Icon}
             />
             {copy.live}

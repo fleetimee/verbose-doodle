@@ -53,11 +53,7 @@ function ContainerLiveMetrics({
   return (
     <Card size="monitor" variant="monitor">
       <CardHeader size="none">
-        <CardTitle
-          className="text-sm tracking-[-0.01em]"
-          size="sm"
-          variant="inline"
-        >
+        <CardTitle size="sm" variant="inline">
           <Activity
             aria-hidden="true"
             className="size-4 shrink-0 text-muted-foreground"
@@ -125,12 +121,12 @@ function ContainerIdentity({
       : ShutDownIcon;
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3.5">
-      <div className="flex size-12 shrink-0 items-center justify-center rounded-[14px] border border-border/60 bg-gradient-to-b from-primary/15 to-primary/5 text-primary shadow-2xs">
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-gradient-to-b from-primary/15 to-primary/5 text-primary shadow-2xs">
         <SiDocker aria-hidden="true" className="size-7" />
       </div>
       <div className="flex min-w-0 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2.5">
-          <h2 className="min-w-0 break-words font-semibold text-xl tracking-[-0.02em] sm:text-2xl">
+          <h2 className="min-w-0 break-words font-semibold text-xl tracking-tight sm:text-2xl">
             {loading ? (
               <Skeleton
                 aria-hidden="true"
@@ -148,7 +144,7 @@ function ContainerIdentity({
             <span
               className={cn(
                 "inline-flex items-center gap-1.5 font-medium text-xs",
-                isPositive ? "text-emerald-500" : "text-destructive"
+                isPositive ? "text-success" : "text-destructive"
               )}
             >
               <HugeiconsIcon

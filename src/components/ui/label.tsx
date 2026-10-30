@@ -9,6 +9,7 @@ const labelVariants = cva(
     variants: {
       variant: {
         default: "",
+        control: "inline-flex h-7 shrink-0 cursor-pointer gap-1.5 rounded-md border border-input bg-background px-2 shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:hover:bg-input/50",
         muted: "text-muted-foreground",
         "muted-mono": "font-mono text-muted-foreground",
         mono: "font-mono uppercase tracking-wider text-muted-foreground",

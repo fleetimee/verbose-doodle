@@ -73,10 +73,7 @@ export function DockerSummarySkeleton() {
         <div className="grid grid-cols-2 gap-x-8 gap-y-2.5">
           {["running", "stopped", "healthy", "unhealthy"].map((metric) => (
             <div className="flex min-w-0 items-center gap-2" key={metric}>
-              <Skeleton
-                className="size-4 shrink-0 rounded-full"
-                variant="table"
-              />
+              <Skeleton className="size-4 shrink-0" variant="full" />
               <Skeleton className="h-4 w-20 max-w-full" variant="table" />
             </div>
           ))}
@@ -84,10 +81,7 @@ export function DockerSummarySkeleton() {
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-border/40 border-t @min-[36rem]:border-t-0 @min-[36rem]:border-l @min-[36rem]:pt-0 pt-2.5 @min-[36rem]:pl-6">
           {["total", "images"].map((metric) => (
             <div className="flex min-w-0 items-center gap-2" key={metric}>
-              <Skeleton
-                className="size-4 shrink-0 rounded-md"
-                variant="table"
-              />
+              <Skeleton className="size-4 shrink-0" variant="table" />
               <Skeleton className="h-4 w-16 max-w-full" variant="table" />
             </div>
           ))}

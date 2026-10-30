@@ -65,7 +65,7 @@ function GroupedInsetList({
   loading?: boolean;
   skeletonCount?: number;
   preserveLabelsOnLoad?: boolean;
-  maxHeightClassName?: string;
+  maxHeightClassName?: "max-h-48" | "max-h-60";
 }) {
   if (loading && !preserveLabelsOnLoad) {
     return (
@@ -97,7 +97,7 @@ function GroupedInsetList({
           </dt>
           <dd
             className={cn(
-              "min-w-0 break-all font-medium text-[13px] text-foreground leading-relaxed sm:text-right",
+              "min-w-0 break-all font-medium text-foreground text-sm leading-relaxed sm:text-right",
               row.mono && "font-mono font-normal text-xs"
             )}
           >
@@ -124,12 +124,8 @@ function GroupedInsetList({
   }
   return (
     <ScrollArea
-      className={cn(
-        "rounded-xl border border-border/50 bg-muted/15",
-        maxHeightClassName
-      )}
-      variant="fit"
-      viewportClassName={maxHeightClassName}
+      className={maxHeightClassName === "max-h-48" ? "max-h-48" : "max-h-60"}
+      variant="panel"
     >
       {list}
     </ScrollArea>
@@ -255,7 +251,7 @@ function buildMountRows(
           <span className="font-medium font-mono text-foreground text-xs">
             {mount.destination}
           </span>
-          <span className="text-[11px] text-muted-foreground">
+          <span className="text-muted-foreground text-xs">
             {mount.type} · {mount.writable ? copy.readWrite : copy.readOnly}
           </span>
         </span>
@@ -301,11 +297,7 @@ export function ServerContainerDetailValues({
     <div aria-busy={loading} className="flex min-w-0 flex-col gap-4">
       <Card size="monitor" variant="monitor">
         <CardHeader size="none">
-          <CardTitle
-            className="text-sm tracking-[-0.01em]"
-            size="sm"
-            variant="inline"
-          >
+          <CardTitle size="sm" variant="inline">
             <SectionIcon icon={Info} />
             {copy.basicInfo}
           </CardTitle>
@@ -322,11 +314,7 @@ export function ServerContainerDetailValues({
       <div className="grid min-w-0 gap-4 md:grid-cols-2">
         <Card className="min-w-0" size="monitor" variant="monitor">
           <CardHeader size="none">
-            <CardTitle
-              className="text-sm tracking-[-0.01em]"
-              size="sm"
-              variant="inline"
-            >
+            <CardTitle size="sm" variant="inline">
               <SectionIcon icon={Network} />
               {copy.networks}
             </CardTitle>
@@ -349,11 +337,7 @@ export function ServerContainerDetailValues({
 
         <Card className="min-w-0" size="monitor" variant="monitor">
           <CardHeader size="none">
-            <CardTitle
-              className="text-sm tracking-[-0.01em]"
-              size="sm"
-              variant="inline"
-            >
+            <CardTitle size="sm" variant="inline">
               <SectionIcon svg={ArrowLeftRightIcon} />
               {copy.ports}
             </CardTitle>
@@ -380,11 +364,7 @@ export function ServerContainerDetailValues({
           variant="monitor"
         >
           <CardHeader size="none">
-            <CardTitle
-              className="text-sm tracking-[-0.01em]"
-              size="sm"
-              variant="inline"
-            >
+            <CardTitle size="sm" variant="inline">
               <SectionIcon svg={HardDriveIcon} />
               {copy.mounts}
             </CardTitle>
@@ -409,11 +389,7 @@ export function ServerContainerDetailValues({
       <Card size="monitor" variant="monitor">
         <CardHeader size="none">
           <div className="flex flex-col gap-1">
-            <CardTitle
-              className="text-sm tracking-[-0.01em]"
-              size="sm"
-              variant="inline"
-            >
+            <CardTitle size="sm" variant="inline">
               <SectionIcon svg={PackageIcon} />
               {copy.installedSoftware}
             </CardTitle>
@@ -424,8 +400,8 @@ export function ServerContainerDetailValues({
         </CardHeader>
         <CardContent size="none">
           <ScrollArea
-            className="max-h-40 rounded-xl border border-border/50 bg-muted/15"
-            variant="fit"
+            className="max-h-40"
+            variant="panel"
             viewportClassName="max-h-40"
           >
             <div className="p-3.5">

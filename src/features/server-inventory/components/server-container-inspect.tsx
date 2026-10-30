@@ -20,36 +20,40 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { isInspectObject } from "@/features/server-inventory/container-inspect-values";
+import type {
+  ContainerInspectObject,
+  ContainerInspectValue,
+} from "@/features/server-inventory/types";
 import { cn } from "@/lib/utils";
 
 type InspectMode = "tree" | "text";
 
 function isExpandable(
-  value: unknown
-): value is Record<string, unknown> | unknown[] {
-  if (value === null || typeof value !== "object") {
-    return false;
-  }
+  value: ContainerInspectValue
+): value is ContainerInspectObject | ContainerInspectValue[] {
   if (Array.isArray(value)) {
     return value.length > 0;
   }
-  return Object.keys(value).length > 0;
+  return isInspectObject(value) && Object.keys(value).length > 0;
 }
 
-function inlineValuePreview(value: unknown): string {
+function inlineValuePreview(value: ContainerInspectValue): string {
   if (value === null || value === undefined) {
     return "";
   }
   if (Array.isArray(value)) {
     return "[object Object]";
   }
-  if (typeof value === "object") {
+  if (isInspectObject(value)) {
     return "[object Object]";
   }
   return String(value);
 }
 
-function collapsedSummary(value: Record<string, unknown> | unknown[]): string {
+function collapsedSummary(
+  value: ContainerInspectObject | ContainerInspectValue[]
+): string {
   if (Array.isArray(value)) {
     const items = value.slice(0, 6).map((item) => inlineValuePreview(item));
     const suffix = value.length > 6 ? ", …" : "";
@@ -67,17 +71,21 @@ function collapsedSummary(value: Record<string, unknown> | unknown[]): string {
   return `{ ${pairs.join(", ")}${suffix} }`;
 }
 
-function formatLeafValue(value: unknown): string {
+function formatLeafValue(value: ContainerInspectValue): string {
   if (value === null || value === undefined) {
     return "";
   }
-  if (Array.isArray(value) || typeof value === "object") {
+  if (Array.isArray(value) || isInspectObject(value)) {
     return "";
   }
   return String(value);
 }
 
-function nodeMatchesQuery(key: string, value: unknown, query: string): boolean {
+function nodeMatchesQuery(
+  key: string,
+  value: ContainerInspectValue,
+  query: string
+): boolean {
   if (!query) {
     return true;
   }
@@ -87,7 +95,7 @@ function nodeMatchesQuery(key: string, value: unknown, query: string): boolean {
   if (value === null || value === undefined) {
     return false;
   }
-  if (typeof value !== "object") {
+  if (!(isInspectObject(value) || Array.isArray(value))) {
     return String(value).toLowerCase().includes(query);
   }
   if (Array.isArray(value)) {
@@ -101,7 +109,7 @@ function nodeMatchesQuery(key: string, value: unknown, query: string): boolean {
 }
 
 function collectExpandablePaths(
-  value: unknown,
+  value: ContainerInspectValue,
   path: string,
   out: Set<string>
 ) {
@@ -130,7 +138,7 @@ function InspectTreeNode({
   searchQuery,
 }: {
   label: string;
-  value: unknown;
+  value: ContainerInspectValue;
   path: string;
   depth: number;
   expandedPaths: Set<string>;
@@ -149,20 +157,21 @@ function InspectTreeNode({
     const formatted = formatLeafValue(value);
     return (
       <div
-        className="flex min-w-0 items-baseline gap-2 rounded-md py-1 pr-3 font-mono text-xs leading-5 transition-colors hover:bg-muted/40"
-        style={{ paddingLeft: `${indent + 22}px` }}
+        className="container-inspect-indent flex min-w-0 items-baseline gap-2 rounded-md py-1 pr-3 font-mono text-xs leading-5 transition-colors hover:bg-muted/40"
+        // SAFETY: CSS custom property stores the computed tree indentation.
+        style={
+          { "--inspect-indent": `${indent + 22}px` } as React.CSSProperties
+        }
       >
         <span className="shrink-0 text-foreground/90">{label}:</span>
         {formatted !== "" && (
-          <span className="min-w-0 break-all text-primary dark:text-sky-400">
-            {formatted}
-          </span>
+          <span className="min-w-0 break-all text-primary">{formatted}</span>
         )}
       </div>
     );
   }
 
-  const entries: [string, unknown][] = Array.isArray(value)
+  const entries: [string, ContainerInspectValue][] = Array.isArray(value)
     ? value.map((item, index) => [String(index), item])
     : Object.keys(value)
         .sort((a, b) => a.localeCompare(b))
@@ -172,9 +181,10 @@ function InspectTreeNode({
     <div className="min-w-0">
       <button
         aria-expanded={isExpanded}
-        className="group flex w-full min-w-0 items-baseline gap-1.5 rounded-md py-1 pr-3 text-left font-mono text-xs leading-5 outline-none transition-colors hover:bg-muted/50 focus-visible:ring-1 focus-visible:ring-ring active:bg-muted/70"
+        className="group container-inspect-indent flex w-full min-w-0 items-baseline gap-1.5 rounded-md py-1 pr-3 text-left font-mono text-xs leading-5 outline-none transition-colors hover:bg-muted/50 focus-visible:ring-1 focus-visible:ring-ring active:bg-muted/70"
         onClick={() => onToggle(path)}
-        style={{ paddingLeft: `${indent + 4}px` }}
+        // SAFETY: CSS custom property stores the computed tree indentation.
+        style={{ "--inspect-indent": `${indent + 4}px` } as React.CSSProperties}
         type="button"
       >
         <ChevronRight
@@ -186,7 +196,7 @@ function InspectTreeNode({
         />
         <span className="shrink-0 font-medium text-foreground">{label}:</span>
         {!isExpanded && (
-          <span className="min-w-0 truncate text-primary/80 dark:text-sky-400/85">
+          <span className="min-w-0 truncate text-primary/80">
             {collapsedSummary(value)}
           </span>
         )}
@@ -217,7 +227,7 @@ export function ServerContainerInspect({
   loading,
 }: {
   containerId: string;
-  inspect?: Record<string, unknown> | null;
+  inspect?: ContainerInspectObject | null;
   loading: boolean;
 }) {
   const { messages } = useI18n();
@@ -269,7 +279,7 @@ export function ServerContainerInspect({
       return;
     }
     const next = new Set<string>();
-    collectExpandablePaths(inspect, "root", next);
+    collectExpandablePaths(inspect ?? null, "root", next);
     setExpandedPaths(next);
   };
 
@@ -286,18 +296,14 @@ export function ServerContainerInspect({
   const hasMatches =
     !normalizedSearch ||
     (mode === "tree"
-      ? nodeMatchesQuery(rootKey, inspect, normalizedSearch)
+      ? nodeMatchesQuery(rootKey, inspect ?? null, normalizedSearch)
       : filteredText.length > 0);
 
   return (
     <Card size="monitor" variant="monitor">
       <CardHeader size="none">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CardTitle
-            className="text-sm tracking-[-0.01em]"
-            size="sm"
-            variant="inline"
-          >
+          <CardTitle size="sm" variant="inline">
             <Braces
               aria-hidden="true"
               className="size-4 shrink-0 text-muted-foreground"
@@ -339,7 +345,7 @@ export function ServerContainerInspect({
             </div>
             {mode === "tree" && (
               <Button
-                className="h-7 px-2.5 text-xs"
+                className="h-7"
                 disabled={loading || !inspect}
                 onClick={handleToggleAll}
                 size="sm"
@@ -359,7 +365,7 @@ export function ServerContainerInspect({
                   variant="outline"
                 >
                   {copied ? (
-                    <Check className="size-3.5 text-emerald-500" />
+                    <Check className="size-3.5 text-success" />
                   ) : (
                     <CopyIcon className="size-3.5" />
                   )}
@@ -430,14 +436,12 @@ export function ServerContainerInspect({
                 ) : (
                   <span className="size-3.5 shrink-0" />
                 )}
-                <Skeleton
-                  className={cn("h-3.5", row.keyWidth)}
-                  variant="table"
-                />
-                <Skeleton
-                  className={cn("h-3.5", row.valWidth)}
-                  variant="table"
-                />
+                <div className={row.keyWidth}>
+                  <Skeleton className="h-3.5 w-full" variant="table" />
+                </div>
+                <div className={row.valWidth}>
+                  <Skeleton className="h-3.5 w-full" variant="table" />
+                </div>
               </div>
             ))}
           </div>
@@ -454,8 +458,8 @@ export function ServerContainerInspect({
         )}
         {!loading && inspect && hasMatches && (
           <ScrollArea
-            className="max-h-[34rem] w-full min-w-0 max-w-full rounded-xl border border-border/50 bg-muted/15"
-            variant="traffic"
+            className="max-h-[34rem] w-full min-w-0 max-w-full"
+            variant="panel"
             viewportClassName="max-h-[34rem]"
           >
             {mode === "tree" ? (

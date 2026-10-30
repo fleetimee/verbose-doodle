@@ -11,6 +11,7 @@ const scrollAreaVariants = cva("relative overflow-hidden group/scroll-area", {
     variant: {
         "traffic": "rounded-lg border border-border bg-background text-foreground shadow-inner dark:border-[#2f2f2f] dark:bg-[#151515]",
       default: "",
+      panel: "rounded-xl border border-border/50 bg-muted/15 [&>[data-slot=scroll-area-viewport]>[role=presentation]]:!min-w-0",
       terminal: "rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner",
       bordered: "rounded-lg border border-border/70",
       subtle: "border-t border-border/70",

@@ -106,12 +106,24 @@ export interface ServerContainerProcess {
   uid: string;
 }
 
+export type ContainerInspectValue =
+  | string
+  | number
+  | boolean
+  | null
+  | ContainerInspectValue[]
+  | ContainerInspectObject;
+
+export interface ContainerInspectObject {
+  [key: string]: ContainerInspectValue;
+}
+
 export interface ServerContainerDetail {
   collectedAt: string | null;
   created: string | null;
   id: string | null;
   image: string | null;
-  inspect?: Record<string, unknown> | null;
+  inspect?: ContainerInspectObject | null;
   installedSoftware?: string[] | null;
   mounts: {
     destination: string;

@@ -1,6 +1,13 @@
 import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ArrowUpDown, BarChart3, Cpu } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
@@ -22,17 +29,17 @@ import type {
 const HISTORY_LIMIT = 24;
 const BYTE_UNIT_PATTERN = /^([0-9]+(?:\.[0-9]+)?)\s*([a-zA-Z]+)$/;
 
-const UNIT_MULTIPLIERS: Record<string, number> = {
-  b: 1,
-  kb: 1000,
-  kib: 1024,
-  mb: 1_000_000,
-  mib: 1_048_576,
-  gb: 1_000_000_000,
-  gib: 1_073_741_824,
-  tb: 1_000_000_000_000,
-  tib: 1_099_511_627_776,
-};
+const UNIT_MULTIPLIERS = new Map([
+  ["b", 1],
+  ["kb", 1000],
+  ["kib", 1024],
+  ["mb", 1_000_000],
+  ["mib", 1_048_576],
+  ["gb", 1_000_000_000],
+  ["gib", 1_073_741_824],
+  ["tb", 1_000_000_000_000],
+  ["tib", 1_099_511_627_776],
+]);
 
 function parseDockerBytes(raw: string | undefined): number {
   if (!raw) {
@@ -44,7 +51,7 @@ function parseDockerBytes(raw: string | undefined): number {
   }
   const amount = Number.parseFloat(match[1]);
   const unit = match[2].toLowerCase();
-  const multiplier = UNIT_MULTIPLIERS[unit] ?? 1;
+  const multiplier = UNIT_MULTIPLIERS.get(unit) ?? 1;
   return Number.isFinite(amount) ? Math.round(amount * multiplier) : 0;
 }
 
@@ -97,16 +104,18 @@ function SingleSeriesChartCard({
             aria-hidden="true"
             className="size-3.5 shrink-0 text-muted-foreground"
           />
-          <h3 className="font-medium text-xs tracking-[-0.01em]">{title}</h3>
+          <h3 className="font-medium text-xs tracking-tight">{title}</h3>
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
           <span
             aria-hidden="true"
-            className="h-2 w-4 rounded-xs border"
-            style={{
-              backgroundColor: `color-mix(in oklab, ${color} 35%, transparent)`,
-              borderColor: color,
-            }}
+            className="container-series-swatch h-2 w-4 rounded-xs border"
+            // SAFETY: CSS custom property supplies the chart series color.
+            style={
+              {
+                "--series-color": color,
+              } as CSSProperties
+            }
           />
           <span>{seriesLabel}</span>
         </div>
@@ -209,28 +218,32 @@ function DualSeriesChartCard({
             aria-hidden="true"
             className="size-3.5 shrink-0 text-muted-foreground"
           />
-          <h3 className="font-medium text-xs tracking-[-0.01em]">{title}</h3>
+          <h3 className="font-medium text-xs tracking-tight">{title}</h3>
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-3 text-muted-foreground text-xs">
           <span className="inline-flex items-center gap-1.5">
             <span
               aria-hidden="true"
-              className="h-2 w-4 rounded-xs border"
-              style={{
-                backgroundColor: `color-mix(in oklab, ${firstColor} 35%, transparent)`,
-                borderColor: firstColor,
-              }}
+              className="container-series-swatch h-2 w-4 rounded-xs border"
+              // SAFETY: CSS custom property supplies the chart series color.
+              style={
+                {
+                  "--series-color": firstColor,
+                } as CSSProperties
+              }
             />
             {firstLabel}
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span
               aria-hidden="true"
-              className="h-2 w-4 rounded-xs border"
-              style={{
-                backgroundColor: `color-mix(in oklab, ${secondColor} 35%, transparent)`,
-                borderColor: secondColor,
-              }}
+              className="container-series-swatch h-2 w-4 rounded-xs border"
+              // SAFETY: CSS custom property supplies the chart series color.
+              style={
+                {
+                  "--series-color": secondColor,
+                } as CSSProperties
+              }
             />
             {secondLabel}
           </span>
@@ -335,14 +348,14 @@ export function ServerContainerStatisticsChartsSkeleton() {
                 aria-hidden="true"
                 className="size-3.5 shrink-0 text-muted-foreground"
               />
-              <span className="font-medium text-xs tracking-[-0.01em]">
+              <span className="font-medium text-xs tracking-tight">
                 {card.title}
               </span>
             </div>
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-3 text-muted-foreground text-xs">
               {card.legends.map((legend) => (
                 <span className="inline-flex items-center gap-1.5" key={legend}>
-                  <Skeleton className="h-2 w-4 rounded-xs" variant="table" />
+                  <Skeleton className="h-2 w-4" variant="table" />
                   <span>{legend}</span>
                 </span>
               ))}
@@ -542,11 +555,7 @@ export function ServerContainerProcessesCard({
     <Card size="monitor" variant="monitor">
       <CardHeader size="none">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CardTitle
-            className="text-sm tracking-[-0.01em]"
-            size="sm"
-            variant="inline"
-          >
+          <CardTitle size="sm" variant="inline">
             <Cpu
               aria-hidden="true"
               className="size-4 shrink-0 text-muted-foreground"
@@ -595,8 +604,8 @@ export function ServerContainerProcessesCard({
         )}
         {(loading || filteredProcesses.length > 0) && (
           <ScrollArea
-            className="max-h-64 w-full min-w-0 max-w-full rounded-xl border border-border/50 bg-muted/15"
-            variant="fit"
+            className="max-h-64 w-full min-w-0 max-w-full"
+            variant="panel"
             viewportClassName="max-h-64"
           >
             <table className="w-full min-w-max border-collapse text-left text-xs">

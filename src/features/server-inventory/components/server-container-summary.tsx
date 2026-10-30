@@ -57,7 +57,7 @@ function SummaryValues({ data }: { data: ServerContainerSummary }) {
       <div className="grid grid-cols-2 gap-x-8 gap-y-2.5">
         <SummaryStatItem
           icon={ShutDownIcon}
-          iconClassName="text-emerald-500"
+          iconClassName="text-success"
           label={copy.states.running}
           value={data.running}
         />
@@ -69,7 +69,7 @@ function SummaryValues({ data }: { data: ServerContainerSummary }) {
         />
         <SummaryStatItem
           icon={FavouriteIcon}
-          iconClassName="text-emerald-500"
+          iconClassName="text-success"
           label={copy.healthy}
           value={data.healthy}
         />
@@ -194,7 +194,7 @@ export function ServerDockerSummary({
   return (
     <section aria-label={copy.title} className="flex min-w-0 flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="flex items-center gap-2 font-medium text-sm tracking-[-0.01em]">
+        <h3 className="flex items-center gap-2 font-medium text-sm tracking-tight">
           <SiDocker
             aria-hidden="true"
             className="size-4 shrink-0 text-primary"

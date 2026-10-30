@@ -4347,3 +4347,14 @@ main:has(.log-viewer-workspace[data-restoring="true"]) {
     backdrop-filter: none;
   }
 }
+
+@layer components {
+  .container-inspect-indent {
+    padding-left: var(--inspect-indent);
+  }
+
+  .container-series-swatch {
+    background-color: color-mix(in oklab, var(--series-color) 35%, transparent);
+    border-color: var(--series-color);
+  }
+}

@@ -6,8 +6,9 @@ import { cn } from "@/lib/utils"
 function Progress({
   className,
   value = null,
+  tone = "default",
   ...props
-}: React.ComponentProps<typeof ProgressPrimitive.Root>) {
+}: React.ComponentProps<typeof ProgressPrimitive.Root> & { tone?: "default" | "warning" | "destructive" }) {
   return (
     <ProgressPrimitive.Root
       data-slot="progress"
@@ -21,7 +22,7 @@ function Progress({
       <ProgressPrimitive.Track className="h-full w-full">
         <ProgressPrimitive.Indicator
           data-slot="progress-indicator"
-          className="bg-primary h-full transition-transform duration-200 ease-[var(--ease-in-out)] motion-reduce:transition-none"
+          className={cn("h-full transition-transform duration-200 ease-[var(--ease-in-out)] motion-reduce:transition-none", tone === "destructive" ? "bg-destructive" : tone === "warning" ? "bg-warning" : "bg-primary")}
         />
       </ProgressPrimitive.Track>
     </ProgressPrimitive.Root>

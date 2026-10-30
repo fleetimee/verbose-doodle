@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
-function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
+function InputGroup({ className, size = "default", ...props }: React.ComponentProps<"div"> & { size?: "default" | "compact" }) {
   return (
     <div
       data-slot="input-group"
+      data-size={size}
       role="group"
       className={cn(
         "group/input-group border-input dark:bg-input/30 relative flex w-full items-center rounded-md border shadow-xs transition-[color,box-shadow] outline-none",
@@ -29,6 +30,7 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
         // Error state.
         "has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40",
 
+        size === "compact" && "h-7 text-xs [&_[data-slot=input-group-control]]:h-full [&_[data-slot=input-group-control]]:py-0 [&_[data-slot=input-group-control]]:text-xs [&_[data-slot=input-group-addon]]:py-0 [&_[data-align=inline-start]]:pl-2.5 [&_[data-align=inline-end]]:gap-0.5 [&_[data-align=inline-end]]:pr-1.5 [&_[data-slot=input-group-text]]:px-1 [&_[data-slot=input-group-text]]:text-xs [&_[data-slot=input-group-text]]:tabular-nums",
         className
       )}
       {...props}
@@ -121,6 +123,7 @@ function InputGroupButton({
 function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
+      data-slot="input-group-text"
       className={cn(
         "text-muted-foreground flex items-center gap-2 text-sm [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
         className

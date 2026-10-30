@@ -84,14 +84,14 @@ function ratioPercent(part: number | null, total: number | null) {
   return clampPercent((part / total) * 100);
 }
 
-function meterToneClass(percent: number) {
+function meterTone(percent: number) {
   if (percent >= 90) {
-    return "[&_[data-slot=progress-indicator]]:bg-destructive";
+    return "destructive";
   }
   if (percent >= 75) {
-    return "[&_[data-slot=progress-indicator]]:bg-warning";
+    return "warning";
   }
-  return "[&_[data-slot=progress-indicator]]:bg-primary";
+  return "default";
 }
 
 function defaultDirection(key: SortKey): SortDirection {
@@ -228,7 +228,8 @@ function CpuPanel({
               </span>
             </div>
             <Progress
-              className={cn("h-1.5", meterToneClass(cpuPercent))}
+              className="h-1.5"
+              tone={meterTone(cpuPercent)}
               value={cpuPercent}
             />
             {perCore.length > 0 && (
@@ -242,12 +243,13 @@ function CpuPanel({
                   const pct = clampPercent(coreValue);
                   return (
                     <div
-                      className="grid grid-cols-[1.5rem_1fr_2rem] items-center gap-1.5 font-mono text-[11px]"
+                      className="grid grid-cols-[1.5rem_1fr_2rem] items-center gap-1.5 font-mono text-xs"
                       key={`c${index}`}
                     >
                       <span className="text-muted-foreground">C{index}</span>
                       <Progress
-                        className={cn("h-1.5", meterToneClass(pct))}
+                        className="h-1.5"
+                        tone={meterTone(pct)}
                         value={pct}
                       />
                       <span className="text-right tabular-nums">
@@ -267,12 +269,12 @@ function CpuPanel({
 
 function MemoryRow({
   bytes,
-  indicatorClass,
+  tone,
   label,
   percent,
 }: {
   bytes: number | null;
-  indicatorClass?: string;
+  tone?: "default" | "warning" | "destructive";
   label: string;
   percent: number;
 }) {
@@ -285,10 +287,7 @@ function MemoryRow({
           <span className="text-muted-foreground">({percent.toFixed(0)}%)</span>
         </span>
       </div>
-      <Progress
-        className={cn("h-1.5", indicatorClass)}
-        value={clampPercent(percent)}
-      />
+      <Progress className="h-1.5" tone={tone} value={clampPercent(percent)} />
     </div>
   );
 }
@@ -342,12 +341,12 @@ function MemoryAndNetColumn({
           </CardAction>
         </CardHeader>
         <Separator />
-        <CardContent className="flex flex-col gap-2.5" size="none">
+        <CardContent className="flex flex-col" size="none">
           <MemoryRow
             bytes={data.memoryUsedBytes}
-            indicatorClass={meterToneClass(usedPct)}
             label={copy.memoryUsed}
             percent={usedPct}
+            tone={meterTone(usedPct)}
           />
           <MemoryRow
             bytes={data.memoryAvailableBytes}
@@ -384,7 +383,7 @@ function MemoryAndNetColumn({
         </CardHeader>
         <Separator />
         <CardContent
-          className="flex flex-1 flex-col justify-between gap-3"
+          className="flex flex-1 flex-col justify-between"
           size="none"
         >
           <ChartContainer
@@ -470,7 +469,7 @@ function MemoryAndNetColumn({
               <span className="font-mono font-semibold text-sm tabular-nums">
                 {metricBytes(data.networkReceiveBytesPerSecond, true)}/s
               </span>
-              <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+              <span className="font-mono text-muted-foreground text-xs tabular-nums">
                 {copy.networkPeak}: {metricBytes(peakRx, true)}/s
               </span>
             </div>
@@ -481,7 +480,7 @@ function MemoryAndNetColumn({
               <span className="font-mono font-semibold text-sm tabular-nums">
                 {metricBytes(data.networkTransmitBytesPerSecond, true)}/s
               </span>
-              <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+              <span className="font-mono text-muted-foreground text-xs tabular-nums">
                 {copy.networkPeak}: {metricBytes(peakTx, true)}/s
               </span>
             </div>
@@ -531,19 +530,15 @@ function SortableColumnHead({
   return (
     <TableHead
       aria-sort={ariaSort}
-      className={cn("h-8 py-1", align === "right" && "text-right", className)}
+      className={cn("h-8", align === "right" && "text-right", className)}
     >
       <Button
         aria-label={formatMessage(messages.servers.sortBy, { column: label })}
-        className={cn(
-          "h-6 px-1.5 text-xs",
-          align === "left" ? "-ml-1.5" : "-mr-1.5 ml-auto",
-          active ? "text-foreground" : "text-muted-foreground"
-        )}
+        className={cn("h-6", align === "left" ? "-ml-1.5" : "-mr-1.5 ml-auto")}
         onClick={onSort}
         size="sm"
         type="button"
-        variant="ghost"
+        variant={active ? "ghost" : "ghost-muted"}
       >
         {label}
         <ArrowUpDown
@@ -611,8 +606,12 @@ function ProcessesPanel({
             />
             <ToggleGroup
               onValueChange={(values) => {
-                const next = values[0] as SortKey | undefined;
-                if (next) {
+                const next = values[0];
+                if (
+                  next === "name" ||
+                  next === "cpuPercent" ||
+                  next === "memoryBytes"
+                ) {
                   onQuickSortChange(next);
                 }
               }}
@@ -635,13 +634,10 @@ function ProcessesPanel({
       </CardHeader>
       <Separator />
       <CardContent className="min-h-0 flex-1" size="none">
-        <ScrollArea
-          className="h-96 overflow-hidden rounded-xl border border-border/60"
-          variant="fit"
-        >
+        <ScrollArea className="h-96 overflow-hidden" variant="panel">
           <table className="w-full caption-bottom text-xs" data-slot="table">
-            <TableHeader className="sticky top-0 z-10 bg-card/95 backdrop-blur-xs">
-              <TableRow className="text-xs">
+            <TableHeader className="sticky top-0 z-10" variant="sticky">
+              <TableRow>
                 <SortableColumnHead
                   active={sort === "pid"}
                   className="w-20"
@@ -694,13 +690,10 @@ function ProcessesPanel({
                 />
               </TableRow>
             </TableHeader>
-            <TableBody className="text-xs">
+            <TableBody>
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    className="py-8 text-center text-muted-foreground"
-                    colSpan={7}
-                  >
+                  <TableCell className="text-center" colSpan={7}>
                     {copy.processesEmpty}
                   </TableCell>
                 </TableRow>
@@ -709,34 +702,50 @@ function ProcessesPanel({
                 const cpuShare = clampPercent(row.cpuPercent / cores);
                 return (
                   <TableRow key={row.pid}>
-                    <TableCell className="py-1.5 font-mono text-muted-foreground tabular-nums">
+                    <TableCell size="compact" variant="mono">
                       {row.pid}
                     </TableCell>
-                    <TableCell className="max-w-40 truncate py-1.5 font-medium text-foreground">
+                    <TableCell
+                      className="max-w-40"
+                      size="compact"
+                      variant="truncate"
+                    >
                       {row.name}
                     </TableCell>
                     <TableCell
-                      className="hidden max-w-64 truncate py-1.5 font-mono text-muted-foreground xl:table-cell"
+                      className="hidden max-w-64 xl:table-cell"
+                      size="compact"
                       title={row.command}
+                      variant="mono"
                     >
                       {row.command}
                     </TableCell>
-                    <TableCell className="hidden py-1.5 text-right font-mono text-muted-foreground tabular-nums sm:table-cell">
+                    <TableCell
+                      className="hidden text-right sm:table-cell"
+                      size="compact"
+                      variant="mono"
+                    >
                       {row.threads}
                     </TableCell>
-                    <TableCell className="hidden max-w-24 truncate py-1.5 text-muted-foreground md:table-cell">
+                    <TableCell
+                      className="hidden max-w-24 md:table-cell"
+                      size="compact"
+                      variant="muted"
+                    >
                       {row.user}
                     </TableCell>
-                    <TableCell className="py-1.5 text-right font-mono tabular-nums">
+                    <TableCell
+                      className="text-right"
+                      size="compact"
+                      variant="mono"
+                    >
                       {metricBytes(row.memoryBytes, true)}
                     </TableCell>
-                    <TableCell className="py-1.5">
+                    <TableCell size="compact">
                       <div className="flex items-center justify-end gap-2">
                         <Progress
-                          className={cn(
-                            "hidden h-1.5 w-12 sm:block",
-                            meterToneClass(cpuShare)
-                          )}
+                          className="hidden h-1.5 w-12 sm:block"
+                          tone={meterTone(cpuShare)}
                           value={cpuShare}
                         />
                         <span className="w-12 text-right font-mono tabular-nums">
@@ -764,7 +773,7 @@ function ServerProcessesSkeleton() {
       <Card className="lg:col-span-12" size="compact" variant="monitor">
         <CardHeader size="none">
           <div className="flex min-w-0 items-center gap-2.5">
-            <Skeleton className="size-8 shrink-0 rounded-lg" variant="table" />
+            <Skeleton className="size-8 shrink-0" variant="lg" />
             <div className="flex items-center gap-2.5">
               <Skeleton className="h-4 w-12" variant="table" />
               <Skeleton className="h-3.5 w-24" variant="table" />
@@ -772,21 +781,21 @@ function ServerProcessesSkeleton() {
           </div>
           <CardAction>
             <div className="flex items-center gap-1.5">
-              <Skeleton className="h-5 w-32 rounded-md" variant="table" />
-              <Skeleton className="h-5 w-12 rounded-md" variant="table" />
+              <Skeleton className="h-5 w-32" variant="table" />
+              <Skeleton className="h-5 w-12" variant="table" />
             </div>
           </CardAction>
         </CardHeader>
         <Separator />
         <CardContent size="none">
           <div className="grid items-center gap-4 lg:grid-cols-[1fr_20rem]">
-            <Skeleton className="h-32 w-full rounded-xl" variant="table" />
+            <Skeleton className="h-32 w-full" variant="xl" />
             <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-muted/10 p-3">
               <div className="flex items-center justify-between gap-2">
                 <Skeleton className="h-3.5 w-14" variant="table" />
                 <Skeleton className="h-3.5 w-8" variant="table" />
               </div>
-              <Skeleton className="h-1.5 w-full rounded-full" variant="table" />
+              <Skeleton className="h-1.5 w-full" variant="full" />
               <div className="mt-0.5 grid grid-cols-2 gap-x-3 gap-y-1.5">
                 {["c0", "c1", "c2", "c3", "c4", "c5"].map((core) => (
                   <div
@@ -794,10 +803,7 @@ function ServerProcessesSkeleton() {
                     key={core}
                   >
                     <Skeleton className="h-3 w-5" variant="table" />
-                    <Skeleton
-                      className="h-1.5 w-full rounded-full"
-                      variant="table"
-                    />
+                    <Skeleton className="h-1.5 w-full" variant="full" />
                     <Skeleton className="ml-auto h-3 w-6" variant="table" />
                   </div>
                 ))}
@@ -811,28 +817,22 @@ function ServerProcessesSkeleton() {
         <Card size="compact" variant="monitor">
           <CardHeader size="none">
             <div className="flex items-center gap-2.5">
-              <Skeleton
-                className="size-8 shrink-0 rounded-lg"
-                variant="table"
-              />
+              <Skeleton className="size-8 shrink-0" variant="lg" />
               <Skeleton className="h-4 w-16" variant="table" />
             </div>
             <CardAction>
-              <Skeleton className="h-5 w-20 rounded-md" variant="table" />
+              <Skeleton className="h-5 w-20" variant="table" />
             </CardAction>
           </CardHeader>
           <Separator />
-          <CardContent className="flex flex-col gap-2.5" size="none">
+          <CardContent className="flex flex-col" size="none">
             {["used", "available", "cached", "free"].map((item) => (
               <div className="flex flex-col gap-1" key={item}>
                 <div className="flex items-center justify-between gap-2">
                   <Skeleton className="h-3.5 w-16" variant="table" />
                   <Skeleton className="h-3.5 w-20" variant="table" />
                 </div>
-                <Skeleton
-                  className="h-1.5 w-full rounded-full"
-                  variant="table"
-                />
+                <Skeleton className="h-1.5 w-full" variant="full" />
               </div>
             ))}
           </CardContent>
@@ -841,22 +841,19 @@ function ServerProcessesSkeleton() {
         <Card className="flex-1" size="compact" variant="monitor">
           <CardHeader size="none">
             <div className="flex items-center gap-2.5">
-              <Skeleton
-                className="size-8 shrink-0 rounded-lg"
-                variant="table"
-              />
+              <Skeleton className="size-8 shrink-0" variant="lg" />
               <Skeleton className="h-4 w-16" variant="table" />
             </div>
             <CardAction>
-              <Skeleton className="h-5 w-28 rounded-md" variant="table" />
+              <Skeleton className="h-5 w-28" variant="table" />
             </CardAction>
           </CardHeader>
           <Separator />
           <CardContent
-            className="flex flex-1 flex-col justify-between gap-3"
+            className="flex flex-1 flex-col justify-between"
             size="none"
           >
-            <Skeleton className="h-28 w-full rounded-xl" variant="table" />
+            <Skeleton className="h-28 w-full" variant="xl" />
             <div className="grid grid-cols-2 divide-x divide-border/60 rounded-xl border border-border/60 bg-muted/10">
               {["rx", "tx"].map((dir) => (
                 <div className="flex flex-col gap-1 px-3 py-2" key={dir}>
@@ -877,14 +874,14 @@ function ServerProcessesSkeleton() {
       >
         <CardHeader size="none">
           <div className="flex items-center gap-2.5">
-            <Skeleton className="size-8 shrink-0 rounded-lg" variant="table" />
+            <Skeleton className="size-8 shrink-0" variant="lg" />
             <Skeleton className="h-4 w-28" variant="table" />
-            <Skeleton className="h-5 w-16 rounded-md" variant="table" />
+            <Skeleton className="h-5 w-16" variant="table" />
           </div>
           <CardAction>
             <div className="flex items-center gap-2">
               <Skeleton className="h-8 w-36 sm:w-44" variant="table" />
-              <Skeleton className="h-8 w-52 rounded-xl" variant="table" />
+              <Skeleton className="h-8 w-52" variant="xl" />
             </div>
           </CardAction>
         </CardHeader>

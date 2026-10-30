@@ -1,4 +1,8 @@
 import { useI18n } from "@/components/i18n-provider";
+import {
+  isInspectObject,
+  isInspectString,
+} from "@/features/server-inventory/container-inspect-values";
 import type { ServerContainerDetail } from "@/features/server-inventory/types";
 import { getErrorMessage } from "@/lib/error-handler";
 
@@ -13,26 +17,22 @@ export type ContainerStatusKind =
   | "stopped";
 
 export function inspectHealthStatus(data?: ServerContainerDetail): string {
-  const stateObj = data?.inspect?.State;
-  if (!stateObj || typeof stateObj !== "object") {
-    return "";
-  }
-  const healthObj = (stateObj as Record<string, unknown>).Health;
-  if (!healthObj || typeof healthObj !== "object") {
-    return "";
-  }
-  const status = (healthObj as Record<string, unknown>).Status;
-  return typeof status === "string" ? status : "";
+  const state = data?.inspect?.State;
+  const health = isInspectObject(state) ? state.Health : undefined;
+  const status = isInspectObject(health) ? health.Status : undefined;
+  return isInspectString(status) ? status : "";
+}
+
+interface ContainerStatus {
+  kind: ContainerStatusKind;
+  label: string;
 }
 
 export function resolveContainerStatus(
   state: string,
   status: string,
   copy: ContainerCopy
-): {
-  kind: ContainerStatusKind;
-  label: string;
-} {
+): ContainerStatus {
   const normalized = status.toLowerCase();
   if (normalized.includes("unhealthy")) {
     return { kind: "unhealthy", label: copy.unhealthy };

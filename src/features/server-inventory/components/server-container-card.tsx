@@ -160,7 +160,7 @@ export function ServerContainerCard({
           <span
             className={cn(
               "inline-flex items-center gap-1.5 font-medium text-xs",
-              isPositive ? "text-emerald-500" : "text-destructive"
+              isPositive ? "text-success" : "text-destructive"
             )}
           >
             <HugeiconsIcon

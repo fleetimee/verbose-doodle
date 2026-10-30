@@ -92,11 +92,7 @@ export function ServerContainerLogs({
       <CardHeader size="none">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <CardTitle
-              className="text-sm tracking-[-0.01em]"
-              size="sm"
-              variant="inline"
-            >
+            <CardTitle size="sm" variant="inline">
               <HugeiconsIcon
                 aria-hidden="true"
                 className="size-4 shrink-0 text-muted-foreground"
@@ -110,7 +106,7 @@ export function ServerContainerLogs({
                 aria-hidden="true"
                 className={cn(
                   "size-1.5 rounded-full",
-                  isLive ? "bg-emerald-500" : "bg-muted-foreground/50"
+                  isLive ? "bg-success" : "bg-muted-foreground/50"
                 )}
               />
               {status}
@@ -120,7 +116,7 @@ export function ServerContainerLogs({
             <ButtonGroup aria-label={messages.servers.actions}>
               <Button
                 aria-pressed={follow}
-                className="h-7 px-2.5 text-xs"
+                className="h-7"
                 onClick={() => setFollow(!follow)}
                 size="sm"
                 variant={follow ? "secondary" : "outline"}
@@ -134,7 +130,7 @@ export function ServerContainerLogs({
                 {copy.logsFollow}
               </Button>
               <Button
-                className="h-7 px-2.5 text-xs"
+                className="h-7"
                 onClick={logs.clear}
                 size="sm"
                 variant="outline"
@@ -148,7 +144,7 @@ export function ServerContainerLogs({
                 {copy.logsClear}
               </Button>
               <Button
-                className="h-7 px-2.5 text-xs"
+                className="h-7"
                 disabled={paused || loading}
                 onClick={() => setStreaming(!streaming)}
                 size="sm"
@@ -172,8 +168,8 @@ export function ServerContainerLogs({
             {status}
           </p>
           <ScrollArea
-            className="h-80 w-full min-w-0 max-w-full rounded-xl border border-border/50 bg-muted/15"
-            variant="traffic"
+            className="h-80 w-full min-w-0 max-w-full"
+            variant="panel"
             viewportRef={viewport}
           >
             {loading && !logs.output ? (
@@ -189,7 +185,9 @@ export function ServerContainerLogs({
                 ].map((width) => (
                   <div className="flex items-center gap-3" key={width}>
                     <Skeleton className="h-3.5 w-32 shrink-0" variant="table" />
-                    <Skeleton className={cn("h-3.5", width)} variant="table" />
+                    <div className={width}>
+                      <Skeleton className="h-3.5 w-full" variant="table" />
+                    </div>
                   </div>
                 ))}
               </div>
