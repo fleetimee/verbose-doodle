@@ -21,6 +21,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useI18n } from "@/components/i18n-provider";
@@ -66,6 +67,7 @@ import {
 } from "@/features/dashboard/dashboard-activity";
 import { formatJakartaTimestamp } from "@/features/endpoints/utils/endpoint-time";
 import { type AppLocale, formatMessage, type Messages } from "@/lib/i18n";
+import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { queryClient } from "@/lib/query-client";
 import { cn } from "@/lib/utils";
 
@@ -440,6 +442,137 @@ function OnlineVisitorsTriggerButton({
   );
 }
 
+function VisitorsOverviewScrollView({
+  copy,
+  currentIp,
+  history,
+  locale,
+  messages,
+  nowMs,
+  onlineCount,
+  onlineVisitors,
+  peakOnlineCount,
+  recentVisitors,
+  onNavigate,
+  onOpenChat,
+}: {
+  copy: Messages["dashboardActivity"]["presence"];
+  currentIp: string | undefined;
+  history: readonly DashboardPresencePoint[];
+  locale: AppLocale;
+  messages: Messages;
+  nowMs: number;
+  onlineCount: number;
+  onlineVisitors: readonly DashboardVisitorPresence[];
+  peakOnlineCount: number;
+  recentVisitors: readonly DashboardVisitorPresence[];
+  onNavigate: () => void;
+  onOpenChat: (targetIp: string) => void;
+}) {
+  return (
+    <ScrollArea
+      className="min-h-0 flex-1"
+      contentClassName="min-w-0 max-w-full overflow-x-hidden"
+      variant="fit"
+      viewportClassName="overflow-x-hidden"
+    >
+      <div className="min-w-0 space-y-4 px-4 pb-4">
+        <VisitorsSteamChart
+          copy={copy}
+          history={history}
+          onlineCount={onlineCount}
+          peakOnlineCount={peakOnlineCount}
+        />
+
+        <section className="min-w-0 space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+              {copy.onlineSection}
+            </h3>
+            <span className="font-mono text-muted-foreground text-xs tabular-nums">
+              {onlineVisitors.length}
+            </span>
+          </div>
+          {onlineVisitors.length === 0 ? (
+            <p className="rounded-lg border border-dashed px-3 py-3 text-center text-muted-foreground text-xs">
+              {copy.emptyOnline}
+            </p>
+          ) : (
+            <div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card">
+              {onlineVisitors.map((visitor) => (
+                <VisitorPresenceRow
+                  copy={copy}
+                  isCurrentIp={visitor.ipAddress === currentIp}
+                  key={visitor.ipAddress}
+                  locale={locale}
+                  messages={messages}
+                  nowMs={nowMs}
+                  onNavigate={onNavigate}
+                  onOpenChat={() => onOpenChat(visitor.ipAddress)}
+                  visitor={visitor}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="min-w-0 space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+              {copy.recentSection}
+            </h3>
+            <span className="font-mono text-muted-foreground text-xs tabular-nums">
+              {recentVisitors.length}
+            </span>
+          </div>
+          {recentVisitors.length === 0 ? (
+            <p className="rounded-lg border border-dashed px-3 py-3 text-center text-muted-foreground text-xs">
+              {copy.emptyRecent}
+            </p>
+          ) : (
+            <div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card">
+              {recentVisitors.map((visitor) => (
+                <VisitorPresenceRow
+                  copy={copy}
+                  isCurrentIp={visitor.ipAddress === currentIp}
+                  key={visitor.ipAddress}
+                  locale={locale}
+                  messages={messages}
+                  nowMs={nowMs}
+                  onNavigate={onNavigate}
+                  onOpenChat={() => onOpenChat(visitor.ipAddress)}
+                  visitor={visitor}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </ScrollArea>
+  );
+}
+
+const visitorPaneVariants = {
+  center: {
+    opacity: 1,
+    transform: "translateX(0%)",
+  },
+  enter: (direction: number) => ({
+    opacity: 0,
+    transform:
+      direction === 0
+        ? "translateX(0%)"
+        : `translateX(${direction > 0 ? "7%" : "-7%"})`,
+  }),
+  exit: (direction: number) => ({
+    opacity: 0,
+    transform:
+      direction === 0
+        ? "translateX(0%)"
+        : `translateX(${direction > 0 ? "-7%" : "7%"})`,
+  }),
+};
+
 export function OnlineVisitorsDrawer({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
@@ -451,12 +584,22 @@ export function OnlineVisitorsDrawer({
 } = {}) {
   const { locale, messages } = useI18n();
   const { snapshot } = useAuth();
+  const shouldReduceMotion = useReducedMotion();
   const copy = messages.dashboardActivity.presence;
   const [internalOpen, setInternalOpen] = useState(false);
   const [selectedChatIp, setSelectedChatIp] = useState<string | null>(null);
+  const [navDirection, setNavDirection] = useState(1);
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   const isOpen = controlledOpen ?? internalOpen;
+  const openChatWithIp = (targetIp: string) => {
+    setNavDirection(1);
+    setSelectedChatIp(targetIp);
+  };
+  const closeChatToAllVisitors = () => {
+    setNavDirection(-1);
+    setSelectedChatIp(null);
+  };
   const handleOpenChange = (nextOpen: boolean) => {
     setInternalOpen(nextOpen);
     if (!nextOpen) {
@@ -470,6 +613,7 @@ export function OnlineVisitorsDrawer({
       return;
     }
     return subscribeOpenVisitorChat((targetIp) => {
+      setNavDirection(1);
       setSelectedChatIp(targetIp);
       setInternalOpen(true);
       controlledOnOpenChange?.(true);
@@ -529,6 +673,7 @@ export function OnlineVisitorsDrawer({
   const selectedVisitor = selectedChatIp
     ? visitors.find((v) => v.ipAddress === selectedChatIp)
     : undefined;
+  const effectiveDirection = shouldReduceMotion ? 0 : navDirection;
 
   return (
     <Drawer direction="right" onOpenChange={handleOpenChange} open={isOpen}>
@@ -567,95 +712,66 @@ export function OnlineVisitorsDrawer({
             </div>
           )}
         </DrawerHeader>
-        {selectedChatIp ? (
-          <VisitorIpChatPanel
-            copy={copy}
-            currentIp={currentIp ?? "unknown"}
-            onBack={() => setSelectedChatIp(null)}
-            targetIp={selectedChatIp}
-            visitor={selectedVisitor}
-          />
-        ) : (
-          <ScrollArea
-            className="min-h-0 flex-1"
-            contentClassName="min-w-0 max-w-full overflow-x-hidden"
-            variant="fit"
-            viewportClassName="overflow-x-hidden"
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+          <AnimatePresence
+            custom={effectiveDirection}
+            initial={false}
+            mode="popLayout"
           >
-            <div className="min-w-0 space-y-4 px-4 pb-4">
-              <VisitorsSteamChart
-                copy={copy}
-                history={history}
-                onlineCount={onlineCount}
-                peakOnlineCount={peakOnlineCount}
-              />
-
-              <section className="min-w-0 space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                    {copy.onlineSection}
-                  </h3>
-                  <span className="font-mono text-muted-foreground text-xs tabular-nums">
-                    {onlineVisitors.length}
-                  </span>
-                </div>
-                {onlineVisitors.length === 0 ? (
-                  <p className="rounded-lg border border-dashed px-3 py-3 text-center text-muted-foreground text-xs">
-                    {copy.emptyOnline}
-                  </p>
-                ) : (
-                  <div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card">
-                    {onlineVisitors.map((visitor) => (
-                      <VisitorPresenceRow
-                        copy={copy}
-                        isCurrentIp={visitor.ipAddress === currentIp}
-                        key={visitor.ipAddress}
-                        locale={locale}
-                        messages={messages}
-                        nowMs={nowMs}
-                        onNavigate={() => handleOpenChange(false)}
-                        onOpenChat={() => setSelectedChatIp(visitor.ipAddress)}
-                        visitor={visitor}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-
-              <section className="min-w-0 space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                    {copy.recentSection}
-                  </h3>
-                  <span className="font-mono text-muted-foreground text-xs tabular-nums">
-                    {recentVisitors.length}
-                  </span>
-                </div>
-                {recentVisitors.length === 0 ? (
-                  <p className="rounded-lg border border-dashed px-3 py-3 text-center text-muted-foreground text-xs">
-                    {copy.emptyRecent}
-                  </p>
-                ) : (
-                  <div className="min-w-0 divide-y overflow-hidden rounded-lg border bg-card">
-                    {recentVisitors.map((visitor) => (
-                      <VisitorPresenceRow
-                        copy={copy}
-                        isCurrentIp={visitor.ipAddress === currentIp}
-                        key={visitor.ipAddress}
-                        locale={locale}
-                        messages={messages}
-                        nowMs={nowMs}
-                        onNavigate={() => handleOpenChange(false)}
-                        onOpenChat={() => setSelectedChatIp(visitor.ipAddress)}
-                        visitor={visitor}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-            </div>
-          </ScrollArea>
-        )}
+            {selectedChatIp ? (
+              <motion.div
+                animate="center"
+                className="flex min-h-0 flex-1 flex-col"
+                custom={effectiveDirection}
+                exit="exit"
+                initial="enter"
+                key={`chat-${selectedChatIp}`}
+                transition={{
+                  duration: MOTION_DURATION.standard,
+                  ease: MOTION_EASE.out,
+                }}
+                variants={visitorPaneVariants}
+              >
+                <VisitorIpChatPanel
+                  copy={copy}
+                  currentIp={currentIp ?? "unknown"}
+                  onBack={closeChatToAllVisitors}
+                  targetIp={selectedChatIp}
+                  visitor={selectedVisitor}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                animate="center"
+                className="flex min-h-0 flex-1 flex-col"
+                custom={effectiveDirection}
+                exit="exit"
+                initial="enter"
+                key="visitors-overview"
+                transition={{
+                  duration: MOTION_DURATION.standard,
+                  ease: MOTION_EASE.out,
+                }}
+                variants={visitorPaneVariants}
+              >
+                <VisitorsOverviewScrollView
+                  copy={copy}
+                  currentIp={currentIp}
+                  history={history}
+                  locale={locale}
+                  messages={messages}
+                  nowMs={nowMs}
+                  onlineCount={onlineCount}
+                  onlineVisitors={onlineVisitors}
+                  onNavigate={() => handleOpenChange(false)}
+                  onOpenChat={openChatWithIp}
+                  peakOnlineCount={peakOnlineCount}
+                  recentVisitors={recentVisitors}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         <DrawerFooter size="compact" variant="bordered">
           <DrawerClose asChild>
             <Button size="sm" variant="outline">
