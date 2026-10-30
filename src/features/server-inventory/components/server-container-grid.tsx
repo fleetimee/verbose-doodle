@@ -1,5 +1,8 @@
+import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
-import { useId } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useId, useState } from "react";
 import { useSearchParams } from "react-router";
 import { RefreshCw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
@@ -11,7 +14,12 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -30,6 +38,77 @@ import { useContainerError } from "@/features/server-inventory/components/server
 import { containerPollInterval } from "@/features/server-inventory/components/server-spec";
 import type { ServerEntry } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+
+function ContainerSearchInput({
+  value,
+  isSearching,
+  onChange,
+  onCommit,
+  onClear,
+}: {
+  value: string;
+  isSearching: boolean;
+  onChange: (value: string) => void;
+  onCommit: (value: string) => void;
+  onClear: () => void;
+}) {
+  const copy = useI18n().messages.servers.containers;
+  return (
+    <div className="relative flex min-w-48 flex-1 items-center transition-all">
+      <InputGroup size="compact">
+        <InputGroupAddon align="inline-start">
+          {isSearching ? (
+            <Spinner size="sm" variant="muted" />
+          ) : (
+            <HugeiconsIcon
+              aria-hidden="true"
+              className="size-3.5 text-muted-foreground transition-colors group-focus-within/input-group:text-foreground"
+              icon={Search01Icon}
+              strokeWidth={2}
+            />
+          )}
+        </InputGroupAddon>
+        <InputGroupInput
+          aria-label={copy.search}
+          onChange={(event) => onChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              onCommit(value);
+            }
+          }}
+          placeholder={copy.search}
+          value={value}
+        />
+        <AnimatePresence>
+          {value && (
+            <InputGroupAddon align="inline-end">
+              <motion.div
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+              >
+                <InputGroupButton
+                  aria-label={copy.clearSearch}
+                  onClick={onClear}
+                  size="icon-xs"
+                >
+                  <HugeiconsIcon
+                    aria-hidden="true"
+                    className="size-3"
+                    icon={Cancel01Icon}
+                    strokeWidth={2}
+                  />
+                </InputGroupButton>
+              </motion.div>
+            </InputGroupAddon>
+          )}
+        </AnimatePresence>
+      </InputGroup>
+    </div>
+  );
+}
 
 export function ServerContainerGrid({
   entry,
@@ -42,7 +121,44 @@ export function ServerContainerGrid({
   const copy = messages.servers.containers;
   const [params, setParams] = useSearchParams();
   const includeStopped = params.get("includeStopped") === "1";
-  const search = params.get("containerSearch") ?? "";
+  const urlSearch = params.get("containerSearch") ?? "";
+  const [localSearch, setLocalSearch] = useState(urlSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlSearch);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    setLocalSearch(urlSearch);
+    setDebouncedSearch(urlSearch);
+  }, [urlSearch]);
+
+  const update = (key: string, value: string) =>
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        if (value) {
+          next.set(key, value);
+        } else {
+          next.delete(key);
+        }
+        return next;
+      },
+      { replace: true }
+    );
+
+  useEffect(() => {
+    if (localSearch === debouncedSearch) {
+      setIsSearching(false);
+      return;
+    }
+    setIsSearching(true);
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(localSearch);
+      update("containerSearch", localSearch);
+      setIsSearching(false);
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [localSearch, debouncedSearch]);
+
   const switchId = useId();
   const eligible = Boolean(entry.hasPassword && entry.username);
   const query = useQuery({
@@ -60,7 +176,7 @@ export function ServerContainerGrid({
   const error = useContainerError(data?.status, query.error);
   const containers = data?.containers ?? [];
   const running = containers.filter((item) => item.state === "running").length;
-  const term = search.trim().toLowerCase();
+  const term = debouncedSearch.trim().toLowerCase();
   const visible = containers.filter((item) =>
     `${item.name} ${item.image} ${item.id} ${item.ports}`
       .toLowerCase()
@@ -81,67 +197,96 @@ export function ServerContainerGrid({
   const hasMatches = groups.some((group) => group.items.length > 0);
   return (
     <div className="flex min-w-0 flex-col gap-5">
-      <div className="server-monitor-toolbar sticky top-16 z-10 flex flex-wrap items-center gap-3 rounded-2xl border border-border/60 bg-background/90 p-3 backdrop-blur-xl">
-        <Input
-          aria-label={copy.search}
-          className="min-w-40 flex-1"
-          onChange={(event) =>
-            setParams(
-              (current) => {
-                const next = new URLSearchParams(current);
-                next.set("containerSearch", event.target.value);
-                return next;
-              },
-              { replace: true }
-            )
-          }
-          placeholder={copy.search}
-          type="search"
-          value={search}
-        />
-        <div className="flex items-center gap-2">
-          <Switch
-            checked={includeStopped}
-            id={switchId}
-            onCheckedChange={(checked) =>
-              setParams(
-                (current) => {
-                  const next = new URLSearchParams(current);
-                  if (checked) {
-                    next.set("includeStopped", "1");
-                  } else {
-                    next.delete("includeStopped");
-                  }
-                  return next;
-                },
-                { replace: true }
-              )
-            }
+      <div className="server-monitor-toolbar sticky top-16 z-10 flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-background/90 backdrop-blur-xl">
+        <div className="flex flex-wrap items-center gap-3 p-3">
+          <ContainerSearchInput
+            isSearching={isSearching}
+            onChange={setLocalSearch}
+            onClear={() => {
+              setLocalSearch("");
+              setDebouncedSearch("");
+              update("containerSearch", "");
+              setIsSearching(false);
+            }}
+            onCommit={(val) => {
+              setDebouncedSearch(val);
+              update("containerSearch", val);
+              setIsSearching(false);
+            }}
+            value={localSearch}
           />
-          <Label htmlFor={switchId} size="sm">
-            {copy.includeStopped}
-          </Label>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={includeStopped}
+              id={switchId}
+              onCheckedChange={(checked) =>
+                setParams(
+                  (current) => {
+                    const next = new URLSearchParams(current);
+                    if (checked) {
+                      next.set("includeStopped", "1");
+                    } else {
+                      next.delete("includeStopped");
+                    }
+                    return next;
+                  },
+                  { replace: true }
+                )
+              }
+            />
+            <Label htmlFor={switchId} size="sm">
+              {copy.includeStopped}
+            </Label>
+          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                aria-label={copy.refresh}
+                disabled={!eligible || query.isFetching}
+                onClick={() => query.refetch()}
+                size="icon-sm"
+                variant="outline"
+              >
+                {query.isFetching ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <RefreshCw data-icon="inline-start" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{copy.refresh}</TooltipContent>
+          </Tooltip>
         </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              aria-label={copy.refresh}
-              disabled={!eligible || query.isFetching}
-              onClick={() => query.refetch()}
-              size="icon-sm"
-              variant="outline"
-            >
-              {query.isFetching ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <RefreshCw data-icon="inline-start" />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{copy.refresh}</TooltipContent>
-        </Tooltip>
+        <div className="relative h-0.5 w-full overflow-hidden bg-transparent">
+          <AnimatePresence>
+            {isSearching && (
+              <motion.div
+                animate={{ opacity: 1 }}
+                className="absolute inset-0 bg-primary/20"
+                exit={{ opacity: 0 }}
+                initial={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <motion.div
+                  animate={{ x: ["-100%", "250%"] }}
+                  className="h-full w-1/3 rounded-full bg-primary"
+                  transition={{
+                    duration: 1,
+                    ease: "easeInOut",
+                    repeat: Number.POSITIVE_INFINITY,
+                  }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-      <div className="flex min-w-0 flex-col gap-5">
+      <div
+        className={cn(
+          "flex min-w-0 flex-col gap-5 transition-opacity duration-200",
+          isSearching && "opacity-60"
+        )}
+      >
         <div
           aria-live="polite"
           className="flex flex-wrap items-center justify-between gap-2 text-muted-foreground text-xs"
@@ -191,12 +336,14 @@ export function ServerContainerGrid({
           </Alert>
         )}
         {ready && !hasMatches && (
-          <Empty variant="bordered">
-            <EmptyHeader>
-              <EmptyTitle>{copy.empty}</EmptyTitle>
-              <EmptyDescription>{copy.emptyDescription}</EmptyDescription>
-            </EmptyHeader>
-          </Empty>
+          <div className="flex min-h-[280px] items-center justify-center">
+            <Empty variant="bordered">
+              <EmptyHeader>
+                <EmptyTitle>{copy.empty}</EmptyTitle>
+                <EmptyDescription>{copy.emptyDescription}</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </div>
         )}
         {ready &&
           groups.map(

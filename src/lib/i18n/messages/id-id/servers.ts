@@ -243,6 +243,7 @@ export const serversMessages = {
     refresh: "Muat ulang kontainer",
     loading: "Memuat kontainer…",
     search: "Cari kontainer…",
+    clearSearch: "Hapus pencarian",
     includeStopped: "Sertakan yang berhenti",
     name: "Nama / image",
     state: "Status",

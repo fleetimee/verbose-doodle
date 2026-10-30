@@ -236,6 +236,7 @@ export const serversMessages = {
     refresh: "Refresh containers",
     loading: "Loading containers…",
     search: "Search containers…",
+    clearSearch: "Clear search",
     includeStopped: "Include stopped",
     name: "Name / image",
     state: "State",
