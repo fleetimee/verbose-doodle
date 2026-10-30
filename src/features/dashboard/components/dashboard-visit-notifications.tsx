@@ -2,6 +2,7 @@ import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
+import { useIsScreenLocked } from "@/features/auth/components/screen-lock";
 import { useAuth } from "@/features/auth/context";
 import {
   type DashboardPresenceSnapshot,
@@ -56,6 +57,7 @@ function pickVisitMessage(
 
 export function DashboardVisitNotifications() {
   const { snapshot } = useAuth();
+  const isScreenLocked = useIsScreenLocked();
   const location = useLocation();
   const [notices, setNotices] = useState<DashboardVisitNotice[]>([]);
   const seenVisitIdsRef = useRef(new Set<string>());
@@ -67,6 +69,8 @@ export function DashboardVisitNotifications() {
   const currentIpAddressRef = useRef<string | null>(null);
   const currentPathnameRef = useRef<string>(location.pathname);
   currentPathnameRef.current = location.pathname;
+  const isScreenLockedRef = useRef<boolean>(isScreenLocked);
+  isScreenLockedRef.current = isScreenLocked;
   const visitRequestGenerationRef = useRef(0);
   const connectionRef = useRef<TicketedRealtimeConnection | null>(null);
 
@@ -172,6 +176,7 @@ export function DashboardVisitNotifications() {
         connection.send(
           JSON.stringify({
             path: currentPathnameRef.current,
+            sleeping: isScreenLockedRef.current,
             type: "page_change",
           })
         );
@@ -211,6 +216,7 @@ export function DashboardVisitNotifications() {
     connection.send(
       JSON.stringify({
         path: location.pathname,
+        sleeping: isScreenLockedRef.current,
         type: "page_change",
       })
     );
@@ -220,6 +226,18 @@ export function DashboardVisitNotifications() {
     location.pathname,
     snapshot.isAuthenticated,
   ]);
+
+  useEffect(() => {
+    if (!(snapshot.isAuthenticated && isDashboardRoute)) {
+      return;
+    }
+    connection.send(
+      JSON.stringify({
+        sleeping: isScreenLocked,
+        type: "presence_status",
+      })
+    );
+  }, [connection, isDashboardRoute, isScreenLocked, snapshot.isAuthenticated]);
 
   if (notices.length === 0) {
     return null;

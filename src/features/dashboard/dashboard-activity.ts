@@ -25,6 +25,7 @@ export type DashboardVisitorPresence = {
   readonly ipAddress: string;
   readonly lastSeenAt: string;
   readonly online: boolean;
+  readonly sleeping: boolean;
   readonly userAgent?: string;
 };
 
@@ -107,6 +108,7 @@ const rawVisitorPresenceSchema = z
     lastSeenAt: z.string().min(1).optional(),
     last_seen_at: z.string().min(1).optional(),
     online: z.boolean(),
+    sleeping: z.boolean().optional(),
     userAgent: z.string().optional().nullable(),
     user_agent: z.string().optional().nullable(),
   })
@@ -127,6 +129,7 @@ const rawVisitorPresenceSchema = z
       value.activeConnections ??
       value.active_connections ??
       (value.online ? 1 : 0);
+    const sleeping = value.online && Boolean(value.sleeping);
     if (userAgent) {
       return {
         activeConnections,
@@ -134,6 +137,7 @@ const rawVisitorPresenceSchema = z
         ipAddress,
         lastSeenAt,
         online: value.online,
+        sleeping,
         userAgent,
       };
     }
@@ -143,6 +147,7 @@ const rawVisitorPresenceSchema = z
       ipAddress,
       lastSeenAt,
       online: value.online,
+      sleeping,
     };
   });
 

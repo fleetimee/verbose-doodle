@@ -15,10 +15,15 @@ import { SCREEN_LOCK_STORAGE_KEY, useAuth } from "@/features/auth/context";
 import { MacOsLogin } from "@/features/login/components/macos-login";
 import { messages } from "@/lib/i18n";
 
-export const IDLE_LOCK_TIMEOUT_MS = 2.5 * 60 * 1000; // 2.5 minutes (150,000 ms)
+export const IDLE_LOCK_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes (1,800,000 ms)
 const ACTIVITY_THROTTLE_MS = 1000;
 
 const LockContext = createContext<(() => void) | null>(null);
+const ScreenLockedStateContext = createContext<boolean>(false);
+
+export function useIsScreenLocked(): boolean {
+  return useContext(ScreenLockedStateContext);
+}
 
 export function ScreenLockProvider({ children }: { children: ReactNode }) {
   const { snapshot } = useAuth();
@@ -122,12 +127,14 @@ export function ScreenLockProvider({ children }: { children: ReactNode }) {
     };
   }, [snapshot.user, account, lock, remoteSession]);
 
+  const isLocked = account !== null && !remoteSession;
+
   return (
     <LockContext.Provider value={lock}>
-      {children}
-      {account !== null && !remoteSession && (
-        <LockScreen account={account} onUnlocked={unlock} />
-      )}
+      <ScreenLockedStateContext.Provider value={isLocked}>
+        {children}
+        {isLocked && <LockScreen account={account} onUnlocked={unlock} />}
+      </ScreenLockedStateContext.Provider>
     </LockContext.Provider>
   );
 }

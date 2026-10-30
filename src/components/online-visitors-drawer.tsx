@@ -8,6 +8,7 @@ import {
   ComputerIcon,
   ComputerTerminal01Icon,
   GlobeIcon,
+  MoonIcon,
   SafariIcon,
   SmartPhone01Icon,
   UserGroupIcon,
@@ -734,12 +735,40 @@ function VisitorPresenceRow({
       : copy.activeSessionSingle;
   const pageInfo = describeVisitorPage(visitor.currentPath, messages);
   const deviceInfo = describeVisitorUserAgent(visitor.userAgent, isCurrentIp);
-  const activityText = visitor.online
-    ? formatMessage(
-        pageInfo.isGame ? copy.playingGameLabel : copy.viewingPageLabel,
-        { page: pageInfo.label }
-      )
-    : formatMessage(copy.lastVisitedPageLabel, { page: pageInfo.label });
+  const isSleeping = visitor.online && visitor.sleeping;
+  let activityText: string;
+  if (isSleeping) {
+    activityText = formatMessage(copy.sleepingPageLabel, {
+      page: pageInfo.label,
+    });
+  } else if (visitor.online) {
+    activityText = formatMessage(
+      pageInfo.isGame ? copy.playingGameLabel : copy.viewingPageLabel,
+      { page: pageInfo.label }
+    );
+  } else {
+    activityText = formatMessage(copy.lastVisitedPageLabel, {
+      page: pageInfo.label,
+    });
+  }
+  let statusBadgeText = copy.offlineBadge;
+  let statusDotClass = "bg-muted-foreground/40";
+  let statusTextClass = "text-muted-foreground";
+  if (isSleeping) {
+    statusBadgeText = copy.sleepingBadge;
+    statusDotClass = "bg-warning";
+    statusTextClass = "text-warning";
+  } else if (visitor.online) {
+    statusBadgeText = copy.onlineBadge;
+    statusDotClass = "bg-success";
+    statusTextClass = "text-success";
+  }
+  let activityIconColorClass = "text-muted-foreground";
+  if (isSleeping) {
+    activityIconColorClass = "text-warning";
+  } else if (visitor.online) {
+    activityIconColorClass = "text-primary";
+  }
 
   return (
     <div className="min-w-0 space-y-1.5 px-3 py-2.5">
@@ -747,10 +776,7 @@ function VisitorPresenceRow({
         <div className="flex min-w-0 items-center gap-1.5">
           <span
             aria-hidden="true"
-            className={cn(
-              "size-2 shrink-0 rounded-full",
-              visitor.online ? "bg-success" : "bg-muted-foreground/40"
-            )}
+            className={cn("size-2 shrink-0 rounded-full", statusDotClass)}
           />
           <HugeiconsIcon
             className="size-3.5 shrink-0 text-muted-foreground"
@@ -766,13 +792,8 @@ function VisitorPresenceRow({
             </Badge>
           )}
         </div>
-        <span
-          className={cn(
-            "shrink-0 font-medium text-xs",
-            visitor.online ? "text-success" : "text-muted-foreground"
-          )}
-        >
-          {visitor.online ? copy.onlineBadge : copy.offlineBadge}
+        <span className={cn("shrink-0 font-medium text-xs", statusTextClass)}>
+          {statusBadgeText}
         </span>
       </div>
 
@@ -784,11 +805,8 @@ function VisitorPresenceRow({
           to={pageInfo.path}
         >
           <HugeiconsIcon
-            className={cn(
-              "size-3 shrink-0",
-              visitor.online ? "text-primary" : "text-muted-foreground"
-            )}
-            icon={Activity01Icon}
+            className={cn("size-3 shrink-0", activityIconColorClass)}
+            icon={isSleeping ? MoonIcon : Activity01Icon}
             strokeWidth={2}
           />
           <span className="truncate font-medium underline-offset-2 hover:underline">
@@ -833,7 +851,7 @@ function VisitorPresenceRow({
           />
           <span>
             {visitor.online
-              ? `${copy.activeNowLabel} · ${sessionText}`
+              ? `${isSleeping ? copy.sleepingNowLabel : copy.activeNowLabel} · ${sessionText}`
               : formatMessage(copy.lastOnlineLabel, { time: relativeTime })}
           </span>
         </div>
