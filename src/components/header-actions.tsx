@@ -1,12 +1,14 @@
 import {
   KeyboardIcon,
   MoreHorizontalCircle01Icon,
+  UserGroupIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import { KeyboardShortcutsDrawer } from "@/components/keyboard-shortcuts-drawer";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { OnlineVisitorsDrawer } from "@/components/online-visitors-drawer";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +30,7 @@ export function HeaderActions({
   const mobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [visitorsOpen, setVisitorsOpen] = useState(false);
 
   useEffect(() => {
     if (!mobile) {
@@ -38,6 +41,7 @@ export function HeaderActions({
   return (
     <>
       <div className="hidden items-center gap-1 md:flex">
+        <OnlineVisitorsDrawer />
         <LockScreenButton />
         <KeyboardShortcutsDrawer />
         <LanguageSwitcher />
@@ -58,6 +62,21 @@ export function HeaderActions({
           </PopoverTrigger>
           <PopoverContent align="end" className="w-64" size="none">
             <div className="grid gap-1 p-2">
+              <Button
+                className="w-full justify-start"
+                onClick={() => {
+                  setOpen(false);
+                  setVisitorsOpen(true);
+                }}
+                variant="ghost"
+              >
+                <HugeiconsIcon
+                  data-icon="inline-start"
+                  icon={UserGroupIcon}
+                  strokeWidth={2}
+                />
+                {messages.dashboardActivity.presence.title}
+              </Button>
               <div className="flex min-h-10 items-center justify-between gap-3 px-2">
                 <span className="text-sm">{messages.auth.lockScreen}</span>
                 <LockScreenButton />
@@ -93,6 +112,11 @@ export function HeaderActions({
           </PopoverContent>
         </Popover>
       </div>
+      <OnlineVisitorsDrawer
+        hideTrigger
+        onOpenChange={setVisitorsOpen}
+        open={visitorsOpen}
+      />
       <KeyboardShortcutsDrawer
         hideTrigger
         onOpenChange={setShortcutsOpen}

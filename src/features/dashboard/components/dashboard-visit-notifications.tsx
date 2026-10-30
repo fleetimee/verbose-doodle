@@ -4,7 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 import { useAuth } from "@/features/auth/context";
 import {
+  type DashboardPresenceSnapshot,
   type DashboardVisitEvent,
+  fetchDashboardPresence,
+  parseDashboardPresenceEvent,
   parseDashboardVisitEvent,
   recordDashboardVisit,
 } from "@/features/dashboard/dashboard-activity";
@@ -14,6 +17,7 @@ import {
   type TicketedRealtimeConnection,
 } from "@/features/realtime/ticketed-realtime-connection";
 import { formatMessage, messages } from "@/lib/i18n";
+import { queryClient } from "@/lib/query-client";
 
 const DASHBOARD_EVENTS_PATH = "/api/dashboard/events";
 const DASHBOARD_VISIT_BUBBLE_DURATION_MS = 6000;
@@ -21,10 +25,34 @@ const DASHBOARD_VISIT_BUBBLE_EXIT_DURATION_MS = 260;
 const MAX_ACTIVE_VISIT_NOTICES = 4;
 const MAX_SEEN_VISIT_IDS = 1000;
 
+export const DASHBOARD_PRESENCE_QUERY_KEY = ["dashboard", "presence"] as const;
+
 type DashboardVisitNotice = {
   readonly copy: string;
   readonly visitId: string;
 };
+
+function rememberSeenVisitId(seenVisitIds: Set<string>, visitId: string): void {
+  seenVisitIds.add(visitId);
+  if (seenVisitIds.size > MAX_SEEN_VISIT_IDS) {
+    const oldestVisitId = seenVisitIds.values().next().value;
+    if (oldestVisitId) {
+      seenVisitIds.delete(oldestVisitId);
+    }
+  }
+}
+
+function pickVisitMessage(
+  lastIndexRef: { current: number | null },
+  visitMessages: readonly string[]
+): string | undefined {
+  let messageIndex = Math.floor(Math.random() * visitMessages.length);
+  if (visitMessages.length > 1 && messageIndex === lastIndexRef.current) {
+    messageIndex = (messageIndex + 1) % visitMessages.length;
+  }
+  lastIndexRef.current = messageIndex;
+  return visitMessages[messageIndex] ?? visitMessages[0];
+}
 
 export function DashboardVisitNotifications() {
   const { snapshot } = useAuth();
@@ -36,6 +64,9 @@ export function DashboardVisitNotifications() {
   const recordedVisitPromiseRef =
     useRef<Promise<DashboardVisitEvent | null> | null>(null);
   const currentVisitIdRef = useRef<string | null>(null);
+  const currentIpAddressRef = useRef<string | null>(null);
+  const currentPathnameRef = useRef<string>(location.pathname);
+  currentPathnameRef.current = location.pathname;
   const visitRequestGenerationRef = useRef(0);
   const connectionRef = useRef<TicketedRealtimeConnection | null>(null);
 
@@ -44,6 +75,22 @@ export function DashboardVisitNotifications() {
       acquireTicket: () => createRealtimeTicket("dashboard-visits"),
       configuredUrl: import.meta.env.VITE_DASHBOARD_EVENTS_WS_URL,
       onMessage: (data) => {
+        const presenceEvent = parseDashboardPresenceEvent(data);
+        if (presenceEvent) {
+          queryClient.setQueryData<DashboardPresenceSnapshot | null>(
+            DASHBOARD_PRESENCE_QUERY_KEY,
+            (previous) => ({
+              currentIp:
+                previous?.currentIp ?? currentIpAddressRef.current ?? "unknown",
+              history: presenceEvent.payload.history,
+              onlineCount: presenceEvent.payload.onlineCount,
+              peakOnlineCount: presenceEvent.payload.peakOnlineCount,
+              visitors: presenceEvent.payload.visitors,
+            })
+          );
+          return;
+        }
+
         const event = parseDashboardVisitEvent(data);
         if (
           !event ||
@@ -53,24 +100,11 @@ export function DashboardVisitNotifications() {
           return;
         }
 
-        seenVisitIdsRef.current.add(event.payload.visitId);
-        if (seenVisitIdsRef.current.size > MAX_SEEN_VISIT_IDS) {
-          const oldestVisitId = seenVisitIdsRef.current.values().next().value;
-          if (oldestVisitId) {
-            seenVisitIdsRef.current.delete(oldestVisitId);
-          }
-        }
-
-        const visitMessages = messages.dashboardActivity.visitMessages;
-        let messageIndex = Math.floor(Math.random() * visitMessages.length);
-        if (
-          visitMessages.length > 1 &&
-          messageIndex === visitMessageIndexRef.current
-        ) {
-          messageIndex = (messageIndex + 1) % visitMessages.length;
-        }
-        visitMessageIndexRef.current = messageIndex;
-        const message = visitMessages[messageIndex] ?? visitMessages[0];
+        rememberSeenVisitId(seenVisitIdsRef.current, event.payload.visitId);
+        const message = pickVisitMessage(
+          visitMessageIndexRef,
+          messages.dashboardActivity.visitMessages
+        );
         if (!message) {
           return;
         }
@@ -109,6 +143,7 @@ export function DashboardVisitNotifications() {
       recordedVisitUserIdRef.current = null;
       recordedVisitPromiseRef.current = null;
       currentVisitIdRef.current = null;
+      currentIpAddressRef.current = null;
       visitRequestGenerationRef.current += 1;
       connection.disconnect();
       return;
@@ -118,10 +153,13 @@ export function DashboardVisitNotifications() {
       recordedVisitUserIdRef.current = userId;
       currentVisitIdRef.current = null;
       const generation = ++visitRequestGenerationRef.current;
-      recordedVisitPromiseRef.current = recordDashboardVisit()
+      recordedVisitPromiseRef.current = recordDashboardVisit(
+        currentPathnameRef.current
+      )
         .then((visit) => {
           if (visitRequestGenerationRef.current === generation) {
             currentVisitIdRef.current = visit?.payload.visitId ?? null;
+            currentIpAddressRef.current = visit?.payload.ipAddress ?? null;
           }
           return visit;
         })
@@ -129,20 +167,59 @@ export function DashboardVisitNotifications() {
     }
 
     let active = true;
+    const unsubscribe = connection.subscribe((state) => {
+      if (state.status === "connected" && active) {
+        connection.send(
+          JSON.stringify({
+            path: currentPathnameRef.current,
+            type: "page_change",
+          })
+        );
+      }
+    });
     const connectAfterVisit = async () => {
       await (recordedVisitPromiseRef.current ?? Promise.resolve(null));
       if (!active) {
         return;
       }
       await connection.connect();
+      if (!active) {
+        return;
+      }
+      const presenceSnapshot = await fetchDashboardPresence().catch(() => null);
+      if (active && presenceSnapshot) {
+        currentIpAddressRef.current = presenceSnapshot.currentIp;
+        queryClient.setQueryData(
+          DASHBOARD_PRESENCE_QUERY_KEY,
+          presenceSnapshot
+        );
+      }
     };
     connectAfterVisit().catch(() => undefined);
 
     return () => {
       active = false;
+      unsubscribe();
       connection.disconnect();
     };
   }, [connection, isDashboardRoute, snapshot.isAuthenticated, userId]);
+
+  useEffect(() => {
+    if (!(snapshot.isAuthenticated && isDashboardRoute)) {
+      return;
+    }
+    connection.send(
+      JSON.stringify({
+        path: location.pathname,
+        type: "page_change",
+      })
+    );
+  }, [
+    connection,
+    isDashboardRoute,
+    location.pathname,
+    snapshot.isAuthenticated,
+  ]);
 
   if (notices.length === 0) {
     return null;
