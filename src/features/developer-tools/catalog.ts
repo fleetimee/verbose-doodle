@@ -8,6 +8,7 @@ import {
   FileJson,
   Fingerprint,
   GitCommitIcon,
+  Hash,
   KeyRound,
   Layers3,
   RadioReceiver,
@@ -176,6 +177,41 @@ const loadScheduleOverlapChecker: DeveloperToolLoader = () =>
   );
 
 export const DEVELOPER_TOOLS: readonly DeveloperToolDefinition[] = [
+  {
+    categoryId: "conversion",
+    id: "text-crypto",
+    path: "developer-tools/text-crypto",
+    icon: Hash,
+    load: () =>
+      import("@/pages/dashboard/text-crypto").then(({ TextCryptoPage }) => ({
+        default: TextCryptoPage,
+      })),
+    get name() {
+      return messages.textCrypto.title;
+    },
+    get description() {
+      return messages.textCrypto.description;
+    },
+    get searchDescription() {
+      return messages.textCrypto.description;
+    },
+    get document() {
+      return {
+        title: messages.textCrypto.title,
+        description: messages.textCrypto.description,
+        keywords: messages.textCrypto.keywords,
+      };
+    },
+    get runtime() {
+      return messages.textCrypto.runtime;
+    },
+    get limit() {
+      return messages.textCrypto.limit;
+    },
+    get tags() {
+      return messages.textCrypto.tags;
+    },
+  },
   {
     categoryId: "validation",
     id: "hmac-generator",

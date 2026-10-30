@@ -77,6 +77,7 @@ function getRouteLabels(
   messages: import("@/lib/i18n").Messages
 ): RouteLabelRegistry {
   return {
+    "text-crypto": messages.textCrypto.title,
     "hmac-generator": messages.hmacGenerator.title,
     "temp-files": messages.tempFiles.title,
     "cron-parser": messages.cronParser.title,
@@ -185,6 +186,7 @@ export function DashboardLayout() {
     "/dashboard/simulator-db",
     "/dashboard/logs",
     "/dashboard/wheel",
+    "/dashboard/developer-tools/text-crypto",
   ].includes(location.pathname);
   const hasOwnPageEntrance = location.pathname.startsWith(
     "/dashboard/socket-test/"
@@ -388,6 +390,8 @@ export function DashboardLayout() {
                       "/dashboard/developer-tools/json-text-diff" ||
                     location.pathname ===
                       "/dashboard/developer-tools/hmac-generator" ||
+                    location.pathname ===
+                      "/dashboard/developer-tools/text-crypto" ||
                     location.pathname.startsWith("/dashboard/socks-relay/") ||
                     location.pathname.startsWith("/dashboard/socket-test/")) &&
                     "lg:h-full lg:min-h-0"
@@ -467,6 +471,7 @@ export function DashboardLayout() {
                         "/dashboard/temp-files",
                         "/dashboard/logs",
                         "/dashboard/wheel",
+                        "/dashboard/developer-tools/text-crypto",
                       ].includes(location.pathname),
                     }
                   )}
