@@ -2,7 +2,8 @@ import { FavouriteIcon, ShutDownIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import { SiDocker } from "react-icons/si";
-import { Activity } from "@/components/hugeicons";
+import { Link } from "react-router";
+import { Activity, ChevronRight } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,7 @@ import {
   resolveContainerStatus,
   useContainerError,
 } from "@/features/server-inventory/components/server-container-status";
+import { inspectImageId } from "@/features/server-inventory/container-inspect-values";
 import type {
   ServerContainerDetail,
   ServerContainers,
@@ -105,11 +107,15 @@ function ContainerLiveMetrics({
 function ContainerIdentity({
   data,
   loading,
+  serverId,
 }: {
   data?: ServerContainerDetail;
   loading: boolean;
+  serverId?: string;
 }) {
-  const copy = useI18n().messages.servers.containers;
+  const { messages } = useI18n();
+  const copy = messages.servers.containers;
+  const imageCopy = messages.servers.images;
   const resolved = data?.state
     ? resolveContainerStatus(data.state, inspectHealthStatus(data), copy)
     : null;
@@ -119,6 +125,7 @@ function ContainerIdentity({
     resolved?.kind === "healthy" || resolved?.kind === "unhealthy"
       ? FavouriteIcon
       : ShutDownIcon;
+  const imageTargetId = inspectImageId(data?.inspect);
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3.5">
       <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-gradient-to-b from-primary/15 to-primary/5 text-primary shadow-2xs">
@@ -165,9 +172,27 @@ function ContainerIdentity({
           />
         )}
         {data?.image && (
-          <p className="break-all font-mono text-muted-foreground text-xs leading-relaxed">
-            {data.image}
-          </p>
+          <div className="flex min-w-0 items-center gap-1.5">
+            {imageTargetId && serverId ? (
+              <Link
+                className="group inline-flex min-w-0 max-w-full items-center gap-1.5 break-all font-mono text-muted-foreground text-xs leading-relaxed transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                title={`${imageCopy.inspect}: ${data.image}`}
+                to={`/dashboard/server-metrics/${serverId}/images/${encodeURIComponent(imageTargetId)}`}
+              >
+                <span className="underline decoration-border/80 underline-offset-4 transition-colors group-hover:decoration-foreground">
+                  {data.image}
+                </span>
+                <ChevronRight
+                  aria-hidden="true"
+                  className="size-3 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"
+                />
+              </Link>
+            ) : (
+              <p className="break-all font-mono text-muted-foreground text-xs leading-relaxed">
+                {data.image}
+              </p>
+            )}
+          </div>
         )}
       </div>
     </div>
@@ -226,7 +251,11 @@ export function ServerContainerDetailPanel({
   return (
     <div className="flex w-full min-w-0 flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <ContainerIdentity data={ready ? data : undefined} loading={loading} />
+        <ContainerIdentity
+          data={ready ? data : undefined}
+          loading={loading}
+          serverId={entry.id}
+        />
         <ServerContainerActions
           containerId={containerId}
           entry={entry}
@@ -278,6 +307,7 @@ export function ServerContainerDetailPanel({
           containerId={containerId}
           data={ready ? data : undefined}
           loading={!ready}
+          serverId={entry.id}
         />
       )}
       <p className="text-muted-foreground text-xs">{copy.managementHint}</p>

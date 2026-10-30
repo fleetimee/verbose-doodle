@@ -14,3 +14,13 @@ export function isInspectString(
 ): value is string {
   return typeof value === "string";
 }
+
+export function inspectImageId(
+  inspect: ContainerInspectObject | null | undefined
+): string | undefined {
+  const image = inspect?.Image;
+  if (isInspectString(image) && image.startsWith("sha256:")) {
+    return image;
+  }
+  return undefined;
+}

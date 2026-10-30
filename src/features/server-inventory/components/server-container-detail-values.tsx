@@ -5,7 +5,13 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import type { ReactNode } from "react";
-import { type HugeIcon, Info, Network } from "@/components/hugeicons";
+import { Link } from "react-router";
+import {
+  ChevronRight,
+  type HugeIcon,
+  Info,
+  Network,
+} from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,6 +21,7 @@ import {
   inspectHealthStatus,
   resolveContainerStatus,
 } from "@/features/server-inventory/components/server-container-status";
+import { inspectImageId } from "@/features/server-inventory/container-inspect-values";
 import type { ServerContainerDetail } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -140,11 +147,13 @@ function buildBasicRows(
   data: ServerContainerDetail | undefined,
   copy: ContainerCopy,
   specOsLabel: string,
-  locale: string
+  locale: string,
+  serverId?: string
 ): DetailRow[] {
   const resolvedState = data?.state
     ? resolveContainerStatus(data.state, inspectHealthStatus(data), copy).label
     : "—";
+  const imageTargetId = inspectImageId(data?.inspect);
   return [
     {
       id: "name",
@@ -159,7 +168,22 @@ function buildBasicRows(
     {
       id: "image",
       label: copy.image,
-      value: data?.image || "—",
+      value:
+        imageTargetId && serverId && data?.image ? (
+          <Link
+            className="group inline-flex items-center gap-1 break-all underline-offset-4 transition-colors hover:text-foreground hover:underline"
+            title={data.image}
+            to={`/dashboard/server-metrics/${serverId}/images/${encodeURIComponent(imageTargetId)}`}
+          >
+            <span>{data.image}</span>
+            <ChevronRight
+              aria-hidden="true"
+              className="size-3 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"
+            />
+          </Link>
+        ) : (
+          data?.image || "—"
+        ),
       mono: true,
     },
     {
@@ -271,10 +295,12 @@ export function ServerContainerDetailValues({
   containerId = "",
   data,
   loading,
+  serverId,
 }: {
   containerId?: string;
   data?: ServerContainerDetail;
   loading: boolean;
+  serverId?: string;
 }) {
   const { messages, locale } = useI18n();
   const copy = messages.servers.containers;
@@ -282,7 +308,8 @@ export function ServerContainerDetailValues({
     data,
     copy,
     messages.servers.metrics.specOs,
-    locale
+    locale,
+    serverId
   );
   const networkRows = buildNetworkRows(data, copy);
   const portRows = buildPortRows(data, copy);
