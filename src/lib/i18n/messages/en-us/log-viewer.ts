@@ -1,4 +1,8 @@
 export const logViewerMessages = {
+  copyLogEntry: "Copy log entry",
+  entryCopied: "Log entry copied",
+  findSelectedText: "Find selected text",
+  browserMenuHint: "Shift + right-click opens the browser menu.",
   copySelection: "Copy",
   selectionCopiedShort: "Copied",
   copySelectedText: "Copy selected log text",

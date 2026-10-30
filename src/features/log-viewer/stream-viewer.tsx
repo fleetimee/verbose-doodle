@@ -12,9 +12,10 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { LogContextMenu } from "@/features/log-viewer/log-context-menu";
+import { splitLogEntries } from "@/features/log-viewer/log-entries";
 import { LogFileHeader } from "@/features/log-viewer/log-file-header";
 import { LogPayload } from "@/features/log-viewer/log-payload";
-import { LogSelectionAction } from "@/features/log-viewer/log-selection-action";
 import { LogToolbar } from "@/features/log-viewer/log-toolbar";
 import { LogContentSkeleton } from "@/features/log-viewer/log-viewer-skeleton";
 import type { LogSegment } from "@/features/log-viewer/types";
@@ -81,36 +82,6 @@ function groupLogSegments(segments: LogSegment[]) {
     }
   }
   return files;
-}
-
-const LOG_ENTRY_START =
-  /^(?:\[(?:\d{2}[/-]\d{2}[/-]\d{4}[ \t]+|\d{4}[/-]\d{2}[/-]\d{2}[ \tT]+)?\d{2}:\d{2}:\d{2}|(?:\d{4}[/-]\d{2}[/-]\d{2}|\d{2}[/-]\d{2}[/-]\d{4})[ \tT]+\d{2}:\d{2}:\d{2}|\d{2}:\d{2}:\d{2}(?:[.,]\d+)?[ \t]+|[A-Z][a-z]{2}[ \t]+\d{1,2}[ \t]+\d{2}:\d{2}:\d{2})/;
-
-function splitLogEntries(text: string): string[] {
-  const lines = text.split("\n");
-  if (lines.at(-1) === "") {
-    lines.pop();
-  }
-  const hasTimestampedEntries = lines.some((line) =>
-    LOG_ENTRY_START.test(line)
-  );
-  if (!hasTimestampedEntries) {
-    return lines.map((line) => `${line}\n`);
-  }
-  const entries: string[] = [];
-  let current: string[] = [];
-  for (const line of lines) {
-    if (LOG_ENTRY_START.test(line) && current.length > 0) {
-      entries.push(`${current.join("\n")}\n`);
-      current = [line];
-    } else {
-      current.push(line);
-    }
-  }
-  if (current.length > 0) {
-    entries.push(`${current.join("\n")}\n`);
-  }
-  return entries;
 }
 
 function filterLogFiles(
@@ -396,83 +367,93 @@ export function StreamViewer({
             {copy.loadingOlder}
           </div>
         )}
-        <ScrollArea
-          aria-busy={loading}
-          aria-label={copy.content}
-          className={cn(
-            "min-h-0 flex-1",
-            (showEmpty || showFilteredEmpty) && "hidden"
-          )}
-          contentClassName={wordWrap ? "w-full min-w-0" : "min-w-full"}
-          onScrollCapture={(event) => {
-            const element = viewport.current;
-            if (!element || event.target !== element) {
-              return;
-            }
-            const scrollTop = Math.max(0, element.scrollTop);
-            const previousTop = previousScrollTop.current;
-            previousScrollTop.current = scrollTop;
-            if (scrollTop === previousTop) {
-              return;
-            }
-            if (
-              element.scrollHeight - element.scrollTop - element.clientHeight >
-              80
-            ) {
-              setFollow(false);
-            }
-            if (!query && scrollTop === 0 && scrollTop < previousTop) {
-              older();
-            }
+        <LogContextMenu
+          onFind={(value) => {
+            setQuery(value);
+            setFollow(false);
+            searchInput.current?.focus();
           }}
           viewportRef={viewport}
         >
-          <motion.div
-            animate={{ opacity: hasContent ? 1 : 0.65 }}
-            className="min-w-0 px-4 pb-5 md:px-5"
-            initial={false}
-            transition={{
-              duration: reduceMotion
-                ? MOTION_DURATION.instant
-                : MOTION_DURATION.fast,
-              ease: MOTION_EASE.out,
-            }}
-          >
-            {hasContent
-              ? files.map((file) => (
-                  <div key={`${file.filename}:${file.segments[0].offset}`}>
-                    <LogFileHeader file={file} />
-                    {file.segments.map((segment) => (
-                      <div
-                        data-log-segment={`${segment.filename}:${segment.offset}`}
-                        key={`${segment.filename}:${segment.offset}`}
-                      >
-                        <pre
-                          className={cn(
-                            "font-mono leading-relaxed",
-                            wordWrap
-                              ? "whitespace-pre-wrap break-all"
-                              : "whitespace-pre",
-                            FONT_SIZE_CLASSES[fontSize - 9]
-                          )}
-                          data-log-text={segment.filename}
-                        >
-                          <LogPayload text={segment.text} />
-                        </pre>
-                      </div>
-                    ))}
-                  </div>
-                ))
-              : null}
-            {!hasContent && loading && (
-              <LogContentSkeleton
-                fontClassName={FONT_SIZE_CLASSES[fontSize - 9]}
-              />
+          <ScrollArea
+            aria-busy={loading}
+            aria-label={copy.content}
+            className={cn(
+              "min-h-0 flex-1",
+              (showEmpty || showFilteredEmpty) && "hidden"
             )}
-          </motion.div>
-          {!wordWrap && <ScrollBar orientation="horizontal" />}
-        </ScrollArea>
-        <LogSelectionAction viewportRef={viewport} />
+            contentClassName={wordWrap ? "w-full min-w-0" : "min-w-full"}
+            onScrollCapture={(event) => {
+              const element = viewport.current;
+              if (!element || event.target !== element) {
+                return;
+              }
+              const scrollTop = Math.max(0, element.scrollTop);
+              const previousTop = previousScrollTop.current;
+              previousScrollTop.current = scrollTop;
+              if (scrollTop === previousTop) {
+                return;
+              }
+              if (
+                element.scrollHeight -
+                  element.scrollTop -
+                  element.clientHeight >
+                80
+              ) {
+                setFollow(false);
+              }
+              if (!query && scrollTop === 0 && scrollTop < previousTop) {
+                older();
+              }
+            }}
+            viewportRef={viewport}
+          >
+            <motion.div
+              animate={{ opacity: hasContent ? 1 : 0.65 }}
+              className="min-w-0 px-4 pb-5 md:px-5"
+              initial={false}
+              transition={{
+                duration: reduceMotion
+                  ? MOTION_DURATION.instant
+                  : MOTION_DURATION.fast,
+                ease: MOTION_EASE.out,
+              }}
+            >
+              {hasContent
+                ? files.map((file) => (
+                    <div key={`${file.filename}:${file.segments[0].offset}`}>
+                      <LogFileHeader file={file} />
+                      {file.segments.map((segment) => (
+                        <div
+                          data-log-segment={`${segment.filename}:${segment.offset}`}
+                          key={`${segment.filename}:${segment.offset}`}
+                        >
+                          <pre
+                            className={cn(
+                              "font-mono leading-relaxed",
+                              wordWrap
+                                ? "whitespace-pre-wrap break-all"
+                                : "whitespace-pre",
+                              FONT_SIZE_CLASSES[fontSize - 9]
+                            )}
+                            data-log-text={segment.filename}
+                          >
+                            <LogPayload text={segment.text} />
+                          </pre>
+                        </div>
+                      ))}
+                    </div>
+                  ))
+                : null}
+              {!hasContent && loading && (
+                <LogContentSkeleton
+                  fontClassName={FONT_SIZE_CLASSES[fontSize - 9]}
+                />
+              )}
+            </motion.div>
+            {!wordWrap && <ScrollBar orientation="horizontal" />}
+          </ScrollArea>
+        </LogContextMenu>
         {showEmpty && (
           <Empty className="relative min-h-0">
             <EmptyHeader>

@@ -1,4 +1,8 @@
 export const logViewerMessages = {
+  copyLogEntry: "Salin entri log",
+  entryCopied: "Entri log disalin",
+  findSelectedText: "Cari teks yang dipilih",
+  browserMenuHint: "Shift + klik kanan membuka menu browser.",
   copySelection: "Salin",
   selectionCopiedShort: "Disalin",
   copySelectedText: "Salin teks log yang dipilih",

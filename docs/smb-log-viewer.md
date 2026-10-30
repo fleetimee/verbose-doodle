@@ -299,6 +299,17 @@ text, preserving whitespace, and briefly shows **Copied** in place. Clearing
 the selection, scrolling, or pressing Escape dismisses the action. The popup
 stays within the viewer in fullscreen; reduced motion removes its lift/scale.
 
+Right-click log text for **Copy selected log text**, **Copy log entry**, and
+**Find selected text**. Copy entry uses the timestamp boundaries already used
+by the viewer's entry filter and includes loaded multiline continuations,
+including across adjacent loaded chunks of one file. Without a recognized
+timestamp it copies the clicked line. Unloaded history is not fetched by copying.
+Find is available for a nonempty single-line selection and pauses Live while
+focusing search. Selection actions are disabled when no text is highlighted.
+**Shift + right-click** preserves the browser's native menu; headers, controls,
+and empty space outside log text also keep the native menu. The floating Copy
+action is hidden while the context menu is open, including in fullscreen.
+
 The toolbar's **Open source in new tab** action opens a dedicated
 `/logs/{sourceId}` page without dashboard navigation. It preserves the selected
 source, stream, and date range. Stream and date changes update that tab's URL,

@@ -120,12 +120,14 @@ function ContextMenuContent({
   variant = "default",
   size = "default",
   alignOffset = 0,
+  portalContainer,
   ...props
 }: React.ComponentProps<typeof ContextMenuPrimitive.Popup> &
+  { portalContainer?: React.ComponentProps<typeof ContextMenuPrimitive.Portal>["container"] } &
   VariantProps<typeof contextMenuContentVariants> &
   Pick<ContextMenuPrimitive.Positioner.Props, "alignOffset">) {
   return (
-    <ContextMenuPrimitive.Portal>
+    <ContextMenuPrimitive.Portal container={portalContainer}>
       <ContextMenuPrimitive.Positioner
         alignOffset={alignOffset}
         className="isolate z-50 outline-none"
