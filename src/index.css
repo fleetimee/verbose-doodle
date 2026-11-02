@@ -3820,6 +3820,95 @@ html[data-transition="login-dashboard"]::view-transition-new(root) {
   }
 }
 
+/* Chat redaction spoiler/blur effect (WhatsApp privacy blur + Telegram animated ink) */
+.chat-redacted-bubble {
+  position: relative;
+  display: block;
+  user-select: none;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.chat-redacted-text {
+  filter: blur(7px);
+  opacity: 0.25;
+  transition:
+    filter 220ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
+    opacity 220ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.chat-redacted-dust {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.75;
+  transition:
+    opacity 200ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
+    transform 220ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.chat-redacted-dust > span {
+  position: absolute;
+  inset: -4px;
+  background-image:
+    radial-gradient(circle, currentColor 0.75px, transparent 1.1px),
+    radial-gradient(circle, currentColor 0.5px, transparent 0.9px);
+  background-position:
+    0 0,
+    3px 2px;
+  background-size:
+    7px 5px,
+    9px 7px;
+  opacity: 0.6;
+  animation: server-password-dust-drift 2000ms linear infinite alternate;
+}
+
+.chat-redacted-dust > span:nth-child(2) {
+  background-position:
+    2px 3px,
+    5px 1px;
+  animation-duration: 2500ms;
+  animation-delay: -800ms;
+  animation-direction: alternate-reverse;
+}
+
+/* Hover, keyboard focus, or click/tap to reveal */
+.chat-redacted-bubble:hover .chat-redacted-text,
+.chat-redacted-bubble:focus-visible .chat-redacted-text,
+.chat-redacted-bubble[data-revealed="true"] .chat-redacted-text {
+  filter: blur(0);
+  opacity: 1;
+  user-select: text;
+}
+
+.chat-redacted-bubble:hover .chat-redacted-dust,
+.chat-redacted-bubble:focus-visible .chat-redacted-dust,
+.chat-redacted-bubble[data-revealed="true"] .chat-redacted-dust {
+  opacity: 0;
+  transform: scale(1.08);
+  pointer-events: none;
+}
+
+.chat-redacted-bubble:hover .chat-redacted-dust > span,
+.chat-redacted-bubble:focus-visible .chat-redacted-dust > span,
+.chat-redacted-bubble[data-revealed="true"] .chat-redacted-dust > span {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-redacted-text {
+    filter: none;
+    opacity: 0.3;
+    transition: opacity 100ms linear;
+  }
+  .chat-redacted-dust {
+    transform: none;
+    transition: opacity 100ms linear;
+  }
+}
+
 :root {
   --macos-menu-selection: oklch(0.54 0.2 258);
   --macos-menu-selection-foreground: oklch(0.99 0 0);

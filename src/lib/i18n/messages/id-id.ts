@@ -106,6 +106,10 @@ export const idIdMessages = {
       chatReceiptPendingLabel: "Mengirim…",
       chatReceiptSentLabel: "Terkirim",
       chatReceiptReadLabel: "Dibaca",
+      chatRedactionToggleLabel:
+        "Alihkan mode sensor privasi untuk obrolan IP ini",
+      chatRedactionActiveHint:
+        "Sensor privasi aktif — sorot atau ketuk pesan untuk menampilkan",
     },
   },
   dateConverter: idDateConverterMessages,

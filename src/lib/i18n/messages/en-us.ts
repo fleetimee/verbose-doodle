@@ -104,6 +104,9 @@ export const enUsMessages = {
       chatReceiptPendingLabel: "Sending…",
       chatReceiptSentLabel: "Sent",
       chatReceiptReadLabel: "Read",
+      chatRedactionToggleLabel: "Toggle privacy blur for this chat partner",
+      chatRedactionActiveHint:
+        "Privacy mode is on — hover or tap message to reveal",
     },
   },
   developerTools: developerToolsMessages,

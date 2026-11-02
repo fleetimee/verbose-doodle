@@ -17,6 +17,8 @@ import {
   Tick02Icon,
   TickDouble02Icon,
   UserGroupIcon,
+  ViewIcon,
+  ViewOffIcon,
   WindowsNewIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
@@ -1254,6 +1256,38 @@ function ChatMessageDeliveryReceipt({
   );
 }
 
+function ChatRedactedMessageContent({
+  message,
+  isRedacted,
+}: {
+  message: string;
+  isRedacted: boolean;
+}) {
+  const [clickedReveal, setClickedReveal] = useState(false);
+
+  // If redaction is disabled for this chat, display standard text
+  if (!isRedacted) {
+    return <BubbleContent>{message}</BubbleContent>;
+  }
+
+  return (
+    <BubbleContent>
+      <button
+        className="chat-redacted-bubble text-left"
+        data-revealed={clickedReveal}
+        onClick={() => setClickedReveal((prev) => !prev)}
+        type="button"
+      >
+        <span className="chat-redacted-text block">{message}</span>
+        <span aria-hidden="true" className="chat-redacted-dust">
+          <span />
+          <span />
+        </span>
+      </button>
+    </BubbleContent>
+  );
+}
+
 function VisitorIpChatPanel({
   targetIp,
   currentIp,
@@ -1270,6 +1304,27 @@ function VisitorIpChatPanel({
   const [draft, setDraft] = useState("");
   const endRef = useRef<HTMLDivElement | null>(null);
   const optimisticIdRef = useRef(-1);
+
+  // Per-partner privacy redaction toggle, persisted per IP in localStorage
+  const [isRedacted, setIsRedacted] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(`chat-privacy-blur:${targetIp}`) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleRedaction = () => {
+    setIsRedacted((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(`chat-privacy-blur:${targetIp}`, String(next));
+      } catch {
+        // Ignore localStorage error
+      }
+      return next;
+    });
+  };
 
   const threadQuery = useQuery({
     queryKey: dashboardChatThreadQueryKey(targetIp),
@@ -1457,15 +1512,33 @@ function VisitorIpChatPanel({
           />
           <span>{copy.chatBackLabel}</span>
         </Button>
-        <div className="flex items-center gap-1.5 text-xs">
-          <span
-            aria-hidden="true"
-            className={cn("size-2 rounded-full", statusDotClass)}
-          />
-          <span className="font-medium font-mono">{targetIp}</span>
-          <span className={cn("font-medium", statusTextClass)}>
-            ({statusLabel})
-          </span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs">
+            <span
+              aria-hidden="true"
+              className={cn("size-2 rounded-full", statusDotClass)}
+            />
+            <span className="font-medium font-mono">{targetIp}</span>
+            <span className={cn("font-medium", statusTextClass)}>
+              ({statusLabel})
+            </span>
+          </div>
+          <Button
+            aria-label={copy.chatRedactionToggleLabel}
+            aria-pressed={isRedacted}
+            className="size-7 shrink-0"
+            onClick={toggleRedaction}
+            size="icon-xs"
+            title={copy.chatRedactionToggleLabel}
+            type="button"
+            variant={isRedacted ? "secondary" : "ghost"}
+          >
+            <HugeiconsIcon
+              className="size-3.5"
+              icon={isRedacted ? ViewOffIcon : ViewIcon}
+              strokeWidth={2}
+            />
+          </Button>
         </div>
       </div>
 
@@ -1505,7 +1578,10 @@ function VisitorIpChatPanel({
                       align={isMine ? "end" : "start"}
                       variant={isMine ? "default" : "muted"}
                     >
-                      <BubbleContent>{msg.message}</BubbleContent>
+                      <ChatRedactedMessageContent
+                        isRedacted={isRedacted}
+                        message={msg.message}
+                      />
                       <div
                         className={cn(
                           "flex items-center gap-1 px-1 font-mono text-muted-foreground/80 text-xs",
