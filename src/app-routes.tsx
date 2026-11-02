@@ -35,6 +35,14 @@ const ServerContainerTerminalPage = lazy(() =>
   )
 );
 
+const ServerContainerFilePreviewPage = lazy(() =>
+  import("@/pages/server-container-file-preview").then(
+    ({ ServerContainerFilePreviewPage }) => ({
+      default: ServerContainerFilePreviewPage,
+    })
+  )
+);
+
 export function AppRoutes() {
   const { locale } = useI18n();
 
@@ -78,6 +86,14 @@ export function AppRoutes() {
             </ProtectedRoute>
           }
           path="/servers/:serverId/containers/:containerId/terminal"
+        />
+        <Route
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <ServerContainerFilePreviewPage />
+            </ProtectedRoute>
+          }
+          path="/servers/:serverId/containers/:containerId/preview"
         />
         <Route element={<NotFoundPage />} path="*" />
       </Routes>

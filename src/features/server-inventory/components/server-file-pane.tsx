@@ -36,6 +36,12 @@ interface ServerFilePaneProps {
   emptyMessage: string;
   entries: BrowserFileEntry[];
   error?: string;
+  fileSelection?: {
+    names: string[];
+    onChange: (names: string[], checked: boolean) => void;
+    selectAllLabel: string;
+    fileLabel: (name: string) => string;
+  };
   loading: boolean;
   onBack: () => void;
   onForward: () => void;
@@ -44,6 +50,8 @@ interface ServerFilePaneProps {
   onRefresh?: () => void;
   onSelect: (name: string) => void;
   path: string;
+  renderEntryActions?: (entry: BrowserFileEntry) => ReactNode;
+  renderFileName?: (entry: BrowserFileEntry) => ReactNode;
   rootLabel: string;
   selected: string;
   title: string;
@@ -62,8 +70,73 @@ function displaySize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MiB`;
 }
 
+function FileEntryControl({
+  entry,
+  disabled,
+  selected,
+  path,
+  onSelect,
+  onNavigate,
+  onOpen,
+  renderFileName,
+}: Pick<
+  ServerFilePaneProps,
+  | "disabled"
+  | "selected"
+  | "path"
+  | "onSelect"
+  | "onNavigate"
+  | "onOpen"
+  | "renderFileName"
+> & { entry: BrowserFileEntry }) {
+  if (entry.kind === "file" && renderFileName) {
+    return renderFileName(entry);
+  }
+  return (
+    <button
+      aria-pressed={entry.name === selected}
+      className="flex w-full min-w-0 items-center gap-2 py-1 text-left focus-visible:outline-2 focus-visible:outline-ring"
+      disabled={disabled}
+      onClick={() => onSelect(entry.name)}
+      onDoubleClick={() => {
+        if (entry.kind === "directory") {
+          onNavigate(joinRemotePath(path, entry.name));
+        } else {
+          onOpen(entry);
+        }
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          onOpen(entry);
+        }
+      }}
+      type="button"
+    >
+      <HugeiconsIcon
+        aria-hidden="true"
+        className="size-5 shrink-0 text-primary"
+        icon={entry.kind === "directory" ? Folder01Icon : File01Icon}
+      />
+      <span className="flex min-w-0 flex-col">
+        <span className="truncate text-sm" title={entry.name}>
+          {entry.name}
+        </span>
+        {entry.permissions && (
+          <span className="font-mono text-muted-foreground text-xs">
+            {entry.permissions}
+          </span>
+        )}
+      </span>
+    </button>
+  );
+}
+
 export function ServerFilePane({
   actions,
+  fileSelection,
+  renderEntryActions,
+  renderFileName,
   canBack,
   canForward,
   disabled,
@@ -121,6 +194,15 @@ export function ServerFilePane({
     breadcrumbPath += `/${segment}`;
     breadcrumbs.push({ name: segment, path: breadcrumbPath });
   }
+  const visibleFileNames = visible
+    .filter((entry) => entry.kind === "file")
+    .map((entry) => entry.name);
+  const selectedVisibleCount = visibleFileNames.filter((name) =>
+    fileSelection?.names.includes(name)
+  ).length;
+  const allVisibleSelected =
+    visibleFileNames.length > 0 &&
+    selectedVisibleCount === visibleFileNames.length;
   const sortDirection = ascending ? "ascending" : "descending";
   const directionIcon = ascending ? ArrowUp01Icon : ArrowDown01Icon;
   const columns = [
@@ -296,30 +378,45 @@ export function ServerFilePane({
               {columns.map((column) => (
                 <TableHead
                   aria-sort={sort === column.key ? sortDirection : "none"}
-                  className={column.key === "name" ? "w-[44%]" : "w-[18%]"}
+                  className={column.key === "name" ? "w-[40%]" : "w-[20%]"}
                   key={column.key}
                 >
-                  <button
-                    className="flex w-full items-center gap-1 py-1 text-left text-xs focus-visible:outline-2 focus-visible:outline-ring"
-                    onClick={() => {
-                      if (sort === column.key) {
-                        setAscending((value) => !value);
-                      } else {
-                        setSort(column.key);
-                        setAscending(true);
-                      }
-                    }}
-                    type="button"
-                  >
-                    <span className="truncate">{column.label}</span>
-                    {sort === column.key && (
-                      <HugeiconsIcon
-                        aria-hidden="true"
-                        className="size-3 shrink-0"
-                        icon={directionIcon}
+                  <div className="flex items-center gap-2">
+                    {column.key === "name" && fileSelection && (
+                      <Checkbox
+                        aria-label={fileSelection.selectAllLabel}
+                        checked={allVisibleSelected}
+                        disabled={disabled || visibleFileNames.length === 0}
+                        indeterminate={
+                          selectedVisibleCount > 0 && !allVisibleSelected
+                        }
+                        onCheckedChange={(checked) =>
+                          fileSelection.onChange(visibleFileNames, checked)
+                        }
                       />
                     )}
-                  </button>
+                    <button
+                      className="flex w-full items-center gap-1 py-1 text-left text-xs focus-visible:outline-2 focus-visible:outline-ring"
+                      onClick={() => {
+                        if (sort === column.key) {
+                          setAscending((value) => !value);
+                        } else {
+                          setSort(column.key);
+                          setAscending(true);
+                        }
+                      }}
+                      type="button"
+                    >
+                      <span className="truncate">{column.label}</span>
+                      {sort === column.key && (
+                        <HugeiconsIcon
+                          aria-hidden="true"
+                          className="size-3 shrink-0"
+                          icon={directionIcon}
+                        />
+                      )}
+                    </button>
+                  </div>
                 </TableHead>
               ))}
             </TableRow>
@@ -362,44 +459,28 @@ export function ServerFilePane({
                   key={entry.name}
                 >
                   <TableCell>
-                    <button
-                      aria-pressed={entry.name === selected}
-                      className="flex w-full min-w-0 items-center gap-2 py-1 text-left focus-visible:outline-2 focus-visible:outline-ring"
-                      disabled={disabled}
-                      onClick={() => onSelect(entry.name)}
-                      onDoubleClick={() => {
-                        if (entry.kind === "directory") {
-                          onNavigate(joinRemotePath(path, entry.name));
-                        } else {
-                          onOpen(entry);
-                        }
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                          onOpen(entry);
-                        }
-                      }}
-                      type="button"
-                    >
-                      <HugeiconsIcon
-                        aria-hidden="true"
-                        className="size-5 shrink-0 text-primary"
-                        icon={
-                          entry.kind === "directory" ? Folder01Icon : File01Icon
-                        }
+                    <div className="flex min-w-0 items-center gap-2">
+                      {fileSelection && entry.kind === "file" && (
+                        <Checkbox
+                          aria-label={fileSelection.fileLabel(entry.name)}
+                          checked={fileSelection.names.includes(entry.name)}
+                          disabled={disabled}
+                          onCheckedChange={(checked) =>
+                            fileSelection.onChange([entry.name], checked)
+                          }
+                        />
+                      )}
+                      <FileEntryControl
+                        disabled={disabled}
+                        entry={entry}
+                        onNavigate={onNavigate}
+                        onOpen={onOpen}
+                        onSelect={onSelect}
+                        path={path}
+                        renderFileName={renderFileName}
+                        selected={selected}
                       />
-                      <span className="flex min-w-0 flex-col">
-                        <span className="truncate text-sm" title={entry.name}>
-                          {entry.name}
-                        </span>
-                        {entry.permissions && (
-                          <span className="font-mono text-muted-foreground text-xs">
-                            {entry.permissions}
-                          </span>
-                        )}
-                      </span>
-                    </button>
+                    </div>
                   </TableCell>
                   <TableCell size="compact" variant="muted">
                     <span
@@ -427,9 +508,10 @@ export function ServerFilePane({
                     </span>
                   </TableCell>
                   <TableCell size="compact" variant="muted">
-                    <span className="block truncate">
-                      {kindLabels[entry.kind]}
-                    </span>
+                    <div className="flex min-w-0 items-center justify-between gap-1">
+                      <span className="truncate">{kindLabels[entry.kind]}</span>
+                      {renderEntryActions?.(entry)}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

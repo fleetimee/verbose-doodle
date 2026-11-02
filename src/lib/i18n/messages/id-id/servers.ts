@@ -139,10 +139,47 @@ export const serversMessages = {
     logsHint:
       "Menampilkan 200 baris log terakhir, lalu mengalirkan keluaran baru dengan waktu. Menyimpan 200.000 karakter terbaru. Menjeda atau menyembunyikan tab memutus aliran; melanjutkan memuat ulang log terbaru.",
 
+    volumeBrowse: "Jelajahi",
+    volumePreview: "Pratinjau berkas",
+    volumePreviewFile: "Pratinjau {name} di tab baru",
+    volumePreviewSearch: "Cari di berkas…",
+    volumePreviewMatches: "{current} dari {total} kecocokan",
+    volumePreviewDescription:
+      "Pratinjau berkas volume container dalam mode baca saja.",
+    volumePreviewLoading: "Memuat pratinjau berkas…",
+    volumeInvalidPreview:
+      "Tautan pratinjau tidak memiliki mount atau path berkas.",
+    volumeTitle: "Berkas volume",
+    volumeDescription:
+      "Hanya baca. Klik nama berkas untuk pratinjau di tab baru, gunakan ikon unduh, atau pilih beberapa berkas untuk diunduh bersama.",
+    volumeDownloadSelected: "Unduh ({count})",
+    volumeSelectAll: "Pilih semua berkas yang terlihat",
+    volumeSelectFile: "Pilih {name}",
+    volumeDownloadFile: "Unduh {name}",
+    volumeBatchTooLarge:
+      "Berkas terpilih melebihi batas ZIP 25 MiB. Pilih lebih sedikit berkas.",
+    volumeDownload: "Unduh berkas",
+    volumePreviewTooLarge:
+      "Berkas ini terlalu besar untuk ditampilkan. Pratinjau mendukung berkas hingga 5 MiB.",
+    volumeFileTooLarge: "Berkas ini melebihi batas unduhan 5 MiB.",
+    volumeOutsideMount: "Path ini mengarah ke luar mount yang dipilih.",
+    volumeMissingTools:
+      "Alat penjelajahan berkas yang diperlukan tidak tersedia di container ini.",
+    volumePermissionDenied:
+      "Pengguna container tidak memiliki izin untuk membaca path ini.",
+    volumeNotFound: "Berkas atau folder ini sudah tidak ada di dalam mount.",
+    volumeUnavailable:
+      "Berkas tidak tersedia. Container harus berjalan dengan sh, stat, readlink, head, dan base64, serta penggunanya memerlukan akses baca.",
+    volumeBinary:
+      "Berkas biner ditampilkan sebagai teks mentah. Byte nonteks ditampilkan dengan escape; unduhan mempertahankan berkas asli.",
     installedSoftware: "Perangkat lunak terpasang",
     softwareDescription:
-      "Alat umum yang tersedia pada PATH pengguna container.",
-    softwareEmpty: "Tidak ada alat umum yang diperiksa terdeteksi.",
+      "Paket terpasang dan program yang ditemukan pada PATH pengguna container.",
+    softwareEmpty: "Tidak ditemukan paket terpasang atau program pada PATH.",
+    softwareSearch: "Cari paket terpasang…",
+    softwareFilter: "Filter perangkat lunak utama",
+    softwareNoMatches:
+      "Tidak ada paket terpasang yang cocok dengan pencarian atau filter.",
     softwareUnavailable:
       "Deteksi perangkat lunak tidak tersedia. Container harus berjalan dengan shell sh yang berfungsi.",
     inspectTitle: "Inspeksi",
@@ -161,6 +198,8 @@ export const serversMessages = {
     networkUsageChart: "Penggunaan jaringan (agregat)",
     ioUsageChart: "Penggunaan I/O (agregat)",
     processesTitle: "Proses",
+    processCommand: "Perintah lengkap",
+    processCommandCopy: "Salin perintah",
     processesSearch: "Cari proses…",
     processesEmpty: "Tidak ada proses aktif untuk kontainer ini.",
     hostTerminal: "SSH host",

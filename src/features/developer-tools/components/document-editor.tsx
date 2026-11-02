@@ -22,6 +22,7 @@ type DocumentEditorProps = {
   readonly lineCountMessage?: string;
   readonly byteCountMessage?: string;
   readonly onChange?: (value: string) => void;
+  readonly onCreateEditor?: (view: EditorView) => void;
   readonly readOnly?: boolean;
   readonly extensions?: Extension[];
 };
@@ -30,13 +31,13 @@ const editorTheme = EditorView.theme({
   "&": { backgroundColor: "transparent !important", fontSize: "13px" },
   "&.cm-editor": { backgroundColor: "transparent !important" },
   ".cm-activeLine": { backgroundColor: "hsl(var(--muted) / 0.35)" },
-  ".cm-activeLineGutter": { backgroundColor: "hsl(var(--muted) / 0.35)" },
+  ".cm-activeLineGutter": { backgroundColor: "var(--muted) !important" },
   ".cm-content": { fontFamily: "Geist Mono, monospace", padding: "16px 0" },
   ".cm-cursor": { borderLeftColor: "hsl(var(--foreground))" },
   ".cm-gutters": {
-    backgroundColor: "transparent !important",
-    borderRight: "1px solid hsl(var(--border) / 0.55)",
-    color: "hsl(var(--muted-foreground) / 0.65)",
+    backgroundColor: "var(--background) !important",
+    borderRight: "1px solid var(--border)",
+    color: "var(--muted-foreground)",
   },
   ".cm-scroller": { minHeight: "400px" },
 });
@@ -54,6 +55,7 @@ export function DocumentEditor({
   label,
   lineCountMessage,
   onChange,
+  onCreateEditor,
   readOnly = false,
   value,
   extensions: customExtensions,
@@ -99,7 +101,7 @@ export function DocumentEditor({
         "&.cm-editor": { height: "100% !important" },
         ".cm-scroller": {
           height: "100% !important",
-          minHeight: "100% !important",
+          minHeight: "0 !important",
           overflow: "auto",
         },
       })
@@ -167,6 +169,7 @@ export function DocumentEditor({
         extensions={extensions}
         height={height ?? (compact ? "220px" : "440px")}
         onChange={readOnly ? undefined : onChange}
+        onCreateEditor={onCreateEditor}
         theme={theme}
         value={value}
       />

@@ -1,10 +1,12 @@
 import {
   ArrowLeftRightIcon,
+  ArrowUpRight01Icon,
+  FolderOpenIcon,
   HardDriveIcon,
   PackageIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
-import type { ReactNode } from "react";
+import { type ReactNode, useId, useRef, useState } from "react";
 import { Link } from "react-router";
 import {
   ChevronRight,
@@ -13,14 +15,34 @@ import {
   Network,
 } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ServerContainerInspect } from "@/features/server-inventory/components/server-container-inspect";
 import {
   inspectHealthStatus,
   resolveContainerStatus,
 } from "@/features/server-inventory/components/server-container-status";
+import { ServerContainerVolumeDrawer } from "@/features/server-inventory/components/server-container-volume-drawer";
+import {
+  notableSoftware,
+  ServerSoftwareIcon,
+} from "@/features/server-inventory/components/server-software-icon";
 import { inspectImageId } from "@/features/server-inventory/container-inspect-values";
 import type { ServerContainerDetail } from "@/features/server-inventory/types";
 import { formatMessage } from "@/lib/i18n";
@@ -235,12 +257,58 @@ function buildNetworkRows(
 
 function buildPortRows(
   data: ServerContainerDetail | undefined,
-  copy: ContainerCopy
+  copy: ContainerCopy,
+  serverHost?: string
 ): DetailRow[] {
   return (
     data?.ports.map((port, index) => {
       const address = port.hostIp || "*";
       const host = address.includes(":") ? `[${address}]` : address;
+      const publishedHost = ["*", "0.0.0.0", "::"].includes(address)
+        ? serverHost
+        : address;
+      const linkHost =
+        publishedHost?.includes(":") && !publishedHost.startsWith("[")
+          ? `[${publishedHost}]`
+          : publishedHost;
+      const protocol = ["443/tcp", "8443/tcp"].includes(port.containerPort)
+        ? "https"
+        : "http";
+      const href =
+        linkHost && port.hostPort && port.containerPort.endsWith("/tcp")
+          ? `${protocol}://${linkHost}:${port.hostPort}`
+          : undefined;
+      const mapping = (
+        <span>
+          {host}:{port.hostPort}{" "}
+          <span className="text-muted-foreground">→</span> {port.containerPort}
+        </span>
+      );
+      let value: ReactNode = (
+        <span className="text-muted-foreground">{copy.notPublished}</span>
+      );
+      if (port.hostPort) {
+        value = mapping;
+      }
+      if (href) {
+        value = (
+          <a
+            className="inline-flex items-center gap-1 break-all underline underline-offset-4 transition-colors hover:text-foreground"
+            href={href}
+            rel="noopener noreferrer"
+            target="_blank"
+            title={href}
+          >
+            {mapping}
+            <HugeiconsIcon
+              aria-hidden="true"
+              className="size-3 shrink-0"
+              icon={ArrowUpRight01Icon}
+              strokeWidth={2}
+            />
+          </a>
+        );
+      }
       return {
         id: `${port.containerPort}-${String(index)}`,
         label: (
@@ -248,15 +316,7 @@ function buildPortRows(
             {port.containerPort}
           </span>
         ),
-        value: port.hostPort ? (
-          <span>
-            {host}:{port.hostPort}{" "}
-            <span className="text-muted-foreground">→</span>{" "}
-            {port.containerPort}
-          </span>
-        ) : (
-          <span className="text-muted-foreground">{copy.notPublished}</span>
-        ),
+        value,
         mono: true,
       };
     }) ?? []
@@ -265,7 +325,9 @@ function buildPortRows(
 
 function buildMountRows(
   data: ServerContainerDetail | undefined,
-  copy: ContainerCopy
+  copy: ContainerCopy,
+  onBrowse: (mount: string) => void,
+  serverId?: string
 ): DetailRow[] {
   return (
     data?.mounts.map((mount, index) => ({
@@ -281,9 +343,31 @@ function buildMountRows(
         </span>
       ),
       value: (
-        <span className="break-all text-muted-foreground">
-          {mount.source} <span className="text-foreground/60">→</span>{" "}
-          <span className="text-foreground">{mount.destination}</span>
+        <span className="flex flex-wrap items-center justify-end gap-2">
+          <span className="break-all text-muted-foreground">
+            {mount.source} <span className="text-foreground/60">→</span>{" "}
+            <span className="text-foreground">{mount.destination}</span>
+          </span>
+          {serverId && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label={copy.volumeBrowse}
+                  disabled={data?.state !== "running"}
+                  onClick={() => onBrowse(mount.destination)}
+                  size="icon-xs"
+                  variant="ghost"
+                >
+                  <HugeiconsIcon
+                    aria-hidden="true"
+                    icon={FolderOpenIcon}
+                    strokeWidth={2}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{copy.volumeBrowse}</TooltipContent>
+            </Tooltip>
+          )}
         </span>
       ),
       mono: true,
@@ -296,11 +380,13 @@ export function ServerContainerDetailValues({
   data,
   loading,
   serverId,
+  serverHost,
 }: {
   containerId?: string;
   data?: ServerContainerDetail;
   loading: boolean;
   serverId?: string;
+  serverHost?: string;
 }) {
   const { messages, locale } = useI18n();
   const copy = messages.servers.containers;
@@ -312,10 +398,62 @@ export function ServerContainerDetailValues({
     serverId
   );
   const networkRows = buildNetworkRows(data, copy);
-  const portRows = buildPortRows(data, copy);
-  const mountRows = buildMountRows(data, copy);
+  const portRows = buildPortRows(data, copy, serverHost);
+  const [browsingMount, setBrowsingMount] = useState<string | null>(null);
+  const mountRows = buildMountRows(data, copy, setBrowsingMount, serverId);
+  const [softwareSearch, setSoftwareSearch] = useState("");
+  const [selectedSoftware, setSelectedSoftware] = useState<string[]>([]);
+  const softwareFilterId = useId();
+  const softwareViewportRef = useRef<HTMLDivElement>(null);
+  const softwareResultsRef = useRef<HTMLDivElement>(null);
+  const softwareAnimationRef = useRef<Animation | null>(null);
+
+  function resetSoftwareScroll() {
+    softwareViewportRef.current?.scrollTo({ top: 0 });
+  }
+
+  function fadeSoftwareResults() {
+    const results = softwareResultsRef.current;
+    if (!results) {
+      return;
+    }
+    const opacity =
+      softwareAnimationRef.current?.playState === "running"
+        ? Number(getComputedStyle(results).opacity)
+        : 0.7;
+    softwareAnimationRef.current?.cancel();
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    const easing = getComputedStyle(results)
+      .getPropertyValue("--ease-out")
+      .trim();
+    softwareAnimationRef.current = results.animate(
+      [{ opacity }, { opacity: 1 }],
+      {
+        duration: reducedMotion ? 100 : 150,
+        easing: easing || "cubic-bezier(0.23, 1, 0.32, 1)",
+      }
+    );
+  }
   const softwareList = data?.installedSoftware;
-  const hasSoftware = Boolean(softwareList && softwareList.length > 0);
+  const availableSoftware = notableSoftware.filter(({ pattern }) =>
+    softwareList?.some((software) => pattern.test(software))
+  );
+  const activeSoftware = availableSoftware.filter(({ label }) =>
+    selectedSoftware.includes(label)
+  );
+  const softwareQuery = softwareSearch.trim().toLowerCase();
+  const filteredSoftware = softwareList?.filter(
+    (software) =>
+      software.toLowerCase().includes(softwareQuery) &&
+      (activeSoftware.length === 0 ||
+        activeSoftware.some(({ pattern }) => pattern.test(software)))
+  );
+  const hasSoftware = Boolean(filteredSoftware && filteredSoftware.length > 0);
+  const softwareEmptyMessage = softwareList?.length
+    ? copy.softwareNoMatches
+    : copy.softwareEmpty;
   const updatedTime = data?.collectedAt
     ? new Date(data.collectedAt).toLocaleTimeString(locale)
     : "—";
@@ -423,29 +561,92 @@ export function ServerContainerDetailValues({
             <p className="text-muted-foreground text-xs">
               {copy.softwareDescription}
             </p>
+            <Input
+              aria-label={copy.softwareSearch}
+              className="mt-2 sm:max-w-xs"
+              disabled={loading || !softwareList?.length}
+              onChange={(event) => {
+                setSoftwareSearch(event.target.value);
+                resetSoftwareScroll();
+              }}
+              placeholder={copy.softwareSearch}
+              size="sm"
+              type="search"
+              value={softwareSearch}
+              variant="search-field"
+            />
+            {!loading && availableSoftware.length > 0 && (
+              <FieldSet className="mt-3">
+                <FieldLegend variant="label">{copy.softwareFilter}</FieldLegend>
+                <FieldGroup className="flex-row flex-wrap" size="sm">
+                  {availableSoftware.map(({ label, Icon }) => (
+                    <Field
+                      className="w-auto"
+                      key={label}
+                      orientation="horizontal"
+                    >
+                      <Checkbox
+                        checked={selectedSoftware.includes(label)}
+                        id={`${softwareFilterId}-${label.replaceAll(" ", "-")}`}
+                        onCheckedChange={(checked) => {
+                          setSelectedSoftware((selected) =>
+                            checked
+                              ? [...selected, label]
+                              : selected.filter((value) => value !== label)
+                          );
+                          resetSoftwareScroll();
+                        }}
+                        onClick={(event) => {
+                          if (event.detail > 0) {
+                            fadeSoftwareResults();
+                          }
+                        }}
+                      />
+                      <FieldLabel
+                        htmlFor={`${softwareFilterId}-${label.replaceAll(" ", "-")}`}
+                      >
+                        <Icon aria-hidden="true" className="size-4 shrink-0" />
+                        {label}
+                      </FieldLabel>
+                    </Field>
+                  ))}
+                </FieldGroup>
+              </FieldSet>
+            )}
           </div>
         </CardHeader>
         <CardContent size="none">
           <ScrollArea
-            className="max-h-40"
+            className="h-40"
             variant="panel"
-            viewportClassName="max-h-40"
+            viewportClassName="h-full [overflow-anchor:none]"
+            viewportRef={softwareViewportRef}
           >
-            <div className="p-3.5">
+            <div className="p-3.5" ref={softwareResultsRef}>
               {loading && (
                 <div aria-hidden="true" className="flex h-6 items-center">
                   <Skeleton className="h-4 w-64 max-w-full" variant="table" />
                 </div>
               )}
               {!loading &&
-                (hasSoftware && softwareList ? (
-                  <p className="font-mono text-foreground text-xs leading-6">
-                    {softwareList.join("  ·  ")}
-                  </p>
+                (hasSoftware && filteredSoftware ? (
+                  <ul className="grid grid-cols-1 gap-x-5 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {filteredSoftware.map((software) => (
+                      <li
+                        className="flex min-w-0 items-center gap-2"
+                        key={software}
+                      >
+                        <ServerSoftwareIcon name={software} />
+                        <span className="break-all font-mono text-foreground text-xs">
+                          {software}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 ) : (
                   <p className="text-muted-foreground text-xs">
                     {softwareList
-                      ? copy.softwareEmpty
+                      ? softwareEmptyMessage
                       : copy.softwareUnavailable}
                   </p>
                 ))}
@@ -453,6 +654,13 @@ export function ServerContainerDetailValues({
           </ScrollArea>
         </CardContent>
       </Card>
+
+      <ServerContainerVolumeDrawer
+        containerId={data?.id ?? containerId}
+        mount={browsingMount}
+        onClose={() => setBrowsingMount(null)}
+        serverId={serverId}
+      />
 
       <ServerContainerInspect
         containerId={data?.id ?? containerId}

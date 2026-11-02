@@ -278,3 +278,32 @@ Manually verify Docker and journal available/unavailable cases, a host without
 Docker or timeout, SSH failures, zero versus unknown sizes, dialog close during
 collection, Refresh, and opening the correct host terminal. Unauthenticated and
 USER requests must fail. The collector must never invoke prune or remove commands.
+
+### Browse container mounts
+
+Select **Browse** beside a mount on a running container to open its read-only
+file drawer. Paths and breadcrumbs are relative to the selected mount.
+Single-file mounts such as `/etc/timezone` or `/etc/localtime` show the mounted
+file as the only entry. Binary files such as `/etc/localtime` display as raw text
+with non-text bytes escaped as `\xNN`; ordinary text such as `/etc/timezone`
+displays normally. Downloads preserve the original bytes. The drawer
+reuses the file browser's history, current-folder search, sorting, and hidden-file
+controls. Click an underlined file name to open a read-only CodeMirror preview in a new
+browser tab. JSON and Markdown have syntax
+highlighting; text and logs have line numbers and a visible search bar with match
+counts, highlighted matches, previous/next controls, Enter/Shift+Enter navigation,
+and Escape to clear. Ctrl/Cmd+F focuses the file search bar. Binary files use the same editor with an escaped raw-text view. Use the compact download icon to save a file directly. Check individual files or the header checkbox to select all visible regular
+files in the current folder. The compact toolbar downloads one selected file
+unchanged or multiple files together as `volume-files.zip`. Selection clears when
+changing folders. ZIP downloads stop at 25 MiB of total file contents. Symlinks
+are listed but cannot be opened in the drawer.
+
+The backend validates the mount against a fresh Docker inspection, reads through
+the container's default user, and rejects resolved paths outside that mount.
+It requires `sh`, `stat`, and `readlink`; file reads also require `head` and
+`base64`. Directory listings stop at 1,000 entries and individual downloads at 5 MiB.
+Text previews display the entire file up to 5 MiB. Larger files show a
+“too large to display” notice without fetching or rendering partial contents.
+Growing logs use the size measured when opened as a snapshot boundary; refresh
+to load newer content. Stopped containers and missing tools, paths,
+or read permissions show errors without modifying the container or its files.

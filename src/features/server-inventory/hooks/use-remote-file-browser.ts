@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RemoteFileListing } from "@/features/server-inventory/utils/terminal-file-browser";
+import { getErrorMessage } from "@/lib/error-handler";
 
 function nextHistory(
   current: { paths: string[]; index: number },
@@ -38,6 +39,8 @@ export function useRemoteFileBrowser(
     mounted.current = true;
     return () => {
       mounted.current = false;
+      generation.current += 1;
+      pending.current = false;
     };
   }, []);
 
@@ -71,10 +74,10 @@ export function useRemoteFileBrowser(
           nextHistory(current, result.path, historyIndex)
         );
       } catch (failure) {
-        const message =
-          failure instanceof Error ? failure.message : String(failure);
-        if (mounted.current && request === generation.current) {
-          setError(message);
+        const cancelled =
+          failure instanceof Error && failure.name === "AbortError";
+        if (!cancelled && mounted.current && request === generation.current) {
+          setError(getErrorMessage(failure));
         }
       } finally {
         finishRequest(request);

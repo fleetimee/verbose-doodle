@@ -307,6 +307,7 @@ export function ServerContainerDetailPanel({
           containerId={containerId}
           data={ready ? data : undefined}
           loading={!ready}
+          serverHost={entry.host}
           serverId={entry.id}
         />
       )}

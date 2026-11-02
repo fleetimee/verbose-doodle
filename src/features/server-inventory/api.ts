@@ -329,3 +329,31 @@ export async function pruneServerImages(
   }
   return { status: "OK", completedAt: new Date().toISOString() };
 }
+
+export interface ContainerFileListing {
+  content: string | null;
+  entries: import("@/features/server-inventory/utils/terminal-file-browser").RemoteFileEntry[];
+  path: string;
+  status: string;
+  truncated: boolean;
+}
+
+export async function fetchContainerFiles(
+  id: string,
+  containerId: string,
+  mount: string,
+  path: string,
+  mode: "list" | "preview" | "download",
+  signal: AbortSignal
+): Promise<ContainerFileListing> {
+  const query = new URLSearchParams({
+    mount,
+    path,
+    mode,
+  });
+  const response = await apiGet<{ data: ContainerFileListing }>(
+    `${endpoints.detail(id)}/containers/${encodeURIComponent(containerId)}/files?${query}`,
+    { cache: "no-store", signal, timeout: 30_000 }
+  );
+  return response.data;
+}

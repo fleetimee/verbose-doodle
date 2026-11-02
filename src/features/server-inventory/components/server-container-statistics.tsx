@@ -21,6 +21,7 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { metricBytes } from "@/features/server-inventory/components/server-metric-values";
+import { ServerProcessCommand } from "@/features/server-inventory/components/server-process-command";
 import type {
   ServerContainer,
   ServerContainerProcess,
@@ -608,7 +609,7 @@ export function ServerContainerProcessesCard({
             variant="panel"
             viewportClassName="max-h-64"
           >
-            <table className="w-full min-w-max border-collapse text-left text-xs">
+            <table className="w-full min-w-[40rem] border-collapse text-left text-xs">
               <thead>
                 <tr className="border-border/50 border-b bg-muted/20 text-muted-foreground">
                   {PROCESS_COLUMNS.map((col) => (
@@ -689,8 +690,8 @@ export function ServerContainerProcessesCard({
                         <td className="whitespace-nowrap px-3.5 py-2.5 text-muted-foreground tabular-nums">
                           {proc.time}
                         </td>
-                        <td className="px-3.5 py-2.5 text-foreground">
-                          {proc.cmd}
+                        <td className="w-full max-w-0 px-3.5 py-2.5 text-foreground">
+                          <ServerProcessCommand command={proc.cmd} />
                         </td>
                       </tr>
                     ))}

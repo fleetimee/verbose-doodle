@@ -52,6 +52,16 @@ export function useContainerError(
   error: Error | null
 ) {
   const { messages } = useI18n();
+  if (error) {
+    return getErrorMessage(error);
+  }
+  return containerStatusError(status, messages);
+}
+
+export function containerStatusError(
+  status: string | undefined,
+  messages: ReturnType<typeof useI18n>["messages"]
+) {
   const copy = messages.servers.containers;
   const errors = new Map([
     ["HOST_KEY_REQUIRED", messages.servers.metrics.hostKeyRequired],
@@ -66,10 +76,14 @@ export function useContainerError(
     ["CONTAINER_NOT_FOUND", copy.notFound],
     ["INVALID_STATE", copy.invalidState],
     ["ACTION_FAILED", copy.actionFailed],
+    ["FILE_TOO_LARGE", copy.volumeFileTooLarge],
+    ["FILE_PREVIEW_TOO_LARGE", copy.volumePreviewTooLarge],
+    ["PATH_OUTSIDE_MOUNT", copy.volumeOutsideMount],
+    ["FILE_UNAVAILABLE", copy.volumeUnavailable],
+    ["FILE_TOOLS_UNAVAILABLE", copy.volumeMissingTools],
+    ["FILE_PERMISSION_DENIED", copy.volumePermissionDenied],
+    ["FILE_NOT_FOUND", copy.volumeNotFound],
   ]);
-  if (error) {
-    return getErrorMessage(error);
-  }
   if (!status || status === "OK") {
     return;
   }

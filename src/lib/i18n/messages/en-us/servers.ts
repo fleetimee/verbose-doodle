@@ -134,9 +134,44 @@ export const serversMessages = {
     logsHint:
       "Shows the last 200 log lines, then streams new output with timestamps. Keeps the latest 200,000 characters. Pausing or hiding this tab disconnects the stream; resuming reloads the latest logs.",
 
+    volumeBrowse: "Browse",
+    volumePreview: "File preview",
+    volumePreviewFile: "Preview {name} in a new tab",
+    volumePreviewSearch: "Search file…",
+    volumePreviewMatches: "{current} of {total} matches",
+    volumePreviewDescription: "Read-only preview of a container volume file.",
+    volumePreviewLoading: "Loading file preview…",
+    volumeInvalidPreview: "The preview link is missing its mount or file path.",
+    volumeTitle: "Volume files",
+    volumeDescription:
+      "Read-only. Click a file name to preview it in a new tab, use its download icon, or select files to download together.",
+    volumeDownloadSelected: "Download ({count})",
+    volumeSelectAll: "Select all visible files",
+    volumeSelectFile: "Select {name}",
+    volumeDownloadFile: "Download {name}",
+    volumeBatchTooLarge:
+      "Selected files exceed the 25 MiB ZIP limit. Select fewer files.",
+    volumeDownload: "Download file",
+    volumePreviewTooLarge:
+      "This file is too large to display. File previews support up to 5 MiB.",
+    volumeFileTooLarge: "This file exceeds the 5 MiB download limit.",
+    volumeOutsideMount: "This path leads outside the selected mount.",
+    volumeMissingTools:
+      "Required file-browsing tools are missing from this container.",
+    volumePermissionDenied:
+      "The container user does not have permission to read this path.",
+    volumeNotFound: "This file or folder no longer exists inside the mount.",
+    volumeUnavailable:
+      "Files are unavailable. The container must be running with sh, stat, readlink, head, and base64, and its user needs read access.",
+    volumeBinary:
+      "Binary file shown as raw text. Non-text bytes are escaped; downloads preserve the original file.",
     installedSoftware: "Installed software",
-    softwareDescription: "Common tools available on the container user’s PATH.",
-    softwareEmpty: "None of the common tools checked were detected.",
+    softwareDescription:
+      "Installed packages and executables found on the container user’s PATH.",
+    softwareEmpty: "No installed packages or PATH executables were detected.",
+    softwareSearch: "Search installed packages…",
+    softwareFilter: "Filter by notable software",
+    softwareNoMatches: "No installed packages match your search or filters.",
     softwareUnavailable:
       "Software detection is unavailable. The container must be running with a working sh shell.",
     inspectTitle: "Inspect",
@@ -155,6 +190,8 @@ export const serversMessages = {
     networkUsageChart: "Network usage (aggregate)",
     ioUsageChart: "I/O usage (aggregate)",
     processesTitle: "Processes",
+    processCommand: "Full command",
+    processCommandCopy: "Copy command",
     processesSearch: "Search processes…",
     processesEmpty: "No running processes reported for this container.",
     hostTerminal: "Host SSH",
