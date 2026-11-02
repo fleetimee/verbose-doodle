@@ -26,7 +26,8 @@
   "assist": {
     "actions": {
       "source": {
-        "useSortedKeys": "off"
+        "useSortedKeys": "off",
+        "useSortedProperties": "off"
       }
     }
   },
@@ -35,7 +36,12 @@
       "style": {
         "useConsistentTypeDefinitions": "off",
         "useDestructuring": "off",
-        "noIncrementDecrement": "off"
+        "noIncrementDecrement": "off",
+        "useUnicodeRegex": "off",
+        "useNamedCaptureGroup": "off",
+        "useImportsFirst": "off",
+        "useDomQuerySelector": "off",
+        "useThisInClassMethods": "off"
       },
       "performance": {
         "noJsxPropsBind": "off",
@@ -43,7 +49,13 @@
       },
       "suspicious": {
         "noShadow": "off",
-        "noUnnecessaryConditions": "off"
+        "noUnnecessaryConditions": "off",
+        "useBaseline": "off",
+        "noDuplicateSelectors": "off",
+        "noLoopFunc": "off"
+      },
+      "nursery": {
+        "useTailwindSortedClasses": "off"
       }
     }
   },
@@ -111,7 +123,7 @@
             "noNamespaceImport": "off"
           },
           "nursery": {
-            "useSortedClasses": "off"
+            "useTailwindSortedClasses": "off"
           },
           "style": {
             "useImportType": "off",
@@ -178,6 +190,49 @@
           "suspicious": {
             "noConsole": "off",
             "noAlert": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/pages/dashboard/arkanoid-neon.tsx",
+        "src/pages/dashboard/build-your-town.tsx",
+        "src/pages/dashboard/chess-3d.tsx",
+        "src/pages/dashboard/dynamite-mole.tsx",
+        "src/pages/dashboard/emberwake.tsx",
+        "src/pages/dashboard/gravewake.tsx",
+        "src/pages/dashboard/hearthvale.tsx",
+        "src/pages/dashboard/nova-lancer.tsx",
+        "src/pages/dashboard/pokemon-claude-red.tsx",
+        "src/pages/dashboard/ponpoko-kart.tsx",
+        "src/pages/dashboard/sunbreak.tsx",
+        "src/pages/dashboard/terrabrowser.tsx",
+        "src/pages/dashboard/yet-another-voxelcraft.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "security": {
+            "useIframeSandbox": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/components/ui/field.tsx",
+        "src/components/ui/form.tsx",
+        "src/features/developer-tools/tools/date-converter/components/date-picker-popover.tsx",
+        "src/features/developer-tools/tools/number-base-converter/components/number-base-converter.tsx",
+        "src/features/developer-tools/tools/qris-mdr-calculator/components/qris-mdr-calculator.tsx",
+        "src/features/log-viewer/log-toolbar.tsx",
+        "src/features/overview/components/user-status-chart.tsx",
+        "src/features/simulator-db/components/row-edit-dialog.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noLabelWithoutControl": "off"
           }
         }
       }

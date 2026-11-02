@@ -8,6 +8,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        "image-inspect": "text-muted-foreground transition-all hover:bg-accent hover:text-foreground active:scale-95 dark:hover:bg-accent/50",
         "pattern-dot": "rounded-full hover:bg-accent aria-pressed:bg-primary/10 aria-pressed:text-primary",
         "qr-upload": "rounded-xl border border-dashed font-medium text-xs hover:border-primary/50 hover:bg-muted/50 data-[drag-active=true]:ring-2 data-[drag-active=true]:ring-ring",
         "biller-group-action": "biller-group-action rounded-full border border-border/50 bg-background/40 text-muted-foreground shadow-none hover:border-primary/40 hover:bg-primary/10 hover:text-primary focus-visible:border-primary/50",
@@ -80,6 +81,7 @@ const buttonVariants = cva(
           "text-muted-foreground underline-offset-4 hover:text-foreground hover:underline",
       },
       size: {
+        "image-inspect": "h-7 gap-1 rounded-md px-2.5 text-xs [&_svg:not([class*='size-'])]:size-3",
         selection: "h-9 rounded-xl px-4 text-sm font-normal",
         "grid-icon": "size-5 rounded-sm p-0 [&_svg:not([class*='size-'])]:size-3",
         "database-cell": "database-cell-value",

@@ -401,7 +401,7 @@ export function DashboardLayout() {
               >
                 <header
                   className={cn(
-                    "relative sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2.5 border-b bg-card/95 px-3 backdrop-blur after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-2 after:h-2 after:bg-gradient-to-b after:from-foreground/10 after:to-transparent after:opacity-0 after:transition-opacity after:duration-200 after:ease-out supports-backdrop-filter:bg-card/80 motion-reduce:after:duration-0 sm:px-4",
+                    "relative sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2.5 border-b bg-card/95 px-3 backdrop-blur after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-2 after:h-2 after:bg-linear-to-b after:from-foreground/10 after:to-transparent after:opacity-0 after:transition-opacity after:duration-200 after:ease-out supports-backdrop-filter:bg-card/80 motion-reduce:after:duration-0 sm:px-4",
                     isHeaderScrolled && "after:opacity-100"
                   )}
                 >

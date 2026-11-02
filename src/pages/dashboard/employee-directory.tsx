@@ -435,10 +435,7 @@ export function EmployeeDirectoryPage() {
                     <li className="list-none" key={employee.nrp}>
                       {index > 0 ? <ItemSeparator /> : null}
                       <Item
-                        className={cn(
-                          "w-full flex-nowrap items-start rounded-none border-0 text-left hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 focus-visible:ring-0 disabled:cursor-wait",
-                          selectedNrp === employee.nrp && "bg-primary/5"
-                        )}
+                        className="w-full flex-nowrap items-start text-left disabled:cursor-wait"
                         render={
                           <button
                             aria-controls="employee-profile"
@@ -451,6 +448,11 @@ export function EmployeeDirectoryPage() {
                           />
                         }
                         size="sm"
+                        variant={
+                          selectedNrp === employee.nrp
+                            ? "directory-row-selected"
+                            : "directory-row"
+                        }
                       >
                         <ItemMedia className="translate-y-0!">
                           <EmployeeInitials name={employee.name} />

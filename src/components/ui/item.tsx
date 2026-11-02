@@ -36,6 +36,8 @@ const itemVariants = cva(
   {
     variants: {
       variant: {
+        "directory-row": "rounded-none border-0 hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 focus-visible:ring-0",
+        "directory-row-selected": "rounded-none border-0 bg-primary/5 hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 focus-visible:ring-0",
         default: "bg-transparent",
         outline: "border-border",
         muted: "bg-muted/50",

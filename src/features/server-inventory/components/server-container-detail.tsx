@@ -128,7 +128,7 @@ function ContainerIdentity({
   const imageTargetId = inspectImageId(data?.inspect);
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3.5">
-      <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-gradient-to-b from-primary/15 to-primary/5 text-primary shadow-2xs">
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-linear-to-b from-primary/15 to-primary/5 text-primary shadow-2xs">
         <SiDocker aria-hidden="true" className="size-7" />
       </div>
       <div className="flex min-w-0 flex-col gap-1">

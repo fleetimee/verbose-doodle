@@ -304,7 +304,7 @@ export function ExportEndpointsDialog({
         <div className="relative border-b bg-muted/25 px-6 py-5">
           <div
             aria-hidden="true"
-            className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary/75 to-transparent"
+            className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-transparent via-primary/75 to-transparent"
           />
           <DialogHeader className="relative" size="relaxed">
             <div className="flex items-start gap-4 pr-8">

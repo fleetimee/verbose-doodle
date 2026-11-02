@@ -29,7 +29,7 @@ const LINES = Array.from({ length: 40 }, (_, id) => ({
 
 export function LogContentSkeleton({
   announce = true,
-  fontClassName = "text-[10px]",
+  fontClassName = "text-log",
 }: {
   announce?: boolean;
   fontClassName?: string;

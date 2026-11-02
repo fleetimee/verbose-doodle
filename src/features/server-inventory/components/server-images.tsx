@@ -454,14 +454,14 @@ export function ServerImagesPanel({
                           <TableCell className="text-right">
                             <Button
                               aria-label={`${copy.inspect}: ${row.Repository}:${row.Tag}`}
-                              className="group/btn h-7 px-2.5 text-muted-foreground text-xs transition-all hover:text-foreground active:scale-95"
+                              className="group/btn"
                               render={
                                 <Link
                                   to={`/dashboard/server-metrics/${entry.id}/images/${encodeURIComponent(row.ID ?? "")}${detailParams.size ? `?${detailParams}` : ""}`}
                                 />
                               }
-                              size="xs"
-                              variant="ghost"
+                              size="image-inspect"
+                              variant="image-inspect"
                             >
                               {copy.inspect}
                               <ChevronRight

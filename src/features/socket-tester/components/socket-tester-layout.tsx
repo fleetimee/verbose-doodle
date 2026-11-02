@@ -395,7 +395,7 @@ export function SocketTesterLayout({
         <motion.div
           animate={traceAnimate}
           aria-hidden="true"
-          className="absolute -bottom-px left-0 h-px w-full origin-left bg-gradient-to-r from-transparent via-primary to-transparent will-change-transform"
+          className="absolute -bottom-px left-0 h-px w-full origin-left bg-linear-to-r from-transparent via-primary to-transparent will-change-transform"
           initial={traceInitial}
           transition={
             shouldReduceMotion

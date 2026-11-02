@@ -280,6 +280,7 @@
 }
 
 @theme inline {
+  --text-log: 10px;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
