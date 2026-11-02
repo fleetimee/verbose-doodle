@@ -329,8 +329,16 @@ function buildMountRows(
   onBrowse: (mount: string) => void,
   serverId?: string
 ): DetailRow[] {
+  const mounts = data?.mounts
+    ? [...data.mounts].sort(
+        (a, b) =>
+          a.destination.localeCompare(b.destination) ||
+          a.source.localeCompare(b.source)
+      )
+    : [];
+
   return (
-    data?.mounts.map((mount, index) => ({
+    mounts.map((mount, index) => ({
       id: `${mount.destination}-${String(index)}`,
       label: (
         <span className="inline-flex items-baseline gap-2">
