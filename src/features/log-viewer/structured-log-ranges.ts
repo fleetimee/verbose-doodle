@@ -1,13 +1,17 @@
+import { DBS_LOG_LINE } from "@/features/log-viewer/dbs-log-payload";
 import { inspectLogTokens } from "@/features/log-viewer/inspect-log-payload";
+import { SIG_LOG_HEADER } from "@/features/log-viewer/sig-log-payload";
 
 interface StructuredLogRange {
   end: number;
-  kind: "json" | "inspect";
+  kind: "json" | "inspect" | "dbs" | "sig";
   start: number;
 }
 
 const ISO_FIELD_LABEL = /^\[\d{1,3}\]$/;
 const FIELD_SEPARATOR = /^[ \t]*:/;
+const NEXT_LOG_RECORD =
+  /\r?\n\[(?:\d{2}\/\d{2}\/\d{4}[ \t]+)?\d{2}:\d{2}:\d{2}(?:\.\d+)?\][ \t]+/;
 
 function quotedStringEnd(text: string, start: number): number {
   for (let index = start + 1; index < text.length; index++) {
@@ -57,9 +61,40 @@ function isIsoFieldLabel(text: string, start: number, end: number): boolean {
   );
 }
 
+function logRecordRange(
+  text: string,
+  start: number,
+  dbsLine: RegExp,
+  sigHeader: RegExp
+): StructuredLogRange | null {
+  sigHeader.lastIndex = start;
+  const sigMatch = sigHeader.exec(text);
+  if (sigMatch) {
+    const bodyStart = start + sigMatch[0].length;
+    const next = text.slice(bodyStart).search(NEXT_LOG_RECORD);
+    const end = next < 0 ? text.length : bodyStart + next;
+    return { start, end, kind: "sig" };
+  }
+  dbsLine.lastIndex = start;
+  const dbsMatch = dbsLine.exec(text);
+  return dbsMatch
+    ? { start, end: start + dbsMatch[0].length, kind: "dbs" }
+    : null;
+}
+
 export function findStructuredLogRanges(text: string): StructuredLogRange[] {
   const ranges: StructuredLogRange[] = [];
+  const dbsLine = new RegExp(DBS_LOG_LINE);
+  const sigHeader = new RegExp(SIG_LOG_HEADER);
   for (let index = 0; index < text.length; index++) {
+    if (index === 0 || text[index - 1] === "\n") {
+      const record = logRecordRange(text, index, dbsLine, sigHeader);
+      if (record) {
+        ranges.push(record);
+        index = record.end - 1;
+        continue;
+      }
+    }
     if (text[index] !== "{" && text[index] !== "[") {
       continue;
     }

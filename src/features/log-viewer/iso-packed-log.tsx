@@ -2,7 +2,9 @@ import type { ReactNode } from "react";
 import { isoFieldColor } from "@/features/log-viewer/iso-log-colors";
 
 const PACKED_LINE =
-  /^(\[[^\]\r\n]+\][ \t]+[RS][ \t]+)([012][0-9]{3})([0-9a-f]{16})([^\r\n]*)(\r?)$/gim;
+  /^(\[[^\]\r\n]+\][ \t]+[RS][ \t]+(?:[\w.-]+[ \t]+LENGTH:[ \t]*MATCH[ \t]+)?)([^\r\n]+)(\r?)$/gim;
+const PACKED_MESSAGE = /^([012][0-9]{3})([0-9a-f]{16})(.*)$/i;
+const MESSAGE_LENGTH = /^\d{4}$/;
 const HEX_16 = /^[0-9a-f]{16}$/i;
 const DUMP_LINE =
   /^[ \t]*\[(MTI|\d{1,3})\][ \t]*:[ \t]*(['"])(.*)\2(?:[ \t]+\(\d+\))?[ \t]*\r?$/gim;
@@ -98,7 +100,16 @@ export function highlightPackedLogs(
   const output: ReactNode[] = [];
   let offset = 0;
   for (const match of text.matchAll(PACKED_LINE)) {
-    const [line, prefix, mti, primary, remainder, ending] = match;
+    const [line, prefix, wire, ending] = match;
+    const lengthPrefix = wire.slice(0, 4);
+    const hasLength =
+      MESSAGE_LENGTH.test(lengthPrefix) &&
+      Number(lengthPrefix) === wire.length - 4;
+    const message = PACKED_MESSAGE.exec(hasLength ? wire.slice(4) : wire);
+    if (!message) {
+      continue;
+    }
+    const [, mti, primary, remainder] = message;
     const hasSecondary = Number.parseInt(primary[0], 16) >= 8;
     const secondary = hasSecondary ? remainder.slice(0, 16) : "";
     if (hasSecondary && !HEX_16.test(secondary)) {
@@ -114,6 +125,11 @@ export function highlightPackedLogs(
     output.push(
       <span key={match.index}>
         {prefix}
+        {hasLength && (
+          <span className="iso8583-syntax-length" title="Message length">
+            {lengthPrefix}
+          </span>
+        )}
         <span className={isoFieldColor(0, mti)} title="MTI">
           {mti}
         </span>
