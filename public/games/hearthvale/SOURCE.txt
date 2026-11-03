@@ -1,5 +1,10 @@
 Hearthvale by duolahypercho
 https://github.com/duolahypercho/hearthvale
-Source commit: 9a66ae32c26406fc9577a8dd694e9e0d0628a89b
-Local changes: single-player only; relative asset paths; remove external fonts; game activity script.
+Source commit: e7f7ac973c0ab5efe968a5067beea93e2645761c
+Local changes: single-player only (omit NetSystem startup and Co-op title action); relative asset paths; remove external fonts; game activity script.
+Save storage: hearthvale.save.<slot>, upstream save version 1 (unchanged).
 No upstream project license file or package license is declared at this revision.
+
+Rebuild: check out the source commit above in a temporary directory, apply integration.patch,
+run bun install and bun run build --base=./, then replace index.html and assets/ with dist/.
+Preserve SOURCE.txt, integration.patch, THREE-LICENSE, and the shared ../activity.js.

@@ -1,0 +1,94 @@
+diff --git a/index.html b/index.html
+index e6a8d84..14301e0 100644
+--- a/index.html
++++ b/index.html
+@@ -5,9 +5,7 @@
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <title>Hearthvale</title>
+     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8 8 2l6 6v6H2z' fill='%23c86c4e'/%3E%3C/svg%3E" />
+-    <link rel="preconnect" href="https://fonts.googleapis.com" />
+-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
++    <script src="../activity.js"></script>
+   </head>
+   <body>
+     <div id="app"></div>
+diff --git a/src/core/game.ts b/src/core/game.ts
+index 3f96a33..e53fbc5 100644
+--- a/src/core/game.ts
++++ b/src/core/game.ts
+@@ -49,7 +49,6 @@ import { CutsceneSystem } from '../systems/cutscene';
+ import { StorySystem } from '../systems/story';
+ import { LanternHallSystem } from '../systems/story-hall';
+ import { StoryWorldSystem } from '../systems/story-world';
+-import { NetSystem } from '../net/system';
+ import { DropsSystem } from '../systems/drops';
+ import { ForestCoopSystem } from '../world/forest/coop';
+ import { KintaraSystem } from '../systems/kintara';
+@@ -82,7 +81,6 @@ const SYSTEMS: (() => System)[] = [
+   () => new LanternHallSystem(),
+   () => new StoryWorldSystem(),
+   () => new StorySystem(),
+-  () => new NetSystem(),
+   () => new ForestCoopSystem(),
+   () => new KintaraSystem(),
+ ];
+diff --git a/src/ui/journal-cutscene.ts b/src/ui/journal-cutscene.ts
+index bdb4b27..5ff04e5 100644
+--- a/src/ui/journal-cutscene.ts
++++ b/src/ui/journal-cutscene.ts
+@@ -23,14 +23,7 @@ export interface ChoiceOption {
+ 
+ export type Backdrop = 'coach';
+ 
+-export function loadStoryFonts(): void {
+-  if (document.getElementById('hv-story-fonts')) return;
+-  const l = document.createElement('link');
+-  l.id = 'hv-story-fonts';
+-  l.rel = 'stylesheet';
+-  l.href = 'https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Cormorant+Garamond:ital,wght@0,600;1,500;1,600&display=swap';
+-  document.head.appendChild(l);
+-}
++export function loadStoryFonts(): void {}
+ 
+ /** Padlock glyph for a farmhand's locked choice cards. */
+ const LOCK = '<svg class="cin-lock" viewBox="0 0 16 18" aria-hidden="true"><path d="M4.5 8V5.5a3.5 3.5 0 0 1 7 0V8" fill="none" stroke="currentColor" stroke-width="2"/><rect x="2" y="8" width="12" height="9" rx="2" fill="currentColor"/><circle cx="8" cy="12.3" r="1.4" fill="#2a1a0e"/></svg>';
+diff --git a/src/ui/kit.ts b/src/ui/kit.ts
+index 15716f1..b617260 100644
+--- a/src/ui/kit.ts
++++ b/src/ui/kit.ts
+@@ -195,14 +195,6 @@ export function installTextures(): void {
+   } catch {
+     /* canvas blocked: plain gradients still look fine */
+   }
+-  // Handwriting face for letters / notes (Google Fonts is the only allowed network asset).
+-  if (!document.querySelector('link[data-hv-font]')) {
+-    const l = document.createElement('link');
+-    l.rel = 'stylesheet';
+-    l.dataset.hvFont = '1';
+-    l.href = 'https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap';
+-    document.head.appendChild(l);
+-  }
+   // Keyboard vs pointer mode (focus rings only for keyboard / gamepad users).
+   window.addEventListener('pointermove', () => document.body.classList.remove('u-kbd'), { passive: true });
+ }
+diff --git a/src/ui/title.ts b/src/ui/title.ts
+index 87d5cd1..2f885f7 100644
+--- a/src/ui/title.ts
++++ b/src/ui/title.ts
+@@ -124,7 +124,6 @@ export class TitlePanel extends Screen {
+       ['new', 'New Game', 'sprout', 'Begin your story', true],
+       ['continue', 'Continue', 'play', latest ? latest.label : 'No journal yet', !!latest],
+       ['load', 'Load', 'door', latest ? 'Pick a journal' : 'Nothing saved', !!latest],
+-      ['coop', 'Co-op', 'people', 'Farm with friends', true],
+       ['settings', 'Options', 'gear', 'Sound & graphics', true],
+       ['credits', 'Credits', 'quill', 'Who made this', true],
+     ];
+@@ -170,7 +169,6 @@ export class TitlePanel extends Screen {
+     }
+     sfx(this.game, 'click');
+     if (a === 'credits') return this.credits(true);
+-    if (a === 'coop') return this.game.events.emit('ui:open', { name: 'coop:title' });
+     if (a === 'settings') return this.game.events.emit('ui:open', { name: 'settings:title' });
+     if (a === 'load') return this.game.events.emit('ui:open', { name: 'saves:load:title' });
+     if (a === 'continue') {
