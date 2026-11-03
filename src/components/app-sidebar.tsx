@@ -392,6 +392,20 @@ export function getSidebarData(
             url: "/dashboard/games",
           },
           {
+            groupLabel: messages.common.gamesMultiplayer,
+            icon: Chess3dIcon,
+            description: messages.common.chess3dDescription,
+            title: messages.common.chess3dTitle,
+            url: "/dashboard/games/chess-3d",
+          },
+          {
+            icon: HearthvaleIcon,
+            description: messages.common.hearthvaleDescription,
+            title: messages.common.hearthvaleTitle,
+            url: "/dashboard/games/hearthvale",
+          },
+          {
+            groupLabel: messages.common.gamesSinglePlayer,
             icon: FallLinesIcon,
             description: messages.common.fallLineDescription,
             title: messages.common.fallLineTitle,
@@ -422,12 +436,6 @@ export function getSidebarData(
             url: "/dashboard/games/build-your-town",
           },
           {
-            icon: Chess3dIcon,
-            description: messages.common.chess3dDescription,
-            title: messages.common.chess3dTitle,
-            url: "/dashboard/games/chess-3d",
-          },
-          {
             icon: NovaLancerIcon,
             description: messages.common.novaLancerDescription,
             title: messages.common.novaLancerTitle,
@@ -444,12 +452,6 @@ export function getSidebarData(
             description: messages.common.arkanoidNeonDescription,
             title: messages.common.arkanoidNeonTitle,
             url: "/dashboard/games/arkanoid-neon",
-          },
-          {
-            icon: HearthvaleIcon,
-            description: messages.common.hearthvaleDescription,
-            title: messages.common.hearthvaleTitle,
-            url: "/dashboard/games/hearthvale",
           },
           {
             icon: GravewakeIcon,

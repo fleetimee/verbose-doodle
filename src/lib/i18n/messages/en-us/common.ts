@@ -31,6 +31,8 @@ export const commonMessages = {
     other:
       "Editors and games also provide their own contextual keyboard controls.",
   },
+  gamesMultiplayer: "Multiplayer & co-op",
+  gamesSinglePlayer: "Single-player",
   gamesBrowse: "Browse games",
   gamesDescription: "Pick a game and jump straight in.",
   gamesFeatured: "Featured game",
@@ -44,7 +46,8 @@ export const commonMessages = {
   buildYourTownTitle: "Build Your Town",
   buildYourTownDescription: "Build and manage your own growing city.",
   chess3dTitle: "3D Chess",
-  chess3dDescription: "Play chess against the computer in 3D or 2D.",
+  chess3dDescription:
+    "Play chess against the computer or a friend in 3D or 2D.",
   novaLancerTitle: "Nova Lancer",
   novaLancerDescription: "Pilot your fighter through a 3D space mission.",
   sunbreakTitle: "Sunbreak Downhill",
@@ -154,7 +157,7 @@ export const commonMessages = {
   },
   hearthvaleTitle: "Hearthvale",
   hearthvaleDescription:
-    "Grow your farm and explore the valley in single-player.",
+    "Grow your farm and explore the valley solo or in co-op.",
   emberwakeTitle: "Emberwake",
   emberwakeDescription: "Keep your lantern burning and survive until dawn.",
   ponpokoKartTitle: "Ponpoko Kart",

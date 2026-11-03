@@ -29,6 +29,8 @@ export const commonMessages = {
     unlock: "Buka kunci layar",
     other: "Editor dan game juga memiliki kontrol keyboard sesuai konteks.",
   },
+  gamesMultiplayer: "Multipemain & kooperatif",
+  gamesSinglePlayer: "Pemain tunggal",
   gamesBrowse: "Jelajahi gim",
   gamesDescription: "Pilih gim dan langsung mainkan.",
   gamesFeatured: "Gim pilihan",
@@ -42,7 +44,8 @@ export const commonMessages = {
   buildYourTownTitle: "Build Your Town",
   buildYourTownDescription: "Bangun dan kelola kotamu yang terus berkembang.",
   chess3dTitle: "3D Chess",
-  chess3dDescription: "Main catur melawan komputer dalam tampilan 3D atau 2D.",
+  chess3dDescription:
+    "Main catur melawan komputer atau teman dalam tampilan 3D atau 2D.",
   novaLancerTitle: "Nova Lancer",
   novaLancerDescription:
     "Terbangkan pesawat tempurmu dalam misi luar angkasa 3D.",
@@ -154,7 +157,7 @@ export const commonMessages = {
   },
   hearthvaleTitle: "Hearthvale",
   hearthvaleDescription:
-    "Kembangkan pertanianmu dan jelajahi lembah dalam mode pemain tunggal.",
+    "Kembangkan pertanianmu dan jelajahi lembah sendiri atau bersama teman.",
   emberwakeTitle: "Emberwake",
   emberwakeDescription: "Jaga lentera tetap menyala dan bertahan hingga fajar.",
   ponpokoKartTitle: "Ponpoko Kart",

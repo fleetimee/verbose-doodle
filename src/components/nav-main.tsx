@@ -1,6 +1,6 @@
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import type { HugeIcon } from "@/components/hugeicons";
 import {
@@ -28,6 +28,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
@@ -36,6 +37,7 @@ import {
 } from "@/lib/keyboard-shortcuts";
 
 export type NavMainSubItem = {
+  groupLabel?: string;
   title: string;
   url: string;
   icon: HugeIcon;
@@ -246,29 +248,38 @@ function NavMenuItem({
                   currentPath.startsWith(`${subItem.url}/`);
                 const childKey = childShortcutKeys[index];
                 return (
-                  <DropdownMenuItem
-                    aria-current={isActive ? "page" : undefined}
-                    aria-keyshortcuts={
-                      childKey ? `Alt+${childKey.toUpperCase()}` : undefined
-                    }
-                    key={subItem.url}
-                    render={
-                      <Link
-                        onFocus={subItem.onPrefetch}
-                        onMouseEnter={subItem.onPrefetch}
-                        to={subItem.url}
-                      />
-                    }
-                    variant="nav"
-                  >
-                    <subItem.icon />
-                    <span className="flex-1">{subItem.title}</span>
-                    {isAltHeld && childKey ? (
-                      <Kbd aria-hidden="true">
-                        {formatOptionShortcut(childKey.toUpperCase())}
-                      </Kbd>
+                  <Fragment key={subItem.url}>
+                    {subItem.groupLabel ? (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel size="relaxed" variant="subtle">
+                          {subItem.groupLabel}
+                        </DropdownMenuLabel>
+                      </>
                     ) : null}
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      aria-current={isActive ? "page" : undefined}
+                      aria-keyshortcuts={
+                        childKey ? `Alt+${childKey.toUpperCase()}` : undefined
+                      }
+                      render={
+                        <Link
+                          onFocus={subItem.onPrefetch}
+                          onMouseEnter={subItem.onPrefetch}
+                          to={subItem.url}
+                        />
+                      }
+                      variant="nav"
+                    >
+                      <subItem.icon />
+                      <span className="flex-1">{subItem.title}</span>
+                      {isAltHeld && childKey ? (
+                        <Kbd aria-hidden="true">
+                          {formatOptionShortcut(childKey.toUpperCase())}
+                        </Kbd>
+                      ) : null}
+                    </DropdownMenuItem>
+                  </Fragment>
                 );
               })}
             </DropdownMenuGroup>
@@ -318,6 +329,14 @@ function NavMenuItem({
               const childShortcutKey = childShortcutKeys[subItemIndex];
               return (
                 <SidebarMenuSubItem key={subItem.title}>
+                  {subItem.groupLabel ? (
+                    <>
+                      <SidebarSeparator className="mt-2 mb-1" />
+                      <SidebarGroupLabel>
+                        {subItem.groupLabel}
+                      </SidebarGroupLabel>
+                    </>
+                  ) : null}
                   <SidebarMenuSubButton
                     aria-current={isSubActive ? "page" : undefined}
                     aria-keyshortcuts={
