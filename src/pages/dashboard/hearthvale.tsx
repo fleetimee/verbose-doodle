@@ -22,7 +22,7 @@ export function HearthvalePage() {
         <GameFullscreenButton frameRef={frameRef} />
       </header>
       <iframe
-        allow="fullscreen"
+        allow="fullscreen; clipboard-write"
         className="aspect-video max-h-[75dvh] min-h-80 w-full rounded-lg border [&:fullscreen]:h-dvh [&:fullscreen]:max-h-none [&:fullscreen]:rounded-none [&:fullscreen]:border-0"
         data-game-frame=""
         ref={frameRef}

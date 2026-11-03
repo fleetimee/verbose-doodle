@@ -87,7 +87,8 @@ export const commonMessages = {
     reconnect: "Reconnecting… Your game is held for two minutes.",
     retry: "Reconnect",
     waiting: "Waiting for your opponent",
-    share: "Share this code with a signed-in friend.",
+    share:
+      "Share this code with another player, or join from another tab using the same account.",
     you: "You",
     opponent: "Opponent",
     yourTurn: "YOUR TURN",

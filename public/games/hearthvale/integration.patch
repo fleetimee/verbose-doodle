@@ -1,12 +1,13 @@
 diff --git a/index.html b/index.html
-index e6a8d84..14301e0 100644
+index e6a8d84..028d7de 100644
 --- a/index.html
 +++ b/index.html
-@@ -8,3 +8 @@
+@@ -8,3 +8,2 @@
 -    <link rel="preconnect" href="https://fonts.googleapis.com" />
 -    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 -    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
 +    <script src="../activity.js"></script>
++    <script src="../clipboard.js"></script>
 diff --git a/src/net/transport.ts b/src/net/transport.ts
 index b188f97..eef3c36 100644
 --- a/src/net/transport.ts
@@ -82,10 +83,17 @@ index b188f97..eef3c36 100644
 @@ -280,0 +319 @@ export class Transport {
 +    this.connectionAttempt?.abort();
 diff --git a/src/ui/coop.ts b/src/ui/coop.ts
-index fc0bac0..cc50b11 100644
+index fc0bac0..cede4f3 100644
 --- a/src/ui/coop.ts
 +++ b/src/ui/coop.ts
-@@ -661,16 +661 @@ class CoopScreen extends Screen {
+@@ -0,0 +1,6 @@
++declare global {
++  interface Window {
++    copyGameText: (text: string) => Promise<boolean>;
++  }
++}
++
+@@ -661,16 +667 @@ class CoopScreen extends Screen {
 -    const server = el('details', 'coop-server');
 -    server.innerHTML = `<summary>Server</summary>`;
 -    const si = el('input', 'coop-input small');
@@ -103,9 +111,25 @@ index fc0bac0..cc50b11 100644
 -    server.appendChild(el('small', '', 'Run <code>npm run server</code> on the host machine (port 8787).'));
 -    body.append(hostCard, joinCard, server);
 +    body.append(hostCard, joinCard);
-@@ -700 +685 @@ class CoopScreen extends Screen {
+@@ -700 +691 @@ class CoopScreen extends Screen {
 -      this.err = `${(e as Error).message} — is <code>npm run server</code> running?`;
 +      this.err = (e as Error).message;
+@@ -724,4 +715,11 @@ class CoopScreen extends Screen {
+-    copy.addEventListener('click', () => {
+-      void navigator.clipboard?.writeText(code).catch(() => {});
+-      copy.querySelector('span')!.textContent = 'Copied!';
+-      sfx(this.game, 'coin');
++    copy.addEventListener('click', async () => {
++      const copied = await window.copyGameText(code);
++      copy.querySelector('span')!.textContent = copied ? 'Copied!' : 'Select code to copy';
++      if (copied) sfx(this.game, 'coin');
++      else {
++        const range = document.createRange();
++        range.selectNodeContents(codeBox.querySelector('.tiles')!);
++        const selection = window.getSelection();
++        selection?.removeAllRanges();
++        selection?.addRange(range);
++      }
 diff --git a/src/ui/journal-cutscene.ts b/src/ui/journal-cutscene.ts
 index bdb4b27..5ff04e5 100644
 --- a/src/ui/journal-cutscene.ts

@@ -87,7 +87,8 @@ export const commonMessages = {
     reconnect: "Menghubungkan kembali… Permainan disimpan selama dua menit.",
     retry: "Hubungkan kembali",
     waiting: "Menunggu lawan",
-    share: "Bagikan kode ini kepada teman yang sudah masuk.",
+    share:
+      "Bagikan kode ini kepada pemain lain, atau bergabung dari tab lain menggunakan akun yang sama.",
     you: "Anda",
     opponent: "Lawan",
     yourTurn: "GILIRAN ANDA",

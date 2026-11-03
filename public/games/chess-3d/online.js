@@ -25,6 +25,16 @@
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
   }
 
+  const playerId = (() => {
+    try {
+      const saved = sessionStorage.getItem('atelier-online-player');
+      if (saved) return saved;
+      const id = requestId();
+      sessionStorage.setItem('atelier-online-player', id);
+      return id;
+    } catch { return requestId(); }
+  })();
+
   function remember(code) {
     try {
       if (code) sessionStorage.setItem('atelier-online-room', code);
@@ -105,7 +115,7 @@
       socket = ws;
       handshakeTimer = setTimeout(() => ws.close(), 10000);
       ws.onopen = () => {
-        if (attempt === generation) ws.send(JSON.stringify(intent));
+        if (attempt === generation) ws.send(JSON.stringify({...intent, playerId}));
       };
       ws.onmessage = (event) => {
         if (attempt !== generation) return;
@@ -258,7 +268,8 @@
   el('online-code').oninput = () => { el('online-code').value = el('online-code').value.toUpperCase().replace(/[^A-Z0-9]/g, ''); };
   el('online-copy').onclick = async () => {
     try {
-      await navigator.clipboard.writeText(el('online-room').value);
+      if (!await window.copyGameText(el('online-room').value)) throw new Error('copy');
+      el('online-error').textContent = '';
       el('online-copy').textContent = copy.copied;
     } catch { el('online-room').select(); fail('copyFailed'); }
   };
