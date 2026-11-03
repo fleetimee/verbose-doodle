@@ -1,18 +1,21 @@
 import { type RefObject, useEffect } from "react";
 import { z } from "zod";
+import { useI18n } from "@/components/i18n-provider";
 import {
   buildTicketWebSocketUrl,
   createRealtimeTicket,
 } from "@/features/realtime/ticket-client";
 
 const connectionRequest = z.object({
-  type: z.literal("hearthvale:connect"),
+  type: z.enum(["hearthvale:connect", "chess:connect", "chess:copy"]),
   id: z.string().uuid(),
 });
 
-export function useHearthvaleConnection(
-  frameRef: RefObject<HTMLIFrameElement | null>
+export function useGameConnection(
+  frameRef: RefObject<HTMLIFrameElement | null>,
+  game: "hearthvale" | "chess"
 ) {
+  const { messages } = useI18n();
   useEffect(() => {
     let disposed = false;
     let pending = false;
@@ -26,7 +29,22 @@ export function useHearthvaleConnection(
         return;
       }
       const request = connectionRequest.safeParse(event.data);
-      if (!request.success || pending) {
+      if (
+        request.success &&
+        game === "chess" &&
+        request.data.type === "chess:copy"
+      ) {
+        frame.contentWindow.postMessage(
+          { type: "chess:copy", copy: messages.common.chessOnline },
+          window.location.origin
+        );
+        return;
+      }
+      if (
+        !request.success ||
+        request.data.type !== `${game}:connect` ||
+        pending
+      ) {
         return;
       }
       const { id } = request.data;
@@ -35,25 +53,27 @@ export function useHearthvaleConnection(
       const reply = (result: { url: string } | { error: string }) => {
         if (!disposed && frameRef.current?.contentWindow === target) {
           target.postMessage(
-            { type: "hearthvale:connection", id, ...result },
+            { type: `${game}:connection`, id, ...result },
             window.location.origin
           );
         }
       };
-      createRealtimeTicket("hearthvale")
+      createRealtimeTicket(game)
         .then(({ ticket }) => {
           reply({
             url: buildTicketWebSocketUrl(
-              "/api/games/hearthvale/ws",
+              `/api/games/${game}/ws`,
               ticket,
-              import.meta.env.VITE_HEARTHVALE_WS_URL
+              game === "hearthvale"
+                ? import.meta.env.VITE_HEARTHVALE_WS_URL
+                : import.meta.env.VITE_CHESS_WS_URL
             ),
           });
         })
         .catch(() => {
           reply({
             error:
-              "Could not connect to co-op. Check your connection and sign in again if needed.",
+              "Could not connect to online play. Check your connection and sign in again if needed.",
           });
         })
         .finally(() => {
@@ -61,9 +81,15 @@ export function useHearthvaleConnection(
         });
     };
     window.addEventListener("message", onMessage);
+    if (game === "chess") {
+      frameRef.current?.contentWindow?.postMessage(
+        { type: "chess:copy", copy: messages.common.chessOnline },
+        window.location.origin
+      );
+    }
     return () => {
       disposed = true;
       window.removeEventListener("message", onMessage);
     };
-  }, [frameRef]);
+  }, [frameRef, game, messages.common.chessOnline]);
 }

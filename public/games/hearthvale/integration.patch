@@ -8,13 +8,13 @@ index e6a8d84..14301e0 100644
 -    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
 +    <script src="../activity.js"></script>
 diff --git a/src/net/transport.ts b/src/net/transport.ts
-index b188f97..70fa28b 100644
+index b188f97..eef3c36 100644
 --- a/src/net/transport.ts
 +++ b/src/net/transport.ts
 @@ -40 +40 @@ export interface TransportHandlers {
 -/** Default relay URL: `?server=` param, then localStorage, then this host on :8787. */
 +/** The dashboard provides a fresh one-time ticket for every socket attempt. */
-@@ -42,11 +42,35 @@ export function defaultServerUrl(): string {
+@@ -42,11 +42,39 @@ export function defaultServerUrl(): string {
 -  try {
 -    const q = new URLSearchParams(location.search).get('server');
 -    if (q) return q;
@@ -35,7 +35,11 @@ index b188f97..70fa28b 100644
 +      reject(new Error('Open Hearthvale from the dashboard to play co-op'));
 +      return;
 +    }
-+    const id = crypto.randomUUID();
++    const bytes = crypto.getRandomValues(new Uint8Array(16));
++    bytes[6] = (bytes[6]! & 15) | 64;
++    bytes[8] = (bytes[8]! & 63) | 128;
++    const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
++    const id = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 +    const cleanup = (): void => {
 +      window.removeEventListener('message', receive);
 +      signal.removeEventListener('abort', cancel);
@@ -61,9 +65,9 @@ index b188f97..70fa28b 100644
 +    signal.addEventListener('abort', cancel, { once: true });
 +    window.parent.postMessage({ type: 'hearthvale:connect', id }, location.origin);
 +  });
-@@ -73,0 +98 @@ export class Transport {
+@@ -73,0 +102 @@ export class Transport {
 +  private connectionAttempt: AbortController | null = null;
-@@ -182 +207,10 @@ export class Transport {
+@@ -182 +211,10 @@ export class Transport {
 -    this.sock.open(this.url);
 +    this.connectionAttempt?.abort();
 +    const attempt = new AbortController();
@@ -75,7 +79,7 @@ index b188f97..70fa28b 100644
 +      if (this.retry >= 10) this.h.ctrl({ t: 'error', code: 'connection', text: error.message });
 +      else this.onClose();
 +    });
-@@ -280,0 +315 @@ export class Transport {
+@@ -280,0 +319 @@ export class Transport {
 +    this.connectionAttempt?.abort();
 diff --git a/src/ui/coop.ts b/src/ui/coop.ts
 index fc0bac0..cc50b11 100644
