@@ -7,10 +7,33 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
+import { CopyIcon } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { copyToClipboard } from "@/lib/clipboard";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
+
+const CONFETTI_COLORS = [
+  "bg-[var(--wheel-color-1)]",
+  "bg-[var(--wheel-color-2)]",
+  "bg-[var(--wheel-color-3)]",
+  "bg-[var(--wheel-color-4)]",
+  "bg-[var(--wheel-color-5)]",
+  "bg-[var(--wheel-color-6)]",
+  "bg-[var(--wheel-color-7)]",
+  "bg-[var(--wheel-color-8)]",
+];
+
+const CONFETTI_PIECES = [
+  { x: -38, y: -20, rotation: -70 },
+  { x: -22, y: -32, rotation: 45 },
+  { x: 0, y: -38, rotation: -30 },
+  { x: 22, y: -32, rotation: 75 },
+  { x: 38, y: -20, rotation: -45 },
+  { x: 42, y: 8, rotation: 60 },
+  { x: -42, y: 8, rotation: -60 },
+  { x: 10, y: 24, rotation: 90 },
+];
 
 interface SelectedLogText {
   text: string;
@@ -25,7 +48,8 @@ interface SelectionActionStyle extends CSSProperties {
 
 function selectedLogText(
   viewport: HTMLElement,
-  host: HTMLElement
+  host: HTMLElement,
+  pointer: { x: number; y: number } | null
 ): SelectedLogText | null {
   const selection = window.getSelection();
   if (
@@ -49,6 +73,13 @@ function selectedLogText(
   );
   if (!bounds) {
     return null;
+  }
+  if (pointer) {
+    return {
+      text,
+      x: pointer.x - frame.left - 48,
+      y: Math.max(8, Math.min(frame.height - 44, pointer.y - frame.top - 48)),
+    };
   }
   const top = bounds.top - frame.top;
   const y =
@@ -78,8 +109,7 @@ export function LogSelectionAction({
     }
     const timer = window.setTimeout(() => {
       setSelection(null);
-      setCopied(false);
-    }, 800);
+    }, 1000);
     return () => window.clearTimeout(timer);
   }, [copied]);
 
@@ -90,6 +120,7 @@ export function LogSelectionAction({
       return;
     }
     let dragging = false;
+    let pointer: { x: number; y: number } | null = null;
     const hide = () => {
       setSelection(null);
       setCopied(false);
@@ -98,7 +129,7 @@ export function LogSelectionAction({
       const viewport = viewportRef.current;
       const host = hostRef.current;
       if (!dragging && viewport && host) {
-        setSelection(selectedLogText(viewport, host));
+        setSelection(selectedLogText(viewport, host, pointer));
       }
     };
     const down = (event: PointerEvent) => {
@@ -109,9 +140,14 @@ export function LogSelectionAction({
         return;
       }
       dragging = true;
+      pointer = null;
       hide();
     };
-    const up = () => {
+    const up = (event: PointerEvent) => {
+      if (!dragging) {
+        return;
+      }
+      pointer = { x: event.clientX, y: event.clientY };
       dragging = false;
       update();
     };
@@ -120,6 +156,7 @@ export function LogSelectionAction({
       hide();
     };
     const keyDown = (event: KeyboardEvent) => {
+      pointer = null;
       if (event.key === "Escape") {
         hide();
       }
@@ -188,14 +225,41 @@ export function LogSelectionAction({
               ease: MOTION_EASE.out,
             }}
           >
+            {copied && !reduceMotion && (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0"
+              >
+                {CONFETTI_PIECES.map((piece, index) => (
+                  <motion.span
+                    animate={{
+                      opacity: [0, 1, 0],
+                      transform: `translate(${piece.x}px, ${piece.y}px) rotate(${piece.rotation}deg)`,
+                    }}
+                    className={`absolute top-1/2 left-1/2 h-1.5 w-1 rounded-xs ${CONFETTI_COLORS[index]}`}
+                    initial={{
+                      opacity: 0,
+                      transform: "translate(0, 0) rotate(0deg)",
+                    }}
+                    key={piece.rotation}
+                    transition={{
+                      delay: 0.25,
+                      duration: 0.45,
+                      ease: MOTION_EASE.out,
+                    }}
+                  />
+                ))}
+              </span>
+            )}
             <Button
               aria-label={copied ? copy.selectionCopied : copy.copySelectedText}
-              className="pointer-events-auto w-20"
+              className="pointer-events-auto w-24"
               onClick={copySelection}
               onPointerDown={(event) => event.preventDefault()}
               size="selection"
               variant="floating"
             >
+              <CopyIcon aria-hidden="true" className="size-4" />
               <span aria-live="polite">
                 {copied ? copy.selectionCopiedShort : copy.copySelection}
               </span>
