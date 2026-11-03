@@ -1,10 +1,12 @@
 import { useRef } from "react";
 import { GameFullscreenButton } from "@/components/game-fullscreen-button";
 import { useI18n } from "@/components/i18n-provider";
+import { useHearthvaleConnection } from "@/features/games/use-hearthvale-connection";
 
 export function HearthvalePage() {
   const { messages } = useI18n();
   const frameRef = useRef<HTMLIFrameElement>(null);
+  useHearthvaleConnection(frameRef);
 
   return (
     <section className="mx-auto flex w-full min-w-0 max-w-[1400px] flex-col gap-4">

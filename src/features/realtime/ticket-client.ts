@@ -1,6 +1,7 @@
 import { apiPost } from "@/lib/api";
 
 export type RealtimeAudience =
+  | "hearthvale"
   | "dashboard-visits"
   | "relay-events"
   | "socket-test"

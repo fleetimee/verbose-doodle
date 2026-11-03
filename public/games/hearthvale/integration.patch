@@ -2,45 +2,111 @@ diff --git a/index.html b/index.html
 index e6a8d84..14301e0 100644
 --- a/index.html
 +++ b/index.html
-@@ -5,9 +5,7 @@
-     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-     <title>Hearthvale</title>
-     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8 8 2l6 6v6H2z' fill='%23c86c4e'/%3E%3C/svg%3E" />
+@@ -8,3 +8 @@
 -    <link rel="preconnect" href="https://fonts.googleapis.com" />
 -    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 -    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
 +    <script src="../activity.js"></script>
-   </head>
-   <body>
-     <div id="app"></div>
-diff --git a/src/core/game.ts b/src/core/game.ts
-index 3f96a33..e53fbc5 100644
---- a/src/core/game.ts
-+++ b/src/core/game.ts
-@@ -49,7 +49,6 @@ import { CutsceneSystem } from '../systems/cutscene';
- import { StorySystem } from '../systems/story';
- import { LanternHallSystem } from '../systems/story-hall';
- import { StoryWorldSystem } from '../systems/story-world';
--import { NetSystem } from '../net/system';
- import { DropsSystem } from '../systems/drops';
- import { ForestCoopSystem } from '../world/forest/coop';
- import { KintaraSystem } from '../systems/kintara';
-@@ -82,7 +81,6 @@ const SYSTEMS: (() => System)[] = [
-   () => new LanternHallSystem(),
-   () => new StoryWorldSystem(),
-   () => new StorySystem(),
--  () => new NetSystem(),
-   () => new ForestCoopSystem(),
-   () => new KintaraSystem(),
- ];
+diff --git a/src/net/transport.ts b/src/net/transport.ts
+index b188f97..70fa28b 100644
+--- a/src/net/transport.ts
++++ b/src/net/transport.ts
+@@ -40 +40 @@ export interface TransportHandlers {
+-/** Default relay URL: `?server=` param, then localStorage, then this host on :8787. */
++/** The dashboard provides a fresh one-time ticket for every socket attempt. */
+@@ -42,11 +42,35 @@ export function defaultServerUrl(): string {
+-  try {
+-    const q = new URLSearchParams(location.search).get('server');
+-    if (q) return q;
+-    const s = localStorage.getItem('hearthvale.server');
+-    if (s) return s;
+-  } catch {
+-    /* ignore */
+-  }
+-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+-  const host = location.hostname || '127.0.0.1';
+-  return `${proto}://${host}:8787/ws`;
++  return 'managed';
++}
++
++function connectionUrl(signal: AbortSignal): Promise<string> {
++  return new Promise((resolve, reject) => {
++    if (window.parent === window) {
++      reject(new Error('Open Hearthvale from the dashboard to play co-op'));
++      return;
++    }
++    const id = crypto.randomUUID();
++    const cleanup = (): void => {
++      window.removeEventListener('message', receive);
++      signal.removeEventListener('abort', cancel);
++      clearTimeout(timer);
++    };
++    const cancel = (): void => {
++      cleanup();
++      reject(new Error('Connection cancelled'));
++    };
++    const receive = (event: MessageEvent): void => {
++      if (event.source !== window.parent || event.origin !== location.origin) return;
++      const data = event.data as { type?: string; id?: string; url?: string; error?: string } | null;
++      if (!data || data.type !== 'hearthvale:connection' || data.id !== id) return;
++      cleanup();
++      if (typeof data.url === 'string') resolve(data.url);
++      else reject(new Error(typeof data.error === 'string' ? data.error : 'Co-op connection unavailable'));
++    };
++    const timer = setTimeout(() => {
++      cleanup();
++      reject(new Error('The dashboard did not answer the co-op connection request'));
++    }, 10000);
++    window.addEventListener('message', receive);
++    signal.addEventListener('abort', cancel, { once: true });
++    window.parent.postMessage({ type: 'hearthvale:connect', id }, location.origin);
++  });
+@@ -73,0 +98 @@ export class Transport {
++  private connectionAttempt: AbortController | null = null;
+@@ -182 +207,10 @@ export class Transport {
+-    this.sock.open(this.url);
++    this.connectionAttempt?.abort();
++    const attempt = new AbortController();
++    this.connectionAttempt = attempt;
++    void connectionUrl(attempt.signal).then((url) => {
++      if (!attempt.signal.aborted && !this.closedByUser) this.sock.open(url);
++    }).catch((error: Error) => {
++      if (attempt.signal.aborted || this.closedByUser) return;
++      if (this.retry >= 10) this.h.ctrl({ t: 'error', code: 'connection', text: error.message });
++      else this.onClose();
++    });
+@@ -280,0 +315 @@ export class Transport {
++    this.connectionAttempt?.abort();
+diff --git a/src/ui/coop.ts b/src/ui/coop.ts
+index fc0bac0..cc50b11 100644
+--- a/src/ui/coop.ts
++++ b/src/ui/coop.ts
+@@ -661,16 +661 @@ class CoopScreen extends Screen {
+-    const server = el('details', 'coop-server');
+-    server.innerHTML = `<summary>Server</summary>`;
+-    const si = el('input', 'coop-input small');
+-    si.value = this.net.serverUrl;
+-    si.addEventListener('keydown', (e) => e.stopPropagation());
+-    si.addEventListener('change', () => {
+-      this.net.serverUrl = si.value.trim();
+-      try {
+-        localStorage.setItem('hearthvale.server', this.net.serverUrl);
+-      } catch {
+-        /* ignore */
+-      }
+-    });
+-    server.appendChild(si);
+-    server.appendChild(el('small', '', 'Run <code>npm run server</code> on the host machine (port 8787).'));
+-    body.append(hostCard, joinCard, server);
++    body.append(hostCard, joinCard);
+@@ -700 +685 @@ class CoopScreen extends Screen {
+-      this.err = `${(e as Error).message} — is <code>npm run server</code> running?`;
++      this.err = (e as Error).message;
 diff --git a/src/ui/journal-cutscene.ts b/src/ui/journal-cutscene.ts
 index bdb4b27..5ff04e5 100644
 --- a/src/ui/journal-cutscene.ts
 +++ b/src/ui/journal-cutscene.ts
-@@ -23,14 +23,7 @@ export interface ChoiceOption {
- 
- export type Backdrop = 'coach';
- 
+@@ -26,8 +26 @@ export type Backdrop = 'coach';
 -export function loadStoryFonts(): void {
 -  if (document.getElementById('hv-story-fonts')) return;
 -  const l = document.createElement('link');
@@ -50,17 +116,11 @@ index bdb4b27..5ff04e5 100644
 -  document.head.appendChild(l);
 -}
 +export function loadStoryFonts(): void {}
- 
- /** Padlock glyph for a farmhand's locked choice cards. */
- const LOCK = '<svg class="cin-lock" viewBox="0 0 16 18" aria-hidden="true"><path d="M4.5 8V5.5a3.5 3.5 0 0 1 7 0V8" fill="none" stroke="currentColor" stroke-width="2"/><rect x="2" y="8" width="12" height="9" rx="2" fill="currentColor"/><circle cx="8" cy="12.3" r="1.4" fill="#2a1a0e"/></svg>';
 diff --git a/src/ui/kit.ts b/src/ui/kit.ts
 index 15716f1..b617260 100644
 --- a/src/ui/kit.ts
 +++ b/src/ui/kit.ts
-@@ -195,14 +195,6 @@ export function installTextures(): void {
-   } catch {
-     /* canvas blocked: plain gradients still look fine */
-   }
+@@ -198,8 +197,0 @@ export function installTextures(): void {
 -  // Handwriting face for letters / notes (Google Fonts is the only allowed network asset).
 -  if (!document.querySelector('link[data-hv-font]')) {
 -    const l = document.createElement('link');
@@ -69,26 +129,3 @@ index 15716f1..b617260 100644
 -    l.href = 'https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap';
 -    document.head.appendChild(l);
 -  }
-   // Keyboard vs pointer mode (focus rings only for keyboard / gamepad users).
-   window.addEventListener('pointermove', () => document.body.classList.remove('u-kbd'), { passive: true });
- }
-diff --git a/src/ui/title.ts b/src/ui/title.ts
-index 87d5cd1..2f885f7 100644
---- a/src/ui/title.ts
-+++ b/src/ui/title.ts
-@@ -124,7 +124,6 @@ export class TitlePanel extends Screen {
-       ['new', 'New Game', 'sprout', 'Begin your story', true],
-       ['continue', 'Continue', 'play', latest ? latest.label : 'No journal yet', !!latest],
-       ['load', 'Load', 'door', latest ? 'Pick a journal' : 'Nothing saved', !!latest],
--      ['coop', 'Co-op', 'people', 'Farm with friends', true],
-       ['settings', 'Options', 'gear', 'Sound & graphics', true],
-       ['credits', 'Credits', 'quill', 'Who made this', true],
-     ];
-@@ -170,7 +169,6 @@ export class TitlePanel extends Screen {
-     }
-     sfx(this.game, 'click');
-     if (a === 'credits') return this.credits(true);
--    if (a === 'coop') return this.game.events.emit('ui:open', { name: 'coop:title' });
-     if (a === 'settings') return this.game.events.emit('ui:open', { name: 'settings:title' });
-     if (a === 'load') return this.game.events.emit('ui:open', { name: 'saves:load:title' });
-     if (a === 'continue') {
