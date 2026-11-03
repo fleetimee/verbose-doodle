@@ -1,11 +1,13 @@
 import { Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router";
 import {
   ChevronLeft,
   ChevronRight,
   Info,
+  ListFilter,
   Pause,
   Play,
 } from "@/components/hugeicons";
@@ -36,6 +38,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { fetchServerMetrics } from "@/features/server-inventory/api";
 import { ServerConnectionButton } from "@/features/server-inventory/components/server-connection-button";
@@ -434,12 +444,43 @@ export function ServerHostCard({
   );
 }
 
+function matchesPlatform(entry: ServerEntry, platform: string) {
+  if (platform === "LINUX") {
+    return entry.accessType !== "RDP";
+  }
+  if (platform === "WINDOWS") {
+    return entry.accessType === "RDP";
+  }
+  return true;
+}
+
+function matchesStatus(
+  entry: ServerEntry,
+  statusFilter: string,
+  queryClient: ReturnType<typeof useQueryClient>
+) {
+  if (statusFilter === "ALL") {
+    return true;
+  }
+  const state = queryClient.getQueryState<ServerMetrics>([
+    "server-inventory",
+    "metrics",
+    entry.id,
+    entry.updatedAt,
+  ]);
+  const isLive = state?.data?.status === "OK" && state.status === "success";
+  return statusFilter === "LIVE" ? isLive : !isLive;
+}
+
 export function ServerMetricsPanel() {
   const { messages } = useI18n();
   const copy = messages.servers.metrics;
+  const queryClient = useQueryClient();
   const [params, setParams] = useSearchParams();
   const paused = params.get("paused") === "1";
   const search = params.get("search") ?? "";
+  const platform = params.get("platform") ?? "ALL";
+  const statusFilter = params.get("status") ?? "ALL";
   const size = 6;
   const requestedPage =
     params.get("size") === String(size) ? Number(params.get("page") ?? 0) : 0;
@@ -455,13 +496,27 @@ export function ServerMetricsPanel() {
       return next;
     });
   const entries = useMetricHosts(search, paused);
-  const totalPages = Math.ceil(entries.hosts.length / size);
+
+  const filteredHosts = useMemo(
+    () =>
+      entries.hosts.filter(
+        (entry) =>
+          matchesPlatform(entry, platform) &&
+          matchesStatus(entry, statusFilter, queryClient)
+      ),
+    [entries.hosts, platform, statusFilter, queryClient]
+  );
+
+  const totalPages = Math.ceil(filteredHosts.length / size);
   const page = Math.min(validPage, Math.max(0, totalPages - 1));
-  const visibleHosts = entries.hosts.slice(page * size, (page + 1) * size);
+  const visibleHosts = filteredHosts.slice(page * size, (page + 1) * size);
+  const hasActiveFilters =
+    Boolean(search) || platform !== "ALL" || statusFilter !== "ALL";
+
   return (
     <div className="flex min-w-0 flex-col gap-3 lg:min-h-0 lg:flex-1">
-      <div className="server-monitor-toolbar sticky top-16 z-10 flex shrink-0 flex-col gap-3 rounded-xl border border-border/60 bg-background/90 p-2 backdrop-blur-xl sm:flex-row sm:items-center">
-        <InputGroup>
+      <div className="server-monitor-toolbar sticky top-16 z-10 flex shrink-0 flex-wrap items-center gap-2 rounded-xl border border-border/60 bg-background/90 p-2 backdrop-blur-xl">
+        <InputGroup className="w-full sm:min-w-60 sm:flex-1">
           <InputGroupAddon>
             <HugeiconsIcon aria-hidden="true" icon={Search01Icon} />
           </InputGroupAddon>
@@ -482,7 +537,92 @@ export function ServerMetricsPanel() {
             value={search}
           />
         </InputGroup>
-        <div className="flex shrink-0 items-center gap-2">
+
+        <Select
+          onValueChange={(val) => {
+            setParams(
+              (current) => {
+                const next = new URLSearchParams(current);
+                if (val && val !== "ALL") {
+                  next.set("platform", val);
+                } else {
+                  next.delete("platform");
+                }
+                next.delete("page");
+                return next;
+              },
+              { replace: true }
+            );
+          }}
+          value={platform}
+        >
+          <SelectTrigger aria-label={copy.filterPlatform} size="sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="start">
+            <SelectGroup>
+              <SelectItem value="ALL">{copy.allPlatforms}</SelectItem>
+              <SelectItem value="LINUX">{copy.platformLinux}</SelectItem>
+              <SelectItem value="WINDOWS">{copy.platformWindows}</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        <Select
+          onValueChange={(val) => {
+            setParams(
+              (current) => {
+                const next = new URLSearchParams(current);
+                if (val && val !== "ALL") {
+                  next.set("status", val);
+                } else {
+                  next.delete("status");
+                }
+                next.delete("page");
+                return next;
+              },
+              { replace: true }
+            );
+          }}
+          value={statusFilter}
+        >
+          <SelectTrigger aria-label={copy.filterStatus} size="sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="start">
+            <SelectGroup>
+              <SelectItem value="ALL">{copy.allStatuses}</SelectItem>
+              <SelectItem value="LIVE">{copy.statusLive}</SelectItem>
+              <SelectItem value="ISSUES">{copy.statusIssues}</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        {hasActiveFilters && (
+          <Button
+            aria-label={copy.clearFilters}
+            onClick={() => {
+              setParams(
+                (current) => {
+                  const next = new URLSearchParams(current);
+                  next.delete("search");
+                  next.delete("platform");
+                  next.delete("status");
+                  next.delete("page");
+                  return next;
+                },
+                { replace: true }
+              );
+            }}
+            size="sm"
+            variant="ghost"
+          >
+            <ListFilter data-icon="inline-start" />
+            {copy.clearFiltersCompact}
+          </Button>
+        )}
+
+        <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
           <Button
             aria-pressed={paused}
             onClick={() =>
@@ -546,11 +686,13 @@ export function ServerMetricsPanel() {
       )}
       {!(entries.isPending || entries.isChecking) &&
         entries.data &&
-        entries.hosts.length === 0 && (
+        filteredHosts.length === 0 && (
           <Empty variant="bordered">
             <EmptyHeader>
               <EmptyTitle>{copy.empty}</EmptyTitle>
-              <EmptyDescription>{copy.emptyDescription}</EmptyDescription>
+              <EmptyDescription>
+                {hasActiveFilters ? copy.noMatches : copy.emptyDescription}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         )}
