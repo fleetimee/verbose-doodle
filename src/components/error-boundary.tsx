@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Component } from "react";
 import { ErrorFallback } from "@/components/error-fallback";
+import { reportClientError } from "@/lib/client-logs";
 
 type ErrorBoundaryProps = {
   children: ReactNode;
@@ -24,8 +25,8 @@ export class ErrorBoundary extends Component<
     return { error, hasError: true };
   }
 
-  componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo): void {
-    // Error logging can be added here in the future (e.g., sending to error tracking service)
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    reportClientError("react", error, errorInfo.componentStack ?? undefined);
   }
 
   resetError = (): void => {

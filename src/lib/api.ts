@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { reportClientLog, setClientLogTokenProvider } from "@/lib/client-logs";
 import { createUploadFetch } from "@/lib/upload-fetch";
 
 /**
@@ -239,12 +240,27 @@ export function createApiClient({
       rest.body,
       accessToken
     );
+    const started = performance.now();
+    const requestLog = {
+      kind: "request" as const,
+      method: rest.method ?? "GET",
+      path: new URL(url, window.location.origin).pathname,
+    };
     const response = await fetchWithTimeout(
       onUploadProgress ? createUploadFetch(onUploadProgress) : fetch,
       url,
       { ...rest, headers: requestHeaders },
       timeout
-    );
+    ).catch((error) => {
+      if (!rest.signal?.aborted) {
+        reportClientLog({
+          ...requestLog,
+          message: "Network request failed or timed out",
+          durationMs: Math.round(performance.now() - started),
+        });
+      }
+      throw error;
+    });
 
     if (
       !response.ok &&
@@ -277,6 +293,12 @@ export function createApiClient({
     }
 
     if (!response.ok) {
+      reportClientLog({
+        ...requestLog,
+        message: `HTTP ${response.status}`,
+        status: response.status,
+        durationMs: Math.round(performance.now() - started),
+      });
       throw await createApiError(response);
     }
 
@@ -352,6 +374,7 @@ let defaultClient = createApiClient({
 
 export function setDefaultApiSession(session: ApiSession): void {
   defaultClient = createApiClient({ fetch: defaultFetch, session });
+  setClientLogTokenProvider(() => session.getSnapshot().accessToken);
 }
 
 export function apiFetch<T>(
