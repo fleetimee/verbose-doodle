@@ -1,6 +1,38 @@
 chess3dastra by yortch
 https://github.com/yortch/chess3dastra
 Source commit: f7748d0557c6f98a1255046810188e6a23dd0b63
-The prebuilt HTML is preserved with the addition of ../activity.js.
+The prebuilt HTML includes local dashboard activity/clipboard integration, online play,
+viewport layout, move/capture motion hooks, and board rotation. Keep layout.css, layout.js, move-motion.js, capture-feedback.js,
+online.js, title-cards.js, title-cards.css, ../activity.js, and ../clipboard.js with index.html.
+Move motion: Zr captures the previous rendered position and animates only a single
+new move; game/session changes reset the motion history. 2D uses WAAPI transforms,
+3D interpolates piece-group positions over the same 200ms ease-in-out curve.
+Reduced motion keeps static last-move highlights and a 2D opacity cue. Keyboard
+moves, initial restoration, undo/reset, and multi-move resync settle immediately.
+Captures use short-lived SVG/mesh copies, removed after a 125ms impact fade.
+Web Audio synthesizes soft move taps and stronger capture sounds after user activation; the sound button
+persists mute state in atelier-chess-muted. No audio files are required.
+Flip board counter-rotates 2D squares to keep pieces upright over 250ms; Rotate
+board orbits the 3D camera. Reduced motion makes board orientation changes instant.
 Bundled Three.js and chess.js license comments are preserved in index.html.
 Upstream contains no project license file at this revision.
+
+Arcade title cards are driven by position/status transitions, not render frequency.
+They announce start, check, your turn, and game over without blocking board input.
+Repeated online states do not replay cards; check and result override turn notices.
+Translations come from the dashboard chess copy bridge. Reduced motion and keyboard
+input use opacity-only card transitions.
+
+3D move profiles: pawn hop, knight leap, bishop aim-and-dash, grounded rook slide,
+queen glide, and king step. Castling also animates the rook; interrupted moves
+settle from their current pose. Reduced motion keeps instant piece placement.
+An actionable check notice stays below the board until the local player's check
+is resolved; it includes king moves, blocking, and capturing the checking piece.
+
+Piece actions v2: captures use readable generated 3D effects (bishop shot, knight
+landing burst, rook impact, queen sweep, king strike). Capture choreography lasts
+300–500ms; quiet 3D moves last 250ms. Computer replies wait for the active move to
+settle, and their pending callbacks are canceled on reset. Geometry/materials for
+attack effects are created locally and disposed afterward; no media assets load.
+The iframe and action script URLs include a version to refresh updated public
+scripts in an already-open development dashboard.

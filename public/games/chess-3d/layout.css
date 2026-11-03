@@ -1,0 +1,98 @@
+html, body { height: 100%; overflow: hidden; }
+body { font-size: 13px; }
+body > header { display: none; }
+main { position: relative; overflow: hidden; height: 100%; min-height: 0; grid-template-columns: minmax(0, 1fr) clamp(240px, 29vw, 320px); }
+.arena { min-height: 0; }
+.player-bar { padding: 10px 16px; min-height: 52px; }
+#stage { height: auto; min-height: 0; max-height: none; }
+.view-controls { flex-wrap: nowrap; padding: 0 8px 6px; gap: 4px; }
+.view-controls button { padding: 6px 8px; }
+.hintline { font-size: 11px; padding-bottom: 4px; }
+aside { min-width: 0; min-height: 0; padding: 16px 16px 12px; gap: 12px; display: flex; border-top: 0; border-left: 1px solid var(--cp-border); }
+.panel-nav { display: flex; gap: 4px; flex-shrink: 0; }
+.panel-nav button { flex: 1; padding: 8px; }
+.panel-nav button[aria-pressed="true"] { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); }
+aside[data-panel="play"] > :is(.online-panel, .history-panel, .captured-panel),
+aside[data-panel="online"] > :is(.position-panel, .controls, .history-panel, .captured-panel),
+aside[data-panel="moves"] > :is(.online-panel, .controls) { display: none !important; }
+h1 { font-size: 22px; margin: 0 0 4px; }
+.controls { gap: 8px; min-width: 0; }
+.controls select { width: 100%; min-width: 0; }
+label { gap: 4px; }
+button, select { padding: 7px 10px; }
+.notation { margin-top: 0; }
+.divider { padding-top: 10px; }
+.history-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+#history { height: auto; min-height: 0; flex: 1; }
+.history-title { margin-bottom: 6px; }
+footer { font-size: 10px; line-height: 1.4; }
+.online-panel h2 { margin-bottom: 4px; }
+.online-panel p { margin: 6px 0; line-height: 1.4; }
+.online-options { margin: 10px 0; }
+.online-panel form { margin-top: 10px; }
+@media (max-height: 450px) {
+  aside { padding: 12px 10px 8px; gap: 8px; }
+  .player-bar { min-height: 40px; padding: 6px 12px; }
+  .player-sub { margin-top: 2px; }
+  footer, #board-hint { display: none; }
+  .online-panel p[data-online-copy="intro"] { display: none; }
+  .online-panel h2 { font-size: 16px; }
+  .online-options { margin: 6px 0; }
+  .online-panel :is(button, input) { min-height: 32px; padding: 6px 8px; }
+  h1 { font-size: 18px; }
+}
+@media (max-width: 600px) {
+  main { grid-template-columns: minmax(0, 1fr) 44%; }
+  body { font-size: 11px; }
+  .player-name { font-size: 12px; }
+  .player-sub, .turn-label { font-size: 10px; }
+  .view-controls > #top, .view-controls > #reset-view { display: none; }
+  .view-controls button { font-size: 10px; padding: 4px; }
+  .chess-clock { font-size: 14px; padding: 4px; }
+}
+
+@media (max-height: 300px) {
+  aside { padding: 8px 8px 6px; gap: 5px; }
+  .panel-nav button { padding: 5px 2px; font-size: 11px; }
+  #status-detail, .online-panel h2, .online-options label > span { display: none; }
+  .controls { gap: 3px; }
+  .controls label { font-size: 10px; gap: 2px; }
+  .controls :is(button, select), .notation input { padding: 4px; font-size: 11px; }
+  #notice:empty, #online-error:empty { display: none; }
+  h1 { font-size: 16px; margin: 0; }
+  .online-options { margin: 0 0 5px; }
+  .online-options select { padding: 4px; font-size: 11px; }
+  .online-panel form { margin-top: 5px; }
+  .online-code-row { margin-top: 3px; gap: 4px; }
+  .online-panel :is(button, input) { min-height: 26px; padding: 4px; font-size: 11px; }
+  .online-actions { margin-top: 5px; }
+  .online-panel p { font-size: 10px; margin: 4px 0; }
+}
+
+.panel-nav [data-game-sound] { flex: 0 0 30px; display: grid; place-items: center; padding: 6px; }
+#flat-board { transform-origin: center; }
+.capture-ghost { will-change: transform, opacity; }
+
+@media (max-width: 600px) {
+  .panel-nav { gap: 2px; }
+  .panel-nav button { min-width: 0; padding-inline: 2px; font-size: 10px; }
+  .panel-nav [data-game-sound] { flex-basis: 26px; }
+}
+
+main[data-sidebar-hidden="true"] { grid-template-columns: minmax(0, 1fr); }
+.arena > .player-bar:first-child { padding-right: 52px; }
+.sidebar-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  background: var(--cp-bg-elevated);
+}
+@media (max-height: 450px) {
+  .sidebar-toggle { top: 4px; width: 32px; height: 32px; }
+}

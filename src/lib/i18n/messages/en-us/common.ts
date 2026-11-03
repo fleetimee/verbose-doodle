@@ -67,6 +67,25 @@ export const commonMessages = {
   gravewakeDescription:
     "Cast spells, choose boons, and survive waves of undead.",
   chessOnline: {
+    checkNoticeCompact: "In check: move, block, or capture.",
+    checkNotice:
+      "In check: move your king, block the attack, or capture the checking piece.",
+    hideSidebar: "Hide sidebar",
+    showSidebar: "Show sidebar",
+    fightCard: "PLAY!",
+    checkCard: "CHECK!",
+    knockoutCard: "K.O.",
+    gameOverCard: "GAME OVER",
+    drawCard: "DRAW",
+    yourTurnCard: "YOUR TURN",
+    opponentTurnCard: "OPPONENT’S TURN",
+
+    muteSound: "Mute game sounds",
+    enableSound: "Enable game sounds",
+    gameTab: "Game",
+    onlineTab: "Online",
+    movesTab: "Moves",
+
     title: "Play a friend",
     intro: "Create a private game or join with a six-character code.",
     side: "Your side",
@@ -96,7 +115,8 @@ export const commonMessages = {
     yourMove: "Your move.",
     theirMove: "Opponent’s move.",
     check: "Check.",
-    protect: "Protect your king with a legal move.",
+    protect:
+      "You’re in check. Move your king, block the attack, or capture the checking piece.",
     onlineDetail: "You play {color}. Moves and clocks are synchronized.",
     offline: "Opponent disconnected. Waiting for them to return.",
     pending: "Sending your move…",

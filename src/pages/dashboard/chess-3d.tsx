@@ -21,14 +21,16 @@ export function Chess3dPage() {
         </div>
         <GameFullscreenButton frameRef={frameRef} />
       </header>
-      <iframe
-        allow="fullscreen; clipboard-write"
-        className="aspect-video max-h-[75dvh] min-h-80 w-full rounded-lg border [&:fullscreen]:h-dvh [&:fullscreen]:max-h-none [&:fullscreen]:rounded-none [&:fullscreen]:border-0"
-        data-game-frame=""
-        ref={frameRef}
-        src={`${import.meta.env.BASE_URL}games/chess-3d/index.html`}
-        title={messages.common.chess3dTitle}
-      />
+      <div className="mx-auto aspect-video w-full max-w-[min(1400px,calc((100dvh_-_14rem)*16/9))] overflow-hidden rounded-lg border">
+        <iframe
+          allow="fullscreen; clipboard-write"
+          className="block h-full w-full border-0 [&:fullscreen]:h-dvh"
+          data-game-frame=""
+          ref={frameRef}
+          src={`${import.meta.env.BASE_URL}games/chess-3d/index.html?v=piece-actions-2`}
+          title={messages.common.chess3dTitle}
+        />
+      </div>
     </section>
   );
 }

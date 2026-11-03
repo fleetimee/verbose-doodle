@@ -67,6 +67,25 @@ export const commonMessages = {
   gravewakeDescription:
     "Gunakan sihir, pilih berkah, dan bertahan dari gelombang mayat hidup.",
   chessOnline: {
+    checkNoticeCompact: "Skak: pindah, blokir, atau tangkap.",
+    checkNotice:
+      "Sedang skak: pindahkan raja, blokir serangan, atau tangkap buah yang menyerang.",
+    hideSidebar: "Sembunyikan panel samping",
+    showSidebar: "Tampilkan panel samping",
+    fightCard: "MULAI!",
+    checkCard: "SKAK!",
+    knockoutCard: "K.O.",
+    gameOverCard: "PERMAINAN SELESAI",
+    drawCard: "REMIS",
+    yourTurnCard: "GILIRAN ANDA",
+    opponentTurnCard: "GILIRAN LAWAN",
+
+    muteSound: "Bisukan suara permainan",
+    enableSound: "Aktifkan suara permainan",
+    gameTab: "Main",
+    onlineTab: "Daring",
+    movesTab: "Langkah",
+
     title: "Main bersama teman",
     intro: "Buat permainan privat atau gabung dengan kode enam karakter.",
     side: "Sisi Anda",
@@ -96,7 +115,8 @@ export const commonMessages = {
     yourMove: "Giliran Anda.",
     theirMove: "Giliran lawan.",
     check: "Skak.",
-    protect: "Lindungi raja dengan langkah yang sah.",
+    protect:
+      "Anda sedang skak. Pindahkan raja, blokir serangan, atau tangkap buah yang menyerang.",
     onlineDetail: "Anda bermain {color}. Langkah dan waktu tersinkron.",
     offline: "Lawan terputus. Menunggu terhubung kembali.",
     pending: "Mengirim langkah…",
