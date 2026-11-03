@@ -27,7 +27,7 @@ export function Chess3dPage() {
           className="block h-full w-full border-0 [&:fullscreen]:h-dvh"
           data-game-frame=""
           ref={frameRef}
-          src={`${import.meta.env.BASE_URL}games/chess-3d/index.html?v=piece-actions-2`}
+          src={`${import.meta.env.BASE_URL}games/chess-3d/index.html?v=frontend-theme-1`}
           title={messages.common.chess3dTitle}
         />
       </div>

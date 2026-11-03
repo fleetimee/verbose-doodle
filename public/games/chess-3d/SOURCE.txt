@@ -36,3 +36,12 @@ settle, and their pending callbacks are canceled on reset. Geometry/materials fo
 attack effects are created locally and disposed afterward; no media assets load.
 The iframe and action script URLs include a version to refresh updated public
 scripts in an already-open development dashboard.
+
+UI theme: ui-theme.js reads live semantic colors and shares Mona Sans/Geist Mono
+font faces from the same-origin dashboard. ui-theme.css provides the standalone
+fallback and compact control styling. Three.js colors are resolved to RGB before
+use. Theme changes repaint the board without resetting the match.
+The small action icons in icons/ are generated from the installed
+@hugeicons/core-free-icons package (MIT; icons/LICENSE.md). They are used only for
+undo, board rotation/reset, sound, and the sidebar toggle. Preserve these files
+when updating the upstream bundle.

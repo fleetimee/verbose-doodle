@@ -1,0 +1,130 @@
+/* Standalone fallback. Embedded play reads the app's live semantic tokens. */
+:root {
+  --background: oklch(0.973 0.006 180);
+  --foreground: oklch(0.245 0.012 240);
+  --card: oklch(0.995 0.002 180);
+  --primary: oklch(0.51 0.08 185);
+  --primary-foreground: oklch(0.985 0.004 180);
+  --secondary: oklch(0.928 0.008 205);
+  --muted-foreground: oklch(0.485 0.016 230);
+  --border: oklch(0.86 0.008 210);
+  --destructive: oklch(0.5594 0.19 25.8625);
+  --warning: oklch(0.76 0.16 75);
+  --radius: 0.35rem;
+  --font-mono: "Geist Mono", monospace;
+}
+html[data-theme="dark"] {
+  --background: oklch(0.19 0.014 240);
+  --foreground: oklch(0.9 0.008 205);
+  --card: oklch(0.225 0.014 240);
+  --primary: oklch(0.67 0.075 185);
+  --primary-foreground: oklch(0.17 0.014 240);
+  --secondary: oklch(0.28 0.014 235);
+  --muted-foreground: oklch(0.67 0.014 220);
+  --border: oklch(0.34 0.014 235);
+  --destructive: oklch(0.6591 0.153 22.1703);
+  --warning: oklch(0.72 0.15 75);
+}
+body { font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+button, input, select { font: inherit; }
+button { font-size: 12px; font-weight: 500; }
+button, select, input, .online-code-row input, .notation input { border-radius: var(--radius); }
+button, select { background: var(--cp-bg-elevated); }
+button:hover:not(:disabled) { border-color: var(--cp-border-strong); background: var(--cp-surface-soft); }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 2px; }
+.primary { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); }
+.primary:hover:not(:disabled) { background: var(--cp-accent-hover); border-color: var(--cp-accent-hover); }
+aside { gap: 16px; padding: 16px; background: var(--cp-bg-elevated); }
+.panel-nav { gap: 2px; padding: 3px; border-radius: calc(var(--radius) + 3px); background: var(--cp-surface-soft); }
+.panel-nav button { border: 0; background: transparent; color: var(--cp-text-muted); padding: 7px 6px; }
+.panel-nav button[aria-pressed="true"] { background: var(--cp-bg-elevated); color: var(--cp-accent); box-shadow: 0 1px 2px rgb(0 0 0 / 8%); }
+.panel-nav [data-game-sound] { border-left: 1px solid var(--cp-border); border-radius: 0; margin-left: 3px; }
+.panel-nav [data-game-sound][aria-pressed="true"] { background: transparent; box-shadow: none; }
+h1 { font-size: 21px; font-weight: 600; line-height: 1.2; letter-spacing: -0.025em; }
+#status-detail { line-height: 1.5; font-size: 12px; }
+.controls { gap: 12px; }
+.controls label, .online-panel label { font-size: 11px; font-weight: 500; gap: 6px; }
+.controls select, .online-options select { height: 34px; font-size: 12px; padding: 6px 8px; width: 100%; }
+.button-row button { min-height: 34px; }
+.notation { gap: 6px; }
+.notation input { background: var(--cp-bg); font-family: var(--mono); }
+.notation button { min-width: 42px; }
+.divider { border-color: var(--cp-border); padding-top: 12px; }
+.eyebrow { font: 500 11px "Mona Sans", sans-serif; letter-spacing: 0; text-transform: none; }
+#history { font-family: var(--mono); font-size: 12px; }
+.move-row { padding: 7px 6px; }
+.move-row:nth-child(odd) { background: var(--cp-bg); }
+.empty { font-family: inherit; }
+.player-name { font-size: 13px; font-weight: 600; }
+.player-sub { font-size: 11px; line-height: 1.4; }
+.turn-label { font-family: inherit; font-size: 10px; font-weight: 600; letter-spacing: 0.02em; }
+.stone { width: 10px; height: 10px; }
+.view-controls { width: fit-content; max-width: calc(100% - 16px); margin: 0 auto 8px; padding: 3px; border: 1px solid var(--cp-border); border-radius: calc(var(--radius) + 3px); background: var(--cp-bg-elevated); gap: 2px; }
+.view-controls button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 0; background: transparent; padding: 6px 8px; white-space: nowrap; }
+.view-mode { gap: 2px; padding-right: 3px; }
+.view-mode button[aria-pressed="true"] { background: var(--cp-accent-soft); color: var(--cp-accent); }
+#board-hint { font-size: 10px; }
+.frontend-theme #theme { display: none; }
+#flat-board { border: 3px solid var(--cp-border-strong); border-radius: 3px; }
+.flat-square { background: var(--chess-board-light) !important; }
+.flat-square.dark { background: var(--chess-board-dark) !important; }
+.flat-square:hover { box-shadow: inset 0 0 0 2px var(--cp-accent); }
+.square-coordinate { color: #162c2e !important; }
+.dark .square-coordinate { color: #f1faf8 !important; }
+.online-panel h2 { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+.online-panel p { font-size: 12px; line-height: 1.5; }
+.online-panel button { font-size: 12px; }
+.online-code-row input { font-size: 14px; letter-spacing: 0.12em; background: var(--cp-bg); }
+.online-actions button { min-height: 32px; }
+.chess-clock { border: 1px solid var(--cp-border); background: var(--cp-bg); font-size: 20px; }
+.chess-clock.active { color: var(--cp-accent); outline: none; border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+footer { padding-top: 12px; border-top: 1px solid var(--cp-border); line-height: 1.5; }
+.sidebar-toggle { border-color: var(--cp-border); background: var(--cp-bg-elevated); }
+#undo::before, #rotate::before, #reset-view::before, [data-game-sound]::before, .sidebar-toggle::before {
+  content: ""; width: 15px; height: 15px; flex-shrink: 0; display: inline-block; background: currentColor; mask: var(--control-icon) center / contain no-repeat;
+}
+#undo { display: inline-flex; align-items: center; justify-content: center; gap: 6px; --control-icon: url("./icons/undo.svg"); }
+#rotate { --control-icon: url("./icons/rotate.svg"); }
+#reset-view { --control-icon: url("./icons/reset.svg"); }
+[data-game-sound] svg, .sidebar-toggle svg { display: none; }
+[data-game-sound] { --control-icon: url("./icons/sound-on.svg"); }
+[data-game-sound][aria-pressed="false"] { --control-icon: url("./icons/sound-off.svg"); }
+.sidebar-toggle { --control-icon: url("./icons/sidebar-hide.svg"); }
+.sidebar-toggle[aria-expanded="false"] { --control-icon: url("./icons/sidebar-show.svg"); }
+.chess-title-card { background: color-mix(in srgb, var(--cp-bg-elevated) 94%, transparent); color: var(--cp-text); }
+.chess-title-card strong { color: var(--cp-accent); text-shadow: 2px 2px 0 var(--cp-accent-soft); }
+.chess-title-layer[data-kind="check"] strong { color: var(--cp-danger); }
+.chess-title-layer[data-kind="finish"] strong { color: var(--cp-accent); }
+.chess-title-card span { color: var(--cp-text-muted); }
+.chess-check-notice { border: 1px solid color-mix(in srgb, var(--cp-danger) 30%, transparent); background: color-mix(in srgb, var(--cp-danger) 8%, var(--cp-bg)); }
+@media (max-height: 450px) {
+  aside { gap: 10px; padding: 12px; }
+  .controls { gap: 8px; }
+  .controls select, .online-options select, .button-row button { height: 30px; min-height: 30px; }
+  .view-controls { margin-bottom: 4px; }
+}
+@media (max-width: 600px) {
+  aside { padding: 8px; gap: 8px; }
+  .panel-nav { padding: 2px; }
+  .panel-nav button { padding: 5px 1px; font-size: 10px; }
+  .panel-nav [data-game-sound] { flex-basis: 23px; margin-left: 0; }
+  .controls { gap: 4px; }
+  .controls label { font-size: 10px; gap: 3px; }
+  .controls select, .button-row button { font-size: 10px; min-height: 24px; height: 24px; padding: 3px; }
+  .view-controls button { padding: 4px 5px; font-size: 10px; }
+  #rotate::before, #reset-view::before { display: none; }
+  #undo::before { width: 12px; height: 12px; }
+  .player-name { font-size: 11px; }
+  .player-sub { font-size: 10px; }
+  .chess-clock { font-size: 14px; padding: 3px 4px; }
+  .online-panel button { font-size: 10px; padding: 4px; }
+  .online-panel p { font-size: 10px; }
+}
+@media (max-height: 300px) {
+  aside { gap: 5px; }
+  .controls { gap: 3px; }
+  .controls label { font-size: 10px; gap: 2px; }
+  .controls select, .button-row button { height: 24px; min-height: 24px; }
+  .notation input, .notation button { font-size: 10px; padding: 4px; }
+  .online-panel :is(button, input) { min-height: 25px; font-size: 10px; }
+}
