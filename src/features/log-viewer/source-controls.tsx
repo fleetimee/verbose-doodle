@@ -1,3 +1,4 @@
+import { format, startOfYear, subDays, subMonths } from "date-fns";
 import {
   Check,
   CircleAlert,
@@ -92,6 +93,7 @@ export function SourceControls({
   from,
   to,
   setFrom,
+  setRange,
   setTo,
   onSelect,
   onEdit,
@@ -109,6 +111,7 @@ export function SourceControls({
   from: string;
   to: string;
   setFrom: (value: string) => void;
+  setRange: (from: string, to: string) => void;
   setTo: (value: string) => void;
   onSelect: (id: string) => void;
   onEdit: () => void;
@@ -119,6 +122,14 @@ export function SourceControls({
   const {
     messages: { logViewer: copy },
   } = useI18n();
+  const today = new Date();
+  const end = format(today, "yyyy-MM-dd");
+  const ranges = [
+    { label: copy.rangeToday, description: copy.rangeToday, start: today },
+    { label: "1W", description: copy.rangeWeek, start: subDays(today, 6) },
+    { label: "1M", description: copy.rangeMonth, start: subMonths(today, 1) },
+    { label: "YTD", description: copy.rangeYear, start: startOfYear(today) },
+  ];
   return (
     <Card className="shrink-0" size="none" variant="outline">
       <CardHeader className="sr-only" size="none">
@@ -249,6 +260,28 @@ export function SourceControls({
               value={to}
             />
           </Field>
+          <div className="col-span-2 flex flex-wrap items-center gap-2 md:col-span-6 md:col-start-7">
+            <ButtonGroup aria-label={copy.quickRange}>
+              {ranges.map((range) => {
+                const start = format(range.start, "yyyy-MM-dd");
+                return (
+                  <Button
+                    aria-label={range.description}
+                    aria-pressed={from === start && to === end}
+                    key={range.label}
+                    onClick={() => setRange(start, end)}
+                    size="sm"
+                    title={range.description}
+                    variant={
+                      from === start && to === end ? "secondary" : "outline"
+                    }
+                  >
+                    {range.label}
+                  </Button>
+                );
+              })}
+            </ButtonGroup>
+          </div>
         </FieldGroup>
         <div className="mt-2 flex min-w-0 items-center gap-3">
           <code

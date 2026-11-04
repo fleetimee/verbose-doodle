@@ -73,6 +73,22 @@ export function useLogViewerLocation() {
     }
   }
 
+  function setRange(from: string, to: string) {
+    if (sourceId) {
+      setParams(
+        (previous) => {
+          const next = new URLSearchParams(previous);
+          next.set("from", from);
+          next.set("to", to);
+          return next;
+        },
+        { replace: true }
+      );
+    } else {
+      setLocal((previous) => ({ ...previous, from, to }));
+    }
+  }
+
   function selectSource(id: string) {
     if (sourceId) {
       if (!id) {
@@ -91,6 +107,7 @@ export function useLogViewerLocation() {
     dedicated: Boolean(sourceId),
     selectedId: sourceId ?? storedId,
     setSelectedId: selectSource,
+    setRange,
     setFrom: (value: string) => update("from", value),
     setTo: (value: string) => update("to", value),
     setStream: (value: string) => update("stream", value),

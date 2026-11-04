@@ -243,6 +243,7 @@ export function LogViewerPage() {
     setSelectedId,
     from,
     setFrom,
+    setRange,
     to,
     setTo,
     stream,
@@ -376,6 +377,7 @@ export function LogViewerPage() {
               onSelect={setSelectedId}
               selected={selected}
               setFrom={setFrom}
+              setRange={setRange}
               setTo={setTo}
               sources={sources.data ?? []}
               to={to}

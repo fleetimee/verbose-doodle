@@ -356,4 +356,9 @@ export const logViewerMessages = {
   content: "Konten log",
   preset: "Preset JavaCMSInterface",
   chooseSource: "Pilih sumber",
+  quickRange: "Rentang tanggal cepat",
+  rangeToday: "Hari ini",
+  rangeWeek: "7 hari terakhir, termasuk hari ini",
+  rangeMonth: "Satu bulan hingga hari ini",
+  rangeYear: "Awal tahun hingga hari ini",
 } as const;
