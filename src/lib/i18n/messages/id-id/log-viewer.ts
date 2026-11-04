@@ -288,6 +288,7 @@ export const logViewerMessages = {
   streamHint: "Berkas harian digabung secara kronologis menurut aliran.",
   live: "Langsung",
   today: "Hari ini · ikuti log baru",
+  goToToday: "Ke hari ini",
   useToday: "Ikuti hari ini",
   checking: "Memeriksa sumber…",
   unavailable: "Koneksi tidak tersedia",

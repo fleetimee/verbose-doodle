@@ -289,6 +289,7 @@ export const logViewerMessages = {
   streamHint: "Files, joined chronologically by stream.",
   live: "Live",
   today: "Today · follows new logs",
+  goToToday: "Go to today",
   useToday: "Follow today",
   checking: "Checking source…",
   unavailable: "Connection unavailable",

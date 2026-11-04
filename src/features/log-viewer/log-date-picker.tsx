@@ -33,6 +33,8 @@ export function LogDatePicker({
   const [open, setOpen] = useState(false);
   const dateLocale = locale === "id-ID" ? id : enUS;
   const selected = value ? parseISO(value) : undefined;
+  const today = format(new Date(), "yyyy-MM-dd");
+  const todayDisabled = Boolean((min && today < min) || (max && today > max));
   return (
     <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger
@@ -74,24 +76,34 @@ export function LogDatePicker({
           }}
           selected={selected}
         />
-        {optional && (
-          <>
-            <Separator />
-            <div className="p-2">
-              <Button
-                className="w-full"
-                onClick={() => {
-                  onChange("");
-                  setOpen(false);
-                }}
-                size="sm"
-                variant="ghost"
-              >
-                {messages.logViewer.useToday}
-              </Button>
-            </div>
-          </>
-        )}
+        <Separator />
+        <div className="flex flex-wrap gap-1 p-2">
+          <Button
+            className="flex-1"
+            disabled={todayDisabled}
+            onClick={() => {
+              onChange(today);
+              setOpen(false);
+            }}
+            size="sm"
+            variant="ghost"
+          >
+            {messages.logViewer.goToToday}
+          </Button>
+          {optional && (
+            <Button
+              className="flex-1"
+              onClick={() => {
+                onChange("");
+                setOpen(false);
+              }}
+              size="sm"
+              variant="ghost"
+            >
+              {messages.logViewer.useToday}
+            </Button>
+          )}
+        </div>
       </PopoverContent>
     </Popover>
   );
