@@ -139,7 +139,9 @@ export function SourceControls({
       <CardContent size="compact">
         <FieldGroup className="grid items-start md:grid-cols-12" size="compact">
           <Field className="col-span-2 min-w-0 md:col-span-6">
-            <FieldLabel htmlFor="log-source">{copy.source}</FieldLabel>
+            <FieldLabel className="min-h-6" htmlFor="log-source">
+              {copy.source}
+            </FieldLabel>
             <div className="flex min-w-0 items-center gap-2">
               <div className="min-w-0 flex-1">
                 <SourcePicker
@@ -240,7 +242,29 @@ export function SourceControls({
             </div>
           </Field>
           <Field className="min-w-0 md:col-span-3">
-            <FieldLabel htmlFor="log-from">{copy.from}</FieldLabel>
+            <div className="flex min-h-6 flex-wrap items-center justify-between gap-1">
+              <FieldLabel htmlFor="log-from">{copy.from}</FieldLabel>
+              <ButtonGroup aria-label={copy.quickRange}>
+                {ranges.map((range) => {
+                  const start = format(range.start, "yyyy-MM-dd");
+                  return (
+                    <Button
+                      aria-label={range.description}
+                      aria-pressed={from === start && to === end}
+                      key={range.label}
+                      onClick={() => setRange(start, end)}
+                      size="xs"
+                      title={range.description}
+                      variant={
+                        from === start && to === end ? "secondary" : "outline"
+                      }
+                    >
+                      {range.label}
+                    </Button>
+                  );
+                })}
+              </ButtonGroup>
+            </div>
             <LogDatePicker
               id="log-from"
               label={copy.from}
@@ -250,7 +274,9 @@ export function SourceControls({
             />
           </Field>
           <Field className="min-w-0 md:col-span-3">
-            <FieldLabel htmlFor="log-to">{copy.to}</FieldLabel>
+            <FieldLabel className="min-h-6" htmlFor="log-to">
+              {copy.to}
+            </FieldLabel>
             <LogDatePicker
               id="log-to"
               label={copy.to}
@@ -260,28 +286,6 @@ export function SourceControls({
               value={to}
             />
           </Field>
-          <div className="col-span-2 flex flex-wrap items-center gap-2 md:col-span-6 md:col-start-7">
-            <ButtonGroup aria-label={copy.quickRange}>
-              {ranges.map((range) => {
-                const start = format(range.start, "yyyy-MM-dd");
-                return (
-                  <Button
-                    aria-label={range.description}
-                    aria-pressed={from === start && to === end}
-                    key={range.label}
-                    onClick={() => setRange(start, end)}
-                    size="sm"
-                    title={range.description}
-                    variant={
-                      from === start && to === end ? "secondary" : "outline"
-                    }
-                  >
-                    {range.label}
-                  </Button>
-                );
-              })}
-            </ButtonGroup>
-          </div>
         </FieldGroup>
         <div className="mt-2 flex min-w-0 items-center gap-3">
           <code
