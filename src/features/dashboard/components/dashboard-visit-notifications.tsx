@@ -391,8 +391,13 @@ export function DashboardVisitNotifications() {
   const currentVisitIdRef = useRef<string | null>(null);
   const currentIpAddressRef = useRef<string | null>(null);
   const announcedUnreadIpsRef = useRef(new Set<string>());
-  const currentPathnameRef = useRef<string>(location.pathname);
-  currentPathnameRef.current = location.pathname;
+  const logSourceId = new URLSearchParams(location.search).get("source");
+  const presencePath =
+    location.pathname === "/dashboard/logs" && logSourceId
+      ? `${location.pathname}?${new URLSearchParams({ source: logSourceId })}`
+      : location.pathname;
+  const currentPathnameRef = useRef<string>(presencePath);
+  currentPathnameRef.current = presencePath;
   const isScreenLockedRef = useRef<boolean>(isScreenLocked);
   isScreenLockedRef.current = isScreenLocked;
   const visitRequestGenerationRef = useRef(0);
@@ -464,7 +469,8 @@ export function DashboardVisitNotifications() {
   const connection = connectionRef.current;
   const isDashboardRoute =
     location.pathname === "/dashboard" ||
-    location.pathname.startsWith("/dashboard/");
+    location.pathname.startsWith("/dashboard/") ||
+    location.pathname.startsWith("/logs/");
   const userId = snapshot.user?.user_id;
   const removeNotice = useCallback((visitId: string) => {
     setNotices((currentNotices) =>
@@ -551,17 +557,12 @@ export function DashboardVisitNotifications() {
     }
     connection.send(
       JSON.stringify({
-        path: location.pathname,
+        path: presencePath,
         sleeping: isScreenLockedRef.current,
         type: "page_change",
       })
     );
-  }, [
-    connection,
-    isDashboardRoute,
-    location.pathname,
-    snapshot.isAuthenticated,
-  ]);
+  }, [connection, isDashboardRoute, presencePath, snapshot.isAuthenticated]);
 
   useEffect(() => {
     if (!(snapshot.isAuthenticated && isDashboardRoute)) {

@@ -68,6 +68,7 @@ import {
   subscribeOpenVisitorChat,
 } from "@/features/dashboard/dashboard-activity";
 import { formatJakartaTimestamp } from "@/features/endpoints/utils/endpoint-time";
+import { fetchLogSources } from "@/features/log-viewer/api";
 import { type AppLocale, formatMessage, type Messages } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { queryClient } from "@/lib/query-client";
@@ -286,7 +287,11 @@ function describeVisitorPage(
   messages: Messages
 ): VisitorPageDescription {
   const path = rawPath?.startsWith("/") ? rawPath : "/dashboard/overview";
-  const segments = path
+  const pathname = path.split("?")[0] ?? path;
+  if (pathname === "/dashboard/logs" || pathname.startsWith("/logs/")) {
+    return { isGame: false, label: messages.logViewer.title, path };
+  }
+  const segments = pathname
     .split("/")
     .filter((segment) => segment.length > 0 && segment !== "dashboard");
   const labels = getRouteLabelRegistry(messages);
@@ -1075,7 +1080,29 @@ function VisitorPresenceRow({
           count: visitor.activeConnections,
         })
       : copy.activeSessionSingle;
-  const pageInfo = describeVisitorPage(visitor.currentPath, messages);
+  const { snapshot } = useAuth();
+  const basePageInfo = describeVisitorPage(visitor.currentPath, messages);
+  const visitorUrl = new URL(basePageInfo.path, "https://presence.local");
+  let sourceId: string | null = null;
+  if (visitorUrl.pathname === "/dashboard/logs") {
+    sourceId = visitorUrl.searchParams.get("source");
+  } else if (visitorUrl.pathname.startsWith("/logs/")) {
+    sourceId = visitorUrl.pathname.slice("/logs/".length);
+  }
+  const logSources = useQuery({
+    queryKey: ["log-sources"],
+    queryFn: ({ signal }) => fetchLogSources(signal),
+    enabled: Boolean(sourceId) && snapshot.user?.role === "ADMIN",
+    staleTime: 30_000,
+    retry: false,
+  });
+  const logSource = logSources.data?.find((source) => source.id === sourceId);
+  const pageInfo = {
+    ...basePageInfo,
+    label: logSource
+      ? `${messages.logViewer.title} · ${logSource.name}`
+      : basePageInfo.label,
+  };
   const deviceInfo = describeVisitorUserAgent(visitor.userAgent, isCurrentIp);
   const isSleeping = visitor.online && visitor.sleeping;
   const activityText = resolveVisitorActivityText(visitor, pageInfo, copy);
@@ -1141,7 +1168,7 @@ function VisitorPresenceRow({
         <Link
           className="inline-flex min-w-0 max-w-full items-center gap-1 text-foreground/90 text-xs transition-colors hover:text-primary"
           onClick={onNavigate}
-          title={pageInfo.path}
+          title={activityText}
           to={pageInfo.path}
         >
           <HugeiconsIcon

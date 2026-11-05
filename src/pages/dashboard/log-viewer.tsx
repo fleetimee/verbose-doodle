@@ -258,6 +258,11 @@ export function LogViewerPage() {
   const selected =
     sources.data?.find((source) => source.id === selectedId) ??
     sources.data?.find(() => !dedicated);
+  useEffect(() => {
+    if (!dedicated && selected && selected.id !== selectedId) {
+      setSelectedId(selected.id);
+    }
+  }, [dedicated, selected, selectedId, setSelectedId]);
   const catalog = useQuery({
     queryKey: ["log-catalog", selected?.id, selected?.updatedAt, from, to],
     queryFn: ({ signal }) => {

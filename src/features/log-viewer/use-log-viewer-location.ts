@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { z } from "zod";
 import { useLocalStorage } from "@/hooks/use-local-storage";
@@ -46,6 +46,19 @@ export function useLogViewerLocation() {
     to: "",
     stream: "",
   }));
+  const urlSource = params.get("source");
+  useEffect(() => {
+    if (!sourceId && storedId && !urlSource) {
+      setParams(
+        (previous) => {
+          const next = new URLSearchParams(previous);
+          next.set("source", storedId);
+          return next;
+        },
+        { replace: true }
+      );
+    }
+  }, [sourceId, storedId, urlSource, setParams]);
   const selection = sourceId
     ? {
         from: logDate.safeParse(params.get("from")).data ?? local.from,
@@ -98,6 +111,18 @@ export function useLogViewerLocation() {
       navigate(logSourceHref(id, selection.from, selection.to, ""));
     } else {
       setStoredId(id);
+      setParams(
+        (previous) => {
+          const next = new URLSearchParams(previous);
+          if (id) {
+            next.set("source", id);
+          } else {
+            next.delete("source");
+          }
+          return next;
+        },
+        { replace: true }
+      );
       update("stream", "");
     }
   }
@@ -105,7 +130,7 @@ export function useLogViewerLocation() {
   return {
     ...selection,
     dedicated: Boolean(sourceId),
-    selectedId: sourceId ?? storedId,
+    selectedId: sourceId ?? params.get("source") ?? storedId,
     setSelectedId: selectSource,
     setRange,
     setFrom: (value: string) => update("from", value),
