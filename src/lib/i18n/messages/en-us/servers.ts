@@ -1,7 +1,7 @@
 export const serversMessages = {
-  autoTrustTitle: "Development auto-trust enabled",
+  autoTrustTitle: "Server automatically trusted",
   autoTrustDescription:
-    "SSH host keys and RDP certificates are accepted automatically without approval.",
+    "Accepted the identity of {host} for development and saved it. Future connections will use this saved trust.",
   cleanup: {
     filesPartial: "Some files could not be listed.",
     loadMoreFolders: "Show more folders",

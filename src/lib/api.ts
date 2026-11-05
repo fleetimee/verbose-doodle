@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { reportClientLog, setClientLogTokenProvider } from "@/lib/client-logs";
-import { notifyRemoteAutoTrust } from "@/lib/remote-trust-notice";
+import {
+  notifyRemoteAutoTrust,
+  remoteTrustAcceptanceSchema,
+} from "@/lib/remote-trust-notice";
 import { createUploadFetch } from "@/lib/upload-fetch";
 
 /**
@@ -124,8 +127,11 @@ async function parseResponse<T>(response: Response): Promise<T> {
   }
 
   const data = await response.json();
-  if (z.object({ autoTrust: z.literal(true) }).safeParse(data).success) {
-    notifyRemoteAutoTrust();
+  const acceptance = z
+    .object({ autoTrust: remoteTrustAcceptanceSchema })
+    .safeParse(data);
+  if (acceptance.success) {
+    notifyRemoteAutoTrust(acceptance.data.autoTrust);
   }
   return data;
 }

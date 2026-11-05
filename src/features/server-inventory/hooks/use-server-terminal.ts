@@ -19,7 +19,10 @@ import {
   fileTransferEventSchema,
   type TerminalFileTransfer,
 } from "@/features/server-inventory/utils/terminal-file-transfers";
-import { notifyRemoteAutoTrust } from "@/lib/remote-trust-notice";
+import {
+  notifyRemoteAutoTrust,
+  remoteTrustAcceptanceSchema,
+} from "@/lib/remote-trust-notice";
 
 type TerminalCommand =
   | FileListCommand
@@ -52,7 +55,7 @@ const terminalEventSchema = z.union([
   z.object({
     type: z.enum(["connected", "error", "pong"]),
     code: z.string(),
-    autoTrust: z.boolean().optional(),
+    autoTrust: remoteTrustAcceptanceSchema.optional(),
   }),
   hostKeySchema,
   fileTransferEventSchema,
@@ -396,7 +399,7 @@ export function useServerTerminal(
             break;
           case "connected":
             if (message.autoTrust) {
-              notifyRemoteAutoTrust();
+              notifyRemoteAutoTrust(message.autoTrust);
             }
             setHostKey(null);
             setTrustPending(false);
