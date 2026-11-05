@@ -81,6 +81,8 @@ const buttonVariants = cva(
           "text-muted-foreground underline-offset-4 hover:text-foreground hover:underline",
       },
       size: {
+        "chat-send": "h-9 rounded-lg px-3 py-2 text-sm",
+        "chat-sticker": "size-9 rounded-lg",
         "image-inspect": "h-7 gap-1 rounded-md px-2.5 text-xs [&_svg:not([class*='size-'])]:size-3",
         selection: "h-9 rounded-xl px-4 text-sm font-normal",
         "grid-icon": "size-5 rounded-sm p-0 [&_svg:not([class*='size-'])]:size-3",

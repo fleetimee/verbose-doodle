@@ -8,7 +8,9 @@ import {
   Clock03Icon,
   ComputerIcon,
   ComputerTerminal01Icon,
+  Delete02Icon,
   GlobeIcon,
+  LockKeyIcon,
   MailSend01Icon,
   MessageSquareCodeIcon,
   MoonIcon,
@@ -24,7 +26,14 @@ import {
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Link } from "react-router";
 import { useI18n } from "@/components/i18n-provider";
 import { Badge } from "@/components/ui/badge";
@@ -46,10 +55,26 @@ import {
   EmptyHeader,
   EmptyMedia,
 } from "@/components/ui/empty";
-import { Input } from "@/components/ui/input";
 import { Message, MessageContent } from "@/components/ui/message";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  type VisitorChatAction,
+  VisitorChatActionDialog,
+  VisitorChatMessageActions,
+} from "@/components/visitor-chat-message-actions";
+import { VisitorChatStickerPicker } from "@/components/visitor-chat-sticker-picker";
 import { useAuth } from "@/features/auth/context";
+import {
+  formatChatDay,
+  formatChatTime,
+  getChatDay,
+} from "@/features/dashboard/chat-date";
+import {
+  encodeChatSticker,
+  getChatStickerSrc,
+  parseChatSticker,
+} from "@/features/dashboard/chat-stickers";
 import {
   DASHBOARD_PRESENCE_QUERY_KEY,
   dashboardChatThreadQueryKey,
@@ -60,6 +85,7 @@ import {
   type DashboardPresencePoint,
   type DashboardPresenceSnapshot,
   type DashboardVisitorPresence,
+  deleteDashboardChatMessages,
   fetchDashboardChatThread,
   fetchDashboardPresence,
   markDashboardChatRead,
@@ -69,6 +95,7 @@ import {
 } from "@/features/dashboard/dashboard-activity";
 import { formatJakartaTimestamp } from "@/features/endpoints/utils/endpoint-time";
 import { fetchLogSources } from "@/features/log-viewer/api";
+import { getErrorMessage } from "@/lib/error-handler";
 import { type AppLocale, formatMessage, type Messages } from "@/lib/i18n";
 import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
 import { queryClient } from "@/lib/query-client";
@@ -692,7 +719,10 @@ export function OnlineVisitorsDrawer({
         />
       )}
       <DrawerContent className="overflow-hidden" showSwipeHandle={false}>
-        <DrawerHeader size="compact">
+        <DrawerHeader
+          className={selectedChatIp ? "sr-only" : undefined}
+          size="compact"
+        >
           <div className="flex items-center justify-between gap-2">
             <DrawerTitle size="sm">
               {selectedChatIp
@@ -742,6 +772,7 @@ export function OnlineVisitorsDrawer({
                 <VisitorIpChatPanel
                   copy={copy}
                   currentIp={currentIp ?? "unknown"}
+                  nowMs={nowMs}
                   onBack={closeChatToAllVisitors}
                   targetIp={selectedChatIp}
                   visitor={selectedVisitor}
@@ -1291,10 +1322,24 @@ function ChatRedactedMessageContent({
   isRedacted: boolean;
 }) {
   const [clickedReveal, setClickedReveal] = useState(false);
+  const { messages } = useI18n();
+  const stickerId = parseChatSticker(message);
+  const content = stickerId ? (
+    <img
+      alt={messages.dashboardActivity.presence.stickers.labels[stickerId]}
+      className="aspect-square w-48 max-w-full object-contain"
+      decoding="async"
+      height={192}
+      src={getChatStickerSrc(stickerId)}
+      width={192}
+    />
+  ) : (
+    <span className="whitespace-pre-wrap">{message}</span>
+  );
 
   // If redaction is disabled for this chat, display standard text
   if (!isRedacted) {
-    return <BubbleContent>{message}</BubbleContent>;
+    return <BubbleContent>{content}</BubbleContent>;
   }
 
   return (
@@ -1305,7 +1350,7 @@ function ChatRedactedMessageContent({
         onClick={() => setClickedReveal((prev) => !prev)}
         type="button"
       >
-        <span className="chat-redacted-text block">{message}</span>
+        <span className="chat-redacted-text block">{content}</span>
         <span aria-hidden="true" className="chat-redacted-dust">
           <span />
           <span />
@@ -1316,18 +1361,63 @@ function ChatRedactedMessageContent({
 }
 
 function VisitorIpChatPanel({
+  nowMs,
   targetIp,
   currentIp,
   visitor,
   copy,
   onBack,
 }: {
+  nowMs: number;
   targetIp: string;
   currentIp: string;
   visitor: DashboardVisitorPresence | undefined;
   copy: Messages["dashboardActivity"]["presence"];
   onBack: () => void;
 }) {
+  const { locale } = useI18n();
+  const [action, setAction] = useState<VisitorChatAction | null>(null);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
+    null
+  );
+  const setPanelRef = useCallback((node: HTMLDivElement | null) => {
+    setPortalContainer(
+      node?.closest<HTMLElement>('[data-slot="drawer-content"]') ?? null
+    );
+  }, []);
+  const deleteMutation = useMutation({
+    mutationFn: async (selection: VisitorChatAction) => {
+      if (selection.type === "info") {
+        return;
+      }
+      const messageId =
+        selection.type === "delete" ? selection.message.id : undefined;
+      await queryClient.cancelQueries({
+        queryKey: dashboardChatThreadQueryKey(targetIp),
+      });
+      const deletedIds = await deleteDashboardChatMessages(targetIp, messageId);
+      queryClient.setQueryData<DashboardIpChatThread | null>(
+        dashboardChatThreadQueryKey(targetIp),
+        (thread) =>
+          thread
+            ? {
+                ...thread,
+                messages: thread.messages.filter(
+                  (message) => !deletedIds.includes(message.id)
+                ),
+              }
+            : thread
+      );
+      await queryClient.invalidateQueries({
+        queryKey: DASHBOARD_PRESENCE_QUERY_KEY,
+      });
+    },
+    onSuccess: () => setAction(null),
+  });
+  const selectAction = (selection: VisitorChatAction) => {
+    deleteMutation.reset();
+    setAction(selection);
+  };
   const [draft, setDraft] = useState("");
   const endRef = useRef<HTMLDivElement | null>(null);
   const optimisticIdRef = useRef(-1);
@@ -1529,51 +1619,83 @@ function VisitorIpChatPanel({
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex items-center justify-between gap-3 border-b bg-muted/20 px-4 py-2.5">
-        <Button onClick={onBack} size="xs" type="button" variant="ghost">
+    <div className="flex min-h-0 flex-1 flex-col" ref={setPanelRef}>
+      <VisitorChatActionDialog
+        action={action}
+        container={portalContainer}
+        error={
+          deleteMutation.error ? getErrorMessage(deleteMutation.error) : null
+        }
+        onClose={() => setAction(null)}
+        onDelete={() => {
+          if (action) {
+            deleteMutation.mutate(action);
+          }
+        }}
+        pending={deleteMutation.isPending}
+      />
+      <div className="flex shrink-0 items-center gap-2 border-b bg-muted/20 px-3 py-2">
+        <Button
+          aria-label={copy.chatBackLabel}
+          onClick={onBack}
+          size="icon-xs"
+          title={copy.chatBackLabel}
+          type="button"
+          variant="ghost"
+        >
+          <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} />
+        </Button>
+        <div
+          className="flex min-w-0 flex-1 items-center gap-1.5 text-xs"
+          title={statusLabel}
+        >
+          <span
+            aria-hidden="true"
+            className={cn("size-1.5 shrink-0 rounded-full", statusDotClass)}
+          />
+          <span className="truncate font-medium font-mono">{targetIp}</span>
+          <span className={cn("shrink-0", statusTextClass)}>{statusLabel}</span>
+        </div>
+        <Button
+          aria-label={copy.chatClearAll}
+          disabled={
+            chatMessages.length === 0 ||
+            sendMutation.isPending ||
+            deleteMutation.isPending
+          }
+          onClick={() => selectAction({ type: "clear" })}
+          size="icon-xs"
+          title={copy.chatClearAll}
+          type="button"
+          variant="ghost"
+        >
+          <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+        </Button>
+        <Button
+          aria-label={copy.chatRedactionToggleLabel}
+          aria-pressed={isRedacted}
+          onClick={toggleRedaction}
+          size="icon-xs"
+          title={copy.chatRedactionToggleLabel}
+          type="button"
+          variant={isRedacted ? "secondary" : "ghost"}
+        >
           <HugeiconsIcon
-            className="size-3.5"
-            icon={ArrowLeft01Icon}
+            icon={isRedacted ? ViewOffIcon : ViewIcon}
             strokeWidth={2}
           />
-          <span>{copy.chatBackLabel}</span>
         </Button>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 text-xs">
-            <span
-              aria-hidden="true"
-              className={cn("size-2 rounded-full", statusDotClass)}
-            />
-            <span className="font-medium font-mono">{targetIp}</span>
-            <span className={cn("font-medium", statusTextClass)}>
-              ({statusLabel})
-            </span>
-          </div>
-          <Button
-            aria-label={copy.chatRedactionToggleLabel}
-            aria-pressed={isRedacted}
-            className="size-7 shrink-0"
-            onClick={toggleRedaction}
-            size="icon-xs"
-            title={copy.chatRedactionToggleLabel}
-            type="button"
-            variant={isRedacted ? "secondary" : "ghost"}
-          >
-            <HugeiconsIcon
-              className="size-3.5"
-              icon={isRedacted ? ViewOffIcon : ViewIcon}
-              strokeWidth={2}
-            />
-          </Button>
-        </div>
       </div>
 
-      {!isOnline && (
-        <div className="border-b bg-muted/35 px-4 py-2.5 text-muted-foreground text-xs leading-relaxed">
-          {formatMessage(copy.chatOfflineHint, { ip: targetIp })}
-        </div>
-      )}
+      <p className="flex shrink-0 items-center justify-center gap-1.5 px-3 py-1.5 text-muted-foreground text-xs">
+        <HugeiconsIcon
+          aria-hidden="true"
+          className="size-3 shrink-0"
+          icon={LockKeyIcon}
+          strokeWidth={2}
+        />
+        <span>{copy.chatEncryptionNotice}</span>
+      </p>
 
       {chatMessages.length === 0 ? (
         <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-8">
@@ -1596,36 +1718,52 @@ function VisitorIpChatPanel({
           viewportClassName="overflow-x-hidden"
         >
           <div className="flex flex-col gap-4 px-4 py-5">
-            {chatMessages.map((msg) => {
+            {chatMessages.map((msg, index) => {
               const isMine = msg.senderIp === currentIp;
               return (
-                <Message align={isMine ? "end" : "start"} key={msg.id}>
-                  <MessageContent>
-                    <Bubble
-                      align={isMine ? "end" : "start"}
-                      variant={isMine ? "default" : "muted"}
-                    >
-                      <ChatRedactedMessageContent
-                        isRedacted={isRedacted}
-                        message={msg.message}
-                      />
-                      <div
-                        className={cn(
-                          "flex items-center gap-1 px-1 font-mono text-muted-foreground/80 text-xs",
-                          isMine && "self-end text-right"
-                        )}
+                <Fragment key={msg.id}>
+                  {index === 0 ||
+                  getChatDay(msg.createdAt) !==
+                    getChatDay(chatMessages[index - 1].createdAt) ? (
+                    <div className="flex justify-center py-2">
+                      <Badge variant="secondary">
+                        {formatChatDay(msg.createdAt, nowMs, locale, copy)}
+                      </Badge>
+                    </div>
+                  ) : null}
+                  <Message align={isMine ? "end" : "start"}>
+                    <MessageContent>
+                      <VisitorChatMessageActions
+                        message={msg}
+                        onAction={selectAction}
                       >
-                        <span>{formatJakartaTimestamp(msg.createdAt)}</span>
-                        {isMine && (
-                          <ChatMessageDeliveryReceipt
-                            copy={copy}
-                            message={msg}
+                        <Bubble
+                          align={isMine ? "end" : "start"}
+                          variant={isMine ? "default" : "muted"}
+                        >
+                          <ChatRedactedMessageContent
+                            isRedacted={isRedacted}
+                            message={msg.message}
                           />
-                        )}
-                      </div>
-                    </Bubble>
-                  </MessageContent>
-                </Message>
+                          <div
+                            className={cn(
+                              "flex items-center gap-1 whitespace-nowrap px-1 font-mono text-muted-foreground/80 text-xs",
+                              isMine && "self-end text-right"
+                            )}
+                          >
+                            <span>{formatChatTime(msg.createdAt)}</span>
+                            {isMine && (
+                              <ChatMessageDeliveryReceipt
+                                copy={copy}
+                                message={msg}
+                              />
+                            )}
+                          </div>
+                        </Bubble>
+                      </VisitorChatMessageActions>
+                    </MessageContent>
+                  </Message>
+                </Fragment>
               );
             })}
             <div ref={endRef} />
@@ -1634,27 +1772,45 @@ function VisitorIpChatPanel({
       )}
 
       <form
-        className="flex items-center gap-2.5 border-t bg-card/60 px-4 py-3.5"
+        className="flex items-center gap-2 border-t bg-card/60 px-3 py-2"
         onSubmit={handleSubmit}
       >
-        <Input
-          aria-label={formatMessage(copy.chatInputPlaceholder, {
-            ip: targetIp,
-          })}
-          autoFocus
-          className="flex-1"
-          maxLength={500}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder={formatMessage(copy.chatInputPlaceholder, {
-            ip: targetIp,
-          })}
-          size="sm"
-          value={draft}
+        <ScrollArea className="h-9 min-w-0 flex-1" variant="chat">
+          <Textarea
+            aria-describedby="visitor-chat-input-hint"
+            aria-label={formatMessage(copy.chatInputPlaceholder, {
+              ip: targetIp,
+            })}
+            autoFocus
+            maxLength={500}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.nativeEvent.isComposing
+              ) {
+                event.preventDefault();
+                event.currentTarget.form?.requestSubmit();
+              }
+            }}
+            placeholder={formatMessage(copy.chatInputPlaceholder, {
+              ip: targetIp,
+            })}
+            rows={1}
+            size="chat"
+            value={draft}
+            variant="ghost"
+          />
+        </ScrollArea>
+        <VisitorChatStickerPicker
+          disabled={sendMutation.isPending}
+          onSelect={(id) => sendMutation.mutate(encodeChatSticker(id))}
         />
         <Button
           aria-label={copy.chatSendLabel}
           disabled={!draft.trim() || sendMutation.isPending}
-          size="sm"
+          size="chat-send"
           type="submit"
         >
           <HugeiconsIcon
@@ -1665,6 +1821,12 @@ function VisitorIpChatPanel({
           <span>{copy.chatSendLabel}</span>
         </Button>
       </form>
+      <p
+        className="px-4 pb-2 text-muted-foreground text-xs"
+        id="visitor-chat-input-hint"
+      >
+        {copy.chatInputHint}
+      </p>
     </div>
   );
 }

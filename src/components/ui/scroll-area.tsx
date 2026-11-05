@@ -10,6 +10,7 @@ const scrollAreaVariants = cva("relative overflow-hidden group/scroll-area", {
   variants: {
     variant: {
         "traffic": "rounded-lg border border-border bg-background text-foreground shadow-inner dark:border-[#2f2f2f] dark:bg-[#151515]",
+      chat: "rounded-lg border border-input bg-transparent shadow-xs focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
       default: "",
       panel: "rounded-xl border border-border/50 bg-muted/15 [&>[data-slot=scroll-area-viewport]>[role=presentation]]:!min-w-0",
       terminal: "rounded-lg border border-[#2f2f2f] bg-[#151515] shadow-inner",

@@ -18,6 +18,7 @@ const textareaVariants = cva(
           "bg-transparent dark:bg-transparent font-mono text-transparent leading-6 caret-foreground selection:bg-primary/20 selection:text-transparent",
       },
       size: {
+        chat: "field-sizing-content min-h-8 resize-none overflow-hidden px-3 py-1.5 text-sm",
         default: "",
         xs: "text-xs md:text-xs",
         sm: "text-sm",

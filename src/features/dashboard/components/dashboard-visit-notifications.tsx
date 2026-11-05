@@ -11,6 +11,7 @@ import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { Button } from "@/components/ui/button";
 import { useIsScreenLocked } from "@/features/auth/components/screen-lock";
 import { useAuth } from "@/features/auth/context";
+import { parseChatSticker } from "@/features/dashboard/chat-stickers";
 import {
   type DashboardIpChatMessage,
   type DashboardIpChatReadPayload,
@@ -21,6 +22,7 @@ import {
   dispatchOpenVisitorChat,
   fetchDashboardPresence,
   getActiveVisitorChatTargetIp,
+  parseDashboardChatDeletedEvent,
   parseDashboardChatEvent,
   parseDashboardChatReadEvent,
   parseDashboardPresenceEvent,
@@ -160,6 +162,10 @@ function formatChatToastPreview(
 ): string | undefined {
   if (!rawMessage) {
     return undefined;
+  }
+  const stickerId = parseChatSticker(rawMessage);
+  if (stickerId) {
+    return messages.dashboardActivity.presence.stickers.labels[stickerId];
   }
   return rawMessage.length > 96 ? `${rawMessage.slice(0, 96)}…` : rawMessage;
 }
@@ -378,6 +384,37 @@ function announceOfflineUnreadChats(
   }
 }
 
+function applyDeletedChatToCache(
+  event: NonNullable<ReturnType<typeof parseDashboardChatDeletedEvent>>,
+  myIp: string | null
+) {
+  if (myIp !== event.sender_ip && myIp !== event.recipient_ip) {
+    return;
+  }
+  const peerIp =
+    myIp === event.sender_ip ? event.recipient_ip : event.sender_ip;
+  queryClient
+    .cancelQueries({ queryKey: dashboardChatThreadQueryKey(peerIp) })
+    .then(() => {
+      queryClient.setQueryData<DashboardIpChatThread | null>(
+        dashboardChatThreadQueryKey(peerIp),
+        (thread) =>
+          thread
+            ? {
+                ...thread,
+                messages: thread.messages.filter(
+                  (message) => !event.deleted_ids.includes(message.id)
+                ),
+              }
+            : thread
+      );
+    })
+    .catch(() => undefined);
+  queryClient.invalidateQueries({
+    queryKey: DASHBOARD_PRESENCE_QUERY_KEY,
+  });
+}
+
 export function DashboardVisitNotifications() {
   const { snapshot } = useAuth();
   const isScreenLocked = useIsScreenLocked();
@@ -408,6 +445,12 @@ export function DashboardVisitNotifications() {
       acquireTicket: () => createRealtimeTicket("dashboard-visits"),
       configuredUrl: import.meta.env.VITE_DASHBOARD_EVENTS_WS_URL,
       onMessage: (data) => {
+        const deletedEvent = parseDashboardChatDeletedEvent(data);
+        if (deletedEvent) {
+          applyDeletedChatToCache(deletedEvent, currentIpAddressRef.current);
+          return;
+        }
+
         const chatReadEvent = parseDashboardChatReadEvent(data);
         if (chatReadEvent) {
           applyChatReadEventToCache(

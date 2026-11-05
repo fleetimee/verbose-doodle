@@ -329,6 +329,26 @@ The HMAC-SHA-256 tool uses the compact developer-tool layout with two bordered p
 
 The Games index at `/dashboard/games` is a browse-and-play storefront inside the existing dashboard shell. Lead with a wide featured game screenshot beside its title, description, and Play now action. Below it, show a searchable library of all ten games with 16:9 screenshots captured from the bundled games, localized descriptions, and direct links to each game route. Keep the page on the existing theme tokens; stack the featured panel and library on mobile. Store cover images in `public/games/covers/`, lazy-load library images, and keep keyboard focus visible on the full-card links. Search matches game titles and descriptions and offers a clear action when there are no results. On desktop, sustained hover or keyboard focus opens one floating preview panel beside the card after 350ms. Keep the card cover visible; the panel shows the title, gameplay media, and description. Crossfade stills every 2.5 seconds or play an available silent looping clip. Flip the panel near viewport edges and keep it below the sticky header. Escape closes it. Load media only while the panel is open; reduced motion keeps a static still, and touch opens the game on the first tap.
 
+### Visitor chat
+
+The visitor chat composer uses a fixed-height compact textarea with internal
+scrolling for multiline drafts. Enter sends; Shift+Enter inserts a newline.
+It places an outlined sticker-icon button beside
+the message input. Reuse the existing button and popover tokens. Static,
+transparent mascot stickers appear in a large two-column grid inside the shared
+ScrollArea, constrained to the viewport. Portal the picker inside the drawer so
+its modal boundary permits interaction. Selecting one sends it and closes the picker. Chat bubbles show
+the sticker with localized alternative text and retain the existing per-partner
+privacy redaction, timestamps, and delivery/read receipts.
+
+Each visitor chat message exposes a right-click context menu
+for message information and permanent deletion. Message information uses stored
+sender, recipient, sent, and read metadata. A Clear chat action applies to the
+current conversation. Deleting a message or clearing a chat requires a dialog
+that explicitly states removal is permanent for both participants. Keep menus
+and dialogs inside the drawer portal boundary. Apply server-confirmed deleted
+IDs to realtime caches so messages arriving during deletion remain visible.
+
 ### Screen lock
 
 The lock button sits beside the theme switcher in the dashboard header. Locking reuses the macOS lock screen and provides a direct unlock action to resume the workspace. The screen also locks automatically after 2.5 minutes of user inactivity. The lock persists per tab across reloads until unlocked. A full-screen modal keeps keyboard focus and interaction within the lock screen.

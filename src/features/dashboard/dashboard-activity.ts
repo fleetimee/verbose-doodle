@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiDelete, apiGet, apiPost } from "@/lib/api";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 export const DASHBOARD_VISIT_EVENT_TYPE = "dashboard_visited";
@@ -683,4 +683,40 @@ export function tryShowNativeVisitorChatNotification({
   } catch {
     // Ignore on non-secure HTTP contexts
   }
+}
+
+const deletedChatEventSchema = z.object({
+  type: z.literal("dashboard_chat_deleted"),
+  payload: z.object({
+    sender_ip: z.string(),
+    recipient_ip: z.string(),
+    deleted_ids: z.array(z.number().int().positive()),
+  }),
+});
+
+export function parseDashboardChatDeletedEvent(raw: DashboardVisitEventRaw) {
+  let parsed: unknown = raw;
+  if (isRawString(raw)) {
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+  const result = deletedChatEventSchema.safeParse(parsed);
+  return result.success ? result.data.payload : null;
+}
+
+export async function deleteDashboardChatMessages(
+  targetIp: string,
+  messageId?: number
+) {
+  const path =
+    messageId === undefined
+      ? API_ENDPOINTS.admin.dashboard.chats
+      : `${API_ENDPOINTS.admin.dashboard.chats}/${messageId}`;
+  const response = await apiDelete<{ data: { deleted_ids: number[] } }>(
+    `${path}?targetIp=${encodeURIComponent(targetIp)}`
+  );
+  return z.array(z.number().int().positive()).parse(response.data.deleted_ids);
 }
