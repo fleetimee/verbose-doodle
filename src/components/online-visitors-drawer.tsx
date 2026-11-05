@@ -737,9 +737,11 @@ export function OnlineVisitorsDrawer({
               {onlineCount} {copy.onlineBadge.toLowerCase()}
             </Badge>
           </div>
-          <DrawerDescription size="xs">{copy.description}</DrawerDescription>
+          <DrawerDescription className="sr-only" size="xs">
+            {copy.description}
+          </DrawerDescription>
           {currentIp && currentIp !== "unknown" && (
-            <div className="mt-1 flex items-center justify-between rounded-md border bg-muted/40 px-2.5 py-1 text-xs">
+            <div className="flex items-center gap-2 text-xs">
               <span className="text-muted-foreground">
                 {copy.currentIpLabel}
               </span>
@@ -926,32 +928,23 @@ function VisitorsSteamChart({
       : ((hoveredIndex + 0.5) / recentPoints.length) * 100;
 
   return (
-    <section className="min-w-0 space-y-2 rounded-lg border bg-muted/25 p-2.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-          {copy.chartTitle}
+    <section className="flex min-w-0 flex-col gap-2 rounded-lg border bg-muted/25 p-2">
+      <div className="flex items-center justify-between gap-2 text-muted-foreground text-xs">
+        <span>{copy.chartTitle}</span>
+        <span className="flex items-center gap-3">
+          <span>
+            {copy.peakOnlineLabel}{" "}
+            <strong className="font-mono text-foreground">
+              {peakOnlineCount}
+            </strong>
+          </span>
+          <span>
+            {copy.onlineNowLabel}{" "}
+            <strong className="font-mono text-foreground">{onlineCount}</strong>
+          </span>
         </span>
       </div>
-      <div className="grid grid-cols-2 gap-2 pt-0.5">
-        <div className="space-y-0.5">
-          <div className="font-mono font-semibold text-base text-foreground tabular-nums leading-none">
-            {peakOnlineCount}
-          </div>
-          <div className="font-semibold text-success text-xs uppercase tracking-wider">
-            {copy.peakOnlineLabel}
-          </div>
-        </div>
-        <div className="space-y-0.5">
-          <div className="font-mono font-semibold text-base text-foreground tabular-nums leading-none">
-            {onlineCount}
-          </div>
-          <div className="font-semibold text-primary text-xs uppercase tracking-wider">
-            {copy.onlineNowLabel}
-          </div>
-        </div>
-      </div>
-
-      <div className="relative mt-1.5 h-20 w-full overflow-hidden rounded border bg-background/60 px-1.5 pt-2.5 pb-1">
+      <div className="relative h-32 w-full overflow-hidden rounded border bg-background/60 px-1.5 pt-2.5 pb-1">
         <div className="pointer-events-none absolute inset-x-1.5 top-2.5 bottom-1 flex flex-col justify-between">
           <div className="border-border/50 border-t" />
           <div className="border-border/40 border-t" />

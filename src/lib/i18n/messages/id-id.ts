@@ -62,7 +62,7 @@ export const idIdMessages = {
     presence: {
       stickers: {
         open: "Kirim stiker maskot",
-        title: "Stiker maskot",
+        title: "Obrolan",
         labels: {
           hello: "Halo",
           bye: "Sampai jumpa",
@@ -78,7 +78,7 @@ export const idIdMessages = {
         },
       },
       triggerLabel: "Pengunjung online ({count})",
-      title: "Status pengunjung",
+      title: "Obrolan",
       description:
         "Alamat IP yang sedang mengunjungi workspace, halaman yang dibuka, serta waktu aktif terakhirnya.",
       onlineSection: "Sedang online",
@@ -95,9 +95,9 @@ export const idIdMessages = {
       emptyOnline: "Belum ada pengunjung aktif saat ini.",
       emptyRecent: "Belum ada riwayat kunjungan sebelumnya.",
       currentIpLabel: "IP Anda",
-      chartTitle: "PENGUNJUNG ONLINE",
-      peakOnlineLabel: "PUNCAK ONLINE",
-      onlineNowLabel: "ONLINE SEKARANG",
+      chartTitle: "Aktivitas",
+      peakOnlineLabel: "Puncak",
+      onlineNowLabel: "Kini",
       chartHoverLabel: "{count} online pada {time}",
       viewingPageLabel: "Membuka {page}",
       playingGameLabel: "Bermain {page}",

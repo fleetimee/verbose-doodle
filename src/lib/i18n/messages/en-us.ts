@@ -60,7 +60,7 @@ export const enUsMessages = {
     presence: {
       stickers: {
         open: "Send a mascot sticker",
-        title: "Mascot stickers",
+        title: "Chat",
         labels: {
           hello: "Hello",
           bye: "Goodbye",
@@ -76,7 +76,7 @@ export const enUsMessages = {
         },
       },
       triggerLabel: "Online visitors ({count})",
-      title: "Visitor presence",
+      title: "Chat",
       description:
         "IP addresses currently visiting the workspace, their live page activity, and recent history.",
       onlineSection: "Currently online",
@@ -93,9 +93,9 @@ export const enUsMessages = {
       emptyOnline: "No active visitors detected right now.",
       emptyRecent: "No previous visitor history recorded yet.",
       currentIpLabel: "Your IP",
-      chartTitle: "VISITORS ONLINE",
-      peakOnlineLabel: "PEAK ONLINE",
-      onlineNowLabel: "ONLINE NOW",
+      chartTitle: "Activity",
+      peakOnlineLabel: "Peak",
+      onlineNowLabel: "Now",
       chartHoverLabel: "{count} online at {time}",
       viewingPageLabel: "Viewing {page}",
       playingGameLabel: "Playing {page}",
