@@ -1320,11 +1320,11 @@ function ChatRedactedMessageContent({
   const content = stickerId ? (
     <img
       alt={messages.dashboardActivity.presence.stickers.labels[stickerId]}
-      className="aspect-square w-48 max-w-full object-contain"
+      className="aspect-square w-full max-w-full object-contain"
       decoding="async"
-      height={192}
+      height={224}
       src={getChatStickerSrc(stickerId)}
-      width={192}
+      width={224}
     />
   ) : (
     <span className="whitespace-pre-wrap">{message}</span>
@@ -1332,13 +1332,13 @@ function ChatRedactedMessageContent({
 
   // If redaction is disabled for this chat, display standard text
   if (!isRedacted) {
-    return <BubbleContent>{content}</BubbleContent>;
+    return <BubbleContent variant="visitor">{content}</BubbleContent>;
   }
 
   return (
-    <BubbleContent>
+    <BubbleContent variant="visitor">
       <button
-        className="chat-redacted-bubble text-left"
+        className="chat-redacted-bubble w-full text-left"
         data-revealed={clickedReveal}
         onClick={() => setClickedReveal((prev) => !prev)}
         type="button"
@@ -1732,6 +1732,10 @@ function VisitorIpChatPanel({
                       >
                         <Bubble
                           align={isMine ? "end" : "start"}
+                          className={cn(
+                            "max-w-[85%]",
+                            parseChatSticker(msg.message) ? "w-60" : "w-max"
+                          )}
                           variant={isMine ? "default" : "muted"}
                         >
                           <ChatRedactedMessageContent

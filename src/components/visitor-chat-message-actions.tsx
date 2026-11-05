@@ -50,7 +50,7 @@ export function VisitorChatMessageActions({
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        <div className="flex min-w-0 flex-col" ref={ref}>
+        <div className="flex w-full min-w-0 flex-col" ref={ref}>
           {children}
         </div>
       </ContextMenuTrigger>

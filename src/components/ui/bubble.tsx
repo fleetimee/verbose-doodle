@@ -47,6 +47,7 @@ const bubbleContentVariants = cva(
     variants: {
       variant: {
         default: "",
+        visitor: "w-auto self-stretch group-data-[align=end]/bubble:self-stretch",
         chat: "overview-chat-bubble",
         "chat-error": "overview-chat-bubble overview-chat-bubble-error",
       },
