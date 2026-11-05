@@ -228,7 +228,7 @@ export function LogSelectionAction({
             {copied && !reduceMotion && (
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0"
+                className="pointer-events-none absolute inset-0 z-10"
               >
                 {CONFETTI_PIECES.map((piece, index) => (
                   <motion.span
