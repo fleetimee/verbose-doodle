@@ -1,4 +1,7 @@
 export const serversMessages = {
+  autoTrustTitle: "Kepercayaan otomatis pengembangan aktif",
+  autoTrustDescription:
+    "Kunci host SSH dan sertifikat RDP diterima otomatis tanpa persetujuan.",
   cleanup: {
     filesPartial: "Sebagian file tidak dapat ditampilkan.",
     loadMoreFolders: "Tampilkan folder lainnya",

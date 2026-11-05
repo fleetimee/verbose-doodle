@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { reportClientLog, setClientLogTokenProvider } from "@/lib/client-logs";
+import { notifyRemoteAutoTrust } from "@/lib/remote-trust-notice";
 import { createUploadFetch } from "@/lib/upload-fetch";
 
 /**
@@ -115,14 +116,18 @@ async function fetchWithTimeout(
   }
 }
 
-function parseResponse<T>(response: Response): Promise<T> {
+async function parseResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get("content-type");
   if (!contentType?.includes("application/json")) {
     // SAFETY: Non-JSON response returns undefined compatible with void/optional response types
     return Promise.resolve(undefined as T);
   }
 
-  return response.json();
+  const data = await response.json();
+  if (z.object({ autoTrust: z.literal(true) }).safeParse(data).success) {
+    notifyRemoteAutoTrust();
+  }
+  return data;
 }
 
 /**

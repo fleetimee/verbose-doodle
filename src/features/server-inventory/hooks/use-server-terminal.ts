@@ -7,7 +7,6 @@ import {
   buildTicketWebSocketUrl,
   createRealtimeTicket,
 } from "@/features/realtime/ticket-client";
-
 import {
   createTerminalFileBrowser,
   type FileListCommand,
@@ -20,6 +19,7 @@ import {
   fileTransferEventSchema,
   type TerminalFileTransfer,
 } from "@/features/server-inventory/utils/terminal-file-transfers";
+import { notifyRemoteAutoTrust } from "@/lib/remote-trust-notice";
 
 type TerminalCommand =
   | FileListCommand
@@ -52,6 +52,7 @@ const terminalEventSchema = z.union([
   z.object({
     type: z.enum(["connected", "error", "pong"]),
     code: z.string(),
+    autoTrust: z.boolean().optional(),
   }),
   hostKeySchema,
   fileTransferEventSchema,
@@ -394,6 +395,9 @@ export function useServerTerminal(
             }, 95_000);
             break;
           case "connected":
+            if (message.autoTrust) {
+              notifyRemoteAutoTrust();
+            }
             setHostKey(null);
             setTrustPending(false);
             connected = true;
