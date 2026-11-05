@@ -415,6 +415,59 @@ function applyDeletedChatToCache(
   });
 }
 
+function presenceTransitionNotices(
+  previous: Map<string, string> | null,
+  visitors: DashboardPresenceSnapshot["visitors"],
+  myIp: string | null,
+  lastIndexes: {
+    left: { current: number | null };
+    sleeping: { current: number | null };
+  }
+): DashboardVisitNotice[] {
+  if (!previous) {
+    return [];
+  }
+  return visitors.flatMap((visitor) => {
+    if (visitor.ipAddress === myIp) {
+      return [];
+    }
+    const before = previous.get(visitor.ipAddress);
+    let template: string | undefined;
+    if ((before === "online" || before === "sleeping") && !visitor.online) {
+      template = pickVisitMessage(
+        lastIndexes.left,
+        messages.dashboardActivity.leftMessages
+      );
+    } else if (before === "online" && visitor.online && visitor.sleeping) {
+      template = pickVisitMessage(
+        lastIndexes.sleeping,
+        messages.dashboardActivity.sleepingMessages
+      );
+    }
+    return template
+      ? [
+          {
+            copy: formatMessage(template, { ip: visitor.ipAddress }),
+            visitId: `presence-${visitor.ipAddress}-${Date.now()}`,
+          },
+        ]
+      : [];
+  });
+}
+
+function visitorPresenceStates(
+  visitors: DashboardPresenceSnapshot["visitors"]
+) {
+  return new Map(
+    visitors.map((visitor): [string, string] => {
+      if (!visitor.online) {
+        return [visitor.ipAddress, "offline"];
+      }
+      return [visitor.ipAddress, visitor.sleeping ? "sleeping" : "online"];
+    })
+  );
+}
+
 export function DashboardVisitNotifications() {
   const { snapshot } = useAuth();
   const isScreenLocked = useIsScreenLocked();
@@ -422,6 +475,13 @@ export function DashboardVisitNotifications() {
   const [notices, setNotices] = useState<DashboardVisitNotice[]>([]);
   const seenVisitIdsRef = useRef(new Set<string>());
   const visitMessageIndexRef = useRef<number | null>(null);
+  const presenceMessageIndexesRef = useRef<{
+    left: { current: number | null };
+    sleeping: { current: number | null };
+  }>({
+    left: { current: null },
+    sleeping: { current: null },
+  });
   const recordedVisitUserIdRef = useRef<string | null>(null);
   const recordedVisitPromiseRef =
     useRef<Promise<DashboardVisitEvent | null> | null>(null);
@@ -439,6 +499,7 @@ export function DashboardVisitNotifications() {
   isScreenLockedRef.current = isScreenLocked;
   const visitRequestGenerationRef = useRef(0);
   const connectionRef = useRef<TicketedRealtimeConnection | null>(null);
+  const presenceStatesRef = useRef<Map<string, string> | null>(null);
 
   if (!connectionRef.current) {
     connectionRef.current = createTicketedRealtimeConnection({
@@ -471,6 +532,18 @@ export function DashboardVisitNotifications() {
 
         const presenceEvent = parseDashboardPresenceEvent(data);
         if (presenceEvent) {
+          const transitions = presenceTransitionNotices(
+            presenceStatesRef.current,
+            presenceEvent.payload.visitors,
+            currentIpAddressRef.current,
+            presenceMessageIndexesRef.current
+          );
+          presenceStatesRef.current = visitorPresenceStates(
+            presenceEvent.payload.visitors
+          );
+          setNotices((current) =>
+            [...current, ...transitions].slice(-MAX_ACTIVE_VISIT_NOTICES)
+          );
           applyPresenceEventToCache(presenceEvent, currentIpAddressRef.current);
           return;
         }
@@ -529,6 +602,7 @@ export function DashboardVisitNotifications() {
       recordedVisitPromiseRef.current = null;
       currentVisitIdRef.current = null;
       currentIpAddressRef.current = null;
+      presenceStatesRef.current = null;
       visitRequestGenerationRef.current += 1;
       connection.disconnect();
       return;
@@ -554,6 +628,7 @@ export function DashboardVisitNotifications() {
     let active = true;
     const unsubscribe = connection.subscribe((state) => {
       if (state.status === "connected" && active) {
+        presenceStatesRef.current = null;
         connection.send(
           JSON.stringify({
             path: currentPathnameRef.current,

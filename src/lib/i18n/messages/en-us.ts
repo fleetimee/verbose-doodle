@@ -47,6 +47,26 @@ export const enUsMessages = {
   cronParser: cronParserMessages,
   dateConverter: dateConverterMessages,
   dashboardActivity: {
+    leftMessages: [
+      "{ip} has left the workspace.",
+      "{ip} signed off. Catch you later!",
+      "And… {ip} has left the building.",
+      "{ip} called it a day.",
+      "{ip} stepped out of the workspace.",
+      "See you next time, {ip}.",
+      "{ip} went offline. Until next time!",
+      "One less tab in the workspace: {ip} is offline.",
+    ],
+    sleepingMessages: [
+      "{ip} locked their screen.",
+      "{ip} is taking a screen break.",
+      "Screen locked. {ip} will be back.",
+      "{ip} put their workspace on pause.",
+      "A little downtime for {ip}: screen locked.",
+      "{ip} stepped away with their screen locked.",
+      "{ip} hit pause. The screen is locked.",
+      "The workspace can wait: {ip} locked their screen.",
+    ],
     visitDismissLabel: "Dismiss dashboard visit",
     visitIpFallback: "an unknown IP",
     visitMessages: [
@@ -60,7 +80,7 @@ export const enUsMessages = {
     presence: {
       stickers: {
         open: "Send a mascot sticker",
-        title: "Chat",
+        title: "Stickers",
         labels: {
           hello: "Hello",
           bye: "Goodbye",

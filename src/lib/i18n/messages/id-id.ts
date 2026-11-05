@@ -49,6 +49,26 @@ export const idIdMessages = {
   common: idCommonMessages,
   cronParser: idCronParserMessages,
   dashboardActivity: {
+    leftMessages: [
+      "{ip} telah meninggalkan ruang kerja.",
+      "{ip} pamit dulu. Sampai nanti!",
+      "{ip} sudah keluar dari ruang kerja.",
+      "{ip} mengakhiri sesinya.",
+      "{ip} beranjak dari ruang kerja.",
+      "Sampai jumpa lagi, {ip}.",
+      "{ip} sedang offline. Sampai nanti!",
+      "Satu sesi berkurang: {ip} sudah offline.",
+    ],
+    sleepingMessages: [
+      "{ip} mengunci layarnya.",
+      "{ip} beristirahat sejenak dari layar.",
+      "Layar terkunci. {ip} akan kembali.",
+      "{ip} menjeda ruang kerjanya.",
+      "Waktunya jeda: layar {ip} terkunci.",
+      "{ip} beranjak dengan layar terkunci.",
+      "{ip} menekan jeda. Layarnya terkunci.",
+      "Ruang kerja bisa menunggu: {ip} mengunci layar.",
+    ],
     visitDismissLabel: "Tutup notifikasi kunjungan dashboard",
     visitIpFallback: "IP tidak dikenal",
     visitMessages: [
@@ -62,7 +82,7 @@ export const idIdMessages = {
     presence: {
       stickers: {
         open: "Kirim stiker maskot",
-        title: "Obrolan",
+        title: "Stiker",
         labels: {
           hello: "Halo",
           bye: "Sampai jumpa",
