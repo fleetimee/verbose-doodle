@@ -186,10 +186,16 @@ export function DataGrid({
   const [editToolbar, setEditToolbar] = useState<HTMLDivElement | null>(null);
   const { activeEdit, setActiveEdit, setIsSavingEdit, isSavingEdit } =
     useInlineCellEdit(onEditStateChange);
+  const pendingFlashRef = useRef<number | "last" | null>(null);
+  const [flashRow, setFlashRow] = useState<{
+    index: number;
+    token: number;
+  } | null>(null);
   const handleCellSaved = useCallback(() => {
+    pendingFlashRef.current = activeEdit?.rowIndex ?? null;
     setActiveEdit(null);
     notifyMutationSuccess(false);
-  }, [notifyMutationSuccess, setActiveEdit]);
+  }, [activeEdit, notifyMutationSuccess, setActiveEdit]);
   const [isAdding, setIsAdding] = useState(false);
   const [wrapText, setWrapText] = useState(false);
   const [searchInput, setSearchInput] = useState(searchQuery ?? "");
@@ -248,6 +254,17 @@ export function DataGrid({
 
   const columns = useMemo(() => data?.columns ?? [], [data]);
   const rawRows = useMemo(() => data?.rows ?? [], [data]);
+  useEffect(() => {
+    const pending = pendingFlashRef.current;
+    if (pending === null || !data) {
+      return;
+    }
+    pendingFlashRef.current = null;
+    const index = pending === "last" ? data.rows.length - 1 : pending;
+    if (index >= 0) {
+      setFlashRow((previous) => ({ index, token: (previous?.token ?? 0) + 1 }));
+    }
+  }, [data]);
   const fitWidths = useMemo(
     () =>
       Object.fromEntries(
@@ -528,6 +545,7 @@ export function DataGrid({
                 onEditStateChange={onEditStateChange}
                 onSaved={() => {
                   setIsAdding(false);
+                  pendingFlashRef.current = "last";
                   notifyMutationSuccess(true);
                 }}
                 tableName={data.tableName}
@@ -538,6 +556,7 @@ export function DataGrid({
               activeEdit={activeEdit}
               columns={columns}
               editToolbar={editToolbar}
+              flashRow={flashRow}
               hasError={Boolean(error)}
               isBusy={rowsBusy}
               isSavingEdit={isSavingEdit}
@@ -572,6 +591,9 @@ export function DataGrid({
         mode={rowModal.mode}
         onOpenChange={(open) => setRowModal((prev) => ({ ...prev, open }))}
         onSuccess={(isNewRow) => {
+          const editedIndex = rowModal.row ? rawRows.indexOf(rowModal.row) : -1;
+          pendingFlashRef.current =
+            isNewRow || editedIndex < 0 ? "last" : editedIndex;
           notifyMutationSuccess(isNewRow);
         }}
         open={rowModal.open}

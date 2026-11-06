@@ -7,7 +7,7 @@ import {
   MinimizeScreenIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Code2, Database } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
@@ -34,9 +34,16 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export const SIMULATOR_DB_DEDICATED_PATH = "/simulator-db";
 
+const EXPAND_EASING = "cubic-bezier(0.23, 1, 0.32, 1)";
+const EXPAND_DURATION_MS = 240;
+const EXPAND_REDUCED_MS = 120;
+
 function useViewMode(failedMessage: string) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const previousRectRef = useRef<DOMRect | null>(null);
+  const animationRef = useRef<Animation | null>(null);
   const [maximized, setMaximized] = useState(false);
+  const [restoring, setRestoring] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const fullscreenSupported =
     typeof document !== "undefined" && document.fullscreenEnabled;
@@ -50,6 +57,53 @@ function useViewMode(failedMessage: string) {
     return () => document.removeEventListener("fullscreenchange", sync);
   }, []);
 
+  useLayoutEffect(() => {
+    const first = previousRectRef.current;
+    const root = rootRef.current;
+    if (!(first && root)) {
+      return;
+    }
+    previousRectRef.current = null;
+    animationRef.current?.cancel();
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    const last = root.getBoundingClientRect();
+    const animation = root.animate(
+      reduce
+        ? [{ opacity: 0 }, { opacity: 1 }]
+        : [
+            {
+              transformOrigin: "0 0",
+              transform: `translate3d(${first.left - last.left}px, ${first.top - last.top}px, 0) scale(${first.width / last.width}, ${first.height / last.height})`,
+            },
+            {
+              transformOrigin: "0 0",
+              transform: "translate3d(0, 0, 0) scale(1, 1)",
+            },
+          ],
+      {
+        duration: reduce ? EXPAND_REDUCED_MS : EXPAND_DURATION_MS,
+        easing: EXPAND_EASING,
+      }
+    );
+    animationRef.current = animation;
+    animation.onfinish = () => {
+      if (animationRef.current === animation) {
+        animationRef.current = null;
+        setRestoring(false);
+      }
+    };
+  }, [maximized]);
+
+  const toggleMaximized = () => {
+    if (rootRef.current) {
+      previousRectRef.current = rootRef.current.getBoundingClientRect();
+    }
+    setRestoring(maximized);
+    setMaximized((value) => !value);
+  };
+
   useEffect(() => {
     if (!maximized || fullscreen) {
       return;
@@ -62,6 +116,10 @@ function useViewMode(failedMessage: string) {
           '[data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="select-content"]'
         )
       ) {
+        animationRef.current?.cancel();
+        animationRef.current = null;
+        previousRectRef.current = null;
+        setRestoring(false);
         setMaximized(false);
       }
     };
@@ -90,7 +148,8 @@ function useViewMode(failedMessage: string) {
     maximized,
     fullscreen,
     fullscreenSupported,
-    toggleMaximized: () => setMaximized((value) => !value),
+    restoring,
+    toggleMaximized,
     toggleFullscreen,
   };
 }
@@ -360,6 +419,7 @@ export function SimulatorDbWorkspace({
     <div
       className="database-studio flex min-h-0 min-w-0 flex-1 overflow-hidden bg-background data-[maximized=true]:fixed data-[maximized=true]:inset-0 data-[maximized=true]:z-40 data-[maximized=true]:h-dvh data-[maximized=true]:w-screen"
       data-maximized={view.maximized || undefined}
+      data-restoring={view.restoring || undefined}
       ref={view.rootRef}
     >
       <ResizablePanelGroup direction={isMobile ? "vertical" : "horizontal"}>

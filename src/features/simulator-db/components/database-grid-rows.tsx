@@ -24,6 +24,7 @@ type DatabaseGridRowsProps = {
   readonly isBusy: boolean;
   readonly isSavingEdit: boolean;
   readonly hasError: boolean;
+  readonly flashRow: { index: number; token: number } | null;
   readonly editToolbar: HTMLDivElement | null;
   readonly setActiveEdit: Dispatch<SetStateAction<InlineCellDraft | null>>;
   readonly setIsSavingEdit: Dispatch<SetStateAction<boolean>>;
@@ -86,6 +87,7 @@ export const DatabaseGridRows = memo(function DatabaseGridRows({
   isBusy,
   isSavingEdit,
   hasError,
+  flashRow,
   editToolbar,
   setActiveEdit,
   setIsSavingEdit,
@@ -112,8 +114,12 @@ export const DatabaseGridRows = memo(function DatabaseGridRows({
       ) : (
         rows.map((row, idx) => {
           const rowNum = startRow + idx;
+          const flashed = flashRow?.index === idx;
           return (
-            <TableRow key={rowNum}>
+            <TableRow
+              data-flash={flashed ? "" : undefined}
+              key={flashed ? `${rowNum}-${flashRow.token}` : rowNum}
+            >
               <TableCell size="compact" variant="muted">
                 <span className="tabular-nums">{rowNum}</span>
               </TableCell>
