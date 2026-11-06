@@ -52,6 +52,14 @@ export const simulatorDbMessages = {
   pageSize: "Baris per halaman",
 
   finishEdit: "Simpan atau batalkan edit sel saat ini terlebih dahulu.",
+  backToDashboard: "Kembali ke dasbor",
+  openInNewTab: "Buka ISOBillerSim di tab baru",
+  expandWindow: "Perluas ke jendela",
+  restoreWindow: "Kembalikan ukuran jendela (Esc)",
+  enterFullscreen: "Layar penuh",
+  exitFullscreen: "Keluar layar penuh (Esc)",
+  fullscreenFailed:
+    "Tidak dapat membuka layar penuh. Periksa izin browser Anda lalu coba lagi.",
   editValue: "Klik dua kali untuk mengedit · F2",
   saveRow: "Simpan baris",
   rowInserted: "Baris ditambahkan",

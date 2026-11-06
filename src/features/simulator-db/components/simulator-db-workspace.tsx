@@ -1,16 +1,30 @@
-import { GridTableIcon } from "@hugeicons/core-free-icons";
+import {
+  ArrowShrink01Icon,
+  FullScreenIcon,
+  GridTableIcon,
+  LinkSquare02Icon,
+  MaximizeScreenIcon,
+  MinimizeScreenIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Code2, Database } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { DataGrid } from "@/features/simulator-db/components/data-grid";
 import { DatabaseExplorer } from "@/features/simulator-db/components/database-explorer";
 import { QueryConsole } from "@/features/simulator-db/components/query-console";
@@ -18,10 +32,162 @@ import { TableStructure } from "@/features/simulator-db/components/table-structu
 import { useDatabaseData } from "@/features/simulator-db/hooks/use-database-data";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export function SimulatorDbWorkspace() {
+export const SIMULATOR_DB_DEDICATED_PATH = "/simulator-db";
+
+function useViewMode(failedMessage: string) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [maximized, setMaximized] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+  const fullscreenSupported =
+    typeof document !== "undefined" && document.fullscreenEnabled;
+
+  useEffect(() => {
+    const sync = () =>
+      setFullscreen(
+        !!rootRef.current && document.fullscreenElement === rootRef.current
+      );
+    document.addEventListener("fullscreenchange", sync);
+    return () => document.removeEventListener("fullscreenchange", sync);
+  }, []);
+
+  useEffect(() => {
+    if (!maximized || fullscreen) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.key === "Escape" &&
+        !event.defaultPrevented &&
+        !document.querySelector(
+          '[data-slot="dialog-content"], [data-slot="popover-content"], [data-slot="select-content"]'
+        )
+      ) {
+        setMaximized(false);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [maximized, fullscreen]);
+
+  const toggleFullscreen = async () => {
+    const root = rootRef.current;
+    if (!root) {
+      return;
+    }
+    try {
+      if (document.fullscreenElement === root) {
+        await document.exitFullscreen();
+      } else {
+        await root.requestFullscreen();
+      }
+    } catch {
+      toast.error(failedMessage);
+    }
+  };
+
+  return {
+    rootRef,
+    maximized,
+    fullscreen,
+    fullscreenSupported,
+    toggleMaximized: () => setMaximized((value) => !value),
+    toggleFullscreen,
+  };
+}
+
+function ViewModeControls({
+  dedicated,
+  view,
+}: {
+  dedicated: boolean;
+  view: ReturnType<typeof useViewMode>;
+}) {
   const {
     messages: { simulatorDb: m },
   } = useI18n();
+  const expandLabel = view.maximized ? m.restoreWindow : m.expandWindow;
+  const fullscreenLabel = view.fullscreen
+    ? m.exitFullscreen
+    : m.enterFullscreen;
+  return (
+    <ButtonGroup>
+      {!dedicated && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                aria-label={m.openInNewTab}
+                nativeButton={false}
+                render={
+                  <a
+                    href={SIMULATOR_DB_DEDICATED_PATH}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  />
+                }
+                size="icon-7"
+                variant="ghost"
+              />
+            }
+          >
+            <HugeiconsIcon icon={LinkSquare02Icon} />
+          </TooltipTrigger>
+          <TooltipContent>{m.openInNewTab}</TooltipContent>
+        </Tooltip>
+      )}
+      {!dedicated && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                aria-label={expandLabel}
+                aria-pressed={view.maximized}
+                onClick={view.toggleMaximized}
+                size="icon-7"
+                variant="ghost"
+              />
+            }
+          >
+            <HugeiconsIcon
+              icon={view.maximized ? MinimizeScreenIcon : MaximizeScreenIcon}
+            />
+          </TooltipTrigger>
+          <TooltipContent>{expandLabel}</TooltipContent>
+        </Tooltip>
+      )}
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              aria-label={fullscreenLabel}
+              aria-pressed={view.fullscreen}
+              disabled={!view.fullscreenSupported}
+              focusableWhenDisabled
+              onClick={view.toggleFullscreen}
+              size="icon-7"
+              variant="ghost"
+            />
+          }
+        >
+          <HugeiconsIcon
+            icon={view.fullscreen ? ArrowShrink01Icon : FullScreenIcon}
+          />
+        </TooltipTrigger>
+        <TooltipContent>{fullscreenLabel}</TooltipContent>
+      </Tooltip>
+    </ButtonGroup>
+  );
+}
+
+export function SimulatorDbWorkspace({
+  dedicated = false,
+}: {
+  dedicated?: boolean;
+}) {
+  const {
+    messages: { simulatorDb: m },
+  } = useI18n();
+  const view = useViewMode(m.fullscreenFailed);
   const isMobile = useIsMobile();
   const [editState, setEditState] = useState<"idle" | "editing" | "saving">(
     "idle"
@@ -191,7 +357,11 @@ export function SimulatorDbWorkspace() {
     isLoadingTables || isLoadingData ? m.loading : m.ready;
 
   return (
-    <div className="database-studio flex min-h-0 min-w-0 flex-1 overflow-hidden bg-background">
+    <div
+      className="database-studio flex min-h-0 min-w-0 flex-1 overflow-hidden bg-background data-[maximized=true]:fixed data-[maximized=true]:inset-0 data-[maximized=true]:z-40 data-[maximized=true]:h-dvh data-[maximized=true]:w-screen"
+      data-maximized={view.maximized || undefined}
+      ref={view.rootRef}
+    >
       <ResizablePanelGroup direction={isMobile ? "vertical" : "horizontal"}>
         {/* Left Panel: Database Explorer (DataGrip Sidebar) */}
         <ResizablePanel
@@ -272,6 +442,7 @@ export function SimulatorDbWorkspace() {
                 <span className="flex items-center gap-1 text-muted-foreground text-xs">
                   {tablesError || dataError ? m.unavailable : connectionStatus}
                 </span>
+                <ViewModeControls dedicated={dedicated} view={view} />
               </div>
             </div>
 

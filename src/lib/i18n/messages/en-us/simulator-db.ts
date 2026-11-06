@@ -52,6 +52,14 @@ export const simulatorDbMessages = {
   pageSize: "Rows per page",
 
   finishEdit: "Save or cancel the current cell edit first.",
+  backToDashboard: "Back to dashboard",
+  openInNewTab: "Open ISOBillerSim in new tab",
+  expandWindow: "Expand to window",
+  restoreWindow: "Restore window size (Esc)",
+  enterFullscreen: "Fullscreen",
+  exitFullscreen: "Exit fullscreen (Esc)",
+  fullscreenFailed:
+    "Unable to open fullscreen. Check your browser permissions and try again.",
   editValue: "Double-click to edit · F2",
   saveRow: "Save row",
   rowInserted: "Row inserted",

@@ -8,6 +8,7 @@ import { aboutRoutes } from "@/features/about/routes";
 import { authRoutes } from "@/features/auth/routes";
 import { dashboardRoutes } from "@/features/dashboard/routes";
 import { logSourceRoutes } from "@/features/log-viewer/routes";
+import { simulatorDbStandaloneRoutes } from "@/features/simulator-db/routes";
 
 const WheelResultPage = lazy(() =>
   import("@/pages/wheel-result").then(({ WheelResultPage }) => ({
@@ -55,6 +56,7 @@ export function AppRoutes() {
         {aboutRoutes}
         {dashboardRoutes}
         {logSourceRoutes}
+        {simulatorDbStandaloneRoutes}
         <Route
           element={
             <ProtectedRoute requiredRole="ADMIN">
