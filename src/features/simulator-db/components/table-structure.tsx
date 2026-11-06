@@ -1,7 +1,8 @@
+import { Key01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { type CSSProperties, useState } from "react";
 import { Check, ClipboardCopy } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import {
@@ -153,15 +154,15 @@ export function TableStructure({
                         {col.name}
                       </TableCell>
                       <TableCell size="compact">
-                        <Badge size="xs" variant="outline">
+                        <span className="font-mono text-xs text-muted-foreground uppercase tracking-wide">
                           {col.type || "ANY"}
-                        </Badge>
+                        </span>
                       </TableCell>
                       <TableCell size="compact">
                         {col.notNull ? (
-                          <Badge size="xs" variant="secondary">
+                          <span className="font-medium text-foreground text-xs">
                             NOT NULL
-                          </Badge>
+                          </span>
                         ) : (
                           <span className="text-muted-foreground text-xs">
                             YES
@@ -173,9 +174,13 @@ export function TableStructure({
                       </TableCell>
                       <TableCell size="compact">
                         {col.primaryKey && (
-                          <Badge size="xs" variant="default">
-                            PRIMARY KEY
-                          </Badge>
+                          <span className="inline-flex items-center gap-1 font-medium text-primary text-xs">
+                            <HugeiconsIcon
+                              className="size-3.5"
+                              icon={Key01Icon}
+                            />
+                            Primary key
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>

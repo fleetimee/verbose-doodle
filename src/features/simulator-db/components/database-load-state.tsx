@@ -1,7 +1,6 @@
 import { RefreshCw } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -107,10 +106,10 @@ export function DatabaseRefreshIndicator({
       className="absolute inset-0 flex cursor-progress items-center justify-center bg-background/40"
       role="status"
     >
-      <Badge variant="secondary">
+      <span className="flex items-center gap-2 rounded-md border bg-popover/90 px-3 py-1.5 text-muted-foreground text-xs shadow-sm backdrop-blur-sm">
         <RefreshCw className="size-3 animate-spin motion-reduce:animate-none" />
         {label}
-      </Badge>
+      </span>
     </div>
   );
 }

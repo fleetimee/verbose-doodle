@@ -4178,7 +4178,7 @@ main:has(.database-studio[data-restoring="true"]) {
 }
 
 .database-studio [data-slot="tabs-content"] {
-  animation: database-panel-in 160ms var(--database-ease-out);
+  animation: database-panel-in 110ms var(--database-ease-out);
 }
 
 .database-studio [data-slot="table-row"][data-flash] {
@@ -4187,8 +4187,8 @@ main:has(.database-studio[data-restoring="true"]) {
 
 @keyframes database-panel-in {
   from {
-    opacity: 0;
-    transform: translateY(4px);
+    opacity: 0.5;
+    transform: translateY(2px);
   }
 }
 
@@ -4205,7 +4205,7 @@ main:has(.database-studio[data-restoring="true"]) {
 
   @keyframes database-panel-fade {
     from {
-      opacity: 0;
+      opacity: 0.5;
     }
   }
 }

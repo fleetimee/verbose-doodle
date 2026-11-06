@@ -11,7 +11,6 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Code2, Database } from "@/components/hugeicons";
 import { useI18n } from "@/components/i18n-provider";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -475,9 +474,9 @@ export function SimulatorDbWorkspace({
                       {selectedTable}
                     </span>
                     {tableData && (
-                      <Badge className="ml-1" size="xs" variant="outline">
+                      <span className="ml-1 border-l pl-2 font-normal text-muted-foreground tabular-nums">
                         {tableData.totalRows.toLocaleString()} rows
-                      </Badge>
+                      </span>
                     )}
                   </div>
                 )}

@@ -12,7 +12,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { executeSqlStatement } from "@/features/simulator-db/api";
 import {
   type ColumnMetadata,
@@ -116,14 +115,12 @@ export function DeleteRowDialog({
               Target:
             </span>
             {identifyingKeys.map((item) => (
-              <Badge key={item.name} size="xs" variant="outline">
-                <span className="font-semibold text-foreground">
-                  {item.name}:
-                </span>{" "}
-                <span className="font-mono text-muted-foreground">
+              <span className="text-xs" key={item.name}>
+                <span className="text-muted-foreground">{item.name}</span>{" "}
+                <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-foreground">
                   {item.value}
                 </span>
-              </Badge>
+              </span>
             ))}
           </div>
 

@@ -1,6 +1,5 @@
 import { type Dispatch, memo, type SetStateAction } from "react";
 import { useI18n } from "@/components/i18n-provider";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
@@ -14,6 +13,7 @@ import type {
   SqlCellValue,
   SqlRow,
 } from "@/features/simulator-db/types";
+import { cn } from "@/lib/utils";
 
 type DatabaseGridRowsProps = {
   readonly rows: readonly SqlRow[];
@@ -70,9 +70,21 @@ function renderCellBadge(val: SqlCellValue, strVal: string) {
   }
   if (isBoolean(val)) {
     return (
-      <Badge size="xs" variant={val ? "default" : "secondary"}>
+      <span
+        className={cn(
+          "inline-flex items-center gap-1.5",
+          val ? "text-foreground" : "text-muted-foreground"
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className={cn(
+            "size-1.5 rounded-full",
+            val ? "bg-success" : "bg-muted-foreground/40"
+          )}
+        />
         {String(val)}
-      </Badge>
+      </span>
     );
   }
   return <span className="truncate">{strVal}</span>;

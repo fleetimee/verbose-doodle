@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Check, ClipboardCopy } from "@/components/hugeicons";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -86,14 +85,14 @@ export function CellDetailDialog({
                 </span>
               </DialogTitle>
               {value === null && (
-                <Badge size="sm" variant="outline">
+                <span className="text-muted-foreground text-xs italic">
                   NULL
-                </Badge>
+                </span>
               )}
               {isJson && (
-                <Badge size="sm" variant="secondary">
+                <span className="font-mono text-xs text-muted-foreground uppercase tracking-wide">
                   JSON
-                </Badge>
+                </span>
               )}
             </div>
             <Button onClick={handleCopy} size="sm" variant="outline">

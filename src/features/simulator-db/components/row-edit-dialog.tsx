@@ -1,10 +1,9 @@
-import { FloppyDiskIcon } from "@hugeicons/core-free-icons";
+import { FloppyDiskIcon, Key01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CircleAlert, Code2, RefreshCw } from "@/components/hugeicons";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -236,13 +235,15 @@ export function RowEditDialog({
                       <div className="flex items-center gap-1.5">
                         <Label size="sm">{col.name}</Label>
                         {col.primaryKey && (
-                          <Badge size="xs" variant="default">
-                            PK
-                          </Badge>
+                          <HugeiconsIcon
+                            aria-label="Primary key"
+                            className="size-3.5 text-primary"
+                            icon={Key01Icon}
+                          />
                         )}
-                        <Badge size="xs" variant="outline">
+                        <span className="font-mono text-xs text-muted-foreground uppercase tracking-wide">
                           {col.type || "ANY"}
-                        </Badge>
+                        </span>
                         {col.notNull && (
                           <span className="text-destructive text-xs">
                             *required
