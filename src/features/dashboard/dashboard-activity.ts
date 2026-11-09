@@ -7,6 +7,47 @@ export const DASHBOARD_PRESENCE_EVENT_TYPE = "dashboard_presence";
 export const DASHBOARD_CHAT_EVENT_TYPE = "dashboard_chat_message";
 export const DASHBOARD_CHAT_READ_EVENT_TYPE = "dashboard_chat_read";
 
+export type VisitorPresenceStatusMode = "online" | "away" | "offline";
+
+const PRESENCE_STATUS_STORAGE_KEY = "fleetime-presence-status-mode";
+const presenceStatusModeListeners = new Set<
+  (mode: VisitorPresenceStatusMode) => void
+>();
+
+export function getStoredPresenceStatusMode(): VisitorPresenceStatusMode {
+  try {
+    const raw = localStorage.getItem(PRESENCE_STATUS_STORAGE_KEY);
+    if (raw === "online" || raw === "away" || raw === "offline") {
+      return raw;
+    }
+  } catch {
+    // Ignore storage access errors
+  }
+  return "online";
+}
+
+export function setStoredPresenceStatusMode(
+  mode: VisitorPresenceStatusMode
+): void {
+  try {
+    localStorage.setItem(PRESENCE_STATUS_STORAGE_KEY, mode);
+  } catch {
+    // Ignore storage access errors
+  }
+  for (const listener of presenceStatusModeListeners) {
+    listener(mode);
+  }
+}
+
+export function subscribePresenceStatusMode(
+  listener: (mode: VisitorPresenceStatusMode) => void
+): () => void {
+  presenceStatusModeListeners.add(listener);
+  return () => {
+    presenceStatusModeListeners.delete(listener);
+  };
+}
+
 export type DashboardIpChatMessage = {
   readonly createdAt: string;
   readonly id: number;

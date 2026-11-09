@@ -22,6 +22,7 @@ import {
   dispatchOpenVisitorChat,
   fetchDashboardPresence,
   getActiveVisitorChatTargetIp,
+  getStoredPresenceStatusMode,
   parseDashboardChatDeletedEvent,
   parseDashboardChatEvent,
   parseDashboardChatReadEvent,
@@ -29,7 +30,9 @@ import {
   parseDashboardVisitEvent,
   playVisitorChatNotificationSound,
   recordDashboardVisit,
+  subscribePresenceStatusMode,
   tryShowNativeVisitorChatNotification,
+  type VisitorPresenceStatusMode,
 } from "@/features/dashboard/dashboard-activity";
 import { createRealtimeTicket } from "@/features/realtime/ticket-client";
 import {
@@ -583,11 +586,15 @@ export function DashboardVisitNotifications() {
   }
 
   const connection = connectionRef.current;
-  const isDashboardRoute =
-    location.pathname === "/dashboard" ||
-    location.pathname.startsWith("/dashboard/") ||
-    location.pathname.startsWith("/logs/");
   const userId = snapshot.user?.user_id;
+  const [statusMode, setStatusMode] = useState<VisitorPresenceStatusMode>(() =>
+    getStoredPresenceStatusMode()
+  );
+  const statusModeRef = useRef<VisitorPresenceStatusMode>(statusMode);
+  statusModeRef.current = statusMode;
+
+  useEffect(() => subscribePresenceStatusMode(setStatusMode), []);
+
   const removeNotice = useCallback((visitId: string) => {
     setNotices((currentNotices) =>
       currentNotices.filter((notice) => notice.visitId !== visitId)
@@ -595,9 +602,9 @@ export function DashboardVisitNotifications() {
   }, []);
 
   useEffect(() => {
-    const hasDashboardSession = snapshot.isAuthenticated && isDashboardRoute;
+    const hasSession = snapshot.isAuthenticated;
 
-    if (!(hasDashboardSession && userId)) {
+    if (!(hasSession && userId)) {
       recordedVisitUserIdRef.current = null;
       recordedVisitPromiseRef.current = null;
       currentVisitIdRef.current = null;
@@ -629,13 +636,26 @@ export function DashboardVisitNotifications() {
     const unsubscribe = connection.subscribe((state) => {
       if (state.status === "connected" && active) {
         presenceStatesRef.current = null;
-        connection.send(
-          JSON.stringify({
-            path: currentPathnameRef.current,
-            sleeping: isScreenLockedRef.current,
-            type: "page_change",
-          })
-        );
+        const isAway =
+          isScreenLockedRef.current || statusModeRef.current === "away";
+        if (isAway || statusModeRef.current === "offline") {
+          connection.send(
+            JSON.stringify({
+              sleeping: isAway,
+              status: statusModeRef.current,
+              type: "presence_status",
+            })
+          );
+        } else {
+          connection.send(
+            JSON.stringify({
+              path: currentPathnameRef.current,
+              sleeping: false,
+              status: statusModeRef.current,
+              type: "page_change",
+            })
+          );
+        }
       }
     });
     const connectAfterVisit = async () => {
@@ -667,32 +687,38 @@ export function DashboardVisitNotifications() {
       unsubscribe();
       connection.disconnect();
     };
-  }, [connection, isDashboardRoute, snapshot.isAuthenticated, userId]);
+  }, [connection, snapshot.isAuthenticated, userId]);
 
   useEffect(() => {
-    if (!(snapshot.isAuthenticated && isDashboardRoute)) {
+    if (
+      !snapshot.isAuthenticated ||
+      isScreenLockedRef.current ||
+      statusModeRef.current !== "online"
+    ) {
       return;
     }
     connection.send(
       JSON.stringify({
         path: presencePath,
-        sleeping: isScreenLockedRef.current,
+        sleeping: false,
+        status: statusModeRef.current,
         type: "page_change",
       })
     );
-  }, [connection, isDashboardRoute, presencePath, snapshot.isAuthenticated]);
+  }, [connection, presencePath, snapshot.isAuthenticated]);
 
   useEffect(() => {
-    if (!(snapshot.isAuthenticated && isDashboardRoute)) {
+    if (!snapshot.isAuthenticated) {
       return;
     }
     connection.send(
       JSON.stringify({
-        sleeping: isScreenLocked,
+        sleeping: isScreenLocked || statusMode === "away",
+        status: statusMode,
         type: "presence_status",
       })
     );
-  }, [connection, isDashboardRoute, isScreenLocked, snapshot.isAuthenticated]);
+  }, [connection, isScreenLocked, snapshot.isAuthenticated, statusMode]);
 
   if (notices.length === 0) {
     return null;

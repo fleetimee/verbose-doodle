@@ -13,7 +13,6 @@ import {
   LockKeyIcon,
   MailSend01Icon,
   MessageSquareCodeIcon,
-  MoonIcon,
   SafariIcon,
   SmartPhone01Icon,
   Tick02Icon,
@@ -35,6 +34,7 @@ import {
   useState,
 } from "react";
 import { Link } from "react-router";
+import { toast } from "sonner";
 import { useI18n } from "@/components/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
@@ -88,16 +88,20 @@ import {
   deleteDashboardChatMessages,
   fetchDashboardChatThread,
   fetchDashboardPresence,
+  getStoredPresenceStatusMode,
   markDashboardChatRead,
   sendDashboardChatMessage,
   setActiveVisitorChatTargetIp,
+  setStoredPresenceStatusMode,
   subscribeOpenVisitorChat,
+  subscribePresenceStatusMode,
+  type VisitorPresenceStatusMode,
 } from "@/features/dashboard/dashboard-activity";
 import { formatJakartaTimestamp } from "@/features/endpoints/utils/endpoint-time";
 import { fetchLogSources } from "@/features/log-viewer/api";
 import { getErrorMessage } from "@/lib/error-handler";
 import { type AppLocale, formatMessage, type Messages } from "@/lib/i18n";
-import { MOTION_DURATION, MOTION_EASE } from "@/lib/motion";
+import { MOTION_DURATION, MOTION_EASE, MOTION_SPRING } from "@/lib/motion";
 import { queryClient } from "@/lib/query-client";
 import { cn } from "@/lib/utils";
 
@@ -256,17 +260,21 @@ function describeVisitorUserAgent(
 
 function getRouteLabelRegistry(messages: Messages): RouteLabelRegistry {
   return {
+    about: messages.common.navAbout,
     "arkanoid-neon": messages.common.arkanoidNeonTitle,
     "build-your-town": messages.common.buildYourTownTitle,
     "chess-3d": messages.common.chess3dTitle,
+    containers: "Containers",
     "cron-parser": messages.cronParser.title,
     "date-converter": messages.dateConverter.title,
+    desktop: "Remote Desktop",
     "developer-tools": messages.developerTools.navigationGroup,
     "dynamite-mole": messages.common.dynamiteMoleTitle,
     emberwake: messages.common.emberwakeTitle,
     employees: messages.employees.title,
     endpoints: messages.common.navEndpoints,
     "fall-line": messages.common.fallLineTitle,
+    files: "File Manager",
     games: messages.common.navFunGames,
     gravewake: messages.common.gravewakeTitle,
     hearthvale: messages.common.hearthvaleTitle,
@@ -301,6 +309,7 @@ function getRouteLabelRegistry(messages: Messages): RouteLabelRegistry {
     "tcp-client": messages.common.navTcpClient,
     "tcp-server": messages.common.navTcpServer,
     "temp-files": messages.tempFiles.title,
+    terminal: "Terminal",
     terrabrowser: messages.common.terrabrowserTitle,
     udp: messages.common.navUdp,
     users: messages.common.navUsers,
@@ -425,14 +434,23 @@ function useUnreadChatTabTitle(
 function OnlineVisitorsTriggerButton({
   triggerLabel,
   onlineCount,
+  statusMode,
   totalUnreadCount,
 }: {
   triggerLabel: string;
   onlineCount: number;
+  statusMode: VisitorPresenceStatusMode;
   totalUnreadCount: number;
 }) {
-  const indicatorColorClass =
-    totalUnreadCount > 0 ? "bg-primary" : "bg-success";
+  const shouldReduceMotion = useReducedMotion();
+  let indicatorColorClass = "bg-success";
+  if (totalUnreadCount > 0) {
+    indicatorColorClass = "bg-primary";
+  } else if (statusMode === "away") {
+    indicatorColorClass = "bg-warning";
+  } else if (statusMode === "offline") {
+    indicatorColorClass = "bg-muted-foreground/50";
+  }
   return (
     <DrawerTrigger asChild>
       <Button
@@ -442,22 +460,38 @@ function OnlineVisitorsTriggerButton({
         title={triggerLabel}
         variant="ghost"
       >
-        <span className="relative flex size-2 items-center justify-center">
-          <span
-            aria-hidden="true"
-            className={cn(
-              "absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none",
-              indicatorColorClass
+        <AnimatePresence initial={false} mode="wait">
+          <motion.span
+            animate={{ opacity: 1, transform: "scale(1)" }}
+            className="relative flex size-2 items-center justify-center"
+            exit={{ opacity: 0, transform: "scale(0.95)" }}
+            initial={{ opacity: 0, transform: "scale(0.95)" }}
+            key={`${statusMode}-${totalUnreadCount > 0}`}
+            transition={{
+              duration: shouldReduceMotion
+                ? MOTION_DURATION.instant
+                : MOTION_DURATION.fast,
+              ease: MOTION_EASE.out,
+            }}
+          >
+            {statusMode !== "offline" && (
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none",
+                  indicatorColorClass
+                )}
+              />
             )}
-          />
-          <span
-            aria-hidden="true"
-            className={cn(
-              "relative inline-flex size-2 rounded-full",
-              indicatorColorClass
-            )}
-          />
-        </span>
+            <span
+              aria-hidden="true"
+              className={cn(
+                "relative inline-flex size-2 rounded-full",
+                indicatorColorClass
+              )}
+            />
+          </motion.span>
+        </AnimatePresence>
         <HugeiconsIcon
           className="size-4 text-muted-foreground"
           icon={UserGroupIcon}
@@ -624,6 +658,11 @@ export function OnlineVisitorsDrawer({
   const [selectedChatIp, setSelectedChatIp] = useState<string | null>(null);
   const [navDirection, setNavDirection] = useState(1);
   const [nowMs, setNowMs] = useState(() => Date.now());
+  const [statusMode, setStatusMode] = useState<VisitorPresenceStatusMode>(() =>
+    getStoredPresenceStatusMode()
+  );
+
+  useEffect(() => subscribePresenceStatusMode(setStatusMode), []);
 
   const isOpen = controlledOpen ?? internalOpen;
   const openChatWithIp = (targetIp: string) => {
@@ -683,7 +722,17 @@ export function OnlineVisitorsDrawer({
 
   const presence = presenceQuery.data;
   const currentIp = presence?.currentIp;
-  const visitors = presence?.visitors ?? [];
+  const rawVisitors = presence?.visitors ?? [];
+  const visitors = rawVisitors.map((visitor) => {
+    if (visitor.ipAddress !== currentIp) {
+      return visitor;
+    }
+    return {
+      ...visitor,
+      online: statusMode !== "offline",
+      sleeping: statusMode === "away",
+    };
+  });
   const totalUnreadCount = useUnreadChatTabTitle(
     !hideTrigger && snapshot.isAuthenticated,
     visitors,
@@ -692,10 +741,9 @@ export function OnlineVisitorsDrawer({
   );
   const onlineVisitors = visitors.filter((visitor) => visitor.online);
   const recentVisitors = visitors.filter((visitor) => !visitor.online);
-  const onlineCount = Math.max(
-    presence?.onlineCount ?? onlineVisitors.length,
-    snapshot.isAuthenticated ? 1 : 0
-  );
+  const minSelfOnline =
+    snapshot.isAuthenticated && statusMode !== "offline" ? 1 : 0;
+  const onlineCount = Math.max(onlineVisitors.length, minSelfOnline);
   const peakOnlineCount = Math.max(
     presence?.peakOnlineCount ?? onlineCount,
     onlineCount
@@ -708,12 +756,56 @@ export function OnlineVisitorsDrawer({
     ? visitors.find((v) => v.ipAddress === selectedChatIp)
     : undefined;
   const effectiveDirection = shouldReduceMotion ? 0 : navDirection;
+  const handleStatusModeChange = (nextMode: VisitorPresenceStatusMode) => {
+    if (nextMode === statusMode) {
+      return;
+    }
+    setStoredPresenceStatusMode(nextMode);
+    let statusLabel = copy.onlineBadge;
+    let description = copy.statusChangedOnlineDesc;
+    let dotClass = "bg-success";
+    let pingClass: string | null = "bg-success";
+    if (nextMode === "away") {
+      statusLabel = copy.awayBadge;
+      description = copy.statusChangedAwayDesc;
+      dotClass = "bg-warning";
+      pingClass = null;
+    } else if (nextMode === "offline") {
+      statusLabel = copy.offlineBadge;
+      description = copy.statusChangedOfflineDesc;
+      dotClass = "bg-muted-foreground/50";
+      pingClass = null;
+    }
+    toast(formatMessage(copy.statusChangedTitle, { status: statusLabel }), {
+      description,
+      duration: 3200,
+      icon: (
+        <span className="relative flex size-2.5 items-center justify-center">
+          {pingClass && (
+            <span
+              aria-hidden="true"
+              className={cn(
+                "absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none",
+                pingClass
+              )}
+            />
+          )}
+          <span
+            aria-hidden="true"
+            className={cn("relative inline-flex size-2 rounded-full", dotClass)}
+          />
+        </span>
+      ),
+      id: "presence-status-mode-toast",
+    });
+  };
 
   return (
     <Drawer direction="right" onOpenChange={handleOpenChange} open={isOpen}>
       {!hideTrigger && (
         <OnlineVisitorsTriggerButton
           onlineCount={onlineCount}
+          statusMode={statusMode}
           totalUnreadCount={totalUnreadCount}
           triggerLabel={triggerLabel}
         />
@@ -741,13 +833,86 @@ export function OnlineVisitorsDrawer({
             {copy.description}
           </DrawerDescription>
           {currentIp && currentIp !== "unknown" && (
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-muted-foreground">
-                {copy.currentIpLabel}
-              </span>
-              <span className="font-medium font-mono text-foreground">
-                {currentIp}
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">
+                  {copy.currentIpLabel}
+                </span>
+                <span className="font-medium font-mono text-foreground">
+                  {currentIp}
+                </span>
+              </div>
+              <fieldset
+                aria-label={copy.statusSelectorLabel}
+                className="m-0 inline-flex items-center gap-0.5 rounded-lg border bg-muted/40 p-0.5"
+              >
+                {(
+                  [
+                    {
+                      dotClass: "bg-success",
+                      label: copy.onlineBadge,
+                      value: "online",
+                    },
+                    {
+                      dotClass: "bg-warning",
+                      label: copy.awayBadge,
+                      value: "away",
+                    },
+                    {
+                      dotClass: "bg-muted-foreground/50",
+                      label: copy.offlineBadge,
+                      value: "offline",
+                    },
+                  ] as const
+                ).map((option) => {
+                  const active = statusMode === option.value;
+                  return (
+                    <motion.button
+                      aria-pressed={active}
+                      className={cn(
+                        "relative inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-medium text-xs transition-colors",
+                        active
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                      key={option.value}
+                      onClick={() => handleStatusModeChange(option.value)}
+                      transition={{
+                        duration: shouldReduceMotion
+                          ? MOTION_DURATION.instant
+                          : MOTION_DURATION.press,
+                        ease: MOTION_EASE.out,
+                      }}
+                      type="button"
+                      whileTap={
+                        shouldReduceMotion ? undefined : { scale: 0.97 }
+                      }
+                    >
+                      {active && (
+                        <motion.span
+                          aria-hidden="true"
+                          className="absolute inset-0 rounded-md bg-background shadow-2xs"
+                          layoutId="presence-status-active-pill"
+                          transition={
+                            shouldReduceMotion
+                              ? { duration: MOTION_DURATION.instant }
+                              : MOTION_SPRING.snappy
+                          }
+                        />
+                      )}
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          "relative z-10 size-1.5 rounded-full transition-transform duration-150 ease-out",
+                          option.dotClass,
+                          active ? "scale-110" : "scale-90 opacity-75"
+                        )}
+                      />
+                      <span className="relative z-10">{option.label}</span>
+                    </motion.button>
+                  );
+                })}
+              </fieldset>
             </div>
           )}
         </DrawerHeader>
@@ -1105,6 +1270,7 @@ function VisitorPresenceRow({
         })
       : copy.activeSessionSingle;
   const { snapshot } = useAuth();
+  const shouldReduceMotion = useReducedMotion();
   const basePageInfo = describeVisitorPage(visitor.currentPath, messages);
   const visitorUrl = new URL(basePageInfo.path, "https://presence.local");
   let sourceId: string | null = null;
@@ -1142,10 +1308,22 @@ function VisitorPresenceRow({
     <div className="min-w-0 space-y-1.5 px-3 py-2.5">
       <div className="flex min-w-0 items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-1.5">
-          <span
-            aria-hidden="true"
-            className={cn("size-2 shrink-0 rounded-full", statusDotClass)}
-          />
+          <AnimatePresence initial={false} mode="wait">
+            <motion.span
+              animate={{ opacity: 1, transform: "scale(1)" }}
+              aria-hidden="true"
+              className={cn("size-2 shrink-0 rounded-full", statusDotClass)}
+              exit={{ opacity: 0, transform: "scale(0.95)" }}
+              initial={{ opacity: 0, transform: "scale(0.95)" }}
+              key={statusBadgeText}
+              transition={{
+                duration: shouldReduceMotion
+                  ? MOTION_DURATION.instant
+                  : MOTION_DURATION.fast,
+                ease: MOTION_EASE.out,
+              }}
+            />
+          </AnimatePresence>
           <HugeiconsIcon
             className="size-3.5 shrink-0 text-muted-foreground"
             icon={GlobeIcon}
@@ -1161,9 +1339,26 @@ function VisitorPresenceRow({
           )}
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
-          <span className={cn("font-medium text-xs", statusTextClass)}>
-            {statusBadgeText}
-          </span>
+          <AnimatePresence initial={false} mode="wait">
+            <motion.span
+              animate={{ opacity: 1, transform: "translateY(0px)" }}
+              className={cn(
+                "inline-block font-medium text-xs",
+                statusTextClass
+              )}
+              exit={{ opacity: 0, transform: "translateY(-2px)" }}
+              initial={{ opacity: 0, transform: "translateY(2px)" }}
+              key={statusBadgeText}
+              transition={{
+                duration: shouldReduceMotion
+                  ? MOTION_DURATION.instant
+                  : MOTION_DURATION.fast,
+                ease: MOTION_EASE.out,
+              }}
+            >
+              {statusBadgeText}
+            </motion.span>
+          </AnimatePresence>
           {!isCurrentIp && (
             <Button
               aria-label={`${copy.chatActionLabel} ${visitor.ipAddress}`}
@@ -1188,23 +1383,25 @@ function VisitorPresenceRow({
         </div>
       </div>
 
-      <div className="min-w-0 pl-3.5">
-        <Link
-          className="inline-flex min-w-0 max-w-full items-center gap-1 text-foreground/90 text-xs transition-colors hover:text-primary"
-          onClick={onNavigate}
-          title={activityText}
-          to={pageInfo.path}
-        >
-          <HugeiconsIcon
-            className={cn("size-3 shrink-0", activityIconColorClass)}
-            icon={isSleeping ? MoonIcon : Activity01Icon}
-            strokeWidth={2}
-          />
-          <span className="truncate font-medium underline-offset-2 hover:underline">
-            {activityText}
-          </span>
-        </Link>
-      </div>
+      {!isSleeping && (
+        <div className="min-w-0 pl-3.5">
+          <Link
+            className="inline-flex min-w-0 max-w-full items-center gap-1 text-foreground/90 text-xs transition-colors hover:text-primary"
+            onClick={onNavigate}
+            title={activityText}
+            to={pageInfo.path}
+          >
+            <HugeiconsIcon
+              className={cn("size-3 shrink-0", activityIconColorClass)}
+              icon={Activity01Icon}
+              strokeWidth={2}
+            />
+            <span className="truncate font-medium underline-offset-2 hover:underline">
+              {activityText}
+            </span>
+          </Link>
+        </div>
+      )}
 
       {deviceInfo && (
         <div
