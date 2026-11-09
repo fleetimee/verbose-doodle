@@ -171,7 +171,12 @@
     void connect();
   }
 
-  game.canMove = () => phase === 'connected' && state?.status === 'playing' && state.turn === state.you && !pendingMove;
+  game.canMove = () => phase === 'connected' && state?.status === 'playing' && !state?.paused && state.turn === state.you && !pendingMove;
+  game.togglePause = () => {
+    if (phase === 'connected' && state?.status === 'playing') {
+      send(state.paused ? 'resume' : 'pause');
+    }
+  };
   game.sendMove = (move) => {
     if (!game.canMove()) return;
     if (!send('move', {move})) { fail('retryMove'); return; }
@@ -189,6 +194,7 @@
     if (!intent) return;
     const connected = phase === 'connected';
     const playing = state?.status === 'playing';
+    const paused = playing && !!state?.paused;
     const done = state?.status === 'finished';
     const ownTurn = state?.turn === state?.you;
     const them = state?.you === 'w' ? state?.black : state?.white;
@@ -199,8 +205,23 @@
       : !connected ? copy.connectionError
       : state.status === 'waiting' ? copy.share
       : !done && !them?.connected ? copy.offline
+      : paused ? (state.pausedBy === state.you ? copy.pausedByYouDetail : copy.pausedByOpponentDetail)
       : copy.onlineDetail.replace('{color}', state.you === 'w' ? copy.white.toLowerCase() : copy.black.toLowerCase());
     show('online-retry', ['offline', 'closed'].includes(phase) && phase !== 'closed');
+    show('online-pause', connected && playing);
+    el('online-pause').textContent = paused ? copy.resumeGame : copy.pause;
+    el('online-pause').setAttribute('aria-pressed', String(paused));
+    if (el('game-pause')) {
+      el('game-pause').disabled = !(connected && playing);
+      el('game-pause').textContent = paused ? copy.resumeGame : copy.pause;
+      el('game-pause').setAttribute('aria-pressed', String(paused));
+    }
+    if (el('pause-overlay')) {
+      el('pause-overlay').hidden = !paused;
+      el('pause-title').textContent = copy.pausedLabel;
+      el('pause-detail').textContent = state?.pausedBy === state?.you ? copy.pausedByYouDetail : copy.pausedByOpponentDetail;
+      el('pause-resume').textContent = copy.resumeGame;
+    }
     show('online-draw', connected && playing);
     el('online-draw').disabled = !!state?.drawOffer;
     el('online-draw').textContent = state?.drawOffer === state?.you ? copy.drawSent : copy.offerDraw;
@@ -217,11 +238,12 @@
     el('online-rematch').disabled = !!state?.rematch && state.rematch === state.you;
     el('online-leave').textContent = confirmation === 'leave' && connected ? copy.confirmLeave : state?.status === 'waiting' ? copy.cancelRoom : copy.leave;
     show('online-cancel', !!confirmation);
-    for (const id of ['new', 'undo', 'difficulty', 'side']) el(id).disabled = true;
+    for (const id of ['new', 'pause', 'undo', 'difficulty', 'side']) if (el(id)) el(id).disabled = true;
     el('move-input').disabled = !game.canMove();
     el('move-form').querySelector('button').disabled = !game.canMove();
     document.querySelector('footer').textContent = copy.onlineFooter;
     if (!state) {
+      if (el('pause-overlay')) el('pause-overlay').hidden = true;
       el('status').textContent = copy.connect;
       el('status-detail').textContent = '';
       el('human-turn').textContent = el('computer-turn').textContent = '';
@@ -231,17 +253,19 @@
     el('self-name').textContent = `${me?.name || ''} (${copy.you})`;
     el('human-color').textContent = `/ ${state.you === 'w' ? copy.white : copy.black}`;
     el('opponent-level').textContent = them ? (them.connected ? copy.opponent : copy.offline) : copy.share;
-    el('human-turn').textContent = playing && ownTurn ? copy.yourTurn : '';
-    el('computer-turn').textContent = playing && !ownTurn ? copy.theirTurn : '';
+    el('human-turn').textContent = paused ? copy.pausedLabel : playing && ownTurn ? copy.yourTurn : '';
+    el('computer-turn').textContent = paused ? '' : playing && !ownTurn ? copy.theirTurn : '';
     el('status').textContent = done ? state.result === '1/2-1/2' ? copy.draw
       : (state.result === '1-0') === (state.you === 'w') ? copy.win : copy.loss
       : state.status === 'waiting' ? copy.waiting
+      : paused ? copy.pausedStatus
       : pendingMove ? copy.pending : ownTurn && game.inCheck() ? copy.check : ownTurn ? copy.yourMove : copy.theirMove;
     el('status-detail').textContent = done ? (copy[state.reason] || copy.finished)
       : state.status === 'waiting' ? copy.share
+      : paused ? (state.pausedBy === state.you ? copy.pausedByYouDetail : copy.pausedByOpponentDetail)
       : ownTurn && game.inCheck() ? copy.protect
       : copy.onlineDetail.replace('{color}', state.you === 'w' ? copy.white.toLowerCase() : copy.black.toLowerCase());
-    el('selection').textContent = done ? copy.finished : pendingMove ? copy.pending : ownTurn ? copy.yourMove : copy.theirMove;
+    el('selection').textContent = done ? copy.finished : paused ? copy.pausedStatus : pendingMove ? copy.pending : ownTurn ? copy.yourMove : copy.theirMove;
     updateClocks();
   }
 
@@ -252,11 +276,11 @@
       node.hidden = state.seconds === 0;
       if (!state.seconds) continue;
       let ms = side === 'w' ? state.whiteMs : state.blackMs;
-      if (state.status === 'playing' && side === state.turn) ms -= performance.now() - receivedAt;
+      if (state.status === 'playing' && !state.paused && side === state.turn) ms -= performance.now() - receivedAt;
       const seconds = Math.max(0, Math.ceil(ms / 1000));
       const text = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
       if (node.textContent !== text) node.textContent = text;
-      node.classList.toggle('active', state.status === 'playing' && side === state.turn);
+      node.classList.toggle('active', state.status === 'playing' && !state.paused && side === state.turn);
     }
   }
 
@@ -273,6 +297,7 @@
       el('online-copy').textContent = copy.copied;
     } catch { el('online-room').select(); fail('copyFailed'); }
   };
+  el('online-pause').onclick = () => send(state?.paused ? 'resume' : 'pause');
   el('online-draw').onclick = () => send('offer_draw');
   el('online-accept').onclick = () => send('accept_draw');
   el('online-decline').onclick = () => send('decline_draw');
