@@ -1,6 +1,11 @@
-import { Logout01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import {
+  Logout01Icon,
+  SlidersHorizontalIcon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useI18n } from "@/components/i18n-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -31,6 +36,7 @@ export function NavUser({
 }) {
   const { messages } = useI18n();
   const { isMobile } = useSidebar();
+  const navigate = useNavigate();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   return (
@@ -87,6 +93,11 @@ export function NavUser({
                 </div>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate("/dashboard/settings")}>
+              <HugeiconsIcon icon={SlidersHorizontalIcon} strokeWidth={2} />
+              {messages.common.navSettings}
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setShowLogoutDialog(true)}>
               <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} />

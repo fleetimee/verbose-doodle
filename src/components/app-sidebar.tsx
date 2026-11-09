@@ -36,6 +36,7 @@ import {
   Route,
   Server,
   ServerCrash,
+  SlidersHorizontal,
   Users,
   Waves,
 } from "@/components/hugeicons";
@@ -93,6 +94,8 @@ type AppNavigationItem = Omit<NavMainItem, "items"> & {
 type SecondaryNavigationItem = {
   readonly description: string;
   readonly icon: HugeIcon;
+  readonly keywords?: readonly string[];
+  readonly onPrefetch?: () => void;
   readonly title: string;
   readonly url: string;
 };
@@ -481,6 +484,22 @@ export function getSidebarData(
       },
     ],
     navSecondary: [
+      {
+        icon: SlidersHorizontal,
+        description: messages.common.navSettingsDesc,
+        keywords: [
+          "settings",
+          "color scheme",
+          "palette",
+          "appearance",
+          "theme",
+        ],
+        onPrefetch: () => {
+          import("@/pages/dashboard/settings");
+        },
+        title: messages.common.navSettings,
+        url: "/dashboard/settings",
+      },
       {
         icon: Info,
         description: messages.common.navAboutDesc,
