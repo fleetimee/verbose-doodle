@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router";
 import { AppRoutes } from "@/app-routes";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { I18nProvider } from "@/components/i18n-provider";
+import { SeasonalSnowfall } from "@/components/seasonal-snowfall";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TokenExpirationDialog } from "@/components/token-expiration-dialog";
 import { Toaster } from "@/components/ui/sonner";
@@ -24,6 +25,7 @@ export function App() {
                 <MotionConfig reducedMotion="never">
                   <ScreenLockProvider>
                     <AppRoutes />
+                    <SeasonalSnowfall />
                     <TokenExpirationDialog />
                     <Toaster position="bottom-center" />
                     <DashboardVisitNotifications />

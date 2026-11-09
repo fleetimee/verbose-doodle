@@ -18,12 +18,20 @@ export const themeMessages = {
     colorSchemeTitle: "Color Scheme",
     colorSchemeDescription:
       "Switch the instrument bench palette on the go. Each preset coordinates surface layers, borders, and primary accents across both light and dark modes.",
+    colorSchemeAllFilter: "All Schemes",
+    colorSchemeSoftDarkFilter: "Soft Dark",
+    colorSchemeStudioFilter: "Deep Workshop",
+    colorSchemeSeasonalFilter: "Seasonal",
+    colorSchemeSnowBadge: "Snowfall FX",
     colorSchemeStudioGroup: "Deep Workshop Palettes",
     colorSchemeStudioGroupDesc:
       "High-contrast obsidian and deep slate dark backgrounds (L ≈ 0.19) paired with crisp light paper.",
     colorSchemeSoftDarkGroup: "Soft & Lifted Dark Palettes",
     colorSchemeSoftDarkGroupDesc:
       "Lighter, low-glare twilight dark backgrounds (L ≈ 0.26–0.33) inspired by Catppuccin, Tokyo Night Storm, Nord, Rosé Pine Moon, and Everforest.",
+    colorSchemeShowingCount: "{count} schemes",
+    colorSchemeGridView: "Grid view",
+    colorSchemeListView: "List view",
     colorSchemeActiveBadge: "Active",
     colorSchemeDefaultBadge: "Default",
     colorSchemeLightPreview: "Light",
@@ -119,6 +127,60 @@ export const themeMessages = {
         badge: "#2d353b · L 0.32",
         description:
           "Low-contrast woodland moss dark canvas and warm wheat foreground designed for effortless eye comfort.",
+      },
+      "dracula-classic": {
+        name: "Dracula",
+        badge: "#282a36 · L 0.29",
+        description:
+          "Iconic deep vampire-slate canvas with vivid purple, neon pink, and cyan syntax telemetry.",
+      },
+      "gruvbox-material": {
+        name: "Gruvbox Material",
+        badge: "#282828 · L 0.28",
+        description:
+          "Warm retro-earthy charcoal with amber-orange highlights and soft parchment cream text.",
+      },
+      "one-dark-pro": {
+        name: "One Dark Pro",
+        badge: "#282c34 · L 0.29",
+        description:
+          "Atom's classic balanced slate-charcoal workbench with crisp sky-blue and sage highlights.",
+      },
+      "kanagawa-wave": {
+        name: "Kanagawa Wave",
+        badge: "#1f1f28 · L 0.24",
+        description:
+          "Sumi-ink ocean dark layers and Fuji parchment text inspired by Hokusai woodblock prints.",
+      },
+      "ayu-mirage": {
+        name: "Ayu Mirage",
+        badge: "#1f2430 · L 0.26",
+        description:
+          "Refined blue-grey twilight surfaces illuminated by warm golden-amber instrument accents.",
+      },
+      "material-palenight": {
+        name: "Material Palenight",
+        badge: "#292d3e · L 0.30",
+        description:
+          "Velvety violet-slate surfaces designed for low eye strain with amethyst and cyan accents.",
+      },
+      "solarized-precision": {
+        name: "Solarized",
+        badge: "#002b36 · L 0.27",
+        description:
+          "Ethan Schoonover's CIELAB-calibrated deep teal dark and warm cream light instrument bench.",
+      },
+      "monokai-pro": {
+        name: "Monokai Pro",
+        badge: "#272822 · L 0.28",
+        description:
+          "Warm olive-charcoal studio layers with high-focus coral-rose and canary yellow accents.",
+      },
+      "christmas-noel": {
+        name: "Christmas Noël",
+        badge: "Nov 25 – Jan 15 · L 0.26",
+        description:
+          "Nordic winter pine surfaces with holly berry crimson, warm gold, and subtle falling snow (auto-default Nov 25 – Jan 15).",
       },
     },
   },
